@@ -23,7 +23,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     private static final Logger log = LoggerFactory.getLogger(ServiceConnectionHandler.class);
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
     private String protocol;
     private Session session;
@@ -31,7 +31,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     @Override
     public CompletableFuture<Void> connect(URLName url) {
-        return new CompletableFuture<Void>().completeAsync(() -> doConnect(url), executor);
+        return CompletableFuture.runAsync(() -> doConnect(url), singleThreadExecutor);
     }
 
     /**
@@ -45,14 +45,14 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
             try {
                 service.close();
             } catch (MessagingException e) {
-                log.error("Exception while closing service " + service.getURLName(), e);
+                log.error("Exception while disconnecting service " + service.getURLName(), e);
             }
         }
     }
 
     @Override
     public void close() {
-        executor.close();
+        singleThreadExecutor.close();
         disconnect();
     }
 
@@ -68,11 +68,33 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
         return service;
     }
 
+    protected void reconnectIfNeeded() {
+        if (service != null && !service.isConnected()) {
+            try {
+                if (log.isTraceEnabled()) {
+                    log.trace("Reconnecting to " + service.getURLName());
+                }
+                service.connect();
+            } catch (MessagingException e) {
+                log.error("Exception while reconnecting service " + service.getURLName(), e);
+            }
+        }
+    }
+
     /**
-     * Called after the internal {@link Service} got connected.
+     * Called after the connecting of the internal {@link Service} was completed successfully. The provided {@link URLName} does
+     * not contain the password.
+     * <p>
+     * This method will be executed as part of the {@link CompletableFuture} of {@link #connect(URLName)}.
+     *
+     * @param url The {@link URLName} to which the connection was established
      */
-    protected void afterConnect(URLName url) throws MessagingException {
+    protected void afterConnect(URLName url) {
         // Only a hook for subclasses - does nothing by default
+    }
+
+    protected static NoSuchProviderException getNoSuchProviderException(String protocol) {
+        return new NoSuchProviderException("Protocol " + protocol + " is not supported.");
     }
 
     protected abstract void modifyProperties(Properties properties);
@@ -81,28 +103,22 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     protected abstract S createService(URLName url) throws NoSuchProviderException;
 
-    private Void doConnect(URLName url) {
+    private void doConnect(URLName url) {
+        disconnect();
+
+        URLName urlWithoutPassword = url == null || (url.getPassword() == null) ? url
+                : new URLName(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), url.getUsername(), null);
+
+        boolean traceEnabled = log.isTraceEnabled();
+        if (traceEnabled) {
+            log.trace("Attempting connection to " + urlWithoutPassword);
+        }
+
+        protocol = urlWithoutPassword.getProtocol();
+
         try {
-            if (service != null && service.isConnected()) {
-                URLName currentConnection = service.getURLName();
-                if (currentConnection.getProtocol().equalsIgnoreCase(url.getProtocol())//
-                        && currentConnection.getHost().equalsIgnoreCase(url.getHost())//
-                        && currentConnection.getPort() == url.getPort()//
-                        && currentConnection.getUsername().equals(url.getUsername())) {
-                    log.trace("Skipped connection because current URL equals new URL.");
-                    return null;
-                }
-                disconnect();
-            }
-
-            boolean traceEnabled = log.isTraceEnabled();
-            if (traceEnabled) {
-                log.trace("Attempting connection to " + url);
-            }
-
-            protocol = url.getProtocol();
             if (protocol == null) {
-                throw new NoSuchProviderException("null");
+                throw getNoSuchProviderException(null);
             }
             protocol = protocol.trim().toLowerCase();
 
@@ -110,19 +126,17 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
             modifyProperties(properties);
 
             if (traceEnabled) {
-                log.trace("Properties: " + properties);
+                log.trace("Properties for " + protocol + ": " + properties);
             }
 
             session = createSession(properties);
             service = createService(url);
             service.addConnectionListener((LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
             service.connect();
-
-            afterConnect(url);
-
-            return null;
         } catch (MessagingException e) {
-            throw new IllegalStateException("Failed to connect to " + url, e);
+            throw new IllegalStateException("Failed to connect to " + urlWithoutPassword, e);
         }
+
+        afterConnect(urlWithoutPassword);
     }
 }

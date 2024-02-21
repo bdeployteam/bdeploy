@@ -9,14 +9,18 @@ public class StringHelper {
     }
 
     /**
-     * Returns whether the given string is null or empty
+     * Returns whether the given string is null or empty.
+     *
+     * @see String#isEmpty()
      */
     public static boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }
 
     /**
-     * Returns whether the given string is null or blank
+     * Returns whether the given string is null or blank.
+     *
+     * @see String#isBlank()
      */
     public static boolean isNullOrBlank(String s) {
         return s == null || s.isBlank();

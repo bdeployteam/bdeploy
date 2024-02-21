@@ -1,15 +1,11 @@
 package io.bdeploy.messaging.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.util.StringHelper;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Part;
 import jakarta.mail.URLName;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
@@ -26,7 +22,7 @@ public class MessagingUtils {
      * Builds a new {@link URLName} which copies the protocol-, host-, port- and file-part of the given url, but sets the provided
      * username and password.
      *
-     * @param url The base-url
+     * @param url The base-{@link URLName}
      * @param username The username to set to the new {@link URLName}
      * @param password The password to set to the new {@link URLName}
      * @return A newly created {@link URLName}
@@ -71,7 +67,7 @@ public class MessagingUtils {
      *
      * @param address The address to parse
      * @return The newly created {@link InternetAddress}
-     * @throws IllegalArgumentException If no address was provided or it cannot be parsed.
+     * @throws IllegalArgumentException If no address was provided or it cannot be parsed
      */
     public static InternetAddress checkAndParseAddress(String address) {
         if (StringHelper.isNullOrBlank(address)) {
@@ -81,23 +77,6 @@ public class MessagingUtils {
             return new InternetAddress(address.trim());
         } catch (AddressException e) {
             throw new IllegalArgumentException("Failed to parse address.", e);
-        }
-    }
-
-    /**
-     * Calculates the size of the given {@link Part} in bytes.
-     *
-     * @param part The {@link Part} to calculate the size of
-     * @return The size of the {@link Part}, or -1 if the calculation failed
-     */
-    public static int calculateSize(Part part) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-            part.writeTo(os);
-            return os.size();
-        } catch (MessagingException | IOException e) {
-            log.error("Failed to determine size of part.", e);
-            return -1;
         }
     }
 }

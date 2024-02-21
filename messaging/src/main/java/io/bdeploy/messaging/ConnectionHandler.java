@@ -22,14 +22,14 @@ public interface ConnectionHandler extends Closeable {
     CompletableFuture<Void> connect(URLName url);
 
     /**
-     * Terminates the open connection.
+     * Terminates the open connection. Does nothing if there is no open connection.
      *
      * @see #connect(URLName)
      */
     void disconnect();
 
     /**
-     * By default this just calls {@link #disconnect()}.
+     * Closes the {@link ConnectionHandler}. By default this just calls {@link #disconnect()}.
      */
     @Override
     default void close() {

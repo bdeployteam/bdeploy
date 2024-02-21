@@ -5,7 +5,6 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -15,6 +14,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,9 @@ import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
+import jakarta.mail.Address;
 import jakarta.mail.MessagingException;
+import jakarta.mail.SendFailedException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -633,12 +636,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                 Key newInstanceVersionKey = createInstanceVersion(rootKey, state.config, nodeMap);
 
-                try {
-                    if (root.getMode() == MinionMode.MANAGED) {
-                        sendConfigurationChange(newInstanceVersionKey, instanceConfig);
+                if (root.getMode() == MinionMode.MANAGED) {
+                    try {
+                        sendConfigurationChanges(newInstanceVersionKey, instanceConfig);
+                    } catch (RuntimeException e) {
+                        log.error("Failed to send configuration changes.", e);
                     }
-                } catch (Exception e) {
-                    log.error("Cannot send configuration change to central", e);
                 }
 
                 return newInstanceVersionKey;
@@ -646,7 +649,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
-    private void sendConfigurationChange(Key key, InstanceConfiguration cfg) {
+    private void sendConfigurationChanges(Key key, InstanceConfiguration cfg) {
         MailSenderSettingsDto settings = root.getSettings().mailSenderSettings;
         if (settings == null || !settings.enabled || StringHelper.isNullOrBlank(settings.receiverAddress)) {
             if (log.isTraceEnabled()) {
@@ -664,44 +667,47 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Path targetFile = root.getTempDir().resolve("mail-" + uniqueId + "-" + key.getTag() + ".zip");
         URI targetUri = targetFile.toUri();
 
+        PushOperation pushOp = new PushOperation().setRemote(new RemoteService(targetUri));
+        // we need to push:
+        // 1) ALL manifests starting with the instance ID (root, nodes, etc.) with tag matching key.tag
+        hive.execute(new ManifestListOperation().setManifestName(cfg.id)).stream().filter(k -> k.getTag().equals(key.getTag()))
+                .forEach(pushOp::addManifest);
+
+        // 2) ALL meta-manifests starting with the instance ID - the *latest* of each *would* be enough, but we're keeping it simple and send all of them.
+        hive.execute(new ManifestListOperation().setManifestName(MetaManifest.META_PREFIX + cfg.id)).forEach(pushOp::addManifest);
+
+        // 3) In case the instance is part of a system, send the system configuration as well.
+        if (cfg.system != null) {
+            pushOp.addManifest(cfg.system);
+        }
+
+        hive.execute(pushOp);
+
+        byte[] allBytes;
+        String contentType;
         try {
-            PushOperation pushOp = new PushOperation().setRemote(new RemoteService(targetUri));
-            // we need to push:
-            // 1) ALL manifests starting with the instance ID (root, nodes, etc.) with tag matching key.tag
-            hive.execute(new ManifestListOperation().setManifestName(cfg.id)).stream()
-                    .filter(k -> k.getTag().equals(key.getTag())).forEach(pushOp::addManifest);
-
-            // 2) ALL meta-manifests starting with the instance ID - the *latest* of each *would* be enough, but we're keeping it simple and send all of them.
-            hive.execute(new ManifestListOperation().setManifestName(MetaManifest.META_PREFIX + cfg.id))
-                    .forEach(pushOp::addManifest);
-
-            // 3) In case the instance is part of a system, send the system configuration as well.
-            if (cfg.system != null) {
-                pushOp.addManifest(cfg.system);
-            }
-
-            hive.execute(pushOp);
-
-            sendMail(MinionRoot.MAIL_SUBJECT_PATTERN_CONFIG_OF + uniqueId,// subject
-                    "Instance group ID: " + name + "\n"// text
-                            + "Instance ID: " + cfg.id + "\n"//
-                            + "Datetime: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss +S")),//
-                    MediaType.TEXT_PLAIN,// MIME type of text
-                    uniqueId + ".zip",// name of attachment
-                    Files.readAllBytes(targetFile),// attachment as byte[]
-                    Files.probeContentType(targetFile)// MIME type of attachment
-            );
-        } catch (MessagingException e) {
-            log.error("Failed to send mail.", e);
+            allBytes = Files.readAllBytes(targetFile);
+            contentType = Files.probeContentType(targetFile);
         } catch (IOException e) {
             log.error("Parsing failed.", e);
+            return;
         } finally {
             PathHelper.deleteIfExistsRetry(targetFile);
         }
+
+        sendMail(MinionRoot.MAIL_SUBJECT_PATTERN_CONFIG_OF + uniqueId,// subject
+                "Instance group ID: " + name + "\n"// text
+                        + "Instance ID: " + cfg.id + "\n"//
+                        + "Datetime: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss +S")),//
+                MediaType.TEXT_PLAIN,// MIME type of text
+                uniqueId + ".zip",// name of attachment
+                allBytes,// attachment as byte[]
+                contentType// MIME type of attachment
+        );
     }
 
     private void sendMail(String subject, String text, String textMimeType, String attachmentName, byte[] attachment,
-            String attachmentMimeType) throws UnsupportedEncodingException, MessagingException {
+            String attachmentMimeType) {
         MailSenderSettingsDto mailSenderSettingsDto = root.getSettings().mailSenderSettings;
 
         InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
@@ -711,7 +717,30 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, List.of(receiverAddress), subject, text, textMimeType,
                 List.of(new MimeFile(attachmentName, attachment, attachmentMimeType)));
 
-        mailSender.send(dataHolder);
+        try {
+            mailSender.send(dataHolder);
+        } catch (SendFailedException e) {
+            Address[] invalidAddresses = e.getInvalidAddresses();
+            if (invalidAddresses != null) {
+                log.warn("Invalid addresses: " + joinAddresses(invalidAddresses));
+            }
+            Address[] validUnsentAddresses = e.getValidUnsentAddresses();
+            if (validUnsentAddresses != null) {
+                log.error("Valid unsent addresses: " + joinAddresses(validUnsentAddresses));
+            }
+            if (log.isTraceEnabled()) {
+                Address[] validSentAddresses = e.getValidSentAddresses();
+                if (validSentAddresses != null) {
+                    log.trace("Valid sent addresses: " + joinAddresses(validSentAddresses));
+                }
+            }
+        } catch (MessagingException e) {
+            log.error("Failed to send mail.", e);
+        }
+    }
+
+    private static String joinAddresses(Address[] addresses) {
+        return Strings.join(Arrays.stream(addresses).map(Address::toString).iterator(), '|');
     }
 
     private String getNextRootTag(String rootName) {

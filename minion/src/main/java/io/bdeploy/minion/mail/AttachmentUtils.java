@@ -42,12 +42,14 @@ public class AttachmentUtils {
      * </tr>
      * </table>
      *
-     * @param path The path to the file
+     * @param path The {@link Path} to the file
+     * @return A {@link String}-array which contains the individual parts
      */
     public static String[] getAttachmentDataFromName(Path path) {
-        String[] split = FilenameUtils.removeExtension(path.getFileName().toString()).split(HASH);
+        String fileName = path.getFileName().toString();
+        String[] split = FilenameUtils.removeExtension(fileName).split(HASH);
         if (split.length != 3) {
-            throw new IllegalArgumentException("Filename " + path.toString() + " could not be parsed.");
+            throw new IllegalArgumentException("Filename " + fileName + " could not be parsed.");
         }
         return split;
     }

@@ -22,8 +22,7 @@ public class SMTPTransportConnectionHandler extends TransportConnectionHandler<S
     @Override
     protected void modifyProperties(Properties properties) {
         super.modifyProperties(properties);
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.sendpartial", "true");
+        properties.put("mail." + getProtocol() + ".sendpartial", "true");
     }
 
     @Override
@@ -32,10 +31,12 @@ public class SMTPTransportConnectionHandler extends TransportConnectionHandler<S
         switch (protocol) {
             case "smtp":
                 properties.put("mail.smtp.starttls.enable", "true");
+                properties.put("mail.smtp.auth", "true");
+                return Session.getInstance(properties);
             case "smtps":
                 return Session.getInstance(properties);
         }
-        throw new NoSuchProviderException("Transport protocol " + protocol + " is not supported.");
+        throw getNoSuchProviderException(protocol);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class SMTPTransportConnectionHandler extends TransportConnectionHandler<S
             case "smtps":
                 return new SMTPSSLTransport(getSession(), url);
         }
-        throw new NoSuchProviderException("Transport protocol " + protocol + " is not supported.");
+        throw getNoSuchProviderException(protocol);
     }
 
     @Override

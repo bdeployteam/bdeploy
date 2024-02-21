@@ -36,7 +36,7 @@ import jakarta.mail.search.SearchTerm;
  * <li>A new message arrived in the folder and its "seen"-flag is <code>false</code></li>
  * <li>An existing message in the folder got its "seen" flag to <code>false</code></li>
  * </ul>
- * The {@link Flag#SEEN "seen"-flag} is updated to <code>true</code> after the listeners got called if no {@link Exception}
+ * The {@link Flag#SEEN "seen"-flag} is updated to <code>true</code> after the listeners got called if no {@link RuntimeException}
  * occurred.
  */
 public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
@@ -66,7 +66,7 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
     private SearchTerm filter = UNSEEN_MESSAGES_FLAG_TERM;
 
     public ExecuteUnreadMessagesReceiver() {
-        super(FolderOpeningStyle.ReadWrite);
+        super(FolderOpeningMode.ReadWrite);
         addListener(new ExecuteOnNewListener());
         addListener(new ExecuteOnSetUnseenListener());
     }
@@ -86,8 +86,14 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
     }
 
     @Override
-    protected void beforeListeners(IMAPFolder folder) throws MessagingException {
-        Message[] messages = folder.search(filter);
+    protected void beforeListeners(IMAPFolder folder) {
+        Message[] messages;
+        try {
+            messages = folder.search(filter);
+        } catch (MessagingException e) {
+            log.error("Failed to initially retrieve messages.", e);
+            return;
+        }
         Arrays.sort(messages, OLDEST_MESSAGE_FIRST_COMPARATOR);
         for (Message message : messages) {
             execute(message);
@@ -109,7 +115,7 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
 
         try {
             listeners.forEach(listener -> listener.accept(messageDataHolder));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Exception while executing listeners of message " + message.getMessageNumber(), e);
             return;
         }
