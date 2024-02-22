@@ -4,7 +4,6 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
@@ -31,8 +30,9 @@ public class ImportOperation extends BHive.TransactedOperation<Manifest.Key> {
         assertNotNull(manifest, "Manifest not set");
 
         try (Activity activity = getActivityReporter().start("Importing", -1)) {
-            Set<Manifest.Key> existing = execute(new ManifestListOperation());
-            if (existing.contains(manifest)) {
+            // we have a manual check up front just to make sure we do not import a lot to later
+            // on discover that was not required.
+            if (getManifestDatabase().hasManifest(manifest)) {
                 throw new IllegalArgumentException("Manifest " + manifest + " already present");
             }
 
@@ -41,7 +41,7 @@ public class ImportOperation extends BHive.TransactedOperation<Manifest.Key> {
             builder.setRoot(execute(new ImportTreeOperation().setSourcePath(toImport)));
             labels.forEach(builder::addLabel);
 
-            getManifestDatabase().addManifest(builder.build(this));
+            getManifestDatabase().addManifest(builder.build(this), false);
         }
         return manifest;
     }

@@ -31,17 +31,17 @@ public class InsertManifestOperation extends BHive.Operation<Long> {
     public Long call() throws Exception {
         assertFalse(manifests.isEmpty(), "Nothing to insert");
 
+        long counter = 0;
         try (Activity activity = getActivityReporter().start("Inserting Manifests", -1)) {
             for (Map.Entry<Manifest.Key, Manifest> entry : manifests.entrySet()) {
-                if (getManifestDatabase().hasManifest(entry.getValue().getKey())) {
-                    continue;
+                if (getManifestDatabase().addManifest(entry.getValue(), true)) {
+                    counter++;
                 }
-                getManifestDatabase().addManifest(entry.getValue());
                 activity.workAndCancelIfRequested(1);
             }
         }
 
-        return Long.valueOf(manifests.size());
+        return Long.valueOf(counter);
     }
 
     /**

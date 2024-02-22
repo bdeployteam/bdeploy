@@ -28,7 +28,7 @@ class ManifestDatabaseTest extends DbTestBase {
         try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
             Manifest.Builder mf = new Manifest.Builder(key).setRoot(randomId()).addLabel("test", "label");
 
-            db.addManifest(mf.build(null));
+            db.addManifest(mf.build(null), false);
         }
 
         try (ManifestDatabase db = new ManifestDatabase(dbDir)) {

@@ -73,8 +73,7 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
 
                 // Insert manifests as last operation - sorted by references they may have to each other.
                 manifests.stream().sorted(new SortManifestsByReferences()).forEach(mf -> {
-                    if (!getManifestDatabase().hasManifest(mf.getKey())) {
-                        getManifestDatabase().addManifest(mf);
+                    if (getManifestDatabase().addManifest(mf, true)) {
                         result.sumManifests++;
                     }
                 });

@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -157,11 +158,19 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      * Concurrent-save adds a {@link Manifest} to the database.
      *
      * @param manifest the manifest to store in the database.
+     * @return <code>true</code> if the manifest was added, <code>false</code> if ignoreExisting was set and the manifest was not
+     *         added (by this call).
      */
-    public void addManifest(Manifest manifest) {
+    public boolean addManifest(Manifest manifest, boolean ignoreExisting) {
+        AtomicBoolean added = new AtomicBoolean(true);
         locked(() -> {
             if (hasManifest(manifest.getKey())) {
-                throw new IllegalArgumentException("Manifest " + manifest.getKey() + " already present.");
+                if (ignoreExisting) {
+                    added.set(false);
+                    return;
+                } else {
+                    throw new IllegalArgumentException("Manifest " + manifest.getKey() + " already present.");
+                }
             }
             Path pathForKey = getPathForKey(manifest.getKey());
             PathHelper.mkdirs(pathForKey.getParent());
@@ -186,6 +195,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
             updateListCaches(manifest.getKey(), c -> c.add(manifest.getKey()));
             scheduleNotify(manifest.getKey());
         });
+        return added.get();
     }
 
     /**

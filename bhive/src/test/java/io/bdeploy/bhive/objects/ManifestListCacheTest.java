@@ -24,8 +24,8 @@ public class ManifestListCacheTest extends DbTestBase {
         Manifest.Key key4 = new Manifest.Key("xtest/app2/x", "v2.0");
 
         try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
-            db.addManifest(new Manifest.Builder(key1).setRoot(randomId()).build(null));
-            db.addManifest(new Manifest.Builder(key2).setRoot(randomId()).build(null));
+            db.addManifest(new Manifest.Builder(key1).setRoot(randomId()).build(null), false);
+            db.addManifest(new Manifest.Builder(key2).setRoot(randomId()).build(null), false);
         }
 
         try (ManifestDatabase db = new ManifestDatabase(dbDir.resolve("../manifests"))) {
@@ -39,8 +39,8 @@ public class ManifestListCacheTest extends DbTestBase {
             assertEquals(1, db.getAllForName("xtest").size());
             assertEquals(1, db.getAllForName("xtest/app2").size());
 
-            db.addManifest(new Manifest.Builder(key3).setRoot(randomId()).build(null));
-            db.addManifest(new Manifest.Builder(key4).setRoot(randomId()).build(null));
+            db.addManifest(new Manifest.Builder(key3).setRoot(randomId()).build(null), false);
+            db.addManifest(new Manifest.Builder(key4).setRoot(randomId()).build(null), false);
 
             assertTrue(db.hasManifest(key3));
             assertTrue(db.hasManifest(key4));

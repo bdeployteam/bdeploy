@@ -76,9 +76,9 @@ class NestedManifestTest extends DbTestBase {
                     .add(new Tree.Key("nested-b", EntryType.MANIFEST), bRef).build();
             mbr.setRoot(om.insertTree(rootTree));
 
-            mdb.addManifest(amb.build(null));
-            mdb.addManifest(bmb.build(null));
-            mdb.addManifest(mbr.build(null));
+            mdb.addManifest(amb.build(null), false);
+            mdb.addManifest(bmb.build(null), false);
+            mdb.addManifest(mbr.build(null), false);
 
             Manifest m = mdb.getManifest(root);
 
