@@ -123,7 +123,9 @@ export class ConfigService {
           const loadAuthSettings = this.http.get<WebAuthSettingsDto>(this.config.api + '/master/settings/web-auth', {
             headers: suppressUnauthenticatedDelay(new HttpHeaders()),
           });
-          return combineLatest([of(c), loadAuthSettings, this.loadSession()]);
+
+          const urlParams = new URLSearchParams(window.location.search);
+          return combineLatest([of(c), loadAuthSettings, this.loadSession(urlParams.get('otp'))]);
         }),
         map(([config, authSettings, session]) => {
           this.webAuthCfg = authSettings;
@@ -144,14 +146,20 @@ export class ConfigService {
           }
 
           return config;
-        })
-      )
+        }),
+      ),
     );
   }
 
-  public loadSession(): Observable<any> {
+  public loadSession(oneTimePassword: string): Observable<any> {
+    const params = oneTimePassword
+      ? {
+          otp: oneTimePassword,
+        }
+      : null;
     return this.http
       .get(`${this.config.api}/auth/session`, {
+        params: params,
         responseType: 'text',
         headers: suppressGlobalErrorHandling(suppressUnauthenticatedDelay(new HttpHeaders())),
       })
@@ -159,7 +167,7 @@ export class ConfigService {
         catchError((err) => {
           console.log(`No existing session on the remote: ${err}`);
           return of(null);
-        })
+        }),
       );
   }
 
@@ -201,7 +209,7 @@ export class ConfigService {
                 },
               },
             ],
-          })
+          }),
         );
         this.overlayRef.attach(portal);
       });
@@ -262,7 +270,7 @@ export class ConfigService {
     return this.http
       .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
         headers: suppressUnauthenticatedDelay(
-          errorHandling ? new HttpHeaders() : suppressGlobalErrorHandling(new HttpHeaders())
+          errorHandling ? new HttpHeaders() : suppressGlobalErrorHandling(new HttpHeaders()),
         ),
         context: NO_LOADING_BAR_CONTEXT,
       })
@@ -290,7 +298,7 @@ export class ConfigService {
             console.warn('Server time offset', this.backendTimeOffset, 'ms');
             this.backendOffsetWarning = true;
           }
-        })
+        }),
       );
   }
 

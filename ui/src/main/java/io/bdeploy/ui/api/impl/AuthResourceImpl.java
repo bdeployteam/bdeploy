@@ -10,6 +10,7 @@ import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
+import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.jersey.SessionManager;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthGroupService;
@@ -20,6 +21,7 @@ import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Cookie;
@@ -51,6 +53,9 @@ public class AuthResourceImpl implements AuthResource {
 
     @Inject
     private SessionManager sm;
+
+    @Inject
+    private ContainerRequestContext crc;
 
     @Override
     public Response authenticate(CredentialsApi credentials) {
@@ -86,11 +91,43 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public String getSessionToken(Cookie session) {
-        if (session == null) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+    public Response getSessionToken(Cookie cookie, String otp) {
+        if (otp != null) {
+            String otpSessionId = sm.checkSessionOtp(otp);
+            if (otpSessionId != null) {
+                String sessionToken = sm.getSessionToken(otpSessionId);
+                if (sessionToken != null) {
+                    if (cookie != null) {
+                        String cookieSessionId = cookie.getValue();
+                        if (cookieSessionId != null) {
+                            sm.removeSession(cookieSessionId);
+                        }
+                    }
+                    return Response.ok().entity(sessionToken)
+                            .cookie(buildSessionCookie(
+                                    TimeUnit.SECONDS.convert(minion.getSessionConfiguration().sessionTimeout, TimeUnit.HOURS),
+                                    otpSessionId))
+                            .build();
+                }
+            }
+        } else if (cookie != null) {
+            String cookieSessionId = cookie.getValue();
+            if (cookieSessionId != null) {
+                String sessionToken = sm.getSessionToken(cookieSessionId);
+                if (sessionToken != null) {
+                    return Response.ok().entity(sessionToken).build();
+                }
+            }
         }
-        return sm.getSessionToken(session.getValue());
+        throw new WebApplicationException(Status.UNAUTHORIZED);
+    }
+
+    @Override
+    public String createSessionWithOtp() {
+        if (crc.getSecurityContext() instanceof JerseySecurityContext jsc) {
+            return sm.createSessionWithOtp(minion.createToken(jsc.getUserPrincipal().getName(), jsc.getPermissions(), false));
+        }
+        throw new IllegalStateException("SecurityContext must be an instance of JerseySecurityContext.");
     }
 
     @Override

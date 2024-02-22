@@ -37,6 +37,24 @@ public interface SessionManager extends AutoCloseable {
     public Set<String> getActiveSessions();
 
     /**
+     * Creates a new session with an one time password which can be used for a single login.
+     *
+     * @param token The token to create a session for
+     * @return The one time password
+     */
+    public String createSessionWithOtp(String token);
+
+    /**
+     * Checks if a session with the given one time password exists. If one is found, the one time password is used up and
+     * invalidated. This method will therefore only return <code>true</code> once per given OTP (unless another equal OTP is
+     * created coincidentally, which is <i>very</i> unlikely).
+     *
+     * @param otp The one time password to check
+     * @return The ID of the session of one was found, otherwise <code>null</code>
+     */
+    public String checkSessionOtp(String otp);
+
+    /**
      * Closes and cleans up the session manager.
      */
     @Override

@@ -1,5 +1,6 @@
 package io.bdeploy.jersey;
 
+import java.time.Duration;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
@@ -28,6 +29,7 @@ public class JerseySessionManager implements SessionManager {
             new NamedDaemonThreadFactory("Session Storage Persistence"));
 
     private final Cache<String, String> activeInPeriod = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
+    private final Cache<String, String> otps = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofSeconds(60)).build();
 
     public JerseySessionManager(JerseySessionConfiguration config) {
         this.storage = config.storage;
@@ -65,10 +67,7 @@ public class JerseySessionManager implements SessionManager {
 
     @Override
     public synchronized String createSession(String token) {
-        String id = UuidHelper.randomId();
-        while (sessions.asMap().containsKey(id)) {
-            id = UuidHelper.randomId();
-        }
+        String id = getRandomIdNotInCache(sessions);
         sessions.put(id, token);
 
         if (log.isDebugEnabled()) {
@@ -80,6 +79,9 @@ public class JerseySessionManager implements SessionManager {
 
     @Override
     public String getSessionToken(String session) {
+        if (session == null) {
+            return null;
+        }
         String sess = sessions.getIfPresent(session);
         if (sess != null) {
             try {
@@ -106,4 +108,29 @@ public class JerseySessionManager implements SessionManager {
         }
     }
 
+    @Override
+    public synchronized String createSessionWithOtp(String token) {
+        String otp = getRandomIdNotInCache(otps);
+        otps.put(otp, createSession(token));
+        return otp;
+    }
+
+    @Override
+    public synchronized String checkSessionOtp(String otp) {
+        if (otps.asMap().containsKey(otp)) {
+            String session = otps.getIfPresent(otp);
+            otps.invalidate(otp);
+            log.debug("Invalidated otp of session {}", session);
+            return session;
+        }
+        return null;
+    }
+
+    private static String getRandomIdNotInCache(Cache<String, ?> c) {
+        String id = UuidHelper.randomId();
+        while (c.asMap().containsKey(id)) {
+            id = UuidHelper.randomId();
+        }
+        return id;
+    }
 }

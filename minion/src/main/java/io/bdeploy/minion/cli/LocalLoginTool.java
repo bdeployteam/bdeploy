@@ -2,6 +2,8 @@ package io.bdeploy.minion.cli;
 
 import java.util.Map;
 
+import com.vaadin.open.Open;
+
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -64,6 +66,9 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         @Help("Path to the directory which contains the local login data")
         @EnvironmentFallback("BDEPLOY_LOGIN_STORAGE")
         String loginStorage();
+
+        @Help(value = "The name of the stored login session to login on the default browser")
+        String open();
     }
 
     public LocalLoginTool() {
@@ -92,6 +97,8 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
                         .cell((data.current != null && data.current.equals(entry.getKey())) ? "*" : "").build();
             }
             return table;
+        } else if (config.open() != null) {
+            return openInBrowser(config, llm);
         } else {
             return createNoOp();
         }
@@ -135,13 +142,42 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         String serverName = config.check();
         RemoteService service = llm.getNamedService(serverName);
         if (service == null) {
-            throw new IllegalStateException("Unknown server: " + serverName);
+            return createResultWithErrorMessage("Unknown server: " + serverName);
         }
+
         try {
-            ResourceProvider.getResource(service, AuthResource.class, null).getCurrentUser();
+            getAuthRes(service).getCurrentUser();
         } catch (RuntimeException e) {
             return createResultWithErrorMessage("Failed to validate login " + serverName).setException(e);
         }
         return createSuccess();
+    }
+
+    private DataResult openInBrowser(LoginConfig config, LocalLoginManager llm) {
+        String serverName = config.open();
+        RemoteService service = llm.getNamedService(serverName);
+        if (service == null) {
+            return createResultWithErrorMessage("Unknown server: " + serverName);
+        }
+
+        String otp;
+        try {
+            otp = getAuthRes(service).createSessionWithOtp();
+        } catch (RuntimeException e) {
+            return createResultWithErrorMessage("Failed to create one time password for server " + serverName).setException(e);
+        }
+
+        String url = service.getUri().toString();
+        if (url.endsWith(RemoteValidator.API_SUFFIX)) {
+            url = url.substring(0, url.length() - RemoteValidator.API_SUFFIX.length());
+        }
+
+        return Open.open(url + "?otp=" + otp)//
+                ? createResultWithSuccessMessage("Successfully opened " + url)//
+                : createResultWithErrorMessage("Failed to open " + url);
+    }
+
+    private static AuthResource getAuthRes(RemoteService service) {
+        return ResourceProvider.getResource(service, AuthResource.class, null);
     }
 }
