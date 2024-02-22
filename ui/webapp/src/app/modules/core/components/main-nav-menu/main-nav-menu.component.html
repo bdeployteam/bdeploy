@@ -4,18 +4,25 @@
   </mat-card>
 </ng-template>
 
-<div class="bd-rect-card local-sizing local-nav-bar flex flex-col gap-1">
+<div
+  class="bd-rect-card local-sizing local-nav-bar flex flex-col gap-1"
+  *ngIf="{ expanded: areas.menuMaximized$ | async } as scope"
+>
   <!-- Logo & Expand Button -->
   <div class="flex justify-center items-center pb-4 min-h-[100px] h-[100px]">
     <div class="local-hamburger-button">
-      <div class="hamburger hamburger--arrow" [ngClass]="{ 'is-active': expanded }" (click)="expanded = !expanded">
+      <div
+        class="hamburger hamburger--arrow"
+        [ngClass]="{ 'is-active': scope.expanded }"
+        (click)="areas.menuMaximized$.next(!scope.expanded)"
+      >
         <span class="hamburger-box">
           <span class="hamburger-inner"></span>
         </span>
       </div>
     </div>
     <h2
-      *ngIf="expanded"
+      *ngIf="scope.expanded"
       class="local-header"
       [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
       [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
@@ -28,7 +35,7 @@
   <app-main-nav-button
     icon="view_carousel"
     text="Instance Groups"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/groups/browser']"
   ></app-main-nav-button>
 
@@ -36,7 +43,7 @@
     icon="storage"
     *ngIf="!(authService.isGlobalExclusiveReadClient$ | async)"
     text="Software Repositories"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/repositories/browser']"
   ></app-main-nav-button>
 
@@ -46,7 +53,7 @@
     [visible]="!!(areas.groupContext$ | async)"
     icon="settings_system_daydream"
     text="Instances"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/instances', 'browser', areas.groupContext$.value]"
   ></app-main-nav-button>
 
@@ -55,7 +62,7 @@
     [visible]="!!(areas.groupContext$ | async)"
     icon="apps"
     text="Products"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/products', 'browser', areas.groupContext$.value]"
   ></app-main-nav-button>
 
@@ -63,7 +70,7 @@
     [visible]="!!(areas.groupContext$ | async)"
     icon="computer"
     text="Client Applications"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/groups', 'clients', areas.groupContext$.value]"
   ></app-main-nav-button>
 
@@ -72,7 +79,7 @@
     [visible]="!!(areas.groupContext$ | async)"
     icon="dns"
     text="Managed Servers"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/servers', 'browser', areas.groupContext$.value]"
     [disabled]="!(authService.isCurrentScopeAdmin$ | async)"
     [matTooltip]="(authService.isCurrentScopeAdmin$ | async) ? null : 'Only administrators can maintain managed server configuration'"
@@ -84,7 +91,7 @@
     [visible]="!!(areas.groupContext$ | async)"
     icon="inventory_2"
     text="Systems"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/systems', 'browser', areas.groupContext$.value]"
   ></app-main-nav-button>
 
@@ -101,7 +108,7 @@
     [visible]="!!(areas.instanceContext$ | async)"
     icon="dashboard"
     text="Instance Dashboard"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/instances', 'dashboard', areas.groupContext$.value, areas.instanceContext$.value]"
   ></app-main-nav-button>
 
@@ -109,7 +116,7 @@
     [visible]="!!(areas.instanceContext$ | async)"
     svgIcon="instance-settings"
     text="Instance Configuration"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     (click)="goToInstanceConfiguration()"
     [disabled]="!(authService.isCurrentScopeWrite$ | async)"
     [matTooltip]="(authService.isCurrentScopeWrite$ | async) ? null : 'Insufficient permissions to change configuration'"
@@ -120,7 +127,7 @@
     [visible]="!!(areas.instanceContext$ | async)"
     icon="source"
     text="Data Files"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/instances', 'data-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
   ></app-main-nav-button>
 
@@ -128,19 +135,19 @@
     [visible]="!!(areas.instanceContext$ | async)"
     icon="history"
     text="Instance History"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]"
   ></app-main-nav-button>
 
   <!-- Footer -->
   <div class="flex-auto"></div>
-  <div class="local-server-type-wrapper-expanded" *ngIf="expanded">
+  <div class="local-server-type-wrapper-expanded" *ngIf="scope.expanded">
     <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
       >{{ cfgService.config.mode }}</span
     >
   </div>
   <div
-    *ngIf="expanded"
+    *ngIf="scope.expanded"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
     [appBdPopup]="actionsPopup"
     appBdPopupPosition="right-above"
@@ -161,7 +168,7 @@
   </div>
 
   <div
-    *ngIf="!expanded && !!(actions.actions$ | async)?.length"
+    *ngIf="!scope.expanded && !!(actions.actions$ | async)?.length"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
     [appBdPopup]="actionsPopup"
     appBdPopupPosition="right-above"
@@ -170,13 +177,13 @@
     <mat-spinner class="bd-inherited-spinner" [diameter]="24"></mat-spinner>
   </div>
 
-  <div *ngIf="!expanded" class="local-short-version">
+  <div *ngIf="!scope.expanded" class="local-short-version">
     <div class="w-9" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
       {{ cfgService.config.version | formatVersionShort }}
     </div>
   </div>
   <div
-    *ngIf="expanded"
+    *ngIf="scope.expanded"
     class="local-footer flex flex-col gap-1"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
   >
@@ -190,7 +197,7 @@
     icon="system_update"
     text="New Release"
     color="toolbar"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     tooltip="right"
     [isToggle]="true"
     [toggleOnClick]="false"
@@ -200,11 +207,17 @@
   <app-main-nav-button
     icon="settings"
     text="Administration"
-    [collapsed]="!expanded"
+    [collapsed]="!scope.expanded"
     [route]="['/admin/']"
     [disabled]="!(authService.isGlobalAdmin$ | async)"
   ></app-main-nav-button>
   <a href="/assets/doc/index.html" target="_blank" class="bd-button-link" aria-label="Help" class="">
-    <app-bd-button class="flex" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>
+    <app-bd-button
+      class="flex"
+      icon="help_outline"
+      text="Help"
+      color="toolbar"
+      [collapsed]="!scope.expanded"
+    ></app-bd-button>
   </a>
 </div>

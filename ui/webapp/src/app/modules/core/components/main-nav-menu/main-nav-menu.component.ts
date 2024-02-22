@@ -1,5 +1,5 @@
 import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
-import { ChangeDetectionStrategy, Component, HostBinding, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, inject } from '@angular/core';
 import { encodeDataFilePath } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
@@ -43,16 +43,8 @@ export class MainNavMenuComponent {
   protected actions = inject(ActionsService);
   protected masterNode = encodeDataFilePath({ minion: 'master', path: '' });
 
-  @Input() set expanded(val: boolean) {
-    this.areas.menuMaximized$.next(!this.areas.menuMaximized$.value);
-  }
-
-  get expanded() {
-    return this.areas.menuMaximized$.value;
-  }
-
   @HostBinding('@menuOpenClose') get animationState() {
-    return this.expanded ? 'open' : 'closed';
+    return this.areas.menuMaximized$.value ? 'open' : 'closed';
   }
 
   goToInstanceConfiguration() {
