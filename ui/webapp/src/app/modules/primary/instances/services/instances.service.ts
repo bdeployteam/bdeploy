@@ -282,7 +282,7 @@ export class InstancesService {
 
   private getInstances(group: string): Observable<InstanceDto[]> {
     const fetchInstances$ = this.canPartiallyReloadInstances(group)
-      ? this.partiallyReloadInstances(group)
+      ? this.partiallyReloadInstances(group, this.getDeletedInstanceIds(), this.getUpdatedInstanceIds())
       : this.reloadInstances(group);
     this.instancesChanges = [];
     this.listLoading$.next(true);
@@ -319,11 +319,20 @@ export class InstancesService {
     return true;
   }
 
-  private partiallyReloadInstances(group: string): Observable<InstanceDto[]> {
-    const deletedInstanceIds = this.getDeletedInstanceIds();
+  public reloadCurrentInstance() {
+    // consider the current instance as changed and partially reload to update the list.
+    this.partiallyReloadInstances(this.group, [], [this.current$.value?.instanceConfiguration?.id]).subscribe(
+      (list) => {
+        this.instances$.next(list);
+      },
+    );
+  }
 
-    const updatedInstanceIds = this.getUpdatedInstanceIds();
-
+  private partiallyReloadInstances(
+    group: string,
+    deletedInstanceIds: string[],
+    updatedInstanceIds: string[],
+  ): Observable<InstanceDto[]> {
     // remove changed instances. updated/created will be reloaded, and deleted should be excluded
     const unchangedInstances = this.instances$.value.filter(
       (i) =>
@@ -361,7 +370,6 @@ export class InstancesService {
 
   private getUpdatedInstanceIds(): string[] {
     const deletedInstanceIds = this.getDeletedInstanceIds();
-
     const updatedInstanceIds = this.instancesChanges
       .filter((change) => change.event !== ObjectEvent.REMOVED || !!change.details['partial']) // partial REMOVED is considered an update (only a version was removed)
       .map((change) => change.scope.scope[1])

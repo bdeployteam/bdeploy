@@ -2,7 +2,7 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone, inject } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable, Subject, combineLatest, forkJoin, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, combineLatest, forkJoin, of } from 'rxjs';
 import { debounceTime, finalize, first, tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
@@ -18,11 +18,14 @@ import {
   InstanceNodeConfigurationDto,
   InstanceUpdateDto,
   MinionDto,
+  ObjectChangeDetails,
+  ObjectChangeType,
   ProcessControlGroupConfiguration,
   ProductDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { mapObjToArray, removeNullValues } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { DEF_CONTROL_GROUP, getNodeOfApplication } from 'src/app/modules/panels/instances/utils/instance-utils';
@@ -136,6 +139,7 @@ export class InstanceEditService {
   private products = inject(ProductsService);
   private areas = inject(NavAreasService);
   private ngZone = inject(NgZone);
+  private changes = inject(ObjectChangesService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public saving$ = new BehaviorSubject<boolean>(false);
@@ -166,6 +170,7 @@ export class InstanceEditService {
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
   private updateSaveableChangesHandle;
+  private changeSubscription: Subscription;
 
   constructor() {
     this.instances.current$.subscribe((instance) => {
@@ -201,6 +206,28 @@ export class InstanceEditService {
       this.state$.subscribe(() => {
         this.hasCurrentProduct$.next(this.hasCurrentProduct());
       });
+    });
+
+    // listen for  product updates and reload the instance version in that case since
+    // there may be new product versions matching - but only the server can tell us.
+    // we're doing that directly on the websocket so we're not required to figure out
+    // changes in the product.products$ observable.
+    this.current$.subscribe((cur) => {
+      this.changeSubscription?.unsubscribe();
+      this.changeSubscription = this.changes.subscribe(
+        ObjectChangeType.PRODUCT,
+        { scope: [this.groups.current$.value?.name] },
+        (change) => {
+          if (!cur?.instanceConfiguration?.product?.name) {
+            return;
+          }
+          if (change.details[ObjectChangeDetails.KEY_NAME] === cur.instanceConfiguration.product.name) {
+            // product name matches. this very very likely means that there is a new product version
+            // or an existing one has been removed. To determine this we however need to reload the instance.
+            this.instances.reloadCurrentInstance();
+          }
+        },
+      );
     });
 
     this.areas.panelRoute$.subscribe(() => {
