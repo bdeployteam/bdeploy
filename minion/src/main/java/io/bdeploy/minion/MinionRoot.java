@@ -10,6 +10,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -1019,6 +1020,26 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             return SecurityHelper.getInstance().getSelfVerifiedPayloadFromPack(encrypted, clazz);
         } catch (GeneralSecurityException | IOException e) {
             throw new WebApplicationException("Cannot decrypt payload", e);
+        }
+    }
+
+    public <T> T getDecryptedPayload(String enctrypted, Class<T> clazz, Certificate cert) {
+        try {
+            return SecurityHelper.getInstance().getVerifiedPayloadFromPack(enctrypted, clazz, cert);
+        } catch (GeneralSecurityException e) {
+            throw new WebApplicationException("Cannot decrypt payload", e);
+        }
+    }
+
+    public Certificate getCertificateOfRemote(String remoteAuth) {
+        if (remoteAuth == null) {
+            throw new IllegalArgumentException("RemoteService does not carry authentication information");
+        }
+
+        try {
+            return SecurityHelper.getInstance().getCertificateFromToken(remoteAuth);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot extract certificate from token", e);
         }
     }
 

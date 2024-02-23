@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
 import javax.crypto.Cipher;
@@ -194,28 +195,50 @@ public class SecurityHelper {
     }
 
     /**
-     * Accepts a token in {@link String} form, extracts the payload from it (see
+     * Accepts a pack in {@link String} form, extracts the payload from it (see
      * {@link #createSignaturePack(Object, Path, char[])}) and verifies that the
      * enclosed signature is valid for the decoded payload using the enclosed public certificate.
      * <p>
-     * This does NOT verify that the enclosed signature is valid against a present private key.
+     * This does NOT verify that the enclosed signature is valid against a present key on the server.
      *
-     * @param token the encoded payload and signature.
+     * @param pack the encoded payload and signature.
      * @param clazz the {@link Class} of the payload - used for
      *            de-serialization.
      * @return the signed payload, if the signature is valid.
      */
-    public <T> T getSelfVerifiedPayloadFromPack(String token, Class<T> clazz) throws GeneralSecurityException, IOException {
+    public <T> T getSelfVerifiedPayloadFromPack(String pack, Class<T> clazz) throws GeneralSecurityException, IOException {
+        return getVerifiedPayloadFromPack(pack, clazz, getCertificateFromToken(pack));
+    }
+
+    /**
+     * Extracts the certificate (public part) from a token or signed payload pack.
+     *
+     * @param token the token or signed payload
+     * @return the enclosed public certificate
+     */
+    public Certificate getCertificateFromToken(String token) throws CertificateException, IOException {
         SignaturePack sp = SignaturePack.parse(token);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(decode(sp.c))) {
+            return cf.generateCertificate(bais);
+        }
+    }
+
+    /**
+     * Accepts a pack in {@link String} form, extracts the payload from it (see
+     * {@link #createSignaturePack(Object, Path, char[])}) and verifies that the
+     * enclosed signature is valid for the decoded payload using the given certificate.
+     *
+     * @param pack the encoded payload and signature pack
+     * @param clazz the type of the payload to be unwrapped
+     * @param expected the certificate which is expected to be able to verify the signature.
+     * @return the payload if verification was successful.
+     */
+    public <T> T getVerifiedPayloadFromPack(String pack, Class<T> clazz, Certificate expected) throws GeneralSecurityException {
+        SignaturePack sp = SignaturePack.parse(pack);
         SignedPayload t = SignedPayload.parse(sp.t);
 
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        Certificate cert;
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(decode(sp.c))) {
-            cert = cf.generateCertificate(bais);
-        }
-
-        return doVerifyPayload(clazz, t, cert);
+        return doVerifyPayload(clazz, t, expected);
     }
 
     /**

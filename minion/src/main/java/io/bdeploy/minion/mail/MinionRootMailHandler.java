@@ -29,6 +29,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MimeFile;
 import io.bdeploy.messaging.util.MessageDataHolderBuilder;
+import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -41,6 +42,7 @@ public class MinionRootMailHandler {
 
     private static final Logger log = LoggerFactory.getLogger(MinionRootMailHandler.class);
 
+    private final MinionRoot root;
     private final Path tempDir;
     private final BHiveRegistry registry;
 
@@ -49,8 +51,9 @@ public class MinionRootMailHandler {
     /**
      * Creates a new {@link MinionRootMailHandler}.
      */
-    public MinionRootMailHandler(Path tempDir, BHiveRegistry registry, ObjectChangeBroadcaster changes) {
-        this.tempDir = tempDir;
+    public MinionRootMailHandler(MinionRoot root, BHiveRegistry registry, ObjectChangeBroadcaster changes) {
+        this.root = root;
+        this.tempDir = root.getTempDir();
         this.registry = registry;
         this.changes = changes;
     }
@@ -64,6 +67,7 @@ public class MinionRootMailHandler {
         for (MimeFile mimeFile : dataHolder.getAttachments()) {
             String name = mimeFile.getName();
             byte[] content = mimeFile.getContent();
+
             try {
                 handleAttachment(tempDir, name, content);
             } catch (RuntimeException e) {
@@ -75,12 +79,11 @@ public class MinionRootMailHandler {
     private void handleAttachment(Path tempDir, String name, byte[] content) {
         log.info("Received attachment " + name);
 
-        Path path = tempDir.resolve(name);
-        if (!path.toString().toLowerCase().endsWith(".zip")) {
-            throw new IllegalArgumentException("Only .zip files are supported. The attachment will be ignored.");
+        if (!name.toLowerCase().endsWith(MinionSignedAttachment.SIGNED_SUFFIX)) {
+            throw new IllegalArgumentException("Only signed .zip files are supported. The attachment will be ignored.");
         }
 
-        String[] data = AttachmentUtils.getAttachmentDataFromName(path);
+        String[] data = AttachmentUtils.getAttachmentDataFromName(Path.of(name));
         String hiveName = data[0];
         String instanceId = data[1];
         String serverName = data[2];
@@ -93,13 +96,31 @@ public class MinionRootMailHandler {
 
         ManagedMasters managedMasters = new ManagedMasters(target);
         ManagedMastersConfiguration cfg = managedMasters.read();
+        ManagedMasterDto managedMaster = cfg.getManagedMaster(serverName);
 
-        if (cfg.getManagedMaster(serverName) == null) {
+        if (managedMaster == null) {
             throw new IllegalArgumentException("Server " + serverName + " is unknown");
         }
 
+        // decrypt and verify signature.
+        var attachment = MinionSignedAttachment.getVerified(root, managedMaster.auth, content);
+
+        String[] signedData = AttachmentUtils.getAttachmentDataFromName(Path.of(attachment.getName()));
+        String signedHiveName = signedData[0];
+        String signedInstanceId = signedData[1];
+        String signedServerName = signedData[2];
+
+        if (!hiveName.equals(signedHiveName) || !instanceId.equals(signedInstanceId) || !serverName.equals(signedServerName)) {
+            // the name carries information, so we must make sure nobody tinkered with it.
+            throw new IllegalArgumentException(
+                    "Attachment name does not match signed name: " + name + " - " + attachment.getName());
+        }
+
+        // use the signed name for the file.
+        Path path = tempDir.resolve(attachment.getName());
+
         try {
-            Files.write(path, content);
+            Files.write(path, attachment.getData());
             try (BHive source = new BHive(path.toUri(), null, new ActivityReporter.Null())) {
                 // copy *all* manifests and objects.
                 source.execute(new CopyOperation().setDestinationHive(target).setPartialAllowed(false));
@@ -123,7 +144,7 @@ public class MinionRootMailHandler {
 
             changes.send(update);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to create file at " + path, e);
+            throw new IllegalStateException("Failed to create file for " + name, e);
         } finally {
             PathHelper.deleteIfExistsRetry(path);
         }

@@ -14,7 +14,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,13 +121,11 @@ import io.bdeploy.messaging.MimeFile;
 import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.mail.AttachmentUtils;
+import io.bdeploy.minion.mail.MinionSignedAttachment;
 import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
-import jakarta.mail.Address;
-import jakarta.mail.MessagingException;
-import jakarta.mail.SendFailedException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -714,33 +710,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
         InternetAddress receiverAddress = MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress);
 
+        // encode the attachment as base64, and sign the whole thing.
+        MinionSignedAttachment signed = new MinionSignedAttachment(attachmentName, attachment, attachmentMimeType);
+
         MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, List.of(receiverAddress), subject, text, textMimeType,
-                List.of(new MimeFile(attachmentName, attachment, attachmentMimeType)));
+                List.of(new MimeFile(signed.getSignedName(), signed.getSigned(root), MinionSignedAttachment.SIGNED_MIME_TYPE)));
 
         try {
             mailSender.send(dataHolder);
-        } catch (SendFailedException e) {
-            Address[] invalidAddresses = e.getInvalidAddresses();
-            if (invalidAddresses != null) {
-                log.warn("Invalid addresses: " + joinAddresses(invalidAddresses));
-            }
-            Address[] validUnsentAddresses = e.getValidUnsentAddresses();
-            if (validUnsentAddresses != null) {
-                log.error("Valid unsent addresses: " + joinAddresses(validUnsentAddresses));
-            }
-            if (log.isTraceEnabled()) {
-                Address[] validSentAddresses = e.getValidSentAddresses();
-                if (validSentAddresses != null) {
-                    log.trace("Valid sent addresses: " + joinAddresses(validSentAddresses));
-                }
-            }
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send mail.", e);
         }
-    }
-
-    private static String joinAddresses(Address[] addresses) {
-        return Strings.join(Arrays.stream(addresses).map(Address::toString).iterator(), '|');
     }
 
     private String getNextRootTag(String rootName) {

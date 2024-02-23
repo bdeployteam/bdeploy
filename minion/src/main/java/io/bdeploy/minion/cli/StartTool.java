@@ -303,7 +303,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.register(new MinionCommonBinder(root, ocws));
         srv.registerResource(r);
 
-        root.configureMessageHandler(new MinionRootMailHandler(root.getTempDir(), r, ocws)::handleMail);
+        root.configureMessageHandler(new MinionRootMailHandler(root, r, ocws)::handleMail);
 
         SchemaResources.register(srv);
 
