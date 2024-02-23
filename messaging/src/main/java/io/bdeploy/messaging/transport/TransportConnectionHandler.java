@@ -1,5 +1,7 @@
 package io.bdeploy.messaging.transport;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,7 +12,6 @@ import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.MimeFile;
 import io.bdeploy.messaging.ServiceConnectionHandler;
-import io.bdeploy.messaging.util.MessagingUtils;
 import jakarta.activation.DataHandler;
 import jakarta.mail.Address;
 import jakarta.mail.BodyPart;
@@ -19,6 +20,9 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
 import jakarta.mail.SendFailedException;
 import jakarta.mail.Transport;
+import jakarta.mail.URLName;
+import jakarta.mail.event.TransportEvent;
+import jakarta.mail.event.TransportListener;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
@@ -97,16 +101,27 @@ public abstract class TransportConnectionHandler<T extends Transport>//
             message.setContent(multipart);
         }
 
-        int sizeInBytes = MessagingUtils.calculateSize(message);
-        if (maxMessageSizeInBytes > 0 && sizeInBytes > maxMessageSizeInBytes) {
-            throw new MessagingException("Message is too big. Determined size is " + sizeInBytes
-                    + "B but currently set maximum size is " + maxMessageSizeInBytes + "B.");
+        if (maxMessageSizeInBytes > 0) {
+            int sizeInBytes;
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try {
+                message.writeTo(os);
+                sizeInBytes = os.size();
+            } catch (MessagingException | IOException e) {
+                log.error("Failed to determine size of part.", e);
+                sizeInBytes = -1;
+            }
+            if (sizeInBytes > maxMessageSizeInBytes) {
+                throw new MessagingException("Message is too big. Determined size is " + sizeInBytes
+                        + "B but currently set maximum size is " + maxMessageSizeInBytes + "B.");
+            }
         }
 
-        getService().sendMessage(message, message.getAllRecipients());
-
-        log.info("Sent message '" + subject + "' via " + getService().getURLName() + " to " + recipients.size()
+        log.info("Sending message '" + subject + "' via " + getService().getURLName() + " to " + recipients.size()
                 + " recipient(s).");
+
+        reconnectIfNeeded();
+        getService().sendMessage(message, message.getAllRecipients());
     }
 
     @Override
@@ -114,5 +129,97 @@ public abstract class TransportConnectionHandler<T extends Transport>//
         properties.put("mail.transport.protocol", getProtocol());
     }
 
+    @Override
+    protected void afterConnect(URLName url) {
+        getService().addTransportListener(LoggingTransportListener.INSTANCE);
+    }
+
     protected abstract Message createMessage();
+
+    /**
+     * A {@link TransportListener} which logs each {@link TransportEvent} at trace level.
+     */
+    private static class LoggingTransportListener implements TransportListener {
+
+        private static LoggingTransportListener INSTANCE = new LoggingTransportListener();
+
+        @Override
+        public void messageDelivered(TransportEvent event) {
+            if (!log.isTraceEnabled()) {
+                return;
+            }
+
+            String source = event.getSource().toString();
+            int type = event.getType();
+            if (type != TransportEvent.MESSAGE_DELIVERED) {
+                log.trace("Message delivered event handler called with unexpected event type. (Source="//
+                        + source + ")(Type=" + type + ')');
+                return;
+            }
+            log.trace("Message delivered from " + source + " to: " + buildEventInfo(event));
+        }
+
+        @Override
+        public void messageNotDelivered(TransportEvent event) {
+            if (!log.isTraceEnabled()) {
+                return;
+            }
+
+            String source = event.getSource().toString();
+            int type = event.getType();
+            if (type != TransportEvent.MESSAGE_NOT_DELIVERED) {
+                log.trace("Message not delivered event handler called with unexpected event type. (Source="//
+                        + source + ")(Type=" + type + ')');
+                return;
+            }
+            log.trace("Message not delivered from " + source + " to: " + buildEventInfo(event));
+        }
+
+        @Override
+        public void messagePartiallyDelivered(TransportEvent event) {
+            if (!log.isTraceEnabled()) {
+                return;
+            }
+
+            String source = event.getSource().toString();
+            int type = event.getType();
+            if (type != TransportEvent.MESSAGE_PARTIALLY_DELIVERED) {
+                log.trace("Message partially delivered event handler called with unexpected event type. (Source="//
+                        + source + ")(Type=" + type + ')');
+                return;
+            }
+            log.trace("Message partially delivered from " + source + " to: " + buildEventInfo(event));
+        }
+
+        private static String buildEventInfo(TransportEvent event) {
+            Address[] validSentAddresses = event.getValidSentAddresses();
+            Address[] validUnsentAddresses = event.getValidUnsentAddresses();
+            Address[] invalidAddresses = event.getInvalidAddresses();
+
+            StringBuilder sb = new StringBuilder();
+            if (validSentAddresses != null && validSentAddresses.length != 0) {
+                sb.append("Valid sent addresses: ");
+                appendAddressInfo(sb, event.getValidSentAddresses());
+            }
+            if (validUnsentAddresses != null && validUnsentAddresses.length != 0) {
+                sb.append(" Valid unsent addresses: ");
+                appendAddressInfo(sb, event.getValidUnsentAddresses());
+            }
+            if (invalidAddresses != null && invalidAddresses.length != 0) {
+                sb.append(" Invalid addresses: ");
+                appendAddressInfo(sb, event.getInvalidAddresses());
+            }
+            return sb.toString();
+        }
+
+        private static void appendAddressInfo(StringBuilder sb, Address[] addresses) {
+            for (Address address : addresses) {
+                sb.append("[(Type=");
+                sb.append(address.getType());
+                sb.append(")(Value=");
+                sb.append(address.toString());
+                sb.append(")]");
+            }
+        }
+    }
 }

@@ -1,17 +1,14 @@
 package io.bdeploy.messaging.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.common.util.ProgressInputStream;
 import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MimeFile;
 import jakarta.mail.Address;
@@ -30,7 +27,6 @@ import jakarta.ws.rs.core.MediaType;
 public class MessageDataHolderBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(MessageDataHolderBuilder.class);
-    private static final int BYTES_PER_LOOP = 10240;
     private static final MediaType MULTIPART_ALTERNATIVE = MediaType.valueOf("multipart/alternative");
     private static final MediaType MULTIPART_MIXED = MediaType.valueOf("multipart/mixed");
 
@@ -83,48 +79,15 @@ public class MessageDataHolderBuilder {
             return textFromBodyPart;
         }
 
-        boolean traceEnabled = log.isTraceEnabled();
-
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < count; i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
             if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-                InputStream inputStream;
-                try {
-                    inputStream = bodyPart.getInputStream();
+                try (InputStream inputStream = bodyPart.getInputStream()) {
+                    attachments.add(new MimeFile(bodyPart.getFileName(), inputStream.readAllBytes(), bodyPart.getContentType()));
                 } catch (IOException e) {
-                    log.error("Failed to get input stream of body part. The body part will be skipped.", e);
-                    continue;
+                    log.error("Failed to read data from body part. It will be skipped.", e);
                 }
-
-                int sizeInBytes = MessagingUtils.calculateSize(bodyPart);
-                BiConsumer<Integer, Integer> loggingListener = (readBytesCount, progress) -> {
-                    if (traceEnabled) {
-                        int digitsInBase10PlusOne = 2 + (int) Math.log10(sizeInBytes);
-                        log.trace(String.format("Reading attachment: %3s%% (%" + digitsInBase10PlusOne + "s/%s)", progress,
-                                readBytesCount, sizeInBytes));
-                    }
-                };
-
-                ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-                byte[] tempBuffer = new byte[BYTES_PER_LOOP];
-                int nRead;
-                try (ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, sizeInBytes);) {
-                    progressInputStream.addListener(loggingListener);
-                    try {
-                        while ((nRead = progressInputStream.read(tempBuffer, 0, tempBuffer.length)) != -1) {
-                            byteBuffer.write(tempBuffer, 0, nRead);
-                        }
-                    } catch (IOException e) {
-                        log.error("Failed to read bytes of input stream. The body part will be skipped.", e);
-                        continue;
-                    }
-                } catch (IOException e) {
-                    log.error("Failed to close stream.", e);
-                    continue;
-                }
-
-                attachments.add(new MimeFile(bodyPart.getFileName(), byteBuffer.toByteArray(), bodyPart.getContentType()));
             } else {
                 sb.append(getTextFromBodyPart(bodyPart, attachments));
             }

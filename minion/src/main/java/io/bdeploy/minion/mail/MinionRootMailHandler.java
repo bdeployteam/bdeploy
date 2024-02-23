@@ -67,7 +67,7 @@ public class MinionRootMailHandler {
             try {
                 handleAttachment(tempDir, name, content);
             } catch (RuntimeException e) {
-                log.warn("Failed to handle attachment " + name, e);
+                throw new IllegalStateException("Failed to handle attachment " + name, e);
             }
         }
     }
@@ -94,7 +94,7 @@ public class MinionRootMailHandler {
         ManagedMasters managedMasters = new ManagedMasters(target);
         ManagedMastersConfiguration cfg = managedMasters.read();
 
-        if (serverName == null || cfg.getManagedMaster(serverName) == null) {
+        if (cfg.getManagedMaster(serverName) == null) {
             throw new IllegalArgumentException("Server " + serverName + " is unknown");
         }
 

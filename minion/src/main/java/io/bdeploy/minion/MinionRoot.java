@@ -87,6 +87,7 @@ import io.bdeploy.jersey.actions.ActionService;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.messaging.ConnectionHandler;
 import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.store.imap.custom.ExecuteUnreadMessagesReceiver;
@@ -110,7 +111,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.dto.JobDto;
-import jakarta.mail.URLName;
 import jakarta.mail.search.SubjectTerm;
 import jakarta.ws.rs.WebApplicationException;
 import net.jsign.AuthenticodeSigner;
@@ -313,45 +313,37 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         SettingsConfiguration settings;
         try {
             settings = getSettings(false);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Failed to retrieve settings.", e);
             return;
         }
 
         try {
             MailSenderSettingsDto mailSenderSettings = settings.mailSenderSettings;
-            if (mailSenderSettings.enabled) {
-                URLName parsedUrl = null;
-                try {
-                    parsedUrl = MessagingUtils.checkAndParseUrl(//
-                            mailSenderSettings.url, mailSenderSettings.username, mailSenderSettings.password);
-                    mailSender.connect(parsedUrl);
-                } catch (IllegalArgumentException e) {
-                    log.error("Mail sender URL is incomplete.", e);
-                }
-            } else {
-                mailSender.close();
-            }
-        } catch (Exception e) {
+            updateHandler(mailSender, mailSenderSettings.enabled,//
+                    mailSenderSettings.url, mailSenderSettings.username, mailSenderSettings.password);
+        } catch (RuntimeException e) {
             log.error("Failed to update mail sender.", e);
         }
 
         try {
             MailReceiverSettingsDto mailReceiverSettings = settings.mailReceiverSettings;
-            if (mailReceiverSettings.enabled) {
-                URLName parsedUrl = null;
-                try {
-                    parsedUrl = MessagingUtils.checkAndParseUrl(//
-                            mailReceiverSettings.url, mailReceiverSettings.username, mailReceiverSettings.password);
-                    mailReceiver.connect(parsedUrl);
-                } catch (IllegalArgumentException e) {
-                    log.error("Mail receiver URL is incomplete.", e);
-                }
-            } else {
-                mailReceiver.close();
-            }
-        } catch (Exception e) {
+            updateHandler(mailReceiver, mailReceiverSettings.enabled,//
+                    mailReceiverSettings.url, mailReceiverSettings.username, mailReceiverSettings.password);
+        } catch (RuntimeException e) {
             log.error("Failed to update mail receiver.", e);
+        }
+    }
+
+    private static void updateHandler(ConnectionHandler handler, boolean enabled, String url, String user, String password) {
+        if (enabled) {
+            try {
+                handler.connect(MessagingUtils.checkAndParseUrl(url, user, password));
+            } catch (IllegalArgumentException e) {
+                log.error("URL is invalid.", e);
+            }
+        } else {
+            handler.close();
         }
     }
 
@@ -1087,12 +1079,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public void setSettings(SettingsConfiguration settings) {
         SettingsManifest.write(hive, settings, getEncryptionKey());
-
-        try {
-            updateMailHandling();
-        } catch (Exception e) {
-            log.error("Cannot update mail handling", e);
-        }
+        updateMailHandling();
     }
 
     public void setLatestGitHubReleaseVersion(Version v) {

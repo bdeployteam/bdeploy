@@ -1,6 +1,7 @@
 
 package io.bdeploy.minion.remote.jersey;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -81,7 +82,7 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
 
     @Override
     public boolean sendTestMail(MailSenderSettingsDto mailSenderSettingsDto) {
-        if (StringHelper.isNullOrBlank(mailSenderSettingsDto.password)) {
+        if (mailSenderSettingsDto.password == null) {
             SettingsConfiguration stored = root.getSettings(false);
             if (stored != null && stored.mailSenderSettings != null) {
                 mailSenderSettingsDto.password = stored.mailSenderSettings.password;
@@ -91,32 +92,33 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
         URLName url = MessagingUtils.checkAndParseUrl(mailSenderSettingsDto.url, mailSenderSettingsDto.username,
                 mailSenderSettingsDto.password);
 
+        InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
+                : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
+
+        List<InternetAddress> receiverAddresses = new ArrayList<>();
+        if (!StringHelper.isNullOrBlank(mailSenderSettingsDto.receiverAddress)) {
+            receiverAddresses.add(MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress));
+        }
+
         try (SMTPTransportConnectionHandler testMailSender = new SMTPTransportConnectionHandler()) {
-            try {
-                testMailSender.connect(url).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new IllegalStateException("Connecting was aborted", e);
-            }
+            testMailSender.connect(url).get();
 
-            InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
-                    : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
-            InternetAddress receiverAddress = MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress);
-
-            MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, List.of(receiverAddress), "Mail sending test",
+            MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, receiverAddresses, "Mail sending test",
                     "This is a test mail.", MediaType.TEXT_PLAIN);
 
-            try {
-                testMailSender.send(dataHolder);
-            } catch (MessagingException e) {
-                throw new IllegalStateException("Failed to send test mail", e);
-            }
+            testMailSender.send(dataHolder);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException | MessagingException | RuntimeException e) {
+            throw new IllegalStateException("Mail sending failed.", e);
         }
         return true;
     }
 
     @Override
     public boolean testSenderConnection(MailSenderSettingsDto mailSenderSettingsDto) {
-        if (StringHelper.isNullOrBlank(mailSenderSettingsDto.password)) {
+        if (mailSenderSettingsDto.password == null) {
             SettingsConfiguration stored = root.getSettings(false);
             if (stored != null && stored.mailSenderSettings != null) {
                 mailSenderSettingsDto.password = stored.mailSenderSettings.password;
@@ -129,7 +131,7 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
 
     @Override
     public boolean testReceiverConnection(MailReceiverSettingsDto mailReceiverSettingsDto) {
-        if (StringHelper.isNullOrBlank(mailReceiverSettingsDto.password)) {
+        if (mailReceiverSettingsDto.password == null) {
             SettingsConfiguration stored = root.getSettings(false);
             if (stored != null && stored.mailReceiverSettings != null) {
                 mailReceiverSettingsDto.password = stored.mailReceiverSettings.password;
@@ -143,19 +145,21 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
     private static void testConnection(boolean enabled, String url, String username, String password,
             Supplier<ConnectionHandler> handlerCreator) {
         if (!enabled) {
-            throw new IllegalStateException("Mail sending is disabled.");
+            throw new IllegalStateException("Connection is disabled.");
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Connection test -> URL=" + url + " | username=" + username);
+            log.trace("Connection test -> URL={} | username={}", url, username);
         }
 
         URLName parsedUrl = MessagingUtils.checkAndParseUrl(url, username, password);
 
         try (ConnectionHandler handler = handlerCreator.get()) {
             handler.connect(parsedUrl).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException("Connecting was aborted", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException | RuntimeException e) {
+            throw new IllegalStateException("Connecting failed.", e);
         }
     }
 }

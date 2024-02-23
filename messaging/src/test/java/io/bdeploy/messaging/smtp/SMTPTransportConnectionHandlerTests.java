@@ -47,6 +47,18 @@ public class SMTPTransportConnectionHandlerTests {
     private static final URLName URL_SMTPS = new URLName(PROTOCOL_SMTPS, HOST, PORT_SMTPS, null, USERNAME, PASSWORD);
 
     @Test
+    void testClosingClosedHandler() throws Exception {
+        try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {
+        }
+        try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {
+            messageSender.disconnect();
+        }
+        try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {
+            messageSender.close();
+        }
+    }
+
+    @Test
     void testWithoutConnection() throws Exception {
         MessageDataHolder dataHolder = createAndSetupBuilder("Test - No Connection");
         assertEquals(1, dataHolder.getRecipients().size());
@@ -62,8 +74,6 @@ public class SMTPTransportConnectionHandlerTests {
             }
             assertTrue(invalidArgumentExceptionThrown);
             assertEquals(1, messageSender.getMaxMessageSize());
-            messageSender.close();
-            messageSender.close();
         }
     }
 
