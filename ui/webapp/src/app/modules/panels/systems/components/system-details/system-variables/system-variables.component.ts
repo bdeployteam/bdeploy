@@ -99,6 +99,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   protected records: ConfigVariable[] = [];
   protected columns: BdDataColumn<ConfigVariable>[] = [colName, colValue, colDesc, this.colEdit, this.colDelete];
   protected checked: ConfigVariable[];
+  protected clipboardVars: ConfigVariable[];
 
   protected newValue: VariableConfiguration;
   protected newUsedIds: string[] = [];
@@ -107,8 +108,6 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
 
   protected completionPrefixes = buildCompletionPrefixes();
   protected completions: ContentCompletion[];
-
-  protected clipboardVars: ConfigVariable[];
 
   private subscription: Subscription;
   private instancesUsing: InstanceDto[];
@@ -143,7 +142,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
         }
 
         this.instancesUsing = i.filter((i) => i.instanceConfiguration?.system?.name === c.key?.name);
-      })
+      }),
     );
 
     this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
@@ -151,7 +150,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
     this.subscription.add(
       interval(1000)
         .pipe(startWith(null))
-        .subscribe(() => this.readFromClipboard())
+        .subscribe(() => this.readFromClipboard()),
     );
   }
 
@@ -184,7 +183,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
         .confirm(
           `Saving ${this.instancesUsing.length} instances`,
           `Affected <strong>${this.instancesUsing.length}</strong> will be updated with the new system version. This needs to be installed and activated on all affected instances.`,
-          'warning'
+          'warning',
         )
         .pipe(
           switchMap((b) => {
@@ -193,7 +192,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
             } else {
               return of(MAGIC_ABORT).pipe(finalize(() => this.saving$.next(false)));
             }
-          })
+          }),
         );
     } else {
       // no confirmation required
@@ -221,7 +220,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
       () =>
         this.snackbar.open('Unable to write to clipboard.', null, {
           duration: 1000,
-        })
+        }),
     );
   }
 
@@ -285,7 +284,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
       (e) => {
         console.error('Unable to read from clipboard', e);
         this.clipboardVars = null;
-      }
+      },
     );
   }
 
@@ -341,7 +340,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
         this.system.config.systemVariables.splice(
           this.system.config.systemVariables.findIndex((x) => x.id === value.id),
           1,
-          value
+          value,
         );
         this.buildVariables();
       });
@@ -364,7 +363,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   private onDelete(r: ConfigVariable) {
     this.system.config.systemVariables.splice(
       this.system.config.systemVariables.findIndex((x) => x.id === r.name),
-      1
+      1,
     );
     this.buildVariables();
   }

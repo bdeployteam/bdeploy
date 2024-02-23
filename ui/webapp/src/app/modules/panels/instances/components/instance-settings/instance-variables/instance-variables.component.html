@@ -1,7 +1,5 @@
 <ng-template #addTemplate>
-  <div>
-    Provide an ID, a value and an optional description for the new variable.
-  </div>
+  <div>Provide an ID, a value and an optional description for the new variable.</div>
   <form #addForm="ngForm">
     <app-bd-form-input
       [(ngModel)]="newValue.id"
@@ -28,11 +26,7 @@
       [product]="instance?.config?.product"
       [group]="(groups.current$ | async)?.name"
     ></app-bd-value-editor>
-    <app-bd-form-input
-      [(ngModel)]="newValue.description"
-      name="description"
-      label="Description"
-    ></app-bd-form-input>
+    <app-bd-form-input [(ngModel)]="newValue.description" name="description" label="Description"></app-bd-form-input>
     <mat-divider></mat-divider>
     <app-bd-form-select
       [ngModel]="newValue.type"
@@ -52,9 +46,7 @@
 </ng-template>
 
 <ng-template #editTemplate>
-  <div>
-    Provide a new value or description for <strong>{{newValue.id}}</strong>.
-  </div>
+  <div>Provide a new value or description for <strong>{{newValue.id}}</strong>.</div>
   <form #editForm="ngForm">
     <app-bd-value-editor
       [(ngModel)]="newValue.value"
@@ -71,11 +63,7 @@
       [product]="instance?.config?.product"
       [group]="(groups.current$ | async)?.name"
     ></app-bd-value-editor>
-    <app-bd-form-input
-      [(ngModel)]="newValue.description"
-      name="description"
-      label="Description"
-    ></app-bd-form-input>
+    <app-bd-form-input [(ngModel)]="newValue.description" name="description" label="Description"></app-bd-form-input>
     <mat-divider></mat-divider>
     <app-bd-form-select
       [ngModel]="newValue.type"
@@ -95,16 +83,22 @@
 </ng-template>
 
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [panel]="true"
-    header="Instance Variables"
-    [route]="['..']"
-  >
+  <app-bd-dialog-toolbar [panel]="true" header="Instance Variables" [route]="['..']">
     <div class="flex-auto"></div>
+    <app-bd-button text="Add" icon="add" (click)="onAdd(addTemplate)"></app-bd-button>
     <app-bd-button
-      text="Add"
-      icon="add"
-      (click)="onAdd(addTemplate)"
+      text="Copy Selected"
+      icon="content_copy"
+      [collapsed]="false"
+      (click)="doCopy()"
+      [disabled]="!checked?.length"
+    ></app-bd-button>
+    <app-bd-button
+      text="Paste"
+      icon="content_paste_go"
+      [collapsed]="false"
+      [disabled]="!clipboardVars?.length"
+      (click)="doPaste()"
     ></app-bd-button>
     <app-bd-button
       text="Apply"
@@ -122,6 +116,8 @@
         <app-bd-data-table
           [records]="records"
           [columns]="columns"
+          [checkMode]="true"
+          [(checked)]="checked"
         ></app-bd-data-table>
       </div>
     </div>
