@@ -18,7 +18,6 @@ import org.eclipse.tea.core.services.TaskChain.TaskChainId;
 import org.eclipse.tea.core.services.TaskingLog;
 import org.eclipse.tea.core.ui.annotations.TaskChainUiInit;
 import org.eclipse.tea.library.build.config.BuildDirectories;
-import org.eclipse.tea.library.build.menu.BuildLibraryMenu;
 import org.osgi.service.component.annotations.Component;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -26,7 +25,7 @@ import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 
 @Component
 @TaskChainId(description = "Push BDeploy Product...", alias = "BDeployProductPush")
-@TaskChainMenuEntry(path = BuildLibraryMenu.MENU_BUILD, groupingId = "BDeploy", icon = "icons/bdeploy.png")
+@TaskChainMenuEntry(path = BDeployMenuDecoration.MENU_BDEPLOY, icon = "icons/bdeploy.png")
 public class BDeployProductPushTaskChain implements TaskChain {
 
     private Manifest.Key product;

@@ -40,7 +40,6 @@ import org.eclipse.tea.core.ui.annotations.TaskChainUiInit;
 import org.eclipse.tea.library.build.config.BuildDirectories;
 import org.eclipse.tea.library.build.jar.ZipExecFactory;
 import org.eclipse.tea.library.build.lcdsl.tasks.p2.DynamicProductBuildRegistry;
-import org.eclipse.tea.library.build.menu.BuildLibraryMenu;
 import org.eclipse.tea.library.build.services.TeaBuildVersionService;
 import org.eclipse.tea.library.build.tasks.jar.TaskInitJarCache;
 import org.osgi.service.component.annotations.Component;
@@ -73,7 +72,7 @@ import jakarta.ws.rs.core.UriBuilder;
 @SuppressWarnings("restriction")
 @Component
 @TaskChainId(description = "Build BDeploy Product...", alias = "BDeployProduct")
-@TaskChainMenuEntry(path = BuildLibraryMenu.MENU_BUILD, groupingId = "BDeploy", icon = "icons/bdeploy.png")
+@TaskChainMenuEntry(path = BDeployMenuDecoration.MENU_BDEPLOY, icon = "icons/bdeploy.png")
 public class BDeployProductTaskChain implements TaskChain {
 
     private Path bdeployProductFile;

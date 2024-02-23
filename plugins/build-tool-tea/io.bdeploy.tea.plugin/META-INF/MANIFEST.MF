@@ -34,4 +34,5 @@ Import-Package: javax.inject,
 Service-Component: OSGI-INF/io.bdeploy.tea.plugin.BDeployConfig.xml,
  OSGI-INF/io.bdeploy.tea.plugin.BDeployProductPushTaskChain.xml,
  OSGI-INF/io.bdeploy.tea.plugin.BDeployProductTaskChain.xml,
- OSGI-INF/io.bdeploy.tea.plugin.rcp.RcpProductBuildService.xml
+ OSGI-INF/io.bdeploy.tea.plugin.rcp.RcpProductBuildService.xml,
+ OSGI-INF/io.bdeploy.tea.plugin.BDeployMenuDecoration.xml
