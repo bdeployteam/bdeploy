@@ -25,7 +25,6 @@ import io.bdeploy.messaging.transport.smtp.SMTPTransportConnectionHandler;
 import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.ui.api.Minion;
 import jakarta.inject.Inject;
-import jakarta.mail.MessagingException;
 import jakarta.mail.URLName;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.ws.rs.core.MediaType;
@@ -106,11 +105,11 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
             MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, receiverAddresses, "Mail sending test",
                     "This is a test mail.", MediaType.TEXT_PLAIN);
 
-            testMailSender.send(dataHolder);
+            testMailSender.send(dataHolder).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return false;
-        } catch (ExecutionException | MessagingException | RuntimeException e) {
+        } catch (ExecutionException | RuntimeException e) {
             throw new IllegalStateException("Mail sending failed.", e);
         }
         return true;

@@ -52,7 +52,7 @@ public class SMTPTransportConnectionHandler extends TransportConnectionHandler<S
     }
 
     @Override
-    protected Message createMessage() {
+    protected Message createEmptyMessage() {
         return new SMTPMessage(getSession());
     }
 }

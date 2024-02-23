@@ -104,39 +104,44 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
     protected abstract S createService(URLName url) throws NoSuchProviderException;
 
     private void doConnect(URLName url) {
-        disconnect();
-
-        URLName urlWithoutPassword = url == null || (url.getPassword() == null) ? url
-                : new URLName(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), url.getUsername(), null);
-
-        boolean traceEnabled = log.isTraceEnabled();
-        if (traceEnabled) {
-            log.trace("Attempting connection to " + urlWithoutPassword);
-        }
-
-        protocol = urlWithoutPassword.getProtocol();
-
         try {
-            if (protocol == null) {
-                throw getNoSuchProviderException(null);
-            }
-            protocol = protocol.trim().toLowerCase();
+            disconnect();
 
-            Properties properties = new Properties();
-            modifyProperties(properties);
+            URLName urlWithoutPassword = url == null || (url.getPassword() == null) ? url
+                    : new URLName(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), url.getUsername(), null);
 
+            boolean traceEnabled = log.isTraceEnabled();
             if (traceEnabled) {
-                log.trace("Properties for " + protocol + ": " + properties);
+                log.trace("Attempting connection to " + urlWithoutPassword);
             }
 
-            session = createSession(properties);
-            service = createService(url);
-            service.addConnectionListener((LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
-            service.connect();
-        } catch (MessagingException e) {
-            throw new IllegalStateException("Failed to connect to " + urlWithoutPassword, e);
-        }
+            protocol = urlWithoutPassword.getProtocol();
 
-        afterConnect(urlWithoutPassword);
+            try {
+                if (protocol == null) {
+                    throw getNoSuchProviderException(null);
+                }
+                protocol = protocol.trim().toLowerCase();
+
+                Properties properties = new Properties();
+                modifyProperties(properties);
+
+                if (traceEnabled) {
+                    log.trace("Properties for " + protocol + ": " + properties);
+                }
+
+                session = createSession(properties);
+                service = createService(url);
+                service.addConnectionListener(
+                        (LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
+                service.connect();
+            } catch (MessagingException e) {
+                throw new IllegalStateException("Failed to connect to " + urlWithoutPassword, e);
+            }
+
+            afterConnect(urlWithoutPassword);
+        } catch (RuntimeException e) {
+            log.error("Unexpected runtime exception during connection handling to.", e);
+        }
     }
 }

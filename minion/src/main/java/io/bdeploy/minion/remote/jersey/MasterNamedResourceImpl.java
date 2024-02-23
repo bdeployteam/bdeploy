@@ -716,11 +716,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, List.of(receiverAddress), subject, text, textMimeType,
                 List.of(new MimeFile(signed.getSignedName(), signed.getSigned(root), MinionSignedAttachment.SIGNED_MIME_TYPE)));
 
-        try {
-            mailSender.send(dataHolder);
-        } catch (Exception e) {
-            log.error("Failed to send mail.", e);
-        }
+        mailSender.send(dataHolder);
     }
 
     private String getNextRootTag(String rootName) {

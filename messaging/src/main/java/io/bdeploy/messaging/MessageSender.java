@@ -1,8 +1,8 @@
 package io.bdeploy.messaging;
 
+import java.util.concurrent.CompletableFuture;
+
 import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.SendFailedException;
 
 /**
  * Interface for generic {@link Message} senders.
@@ -23,10 +23,11 @@ public interface MessageSender extends ConnectionHandler {
 
     /**
      * Sends a {@link Message} based on the given {@link MessageDataHolder}.
+     * <p>
+     * Never throws exceptions.
      *
      * @param dataHolder The {@link MessageDataHolder} to use
-     * @throws SendFailedException If one or more of the recipient addresses were invalid
-     * @throws MessagingException For other failures
+     * @return A {@link CompletableFuture} of the sending process
      */
-    void send(MessageDataHolder dataHolder) throws SendFailedException, MessagingException;
+    CompletableFuture<Void> send(MessageDataHolder dataHolder);
 }
