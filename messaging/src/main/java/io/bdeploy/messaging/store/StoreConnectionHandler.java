@@ -1,6 +1,5 @@
 package io.bdeploy.messaging.store;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -38,7 +37,6 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
 
     private static final Logger log = LoggerFactory.getLogger(StoreConnectionHandler.class);
     private static final String DEFAULT_FOLDER_NAME = "inbox";
-    private static final Duration FOLDER_OPEN_RETRY_TIME = Duration.ofMinutes(1);
 
     private final List<FolderListener> folderListeners = new ArrayList<>();
     private final List<MessageChangedListener> messageChangedListeners = new ArrayList<>();
@@ -76,12 +74,9 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             folder.addConnectionListener((LoggingConnectionListener<F>) (source, info) -> log.info(info + source.getFullName()));
             folder.addMessageChangedListener(LoggingMessageChangedListener.INSTANCE);
             folder.addMessageCountListener(LoggingMessageCountListener.INSTANCE);
-            openFolderRetry();
+            folder.open(getFolderOpeningMode().value);
         } catch (MessagingException e) {
             throw new IllegalStateException("Failed to connect to folder " + url, e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
         }
 
         beforeListeners(folder);
@@ -110,19 +105,6 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
      */
     protected void beforeListeners(F folder) {
         // Only a hook for subclasses - does nothing by default
-    }
-
-    protected void openFolderRetry() throws InterruptedException {
-        reconnectIfNeeded();
-        int folderOpeningMode = getFolderOpeningMode().value;
-        while (!folder.isOpen()) {
-            try {
-                folder.open(folderOpeningMode);
-            } catch (MessagingException e) {
-                log.error("Failed to open " + getFolderAndUrlLogString(), e);
-                Thread.sleep(FOLDER_OPEN_RETRY_TIME);
-            }
-        }
     }
 
     protected F getFolder() {

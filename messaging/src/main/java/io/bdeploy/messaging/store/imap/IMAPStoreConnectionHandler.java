@@ -103,11 +103,13 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             IMAPFolder folder = getFolder();
 
             // Make sure that the folder is open
-            try {
-                openFolderRetry();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
+            if (!folder.isOpen()) {
+                try {
+                    folder.open(getFolderOpeningMode().value);
+                } catch (MessagingException e) {
+                    log.error("Failed to open folder -> idle handling will be aborted | " + getFolderAndUrlLogString(), e);
+                    return;
+                }
             }
 
             // Attempt idleing once
@@ -129,7 +131,9 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 if (supportsIdle) {
                     // Preferred idle logic
                     while (!Thread.interrupted()) {
-                        openFolderRetry();
+                        if (!folder.isOpen()) {
+                            folder.open(getFolderOpeningMode().value);
+                        }
                         if (log.isTraceEnabled()) {
                             log.trace("Idleing on " + getFolderAndUrlLogString());
                         }
@@ -138,7 +142,9 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 } else {
                     // Fallback idle logic
                     while (!Thread.interrupted()) {
-                        openFolderRetry();
+                        if (!folder.isOpen()) {
+                            folder.open(getFolderOpeningMode().value);
+                        }
                         if (log.isTraceEnabled()) {
                             log.trace("Fallback idleing on " + getFolderAndUrlLogString());
                         }
