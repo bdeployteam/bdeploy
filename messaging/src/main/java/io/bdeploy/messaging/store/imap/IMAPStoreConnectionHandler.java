@@ -3,9 +3,11 @@ package io.bdeploy.messaging.store.imap;
 import java.time.Duration;
 import java.util.Properties;
 
+import org.eclipse.angus.mail.iap.ProtocolException;
 import org.eclipse.angus.mail.imap.IMAPFolder;
 import org.eclipse.angus.mail.imap.IMAPSSLStore;
 import org.eclipse.angus.mail.imap.IMAPStore;
+import org.eclipse.angus.mail.imap.protocol.IMAPProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +100,29 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
         if (idleThread != null && idleThread.isAlive()) {
             idleThread.interrupt();
             idleThread = null;
+        }
+    }
+
+    @Override
+    protected void keepAlive() {
+        super.keepAlive();
+
+        try {
+            getFolder().doCommand(new IMAPFolder.ProtocolCommand() {
+
+                @Override
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                    protocol.simpleCommand("NOOP", null);
+                    return null;
+                }
+            });
+        } catch (MessagingException e) {
+            log.error("Failed to send NOOP to " + getFolderAndUrlLogString(), e);
+            return;
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace("Sent NOOP to " + getFolderAndUrlLogString());
         }
     }
 

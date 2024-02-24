@@ -1,11 +1,18 @@
 package io.bdeploy.messaging.store;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.bdeploy.messaging.LoggingConnectionListener;
 import io.bdeploy.messaging.MessageReceiver;
@@ -38,10 +45,17 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
     private static final Logger log = LoggerFactory.getLogger(StoreConnectionHandler.class);
     private static final String DEFAULT_FOLDER_NAME = "inbox";
 
+    private static final Duration KEEP_ALIVE_FREQUENCY = Duration.ofMinutes(3);
+    private static final long KEEP_ALIVE_FREQUENCY__IN_SECONDS = KEEP_ALIVE_FREQUENCY.toSeconds();
+
     private final List<FolderListener> folderListeners = new ArrayList<>();
     private final List<MessageChangedListener> messageChangedListeners = new ArrayList<>();
     private final List<MessageCountListener> messageCountListeners = new ArrayList<>();
 
+    private final ScheduledExecutorService keepAliveExecutor = Executors.newScheduledThreadPool(1,
+            new ThreadFactoryBuilder().setNameFormat(getClass().getSimpleName() + "KeepAliveThread-%d").build());
+
+    private ScheduledFuture<?> keepAliveSchedule;
     private F folder;
 
     @Override
@@ -84,10 +98,17 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         folderListeners.forEach(listener -> folder.addFolderListener(listener));
         messageChangedListeners.forEach(listener -> folder.addMessageChangedListener(listener));
         messageCountListeners.forEach(listener -> folder.addMessageCountListener(listener));
+
+        keepAliveSchedule = keepAliveExecutor.scheduleWithFixedDelay(() -> keepAlive(), KEEP_ALIVE_FREQUENCY__IN_SECONDS,
+                KEEP_ALIVE_FREQUENCY__IN_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
     public void disconnect() {
+        if (keepAliveSchedule != null && !keepAliveSchedule.isDone()) {
+            keepAliveSchedule.cancel(false);
+            keepAliveSchedule = null;
+        }
         if (folder != null && folder.isOpen()) {
             try {
                 folder.close(false);
@@ -97,6 +118,38 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             }
         }
         super.disconnect();
+    }
+
+    @Override
+    public void close() {
+        keepAliveExecutor.close();
+        super.close();
+    }
+
+    protected void keepAlive() {
+        S service = getService();
+        if (!service.isConnected()) {
+            try {
+                service.connect();
+            } catch (MessagingException e) {
+                log.error("Failed to connect to " + service.getURLName(), e);
+                return;
+            }
+        }
+
+        F folder = getFolder();
+        if (!folder.isOpen()) {
+            try {
+                folder.open(getFolderOpeningMode().value);
+            } catch (MessagingException e) {
+                log.error("Failed to open " + getFolderAndUrlLogString(), e);
+                return;
+            }
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace("Made sure that folder is open | " + getFolderAndUrlLogString());
+        }
     }
 
     /**
