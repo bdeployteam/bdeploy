@@ -22,7 +22,8 @@ import jakarta.mail.URLName;
 public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore, IMAPFolder> {
 
     private static final Logger log = LoggerFactory.getLogger(IMAPStoreConnectionHandler.class);
-    private static final Duration IDLE_TIME = Duration.ofMinutes(1);
+    private static final Duration IDLE_RETRY_TIME = Duration.ofMinutes(1);
+    private static final Duration FALLBACK_IDLE_FREQUENCY = Duration.ofMinutes(1);
 
     private final FolderOpeningMode folderOpeningMode;
 
@@ -88,7 +89,8 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     @Override
     protected void afterConnect(URLName url) {
         super.afterConnect(url);
-        idle();
+        idleThread = new Thread(() -> idle(), getClass().getSimpleName() + "IdleThread");
+        idleThread.start();
     }
 
     @Override
@@ -100,66 +102,71 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     }
 
     private void idle() {
-        idleThread = new Thread(() -> {
-            IMAPFolder folder = getFolder();
+        IMAPFolder folder = getFolder();
 
-            // Make sure that the folder is open
-            if (!folder.isOpen()) {
-                try {
-                    folder.open(getFolderOpeningMode().value);
-                } catch (MessagingException e) {
-                    log.error("Failed to open folder -> idle handling will be aborted | " + getFolderAndUrlLogString(), e);
-                    return;
-                }
+        // Attempt idleing once
+        boolean supportsIdle = false;
+        try {
+            if (log.isTraceEnabled()) {
+                log.trace("Idleing on " + getFolderAndUrlLogString());
             }
+            folder.idle();
+            supportsIdle = true;
+        } catch (FolderClosedException | IllegalStateException e) {
+            log.error("Folder was closed -> idle handling could not be started | " + getFolderAndUrlLogString(), e);
+            return;
+        } catch (MessagingException e) {
+            supportsIdle = false;
+        }
 
-            // Attempt idleing once
-            boolean supportsIdle = false;
-            try {
-                if (log.isTraceEnabled()) {
-                    log.trace("Idleing on " + getFolderAndUrlLogString());
-                }
-                folder.idle();
-                supportsIdle = true;
-            } catch (FolderClosedException e) {
-                throw new IllegalStateException("Unexpectedly closed " + getFolderAndUrlLogString(), e);
-            } catch (MessagingException e) {
-                supportsIdle = false;
-            }
-
-            // Loop the appropriate idle logic
-            try {
-                if (supportsIdle) {
-                    // Preferred idle logic
-                    while (!Thread.interrupted()) {
-                        if (!folder.isOpen()) {
-                            folder.open(getFolderOpeningMode().value);
-                        }
-                        if (log.isTraceEnabled()) {
-                            log.trace("Idleing on " + getFolderAndUrlLogString());
-                        }
+        // Loop the appropriate idle logic
+        try {
+            if (supportsIdle) {
+                // Preferred idle logic
+                while (!Thread.interrupted()) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Idleing on " + getFolderAndUrlLogString());
+                    }
+                    if (!folder.isOpen()) {
+                        log.info("Idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
+                                + getFolderAndUrlLogString());
+                        Thread.sleep(IDLE_RETRY_TIME);
+                        continue;
+                    }
+                    try {
                         folder.idle();
-                    }
-                } else {
-                    // Fallback idle logic
-                    while (!Thread.interrupted()) {
-                        if (!folder.isOpen()) {
-                            folder.open(getFolderOpeningMode().value);
-                        }
-                        if (log.isTraceEnabled()) {
-                            log.trace("Fallback idleing on " + getFolderAndUrlLogString());
-                        }
-                        folder.getMessageCount();
-                        Thread.sleep(IDLE_TIME);
+                    } catch (FolderClosedException | IllegalStateException e) {
+                        log.info("Idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
+                                + getFolderAndUrlLogString());
+                        Thread.sleep(IDLE_RETRY_TIME);
                     }
                 }
-            } catch (MessagingException e) {
-                log.error("Failed to idle " + getFolderAndUrlLogString(), e);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
+            } else {
+                // Fallback idle logic
+                while (!Thread.interrupted()) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Fallback idleing on " + getFolderAndUrlLogString());
+                    }
+                    if (!folder.isOpen()) {
+                        log.info("Fallback idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
+                                + getFolderAndUrlLogString());
+                        Thread.sleep(IDLE_RETRY_TIME);
+                        continue;
+                    }
+                    if (folder.getMessageCount() == -1) {
+                        log.info("Fallback idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
+                                + getFolderAndUrlLogString());
+                        Thread.sleep(IDLE_RETRY_TIME);
+                        continue;
+                    }
+                    Thread.sleep(FALLBACK_IDLE_FREQUENCY);
+                }
             }
-        }, getClass().getSimpleName() + "IdleThread");
-        idleThread.start();
+        } catch (MessagingException e) {
+            log.error("Aborted idle handling due to unexpected exception |  " + getFolderAndUrlLogString(), e);
+        } catch (InterruptedException e) {
+            log.info("Interrupted idle thread | " + getFolderAndUrlLogString());
+            Thread.currentThread().interrupt();
+        }
     }
 }

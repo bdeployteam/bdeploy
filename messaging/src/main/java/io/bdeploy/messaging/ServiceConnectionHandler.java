@@ -72,19 +72,6 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
         return service;
     }
 
-    protected void reconnectIfNeeded() {
-        if (service != null && !service.isConnected()) {
-            try {
-                if (log.isTraceEnabled()) {
-                    log.trace("Reconnecting to " + service.getURLName());
-                }
-                service.connect();
-            } catch (MessagingException e) {
-                log.error("Exception while reconnecting service " + service.getURLName(), e);
-            }
-        }
-    }
-
     /**
      * Called after the connecting of the internal {@link Service} was completed successfully. The provided {@link URLName} does
      * not contain the password.
