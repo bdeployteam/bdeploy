@@ -150,7 +150,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 Thread.currentThread().interrupt();
                 return;
             }
-        });
+        }, getClass().getSimpleName() + "IdleThread");
         idleThread.start();
     }
 }

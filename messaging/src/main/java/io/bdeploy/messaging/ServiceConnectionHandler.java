@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.NoSuchProviderException;
 import jakarta.mail.Service;
@@ -23,7 +25,8 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     private static final Logger log = LoggerFactory.getLogger(ServiceConnectionHandler.class);
 
-    private final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService connectionThreadExecutor = Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder().setNameFormat(getClass().getSimpleName() + "ConnectionThread-%d").build());
 
     private String protocol;
     private Session session;
@@ -31,7 +34,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     @Override
     public CompletableFuture<Void> connect(URLName url) {
-        return CompletableFuture.runAsync(() -> doConnect(url), singleThreadExecutor);
+        return CompletableFuture.runAsync(() -> doConnect(url), connectionThreadExecutor);
     }
 
     /**
@@ -52,7 +55,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     @Override
     public void close() {
-        singleThreadExecutor.close();
+        connectionThreadExecutor.close();
         disconnect();
     }
 

@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.MimeFile;
@@ -41,7 +43,8 @@ public abstract class TransportConnectionHandler<T extends Transport>//
 
     private static final Logger log = LoggerFactory.getLogger(TransportConnectionHandler.class);
 
-    private final ExecutorService sendMailExecutor = Executors.newFixedThreadPool(3);
+    private final ExecutorService sendExecutor = Executors.newFixedThreadPool(3,
+            new ThreadFactoryBuilder().setNameFormat(getClass().getSimpleName() + "SendThread-%d").build());
 
     /**
      * Default maximum message size is equal to 50 megabytes (1024 * 1024 * 50 = 52428800)
@@ -69,12 +72,12 @@ public abstract class TransportConnectionHandler<T extends Transport>//
      */
     @Override
     public CompletableFuture<Void> send(MessageDataHolder dataHolder) {
-        return CompletableFuture.runAsync(() -> doSend(dataHolder), sendMailExecutor);
+        return CompletableFuture.runAsync(() -> doSend(dataHolder), sendExecutor);
     }
 
     @Override
     public void close() {
-        sendMailExecutor.close();
+        sendExecutor.close();
         super.close();
     }
 
