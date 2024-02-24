@@ -95,6 +95,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     public void disconnect() {
         if (idleThread != null && idleThread.isAlive()) {
             idleThread.interrupt();
+            idleThread = null;
         }
     }
 

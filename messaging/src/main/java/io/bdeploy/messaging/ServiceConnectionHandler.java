@@ -47,6 +47,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
         if (service != null && service.isConnected()) {
             try {
                 service.close();
+                service = null;
             } catch (MessagingException e) {
                 log.error("Exception while disconnecting service " + service.getURLName(), e);
             }

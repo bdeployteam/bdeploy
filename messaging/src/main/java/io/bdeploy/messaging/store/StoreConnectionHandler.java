@@ -91,6 +91,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         if (folder != null && folder.isOpen()) {
             try {
                 folder.close(false);
+                folder = null;
             } catch (MessagingException e) {
                 log.error("Exception while closing  " + getFolderAndUrlLogString(), e);
             }
