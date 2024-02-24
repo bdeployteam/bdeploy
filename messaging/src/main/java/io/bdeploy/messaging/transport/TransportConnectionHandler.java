@@ -31,8 +31,6 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
 
-//TODO re-check security features like encryption
-
 /**
  * Handles the opening and closing of a connection to a {@link Transport}, as well as basic logic associated with it.
  *

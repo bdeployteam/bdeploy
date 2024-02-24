@@ -25,8 +25,6 @@ import jakarta.mail.event.MessageCountListener;
 import jakarta.mail.event.StoreEvent;
 import jakarta.mail.event.StoreListener;
 
-//TODO re-check security features like encryption
-
 /**
  * Handles the opening and closing of a connection to a {@link Store}, as well as basic logic associated with it. If no
  * {@link URLName#getFile() folder} is provided in the {@link URLName} when calling {@link #connect(URLName)} the opened
