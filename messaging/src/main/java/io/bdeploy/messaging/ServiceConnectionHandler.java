@@ -110,8 +110,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
             URLName urlWithoutPassword = url == null || (url.getPassword() == null) ? url
                     : new URLName(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), url.getUsername(), null);
 
-            boolean traceEnabled = log.isTraceEnabled();
-            if (traceEnabled) {
+            if (log.isTraceEnabled()) {
                 log.trace("Attempting connection to " + urlWithoutPassword);
             }
 
@@ -126,7 +125,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
                 Properties properties = new Properties();
                 modifyProperties(properties);
 
-                if (traceEnabled) {
+                if (log.isTraceEnabled()) {
                     log.trace("Properties for " + protocol + ": " + properties);
                 }
 

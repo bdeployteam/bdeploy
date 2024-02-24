@@ -2,9 +2,6 @@ package io.bdeploy.messaging.util;
 
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.common.util.StringHelper;
 import jakarta.mail.URLName;
 import jakarta.mail.internet.AddressException;
@@ -16,7 +13,6 @@ import jakarta.mail.internet.InternetAddress;
 public class MessagingUtils {
 
     public static final Pattern MAIL_ADDRESS_PATTERN = Pattern.compile("[a-zA-Z0-9-_\\.]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]+");
-    private static final Logger log = LoggerFactory.getLogger(MessagingUtils.class);
 
     /**
      * Builds a new {@link URLName} which copies the protocol-, host-, port- and file-part of the given url, but sets the provided

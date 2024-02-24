@@ -111,7 +111,9 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             // Attempt idleing once
             boolean supportsIdle = false;
             try {
-                log.trace("Idleing on " + getFolderAndUrlLogString());
+                if (log.isTraceEnabled()) {
+                    log.trace("Idleing on " + getFolderAndUrlLogString());
+                }
                 folder.idle();
                 supportsIdle = true;
             } catch (FolderClosedException e) {
@@ -126,14 +128,18 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                     // Preferred idle logic
                     while (!Thread.interrupted()) {
                         openFolderRetry();
-                        log.trace("Idleing on " + getFolderAndUrlLogString());
+                        if (log.isTraceEnabled()) {
+                            log.trace("Idleing on " + getFolderAndUrlLogString());
+                        }
                         folder.idle();
                     }
                 } else {
                     // Fallback idle logic
                     while (!Thread.interrupted()) {
                         openFolderRetry();
-                        log.trace("Fallback idleing on " + getFolderAndUrlLogString());
+                        if (log.isTraceEnabled()) {
+                            log.trace("Fallback idleing on " + getFolderAndUrlLogString());
+                        }
                         folder.getMessageCount();
                         Thread.sleep(IDLE_TIME);
                     }
