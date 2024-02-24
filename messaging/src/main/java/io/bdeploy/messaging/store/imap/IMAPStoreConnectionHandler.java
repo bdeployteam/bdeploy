@@ -53,9 +53,11 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             case "imap":
                 properties.put("mail.imap.starttls.enable", "true");
                 properties.put("mail.imap.peek", "true");
+                properties.put("mail.imap.minidletime", "1000");
                 return Session.getInstance(properties);
             case "imaps":
                 properties.put("mail.imaps.peek", "true");
+                properties.put("mail.imaps.minidletime", "1000");
                 return Session.getInstance(properties);
         }
         throw getNoSuchProviderException(protocol);
