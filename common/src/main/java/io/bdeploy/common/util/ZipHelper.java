@@ -108,7 +108,7 @@ public class ZipHelper {
         PathHelper.mkdirs(target);
 
         // need to use commons compress to be able to unzip file attributes
-        try (ZipFile zf = new ZipFile(zipFile.toFile())) {
+        try (ZipFile zf = ZipFile.builder().setPath(zipFile).get()) {
             Enumeration<ZipArchiveEntry> entries = zf.getEntries();
             while (entries.hasMoreElements()) {
                 ZipArchiveEntry entry = entries.nextElement();
