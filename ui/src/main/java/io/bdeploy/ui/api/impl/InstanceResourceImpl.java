@@ -616,14 +616,17 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // 1. push product to remote in case it is not yet there, and we have it.
         if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
-            TransferStatistics stats = hive.execute(
-                    new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
+            try (ActionHandle handle = af.run(Actions.PUSH_PRODUCT, group, instanceId,
+                    instance.getConfiguration().product.toString())) {
+                TransferStatistics stats = hive.execute(
+                        new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            if (log.isInfoEnabled()) {
-                log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
-                        svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects,
-                        FormatHelper.formatFileSize(stats.transferSize), FormatHelper.formatDuration(stats.duration),
-                        FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+                if (log.isInfoEnabled()) {
+                    log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}",
+                            instance.getConfiguration().product, svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects,
+                            FormatHelper.formatFileSize(stats.transferSize), FormatHelper.formatDuration(stats.duration),
+                            FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+                }
             }
         }
 

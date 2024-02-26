@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
   private isCardView: boolean;
 
-  protected mappedInstall$ = this.actions.action([Actions.INSTALL], this.installing$);
+  protected mappedInstall$ = this.actions.action([Actions.INSTALL, Actions.PUSH_PRODUCT], this.installing$);
   protected mappedActivate$ = this.actions.action([Actions.ACTIVATE], this.activating$);
 
   protected narrow$ = new BehaviorSubject<boolean>(true);

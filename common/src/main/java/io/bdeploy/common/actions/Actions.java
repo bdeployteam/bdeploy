@@ -12,6 +12,7 @@ public enum Actions {
     DELETE_INSTANCE_VERSION(ActionScope.VERSION, true, "Delete Instance Version"),
 
     DELETE_INSTANCE(ActionScope.INSTANCE, true, "Delete Instance"),
+    PUSH_PRODUCT(ActionScope.INSTANCE, true, "Push Product to Managed Server"),
 
     INSTALL(ActionScope.VERSION, true, "Install Instance Version"),
     UNINSTALL(ActionScope.VERSION, true, "Uninstall Instance Version"),
