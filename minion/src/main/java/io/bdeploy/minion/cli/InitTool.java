@@ -94,7 +94,10 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Help(value = "Skip the check for a valid host/port configuration", arg = false)
         boolean skipConnectionCheck() default false;
 
-        @Help("An optional pool directory which will be used to pool common objects.")
+        @Help(value = "Enable pooling. Currently defaults to false, will default to true in future releases.")
+        boolean pooling() default false;
+
+        @Help("An optional pool directory which will be used to pool common objects. Otherwise, the default pooling directory will be used (<root>/objpool) if pooling is enabled.")
         String pool();
     }
 
@@ -176,11 +179,16 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 result.addField("Software Imported", keys);
             }
 
-            if (config.pool() != null) {
-                Path path = Paths.get(config.pool()).toAbsolutePath().normalize();
+            if (config.pooling()) {
+                Path poolPath = config.pool() == null ? root.resolve("objpool") : Paths.get(config.pool());
+                Path path = poolPath.toAbsolutePath().normalize();
                 mr.modifyState(s -> {
                     s.poolDefaultPath = path;
                 });
+
+                // enable pooling on the default hive.
+                mr.getHive().enablePooling(poolPath, false);
+
                 result.addField("Object Pool", path);
             }
         } catch (Exception e) {

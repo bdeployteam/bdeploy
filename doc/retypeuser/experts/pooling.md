@@ -31,7 +31,7 @@ Pooling naturally only makes sense if more that one **BHive** is configured to u
 **BDeploy** can be configured to provide a global default pool directory which is automatically configured on *new* BHives (e.g. new **Instance Group**, new **Software Repository**), but not on existing BHives. This setup can be performed during init:
 
 ```
-bdeploy init --root=/path/to/root ... --pool=/path/to/pool
+bdeploy init --root=/path/to/root ... --pooling [--pool=/path/to/somewhere/pool]
 ```
 
 You can also setup the global default after init using:
@@ -41,7 +41,7 @@ bdeploy pool --root=/path/to/root --defaultPool=/path/to/pool
 ```
 
 !!!info Note
-By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. what you pass as `--root=/path/to/root`) called `objpool`. However this is not technically required, and the pool can even reside on different filesystems.
+By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. what you pass as `--root=/path/to/root`) called `objpool`. This is the path used when `--pooling` is enabled, but `--pool=` is *not* given. This is not technically required, and the pool can even reside on different filesystems when set using `--pool=` during `init` or later using `--defaultPool=`.
 !!!
 
 ### Global Usage Threshold
@@ -54,7 +54,7 @@ bdeploy pool --root=/path/to/root --usageThreshold=3
 
 ## Pooling the *default* BHive
 
-Even when setting a global default pool, the **default** BHive will not participate in pooling by default. This can be changed using the [Per-BHive Pool Setup](#per-bhive-pool-setup).
+The *default* **BHive** created during `init` will be configured to use pooling if `--pooling` is given. Otherwise this can be changed using the [Per-BHive Pool Setup](#per-bhive-pool-setup) later on.
 
 ## Re-organizing Pools
 
