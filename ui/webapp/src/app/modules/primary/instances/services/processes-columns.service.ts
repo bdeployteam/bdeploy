@@ -4,6 +4,7 @@ import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { BdIdentifierCellComponent } from 'src/app/modules/core/components/bd-identifier-cell/bd-identifier-cell.component';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessOutdatedComponent } from '../components/dashboard/process-outdated/process-outdated.component';
+import { ProcessStarttypeIconComponent } from '../components/dashboard/process-starttype-icon/process-starttype-icon.component';
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
 import { PortStatusColumnComponent } from '../components/port-status-column/port-status-column.component';
 import { ProcessNameAndOsComponent } from '../components/process-name-and-os/process-name-and-os.component';
@@ -78,6 +79,15 @@ export class ProcessesColumnsService {
     width: '70px',
   };
 
+  public startTypeColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'startType',
+    name: 'Start Type',
+    display: BdDataColumnDisplay.TABLE,
+    component: ProcessStarttypeIconComponent,
+    data: (r) => r.processControl.startType,
+    width: '40px',
+  };
+
   private processStatusColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'status',
     name: 'Status',
@@ -101,6 +111,7 @@ export class ProcessesColumnsService {
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
+    this.startTypeColumn,
     this.processStatusColumn,
     this.processPortRatingColumn,
     this.processActualityColumn,
@@ -117,6 +128,7 @@ export class ProcessesColumnsService {
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
+    this.startTypeColumn,
   ];
 
   private getAllPortsRating(r: ApplicationConfiguration) {

@@ -19,6 +19,7 @@ import { ConfigurationComponent } from './components/configuration/configuration
 import { ClientNodeComponent } from './components/dashboard/client-node/client-node.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProcessOutdatedComponent } from './components/dashboard/process-outdated/process-outdated.component';
+import { ProcessStarttypeIconComponent } from './components/dashboard/process-starttype-icon/process-starttype-icon.component';
 import { ProcessStatusIconComponent } from './components/dashboard/process-status-icon/process-status-icon.component';
 import { NodeHeaderComponent } from './components/dashboard/server-node/header/header.component';
 import { NodeProcessListComponent } from './components/dashboard/server-node/process-list/process-list.component';
@@ -48,6 +49,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     NodeProcessListComponent,
     ProcessOutdatedComponent,
     ProcessStatusIconComponent,
+    ProcessStarttypeIconComponent,
     ConfigurationComponent,
     HistoryComponent,
     ConfigNodeComponent,
