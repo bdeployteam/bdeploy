@@ -20,6 +20,7 @@ import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 import io.bdeploy.interfaces.settings.WebAuthSettingsDto;
 import io.bdeploy.messaging.ConnectionHandler;
 import io.bdeploy.messaging.MessageDataHolder;
+import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.store.imap.IMAPStoreConnectionHandler;
 import io.bdeploy.messaging.transport.smtp.SMTPTransportConnectionHandler;
 import io.bdeploy.messaging.util.MessagingUtils;
@@ -99,13 +100,13 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
             receiverAddresses.add(MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress));
         }
 
-        try (SMTPTransportConnectionHandler testMailSender = new SMTPTransportConnectionHandler()) {
-            testMailSender.connect(url).get();
+        try (MessageSender testMessageSender = new SMTPTransportConnectionHandler()) {
+            testMessageSender.connect(url, true).get();
 
             MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, receiverAddresses, "Mail sending test",
                     "This is a test mail.", MediaType.TEXT_PLAIN);
 
-            testMailSender.send(dataHolder).get();
+            testMessageSender.send(dataHolder).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return false;
@@ -154,7 +155,7 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
         URLName parsedUrl = MessagingUtils.checkAndParseUrl(url, username, password);
 
         try (ConnectionHandler handler = handlerCreator.get()) {
-            handler.connect(parsedUrl).get();
+            handler.connect(parsedUrl, true).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException | RuntimeException e) {

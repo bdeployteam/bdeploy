@@ -85,7 +85,7 @@ public abstract class TransportConnectionHandler<T extends Transport>//
     }
 
     @Override
-    protected void afterConnect(URLName url) {
+    protected void afterConnect(URLName url, boolean testMode) {
         getService().addTransportListener(LoggingTransportListener.INSTANCE);
     }
 

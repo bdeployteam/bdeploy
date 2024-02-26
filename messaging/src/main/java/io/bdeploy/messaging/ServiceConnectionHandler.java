@@ -33,8 +33,8 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
     private S service;
 
     @Override
-    public CompletableFuture<Void> connect(URLName url) {
-        return CompletableFuture.runAsync(() -> doConnect(url), connectionThreadExecutor);
+    public CompletableFuture<Void> connect(URLName url, boolean testMode) {
+        return CompletableFuture.runAsync(() -> doConnect(url, testMode), connectionThreadExecutor);
     }
 
     /**
@@ -79,8 +79,9 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
      * This method will be executed as part of the {@link CompletableFuture} of {@link #connect(URLName)}.
      *
      * @param url The {@link URLName} to which the connection was established
+     * @param testMode If <code>true</code>, the implementation should start in test mode
      */
-    protected void afterConnect(URLName url) {
+    protected void afterConnect(URLName url, boolean testMode) {
         // Only a hook for subclasses - does nothing by default
     }
 
@@ -94,7 +95,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     protected abstract S createService(URLName url) throws NoSuchProviderException;
 
-    private void doConnect(URLName url) {
+    private void doConnect(URLName url, boolean testMode) {
         try {
             disconnect();
 
@@ -129,7 +130,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
                 throw new IllegalStateException("Failed to connect to " + urlWithoutPassword, e);
             }
 
-            afterConnect(urlWithoutPassword);
+            afterConnect(urlWithoutPassword, testMode);
         } catch (RuntimeException e) {
             log.error("Unexpected runtime exception during connection handling to.", e);
         }

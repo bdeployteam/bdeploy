@@ -79,7 +79,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
     }
 
     @Override
-    protected void afterConnect(URLName url) {
+    protected void afterConnect(URLName url, boolean testMode) {
         getService().addStoreListener(LoggingStoreListener.INSTANCE);
 
         String folderName = url.getFile();
@@ -99,8 +99,10 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         messageChangedListeners.forEach(listener -> folder.addMessageChangedListener(listener));
         messageCountListeners.forEach(listener -> folder.addMessageCountListener(listener));
 
-        keepAliveSchedule = keepAliveExecutor.scheduleWithFixedDelay(() -> keepAlive(), KEEP_ALIVE_FREQUENCY__IN_SECONDS,
-                KEEP_ALIVE_FREQUENCY__IN_SECONDS, TimeUnit.SECONDS);
+        if (!testMode) {
+            keepAliveSchedule = keepAliveExecutor.scheduleWithFixedDelay(() -> keepAlive(), KEEP_ALIVE_FREQUENCY__IN_SECONDS,
+                    KEEP_ALIVE_FREQUENCY__IN_SECONDS, TimeUnit.SECONDS);
+        }
     }
 
     @Override

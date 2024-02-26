@@ -89,10 +89,12 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     }
 
     @Override
-    protected void afterConnect(URLName url) {
-        super.afterConnect(url);
-        idleThread = new Thread(() -> idle(), getClass().getSimpleName() + "IdleThread");
-        idleThread.start();
+    protected void afterConnect(URLName url, boolean testMode) {
+        super.afterConnect(url, testMode);
+        if (!testMode) {
+            idleThread = new Thread(() -> idle(), getClass().getSimpleName() + "IdleThread");
+            idleThread.start();
+        }
     }
 
     @Override
