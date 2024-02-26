@@ -183,7 +183,6 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             // 5) prepare call to pus.update() and pus.validate() for each instance. then save the result if possible.
             Set<Manifest.Key> toSync = new ConcurrentSkipListSet<>();
             List<Runnable> updateRuns = new ArrayList<>();
-            List<InstanceUpdateDto> updated = new ArrayList<>();
             for (var update : updates) {
                 String sourceTag = update.config.config.product.getTag();
 
@@ -201,9 +200,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                                 currentApps.get(sourceTag));
                         var issues = pus.validate(upd, targetApps, system);
 
-                        if (issues.isEmpty()) {
-                            updated.add(upd);
-                        } else {
+                        if (!issues.isEmpty()) {
                             result.add(new OperationResult(upd.config.config.id, OperationResultType.WARNING,
                                     issues.size() + " Validation issues after update, skipping."));
                             return;
