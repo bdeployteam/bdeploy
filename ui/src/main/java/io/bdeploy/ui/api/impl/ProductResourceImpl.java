@@ -21,8 +21,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -72,8 +70,6 @@ import jakarta.ws.rs.core.UriBuilder;
 public class ProductResourceImpl implements ProductResource {
 
     private static final String RELPATH_ERROR = "Only relative paths within the ZIP file are allowed, '..' is forbidden. Offending path: %1$s";
-
-    private static final Logger log = LoggerFactory.getLogger(ProductResourceImpl.class);
 
     @Inject
     private BHiveRegistry registry;
