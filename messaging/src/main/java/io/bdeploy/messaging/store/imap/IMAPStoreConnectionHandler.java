@@ -103,6 +103,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             idleThread.interrupt();
             idleThread = null;
         }
+        super.disconnect();
     }
 
     @Override
