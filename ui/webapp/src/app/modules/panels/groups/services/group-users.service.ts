@@ -31,8 +31,8 @@ export class GroupUsersService {
     u: this.loadingUsers$,
     g: this.loadingUserGroups$,
   }).pipe(map(({ u, g }) => u || g));
-  public users$ = new BehaviorSubject<UserInfo[]>(null);
-  public userGroups$ = new BehaviorSubject<UserGroupInfo[]>(null);
+  public users$ = new BehaviorSubject<UserInfo[]>([]);
+  public userGroups$ = new BehaviorSubject<UserGroupInfo[]>([]);
 
   private group: InstanceGroupConfiguration;
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
@@ -60,7 +60,7 @@ export class GroupUsersService {
       .get<UserInfo[]>(`${this.apiPath(this.group.name)}/users`)
       .pipe(
         measure('Load Users'),
-        finalize(() => this.loadingUsers$.next(false))
+        finalize(() => this.loadingUsers$.next(false)),
       )
       .subscribe((users) => {
         this.users$.next(users);
@@ -76,7 +76,7 @@ export class GroupUsersService {
       .get<UserGroupInfo[]>(`${this.apiPath(this.group.name)}/user-groups`)
       .pipe(
         measure('Load User Groups'),
-        finalize(() => this.loadingUserGroups$.next(false))
+        finalize(() => this.loadingUserGroups$.next(false)),
       )
       .subscribe((groups) => {
         this.userGroups$.next(groups);

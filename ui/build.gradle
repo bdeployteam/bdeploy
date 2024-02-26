@@ -374,6 +374,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.RepairAndPruneResultDto',
         'io.bdeploy.interfaces.UserGroupInfo',
         'io.bdeploy.interfaces.UserInfo',
+        'io.bdeploy.interfaces.UserProfileInfo',
         'io.bdeploy.interfaces.UserPermissionUpdateDto',
         'io.bdeploy.interfaces.UserGroupPermissionUpdateDto',
         'io.bdeploy.interfaces.UserChangePasswordDto',

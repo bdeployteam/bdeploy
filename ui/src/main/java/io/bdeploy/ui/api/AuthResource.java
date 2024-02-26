@@ -5,6 +5,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.UserProfileInfo;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.jersey.SessionManager;
@@ -87,6 +88,15 @@ public interface AuthResource {
     @GET
     @Path("/user")
     public UserInfo getCurrentUser();
+
+    /**
+     * Retrieve the current user profile info.
+     *
+     * @return the currently logged in user's profile information.
+     */
+    @GET
+    @Path("/user-profile")
+    public UserProfileInfo getCurrentUserProfile();
 
     /**
      * Updates the current user with the given information.

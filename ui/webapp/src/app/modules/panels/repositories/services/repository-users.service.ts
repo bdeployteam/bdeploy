@@ -31,8 +31,8 @@ export class RepositoryUsersService {
     u: this.loadingUsers$,
     g: this.loadingUserGroups$,
   }).pipe(map(({ u, g }) => u || g));
-  public users$ = new BehaviorSubject<UserInfo[]>(null);
-  public userGroups$ = new BehaviorSubject<UserGroupInfo[]>(null);
+  public users$ = new BehaviorSubject<UserInfo[]>([]);
+  public userGroups$ = new BehaviorSubject<UserGroupInfo[]>([]);
 
   private repo: SoftwareRepositoryConfiguration;
   private apiPath = (g) => `${this.cfg.config.api}/softwarerepository/${g}`;
@@ -61,7 +61,7 @@ export class RepositoryUsersService {
       .get<UserInfo[]>(`${this.apiPath(this.repo.name)}/users`)
       .pipe(
         measure('Load Users'),
-        finalize(() => this.loadingUsers$.next(false))
+        finalize(() => this.loadingUsers$.next(false)),
       )
       .subscribe((res) => {
         this.users$.next(res);
@@ -78,7 +78,7 @@ export class RepositoryUsersService {
       .get<UserGroupInfo[]>(`${this.apiPath(this.repo.name)}/user-groups`)
       .pipe(
         measure('Load User Groups'),
-        finalize(() => this.loadingUserGroups$.next(false))
+        finalize(() => this.loadingUserGroups$.next(false)),
       )
       .subscribe((res) => {
         this.userGroups$.next(res);

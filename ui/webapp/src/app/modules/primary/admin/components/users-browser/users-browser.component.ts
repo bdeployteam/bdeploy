@@ -9,8 +9,8 @@ import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
+import { getGlobalPermission } from 'src/app/modules/core/utils/permission.utils';
 import { UserBulkService } from 'src/app/modules/panels/admin/services/user-bulk.service';
-import { getGlobalPermission } from 'src/app/modules/panels/admin/utils/permission.utils';
 import { AuthAdminService } from '../../services/auth-admin.service';
 
 @Component({
@@ -71,7 +71,7 @@ export class UsersBrowserComponent {
   };
 
   protected loading$ = combineLatest([this.settings.loading$, this.authAdmin.loadingUsers$]).pipe(
-    map(([s, a]) => s || a)
+    map(([s, a]) => s || a),
   );
   protected columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
@@ -122,7 +122,7 @@ export class UsersBrowserComponent {
     if (userInfo.externalSystem) {
       if (userInfo.externalSystem === 'LDAP') {
         const dto: LDAPSettingsDto = this.settings.settings$.value.auth.ldapSettings.find(
-          (s) => s.id === userInfo.externalTag
+          (s) => s.id === userInfo.externalTag,
         );
         return dto ? dto.description : 'All configured Servers';
       } else if (userInfo.externalSystem === 'OIDC') {
