@@ -52,6 +52,12 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
             execute(new LockDirectoryOperation().setDirectory(getMarkerRoot()));
 
+            // need to cleanup all marker databases that are left over...
+            long stale = getTransactions().cleanStaleTransactions();
+            if (stale > 0) {
+                log.warn("{} stale transactions cleaned", stale);
+            }
+
             // make sure there is no outdated information
             getManifestDatabase().invalidateCaches();
 

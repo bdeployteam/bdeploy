@@ -150,26 +150,31 @@ public class BHiveTransactions {
      * @return the amount of stale transactions found (and removed).
      */
     public long cleanStaleTransactions() {
-        if (hive.getLockContentValidator() == null) {
-            return 0;
-        }
-
         LongAdder amount = new LongAdder();
         try {
             Files.list(markerRoot).forEach(p -> {
                 if (Files.isDirectory(p) && PathHelper.exists(p.resolve(TX_PID_FILE))) {
                     // TX PID exists, validate.
+                    if (hive.getLockContentValidator() == null) {
+                        return; // cannot validate if transaction is still valid - should *never* happen.
+                    }
+
                     try {
                         List<String> lines = Files.readAllLines(p.resolve(TX_PID_FILE));
                         if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))
                                 && !hive.getLockContentValidator().test(lines.get(0))) {
-                            log.warn("Stale transaction detected, removing.");
+                            log.warn("Stale transaction detected, removing {}", p.getFileName());
                             PathHelper.deleteRecursiveRetry(p);
                             amount.increment();
                         }
                     } catch (IOException e) {
                         log.warn("Problem determining stale transactions", e);
                     }
+                } else if (Files.isDirectory(p)) {
+                    // TX PID does NOT exist, this is a *very* old or completely outdated transaction.
+                    log.warn("Stale transaction detected, removing {}" + p.getFileName());
+                    PathHelper.deleteRecursiveRetry(p);
+                    amount.increment();
                 }
             });
         } catch (IOException e) {
