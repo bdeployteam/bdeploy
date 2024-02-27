@@ -21,12 +21,20 @@
           (drop)="onDrop($event)"
           (dragover)="onOver($event)"
           (fileAdded)="fileAdded($event)"
+          [disabled]="(mappedSave$ | async)"
         ></app-bd-file-drop>
-        <app-bd-form-input name="uri" label="Node URI" [(ngModel)]="data.uri" required></app-bd-form-input>
+        <app-bd-form-input
+          name="uri"
+          label="Node URI"
+          [(ngModel)]="data.uri"
+          [disabled]="(mappedSave$ | async)"
+          required
+        ></app-bd-form-input>
         <app-bd-form-input
           name="auth"
           label="Full Auth. Token"
           [(ngModel)]="data.authPack"
+          [disabled]="(mappedSave$ | async)"
           required
         ></app-bd-form-input>
         <app-bd-button
