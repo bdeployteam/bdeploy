@@ -109,35 +109,31 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
             protocol = urlWithoutPassword.getProtocol();
 
-            try {
-                if (protocol == null) {
-                    throw getNoSuchProviderException(null);
-                }
-                protocol = protocol.trim().toLowerCase();
+            if (protocol == null) {
+                throw getNoSuchProviderException(null);
+            }
+            protocol = protocol.trim().toLowerCase();
 
-                Properties properties = new Properties();
-                modifyProperties(properties);
+            Properties properties = new Properties();
+            modifyProperties(properties);
 
-                if (log.isTraceEnabled()) {
-                    log.trace("Properties for " + protocol + ": " + properties);
-                }
-
-                session = createSession(properties);
-                service = createService(url);
-                service.addConnectionListener(
-                        (LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
-                service.connect();
-            } catch (MailConnectException e) {
-                log.warn("Failed to connect to " + urlWithoutPassword, e);
-                return;
-            } catch (MessagingException e) {
-                log.error("Failed to connect to " + urlWithoutPassword, e);
-                return;
+            if (log.isTraceEnabled()) {
+                log.trace("Properties for " + protocol + ": " + properties);
             }
 
+            session = createSession(properties);
+            service = createService(url);
+            service.addConnectionListener((LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
+            service.connect();
             afterConnect(urlWithoutPassword, testMode);
-        } catch (RuntimeException e) {
-            log.error("Unexpected runtime exception during connection handling.", e);
+        } catch (RuntimeException | MessagingException e) {
+            if (testMode) {
+                throw new IllegalStateException("Connection test failed", e);
+            } else if (e instanceof MailConnectException) {
+                log.warn("Failed to connect.", e);
+            } else {
+                log.error("Unexpected exception during connection handling.", e);
+            }
         }
     }
 }
