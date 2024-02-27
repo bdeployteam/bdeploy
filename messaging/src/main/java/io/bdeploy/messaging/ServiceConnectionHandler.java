@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.eclipse.angus.mail.util.MailConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,13 +127,17 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
                 service.addConnectionListener(
                         (LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
                 service.connect();
+            } catch (MailConnectException e) {
+                log.warn("Failed to connect to " + urlWithoutPassword, e);
+                return;
             } catch (MessagingException e) {
-                throw new IllegalStateException("Failed to connect to " + urlWithoutPassword, e);
+                log.error("Failed to connect to " + urlWithoutPassword, e);
+                return;
             }
 
             afterConnect(urlWithoutPassword, testMode);
         } catch (RuntimeException e) {
-            log.error("Unexpected runtime exception during connection handling to.", e);
+            log.error("Unexpected runtime exception during connection handling.", e);
         }
     }
 }
