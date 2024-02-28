@@ -51,6 +51,51 @@ describe('Admin UI Tests (Settings)', () => {
     });
   });
 
+  it('Tests Mail Settings', () => {
+    cy.visit('/');
+    cy.get('.local-hamburger-button').click();
+    cy.get('button[data-cy=Administration]').click();
+
+    cy.inMainNavContent(() => {
+      cy.contains('.mat-mdc-tab', 'Mail Sending').click();
+
+      cy.contains('app-bd-form-toggle', 'Enable Mail Sending').within((toggle) => {
+        cy.get('input[type="checkbox"]').should('not.be.checked');
+        cy.wrap(toggle).click();
+        cy.get('input[type="checkbox"]').should('be.checked');
+      });
+
+      cy.fillFormInput('url', 'smtps://smtp.mycompany.com:587');
+      cy.fillFormInput('username', 'demo');
+      cy.fillFormInput('password', 'demo');
+
+      cy.fillFormInput('receiverAddress', 'central@mycompany.com');
+      cy.fillFormInput('managedServerName', 'MyManagedServer');
+    });
+
+    cy.screenshot('Doc_Admin_Mail_Sending');
+
+    cy.inMainNavContent(() => {
+      cy.contains('.mat-mdc-tab', 'Mail Receiving').click();
+
+      cy.contains('app-bd-form-toggle', 'Enable Mail Receiving').within((toggle) => {
+        cy.get('input[type="checkbox"]').should('not.be.checked');
+        cy.wrap(toggle).click();
+        cy.get('input[type="checkbox"]').should('be.checked');
+      });
+
+      cy.fillFormInput('url', 'imaps://imap.mycompany.com:993');
+      cy.fillFormInput('username', 'demo');
+      cy.fillFormInput('password', 'demo');
+    });
+
+    cy.screenshot('Doc_Admin_Mail_Receiving');
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Discard');
+    });
+  });
+
   it('Tests Authentication Test', () => {
     cy.visit('/');
     cy.get('.local-hamburger-button').click();
@@ -114,9 +159,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.screenshot('Doc_Admin_Ldap_Servers');
 
     cy.inMainNavContent(() => {
-      cy.contains('tr', 'Test Server')
-        .find('button[data-cy^="Check connection"]')
-        .click();
+      cy.contains('tr', 'Test Server').find('button[data-cy^="Check connection"]').click();
     });
     cy.inMainNavFlyin('check-ldap-server', () => {
       cy.wait('@ldapCheck').then((intercept) => {
@@ -172,22 +215,18 @@ describe('Admin UI Tests (Settings)', () => {
     cy.inMainNavFlyin('app-attribute-values', () => {
       cy.get('button[data-cy^="Set Attribute Value"]').click();
 
-      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(
-        () => {
-          cy.fillFormSelect('attribute', 'Test Attribute');
-          cy.fillFormInput('value', 'Test Value');
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(() => {
+        cy.fillFormSelect('attribute', 'Test Attribute');
+        cy.fillFormInput('value', 'Test Value');
+      });
     });
 
     cy.screenshot('Doc_SetGlobalAttributeValue');
 
     cy.inMainNavFlyin('app-attribute-values', () => {
-      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(
-        () => {
-          cy.get('button[data-cy="Apply"]').should('be.enabled').click();
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(() => {
+        cy.get('button[data-cy="Apply"]').should('be.enabled').click();
+      });
     });
 
     cy.pressMainNavButton('Instance Groups');
@@ -260,20 +299,12 @@ describe('Admin UI Tests (Settings)', () => {
     });
 
     cy.inMainNavContent(() => {
-      cy.intercept({ method: 'GET', url: '/api/plugin-admin/list' }).as(
-        'pluginList'
-      );
+      cy.intercept({ method: 'GET', url: '/api/plugin-admin/list' }).as('pluginList');
       cy.contains('tr', 'pause').should('exist');
 
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .contains('mat-icon', 'check_box')
-        .should('exist'); // loaded
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .contains('mat-icon', 'public')
-        .should('exist'); // global
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .find('button[data-cy^="Unload"]')
-        .click();
+      cy.contains('tr', 'bdeploy-demo-plugin').contains('mat-icon', 'check_box').should('exist'); // loaded
+      cy.contains('tr', 'bdeploy-demo-plugin').contains('mat-icon', 'public').should('exist'); // global
+      cy.contains('tr', 'bdeploy-demo-plugin').find('button[data-cy^="Unload"]').click();
 
       cy.wait('@pluginList'); // should be called after unload, required to query the *correct* tr now.
     });
@@ -283,23 +314,15 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.inMainNavContent(() => {
       // re-fetch the row as it is re-created.
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .contains('mat-icon', 'check_box_outline_blank')
-        .should('exist'); // not loaded
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .find('button[data-cy^="Load"]')
-        .click();
+      cy.contains('tr', 'bdeploy-demo-plugin').contains('mat-icon', 'check_box_outline_blank').should('exist'); // not loaded
+      cy.contains('tr', 'bdeploy-demo-plugin').find('button[data-cy^="Load"]').click();
 
       cy.wait('@pluginList'); // should be called after load, required to query the *correct* tr now.
 
       // and re-fetch again.
       cy.contains('tr', 'bdeploy-demo-plugin').should('exist').as('row');
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .contains('mat-icon', 'check_box')
-        .should('exist'); // loaded again
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .find('button[data-cy^="Delete"]')
-        .click();
+      cy.contains('tr', 'bdeploy-demo-plugin').contains('mat-icon', 'check_box').should('exist'); // loaded again
+      cy.contains('tr', 'bdeploy-demo-plugin').find('button[data-cy^="Delete"]').click();
 
       cy.contains('app-bd-notification-card', 'Delete').within(() => {
         cy.get('button[data-cy=Yes]').click();
