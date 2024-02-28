@@ -1,4 +1,5 @@
 import { Component, Input, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Observable, combineLatest, map } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { Permission, UserInfo } from 'src/app/models/gen.dtos';
 import {
@@ -7,7 +8,11 @@ import {
   BdDialogMessageAction,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { getInheritedPermission, getInheritedPermissionHint } from 'src/app/modules/core/utils/permission.utils';
+import {
+  getGlobalOrLocalPermission,
+  getInheritedPermissionHint,
+  getInheritedPermissions,
+} from 'src/app/modules/core/utils/permission.utils';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { BdDataPermissionLevelCellComponent } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
@@ -64,8 +69,6 @@ export class UserPermissionsComponent {
     disabled: () => !this.getLocalPermissionLevel(this.modUser),
   };
 
-  private groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
-
   protected columns: BdDataColumn<UserInfo>[] = [
     ...this.userCols.defaultUsersColumns,
     this.colInheritedPerm,
@@ -73,21 +76,33 @@ export class UserPermissionsComponent {
     this.colLocalPerm,
     this.colModPerm,
   ];
-  protected grouping: BdDataGrouping<UserInfo>[] = [
-    {
-      definition: {
-        group: (r) =>
-          !this.getLocalPermissionLevel(r)
-            ? !this.getGlobalPermissionLevel(r)
-              ? this.groupNames[2]
-              : this.groupNames[1]
-            : this.groupNames[0],
-        name: 'Permission Type',
-        sort: (a, b) => this.groupNames.indexOf(a) - this.groupNames.indexOf(b),
-      },
-      selected: [],
-    },
-  ];
+
+  private groupNames = ['CLIENT', 'READ', 'WRITE', 'ADMIN'];
+
+  protected grouping$: Observable<BdDataGrouping<UserInfo>[]> = combineLatest([
+    this.repos.current$,
+    this.users.userGroups$,
+  ]).pipe(
+    map(([repo, userGroups]) => {
+      if (!repo || !userGroups) {
+        return [];
+      }
+      const scope = repo.name;
+      return [
+        {
+          definition: {
+            group: (r) => {
+              const permissions = [...r.permissions, ...getInheritedPermissions(r, userGroups)];
+              return getGlobalOrLocalPermission(permissions, scope) || Permission.READ; // implicit READ permission on repos for everybody.
+            },
+            name: 'Permission',
+            sort: (a, b) => this.groupNames.indexOf(b) - this.groupNames.indexOf(a),
+          },
+          selected: [],
+        },
+      ];
+    }),
+  );
 
   protected modPerm: Permission;
   protected modUser: UserInfo;
@@ -105,7 +120,8 @@ export class UserPermissionsComponent {
   private getInheritedPermissionLevel(user: UserInfo): Permission {
     const scope = this.repos.current$.value.name;
     const userGroups = this.users.userGroups$.value;
-    return getInheritedPermission(user, userGroups, scope);
+    const inheritedPermissions = getInheritedPermissions(user, userGroups);
+    return getGlobalOrLocalPermission(inheritedPermissions, scope);
   }
 
   private getLocalPermissionLevel(user: UserInfo): Permission {

@@ -1,8 +1,6 @@
 <ng-template #modDialog>
   <div class="flex flex-col gap-2.5">
-    <div>
-      Choose the level of permission on {{ groups.current$.value.name }}.
-    </div>
+    <div>Choose the level of permission on {{ groups.current$.value.name }}.</div>
     <app-bd-form-select
       name="modPerm"
       label="Modify Permission"
@@ -16,5 +14,5 @@
   #dataTable
   [records]="users.users$ | async"
   [columns]="columns"
-  [grouping]="grouping"
+  [grouping]="grouping$ | async"
 ></app-bd-data-table>
