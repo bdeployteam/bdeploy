@@ -344,7 +344,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 log.error("URL is invalid.", e);
             }
         } else {
-            handler.close();
+            handler.disconnect();
         }
     }
 
