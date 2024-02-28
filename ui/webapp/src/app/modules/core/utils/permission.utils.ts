@@ -12,12 +12,10 @@ export function getGlobalOrLocalPermission(permissions: ScopedPermission[], scop
   return getPermissionLevelForScope(permissions, (sc) => sc.scope === null || sc.scope === scope);
 }
 
-export function getInheritedPermission(user: UserInfo, userGroups: UserGroupInfo[], scope: string): Permission {
-  const groupPermissions = userGroups
+export function getInheritedPermissions(user: UserInfo, userGroups: UserGroupInfo[]): ScopedPermission[] {
+  return userGroups
     .filter((userGroup) => user.groups.indexOf(userGroup.id) !== -1)
     .flatMap((userGroup) => userGroup.permissions);
-
-  return getGlobalOrLocalPermission(groupPermissions, scope);
 }
 
 export function getInheritedPermissionHint(user: UserInfo, userGroups: UserGroupInfo[], scope: string): string {
