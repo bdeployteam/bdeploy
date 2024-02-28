@@ -28,8 +28,10 @@ Command | Description
 ---    | ---
 `certificate` | Manage the server certificates (export the existing, import a new, set a separate HTTPS certifivate). This is mainly used to import a properly signed certificate to the _master_, which serves the Web UI using this certificate over HTTPS. **BDeploy** itself does not require a properly signed certificate for internal operation to guarantee [Security](/experts/security/#security).
 `cleanup` | Manage the schedule at which the _master_ performs background cleanup operations on all _nodes_ (including himself).
-`init` | Initializes a _root_ directory for running a server with the `start` command. The init command can be instructed to initialize the directory to run a **master** or a headless **node** when running the `start` command.
 `config` | Allows changes to the basic configuration like hostname, port or mode. The `init` command stores the given hostname, used later on for connections to self and also for variable expansion. If the hostname changed or is no longer valid, this tool can update it. Please refer to [Migrating between Modes](/user/central/#migrating-between-modes) in case you need to change the minion mode.
+`init` | Initializes a _root_ directory for running a server with the `start` command. The init command can be instructed to initialize the directory to run a **master** or a headless **node** when running the `start` command.
+`ldap` | Manages LDAP synchronization job schedule and settings.
+`pool` | Manages object pooling related settings and the re-organization job schedule.
 `storage` | Manages available _storage locations_. A _storage location_ is a folder where the **BDeploy** _master_ puts the **BHives** required to store data for **Instance Groups** and **Software Repositories**.
 
 ### Local session and scripting commands
@@ -63,11 +65,12 @@ Command | Description
 `remote-process-config` | Manipulate the process configuration (parameters) of a given instance remotely.
 `remote-product` | Query and manage products available on the given **Instance Group** on a remote **BDeploy** server.
 `remote-product-validation` | Uses a [`product-validation.yaml`](/power/product/#product-validationyaml) file to perform a remote pre-validation of a product to be built in the future.
-`remote-transfer` | Transfers **External Software** and **Products** between two remote servers (by fetching and pushing locally). Optionally can re-use an existing local **BHive** to benefit from object re-use.
 `remote-repo` | Query and manage **Software Repositories** on a remote **BDeploy** server.
 `remote-repo-software` | Query **External Software** (which can be used as `runtimeDependencies`) on the given server and software repository.
 `remote-system` | Manage systems on a remote **BDeploy** server.
+`remote-transfer` | Transfers **External Software** and **Products** between two remote servers (by fetching and pushing locally). Optionally can re-use an existing local **BHive** to benefit from object re-use.
 `remote-user` | Manages users on a remote **BDeploy** server.
+`remote-user-group` | Manage user groups and associated users and permissions on a remote **BDeploy** server.
 
 ### Server commands
 
@@ -96,7 +99,9 @@ Much like Git, **BHive** only knows two commands that actually perform remote co
 
 Command | Description
 ---     | ---
+`du` | Calulate disc usage for given manifest(s) in a **BHive**.
 `fsck` | Performs a file system check (_fsck_). This involves resolving all inter-**Manifest** dependencies, as well as re-hashing all objects in the underlying storage to assert that all objects in the storage are valid. <br/><br/>Also allows to fix found errors (by deletion). After this, missing **Manifests** must be re-pushed from a **BHive** which still has the required objects.
+`init` | Initalizes a new, empty **BHive** in a given directory.
 `manifest` | Manage existing **Manifests** in a given **BHive**.
 `prune` | Remove unreferenced objects from the given **BHive** to free up disc space.
 `token` | Allows generation of new _access tokens_, see [Security](/experts/security/#security).
@@ -120,6 +125,7 @@ Command | Description
 
 Command | Description
 ---     | ---
+`pool` | Manages object pool configuration on a single **BHive**, re-organizes a pool against a set of **BHive**s.
 `serve` | Serves one or more given **BHives** over the network. The same thing as **BDeploy** does internally, provided as CLI tool for maintenance reasons.
 
 ## Launcher CLI
@@ -136,16 +142,20 @@ Command | Description
 Each command will include information for the according environment fallback in it's help output, for instance:
 
 ```
-$ bhive push --help
+$ bdeploy bhive init --help
+
 Help:
 
-Usage: PushTool <args...>
-               --token=ARG: Token for the remote access. Can be given alternatively to a keystore.
-                            (Environment variable 'BDEPLOY_TOKEN' is used as fallback if not given)
-              --remote=ARG: URI of remote BHive. Supports file:, jar:file:, bhive:
-                            (Environment variable 'BDEPLOY_REMOTE' is used as fallback if not given)
-              ...
+  ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ init: Initializes an empty BHive                                                                                              │
+  ├─────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────┤
+  │ Argument    │ Description                                                                                           │ Default │
+  ├─────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────┤
+  │  --hive=ARG │ The directory to initialize as BHive (Environment variable 'BHIVE' is used as fallback if not given). │         │
+  └─────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────┘
 ```
+
+Some common environment variables include (but are not limited to this list):
 
 Variable | Description
 ---      | ---
