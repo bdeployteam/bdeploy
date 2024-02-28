@@ -16,7 +16,10 @@
       </div>
 
       <app-bd-expand-button text="Own Permissions" icon="security">
-        <app-bd-data-table [records]="user.mergedPermissions" [columns]="permColumns"></app-bd-data-table>
+        <app-bd-data-table [records]="user.permissions" [columns]="permColumns"></app-bd-data-table>
+      </app-bd-expand-button>
+      <app-bd-expand-button text="Group Permissions" icon="security">
+        <app-bd-data-table [records]="userGroupPermissions" [columns]="userGroupPermColumns"></app-bd-data-table>
       </app-bd-expand-button>
 
       <app-bd-panel-button

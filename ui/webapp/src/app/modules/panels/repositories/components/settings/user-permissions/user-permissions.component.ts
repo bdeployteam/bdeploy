@@ -7,6 +7,7 @@ import {
   BdDialogMessageAction,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { getInheritedPermission, getInheritedPermissionHint } from 'src/app/modules/core/utils/permission.utils';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { BdDataPermissionLevelCellComponent } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
@@ -20,6 +21,15 @@ export class UserPermissionsComponent {
   public repos = inject(RepositoriesService);
   public users = inject(RepositoryUsersService);
   public userCols = inject(UsersColumnsService);
+
+  private readonly colInheritedPerm: BdDataColumn<UserInfo> = {
+    id: 'inherited',
+    name: 'Inherited Perm.',
+    data: (r) => this.getInheritedPermissionLevel(r),
+    width: '100px',
+    tooltip: (r) => this.getInheritedPermissionTooltip(r),
+    component: BdDataPermissionLevelCellComponent,
+  };
 
   private readonly colGlobalPerm: BdDataColumn<UserInfo> = {
     id: 'global',
@@ -58,6 +68,7 @@ export class UserPermissionsComponent {
 
   protected columns: BdDataColumn<UserInfo>[] = [
     ...this.userCols.defaultUsersColumns,
+    this.colInheritedPerm,
     this.colGlobalPerm,
     this.colLocalPerm,
     this.colModPerm,
@@ -84,6 +95,18 @@ export class UserPermissionsComponent {
 
   @Input() private dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
+
+  private getInheritedPermissionTooltip(user: UserInfo): string {
+    const scope = this.repos.current$.value.name;
+    const userGroups = this.users.userGroups$.value;
+    return getInheritedPermissionHint(user, userGroups, scope);
+  }
+
+  private getInheritedPermissionLevel(user: UserInfo): Permission {
+    const scope = this.repos.current$.value.name;
+    const userGroups = this.users.userGroups$.value;
+    return getInheritedPermission(user, userGroups, scope);
+  }
 
   private getLocalPermissionLevel(user: UserInfo): Permission {
     return user.permissions.find((p) => p.scope === this.repos.current$.value.name)?.permission;

@@ -10,6 +10,7 @@ import {
   SpecialAuthenticators,
   UserChangePasswordDto,
   UserInfo,
+  UserProfileInfo,
 } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling, suppressUnauthenticatedDelay } from '../utils/server.utils';
 import { ConfigService } from './config.service';
@@ -321,6 +322,10 @@ export class AuthenticationService {
       .get<UserInfo>(this.cfg.config.api + '/auth/user')
       .subscribe((userInfo) => this.userInfoSubject$.next(userInfo));
     return this.userInfoSubject$.asObservable();
+  }
+
+  public getUserProfileInfo(): Observable<UserProfileInfo> {
+    return this.http.get<UserProfileInfo>(this.cfg.config.api + '/auth/user-profile');
   }
 
   public updateUserInfo(info: UserInfo): Observable<any> {

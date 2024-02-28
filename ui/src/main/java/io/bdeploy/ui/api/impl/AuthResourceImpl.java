@@ -9,6 +9,7 @@ import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.UserProfileInfo;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.jersey.SessionManager;
@@ -162,6 +163,14 @@ public class AuthResourceImpl implements AuthResource {
         UserInfo clone = authGroup.getCloneWithMergedPermissions(info);
         clone.password = null;
         return clone;
+    }
+
+    @Override
+    public UserProfileInfo getCurrentUserProfile() {
+        UserProfileInfo profile = new UserProfileInfo();
+        UserInfo user = getCurrentUser();
+        profile.userGroups = authGroup.getUserGroups(user.groups);
+        return profile;
     }
 
     @Override
