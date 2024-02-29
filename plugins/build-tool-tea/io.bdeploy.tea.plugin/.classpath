@@ -7,6 +7,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="maven/api-6.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="maven/api-7.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

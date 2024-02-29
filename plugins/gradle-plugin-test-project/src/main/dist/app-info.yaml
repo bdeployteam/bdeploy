@@ -14,5 +14,5 @@ startCommand:
       #    - id: test
       #      defaultValue: test
 
-#runtimeDependencies:
-#  - external/software:v1.0.0
+runtimeDependencies:
+  - external/software:v1.0.0

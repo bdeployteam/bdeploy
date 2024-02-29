@@ -87,6 +87,7 @@ task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: install
     } else {
         repositoryServer {
             useLogin = true
+            loginStorage = "${buildDir}"
         }
     }
     product {
