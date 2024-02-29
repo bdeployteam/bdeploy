@@ -16,6 +16,7 @@ public class BDeployRepositoryServerConfig {
 	private String uri;
 	private String token;
 	private Boolean useLogin;
+	private String loginStorage;
 	private String login;
 
 	/**
@@ -83,12 +84,28 @@ public class BDeployRepositoryServerConfig {
 	}
 	
 	/**
+	 * @return the the storage path to use to fetch logins
+	 */
+	@Optional
+	@Input
+	public String getLoginStorage() {
+		return loginStorage;
+	}
+	
+	/**
+	 * @param loginStorage the storage path for logins to use.
+	 */
+	public void setLoginStorage(String loginStorage) {
+		this.loginStorage = loginStorage;
+	}
+	
+	/**
 	 * @return whether this repository server is sufficiently configured. 
 	 */
 	@Internal
 	public boolean isConfigured() {
 		if(Boolean.TRUE.equals(useLogin)) {
-			LocalLoginManager llm = new LocalLoginManager();
+			LocalLoginManager llm = new LocalLoginManager(loginStorage);
 			return (login == null && llm.getCurrentService() != null) || (login != null && llm.getNamedService(login) != null);
 		}
 		return (uri != null && token != null);
@@ -104,7 +121,7 @@ public class BDeployRepositoryServerConfig {
 		}
 		
 		if(Boolean.TRUE.equals(useLogin)) {
-			LocalLoginManager llm = new LocalLoginManager();
+			LocalLoginManager llm = new LocalLoginManager(loginStorage);
 			if(login == null) {
 			return llm.getCurrentService();
 			} else {

@@ -23,6 +23,7 @@ public class ServerExtension {
 	private final Property<String> token;
 	private final Property<Boolean> useLogin;
 	private final Property<String> login;
+	private final Property<String> loginStorage;
 	private final Property<String> instanceGroup;
 
 	/**
@@ -37,6 +38,7 @@ public class ServerExtension {
 		this.instanceGroup = factory.property(String.class);
 		this.useLogin = factory.property(Boolean.class);
 		this.login = factory.property(String.class);
+		this.loginStorage = factory.property(String.class);
 	}
 
 	/**
@@ -71,7 +73,7 @@ public class ServerExtension {
 	public RemoteService getRemote() {
 		RemoteService result = null;
 		if(Boolean.TRUE.equals(useLogin.getOrNull())) {
-			LocalLoginManager llm = new LocalLoginManager();
+			LocalLoginManager llm = new LocalLoginManager(loginStorage.getOrNull());
 			String lname = login.getOrNull();
 			if(StringHelper.isNullOrEmpty(lname)) {
 				result = llm.getCurrentService();
@@ -137,6 +139,20 @@ public class ServerExtension {
 	 */
 	public void setLogin(String login) {
 		this.login.set(login);
+	}
+	
+	/**
+	 * @return the path to the login storage directory or null.
+	 */
+	public Property<String> getLoginStorage() {
+		return loginStorage;
+	}
+	
+	/**
+	 * @param loginStorage the path to the login storage to use.
+	 */
+	public void setLoginStorage(String loginStorage) {
+		this.loginStorage.set(loginStorage);
 	}
 
 }

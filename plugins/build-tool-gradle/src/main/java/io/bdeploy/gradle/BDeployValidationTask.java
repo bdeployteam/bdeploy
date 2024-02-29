@@ -60,6 +60,12 @@ public class BDeployValidationTask extends DefaultTask {
 
 		log.warn(" :: Repository Server: {}", sourceServer.getUri());
 		log.warn(" :: Product Validation: {}", descriptorYaml);
+		
+		if(Boolean.TRUE.equals(validationServer.isUseLogin())) {
+			var login = validationServer.getLogin() == null ? "<active>" : validationServer.getLogin();
+			var storage = validationServer.getLoginStorage() == null ? "<default>" : validationServer.getLoginStorage();
+			log.warn(" :: Validation Login: {} from {}", login, storage);
+		}
 
 		ProductValidationResponseApi validate = ProductValidationHelper.validate(descriptorYaml.toPath(), sourceServer);
 		

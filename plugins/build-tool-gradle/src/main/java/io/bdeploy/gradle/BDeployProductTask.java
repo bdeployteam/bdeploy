@@ -145,6 +145,11 @@ public class BDeployProductTask extends DefaultTask {
 
 		if(repositoryServer.isConfigured()) {
 			log.warn(" :: Repository Server: {}", repositoryServer.getRemote().getUri());
+			if(Boolean.TRUE.equals(repositoryServer.isUseLogin())) {
+				var login = repositoryServer.getLogin() == null ? "<active>" : repositoryServer.getLogin();
+				var storage = repositoryServer.getLoginStorage() == null ? "<default>" : repositoryServer.getLoginStorage();
+				log.warn(" :: Repository Login: {} from {}", login, storage);
+			}
 		}
 		log.warn(" :: Product: {}", pd.product);
 		log.warn(" :: Product Version: {}", version);
@@ -182,6 +187,7 @@ public class BDeployProductTask extends DefaultTask {
 			if(log.isInfoEnabled()) {
 				log.info("Exception:", e);
 			}
+			throw e;
 		} finally {
 			if (delete) {
 				pvdFile.delete();
