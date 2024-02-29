@@ -23,7 +23,7 @@ import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.PoolTool.PoolConfig;
-import io.bdeploy.minion.job.SyncLdapUserGroupsJob;
+import io.bdeploy.minion.job.OrganizePoolJob;
 
 @Help("Manage Pool settings")
 @ToolCategory(MinionServerCli.MGMT_TOOLS)
@@ -117,9 +117,9 @@ public class PoolTool extends ConfiguredCliTool<PoolConfig> {
     private DataResult showOrganizeInfo(MinionRoot mr) {
         DataResult result = createEmptyResult();
         String schedule = Optional.ofNullable(mr.getState().poolOrganizationSchedule)
-                .orElse(SyncLdapUserGroupsJob.DEFAULT_SYNC_SCHEDULE);
-        String lastRun = mr.getState().ldapSyncLastRun == 0 ? "N/A"
-                : FormatHelper.format(Instant.ofEpochMilli(mr.getState().ldapSyncLastRun));
+                .orElse(OrganizePoolJob.DEFAULT_REORG_SCHEDULE);
+        String lastRun = mr.getState().poolOrganizationLastRun == 0 ? "N/A"
+                : FormatHelper.format(Instant.ofEpochMilli(mr.getState().poolOrganizationLastRun));
         result.addField("Cron Schedule", schedule);
         result.addField("Last Run", lastRun);
         return result;
