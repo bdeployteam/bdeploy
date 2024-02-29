@@ -13,11 +13,11 @@ repositories {
 
 version = "1.0.5"
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 dependencies {
-    implementation 'io.bdeploy:api:5.1.0-SNAPSHOT'
+    implementation 'io.bdeploy:api:7.0.0'
 }
 
 eclipse {
