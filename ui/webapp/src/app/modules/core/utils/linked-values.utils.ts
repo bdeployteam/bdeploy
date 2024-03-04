@@ -56,7 +56,7 @@ export function getRenderPreview(
   return val.value;
 }
 
-export function expand(val: string, vars: LinkVariable[]) {
+function expand(val: string, vars: LinkVariable[]): string {
   let exp = val;
   let count = 0;
 
@@ -132,7 +132,7 @@ export function gatherVariableExpansions(
   return result;
 }
 
-export function maskIfPassword(value: string, type: ParameterType) {
+function maskIfPassword(value: string, type: ParameterType) {
   if (type === ParameterType.PASSWORD && value) {
     return '*'.repeat(value.length);
   }
@@ -475,7 +475,7 @@ function expandEscapeSpecialCharacters(
   return escapeSpecialCharacters(type, unescaped);
 }
 
-export function expandCondition(
+function expandCondition(
   condition: string,
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
