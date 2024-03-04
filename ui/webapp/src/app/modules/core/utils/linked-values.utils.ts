@@ -56,37 +56,30 @@ export function getRenderPreview(
   return val.value;
 }
 
-function expand(val: string, vars: LinkVariable[]): string {
-  let exp = val;
+function expand(expression: string, expansions: LinkVariable[]): string {
   let count = 0;
 
-  while (exp && exp.match(/{{[^}]+}}/)) {
-    const match = exp.match(/{{[^}]+}}/);
-    const varName = match[0];
-    const varVal = vars.find((v) => {
-      if (v.matches) {
-        return v.matches(varName);
-      }
-      return v.link == varName;
-    });
-
-    let x = exp;
-    if (varVal) {
-      if (varVal.expand) {
-        x = exp.replace(match[0], varVal.expand(varName));
-      } else {
-        x = exp.replace(match[0], varVal.preview);
-      }
+  while (expression) {
+    const match = expression.match(/{{[^}]+}}/);
+    if (!match) {
+      break; // expression contains no more link variables -> we are done
     }
 
-    // found *some* expansion but could not expand any further, either because no value
-    // was found, or because of a circular reference.
-    if (x === exp || count++ > 20) {
-      return exp;
+    const linkVariableId = match[0];
+    const linkVariable = expansions.find((v) => (v.matches ? v.matches(linkVariableId) : v.link == linkVariableId));
+    if (!linkVariable) {
+      return expression; // the link variable in the expression is not known to us -> we cannot expand it -> we return the expression as it currently is
     }
-    exp = x;
+
+    const replaceWith = linkVariable.expand ? linkVariable.expand(linkVariableId) : linkVariable.preview;
+    expression = expression.replace(linkVariableId, replaceWith);
+
+    if (count++ > 20) {
+      return expression; // stop after n expansions with the asumption that we ran into a circular reference
+    }
   }
-  return exp;
+
+  return expression;
 }
 
 export function gatherVariableExpansions(
