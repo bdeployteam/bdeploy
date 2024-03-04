@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -18,11 +17,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.InstanceGroupResource;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
 class InstanceGroupResourceTest {
@@ -46,17 +42,9 @@ class InstanceGroupResourceTest {
         assertNull(list.get(0).instanceGroupConfiguration.logo);
 
         // cannot call update image directly to properly fake a form.
-        try (InputStream logoStream = InstanceGroupResourceTest.class.getClassLoader().getResourceAsStream("logo64.png")) {
-            MultiPart mp = new MultiPart();
-            StreamDataBodyPart bp = new StreamDataBodyPart("image", logoStream);
-            bp.setFilename("logo.png");
-            bp.setMediaType(new MediaType("image", "png"));
-            mp.bodyPart(bp);
-
-            WebTarget target = factory.getBaseTarget().path("/group/demo/image");
-            Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
-
-            assertEquals(204, response.getStatus());
+        try (InputStream logoStream = InstanceGroupResourceTest.class.getClassLoader().getResourceAsStream("logo64.png");
+                FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream("image", logoStream)) {
+            res.updateImage("demo", fdmp);
         }
 
         InstanceGroupConfiguration read = res.getInstanceGroupConfigurationDto("demo").instanceGroupConfiguration;

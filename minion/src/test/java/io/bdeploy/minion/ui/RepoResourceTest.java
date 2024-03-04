@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -11,8 +12,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,15 +27,12 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
@@ -105,13 +101,7 @@ class RepoResourceTest {
             hive.execute(new ImportOperation().setSourcePath(sw).setManifest(swKey));
         }
 
-        WebTarget target = ResourceProvider.of(service).getBaseTarget().path("/softwarerepository/demo/content/upload");
-        MultiPart mp = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE);
-        FileDataBodyPart fdbp = new FileDataBodyPart("file", zip.toFile(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        mp.bodyPart(fdbp);
-
-        Response rs = target.request().post(Entity.entity(mp, mp.getMediaType()));
-        assertEquals(200, rs.getStatus());
+        swr.upload(FormDataHelper.createMultiPartForStream("file", new FileInputStream(zip.toFile())));
 
         assertTrue(swr.list(true, true).contains(swKey));
 

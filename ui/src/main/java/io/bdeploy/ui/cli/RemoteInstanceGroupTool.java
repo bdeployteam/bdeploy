@@ -7,8 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -21,17 +20,11 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.cli.RemoteInstanceGroupTool.RemoteInstanceGroupConfig;
 import io.bdeploy.ui.dto.InstanceDto;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
 
 @Help("Create instance group/hive on the remote")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -94,22 +87,9 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             client.create(desc);
 
             if (iconPath != null) {
-                try (InputStream is = Files.newInputStream(iconPath)) {
-                    try (MultiPart mp = new MultiPart()) {
-                        StreamDataBodyPart bp = new StreamDataBodyPart("image", is);
-                        bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-                        mp.bodyPart(bp);
-
-                        WebTarget target = JerseyClientFactory.get(svc)
-                                .getBaseTarget(new JerseyOnBehalfOfFilter(getLocalContext()))
-                                .path("/group/" + config.create() + "/image");
-                        Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
-
-                        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                            throw new IllegalStateException("Image upload failed: " + response.getStatusInfo().getStatusCode()
-                                    + ": " + response.getStatusInfo().getReasonPhrase());
-                        }
-                    }
+                try (InputStream is = Files.newInputStream(iconPath);
+                        FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream("image", is)) {
+                    client.updateImage(config.create(), fdmp);
                 } catch (IOException e) {
                     throw new IllegalStateException("Cannot upload image", e);
                 }

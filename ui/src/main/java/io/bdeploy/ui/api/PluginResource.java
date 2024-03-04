@@ -1,10 +1,9 @@
 package io.bdeploy.ui.api;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
@@ -93,8 +92,7 @@ public interface PluginResource {
     @Path("/upload-global")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.ADMIN)
-    public PluginInfoDto uploadGlobalPlugin(@FormDataParam("plugin") InputStream inputStream,
-            @QueryParam("replace") boolean replace);
+    public PluginInfoDto uploadGlobalPlugin(FormDataMultiPart fdmp, @QueryParam("replace") boolean replace);
 
     /**
      * @param id the id of the plugin to remove.

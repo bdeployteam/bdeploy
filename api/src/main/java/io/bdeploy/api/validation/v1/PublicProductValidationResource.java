@@ -1,8 +1,6 @@
 package io.bdeploy.api.validation.v1;
 
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
 import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
@@ -32,6 +30,6 @@ public interface PublicProductValidationResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public ProductValidationResponseApi validate(@FormDataParam("file") InputStream inputStream);
+    public ProductValidationResponseApi validate(FormDataMultiPart fdmp);
 
 }

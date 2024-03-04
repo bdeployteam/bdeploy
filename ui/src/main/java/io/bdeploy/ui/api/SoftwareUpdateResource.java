@@ -1,9 +1,8 @@
 package io.bdeploy.ui.api;
 
-import java.io.InputStream;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
@@ -71,7 +70,7 @@ public interface SoftwareUpdateResource {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public List<Manifest.Key> uploadSoftware(@FormDataParam("file") InputStream inputStream);
+    public List<Manifest.Key> uploadSoftware(FormDataMultiPart fdmp);
 
     @POST // DELETE does not accept body for batch delete.
     @RequiredPermission(permission = Permission.ADMIN)

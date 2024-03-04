@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -53,6 +54,7 @@ import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.Minion;
@@ -197,12 +199,12 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public List<Manifest.Key> upload(InputStream inputStream) {
+    public List<Manifest.Key> upload(FormDataMultiPart fdmp) {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
         try {
             // Download the hive to a temporary location
-            Files.copy(inputStream, targetFile);
+            Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), targetFile);
 
             // check if the uploaded file is a hive or "something else".
             boolean isHive = false;

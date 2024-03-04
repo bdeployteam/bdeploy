@@ -17,6 +17,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
@@ -128,13 +130,13 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     }
 
     @Override
-    public List<Key> uploadSoftware(InputStream inputStream) {
+    public List<Key> uploadSoftware(FormDataMultiPart fdmp) {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
         Path unpackTmp = minion.getTempDir().resolve(tmpHiveName + "_unpack");
         try {
             // Download the hive to a temporary location
-            Files.copy(inputStream, targetFile);
+            Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), targetFile);
             return UpdateHelper.importUpdate(targetFile, unpackTmp, getHive());
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);

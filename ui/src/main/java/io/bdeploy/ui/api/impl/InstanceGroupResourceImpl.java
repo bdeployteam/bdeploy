@@ -2,7 +2,6 @@ package io.bdeploy.ui.api.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +12,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +52,7 @@ import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -301,11 +302,11 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public void updateImage(String group, InputStream imageData) {
+    public void updateImage(String group, FormDataMultiPart fdmp) {
         InstanceGroupConfiguration config = read(group);
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Transaction t = getGroupHive(group).getTransactions().begin()) {
-            ByteStreams.copy(imageData, baos);
+            ByteStreams.copy(FormDataHelper.getStreamFromMultiPart(fdmp), baos);
             ObjectId id = getGroupHive(group).execute(new ImportObjectOperation().setData(baos.toByteArray()));
             config.logo = id;
             update(group, config);

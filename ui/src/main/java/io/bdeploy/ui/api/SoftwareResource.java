@@ -1,9 +1,8 @@
 package io.bdeploy.ui.api;
 
-import java.io.InputStream;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
@@ -40,13 +39,13 @@ public interface SoftwareResource {
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
-    public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
+    public List<Manifest.Key> upload(FormDataMultiPart fdmp);
 
     @POST
     @Path("/upload-raw-content")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
-    public UploadInfoDto uploadRawContent(@FormDataParam("file") InputStream inputStream, @QueryParam("name") String manifestName,
+    public UploadInfoDto uploadRawContent(FormDataMultiPart fdmp, @QueryParam("name") String manifestName,
             @QueryParam("tag") String manifestTag, @QueryParam("os") String supportedOS);
 
     @POST

@@ -15,9 +15,9 @@ import jakarta.ws.rs.WebApplicationException;
  */
 public class FormDataHelper {
 
-    public static FormDataMultiPart createMultiPartForStream(InputStream stream) {
+    public static FormDataMultiPart createMultiPartForStream(String name, InputStream stream) {
         FormDataMultiPart fdmp = new FormDataMultiPart();
-        fdmp.bodyPart(new StreamDataBodyPart("stream", stream));
+        fdmp.bodyPart(new StreamDataBodyPart(name, stream));
         return fdmp;
     }
 

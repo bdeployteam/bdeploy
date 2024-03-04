@@ -1,7 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -16,6 +15,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +48,7 @@ import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
@@ -140,14 +141,14 @@ public class SoftwareResourceImpl implements SoftwareResource {
     }
 
     @Override
-    public List<Manifest.Key> upload(InputStream inputStream) {
+    public List<Manifest.Key> upload(FormDataMultiPart fdmp) {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
         List<Manifest.Key> imported = new ArrayList<>();
 
         // Download the hive to a temporary location
         try {
-            Files.copy(inputStream, targetFile);
+            Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), targetFile);
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
         }
@@ -190,7 +191,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
     }
 
     @Override
-    public UploadInfoDto uploadRawContent(InputStream inputStream, String manifestName, String manifestTag, String supportedOS) {
+    public UploadInfoDto uploadRawContent(FormDataMultiPart fdmp, String manifestName, String manifestTag, String supportedOS) {
         UploadInfoDto dto = new UploadInfoDto();
 
         dto.tmpFilename = UuidHelper.randomId() + ".zip";
@@ -198,7 +199,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         dto.isProduct = false;
         Path targetFile = minion.getDownloadDir().resolve(dto.tmpFilename);
         try {
-            Files.copy(inputStream, targetFile);
+            Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), targetFile);
             URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
             try (FileSystem fs = FileSystems.newFileSystem(targetUri, new TreeMap<>())) {
                 if (Files.exists(fs.getPath("/manifests")) && Files.exists(fs.getPath("/objects"))) { // is hive?

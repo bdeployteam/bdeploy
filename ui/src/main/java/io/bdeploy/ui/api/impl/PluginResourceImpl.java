@@ -2,12 +2,13 @@ package io.bdeploy.ui.api.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.api.plugin.v1.CustomEditor;
 import io.bdeploy.bhive.BHive;
@@ -25,6 +26,7 @@ import io.bdeploy.interfaces.plugin.PluginHeader;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.PluginManifest;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.PluginResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -223,11 +225,11 @@ public class PluginResourceImpl implements PluginResource {
     }
 
     @Override
-    public PluginInfoDto uploadGlobalPlugin(InputStream inputStream, boolean replace) {
+    public PluginInfoDto uploadGlobalPlugin(FormDataMultiPart fdmp, boolean replace) {
         BHive hive = getDefaultHive();
 
         try {
-            byte[] bytes = StreamHelper.read(inputStream);
+            byte[] bytes = StreamHelper.read(FormDataHelper.getStreamFromMultiPart(fdmp));
 
             if (replace) {
                 try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {

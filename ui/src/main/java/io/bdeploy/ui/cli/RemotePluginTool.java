@@ -7,8 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -20,16 +19,10 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.PluginResource;
 import io.bdeploy.ui.cli.RemotePluginTool.RemotePluginConfig;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
 
 @Help("Investigate a remote master's plugins")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -84,7 +77,7 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
             return table;
         } else if (config.add() != null) {
             try {
-                return addPlugin(svc, config.add(), config.replace());
+                return addPlugin(client, config.add(), config.replace());
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot add plugin", e);
             }
@@ -100,36 +93,19 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
         return createSuccess();
     }
 
-    private DataResult addPlugin(RemoteService svc, String file, boolean replace) throws IOException {
+    private DataResult addPlugin(PluginResource client, String file, boolean replace) throws IOException {
         Path plugin = Paths.get(file);
         if (!Files.isRegularFile(plugin)) {
             return createResultWithErrorMessage("Not a file: " + file);
         }
 
-        try (InputStream is = Files.newInputStream(plugin)) {
-            try (MultiPart mp = new MultiPart()) {
-                StreamDataBodyPart bp = new StreamDataBodyPart("plugin", is);
-                bp.setFilename("plugin.jar");
-                bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-                mp.bodyPart(bp);
+        try (InputStream is = Files.newInputStream(plugin);
+                FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream("plugin", is)) {
 
-                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget(new JerseyOnBehalfOfFilter(getLocalContext()))
-                        .path("/plugin-admin/upload-global");
-                if (replace) {
-                    target = target.queryParam("replace", true);
-                }
-                Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
+            PluginInfoDto pid = client.uploadGlobalPlugin(fdmp, replace);
 
-                if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                    throw new IllegalStateException("Upload failed: " + response.getStatusInfo().getStatusCode() + ": "
-                            + response.getStatusInfo().getReasonPhrase());
-                }
-
-                PluginInfoDto pid = response.readEntity(PluginInfoDto.class);
-
-                return createSuccess().addField("Plugin Name", pid.name).addField("Plugin Version", pid.version)
-                        .addField("Plugin ID", pid.id);
-            }
+            return createSuccess().addField("Plugin Name", pid.name).addField("Plugin Version", pid.version).addField("Plugin ID",
+                    pid.id);
         }
     }
 

@@ -21,8 +21,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,11 +71,11 @@ import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.actions.ActionBridge;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -96,13 +95,8 @@ import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
 
@@ -219,19 +213,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             dto.config.logo = null; // later.
             self.create(dto.config);
             if (dto.logo != null) {
-                try (ByteArrayInputStream bis = new ByteArrayInputStream(dto.logo); MultiPart mp = new MultiPart();) {
-                    StreamDataBodyPart bp = new StreamDataBodyPart("image", bis);
-                    bp.setFilename("logo.png");
-                    bp.setMediaType(new MediaType("image", "png"));
-                    mp.bodyPart(bp);
-
-                    WebTarget target = ResourceProvider.of(testSelf).getBaseTarget(new JerseyOnBehalfOfFilter(context))
-                            .path("/group/" + dto.config.name + "/image");
-                    Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
-
-                    if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                        throw new IllegalStateException("Image update failed: " + response.getStatusInfo().getReasonPhrase());
-                    }
+                try (ByteArrayInputStream bis = new ByteArrayInputStream(dto.logo);
+                        FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream("image", bis)) {
+                    self.updateImage(dto.config.name, fdmp);
                 } catch (IOException e) {
                     log.error("Failed to update instance group logo", e);
                 }

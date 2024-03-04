@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
@@ -39,6 +41,7 @@ import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.schema.PublicSchemaValidator;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductValidationResource;
 import io.bdeploy.ui.dto.ProductValidationConfigDescriptor;
@@ -50,9 +53,9 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private Minion root;
 
     @Override
-    public ProductValidationResponseApi validate(InputStream inputStream) {
+    public ProductValidationResponseApi validate(FormDataMultiPart fdmp) {
         try {
-            return validate(parse(inputStream));
+            return validate(parse(FormDataHelper.getStreamFromMultiPart(fdmp)));
         } catch (SchemaValidationException ex) {
             return new ProductValidationResponseApi(ex.errors.stream()
                     .map(e -> new ProductValidationIssueApi(ProductValidationSeverity.ERROR, ex.path + ": " + e)).toList());

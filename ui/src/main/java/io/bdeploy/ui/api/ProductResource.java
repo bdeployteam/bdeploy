@@ -1,9 +1,8 @@
 package io.bdeploy.ui.api;
 
-import java.io.InputStream;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
@@ -55,7 +54,7 @@ public interface ProductResource {
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE)
-    public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
+    public List<Manifest.Key> upload(FormDataMultiPart fdmp);
 
     @POST
     @Path("/copy")

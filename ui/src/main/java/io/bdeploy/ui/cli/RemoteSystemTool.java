@@ -213,7 +213,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         if (config.createFrom() != null) {
             try (InputStream is = Files.newInputStream(Paths.get(config.createFrom()))) {
-                SystemTemplateDto tpl = sr.loadTemplate(FormDataHelper.createMultiPartForStream(is), config.server());
+                SystemTemplateDto tpl = sr.loadTemplate(FormDataHelper.createMultiPartForStream("stream", is), config.server());
 
                 // check whether variables are all pre-filled...
                 List<String> stvs = tpl.template.templateVariables.stream().filter(v -> v.defaultValue == null).map(x -> x.id)

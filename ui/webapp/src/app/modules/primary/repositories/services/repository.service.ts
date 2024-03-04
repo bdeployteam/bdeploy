@@ -51,13 +51,13 @@ export class RepositoryService {
         softwarePackages.map((manifestKey) => ({
           type: 'External Software',
           key: manifestKey,
-        }))
-      )
+        })),
+      ),
     ),
   ]).pipe(map(([products, softwarePackages]) => [...products, ...softwarePackages]));
 
   public loading$: Observable<boolean> = combineLatest([this.productsLoading$, this.softwarePackagesLoading$]).pipe(
-    map(([pl, el]) => pl || el)
+    map(([pl, el]) => pl || el),
   );
 
   constructor() {
@@ -118,7 +118,7 @@ export class RepositoryService {
       .get<ManifestKey[]>(`${this.softwareRepositoryApiPath(this.repository)}`, { params: params })
       .pipe(
         finalize(() => this.softwarePackagesLoading$.next(false)),
-        measure('External Software Packages Load')
+        measure('External Software Packages Load'),
       )
       .subscribe((result) => {
         this.softwarePackages$.next(result);
@@ -137,7 +137,7 @@ export class RepositoryService {
       this.subscription.add(
         this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [repository] }, () => {
           this.update$.next(this.repository);
-        })
+        }),
       );
     }
   }

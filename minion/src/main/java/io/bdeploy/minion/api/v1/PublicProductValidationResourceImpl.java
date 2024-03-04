@@ -1,6 +1,6 @@
 package io.bdeploy.minion.api.v1;
 
-import java.io.InputStream;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.api.validation.v1.PublicProductValidationResource;
 import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
@@ -14,8 +14,8 @@ public class PublicProductValidationResourceImpl implements PublicProductValidat
     private ResourceContext rc;
 
     @Override
-    public ProductValidationResponseApi validate(InputStream inputStream) {
-        return rc.initResource(new ProductValidationResourceImpl()).validate(inputStream);
+    public ProductValidationResponseApi validate(FormDataMultiPart fdmp) {
+        return rc.initResource(new ProductValidationResourceImpl()).validate(fdmp);
     }
 
 }
