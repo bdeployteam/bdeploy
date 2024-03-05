@@ -22,7 +22,7 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -42,7 +42,7 @@ const colName: BdDataColumn<ConfigVariable> = {
 const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
-  data: (r) => getMaskedPreRenderable(r.value.value, r.value.type),
+  data: (r) => getPreRenderable(r.value.value, r.value.type),
 };
 
 const colDesc: BdDataColumn<ConfigVariable> = {

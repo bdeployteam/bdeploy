@@ -9,45 +9,50 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 public enum Variables {
 
     /**
+     * Only used in templates.
+     */
+    TEMPLATE("T:", true),
+
+    /**
      * Variable has a manifest reference. The value is expected to be a
      * {@link Manifest} name and optionally a tag separated by ':'
      */
-    MANIFEST_REFERENCE("M:"),
+    MANIFEST_REFERENCE("M:", false),
 
     /**
      * Variable references one of the {@link SpecialDirectory} directories. The
      * value is expected to match one of the {@link SpecialDirectory} enumeration
      * literals (looked up using valueOf).
      */
-    DEPLOYMENT_PATH("P:"),
+    DEPLOYMENT_PATH("P:", false),
 
     /**
      * Variable references a parameter in any application contained in the same
      * deployment. The value is expected to contain the referenced application name
      * and the parameter id separated by ':' (e.g. "MyApp:param1").
      */
-    PARAMETER_VALUE("V:"),
+    PARAMETER_VALUE("V:", true),
 
     /**
      * A value which is provided by the enclosing instance.
      */
-    INSTANCE_VALUE("I:"),
+    INSTANCE_VALUE("I:", false),
 
     /**
      * A value which is provided by the enclosing application.
      */
-    APP_VALUE("A:"),
+    APP_VALUE("A:", false),
 
     /**
      * A value which is provided by system or instance variables.
      */
-    SYSTEM_INSTANCE_VARIABLE("X:"),
+    SYSTEM_INSTANCE_VARIABLE("X:", true),
 
     /**
      * References an environmental variable of the operating system. The value
      * is the name of the variable as present in the OS.
      */
-    ENVIRONMENT_VARIABLE("ENV:"),
+    ENVIRONMENT_VARIABLE("ENV:", false),//TODO arithmetics should be supported - but we have to support baseline numeric environment variables first
 
     /**
      * Indicates that the enclosed variable should be resolved on startup of the application. The content can be any of the
@@ -58,39 +63,41 @@ public enum Variables {
      *      {{DELAYED:ENV:JAVA_HOME}}   -   Delayed resolving of the environment variable JAVA_HOME
      * </pre>
      */
-    DELAYED("DELAYED:"),
+    DELAYED("DELAYED:", false),
 
     /**
      * A value that is resolved on the host where the application is running.
      */
-    HOST("H:"),
+    HOST("H:", false),
 
     /**
      * A conditional which evaluates a nested expression (must be boolean), and evaluates to one of two given values.
      */
-    CONDITIONAL("IF:"),
+    CONDITIONAL("IF:", false),
 
     /**
      * Escapes characters that could corrupt XML files
      */
-    ESCAPE_XML("XML:"),
+    ESCAPE_XML("XML:", false),
 
     /**
      * Escapes characters that could corrupt JSON files
      */
-    ESCAPE_JSON("JSON:"),
+    ESCAPE_JSON("JSON:", false),
 
     /**
      * Escapes characters that could corrupt YAML files
      */
-    ESCAPE_YAML("YAML:")
+    ESCAPE_YAML("YAML:", false)
 
     ;
 
     private final String prefix;
+    private final boolean allowArithmetics;
 
-    private Variables(String prefix) {
+    private Variables(String prefix, boolean allowArithmetics) {
         this.prefix = prefix;
+        this.allowArithmetics = allowArithmetics;
     }
 
     /**
@@ -102,5 +109,9 @@ public enum Variables {
 
     public String getPrefix() {
         return this.prefix;
+    }
+
+    public boolean getAllowArithmetics() {
+        return this.allowArithmetics;
     }
 }
