@@ -36,7 +36,11 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
         Path userArea = null;
         if (PathHelper.isReadOnly(rootDir)) {
             userArea = ClientPathHelper.getUserArea();
-            if (userArea == null || PathHelper.isReadOnly(userArea)) {
+            if (userArea == null) {
+                throw new IllegalStateException(
+                        "The launcher installation directory is read-only and no user area has been set up.");
+            }
+            if (PathHelper.isReadOnly(userArea)) {
                 throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
             }
         }
