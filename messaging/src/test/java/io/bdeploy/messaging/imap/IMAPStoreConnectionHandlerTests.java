@@ -10,7 +10,7 @@ import jakarta.mail.URLName;
 /**
  * Contains unit tests for {@link IMAPStoreConnectionHandler}.
  */
-public class IMAPStoreConnectionHandlerTests {
+class IMAPStoreConnectionHandlerTests {
 
     // IMAP config
 
@@ -41,12 +41,12 @@ public class IMAPStoreConnectionHandlerTests {
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler()) {
             messageReceiver.close();
         }
-        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.ReadWrite)) {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_WRITE)) {
         }
-        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.ReadWrite)) {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_WRITE)) {
             messageReceiver.disconnect();
         }
-        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.ReadWrite)) {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_WRITE)) {
             messageReceiver.close();
         }
     }
@@ -54,7 +54,7 @@ public class IMAPStoreConnectionHandlerTests {
     @Test
     @Disabled("Disabled because a IMAP folder must be configured.")
     void testImap() throws Exception {
-        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.ReadOnly)) {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_ONLY)) {
             messageReceiver.connect(URL_IMAP);
             messageReceiver.connect(URL_IMAP_NOFOLDER);
         }
@@ -63,7 +63,7 @@ public class IMAPStoreConnectionHandlerTests {
     @Test
     @Disabled("Disabled because a IMAP folder must be configured.")
     void testImaps() throws Exception {
-        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.ReadOnly)) {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_ONLY)) {
             messageReceiver.connect(URL_IMAPS);
             messageReceiver.connect(URL_IMAPS_NOFOLDER);
         }

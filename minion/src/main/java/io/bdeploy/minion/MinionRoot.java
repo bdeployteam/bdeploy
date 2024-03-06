@@ -672,13 +672,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         hive.close();
         auditor.close();
         nodeManager.close();
-
-        if (mailSender != null) {
-            mailSender.close();
-        }
-        if (mailReceiver != null) {
-            mailReceiver.close();
-        }
+        mailSender.close();
+        mailReceiver.close();
 
         if (scheduler != null) {
             try {

@@ -30,6 +30,9 @@ public class MessageDataHolderBuilder {
     private static final MediaType MULTIPART_ALTERNATIVE = MediaType.valueOf("multipart/alternative");
     private static final MediaType MULTIPART_MIXED = MediaType.valueOf("multipart/mixed");
 
+    private MessageDataHolderBuilder() {
+    }
+
     /**
      * Creates a new instance of {@link MessageDataHolder}. This method performs all required operations on the given
      * {@link Message} so that once the method completes no further {@link Exception}-handling is required.
@@ -113,7 +116,7 @@ public class MessageDataHolderBuilder {
             return processMultipart(multipart, attachments);
         }
 
-        log.warn("Unsupported media type: " + mediaTypeToString(mediaType));
+        log.warn("Unsupported media type: {}", mediaTypeToString(mediaType));
         return "";
     }
 

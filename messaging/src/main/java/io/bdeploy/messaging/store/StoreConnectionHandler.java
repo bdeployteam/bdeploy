@@ -46,7 +46,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
     private static final String DEFAULT_FOLDER_NAME = "inbox";
 
     private static final Duration KEEP_ALIVE_FREQUENCY = Duration.ofMinutes(3);
-    private static final long KEEP_ALIVE_FREQUENCY__IN_SECONDS = KEEP_ALIVE_FREQUENCY.toSeconds();
+    private static final long KEEP_ALIVE_FREQUENCY_IN_SECONDS = KEEP_ALIVE_FREQUENCY.toSeconds();
 
     private final List<FolderListener> folderListeners = new ArrayList<>();
     private final List<MessageChangedListener> messageChangedListeners = new ArrayList<>();
@@ -85,7 +85,8 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         String folderName = url.getFile();
         try {
             folder = createFolder(getService(), folderName != null ? folderName : DEFAULT_FOLDER_NAME);
-            folder.addConnectionListener((LoggingConnectionListener<F>) (source, info) -> log.info(info + source.getFullName()));
+            folder.addConnectionListener(
+                    (LoggingConnectionListener<F>) (source, info) -> log.info("{}{}", info, source.getFullName()));
             folder.addMessageChangedListener(LoggingMessageChangedListener.INSTANCE);
             folder.addMessageCountListener(LoggingMessageCountListener.INSTANCE);
             folder.open(getFolderOpeningMode().value);
@@ -100,8 +101,8 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         messageCountListeners.forEach(listener -> folder.addMessageCountListener(listener));
 
         if (!testMode) {
-            keepAliveSchedule = keepAliveExecutor.scheduleWithFixedDelay(() -> keepAlive(), KEEP_ALIVE_FREQUENCY__IN_SECONDS,
-                    KEEP_ALIVE_FREQUENCY__IN_SECONDS, TimeUnit.SECONDS);
+            keepAliveSchedule = keepAliveExecutor.scheduleWithFixedDelay(this::keepAlive, KEEP_ALIVE_FREQUENCY_IN_SECONDS,
+                    KEEP_ALIVE_FREQUENCY_IN_SECONDS, TimeUnit.SECONDS);
         }
     }
 
@@ -139,7 +140,6 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             }
         }
 
-        F folder = getFolder();
         if (!folder.isOpen()) {
             try {
                 folder.open(getFolderOpeningMode().value);
@@ -150,7 +150,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Made sure that folder is open | " + getFolderAndUrlLogString());
+            log.trace("Made sure that folder is open | {}", getFolderAndUrlLogString());
         }
     }
 
@@ -168,7 +168,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
     }
 
     protected String getFolderAndUrlLogString() {
-        return "folder " + getFolder().getFullName() + " on " + getService().getURLName();
+        return "folder " + folder.getFullName() + " on " + getService().getURLName();
     }
 
     protected abstract F createFolder(S service, String folderName) throws MessagingException;
@@ -180,7 +180,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
      */
     private static class LoggingStoreListener implements StoreListener {
 
-        private static LoggingStoreListener INSTANCE = new LoggingStoreListener();
+        private static final LoggingStoreListener INSTANCE = new LoggingStoreListener();
 
         @Override
         public void notification(StoreEvent event) {
@@ -188,18 +188,19 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
                 return;
             }
 
-            String source = " (Source=" + event.getSource().toString() + ')';
-
+            String messageAndSource = event.getMessage() + " (Source=" + event.getSource().toString() + ')';
             int messageType = event.getMessageType();
             switch (messageType) {
                 case StoreEvent.NOTICE:
-                    log.trace("Notice: " + event.getMessage() + source);
+                    log.trace("Notice: {}", messageAndSource);
                     return;
                 case StoreEvent.ALERT:
-                    log.trace("Alert: " + event.getMessage() + source);
+                    log.trace("Alert: {}", messageAndSource);
                     return;
+                default:
+                    log.trace("Unknown {} with message type {}. Message: {}", StoreEvent.class.getSimpleName(), messageType,
+                            messageAndSource);
             }
-            log.trace("Unknown " + StoreEvent.class.getSimpleName() + " message type" + messageType + '.' + source);
         }
     }
 
@@ -208,7 +209,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
      */
     private static class LoggingMessageChangedListener implements MessageChangedListener {
 
-        private static LoggingMessageChangedListener INSTANCE = new LoggingMessageChangedListener();
+        private static final LoggingMessageChangedListener INSTANCE = new LoggingMessageChangedListener();
 
         @Override
         public void messageChanged(MessageChangedEvent event) {
@@ -239,13 +240,13 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
                         return;
                     }
                     String flagInfo = "(Current flags: " + flags.toString() + ')';
-                    log.trace("MessageChangedEvent.FLAGS_CHANGED received: " + info + flagInfo);
+                    log.trace("MessageChangedEvent.FLAGS_CHANGED received: {}{}", info, flagInfo);
                     break;
                 case MessageChangedEvent.ENVELOPE_CHANGED:
-                    log.trace("Envelope of message changed: " + info);
+                    log.trace("Envelope of message changed: {}", info);
                     break;
                 default:
-                    log.trace("Unknown message changed event type: " + info + "(Type=" + type + ')');
+                    log.trace("Unknown message changed event type: {}(Type={})", info, type);
             }
         }
     }
@@ -255,7 +256,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
      */
     private static class LoggingMessageCountListener implements MessageCountListener {
 
-        private static LoggingMessageCountListener INSTANCE = new LoggingMessageCountListener();
+        private static final LoggingMessageCountListener INSTANCE = new LoggingMessageCountListener();
 
         @Override
         public void messagesRemoved(MessageCountEvent event) {
@@ -266,11 +267,10 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             String source = event.getSource().toString();
             int type = event.getType();
             if (type != MessageCountEvent.REMOVED) {
-                log.trace("Messages removed event handler called with unexpected event type. (Source="//
-                        + source + ")(Type=" + type + ')');
+                log.trace("Messages removed event handler called with unexpected event type. (Source={})(Type={})", source, type);
                 return;
             }
-            log.trace("Removed messages from " + source + ": " + buildMessageInfo(event));
+            log.trace("Removed messages from {}: {}", source, buildMessageInfo(event));
         }
 
         @Override
@@ -282,11 +282,10 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             String source = event.getSource().toString();
             int type = event.getType();
             if (type != MessageCountEvent.ADDED) {
-                log.trace("Messages added event handler called with unexpected event type. (Source="//
-                        + source + ")(Type=" + type + ')');
+                log.trace("Messages added event handler called with unexpected event type. (Source={})(Type=)", source, type);
                 return;
             }
-            log.trace("Added messages to " + source + ": " + buildMessageInfo(event));
+            log.trace("Added messages to {}: {}", source, buildMessageInfo(event));
         }
 
         private static String buildMessageInfo(MessageCountEvent event) {
@@ -321,12 +320,12 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
         /**
          * @see Folder#READ_ONLY
          */
-        ReadOnly(Folder.READ_ONLY),
+        READ_ONLY(Folder.READ_ONLY),
 
         /**
          * @see Folder#READ_WRITE
          */
-        ReadWrite(Folder.READ_WRITE);
+        READ_WRITE(Folder.READ_WRITE);
 
         public final int value;
 

@@ -11,6 +11,9 @@ public class AttachmentUtils {
 
     private static final String HASH = "#";
 
+    private AttachmentUtils() {
+    }
+
     /**
      * Builds the name of an attachment
      *

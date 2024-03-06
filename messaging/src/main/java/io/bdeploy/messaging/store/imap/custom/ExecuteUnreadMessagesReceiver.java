@@ -66,7 +66,7 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
     private SearchTerm filter = UNSEEN_MESSAGES_FLAG_TERM;
 
     public ExecuteUnreadMessagesReceiver() {
-        super(FolderOpeningMode.ReadWrite);
+        super(FolderOpeningMode.READ_WRITE);
         addListener(new ExecuteOnNewListener());
         addListener(new ExecuteOnSetUnseenListener());
     }
@@ -102,14 +102,14 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
 
     private void execute(Message message) {
         if (log.isTraceEnabled()) {
-            log.trace("Going to execute message " + message.getMessageNumber());
+            log.trace("Going to execute message {}", message.getMessageNumber());
         }
 
         MessageDataHolder messageDataHolder;
         try {
             messageDataHolder = MessageDataHolderBuilder.build(message);
         } catch (MessagingException e) {
-            log.error("Failed to parse message " + message.getMessageNumber(), e);
+            log.error("Failed to parse message {}" + message.getMessageNumber(), e);
             return;
         }
 

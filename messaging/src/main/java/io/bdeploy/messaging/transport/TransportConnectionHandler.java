@@ -146,14 +146,14 @@ public abstract class TransportConnectionHandler<T extends Transport>//
                     }
                 }
 
-                log.info("Sending message '" + subject + "' via " + getService().getURLName() + " to " + recipients.size()
-                        + " recipient(s).");
+                log.info("Sending message '{}' via {} to {} recipient(s).", subject, getService().getURLName(),
+                        recipients.size());
 
                 T transport = getService();
                 if (!transport.isConnected()) {
                     try {
                         if (log.isTraceEnabled()) {
-                            log.trace("Reconnecting to " + transport.getURLName());
+                            log.trace("Reconnecting to {}", transport.getURLName());
                         }
                         transport.connect();
                     } catch (MessagingException e) {
@@ -175,7 +175,7 @@ public abstract class TransportConnectionHandler<T extends Transport>//
      */
     private static class LoggingTransportListener implements TransportListener {
 
-        private static LoggingTransportListener INSTANCE = new LoggingTransportListener();
+        private static final LoggingTransportListener INSTANCE = new LoggingTransportListener();
 
         @Override
         public void messageDelivered(TransportEvent event) {
@@ -186,11 +186,11 @@ public abstract class TransportConnectionHandler<T extends Transport>//
             String source = event.getSource().toString();
             int type = event.getType();
             if (type != TransportEvent.MESSAGE_DELIVERED) {
-                log.trace("Message delivered event handler called with unexpected event type. (Source="//
-                        + source + ")(Type=" + type + ')');
+                log.trace("Message delivered event handler called with unexpected event type. (Source={})(Type={})",//
+                        source, type);
                 return;
             }
-            log.trace("Message delivered from " + source + " to: " + buildEventInfo(event));
+            log.trace("Message delivered from {} to: {}", source, buildEventInfo(event));
         }
 
         @Override
@@ -202,11 +202,11 @@ public abstract class TransportConnectionHandler<T extends Transport>//
             String source = event.getSource().toString();
             int type = event.getType();
             if (type != TransportEvent.MESSAGE_NOT_DELIVERED) {
-                log.trace("Message not delivered event handler called with unexpected event type. (Source="//
-                        + source + ")(Type=" + type + ')');
+                log.trace("Message not delivered event handler called with unexpected event type. (Source={})(Type={})",//
+                        source, type);
                 return;
             }
-            log.trace("Message not delivered from " + source + " to: " + buildEventInfo(event));
+            log.trace("Message not delivered from {} to: {}", source, buildEventInfo(event));
         }
 
         @Override
@@ -218,11 +218,11 @@ public abstract class TransportConnectionHandler<T extends Transport>//
             String source = event.getSource().toString();
             int type = event.getType();
             if (type != TransportEvent.MESSAGE_PARTIALLY_DELIVERED) {
-                log.trace("Message partially delivered event handler called with unexpected event type. (Source="//
-                        + source + ")(Type=" + type + ')');
+                log.trace("Message partially delivered event handler called with unexpected event type. (Source={})(Type={})",//
+                        source, type);
                 return;
             }
-            log.trace("Message partially delivered from " + source + " to: " + buildEventInfo(event));
+            log.trace("Message partially delivered from {} to: {}", source, buildEventInfo(event));
         }
 
         private static String buildEventInfo(TransportEvent event) {

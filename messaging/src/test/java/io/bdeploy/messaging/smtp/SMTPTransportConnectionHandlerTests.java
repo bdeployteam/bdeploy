@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.MediaType;
 /**
  * Contains unit tests for {@link SMTPTransportConnectionHandler}.
  */
-public class SMTPTransportConnectionHandlerTests {
+class SMTPTransportConnectionHandlerTests {
 
     // SMTP config
 
