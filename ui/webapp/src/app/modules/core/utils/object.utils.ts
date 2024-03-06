@@ -1,13 +1,4 @@
-import {
-  cloneDeep,
-  forOwn,
-  isArray,
-  isEmpty,
-  isNull,
-  isObject,
-  isUndefined,
-  pull,
-} from 'lodash-es';
+import { cloneDeep, forOwn, isArray, isEmpty, isNull, isObject, isUndefined, pull } from 'lodash-es';
 import { StatusMessage } from 'src/app/models/config.model';
 
 export interface SimpleEntry<V> {
@@ -28,13 +19,8 @@ export function mapObjToArray<V>(obj: { [key: string]: V }): SimpleEntry<V>[] {
 
 /** formats a size in bytes into a human readable string. */
 export function formatSize(size: number): string {
-  const i: number =
-    size === 0 ? 0 : Math.min(4, Math.floor(Math.log(size) / Math.log(1024)));
-  return (
-    (i === 0 ? size : (size / Math.pow(1024, i)).toFixed(2)) +
-    ' ' +
-    ['B', 'kB', 'MB', 'GB', 'TB'][i]
-  );
+  const i: number = size === 0 ? 0 : Math.min(4, Math.floor(Math.log(size) / Math.log(1024)));
+  return (i === 0 ? size : (size / Math.pow(1024, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
 export function randomString(length: number, alowNumbers?: boolean): string {
@@ -42,16 +28,11 @@ export function randomString(length: number, alowNumbers?: boolean): string {
     ? '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     : 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
-  for (let i = length; i > 0; --i)
-    result += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
   return result;
 }
 
-export function expandVar(
-  variable: string,
-  variables: { [key: string]: string },
-  status: StatusMessage[]
-): string {
+export function expandVar(variable: string, variables: { [key: string]: string }, status: StatusMessage[]): string {
   let varName = variable;
   const colIndex = varName.indexOf(':');
   if (colIndex !== -1) {
@@ -80,7 +61,7 @@ export function expandVar(
 export function performTemplateVariableSubst(
   value: string,
   variables: { [key: string]: string },
-  status: StatusMessage[]
+  status: StatusMessage[],
 ): string {
   if (!!value && value.indexOf('{{T:') !== -1) {
     let found = true;
@@ -99,11 +80,7 @@ export function performTemplateVariableSubst(
 export function removeNullValues(obj) {
   return (function prune(current) {
     forOwn(current, function (value, key) {
-      if (
-        isUndefined(value) ||
-        isNull(value) ||
-        (isObject(value) && isEmpty(prune(value)))
-      ) {
+      if (isUndefined(value) || isNull(value) || (isObject(value) && isEmpty(prune(value)))) {
         delete current[key];
       }
     });
