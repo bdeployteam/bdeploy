@@ -5,15 +5,15 @@ icon: rss
 
 # Endpoint Proxying
 
-**BDeploy** supports proxying (tunnelling) to application endpoints as defined in the [app-info.yaml](/power/product/#app-infoyaml).
+**BDeploy** supports proxying (tunneling) to application endpoints as defined in the [app-info.yaml](/power/product/#app-infoyaml).
 
-The application hosting the endpoint to call can be hosted on any node in the system. As long as this node is attached to a master you can reach (directly in `STANDALONE` or `MANAGED` mode, or indirectly in `CENTRAL` mode), you can tunnel there using **BDeploy**.
+The application hosting the endpoint to call can be hosted on any node within the system. As long as this node is attached to a master you can reach (directly in `STANDALONE` or `MANAGED` mode, or indirectly in `CENTRAL` mode), you can tunnel there using **BDeploy**.
 
-You will need these information to be able to call an Endpoint of a remote application through the **BDeploy** public API:
+You will need these informations to be able to call an Endpoint of a remote application through the **BDeploy** public API:
 
 - A **BDeploy** _slim_ token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`. You can obtain this token from the Web UI for the logged in user.
 - The `id` of the instance group hosting the application you want to tunnel to.
-- The `id` of the instance hosting the application you want to tunnel to. You can see this id for instance from the browsers URL when on the instance overview page for the instance in question.
+- The `id` of the instance hosting the application you want to tunnel to. You can see this id for instance from the browser's URL when on the instance overview page for the instance in question.
 - The `id` of the applications endpoint as defined in the [app-info.yaml](/power/product/#app-infoyaml).
 - The `id` of the application which hosts the endpoint identified by the endpoint `id` above.
 
@@ -34,7 +34,7 @@ curl -k -H "Accept: **/**" \
 
 ## How to obtain required IDs
 
-There are two ways to obtain required IDs. You can use a pure manual approach and for instance deduce ID's from URLs and the Web UI itself. Or you can use the public API to query **BDeploy** for available objects.
+There are two ways to obtain required IDs. You can use a purely manual approach and for example deduce ID's from URLs and the Web UI itself. Or you can use the public API to query **BDeploy** for available objects.
 
 ```
 http://my-server/#/instances/dashboard/MyGroup/xxxx-111-xxxx
@@ -42,13 +42,13 @@ http://my-server/#/instances/dashboard/MyGroup/xxxx-111-xxxx
 
 From the above URL, you can find the instance group `id` (**MyGroup**) as well as the instance `id` (**xxxx-111-xxxx**). When on the instance dashboard, click the server application you want to tunnel to. The process control panel for that application opens up, and you will see the applications ` Process ID` displayed.
 
-Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed on the instance configuration page by clicking on to application you want to tunnel to and then clicking on [ **Configure Endpoints** ]
+Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed on the instance configuration page by clicking on the application you want to tunnel to and then clicking on [ **Configure Endpoints** ]
 
 :::{align=center}
 ![Application Edit Panel](/images/Doc_InstanceConfig_Endpoints.png){width=480}
 :::
 
-You will be able to read the endpoint `id` and configure properties of the endpoint on this page. The configuration will be used by **BDeploy** when instructed remotely to call that endpoint. **BDeploy** will take care of things like authentication, security, etc. The actual caller will only require access (and permissions) on the master server he is calling into, not to the actual application. Instead, **BDeploy** itself is configured to be authorized to perform the call.
+You will be able to read the endpoint `id` and configure properties of the endpoint on this page. The configuration will be used by **BDeploy** when instructed remotely to call that endpoint. **BDeploy** will take care of things like authentication, security, etc. The actual caller will only require access (and permissions) on the master server they are calling into, not to the actual application. Instead, **BDeploy** itself is configured to be authorized to perform the call.
 
 :::{align=center}
 ![Application Endpoints Configuration](/images/Doc_InstanceConfig_EndpointsConfig.png){width=480}
@@ -73,7 +73,7 @@ curl -k -H "Accept: application/json" \
     "https://server/api/public/v1/common/endpoints?BDeploy_group=MyGroup&BDeploy_instance=xxxx-111-xxxx" <2> <3>
 ```
 
-1. **<X>** in all the following **cURL** calls is the bearer token as obtained from the Web UI.
+1. **<X>** in the following **cURL** calls is the bearer token as obtained from the Web UI.
 2. **MyGroup** is the name of one of the instance groups as obtained by the first API. You can fetch the `id` of each instance from the returned JSON.
 3. **xxxx-111-xxxx** is the instance `id` as obtained by the second API. The returned JSON will include the application `id` hosting the endpoint along with the actual specific configuration of that endpoint (including its `id`).
 
@@ -116,5 +116,5 @@ This feature is intended for simple use cases. Advanced use cases may not work a
 !!!
 
 !!!info Note
-Only users which are logged in to **BDeploy** can access UI endpoints through the proxy mechanism!
+Only users which are logged in to **BDeploy** can access UI endpoints via the proxy mechanism!
 !!!

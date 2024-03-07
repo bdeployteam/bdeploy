@@ -13,7 +13,7 @@ The same binaries used to run a **BDeploy** server provide a set of _commands_ a
 
 | Option     | Description                                                                              |
 | ---------- | ---------------------------------------------------------------------------------------- |
-| `-q`       | Quiet - no progess reporting on long running operations.                                 |
+| `-q`       | Quiet - no progress reporting on long running operations.                                 |
 | `-v`       | Verbose - some tools may include additional information.                                 |
 | `-vv`      | Very verbose - enable progress reporting for every tool, show timing summary at the end. |
 | `-o FILE`  | Redirect output to the given `FILE`.                                                     |
@@ -27,7 +27,7 @@ The same binaries used to run a **BDeploy** server provide a set of _commands_ a
 
 Command | Description
 ---    | ---
-`certificate` | Manage the server certificates (export the existing, import a new, set a separate HTTPS certifivate). This is mainly used to import a properly signed certificate to the _master_, which serves the Web UI using this certificate over HTTPS. **BDeploy** itself does not require a properly signed certificate for internal operation to guarantee [Security](/experts/security/#security).
+`certificate` | Manage the server certificates (export the existing, import a new, set a separate HTTPS certificate). This is mainly used to import a properly signed certificate to the _master_, which serves the Web UI using this certificate over HTTPS. **BDeploy** itself does not require a properly signed certificate for internal operation to guarantee [Security](/experts/security/#security).
 `cleanup` | Manage the schedule at which the _master_ performs background cleanup operations on all _nodes_ (including himself).
 `config` | Allows changes to the basic configuration like hostname, port or mode. The `init` command stores the given hostname, used later on for connections to self and also for variable expansion. If the hostname changed or is no longer valid, this tool can update it. Please refer to [Migrating between Modes](/user/central/#migrating-between-modes) in case you need to change the minion mode.
 `init` | Initializes a _root_ directory for running a server with the `start` command. The init command can be instructed to initialize the directory to run a **master** or a headless **node** when running the `start` command.
@@ -39,7 +39,7 @@ Command | Description
 
 Command | Description
 ---     | ---
-`login` | Manages local login sessions to remote servers. This command eliminates the need to manage URIs and tokens yourself. Login sessions are managed per user, can be created, switched and removed. Validity of the login session is the same as for the Web UI. Subsequent commands will use the configured remote login session to perform remote communication.<br/><br/>:warning:**WARNING** Since login sessions are persistent, it can be easy to confuse which session/server is currently worked with. Always verify that the correct session is actively used by commands when performing modifications on the server, e.g. deleting an **Instance**.
+`login` | Manages local login sessions to remote servers. This command eliminates the need to manage URIs and tokens yourself. Login sessions are managed per user, can be created, switched, and removed. Validity of the login session is the same as for the Web UI. Subsequent commands will use the configured remote login session to perform remote communication.<br/><br/>:warning:**WARNING** Since login sessions are persistent, it can be easy to confuse which session/server is currently worked with. Always verify that the correct session is actively used by commands when performing modifications on the server, e.g. deleting an **Instance**.
 `shell` | Provides an interactive shell which can execute tools. The shell can also be fed with a script file which contains a series of commands.
 
 ### Product management commands

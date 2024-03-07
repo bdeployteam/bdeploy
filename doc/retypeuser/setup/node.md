@@ -5,11 +5,11 @@ icon: git-branch
 
 # Nodes
 
-**Nodes** are optional and only required in case that the application that you want to deploy should run on different servers but be managed from a certain master. By default a master is itself a node as well where applications can be deployed to.
+**Nodes** are optional and only required in the case that the application that you want to deploy should run on different servers but be managed from a certain master. By default a master is itself a node as well where applications can be deployed to.
 
 ## Initializing
 
-**Nodes** must be initialized on the according machines (or on the same machine using non-default ports; the default port is 7701).
+**Nodes** must be initialized on the corresponding machines (or on the same machine using non-default ports; the default port is 7701).
 The command is similar to the one used to initialize the **master**. Pass (for example) `--port=7702` to change the
 default port to some other value to avoid conflicts. Running multiple **BDeploy** nodes on the same machine is
 supported for testing, but not recommended for productive setups (as the **master** can be deployed to directly anyway - no need for an explicit **node**).
@@ -69,7 +69,7 @@ When editing an existing node by selecting it in the list, you can also drop the
 
 ### Replacing and Restoring Nodes
 
-**BDeploy** supports replacing and restoring nodes. This is primarily meant to restore nodes after a catastrophic failure of the node in question. This feature is capable of re-installing all required node configurations of all instances which are/were deployed on the node.
+**BDeploy** supports replacing and restoring nodes. This is primarily meant to restore nodes after a catastrophic failure of the node in question. This feature is capable of reinstalling all required node configurations of all instances which are/were deployed on the node.
 
 Replacing can be performed via the [Administrative Web UI](/setup/node/#administrative-web-ui), much the same as _editing_ a node. The steps to replace a node are:
 
@@ -92,7 +92,7 @@ To convert an existing server:
 3. On the to-be-migrated server, click the **master** node in the list of nodes. Click the [ **Convert to Node...** ] button.
 4. Now drag the yellow node identification card from the to-be-migrated server to the new masters drop zone.
 5. Information about the server is pre-filled in the form. Double check the information and press [ **Save** ] to start the migration.
-6. You will be promted to confirm the migration. Click [ **Migrate** ] to continue.
+6. You will be prompted to confirm the migration. Click [ **Migrate** ] to continue.
 
 :::{align=center}
 ![Node Conversion](/images/Doc_Admin_Nodes_Conversion.png){width=480}
@@ -101,9 +101,9 @@ To convert an existing server:
 After the migration is complete, the server will be available as a `NODE` on the new master server. All the **Instances** have been migrated to the new master server.
 
 !!!info Note
-During migration all **Instances** are modified in a way such that software still runs on the same phsyical hardware as before, i.e. the now-new master server is **not** participating in any of the **Instances** configuration. Instead, the previously-master, now-node server is still configured as deployment target where this was the case previously.
+During migration all **Instances** are modified in a way such that software still runs on the same physical hardware as before, i.e. the now-new master server is **not** participating in any of the **Instances** configuration. Instead, the previously-master, now-node server is still configured as deployment target where this was the case previously.
 !!!
 
 !!!info Note
-If the to-be-migrated server has **Nodes** attached to it, all those **Nodes** will be attached to the new master after migration.
+If the to-be-migrated server has **nodes** attached to it, all those **nodes** will be attached to the new master after migration.
 !!!

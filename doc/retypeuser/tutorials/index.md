@@ -5,4 +5,4 @@ icon: mortar-board
 
 # Tutorials
 
-This chapter contains a series of tutorials that cover the basics steps that a typical end user should be able to do.
+This chapter contains a series of tutorials that cover the basic steps that a typical end user should be able to do.

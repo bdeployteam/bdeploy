@@ -14,7 +14,7 @@ icon: key
 **Performance**  
 &emsp;BDeploy uses a delta-transfer mechanics to provide minimal updates throughout a whole network of nodes participating in deployments.
 
-**Easy Of Use**  
+**Easy of Use**  
 &emsp;BDeploy's declarative nature makes it easy to define applications, products and everything around them like templates for ease of use.
 
 **Decentralized**  

@@ -18,7 +18,7 @@ icon: server
 ![STANDALONE Deployment Scenario](/images/Scenario_Standalone.svg){width=480}
 :::
 
-Compared to the rather straight forward standalone scenario above, a `CENTRAL` and `MANAGED` server setup, allows for more flixibility, manageable through a single Web UI:
+Compared to the rather straightforward standalone scenario above, a `CENTRAL` and `MANAGED` server setup allows for more flexibility, while being manageable through a single Web UI:
 
 :::{align=center}
 ![CENTRAL/MANAGED Deployment Scenario](/images/Scenario_Central_Managed.svg){width=480}
@@ -28,7 +28,7 @@ Compared to the rather straight forward standalone scenario above, a `CENTRAL` a
 You can still manage every `MANAGED` server directly through its own Web UI. Creation of new **Instance Groups** is restricted to the `CENTRAL` Web UI though.
 !!!
 
-**BDeploy**'s `CENTRAL` mode is built in a way that attached `MANAGED` servers can have an alternate URL, allowing it to manage servers which are known under a different name in the local network (e.g. VPN/NAT, alternate DNS, etc.).
+**BDeploy**'s `CENTRAL` mode is built in a way that attached `MANAGED` servers can have an alternate URL, making it possible to manage servers which are known under different names in the local network (e.g. VPN/NAT, alternate DNS, etc.).
 
 !!!info Note
 See [Central/Managed Specific Configuration](/user/central/#centralmanaged-specific-configuration) for more details.
@@ -38,9 +38,7 @@ See [Central/Managed Specific Configuration](/user/central/#centralmanaged-speci
 
 To start using BDeploy you will at least need a single **master**. The **master** needs to be initialized before it can be started.
 
-The **root directory** contains all the runtime data. Best to select an empty directory in the data area of your system
-(e.g. /var/bdeploy on Linux) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
-binary installation. Make sure that there is enough space available.
+The **root directory** contains all the runtime data. It is adviseable to select an empty directory in the data area of your system (e.g. /var/bdeploy on Linux) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy binary installation. Make sure that there is enough space available.
 
 ```
 bdeploy init --root=/path/to/root --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=username --initPassword=usersPassword

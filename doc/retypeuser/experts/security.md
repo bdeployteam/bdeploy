@@ -5,9 +5,9 @@ icon: shield-check
 
 # Security
 
-**BDeploy** uses HTTPS everywhere along with advanced _security tokens_ which allow mutual authentication for every request. Think of it as a combination of _JWT_ and mutual certificate based authentication.
+**BDeploy** uses HTTPS everywhere along with advanced _security tokens_ which allow mutual authentication for every request. Think of it as a combination of _JWT_ and mutual certificate-based authentication.
 
-This mechanism is used for _every_ remote communication, especially for every remote communication which would cause a state change in **BDeploy**. There are some endpoints in the Web UI backend which must be unsecured by design (e.g. the one performing authentication and issuing the _security token_ for all following remote communication).
+This mechanism is used for _every_ remote communication, especially for every remote communication which would cause a state change in **BDeploy**. There are some endpoints in the Web UI backend which cannot be secured by design (e.g. the one performing authentication and issuing the _security token_ for all following remote communication).
 
 As a consequence, a _security token_ is required for all CLI commands that communicate with a remote **BDeploy** server, when registering a _node_ with a _master_ minion (as they communicate), and for all toolings which communicate otherwise with **BDeploy** (e.g. build integrations which fetch dependencies and push **Products** to **BDeploy**).
 
@@ -24,7 +24,7 @@ As a consequence, a _security token_ is required for all CLI commands that commu
 | 2.1.5  | Yes       | Users can change their password.                                              |
 | 2.1.6  | Yes       | Password change requires old and new password.                                |
 | 2.1.7  | **No**    | New passwords checked against set of breached passwords.                      |
-| 2.1.8  | Yes       | Strength meter for password stregth hint.                                     |
+| 2.1.8  | Yes       | Strength meter for password strength hint.                                     |
 | 2.1.9  | Yes       | There should be no specific requirement for password composition.             |
 | 2.1.10 | Yes       | No periodic credential rotation of password history requirements.             |
 | 2.1.11 | Yes       | Pasting passwords from password manager should work.                          |
@@ -43,5 +43,5 @@ Exchanging the certificate will currently invalidate all issued _security tokens
 It is also possible to exchange _just_ the HTTPS certificate. This will keep all issued tokens valid while allowing to secure HTTPS communication with a trusted, proper, official certificate.
 
 !!!warning Caution
-It **must** be assured that if this is done, there is _always_ a valid certificate for HTTPS installed and updated before the current one looses validity, as the HTTPS certificate is not only used for browsers (frontend), but _also_ for backend communication. Thus if the HTTPS certificate expires, BDeploy will essentially stop working.
+It **must** be assured that if this is done, there is _always_ a valid certificate for HTTPS installed and updated before the current one loses validity, as the HTTPS certificate is not only used for browsers (frontend), but _also_ for backend communication. Thus if the HTTPS certificate expires, BDeploy will essentially stop working.
 !!!

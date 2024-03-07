@@ -9,7 +9,7 @@ icon: database
 
 ## Per-BHive Pool Setup
 
-Each **BHive** can have a configured _pool directory_, which must be non-existant or an existing object database. You can enable pooling on a single **BHive** from the CLI using:
+Each **BHive** can have a configured _pool directory_, which must be non-existent or an existing object database. You can enable pooling on a single **BHive** from the CLI using:
 
 ```
 bdeploy bhive --hive=/path/to/hive --pool=/path/to/pool
@@ -24,7 +24,7 @@ In case the **BHive** is currently being served by **BDeploy**, pooling will onl
 :::
 
 !!!info Note
-Pooling naturally only makes sense if more that one **BHive** is configured to use the _same_ pool directory.
+Pooling naturally only makes sense if more than one **BHive** is configured to use the _same_ pool directory.
 !!!
 
 ## Global Default Pool
@@ -47,7 +47,7 @@ By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. w
 
 ### Global Usage Threshold
 
-The _global usage threshold_ specifies how often a certain object has to be seen in **BHives** participating in a particular pool. Only once this threshold is reached will an object be move to the pool. The threshold can be set on the CLI, its default value if **2**:
+The _global usage threshold_ specifies how often a certain object has to be seen in **BHives** participating in a particular pool. Only once this threshold is reached will an object be moved to the pool. The threshold can be set on the CLI, its default value if **2**:
 
 ```
 bdeploy pool --root=/path/to/root --usageThreshold=3
@@ -59,7 +59,7 @@ The _default_ **BHive** created during `init` will be configured to use pooling 
 
 ## Re-organizing Pools
 
-Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as _read-only_ additional data-source. The _Pool Re-organization_ Job will (at some configured point in time or when triggered manually) re-organize pool storage by finding all objects eligible to be moved to the pool and doing so. Thereafter those objects are removed from their origin **BHives**. As a last step, the job will find objects in the pool which are no longer referenced by any of the **BHives**, and delete them.
+Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as _read-only_ additional data-source. The _Pool Re-organization_ Job will (at some configured point in time or when triggered manually) re-organize pool storage by finding all objects eligible to be moved to the pool and doing so. Thereafter those objects are removed from their origin **BHives**. As a last step, the job will find objects in the pool that are no longer referenced by any of the **BHives**, and delete them.
 
 :::{align=center}
 ![Jobs](/images/Doc_Admin_Jobs.png){width=480}
@@ -67,7 +67,7 @@ Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as _re
 
 ## _Unpooling_ or disabling Pools
 
-Pooling can be disabled on **BHives** if pooling is currently enabled. However this operation requires to _unpool_ required objects from the currently set pool back into the **BHive** local storage. You can do this using:
+Pooling can be disabled on **BHives** if pooling is currently enabled. However, this operation requires to _unpool_ required objects from the currently set pool back into the **BHive** local storage. You can do this using:
 
 ```
 bdeploy bhive pool --hive=/path/to/hive --unpool
@@ -75,7 +75,7 @@ bdeploy bhive pool --hive=/path/to/hive --unpool
 
 ## Managing Pool through Administrative UI
 
-Pooling can be enabled or disabled through the **BHive Browser** administrative UI. Selecing a **BHive** will give you the options to enable and disable pooling. This is a little less flexible compared to the CLI, as it will enable pooling only on the globally set default pool - if there is one set. Otherwise enabling through the UI is not possible.
+Pooling can be enabled or disabled through the **BHive Browser** administrative UI. Selecting a **BHive** will give you the options to enable and disable pooling. This is a little less flexible compared to the CLI, as it will enable pooling only on the globally set default pool - if there is one set. Otherwise enabling through the UI is not possible.
 
 :::{align=center}
 ![BHive Details](/images/Doc_Admin_BHive_Details.png){width=480}
