@@ -31,8 +31,8 @@ export class LinkVariable {
   preview: string;
   link: string;
   group: string;
-  matches?: (string) => boolean;
-  expand?: (string) => string;
+  matches?: (s: string) => boolean;
+  expand?: (s: string) => string;
 }
 
 export function getRenderPreview(
@@ -381,7 +381,7 @@ export function gatherSpecialExpansions(
     preview: '<windows-value>',
     link: '{{WINDOWS:<windows-value>}}',
     group: null,
-    matches: (s) => s.startsWith('{{WINDOWS:'),
+    matches: (s) => s.startsWith('{{WINDOWS:') && s.endsWith('}}'),
     expand: (s) =>
       process
         ? getAppOs(process.application) === OperatingSystem.WINDOWS
@@ -396,7 +396,7 @@ export function gatherSpecialExpansions(
     preview: '<linux-value>',
     link: '{{LINUX:<linux-value>}}',
     group: null,
-    matches: (s) => s.startsWith('{{LINUX:'),
+    matches: (s) => s.startsWith('{{LINUX:') && s.endsWith('}}'),
     expand: (s) =>
       process
         ? getAppOs(process.application) === OperatingSystem.LINUX
@@ -412,7 +412,7 @@ export function gatherSpecialExpansions(
     preview: '<result>',
     link: '{{IF:condition?valueIfTrue:valueIfFalse}}',
     group: null,
-    matches: (s) => s.startsWith('{{IF:'),
+    matches: (s) => s.startsWith('{{IF:') && s.endsWith('}}') && s.split('?').length === 1 && s.split(':').length === 2,
     expand: (s) => expandCondition(s, instance, process, system),
   });
 
@@ -474,7 +474,7 @@ function expandCondition(
   process: ApplicationConfiguration,
   system: SystemConfiguration,
 ) {
-  const match = condition.match(/{{IF:([^?]*)\?([^:]*):(.*)}}/);
+  const match = condition.match(/{{IF:([^?]+)\?([^:]*):(.*)}}/);
 
   if (!match) {
     return condition; // no match, expression malformed? just don't expand it...
