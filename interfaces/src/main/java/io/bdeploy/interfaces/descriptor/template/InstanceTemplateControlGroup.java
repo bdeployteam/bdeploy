@@ -20,7 +20,7 @@ public class InstanceTemplateControlGroup {
     @JsonPropertyDescription("Defines how processes are started within this group if multiple processes are started.")
     public ProcessControlGroupHandlingType startType = ProcessControlGroupHandlingType.PARALLEL;
 
-    @JsonPropertyDescription("Whether to wait for process startup to complete before proceeding or not")
+    @JsonPropertyDescription("When to continue with starting the next process")
     public ProcessControlGroupWaitType startWait = ProcessControlGroupWaitType.WAIT;
 
     @JsonPropertyDescription("Defines how processes are stopped within this group if multiple processes are stopped.")

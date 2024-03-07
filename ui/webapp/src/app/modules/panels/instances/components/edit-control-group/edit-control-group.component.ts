@@ -34,7 +34,11 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
   private subscription: Subscription;
 
   protected handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
-  protected waitTypeValues = [ProcessControlGroupWaitType.CONTINUE, ProcessControlGroupWaitType.WAIT];
+  protected waitTypeValues = [
+    ProcessControlGroupWaitType.CONTINUE,
+    ProcessControlGroupWaitType.WAIT,
+    ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED,
+  ];
 
   protected origGroup: ProcessControlGroupConfiguration;
   protected group: ProcessControlGroupConfiguration;
@@ -58,7 +62,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
 
         this.origGroup = this.node.controlGroups[index];
         this.group = cloneDeep(this.origGroup);
-      })
+      }),
     );
   }
 
@@ -69,7 +73,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.hasPendingChanges = this.isDirty();
-      })
+      }),
     );
   }
 
@@ -96,7 +100,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Update Control Group ' + this.group.name);
-      })
+      }),
     );
   }
 
@@ -114,13 +118,13 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     for (const id of contained) {
       apps.splice(
         apps.findIndex((a) => a.id === id),
-        1
+        1,
       );
     }
 
     this.node.controlGroups.splice(
       this.node.controlGroups.findIndex((cg) => cg.name === this.group.name),
-      1
+      1,
     );
   }
 }

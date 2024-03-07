@@ -41,7 +41,11 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
   private subscription: Subscription;
 
   protected handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
-  protected waitTypeValues = [ProcessControlGroupWaitType.CONTINUE, ProcessControlGroupWaitType.WAIT];
+  protected waitTypeValues = [
+    ProcessControlGroupWaitType.CONTINUE,
+    ProcessControlGroupWaitType.WAIT,
+    ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED,
+  ];
 
   protected newGroup: ProcessControlGroupConfiguration = cloneDeep(GROUP_TEMPLATE);
   protected node: InstanceNodeConfiguration;
@@ -86,7 +90,7 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Add Control Group ' + this.newGroup.name);
-      })
+      }),
     );
   }
 }

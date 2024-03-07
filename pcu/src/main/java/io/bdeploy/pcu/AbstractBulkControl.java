@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.bdeploy.common.util.MdcLogger;
-import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupWaitType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
@@ -42,9 +41,6 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
             return true;
         }
 
-        // Only start when auto-start is configured
-        ProcessConfiguration config = controller.getDescriptor();
-
         // if the process is already running, we'll use that.
         if (controller.getState().isRunning()) {
             return true;
@@ -53,47 +49,62 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
         // if the process is not *planned* to start, we reject it. this is important in case
         // we use startAll and then stopAll to "abort" starting.
         if (controller.getState() != ProcessState.STOPPED_START_PLANNED) {
-            logger.log(l -> l.warn("Skipping start of {}, not in planned start state", config.id));
+            logger.log(l -> l.warn("Skipping start of {}, not in planned start state", controller.getDescriptor().id));
             return false;
         }
 
         // Start it
-        if (controlGroup.startWait == ProcessControlGroupWaitType.WAIT) {
-            try (MultiStateListener listener = MultiStateListener.createFor(controller)) {
-                CompletableFuture<Boolean> processStarted = new CompletableFuture<>();
-
-                // RUNNING is OK, CRASHED_PERMANENTLY and STOPPED are signals to give up immediately.
-                listener.on(ProcessState.RUNNING, () -> processStarted.complete(true));
-                listener.on(ProcessState.CRASHED_PERMANENTLY,
-                        () -> processStarted.completeExceptionally(new RuntimeException("Permanent crash while starting")));
-                listener.on(ProcessState.STOPPED,
-                        () -> processStarted.completeExceptionally(new RuntimeException("Stopped while starting")));
-                listener.on(ProcessState.RUNNING_STOP_PLANNED,
-                        () -> processStarted.completeExceptionally(new RuntimeException("Stop planned while starting")));
-
-                controller.start(user);
-
-                if (controller.getState() != ProcessState.RUNNING) {
-                    logger.log(l -> l.info("Waiting for startup"), activeTag, appId);
-                    try {
-                        return processStarted.get(20, TimeUnit.MINUTES); // await process changes.
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return false;
-                    } catch (TimeoutException e) {
-                        logger.log(l -> l.error("Timed out starting {}", config.id));
-                        return false;
-                    } catch (ExecutionException e) {
-                        logger.log(l -> l.warn("Failed to start {}: {}", config.id, e.getCause().toString()));
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        } else {
+        ProcessControlGroupWaitType waitType = controlGroup.startWait;
+        if (waitType == ProcessControlGroupWaitType.CONTINUE) {
             controller.start(user);
             return true;
+        }
+
+        try (MultiStateListener listener = MultiStateListener.createFor(controller)) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+            ProcessState happyState;
+            switch (waitType) {
+                case WAIT:
+                    happyState = ProcessState.RUNNING;
+                    listener.on(ProcessState.STOPPED,
+                            () -> future.completeExceptionally(new RuntimeException("Stopped while starting")));
+                    listener.on(ProcessState.RUNNING_STOP_PLANNED,
+                            () -> future.completeExceptionally(new RuntimeException("Stop planned while starting")));
+                    break;
+                case WAIT_UNTIL_STOPPED:
+                    happyState = ProcessState.STOPPED;
+                    break;
+                default:
+                    throw new RuntimeException("Missing implementation of " + ProcessControlGroupWaitType.class.getSimpleName()
+                            + ' ' + waitType.name());
+            }
+
+            listener.on(happyState, () -> future.complete(true));
+            listener.on(ProcessState.CRASHED_PERMANENTLY,
+                    () -> future.completeExceptionally(new RuntimeException("Crashed permanently")));
+
+            controller.start(user);
+
+            if (controller.getState() == happyState) {
+                return true;
+            }
+
+            logger.log(l -> l.info("Delaying startup of next process until current process is in state {}", happyState.name()),
+                    activeTag, appId);
+
+            try {
+                return future.get(20, TimeUnit.MINUTES); // await process changes
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            } catch (TimeoutException e) {
+                logger.log(l -> l.error("Timed out starting {}", controller.getDescriptor().id));
+                return false;
+            } catch (ExecutionException e) {
+                logger.log(l -> l.warn("Failed to start {}: {}", controller.getDescriptor().id, e.getCause().toString()));
+                return false;
+            }
         }
     }
 
@@ -114,5 +125,4 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
             return false;
         }
     }
-
 }

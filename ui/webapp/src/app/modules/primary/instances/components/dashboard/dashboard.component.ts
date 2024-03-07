@@ -174,9 +174,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return null; // client apps
     }
     const grp = getProcessControlGroupOfApplication(node.nodeConfiguration?.controlGroups, app.id);
-    return `${grp?.name} [${grp?.startType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}-${
-      grp?.startWait === ProcessControlGroupWaitType.WAIT ? 'W' : 'C'
-    }/${grp?.stopType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}]`;
+
+    let waitType: string;
+    switch (grp.startWait) {
+      case ProcessControlGroupWaitType.WAIT:
+        waitType = 'W_START';
+        break;
+      case ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED:
+        waitType = 'W_STOP';
+        break;
+      case ProcessControlGroupWaitType.CONTINUE:
+        waitType = 'C';
+        break;
+    }
+
+    return `${grp?.name} [${grp?.startType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}-${waitType}/${grp?.stopType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}]`;
   }
 
   private sortControlGroup(a: string, b: string, entriesA: ApplicationConfiguration[]): number {

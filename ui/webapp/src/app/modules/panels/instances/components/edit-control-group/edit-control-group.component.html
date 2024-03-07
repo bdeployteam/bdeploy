@@ -1,23 +1,17 @@
 <ng-template #handlingTypeInfo>
-  <mat-card
-    appearance="outlined"
-    class="local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]"
-  >
+  <mat-card appearance="outlined" class="local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]">
     <div>
-      The handling type describes how starting or stopping is handled by the
-      process control unit during bulk control.
+      The handling type describes how starting or stopping is handled by the process control unit during bulk control.
       <ul class="list-disc list-inside">
         <li>
-          <code>SEQUENTIAL</code>: Processes are started in sequence and stopped
-          in reverse sequence. Each process start is awaited according to the
-          configured <em>Start Wait</em>. If <em>Start Wait</em> is set to
-          <code>CONTINUE</code> this is similar to type <code>PARALLEL</code>.
-          Stopping always uses wait handling <code>WAIT</code>.
+          <code>SEQUENTIAL</code>: Processes are started in sequence and stopped in reverse sequence. Each process start
+          is awaited according to the configured <em>Start Wait</em>. If <em>Start Wait</em> is set to
+          <code>CONTINUE</code> this is similar to type <code>PARALLEL</code>. Stopping always uses wait handling
+          <code>WAIT</code>.
         </li>
         <li>
-          <code>PARALLEL</code>: All processes in the group are started/stopped
-          in parallel. After initiating start/stop, the group still waits until
-          all processes are done performing the respective action.
+          <code>PARALLEL</code>: All processes in the group are started/stopped in parallel. After initiating
+          start/stop, the group still waits until all processes are done performing the respective action.
         </li>
       </ul>
     </div>
@@ -25,24 +19,22 @@
 </ng-template>
 
 <ng-template #waitTypeInfo>
-  <mat-card
-    appearance="outlined"
-    class="local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]"
-  >
+  <mat-card appearance="outlined" class="local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]">
     <div>
-      The wait type describes how a starting process is handled during bulk
-      start.
+      The wait type describes how a starting process is handled during bulk start.
       <ul class="list-disc list-inside">
         <li>
-          <code>CONTINUE</code>: The process control unit will regard a process
-          as started once the actual operating system process has been created.
+          <code>CONTINUE</code>: The process control unit will regard a process as started once the actual operating
+          system process has been created.
         </li>
         <li>
-          <code>WAIT</code>: The process control unit will regard a process as
-          started once it has reached the proper <code>RUNNING</code> state.
-          This is achieved once a configured startup probe signals process
-          startup, or (if no probe is configured) immediately after the
-          operating system process has been created.
+          <code>WAIT</code>: The process control unit will regard a process as started once it has reached the proper
+          <code>RUNNING</code> state. This is achieved once a configured startup probe signals process startup, or (if
+          no probe is configured) immediately after the operating system process has been created.
+        </li>
+        <li>
+          <code>WAIT_UNTIL_STOPPED</code>: The process control unit will make each process wait until its predecessor
+          has stopped before starting the next process.
         </li>
       </ul>
     </div>
@@ -50,10 +42,7 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="edit.loading$">
-  <app-bd-dialog-toolbar
-    header="Edit Control Group"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit Control Group" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
@@ -66,20 +55,13 @@
           header="Server Not Synchronized"
         >
           <div class="text-justify">
-            The managed server responsible for this instance is not
-            synchronized, details are unavailable. Please synchronize the server
-            to enable editing.
+            The managed server responsible for this instance is not synchronized, details are unavailable. Please
+            synchronize the server to enable editing.
           </div>
         </app-bd-notification-card>
         <div class="flex flex-col gap-2.5" *ngIf="edit.state$ | async as state">
           <div>Edit Control Group <strong>{{ group.name }}</strong></div>
-          <app-bd-form-input
-            label="Name"
-            name="name"
-            [(ngModel)]="group.name"
-            required
-            appTrimmed
-          ></app-bd-form-input>
+          <app-bd-form-input label="Name" name="name" [(ngModel)]="group.name" required appTrimmed></app-bd-form-input>
           <app-bd-form-select
             [appBdPopup]="handlingTypeInfo"
             [appBdPopupDelay]="500"
@@ -119,12 +101,7 @@
         </div>
       </form>
       <mat-divider></mat-divider>
-      <app-bd-button
-        text="Delete"
-        icon="delete"
-        [collapsed]="false"
-        (click)="onDelete()"
-      ></app-bd-button>
+      <app-bd-button text="Delete" icon="delete" [collapsed]="false" (click)="onDelete()"></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>
