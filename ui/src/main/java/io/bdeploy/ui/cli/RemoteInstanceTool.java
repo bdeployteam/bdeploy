@@ -11,8 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -43,9 +42,8 @@ import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescri
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -58,10 +56,6 @@ import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status.Family;
 
@@ -179,7 +173,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         if (config.exportTo() != null) {
             return doExport(ir, config);
         } else if (config.importFrom() != null) {
-            return doImport(remote, config);
+            return doImport(ir, config);
         } else if (config.updateTo() != null) {
             return doUpdateProduct(remote, ir, config);
         } else if (config.delete()) {
@@ -306,31 +300,15 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
     }
 
-    private DataResult doImport(RemoteService svc, InstanceConfig config) {
+    private DataResult doImport(InstanceResource ir, InstanceConfig config) {
         Path input = Paths.get(config.importFrom());
         if (!Files.isRegularFile(input)) {
             helpAndFail("--importFrom is not a regular file");
         }
 
-        try (InputStream is = Files.newInputStream(input)) {
-            try (MultiPart mp = new MultiPart()) {
-                StreamDataBodyPart bp = new StreamDataBodyPart("file", is);
-                bp.setFilename("instance.zip");
-                bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-                mp.bodyPart(bp);
-
-                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget(new JerseyOnBehalfOfFilter(getLocalContext()))
-                        .path("/group/" + config.instanceGroup() + "/instance/" + config.uuid() + "/import");
-                Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
-
-                if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                    throw new IllegalStateException("Import failed: " + response.getStatusInfo().getStatusCode() + ": "
-                            + response.getStatusInfo().getReasonPhrase());
-                }
-
-                return createSuccess().addField("Created", response.readEntity(new GenericType<List<Key>>() {
-                }));
-            }
+        try (InputStream is = Files.newInputStream(input); FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream(is)) {
+            List<Key> keys = ir.importInstance(fdmp, config.uuid());
+            return createSuccess().addField("Created", keys);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot upload instance", e);
         }
