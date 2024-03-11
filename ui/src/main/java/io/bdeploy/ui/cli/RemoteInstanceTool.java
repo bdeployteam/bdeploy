@@ -306,7 +306,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             helpAndFail("--importFrom is not a regular file");
         }
 
-        try (InputStream is = Files.newInputStream(input); FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream(is)) {
+        try (InputStream is = Files.newInputStream(input);
+                FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream("file", is)) {
             List<Key> keys = ir.importInstance(fdmp, config.uuid());
             return createSuccess().addField("Created", keys);
         } catch (IOException e) {
