@@ -117,9 +117,8 @@ public class FlattenedInstanceTemplateConfiguration {
             }
         }
 
-        this.directlyUsedTemplateVars = res.getRequestedVariables().stream()
-                .map(k -> templateVars.stream().filter(x -> x.id.equals(k)).findAny().orElse(null)).filter(Objects::nonNull)
-                .toList();
+        this.directlyUsedTemplateVars = templateVars.stream().filter(Objects::nonNull)
+                .filter(variable -> res.getRequestedVariables().contains(variable.id)).toList();
     }
 
 }
