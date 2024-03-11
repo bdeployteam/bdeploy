@@ -108,7 +108,7 @@
           color="primary"
           [disabled]="startDisabled$ | async"
           (click)="start()"
-          matTooltip="Start Application"
+          matTooltip="Start Process"
         >
           <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedStart$ | async)">play_arrow</mat-icon>
           <div class="flex-auto flex justify-center items-center" *ngIf="mappedStart$ | async">
@@ -120,7 +120,7 @@
           [collapsed]="false"
           [disabled]="stopDisabled$ | async"
           (click)="stop()"
-          matTooltip="Stop Application"
+          matTooltip="Stop Process"
         >
           <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedStop$ | async)">stop</mat-icon>
           <div class="flex-auto flex justify-center items-center" *ngIf="mappedStop$ | async">
@@ -132,7 +132,7 @@
           [collapsed]="false"
           [disabled]="restartDisabled$ | async"
           (click)="restart()"
-          matTooltip="Restart Application"
+          matTooltip="Restart Process"
         >
           <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedRestart$ | async)">replay</mat-icon>
           <div class="flex-auto flex justify-center items-center" *ngIf="mappedRestart$ | async">
