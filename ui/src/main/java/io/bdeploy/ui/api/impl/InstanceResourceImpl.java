@@ -23,8 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,11 +107,10 @@ import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
-import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
@@ -144,15 +142,10 @@ import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
 
@@ -951,7 +944,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @WriteLock
     @Override
-    public List<Key> importInstance(InputStream inputStream, String instanceId) {
+    public List<Key> importInstance(FormDataMultiPart fdmp, String instanceId) {
         InstanceManifest im = readInstance(instanceId);
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
@@ -961,32 +954,17 @@ public class InstanceResourceImpl implements InstanceResource {
             // MUST delegate this 1:1 to managed
             RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
 
-            try (MultiPart multiPart = new MultiPart()) {
-                StreamDataBodyPart bp = new StreamDataBodyPart("file", inputStream);
-                bp.setFilename("instance.zip");
-                bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-                multiPart.bodyPart(bp);
+            List<Key> keys = ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getInstanceResource(group)
+                    .importInstance(fdmp, instanceId);
 
-                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget(new JerseyOnBehalfOfFilter(context))
-                        .path("/group/" + group + "/instance/" + instanceId + "/import");
-                Response response = target.request().post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+            syncInstance(minion, rc, group, instanceId);
 
-                if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                    throw new IllegalStateException("Import failed: " + response.getStatusInfo().getStatusCode() + ": "
-                            + response.getStatusInfo().getReasonPhrase());
-                }
-                syncInstance(minion, rc, group, instanceId);
-
-                return response.readEntity(new GenericType<List<Key>>() {
-                });
-            } catch (IOException e) {
-                throw new WebApplicationException("Cannot delegate import to managed server", e);
-            }
+            return keys;
         }
 
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
-            Files.copy(inputStream, zip);
+            Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), zip);
 
             Map<String, MinionDto> nodeMap = getMinionConfiguration(instanceId, null);
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, nodeMap, context);

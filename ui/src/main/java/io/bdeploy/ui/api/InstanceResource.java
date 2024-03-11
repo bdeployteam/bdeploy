@@ -1,10 +1,9 @@
 package io.bdeploy.ui.api;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RequiredPermission;
@@ -184,8 +183,7 @@ public interface InstanceResource {
     @Path("/{instance}/import")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE)
-    public List<Key> importInstance(@FormDataParam("file") InputStream inputStream,
-            @Scope @PathParam("instance") String instanceId);
+    public List<Key> importInstance(FormDataMultiPart fdmp, @Scope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/output/{tag}/{app}")
