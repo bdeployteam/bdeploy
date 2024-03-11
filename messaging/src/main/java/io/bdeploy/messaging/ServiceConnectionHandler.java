@@ -35,6 +35,9 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     @Override
     public CompletableFuture<Void> connect(URLName url, boolean testMode) {
+        if (url == null) {
+            throw new IllegalArgumentException("Connection handling called with url being null.");
+        }
         return CompletableFuture.runAsync(() -> doConnect(url, testMode), connectionThreadExecutor);
     }
 
@@ -104,7 +107,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
                     : new URLName(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), url.getUsername(), null);
 
             if (log.isTraceEnabled()) {
-                log.trace("Attempting connection to " + urlWithoutPassword);
+                log.trace("Attempting connection to {}", urlWithoutPassword);
             }
 
             protocol = urlWithoutPassword.getProtocol();
@@ -118,7 +121,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
             modifyProperties(properties);
 
             if (log.isTraceEnabled()) {
-                log.trace("Properties for " + protocol + ": " + properties);
+                log.trace("Properties for {}: {}", protocol, properties);
             }
 
             session = createSession(properties);

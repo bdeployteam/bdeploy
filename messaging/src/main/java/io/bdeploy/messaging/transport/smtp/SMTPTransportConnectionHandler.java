@@ -35,8 +35,9 @@ public class SMTPTransportConnectionHandler extends TransportConnectionHandler<S
                 return Session.getInstance(properties);
             case "smtps":
                 return Session.getInstance(properties);
+            default:
+                throw getNoSuchProviderException(protocol);
         }
-        throw getNoSuchProviderException(protocol);
     }
 
     @Override
@@ -47,8 +48,9 @@ public class SMTPTransportConnectionHandler extends TransportConnectionHandler<S
                 return new SMTPTransport(getSession(), url);
             case "smtps":
                 return new SMTPSSLTransport(getSession(), url);
+            default:
+                throw getNoSuchProviderException(protocol);
         }
-        throw getNoSuchProviderException(protocol);
     }
 
     @Override

@@ -77,7 +77,7 @@ public class MinionRootMailHandler {
     }
 
     private void handleAttachment(Path tempDir, String name, byte[] content) {
-        log.info("Received attachment " + name);
+        log.info("Received attachment {}", name);
 
         if (!name.toLowerCase().endsWith(MinionSignedAttachment.SIGNED_SUFFIX)) {
             throw new IllegalArgumentException("Only signed .zip files are supported. The attachment will be ignored.");

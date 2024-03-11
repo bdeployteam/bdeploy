@@ -14,6 +14,9 @@ public class MessagingUtils {
 
     public static final Pattern MAIL_ADDRESS_PATTERN = Pattern.compile("[a-zA-Z0-9-_\\.]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]+");
 
+    private MessagingUtils() {
+    }
+
     /**
      * Builds a new {@link URLName} which copies the protocol-, host-, port- and file-part of the given url, but sets the provided
      * username and password.

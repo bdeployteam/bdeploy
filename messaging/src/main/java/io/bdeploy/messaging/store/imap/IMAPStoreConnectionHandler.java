@@ -33,10 +33,10 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
 
     /**
      * Creates a new {@link IMAPStoreConnectionHandler} with
-     * {@link io.bdeploy.messaging.store.StoreConnectionHandler.FolderOpeningMode#ReadOnly FolderOpeningStyle#ReadOnly}.
+     * {@link io.bdeploy.messaging.store.StoreConnectionHandler.FolderOpeningMode#READ_ONLY FolderOpeningStyle#ReadOnly}.
      */
     public IMAPStoreConnectionHandler() {
-        this(FolderOpeningMode.ReadOnly);
+        this(FolderOpeningMode.READ_ONLY);
     }
 
     /**
@@ -62,8 +62,9 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 properties.put("mail.imaps.peek", "true");
                 properties.put("mail.imaps.minidletime", "1000");
                 return Session.getInstance(properties);
+            default:
+                throw getNoSuchProviderException(protocol);
         }
-        throw getNoSuchProviderException(protocol);
     }
 
     @Override
@@ -74,8 +75,9 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 return new IMAPStore(getSession(), url);
             case "imaps":
                 return new IMAPSSLStore(getSession(), url);
+            default:
+                throw getNoSuchProviderException(protocol);
         }
-        throw getNoSuchProviderException(protocol);
     }
 
     @Override
@@ -92,7 +94,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     protected void afterConnect(URLName url, boolean testMode) {
         super.afterConnect(url, testMode);
         if (!testMode) {
-            idleThread = new Thread(() -> idle(), getClass().getSimpleName() + "IdleThread");
+            idleThread = new Thread(this::idle, getClass().getSimpleName() + "IdleThread");
             idleThread.start();
         }
     }
@@ -125,7 +127,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Sent NOOP to " + getFolderAndUrlLogString());
+            log.trace("Sent NOOP to {}", getFolderAndUrlLogString());
         }
     }
 
@@ -136,7 +138,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
         boolean supportsIdle = false;
         try {
             if (log.isTraceEnabled()) {
-                log.trace("Idleing on " + getFolderAndUrlLogString());
+                log.trace("Idleing on {}", getFolderAndUrlLogString());
             }
             folder.idle();
             supportsIdle = true;
@@ -153,19 +155,19 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 // Preferred idle logic
                 while (!Thread.interrupted()) {
                     if (log.isTraceEnabled()) {
-                        log.trace("Idleing on " + getFolderAndUrlLogString());
+                        log.trace("Idleing on {}", getFolderAndUrlLogString());
                     }
                     if (!folder.isOpen()) {
-                        log.info("Idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
-                                + getFolderAndUrlLogString());
+                        log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                                getFolderAndUrlLogString());
                         Thread.sleep(IDLE_RETRY_TIME);
                         continue;
                     }
                     try {
                         folder.idle();
                     } catch (FolderClosedException | IllegalStateException e) {
-                        log.info("Idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
-                                + getFolderAndUrlLogString());
+                        log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                                getFolderAndUrlLogString());
                         Thread.sleep(IDLE_RETRY_TIME);
                     }
                 }
@@ -176,14 +178,14 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                         log.trace("Fallback idleing on " + getFolderAndUrlLogString());
                     }
                     if (!folder.isOpen()) {
-                        log.info("Fallback idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
-                                + getFolderAndUrlLogString());
+                        log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                                getFolderAndUrlLogString());
                         Thread.sleep(IDLE_RETRY_TIME);
                         continue;
                     }
                     if (folder.getMessageCount() == -1) {
-                        log.info("Fallback idle handling failed because folder is closed. Retrying in " + IDLE_RETRY_TIME + " | "
-                                + getFolderAndUrlLogString());
+                        log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                                getFolderAndUrlLogString());
                         Thread.sleep(IDLE_RETRY_TIME);
                         continue;
                     }
@@ -193,7 +195,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
         } catch (MessagingException e) {
             log.error("Aborted idle handling due to unexpected exception |  " + getFolderAndUrlLogString(), e);
         } catch (InterruptedException e) {
-            log.info("Interrupted idle thread | " + getFolderAndUrlLogString());
+            log.info("Interrupted idle thread | {}", getFolderAndUrlLogString());
             Thread.currentThread().interrupt();
         }
     }
