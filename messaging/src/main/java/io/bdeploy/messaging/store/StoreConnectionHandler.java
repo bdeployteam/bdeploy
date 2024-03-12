@@ -270,7 +270,9 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
                 log.trace("Messages removed event handler called with unexpected event type. (Source={})(Type={})", source, type);
                 return;
             }
-            log.trace("Removed messages from {}: {}", source, buildMessageInfo(event));
+            if (log.isTraceEnabled()) {
+                log.trace("Removed messages from {}: {}", source, buildMessageInfo(event));
+            }
         }
 
         @Override
@@ -282,10 +284,12 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             String source = event.getSource().toString();
             int type = event.getType();
             if (type != MessageCountEvent.ADDED) {
-                log.trace("Messages added event handler called with unexpected event type. (Source={})(Type=)", source, type);
+                log.trace("Messages added event handler called with unexpected event type. (Source={})(Type={})", source, type);
                 return;
             }
-            log.trace("Added messages to {}: {}", source, buildMessageInfo(event));
+            if (log.isTraceEnabled()) {
+                log.trace("Added messages to {}: {}", source, buildMessageInfo(event));
+            }
         }
 
         private static String buildMessageInfo(MessageCountEvent event) {

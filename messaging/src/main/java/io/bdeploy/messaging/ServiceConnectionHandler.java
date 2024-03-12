@@ -35,9 +35,6 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
     @Override
     public CompletableFuture<Void> connect(URLName url, boolean testMode) {
-        if (url == null) {
-            throw new IllegalArgumentException("Connection handling called with url being null.");
-        }
         return CompletableFuture.runAsync(() -> doConnect(url, testMode), connectionThreadExecutor);
     }
 
@@ -100,6 +97,9 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
     protected abstract S createService(URLName url) throws NoSuchProviderException;
 
     private void doConnect(URLName url, boolean testMode) {
+        if (url == null) {
+            throw new IllegalArgumentException("Connection handling called with url being null.");
+        }
         try {
             disconnect();
 
@@ -126,7 +126,8 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
 
             session = createSession(properties);
             service = createService(url);
-            service.addConnectionListener((LoggingConnectionListener<S>) (source, info) -> log.info(info + source.getURLName()));
+            service.addConnectionListener(
+                    (LoggingConnectionListener<S>) (source, info) -> log.info("{}{}", info, source.getURLName()));
             service.connect();
             afterConnect(urlWithoutPassword, testMode);
         } catch (RuntimeException | MessagingException e) {

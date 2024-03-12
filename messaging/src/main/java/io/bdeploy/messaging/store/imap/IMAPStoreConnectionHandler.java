@@ -132,15 +132,13 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     }
 
     private void idle() {
-        IMAPFolder folder = getFolder();
-
         // Attempt idleing once
         boolean supportsIdle = false;
         try {
             if (log.isTraceEnabled()) {
                 log.trace("Idleing on {}", getFolderAndUrlLogString());
             }
-            folder.idle();
+            getFolder().idle();
             supportsIdle = true;
         } catch (FolderClosedException | IllegalStateException e) {
             log.error("Folder was closed -> idle handling could not be started | " + getFolderAndUrlLogString(), e);
@@ -152,51 +150,59 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
         // Loop the appropriate idle logic
         try {
             if (supportsIdle) {
-                // Preferred idle logic
-                while (!Thread.interrupted()) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Idleing on {}", getFolderAndUrlLogString());
-                    }
-                    if (!folder.isOpen()) {
-                        log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
-                                getFolderAndUrlLogString());
-                        Thread.sleep(IDLE_RETRY_TIME);
-                        continue;
-                    }
-                    try {
-                        folder.idle();
-                    } catch (FolderClosedException | IllegalStateException e) {
-                        log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
-                                getFolderAndUrlLogString());
-                        Thread.sleep(IDLE_RETRY_TIME);
-                    }
-                }
+                doPreferredIdle();
             } else {
-                // Fallback idle logic
-                while (!Thread.interrupted()) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Fallback idleing on " + getFolderAndUrlLogString());
-                    }
-                    if (!folder.isOpen()) {
-                        log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
-                                getFolderAndUrlLogString());
-                        Thread.sleep(IDLE_RETRY_TIME);
-                        continue;
-                    }
-                    if (folder.getMessageCount() == -1) {
-                        log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
-                                getFolderAndUrlLogString());
-                        Thread.sleep(IDLE_RETRY_TIME);
-                        continue;
-                    }
-                    Thread.sleep(FALLBACK_IDLE_FREQUENCY);
-                }
+                doFallbackIdle();
             }
         } catch (MessagingException e) {
             log.error("Aborted idle handling due to unexpected exception |  " + getFolderAndUrlLogString(), e);
         } catch (InterruptedException e) {
             log.info("Interrupted idle thread | {}", getFolderAndUrlLogString());
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void doPreferredIdle() throws InterruptedException, MessagingException {
+        IMAPFolder folder = getFolder();
+        while (!Thread.interrupted()) {
+            if (log.isTraceEnabled()) {
+                log.trace("Idleing on {}", getFolderAndUrlLogString());
+            }
+            if (!folder.isOpen()) {
+                log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                        getFolderAndUrlLogString());
+                Thread.sleep(IDLE_RETRY_TIME);
+                continue;
+            }
+            try {
+                folder.idle();
+            } catch (FolderClosedException | IllegalStateException e) {
+                log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                        getFolderAndUrlLogString());
+                Thread.sleep(IDLE_RETRY_TIME);
+            }
+        }
+    }
+
+    private void doFallbackIdle() throws InterruptedException, MessagingException {
+        IMAPFolder folder = getFolder();
+        while (!Thread.interrupted()) {
+            if (log.isTraceEnabled()) {
+                log.trace("Fallback idleing on {}", getFolderAndUrlLogString());
+            }
+            if (!folder.isOpen()) {
+                log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                        getFolderAndUrlLogString());
+                Thread.sleep(IDLE_RETRY_TIME);
+                continue;
+            }
+            if (folder.getMessageCount() == -1) {
+                log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
+                        getFolderAndUrlLogString());
+                Thread.sleep(IDLE_RETRY_TIME);
+                continue;
+            }
+            Thread.sleep(FALLBACK_IDLE_FREQUENCY);
         }
     }
 }

@@ -116,7 +116,9 @@ public class MessageDataHolderBuilder {
             return processMultipart(multipart, attachments);
         }
 
-        log.warn("Unsupported media type: {}", mediaTypeToString(mediaType));
+        if (log.isWarnEnabled()) {
+            log.warn("Unsupported media type: {}", mediaTypeToString(mediaType));
+        }
         return "";
     }
 

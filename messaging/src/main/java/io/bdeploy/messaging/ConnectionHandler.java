@@ -14,12 +14,13 @@ public interface ConnectionHandler extends Closeable {
 
     /**
      * Establishes a connection to the server with the given parameters.
-     * <br>
-     * Internally just calls {@link #connect(URLName, boolean)} with testMode set to <code>false</code>.
+     * <p>
+     * The returned {@link CompletableFuture} only completes exceptionally if the given url is <code>null</code>.
+     * <p>
+     * Internally, this method just calls {@link #connect(URLName, boolean)} with testMode set to <code>false</code>.
      *
      * @param url The {@link URLName} which contains the connection parameters
-     * @return A {@link CompletableFuture} of the connection process, or <code>null</code> if the given url was <code>null</code>
-     * @throws IllegalArgumentException If the given url is <code>null</code>
+     * @return A {@link CompletableFuture} of the connection process
      * @see #connect(URLName, boolean)
      * @see #disconnect()
      */
@@ -29,12 +30,17 @@ public interface ConnectionHandler extends Closeable {
 
     /**
      * Establishes a connection to the server with the given parameters.
+     * <p>
+     * The returned {@link CompletableFuture} only completes exceptionally if at least one of the following conditions arises:
+     * <ul>
+     * <li>The given url is <code>null</code></li>
+     * <li>The {@link ConnectionHandler} failed to connect while testMode is <code>true</code></li>
+     * </ul>
      *
      * @param url The {@link URLName} which contains the connection parameters
      * @param testMode If <code>true</code>, instructs the {@link ConnectionHandler} to start in test mode. This may have no
      *            effect at all, depending on the implementation.
-     * @return A {@link CompletableFuture} of the connection process, or <code>null</code> if the given url was <code>null</code>
-     * @throws IllegalArgumentException If the given url is <code>null</code>
+     * @return A {@link CompletableFuture} of the connection process
      * @see #disconnect()
      */
     CompletableFuture<Void> connect(URLName url, boolean testMode);

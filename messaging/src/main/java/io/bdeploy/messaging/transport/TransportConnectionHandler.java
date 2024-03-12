@@ -70,7 +70,13 @@ public abstract class TransportConnectionHandler<T extends Transport>//
      */
     @Override
     public CompletableFuture<Void> send(MessageDataHolder dataHolder) {
-        return CompletableFuture.runAsync(() -> doSend(dataHolder), sendExecutor);
+        return CompletableFuture.runAsync(() -> {
+            try {
+                doSend(dataHolder);
+            } catch (RuntimeException e) {
+                log.error("Unexpected runtime exception during sending of message.", e);
+            }
+        }, sendExecutor);
     }
 
     @Override
@@ -92,81 +98,76 @@ public abstract class TransportConnectionHandler<T extends Transport>//
     protected abstract Message createEmptyMessage();
 
     private void doSend(MessageDataHolder dataHolder) {
+        List<? extends Address> recipients = dataHolder.getRecipients();
+        if (recipients.isEmpty()) {
+            log.warn("Attempted to send message, but no recipients were found.");
+            return;
+        }
+
+        String subject = dataHolder.getSubject();
+        String text = dataHolder.getText();
+        String textMimeType = dataHolder.getTextMimeType();
+        List<MimeFile> attachments = dataHolder.getAttachments();
+
+        Message message = createEmptyMessage();
         try {
-            List<? extends Address> recipients = dataHolder.getRecipients();
-            if (recipients.isEmpty()) {
-                log.warn("Attempted to send message, but no recipients were found.");
-                return;
+            message.setFrom(dataHolder.getSender());
+            message.setRecipients(Message.RecipientType.TO, recipients.toArray(Address[]::new));
+            message.setSubject(subject);
+
+            if (attachments.isEmpty()) {
+                message.setContent(text, textMimeType);
+            } else {
+                Multipart multipart = new MimeMultipart();
+
+                BodyPart textBodyPart = new MimeBodyPart();
+                textBodyPart.setContent(text, textMimeType);
+                multipart.addBodyPart(textBodyPart);
+
+                for (MimeFile attachment : attachments) {
+                    BodyPart attachmentBodyPart = new MimeBodyPart();
+                    attachmentBodyPart.setDataHandler(
+                            new DataHandler(new ByteArrayDataSource(attachment.getContent(), attachment.getMimeType())));
+                    attachmentBodyPart.setFileName(attachment.getName());
+                    multipart.addBodyPart(attachmentBodyPart);
+                }
+
+                message.setContent(multipart);
             }
 
-            String subject = dataHolder.getSubject();
-            String text = dataHolder.getText();
-            String textMimeType = dataHolder.getTextMimeType();
-            List<MimeFile> attachments = dataHolder.getAttachments();
-
-            Message message = createEmptyMessage();
-            try {
-                message.setFrom(dataHolder.getSender());
-                message.setRecipients(Message.RecipientType.TO, recipients.toArray(Address[]::new));
-                message.setSubject(subject);
-
-                if (attachments.isEmpty()) {
-                    message.setContent(text, textMimeType);
-                } else {
-                    Multipart multipart = new MimeMultipart();
-
-                    BodyPart textBodyPart = new MimeBodyPart();
-                    textBodyPart.setContent(text, textMimeType);
-                    multipart.addBodyPart(textBodyPart);
-
-                    for (MimeFile attachment : attachments) {
-                        BodyPart attachmentBodyPart = new MimeBodyPart();
-                        attachmentBodyPart.setDataHandler(
-                                new DataHandler(new ByteArrayDataSource(attachment.getContent(), attachment.getMimeType())));
-                        attachmentBodyPart.setFileName(attachment.getName());
-                        multipart.addBodyPart(attachmentBodyPart);
-                    }
-
-                    message.setContent(multipart);
+            if (maxMessageSizeInBytes > 0) {
+                int sizeInBytes;
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                try {
+                    message.writeTo(os);
+                    sizeInBytes = os.size();
+                } catch (MessagingException | IOException e) {
+                    log.error("Failed to determine size of part.", e);
+                    sizeInBytes = -1;
                 }
-
-                if (maxMessageSizeInBytes > 0) {
-                    int sizeInBytes;
-                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    try {
-                        message.writeTo(os);
-                        sizeInBytes = os.size();
-                    } catch (MessagingException | IOException e) {
-                        log.error("Failed to determine size of part.", e);
-                        sizeInBytes = -1;
-                    }
-                    if (sizeInBytes > maxMessageSizeInBytes) {
-                        throw new MessagingException("Message is too big. Determined size is " + sizeInBytes
-                                + "B but currently set maximum size is " + maxMessageSizeInBytes + "B.");
-                    }
+                if (sizeInBytes > maxMessageSizeInBytes) {
+                    throw new MessagingException("Message is too big. Determined size is " + sizeInBytes
+                            + "B but currently set maximum size is " + maxMessageSizeInBytes + "B.");
                 }
-
-                log.info("Sending message '{}' via {} to {} recipient(s).", subject, getService().getURLName(),
-                        recipients.size());
-
-                T transport = getService();
-                if (!transport.isConnected()) {
-                    try {
-                        if (log.isTraceEnabled()) {
-                            log.trace("Reconnecting to {}", transport.getURLName());
-                        }
-                        transport.connect();
-                    } catch (MessagingException e) {
-                        log.error("Exception while reconnecting service " + transport.getURLName(), e);
-                    }
-                }
-
-                transport.sendMessage(message, message.getAllRecipients());
-            } catch (MessagingException e) {
-                log.error("Failed to send message.", e);
             }
-        } catch (RuntimeException e) {
-            log.error("Unexpected runtime exception during sending of message.", e);
+
+            log.info("Sending message '{}' via {} to {} recipient(s).", subject, getService().getURLName(), recipients.size());
+
+            T transport = getService();
+            if (!transport.isConnected()) {
+                try {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Reconnecting to {}", transport.getURLName());
+                    }
+                    transport.connect();
+                } catch (MessagingException e) {
+                    throw new MessagingException("Failed to reconnect service " + transport.getURLName(), e);
+                }
+            }
+
+            transport.sendMessage(message, message.getAllRecipients());
+        } catch (MessagingException e) {
+            log.error("Failed to send message.", e);
         }
     }
 
@@ -190,7 +191,9 @@ public abstract class TransportConnectionHandler<T extends Transport>//
                         source, type);
                 return;
             }
-            log.trace("Message delivered from {} to: {}", source, buildEventInfo(event));
+            if (log.isTraceEnabled()) {
+                log.trace("Message delivered from {} to: {}", source, buildEventInfo(event));
+            }
         }
 
         @Override
@@ -206,7 +209,9 @@ public abstract class TransportConnectionHandler<T extends Transport>//
                         source, type);
                 return;
             }
-            log.trace("Message not delivered from {} to: {}", source, buildEventInfo(event));
+            if (log.isTraceEnabled()) {
+                log.trace("Message not delivered from {} to: {}", source, buildEventInfo(event));
+            }
         }
 
         @Override
@@ -222,7 +227,9 @@ public abstract class TransportConnectionHandler<T extends Transport>//
                         source, type);
                 return;
             }
-            log.trace("Message partially delivered from {} to: {}", source, buildEventInfo(event));
+            if (log.isTraceEnabled()) {
+                log.trace("Message partially delivered from {} to: {}", source, buildEventInfo(event));
+            }
         }
 
         private static String buildEventInfo(TransportEvent event) {
