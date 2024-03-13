@@ -390,14 +390,12 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private static class SchemaValidationException extends RuntimeException {
 
         private static final long serialVersionUID = 1L;
-        transient final List<String> errors;
-        transient final Path path;
+        final transient List<String> errors;
+        final transient Path path;
 
         public SchemaValidationException(Path path, List<String> errors) {
             this.path = path;
             this.errors = errors;
         }
-
     }
-
 }

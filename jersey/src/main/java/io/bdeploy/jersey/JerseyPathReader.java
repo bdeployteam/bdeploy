@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -47,7 +46,7 @@ public class JerseyPathReader implements MessageBodyReader<Path> {
 
         Path tmpFile = Files.createTempFile("dl-", ".bin");
         try (OutputStream out = Files.newOutputStream(tmpFile)) {
-            JerseyStreamingHelper.streamWithProgress(StreamDirection.READ, entityStream, out, length);
+            JerseyStreamingHelper.streamWithProgress(entityStream, out, length);
         }
         return tmpFile;
     }

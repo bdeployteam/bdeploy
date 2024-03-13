@@ -127,7 +127,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         } else {
             Path pool = getPoolPath();
             if (pool != null) {
-                log.trace("Using pool from {}" + pool);
+                log.trace("Using pool from {}", pool);
                 this.objects = new AugmentedObjectDatabase(objRoot, objTmp, reporter, transactions,
                         new ReadOnlyObjectDatabase(pool, reporter));
                 this.isPooling = true;

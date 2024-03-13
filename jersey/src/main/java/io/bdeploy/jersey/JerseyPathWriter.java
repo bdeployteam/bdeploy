@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
@@ -68,7 +67,7 @@ public class JerseyPathWriter implements MessageBodyWriter<Path> {
         OpenOption[] delOpt = delete ? new OpenOption[] { StandardOpenOption.DELETE_ON_CLOSE } : new OpenOption[0];
 
         try (InputStream in = Files.newInputStream(t, delOpt)) {
-            JerseyStreamingHelper.streamWithProgress(StreamDirection.WRITE, in, entityStream, size);
+            JerseyStreamingHelper.streamWithProgress(in, entityStream, size);
         }
 
         if (delete) {

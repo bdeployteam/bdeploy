@@ -474,9 +474,8 @@ public class InstanceNodeController {
                 .filter(a -> a.id.equals(applicationId)).findAny().orElseThrow();
         Path target = getApplicationTarget(config);
 
-        VerifyOperationResultDto dto = new VerifyOperationResultDto(
+        return new VerifyOperationResultDto(
                 hive.execute(new VerifyOperation().setTargetPath(target).setManifest(config.application)));
-        return dto;
     }
 
     public void reinstall(String applicationId) {

@@ -57,7 +57,7 @@ public class AppReinstaller extends SwingWorker<Void, Object> {
         }
     }
 
-    private void uninstall() throws IOException, InterruptedException {
+    private void uninstall() {
         log.info("Attempting to uninstall application {}", app.clickAndStart.applicationId);
 
         Path appPoolDir = getAppPoolDir();

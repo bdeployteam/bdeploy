@@ -9,13 +9,7 @@ import java.io.OutputStream;
  */
 public class JerseyStreamingHelper {
 
-    public enum StreamDirection {
-        READ,
-        WRITE
-    }
-
-    public static void streamWithProgress(StreamDirection direction, InputStream in, OutputStream out, long length)
-            throws IOException {
+    public static void streamWithProgress(InputStream in, OutputStream out, long length) throws IOException {
 
         // consume no more than length
         long remaining = length <= 0 ? Long.MAX_VALUE : length;

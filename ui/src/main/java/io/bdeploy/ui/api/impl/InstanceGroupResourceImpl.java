@@ -155,11 +155,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             return false;
         }
         JerseySecurityContext securityContext = (JerseySecurityContext) ctx;
-        if (!securityContext.isAuthorized(requiredPermission)
-                && !auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
-            return false;
-        }
-        return true;
+
+        return securityContext.isAuthorized(requiredPermission)
+                || auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission);
     }
 
     @Override

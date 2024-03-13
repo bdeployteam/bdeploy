@@ -182,9 +182,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             if (config.pooling()) {
                 Path poolPath = config.pool() == null ? root.resolve("objpool") : Paths.get(config.pool());
                 Path path = poolPath.toAbsolutePath().normalize();
-                mr.modifyState(s -> {
-                    s.poolDefaultPath = path;
-                });
+                mr.modifyState(s -> s.poolDefaultPath = path);
 
                 // enable pooling on the default hive.
                 mr.getHive().enablePooling(poolPath, false);

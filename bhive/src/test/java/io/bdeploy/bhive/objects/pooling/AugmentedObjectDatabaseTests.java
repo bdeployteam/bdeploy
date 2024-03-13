@@ -21,7 +21,7 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.util.StreamHelper;
 
 @ExtendWith(TestActivityReporter.class)
-public class AugmentedObjectDatabaseTests {
+class AugmentedObjectDatabaseTests {
 
     @Test
     void testAugment(@TempDir Path tmp, ActivityReporter reporter) throws Exception {

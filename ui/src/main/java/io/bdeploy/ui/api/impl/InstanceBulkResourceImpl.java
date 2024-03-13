@@ -124,7 +124,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
             instanceKeys.put(icd.config.id, im.getManifest());
             return new InstanceUpdateDto(icd, null);
-        }).forEach(dto -> updates.add(dto));
+        }).forEach(updates::add);
 
         try (ActionHandle h = af.runMulti(Actions.UPDATE_PRODUCT_VERSION, group, instanceKeys.keySet())) {
             // 2) validate all are using the same product (name, not version) and that version restrictions match.
@@ -160,9 +160,8 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                 });
 
                 if (pm != null) {
-                    currentApps.computeIfAbsent(productKey.getTag(), v -> {
-                        return pm.getApplications().stream().map(a -> ApplicationManifest.of(hive, a, pm)).toList();
-                    });
+                    currentApps.computeIfAbsent(productKey.getTag(),
+                            v -> pm.getApplications().stream().map(a -> ApplicationManifest.of(hive, a, pm)).toList());
                 }
             }
 

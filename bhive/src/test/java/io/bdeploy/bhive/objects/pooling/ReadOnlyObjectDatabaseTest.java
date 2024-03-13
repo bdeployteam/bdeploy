@@ -21,7 +21,7 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.util.StreamHelper;
 
 @ExtendWith(TestActivityReporter.class)
-public class ReadOnlyObjectDatabaseTest {
+class ReadOnlyObjectDatabaseTest {
 
     @Test
     void testReadOnly(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
@@ -52,5 +52,4 @@ public class ReadOnlyObjectDatabaseTest {
         assertTrue(allObjects.contains(idA));
         assertTrue(allObjects.contains(idB));
     }
-
 }

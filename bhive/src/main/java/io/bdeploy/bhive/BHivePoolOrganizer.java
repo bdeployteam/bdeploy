@@ -112,12 +112,12 @@ public class BHivePoolOrganizer {
             Map<String, List<ObjectId>> toRemove = new TreeMap<>();
 
             // walk through all referenced objects, move to pool as required, and remove from the origins in batches.
-            Consumer<ObjectId> processOne = (id) -> {
+            Consumer<ObjectId> processOne = id -> {
                 SortedSet<String> references = orefdb.read(id);
                 boolean isPooled = poolDb.hasObject(id);
 
                 if (references.size() >= usageThreshold || isPooled) {
-                    List<BHive> refHives = references.stream().map(r -> hivesById.get(r)).collect(Collectors.toList());
+                    List<BHive> refHives = references.stream().map(hivesById::get).collect(Collectors.toList());
 
                     // if reference count > usage threshold and not yet in pool -> move
                     if (!isPooled) {
@@ -149,7 +149,7 @@ public class BHivePoolOrganizer {
             // cleanup of pool. look at all objects in pool - if it does not exist in the orefdb -> remove
             // pruning the pool is way easier than pruning a bhive! we do not need to care about concurrency.
             LongAdder remCount = new LongAdder();
-            Consumer<ObjectId> remover = (id) -> {
+            Consumer<ObjectId> remover = id -> {
                 if (!orefdb.hasObject(id)) {
                     poolDb.removeObject(id);
 
@@ -301,18 +301,16 @@ public class BHivePoolOrganizer {
             List<Future<?>> ops = new ArrayList<>();
 
             getObjectManager().db(db -> {
-                oid.forEach(o -> {
-                    ops.add(submitFileOperation(() -> {
-                        try {
-                            db.removeObject(o);
-                        } catch (Exception e) {
-                            // cannot remove, maybe in use? ignore the issue as the next re-org will try again.
-                            if (log.isDebugEnabled()) {
-                                log.debug("Cannot remove " + o, e);
-                            }
+                oid.forEach(o -> ops.add(submitFileOperation(() -> {
+                    try {
+                        db.removeObject(o);
+                    } catch (Exception e) {
+                        // cannot remove, maybe in use? ignore the issue as the next re-org will try again.
+                        if (log.isDebugEnabled()) {
+                            log.debug("Cannot remove " + o, e);
                         }
-                    }));
-                });
+                    }
+                })));
                 return null;
             });
 
@@ -337,15 +335,13 @@ public class BHivePoolOrganizer {
             List<Future<?>> ops = new ArrayList<>();
 
             getObjectManager().db(db -> {
-                oid.forEach(o -> {
-                    ops.add(submitFileOperation(() -> {
-                        try {
-                            target.addObject(db.getObjectFile(o));
-                        } catch (Exception e) {
-                            throw new IllegalStateException("Cannot copy object " + o, e);
-                        }
-                    }));
-                });
+                oid.forEach(o -> ops.add(submitFileOperation(() -> {
+                    try {
+                        target.addObject(db.getObjectFile(o));
+                    } catch (Exception e) {
+                        throw new IllegalStateException("Cannot copy object " + o, e);
+                    }
+                })));
                 return null;
             });
 

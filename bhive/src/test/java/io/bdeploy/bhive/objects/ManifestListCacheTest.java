@@ -12,7 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.Manifest;
 
-public class ManifestListCacheTest extends DbTestBase {
+class ManifestListCacheTest extends DbTestBase {
 
     @Test
     void storeAndRead(@TempDir Path tmp) throws IOException {

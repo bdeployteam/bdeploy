@@ -104,10 +104,9 @@ public class ApplicationConfiguration {
                 .map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
                 .forEach(processConfig.start::addAll);
 
-        start.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.ENVIRONMENT).forEach(e -> {
-            processConfig.startEnv.put(e.preRendered.get(0),
-                    TemplateHelper.process(e.preRendered.get(1), valueResolver, skipDelayCallback));
-        });
+        start.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.ENVIRONMENT)
+                .forEach(e -> processConfig.startEnv.put(e.preRendered.get(0),
+                        TemplateHelper.process(e.preRendered.get(1), valueResolver, skipDelayCallback)));
 
         if (hasStopCommand()) {
             String stopCmd = TemplateHelper.process(stop.executable, valueResolver, skipDelayCallback);
@@ -116,10 +115,9 @@ public class ApplicationConfiguration {
                     .map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
                     .forEach(processConfig.stop::addAll);
 
-            stop.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.ENVIRONMENT).forEach(e -> {
-                processConfig.stopEnv.put(e.preRendered.get(0),
-                        TemplateHelper.process(e.preRendered.get(1), valueResolver, skipDelayCallback));
-            });
+            stop.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.ENVIRONMENT)
+                    .forEach(e -> processConfig.stopEnv.put(e.preRendered.get(0),
+                            TemplateHelper.process(e.preRendered.get(1), valueResolver, skipDelayCallback)));
         }
 
         return processConfig;

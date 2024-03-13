@@ -88,8 +88,6 @@ public class BrowserDialog extends BaseDialog {
     private JMenuItem customizeAndLaunchItem;
     private JMenuItem refreshItem;
     private JMenuItem uninstallItem;
-    private JMenuItem verifyItem;
-    private JMenuItem reinstallItem;
 
     private JProgressBar progressBar;
 
@@ -229,6 +227,9 @@ public class BrowserDialog extends BaseDialog {
 
     /** Creates the widgets shown in the content */
     private JPanel createContent() {
+        JMenuItem verifyItem;
+        JMenuItem reinstallItem;
+
         JPanel content = new JPanel();
         content.setBackground(Color.WHITE);
         content.setLayout(new BorderLayout(10, 10));

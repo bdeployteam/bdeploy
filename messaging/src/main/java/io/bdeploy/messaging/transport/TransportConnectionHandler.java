@@ -153,21 +153,24 @@ public abstract class TransportConnectionHandler<T extends Transport>//
 
             log.info("Sending message '{}' via {} to {} recipient(s).", subject, getService().getURLName(), recipients.size());
 
-            T transport = getService();
-            if (!transport.isConnected()) {
-                try {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Reconnecting to {}", transport.getURLName());
-                    }
-                    transport.connect();
-                } catch (MessagingException e) {
-                    throw new MessagingException("Failed to reconnect service " + transport.getURLName(), e);
-                }
-            }
-
-            transport.sendMessage(message, message.getAllRecipients());
+            tryReconnectIfNeeded();
+            getService().sendMessage(message, message.getAllRecipients());
         } catch (MessagingException e) {
             log.error("Failed to send message.", e);
+        }
+    }
+
+    private void tryReconnectIfNeeded() throws MessagingException {
+        T transport = getService();
+        if (!transport.isConnected()) {
+            try {
+                if (log.isTraceEnabled()) {
+                    log.trace("Reconnecting to {}", transport.getURLName());
+                }
+                transport.connect();
+            } catch (MessagingException e) {
+                throw new MessagingException("Failed to reconnect service " + transport.getURLName(), e);
+            }
         }
     }
 
