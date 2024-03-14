@@ -26,7 +26,7 @@ import io.bdeploy.launcher.cli.ui.MessageDialogs;
  */
 public class AppReinstaller extends SwingWorker<Void, Object> {
 
-    private static final Logger log = LoggerFactory.getLogger(AppUninstaller.class);
+    private static final Logger log = LoggerFactory.getLogger(AppReinstaller.class);
 
     private final Path rootDir;
     private final ClientSoftwareConfiguration app;

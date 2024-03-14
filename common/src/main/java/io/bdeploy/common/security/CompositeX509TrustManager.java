@@ -34,7 +34,7 @@ public class CompositeX509TrustManager implements X509TrustManager {
     private final List<X509TrustManager> trustManagers;
 
     public CompositeX509TrustManager(KeyStore keystore) {
-        this.trustManagers = ImmutableList.of(getDefaultTrustManager(), getTrustManager(keystore));
+        this.trustManagers = List.of(getDefaultTrustManager(), getTrustManager(keystore));
     }
 
     @Override
@@ -104,5 +104,4 @@ public class CompositeX509TrustManager implements X509TrustManager {
             throw new IllegalStateException("Cannot create trust manager", e);
         }
     }
-
 }
