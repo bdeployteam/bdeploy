@@ -28,11 +28,9 @@ describe('Instance Dashboard Tests', () => {
 
     // create some from a template
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
-        () => {
-          cy.get('button[data-cy^="Apply Instance Template"]').click();
-        }
-      );
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
+        cy.get('button[data-cy^="Apply Instance Template"]').click();
+      });
     });
 
     cy.inMainNavFlyin('app-instance-templates', () => {
@@ -42,7 +40,7 @@ describe('Instance Dashboard Tests', () => {
       cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
       cy.get('button[data-cy="Next"]').click();
 
-      cy.fillFormInput('Text Value', 'Test');
+      cy.fillFormInput('Text Value', 'Test').type('{esc}');
       cy.fillFormInput('Sleep Timeout', '10');
       cy.get('button[data-cy="Confirm"]').click();
     });
@@ -120,9 +118,7 @@ describe('Instance Dashboard Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Click"]').downloadByLinkClick(
-        'dashboard-click-start.json'
-      );
+      cy.get('button[data-cy^="Click"]').downloadByLinkClick('dashboard-click-start.json');
     });
   });
 

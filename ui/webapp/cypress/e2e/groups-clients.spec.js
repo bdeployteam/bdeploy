@@ -40,11 +40,9 @@ describe('Groups Tests (Clients)', () => {
     cy.pressMainNavButton('Instance Configuration');
 
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
-        () => {
-          cy.get('button[data-cy^="Apply Instance Template"]').click();
-        }
-      );
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
+        cy.get('button[data-cy^="Apply Instance Template"]').click();
+      });
     });
 
     cy.inMainNavFlyin('app-instance-templates', () => {
@@ -53,7 +51,7 @@ describe('Groups Tests (Clients)', () => {
       cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
       cy.get('button[data-cy="Next"]').click();
 
-      cy.fillFormInput('Text Value', 'Test');
+      cy.fillFormInput('Text Value', 'Test').type('{esc}');
       cy.fillFormInput('Sleep Timeout', '5');
 
       cy.get('button[data-cy="Confirm"]').click();
@@ -101,12 +99,8 @@ describe('Groups Tests (Clients)', () => {
       cy.get('button[data-cy="Download Installer"]')
         .should('be.enabled')
         .downloadByLocationAssign('test-installer.bin');
-      cy.get('button[data-cy^="Click"]')
-        .should('be.enabled')
-        .downloadByLinkClick('test-click-start.json');
-      cy.readFile(
-        Cypress.config('downloadsFolder') + '/' + 'test-click-start.json'
-      )
+      cy.get('button[data-cy^="Click"]').should('be.enabled').downloadByLinkClick('test-click-start.json');
+      cy.readFile(Cypress.config('downloadsFolder') + '/' + 'test-click-start.json')
         .its('groupId')
         .should('eq', groupName);
 
@@ -173,9 +167,7 @@ describe('Groups Tests (Clients)', () => {
           cy.get('button[data-cy^="Modify permissions"]').click();
         });
 
-      cy.intercept({ method: 'GET', url: `/api/group/${groupName}/users` }).as(
-        'getUsers'
-      );
+      cy.intercept({ method: 'GET', url: `/api/group/${groupName}/users` }).as('getUsers');
 
       cy.waitForApi(() => {
         cy.contains('app-bd-notification-card', 'Modify').within(() => {
