@@ -5,21 +5,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
+import io.bdeploy.interfaces.variables.PrefixResolver;
+import io.bdeploy.interfaces.variables.Variables;
 
-public class TrackingTemplateOverrideResolver implements VariableResolver {
+public class TrackingTemplateOverrideResolver extends PrefixResolver {
 
-    /**
-     * this is intentionally not a Variables prefix and PrefixResolver to keep things apart. templates are resolved at a totally
-     * different point in time
-     */
-    private static final String TEMPLATE_PREFIX = "T:";
+    private static final Variables TEMPLATE_VAR = Variables.TEMPLATE;
+    private static final String TEMPLATE_STRING = TEMPLATE_VAR.getPrefix();
 
     private final Set<String> requestedVariables = new TreeSet<>();
-
     private final List<TemplateVariableFixedValueOverride> overrides;
-
     private final TrackingTemplateOverrideResolver parent;
 
     public TrackingTemplateOverrideResolver(List<TemplateVariableFixedValueOverride> overrides) {
@@ -28,60 +24,31 @@ public class TrackingTemplateOverrideResolver implements VariableResolver {
 
     public TrackingTemplateOverrideResolver(List<TemplateVariableFixedValueOverride> overrides,
             TrackingTemplateOverrideResolver parent) {
+        super(TEMPLATE_VAR);
         this.overrides = overrides;
         this.parent = parent;
+    }
+
+    @Override
+    protected String doResolve(String variable) {
+        Optional<TemplateVariableFixedValueOverride> override = overrides.stream().filter(o -> o.id.equals(variable)).findFirst();
+        if (override.isPresent()) {
+            return override.get().value;
+        }
+        return parent != null ? parent.doResolve(variable) : null;
     }
 
     public Set<String> getRequestedVariables() {
         return requestedVariables;
     }
 
-    @Override
-    public String apply(String t) {
-        if (!t.startsWith(TEMPLATE_PREFIX)) {
-            return null;
-        }
-
-        String expr = t.substring(2); // skip T:
-        String varName = expr;
-
-        int colIndex = varName.indexOf(':');
-        if (colIndex != -1) {
-            varName = varName.substring(0, colIndex);
-        }
-
-        String finVarName = varName;
-        Optional<TemplateVariableFixedValueOverride> override = overrides.stream().filter(o -> o.id.equals(finVarName))
-                .findFirst();
-        if (!override.isPresent()) {
-            if (parent != null) {
-                return parent.apply(t);
-            }
-            return null;
-        }
-
-        if (colIndex != -1) {
-            try {
-                String op = expr.substring(colIndex + 1);
-                Long opNum = Long.parseLong(op);
-                Long valNum = Long.parseLong(override.get().value);
-
-                return Long.toString(valNum + opNum);
-            } catch (Exception e) {
-                throw new IllegalStateException("Invalid variable substitution for " + varName + ": invalid operator or type");
-            }
-        }
-
-        return override.get().value;
-    }
-
     public boolean canResolve(String t) {
         // leave all non-templates alone
-        if (!t.startsWith(TEMPLATE_PREFIX)) {
+        if (!t.startsWith(TEMPLATE_STRING)) {
             return false;
         }
 
-        String expr = t.substring(2); // skip T:
+        String expr = t.substring(TEMPLATE_STRING.length()); // skip T:
         String varName = expr;
 
         int colIndex = varName.indexOf(':');
@@ -109,5 +76,4 @@ public class TrackingTemplateOverrideResolver implements VariableResolver {
 
         return true;
     }
-
 }

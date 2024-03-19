@@ -27,7 +27,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
-import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsEditService } from '../../../services/systems-edit.service';
 import { VariableConfiguration } from './../../../../../../models/gen.dtos';
@@ -49,7 +49,7 @@ const colName: BdDataColumn<ConfigVariable> = {
 const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
-  data: (r) => getMaskedPreRenderable(r.value.value, r.value.type),
+  data: (r) => getPreRenderable(r.value.value, r.value.type),
 };
 
 const colDesc: BdDataColumn<ConfigVariable> = {

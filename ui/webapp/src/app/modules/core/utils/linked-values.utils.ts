@@ -8,21 +8,37 @@ import {
   ParameterConfiguration,
   ParameterType,
   SystemConfiguration,
+  VariableConfiguration,
 } from 'src/app/models/gen.dtos';
 import { SpecialCharacterType, escapeSpecialCharacters } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
+
+const ARITH_EXPR = `(\\+|-|)?[0-9]+`;
 
 export function createLinkedValue(val: string): LinkedValueConfiguration {
   return !!val && val.indexOf('{{') != -1 ? { linkExpression: val, value: null } : { linkExpression: null, value: val };
 }
 
-export function getPreRenderable(val: LinkedValueConfiguration): string {
-  return val?.linkExpression ? val?.linkExpression : val?.value;
-}
+export function getPreRenderable(config: LinkedValueConfiguration, type?: ParameterType): string {
+  if (!config) {
+    return '';
+  }
 
-/** returns the pre-renderable (non-expanded) value, but masks out passwords in case a direct value is used. */
-export function getMaskedPreRenderable(val: LinkedValueConfiguration, type: ParameterType): string {
-  return val?.linkExpression ? val?.linkExpression : maskIfPassword(val?.value, type);
+  const link = config.linkExpression;
+  if (link) {
+    return link;
+  }
+
+  const value = config.value;
+  if (!value) {
+    return '';
+  }
+
+  if (type === ParameterType.PASSWORD) {
+    return '*'.repeat(value.length);
+  }
+
+  return value;
 }
 
 export class LinkVariable {
@@ -94,9 +110,11 @@ export function gatherVariableExpansions(
         return {
           name: v.id,
           description: `Instance Variable - ${instance?.config?.name}`,
-          preview: getMaskedPreRenderable(v.value, v.type), // explicitly the non-expanded value.
+          preview: getPreRenderable(v.value, v.type), // explicitly the non-expanded value.
           link: `{{X:${v.id}}}`,
           group: null,
+          matches: (s: string) => doMatchVariable(s, v),
+          expand: (s: string) => doExpand(s, v.value, v.type),
         };
       })
       .forEach((v) => {
@@ -110,9 +128,11 @@ export function gatherVariableExpansions(
         return {
           name: v.id,
           description: `System Variable - ${system?.name}`,
-          preview: getMaskedPreRenderable(v.value, v.type), // explicitly the non-expanded value.
+          preview: getPreRenderable(v.value, v.type), // explicitly the non-expanded value.
           link: `{{X:${v.id}}}`,
           group: null,
+          matches: (s: string) => doMatchVariable(s, v),
+          expand: (s: string) => doExpand(s, v.value, v.type),
         };
       })
       .forEach((v) => {
@@ -123,14 +143,6 @@ export function gatherVariableExpansions(
   }
 
   return result;
-}
-
-function maskIfPassword(value: string, type: ParameterType) {
-  if (type === ParameterType.PASSWORD && value) {
-    return '*'.repeat(value.length);
-  }
-
-  return value ? value : '';
 }
 
 export function gatherProcessExpansions(
@@ -180,38 +192,109 @@ function processParameter(
   apps: ApplicationDto[],
   result: LinkVariable[],
 ) {
-  let link = `{{V:${app.name}:${param.id}}}`;
-  let group = app.name;
+  let name: string;
+  let description: string;
+  let preview: string;
+  let link: string;
+  let group: string;
+  let expand: (s: string) => string;
+
   if (thisApp) {
     link = `{{V:${param.id}}}`;
     group = `${app.name} (This Application)`;
+  } else {
+    link = `{{V:${app.name}:${param.id}}}`;
+    group = app.name;
   }
 
-  // just for display - this is OK as value and expression, no need to expand.
-  let value = getPreRenderable(param.value);
-  let label = param.id;
-  let desc = '';
-
-  // process value according to type is possible and required.
   const appDesc = apps?.find((a) => a.key.name === app.application.name)?.descriptor;
   if (appDesc) {
+    // process value according to type is possible and required.
     for (const paramDesc of appDesc.startCommand.parameters) {
       if (paramDesc.id === param.id) {
-        label = paramDesc.name;
-        desc = paramDesc.longDescription;
-        value = getMaskedPreRenderable(param.value, paramDesc.type);
+        name = paramDesc.name;
+        description = paramDesc.longDescription;
+        preview = getPreRenderable(param.value, paramDesc.type);
+        expand = (s: string) => doExpand(s, param.value, paramDesc.type);
         break;
       }
     }
+  } else {
+    // just for display - this is OK as value and expression, no need to expand.
+    name = param.id;
+    description = '';
+    preview = getPreRenderable(param.value);
+    expand = (s: string) => doExpand(s, param.value);
   }
 
   result.push({
-    name: label,
-    description: desc,
-    preview: value,
+    name: name,
+    description: description,
+    preview: preview,
     link: link,
     group: group,
+    matches: (s: string) => doMatchProcessParameter(s, param.id, app.name, thisApp),
+    expand: expand,
   });
+}
+
+function doMatchVariable(s: string, config: VariableConfiguration): boolean {
+  return (
+    s &&
+    config &&
+    (s === `{{X:${config.id}}}` ||
+      ([ParameterType.NUMERIC, ParameterType.CLIENT_PORT, ParameterType.SERVER_PORT].includes(config.type) &&
+        s.match(`{{X:${config.id}:${ARITH_EXPR}}}`) != null))
+  );
+}
+
+function doMatchProcessParameter(s: string, paramId: string, appName: string, thisApp: boolean): boolean {
+  if (!s || !paramId) {
+    return false;
+  }
+  if (thisApp) {
+    return s === `{{V:${paramId}}}` || s.match(`{{V:${paramId}:${ARITH_EXPR}}}`) != null;
+  }
+  return s === `{{V:${appName}:${paramId}}}` || s.match(`{{V:${appName}:${paramId}:${ARITH_EXPR}}}`) != null;
+}
+
+function doExpand(wholeExpression: string, config: LinkedValueConfiguration, paramType?: ParameterType): string {
+  if (!wholeExpression || !config) {
+    return '';
+  }
+
+  const linkExpression = config.linkExpression;
+  if (linkExpression) {
+    return linkExpression;
+  }
+
+  const value = config.value;
+  if (!value) {
+    return '';
+  }
+
+  const inner = wholeExpression.substring(1 + wholeExpression.indexOf(':'), wholeExpression.length - '}}'.length);
+  const lastColonIndex = inner.lastIndexOf(':');
+  const valueAsNumber = Number(value);
+  const attemptArithmethic = valueAsNumber && lastColonIndex !== -1;
+
+  if (paramType) {
+    return attemptArithmethic &&
+      [ParameterType.NUMERIC, ParameterType.SERVER_PORT, ParameterType.CLIENT_PORT].includes(paramType)
+      ? doAttemptArithmetic(inner, lastColonIndex, valueAsNumber) || getPreRenderable(config, paramType)
+      : getPreRenderable(config, paramType);
+  }
+
+  return attemptArithmethic
+    ? doAttemptArithmetic(inner, lastColonIndex, valueAsNumber) || getPreRenderable(config)
+    : getPreRenderable(config);
+}
+
+function doAttemptArithmetic(inner: string, lastColonIndex: number, valueAsNumber: number): string {
+  const otherNumber = Number(inner.substring(lastColonIndex + 1));
+  if (otherNumber) {
+    return String(valueAsNumber + otherNumber);
+  }
 }
 
 export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVariable[] {
