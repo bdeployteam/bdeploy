@@ -137,10 +137,6 @@ public class Action implements Comparable<Action> {
         } else if (!item.equals(other.item)) {
             return false;
         }
-        if (type != other.type) {
-            return false;
-        }
-        return true;
+        return type == other.type;
     }
-
 }

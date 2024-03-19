@@ -71,10 +71,8 @@ public class ObjectDatabase extends LockableDatabase {
             PathHelper.mkdirs(root);
         }
 
-        if (tmp != null) {
-            if (!PathHelper.exists(tmp)) {
-                PathHelper.mkdirs(tmp);
-            }
+        if (tmp != null && !PathHelper.exists(tmp)) {
+            PathHelper.mkdirs(tmp);
         }
     }
 
@@ -217,9 +215,7 @@ public class ObjectDatabase extends LockableDatabase {
         if (!PathHelper.exists(file)) {
             return; // not there at all.
         }
-        locked(() -> {
-            PathHelper.deleteIfExistsRetry(file);
-        });
+        locked(() -> PathHelper.deleteIfExistsRetry(file));
     }
 
     /**

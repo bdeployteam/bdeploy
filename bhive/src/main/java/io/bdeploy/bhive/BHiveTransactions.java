@@ -172,7 +172,7 @@ public class BHiveTransactions {
                     }
                 } else if (Files.isDirectory(p)) {
                     // TX PID does NOT exist, this is a *very* old or completely outdated transaction.
-                    log.warn("Stale transaction detected, removing {}" + p.getFileName());
+                    log.warn("Stale transaction detected, removing {}", p.getFileName());
                     PathHelper.deleteRecursiveRetry(p);
                     amount.increment();
                 }

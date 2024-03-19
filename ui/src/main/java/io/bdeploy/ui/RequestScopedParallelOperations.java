@@ -20,6 +20,9 @@ public class RequestScopedParallelOperations {
 
     private static final int MAX_OPS = 4;
 
+    private RequestScopedParallelOperations() {
+    }
+
     public static void runAndAwaitAll(String id, Collection<Runnable> actions, Provider<RequestScope> scope, BHiveTransactions tx,
             JerseyScopeService scopeService) {
         // use the id plus a number for each new thread.

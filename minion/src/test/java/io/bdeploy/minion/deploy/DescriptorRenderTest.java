@@ -23,7 +23,7 @@ import io.bdeploy.minion.TestFactory;
 import io.bdeploy.ui.api.Minion;
 
 @ExtendWith(TestHive.class)
-public class DescriptorRenderTest {
+class DescriptorRenderTest {
 
     @Test
     @SlowTest

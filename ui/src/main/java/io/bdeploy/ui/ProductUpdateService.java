@@ -20,7 +20,6 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
@@ -84,8 +83,8 @@ public class ProductUpdateService {
         for (var app : allApps.keySet()) {
             var node = allApps.get(app);
 
-            updateApplication(instance.config.config, app, allApps.keySet(), targetProduct, currentApplications,
-                    targetApplications, validationIssues, createResolver(node, app));
+            updateApplication(app, allApps.keySet(), targetProduct, currentApplications, targetApplications, validationIssues,
+                    createResolver(node, app));
         }
 
         if (currentProduct == null) {
@@ -100,8 +99,8 @@ public class ProductUpdateService {
         return instance;
     }
 
-    private void updateApplication(InstanceConfiguration instance, ApplicationConfiguration app,
-            Set<ApplicationConfiguration> allApps, ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
+    private void updateApplication(ApplicationConfiguration app, Set<ApplicationConfiguration> allApps,
+            ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
             List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues,
             VariableResolver resolver) {
         var current = currentApplications == null ? null

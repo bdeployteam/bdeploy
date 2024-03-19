@@ -47,7 +47,7 @@ public class OktaTokenAuthenticator implements Authenticator {
         try {
             OktaAccessTokenInfo tokens = JacksonHelper.getDefaultJsonObjectMapper().readValue(String.valueOf(user.externalTag),
                     OktaAccessTokenInfo.class);
-            var info = performRequest(settings.oktaSettings, tokens, null);
+            var info = performRequest(tokens, null);
             if (info == null) {
                 throw new IllegalStateException("Cannot verify login info");
             }
@@ -106,10 +106,10 @@ public class OktaTokenAuthenticator implements Authenticator {
         // Credentials of the user to be authenticated
         OktaAccessTokenInfo info = JacksonHelper.getDefaultJsonObjectMapper().readValue(String.valueOf(password),
                 OktaAccessTokenInfo.class);
-        return verifyAndUpdateSearchResult(user, String.valueOf(password), performRequest(server, info, trace));
+        return verifyAndUpdateSearchResult(user, String.valueOf(password), performRequest(info, trace));
     }
 
-    private OktaUserInfo performRequest(OktaSettingsDto settings, OktaAccessTokenInfo tokens, AuthTrace trace) {
+    private OktaUserInfo performRequest(OktaAccessTokenInfo tokens, AuthTrace trace) {
         try {
             var jcf = JerseyClientFactory.get(new URI(tokens.userinfoUrl), tokens.accessToken);
 

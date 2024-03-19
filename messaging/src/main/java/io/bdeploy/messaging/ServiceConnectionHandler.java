@@ -103,7 +103,7 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
         try {
             disconnect();
 
-            URLName urlWithoutPassword = url == null || (url.getPassword() == null) ? url
+            URLName urlWithoutPassword = url.getPassword() == null ? url
                     : new URLName(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), url.getUsername(), null);
 
             if (log.isTraceEnabled()) {

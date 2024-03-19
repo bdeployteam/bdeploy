@@ -11,6 +11,9 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class InstanceTemplateHelper {
 
+    private InstanceTemplateHelper() {
+    }
+
     public static ProductDto findMatchingProductOrFail(InstanceTemplateReferenceDescriptor instance, List<ProductDto> products) {
         boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
                 || instance.productVersionRegex.equals(".*"));

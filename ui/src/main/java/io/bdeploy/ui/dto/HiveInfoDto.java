@@ -10,7 +10,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
  */
 public class HiveInfoDto {
 
-    public static enum HiveType {
+    public enum HiveType {
         @JsonEnumDefaultValue
         PLAIN,
         INSTANCE_GROUP,
@@ -28,5 +28,4 @@ public class HiveInfoDto {
     public HiveType type = HiveType.PLAIN;
 
     public Permission minPermission;
-
 }

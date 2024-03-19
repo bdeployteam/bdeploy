@@ -96,9 +96,7 @@ public class PoolTool extends ConfiguredCliTool<PoolConfig> {
     }
 
     private RenderableResult setThreshold(MinionRoot mr, PoolConfig config) {
-        mr.modifyState(s -> {
-            s.poolUsageThreshold = config.usageThreshold();
-        });
+        mr.modifyState(s -> s.poolUsageThreshold = config.usageThreshold());
 
         return createSuccess();
     }

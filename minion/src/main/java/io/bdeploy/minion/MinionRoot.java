@@ -562,7 +562,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             if (log.isTraceEnabled()) {
                 log.trace("SchedulerException", e);
             }
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalStateException("Failed to list jobs", e);
         }
     }
 
@@ -591,7 +591,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             if (log.isTraceEnabled()) {
                 log.trace("SchedulerException", e);
             }
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalStateException("Failed to trigger job", e);
         }
     }
 
@@ -801,7 +801,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             modifyState(s -> s.storageLocations = p);
             return p;
         }
-        return paths.stream().map(p -> p.normalize()).toList();
+        return paths.stream().map(Path::normalize).toList();
     }
 
     private <T> T readConfig(String name, Class<T> clazz) {
