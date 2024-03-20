@@ -39,7 +39,7 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
-      })
+      }),
     );
 
     this.groups.newId().subscribe((r) => {
@@ -51,7 +51,7 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
       this.servers.servers$.subscribe((s) => {
         this.serverList = s;
         this.serverNames = this.serverList.map((c) => `${c.hostName} - ${c.description}`);
-      })
+      }),
     );
   }
 
@@ -90,7 +90,7 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
       .pipe(
         finalize(() => {
           this.saving$.next(false);
-        })
+        }),
       );
   }
 }

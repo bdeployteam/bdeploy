@@ -5,19 +5,11 @@
     [route]="['..']"
   >
     <div class="flex-auto"></div>
-    <app-bd-button
-      text="Show only differences"
-      [(toggle)]="showOnlyDifferences"
-      [isToggle]="true"
-      [collapsed]="false"
-    >
+    <app-bd-button text="Show only differences" [(toggle)]="showOnlyDifferences" [isToggle]="true" [collapsed]="false">
     </app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      class="flex flex-col gap-2.5 pt-0.5"
-      *ngIf="configPair$ | async as pair"
-    >
+    <div class="flex flex-col gap-2.5 pt-0.5" *ngIf="configPair$ | async as pair">
       <div class="bd-rect-card flex flex-col">
         <div class="flex flex-col">
           <div class="bd-default-padding flex pb-0">
@@ -28,12 +20,8 @@
         </div>
         <div class="bd-default-padding flex flex-col gap-2.5">
           <div class="flex gap-2.5">
-            <div class="local-compare-header basis-1/2">
-              {{ pair.base.version }}
-            </div>
-            <div class="local-compare-header basis-1/2">
-              {{ pair.compare.version }}
-            </div>
+            <div class="local-compare-header basis-1/2">{{ pair.base.version }}</div>
+            <div class="local-compare-header basis-1/2">{{ pair.compare.version }}</div>
           </div>
           <div class="flex gap-2.5">
             <app-history-header-config
@@ -74,8 +62,7 @@
               <div class="flex flex-col">
                 <div class="bd-type-text">NODE</div>
                 <div class="bd-title-text">
-                  {{ nodePair.name === clientNodeName ? 'Client Applications' :
-                  nodePair.name }}
+                  {{ nodePair.name === clientNodeName ? 'Client Applications' : nodePair.name }}
                 </div>
               </div>
             </div>
@@ -84,23 +71,14 @@
             <div class="flex gap-2.5">
               <div class="local-compare-header basis-1/2 flex">
                 <div>{{ pair.base.version }}</div>
-                <div
-                  class="bd-description-text local-order-changed"
-                  *ngIf="nodePair.isOrderChanged"
-                >
-                  &nbsp;- Note: The order of the processes is not exactly as
-                  configured in this version.
+                <div class="bd-description-text local-order-changed" *ngIf="nodePair.isOrderChanged">
+                  &nbsp;- Note: The order of the processes is not exactly as configured in this version.
                 </div>
               </div>
-              <div class="local-compare-header basis-1/2">
-                {{ pair.compare.version }}
-              </div>
+              <div class="local-compare-header basis-1/2">{{ pair.compare.version }}</div>
             </div>
 
-            <div
-              class="flex gap-2.5 items-stretch"
-              *ngFor="let appPair of nodePair.applications"
-            >
+            <div class="flex gap-2.5 items-stretch" *ngFor="let appPair of nodePair.applications">
               <ng-container *ngIf="showAppPair(appPair)">
                 <app-history-process-config
                   class="basis-1/2"

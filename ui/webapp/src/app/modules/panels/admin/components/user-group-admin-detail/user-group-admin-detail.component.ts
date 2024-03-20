@@ -63,7 +63,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
         }
         const group = groups.find((g) => g.id === route.params['group']);
         this.group$.next(group);
-      }
+      },
     );
     this.subscription.add(
       combineLatest([this.authAdmin.users$, this.group$]).subscribe(([users, group]) => {
@@ -74,7 +74,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
           this.users = users.filter((u) => u.groups.indexOf(group.id) >= 0);
           this.suggestedUsers = users.filter((u) => u.groups.indexOf(group.id) == -1);
         }
-      })
+      }),
     );
   }
 

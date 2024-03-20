@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Edit Server{{ (isDirty$ | async) ? '*' : '' }}"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit Server{{ (isDirty$ | async) ? '*' : '' }}" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
       <ng-container *ngIf="tempServer">
@@ -19,12 +16,7 @@
           [(ngModel)]="tempServer.description"
           required
         ></app-bd-form-input>
-        <app-bd-form-input
-          label="User"
-          name="user"
-          [(ngModel)]="tempServer.user"
-          required
-        ></app-bd-form-input>
+        <app-bd-form-input label="User" name="user" [(ngModel)]="tempServer.user" required></app-bd-form-input>
         <app-bd-form-input
           label="Password"
           name="pass"

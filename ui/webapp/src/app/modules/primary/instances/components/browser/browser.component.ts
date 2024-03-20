@@ -48,7 +48,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       group: (r) =>
         this.products.products$.value.find(
           (p) =>
-            p.key.name === r.instanceConfiguration.product.name && p.key.tag === r.instanceConfiguration.product.tag
+            p.key.name === r.instanceConfiguration.product.name && p.key.tag === r.instanceConfiguration.product.tag,
         )?.name || r.instanceConfiguration.product.name,
       associatedColumn: this.instanceColumns.instanceProductColumn.id,
     },
@@ -123,7 +123,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
         }
 
         this.calculateDefaultGrouping(g);
-      })
+      }),
     );
 
     this.subscription.add(this.instances.overallStates$.subscribe(() => this.data?.redraw()));
@@ -178,7 +178,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     this.dialog
       .confirm(
         'Query all Instances',
-        'This action will <strong>contact all servers and nodes</strong> in the group, to fetch the latest data. This may take a while. Are you sure?'
+        'This action will <strong>contact all servers and nodes</strong> in the group, to fetch the latest data. This may take a while. Are you sure?',
       )
       .subscribe((confirmed) => {
         if (!confirmed) {

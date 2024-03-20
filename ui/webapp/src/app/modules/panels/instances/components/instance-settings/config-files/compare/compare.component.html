@@ -1,9 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Compare/Edit {{ file$ | async }}"
-    [panel]="true"
-    [route]="['..', '..']"
-  >
+  <app-bd-dialog-toolbar header="Compare/Edit {{ file$ | async }}" [panel]="true" [route]="['..', '..']">
     <div class="flex-auto"></div>
     <app-bd-button
       text="Apply all changes from the product."
@@ -21,10 +17,7 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      *ngIf="!(loading$ | async) && file$ | async as file"
-      class="flex flex-col h-full"
-    >
+    <div *ngIf="!(loading$ | async) && file$ | async as file" class="flex flex-col h-full">
       <app-bd-editor-diff
         class="grow basis-0"
         [(modifiedContent)]="content"

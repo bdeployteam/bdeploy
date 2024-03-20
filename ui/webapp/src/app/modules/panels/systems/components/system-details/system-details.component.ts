@@ -54,7 +54,7 @@ export class SystemDetailsComponent implements OnInit, OnDestroy {
     return this.servers.isSynchronized(
       this.edit.current$.value?.minion
         ? this.servers.servers$.value?.find((s) => s.hostName === this.edit.current$.value?.minion)
-        : null
+        : null,
     );
   }
 
@@ -62,7 +62,7 @@ export class SystemDetailsComponent implements OnInit, OnDestroy {
     this.dialog
       .confirm(
         `Delete ${this.edit.current$.value?.config?.name}`,
-        `Are you sure you want to delete ${this.edit.current$.value?.config?.name}?`
+        `Are you sure you want to delete ${this.edit.current$.value?.config?.name}?`,
       )
       .subscribe((confirmed) => {
         if (confirmed) {

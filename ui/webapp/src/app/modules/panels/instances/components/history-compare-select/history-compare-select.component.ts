@@ -65,7 +65,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
         } else {
           this.records$.next(this.doSort(versions));
         }
-      })
+      }),
     );
   }
 

@@ -70,7 +70,7 @@ export class ProductsService {
       .get<ProductDto[]>(`${this.apiPath(group)}/list`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Product Load')
+        measure('Product Load'),
       )
       .subscribe((prods) => {
         this.products$.next(prods);

@@ -15,7 +15,7 @@ export class NotFoundGuard {
     this.snackbar.open(
       `Unfortunately, ${route.url.join('/')} was not found, we returned you to the safe-zone.`,
       'DISMISS',
-      { panelClass: 'error-snackbar' }
+      { panelClass: 'error-snackbar' },
     );
     this.areas.forcePanelClose$.next(true);
     this.router.navigate(['/groups/browser'], {

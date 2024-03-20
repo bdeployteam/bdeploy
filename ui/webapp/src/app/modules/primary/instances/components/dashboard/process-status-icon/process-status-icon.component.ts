@@ -30,7 +30,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
     of(false),
     null,
     null,
-    this.id$
+    this.id$,
   );
 
   ngOnInit(): void {
@@ -79,7 +79,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
           'heart_broken',
           null,
           'Process lifeness probe reported a problem in the running process',
-          'local-crashed'
+          'local-crashed',
         );
       case ProcessState.RUNNING_STOP_PLANNED:
         return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');

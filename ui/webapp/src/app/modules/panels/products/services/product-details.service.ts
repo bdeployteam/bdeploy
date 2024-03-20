@@ -57,9 +57,8 @@ export class ProductDetailsService implements OnDestroy {
       this.prodSubscription?.unsubscribe();
       this.prodSubscription = this.products.products$
         .pipe(
-          map(
-            (prods) =>
-              prods?.find((e) => e.key.name === this.productKey$.value && e.key.tag === this.productTag$.value),
+          map((prods) =>
+            prods?.find((e) => e.key.name === this.productKey$.value && e.key.tag === this.productTag$.value),
           ),
         )
         .subscribe((prod) => {

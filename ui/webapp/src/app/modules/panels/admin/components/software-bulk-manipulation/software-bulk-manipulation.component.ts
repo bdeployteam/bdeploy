@@ -23,7 +23,7 @@ export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
     this.deleting$,
     null,
     null,
-    this.bulk.selection$.pipe(map((b) => b.map((x) => x.version)))
+    this.bulk.selection$.pipe(map((b) => b.map((x) => x.version))),
   );
   protected selections: SoftwareVersion[];
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -46,7 +46,7 @@ export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
         `This will delete <strong>${this.selections.length}</strong> system versions. This action is irreversible. If you want to continue, confirm using <em>I UNDERSTAND</em>. Continue?`,
         'warning',
         'I UNDERSTAND',
-        null
+        null,
       )
       .subscribe((r) => {
         if (!r) {

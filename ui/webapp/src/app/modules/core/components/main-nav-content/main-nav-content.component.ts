@@ -18,7 +18,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
           'margin-right': '10px',
           'max-width': 'calc(100% - 10px - 10px)',
           filter: 'brightness(75%)',
-        })
+        }),
       ),
       state(
         'panelVisible-sm',
@@ -26,7 +26,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
           'margin-left': '74px',
           'margin-right': '360px',
           'max-width': 'calc(100% - 10px - 360px)',
-        })
+        }),
       ),
       state(
         'panelVisible-lg',
@@ -34,7 +34,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
           'margin-left': '174px',
           'margin-right': '360px',
           'max-width': 'calc(100% - 110px - 360px)',
-        })
+        }),
       ),
       state(
         'panelHidden-sm',
@@ -42,7 +42,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
           'margin-left': '74px',
           'margin-right': '10px',
           'max-width': 'calc(100% - 10px - 10px)',
-        })
+        }),
       ),
       state(
         'panelHidden-lg',
@@ -50,7 +50,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
           'margin-left': '174px',
           'margin-right': '110px',
           'max-width': 'calc(100% - 110px - 110px)',
-        })
+        }),
       ),
       transition('* => *', animate('0.2s ease')),
     ]),

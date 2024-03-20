@@ -64,8 +64,8 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
           this.isCentral = isCentral;
           this.isManaged = isManaged;
           this.isStandalone = isStandalone;
-        }
-      )
+        },
+      ),
     );
     this.isAddAllowed = this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
     this.isAttachAllowed = this.authService.isGlobalAdmin() && this.isManaged;
@@ -84,7 +84,7 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
         .info(
           'Group not managed',
           `This server has been reconfigured to be <code>MANAGED</code>, however the instance group ${row.name} is not yet managed. You need to link the group with its counterpart on the <code>CENTRAL</code> server.`,
-          'link'
+          'link',
         )
         .subscribe();
     }
@@ -93,7 +93,7 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   protected searchInstanceGroupData(
     search: string,
     data: InstanceGroupConfigurationDto[],
-    columns: BdDataColumn<InstanceGroupConfigurationDto>[]
+    columns: BdDataColumn<InstanceGroupConfigurationDto>[],
   ) {
     return bdDataDefaultSearch(search, data, [
       ...columns,

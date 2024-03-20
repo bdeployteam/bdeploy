@@ -6,7 +6,7 @@ export interface EditorPlugin {
   bind(
     onRead: () => string,
     onUpdate: (value: string) => void,
-    onValidStateChange: (valid: boolean) => void
+    onValidStateChange: (valid: boolean) => void,
   ): HTMLElement;
 }
 

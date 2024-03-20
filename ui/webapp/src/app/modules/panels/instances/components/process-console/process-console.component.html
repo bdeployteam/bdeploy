@@ -39,18 +39,10 @@
     ></app-bd-terminal>
     <app-bd-no-data *ngIf="!(available$ | async)">
       <p>Process details are unavailable.</p>
-      <p
-        class="text-center"
-        *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-      >
-        <strong
-          >{{ (instances.current$ | async)?.instanceConfiguration.name
-          }}</strong
-        >
+      <p class="text-center" *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)">
+        <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong>
         is not synchronized with the controlling server
-        <strong
-          >{{ (instances.current$ | async).managedServer.hostName }}</strong
-        >
+        <strong>{{ (instances.current$ | async).managedServer.hostName }}</strong>
       </p>
       <p>Synchronize the instance to (re-)enable editing.</p>
       <app-bd-server-sync-button

@@ -26,7 +26,7 @@ export class ProcessPortsComponent implements OnInit, OnDestroy {
         }
 
         this.ports$.next(states.filter((s) => s.appId === config.id));
-      }
+      },
     );
   }
 

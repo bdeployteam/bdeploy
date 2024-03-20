@@ -1,20 +1,15 @@
 <div class="bd-default-padding">
   <p>
-    Configuring an OpenID Connect server will allow users to authenticate
-    against it in addition to other providers. Users will be created on first
-    login. The OpenID Connect authenticator uses the ROPG ("Resource Owner
-    Password Grant") authentication flow to allow using BDeploy's own login
-    dialog.
+    Configuring an OpenID Connect server will allow users to authenticate against it in addition to other providers.
+    Users will be created on first login. The OpenID Connect authenticator uses the ROPG ("Resource Owner Password
+    Grant") authentication flow to allow using BDeploy's own login dialog.
   </p>
   <app-bd-form-toggle
     [(ngModel)]="settings.settings$.value.auth.oidcSettings.enabled"
     label="Enable OpenID Connect Authentication"
   ></app-bd-form-toggle>
-  <p
-    [class.bd-disabled-text]="!settings.settings$.value.auth.oidcSettings.enabled"
-  >
-    Configure the server below if enabled. The server URL needs to be the OpenID
-    Connect Token endpoint.
+  <p [class.bd-disabled-text]="!settings.settings$.value.auth.oidcSettings.enabled">
+    Configure the server below if enabled. The server URL needs to be the OpenID Connect Token endpoint.
   </p>
   <app-bd-form-input
     [(ngModel)]="settings.settings$.value.auth.oidcSettings.url"

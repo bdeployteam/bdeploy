@@ -39,8 +39,8 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
             }
             this.nodeVersion = convert2String(this.nodeState$.value?.config.version);
           }
-        }
-      )
+        },
+      ),
     );
   }
 

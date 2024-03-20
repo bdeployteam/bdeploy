@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Viewing {{ (file$ | async)?.path }}"
-    [panel]="true"
-  >
+  <app-bd-dialog-toolbar header="Viewing {{ (file$ | async)?.path }}" [panel]="true">
     <div class="flex-auto"></div>
     <app-bd-button
       text="Follow Changes"

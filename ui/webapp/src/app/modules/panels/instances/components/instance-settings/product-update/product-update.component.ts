@@ -56,8 +56,8 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
           .filter((p) => p.key.name === state.config.config.product.name)
           .filter(
             (p) =>
-              this.isCurrent(p) || this.matchesProductFilterRegex(p.key.tag, state.config.config.productFilterRegex)
-          )
+              this.isCurrent(p) || this.matchesProductFilterRegex(p.key.tag, state.config.config.productFilterRegex),
+          ),
       );
     });
 
@@ -68,7 +68,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
         }
         const productName = state.config.config.product.name;
         return current?.managedServer?.productUpdates?.newerVersionAvailable[productName];
-      })
+      }),
     );
   }
 

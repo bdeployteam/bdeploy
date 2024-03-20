@@ -7,10 +7,7 @@ import {
   InstanceConfiguration,
   InstanceNodeConfigurationDto,
 } from 'src/app/models/gen.dtos';
-import {
-  ApplicationConfigurationDiff,
-  DiffType,
-} from '../services/history-diff.service';
+import { ApplicationConfigurationDiff, DiffType } from '../services/history-diff.service';
 import { InstanceConfigCache } from './instance-utils';
 
 export class ApplicationPair {
@@ -20,12 +17,11 @@ export class ApplicationPair {
     public base: ApplicationConfiguration,
     public compare: ApplicationConfiguration,
     public baseDesc: ApplicationDescriptor,
-    public compareDesc: ApplicationDescriptor
+    public compareDesc: ApplicationDescriptor,
   ) {
     const left = new ApplicationConfigurationDiff(base, compare, baseDesc);
     const right = new ApplicationConfigurationDiff(compare, base, compareDesc);
-    this.hasDifferences =
-      left.type !== DiffType.UNCHANGED || right.type !== DiffType.UNCHANGED;
+    this.hasDifferences = left.type !== DiffType.UNCHANGED || right.type !== DiffType.UNCHANGED;
   }
 }
 
@@ -39,16 +35,12 @@ export class NodePair {
     base: InstanceNodeConfigurationDto,
     compare: InstanceNodeConfigurationDto,
     baseApplications: ApplicationDto[],
-    compareApplications: ApplicationDto[]
+    compareApplications: ApplicationDto[],
   ) {
     this.name = base?.nodeName ? base.nodeName : compare?.nodeName;
 
-    const baseApps = base?.nodeConfiguration?.applications
-      ? base.nodeConfiguration.applications
-      : [];
-    const compareApps = compare?.nodeConfiguration?.applications
-      ? compare.nodeConfiguration.applications
-      : [];
+    const baseApps = base?.nodeConfiguration?.applications ? base.nodeConfiguration.applications : [];
+    const compareApps = compare?.nodeConfiguration?.applications ? compare.nodeConfiguration.applications : [];
 
     const compIds = compareApps.map((a) => a.id);
     const baseIds = baseApps.map((a) => a.id);
@@ -67,30 +59,22 @@ export class NodePair {
         new ApplicationPair(
           baseApp,
           compareApp,
-          baseApplications
-            ? baseApplications.find(
-                (a) => a.key.name === baseApp?.application?.name
-              )?.descriptor
-            : null,
+          baseApplications ? baseApplications.find((a) => a.key.name === baseApp?.application?.name)?.descriptor : null,
           compareApplications
-            ? compareApplications.find(
-                (a) => a.key.name === compareApp?.application?.name
-              )?.descriptor
-            : null
-        )
+            ? compareApplications.find((a) => a.key.name === compareApp?.application?.name)?.descriptor
+            : null,
+        ),
       );
     }
 
-    this.hasDifferences = this.applications.some(
-      (appPair) => appPair.hasDifferences
-    );
+    this.hasDifferences = this.applications.some((appPair) => appPair.hasDifferences);
   }
 }
 
 export class HeaderPair {
   constructor(
     public base: InstanceConfiguration,
-    public compare: InstanceConfiguration
+    public compare: InstanceConfiguration,
   ) {}
 }
 
@@ -100,13 +84,11 @@ export class ConfigPair {
 
   constructor(
     public base: InstanceConfigCache,
-    public compare: InstanceConfigCache
+    public compare: InstanceConfigCache,
   ) {
     this.header = new HeaderPair(base?.config, compare?.config);
 
-    const sortedNodes = base?.nodes?.nodeConfigDtos
-      ? [...base.nodes.nodeConfigDtos]
-      : [];
+    const sortedNodes = base?.nodes?.nodeConfigDtos ? [...base.nodes.nodeConfigDtos] : [];
     if (compare?.nodes?.nodeConfigDtos) {
       // eslint-disable-next-line no-unsafe-optional-chaining
       for (const node of compare?.nodes?.nodeConfigDtos) {
@@ -118,21 +100,10 @@ export class ConfigPair {
     sortedNodes.sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName));
 
     for (const node of sortedNodes) {
-      const baseNode = base?.nodes?.nodeConfigDtos?.find(
-        (n) => n.nodeName === node.nodeName
-      );
-      const compareNode = compare?.nodes?.nodeConfigDtos?.find(
-        (n) => n.nodeName === node.nodeName
-      );
+      const baseNode = base?.nodes?.nodeConfigDtos?.find((n) => n.nodeName === node.nodeName);
+      const compareNode = compare?.nodes?.nodeConfigDtos?.find((n) => n.nodeName === node.nodeName);
 
-      this.nodes.push(
-        new NodePair(
-          baseNode,
-          compareNode,
-          base?.nodes?.applications,
-          compare?.nodes?.applications
-        )
-      );
+      this.nodes.push(new NodePair(baseNode, compareNode, base?.nodes?.applications, compare?.nodes?.applications));
     }
   }
 }

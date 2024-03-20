@@ -83,7 +83,7 @@ export class AttributeDefinitionsComponent {
     const group = this.groups.current$.value; // this is the same as used in the template, so it must be valid.
     group.instanceAttributes.splice(
       group.instanceAttributes.findIndex((r) => r === record),
-      1
+      1,
     );
 
     this.loading$.next(true);

@@ -1,20 +1,16 @@
 <div class="bd-default-padding">
   <p>
-    The Okta authenticator allows configuration of an Okta domain. The
-    authenticator will use the web-based (popup) Authorization Code Flow for
-    Single Page Applications. This means there is an additional button to
-    trigger authentication and potentially multi-factor verification.
+    The Okta authenticator allows configuration of an Okta domain. The authenticator will use the web-based (popup)
+    Authorization Code Flow for Single Page Applications. This means there is an additional button to trigger
+    authentication and potentially multi-factor verification.
   </p>
   <app-bd-form-toggle
     [(ngModel)]="settings.settings$.value.auth.oktaSettings.enabled"
     label="Enable Okta Authentication"
   ></app-bd-form-toggle>
-  <p
-    [class.bd-disabled-text]="!settings.settings$.value.auth.oktaSettings.enabled"
-  >
-    The domain and client ID can be obtained from the Okta tenant configuration.
-    The display name is used as label for the additional login button on the
-    login page.
+  <p [class.bd-disabled-text]="!settings.settings$.value.auth.oktaSettings.enabled">
+    The domain and client ID can be obtained from the Okta tenant configuration. The display name is used as label for
+    the additional login button on the login page.
   </p>
   <app-bd-form-input
     [(ngModel)]="settings.settings$.value.auth.oktaSettings.displayName"

@@ -8,11 +8,5 @@
 >
   <div class="local-bg-position" [ngClass]="bgClass"></div>
   <div *ngIf="!maxWidthPx" class="local-text">{{ value }}</div>
-  <div
-    *ngIf="!!maxWidthPx"
-    class="local-text truncate"
-    [style.max-width.px]="maxWidthPx"
-  >
-    {{ value }}
-  </div>
+  <div *ngIf="!!maxWidthPx" class="local-text truncate" [style.max-width.px]="maxWidthPx">{{ value }}</div>
 </div>

@@ -19,11 +19,9 @@ export function getAppKeyName(appKey: ManifestKey) {
 export function getTemplateAppKey(
   product: ProductDto,
   template: FlattenedApplicationTemplateConfiguration,
-  node: MinionDto
+  node: MinionDto,
 ) {
-  return (
-    product.product + '/' + template.application + '/' + node.os.toLowerCase()
-  );
+  return product.product + '/' + template.application + '/' + node.os.toLowerCase();
 }
 
 /**
@@ -36,10 +34,7 @@ export function getAppOs(appKey: ManifestKey): OperatingSystem {
   return OperatingSystem[osName];
 }
 
-export function updateAppOs(
-  appKey: ManifestKey,
-  os: OperatingSystem
-): ManifestKey {
+export function updateAppOs(appKey: ManifestKey, os: OperatingSystem): ManifestKey {
   const fullName = appKey.name;
   const lastSlashIdx = fullName.lastIndexOf('/') + 1;
   const osName = fullName.substring(lastSlashIdx).toUpperCase();

@@ -74,7 +74,7 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
             this.followInterval = setInterval(() => this.df.load(), 2000);
           });
         }
-      })
+      }),
     );
   }
 
@@ -113,7 +113,7 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
       .getContentChunk(dir, entry, this.offset, 0)
       .pipe(
         skipWhile((chunk) => !chunk),
-        switchMap((chunk) => unwrap(entry, chunk))
+        switchMap((chunk) => unwrap(entry, chunk)),
       )
       .subscribe((chunk) => {
         this.content$.next(chunk.content);

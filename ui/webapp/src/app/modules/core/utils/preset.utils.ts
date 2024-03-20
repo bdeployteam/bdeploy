@@ -3,16 +3,14 @@ import { CustomDataGrouping } from 'src/app/models/gen.dtos';
 
 export function calculateGrouping<T>(
   definitions: BdDataGroupingDefinition<T>[],
-  preset: CustomDataGrouping[]
+  preset: CustomDataGrouping[],
 ): BdDataGrouping<T>[] {
   const result: BdDataGrouping<T>[] = [];
   if (preset?.length) {
     for (const item of preset) {
       const def = definitions.find((d) => d.name === item.name);
       if (!def) {
-        console.warn(
-          'Grouping definition not (any longer?) available: ' + item.name
-        );
+        console.warn('Grouping definition not (any longer?) available: ' + item.name);
         continue;
       }
       result.push({ definition: def, selected: item.selected });

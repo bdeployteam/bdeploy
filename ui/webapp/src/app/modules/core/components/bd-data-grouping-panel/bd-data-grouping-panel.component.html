@@ -6,36 +6,22 @@
           <ng-content></ng-content>
         </div>
         <div>
-          <span class="grouping-level-number"
-            >{{ groupingLevelNumber(index + 1) }}
-          </span>
-          <span class="local-grouping-header bd-description-text">
-            Grouping Level
-          </span>
+          <span class="grouping-level-number">{{ groupingLevelNumber(index + 1) }} </span>
+          <span class="local-grouping-header bd-description-text"> Grouping Level </span>
         </div>
       </div>
-      <mat-icon
-        class="grouping-remove-icon"
-        matTooltip="Remove"
-        matTooltipPosition="above"
-        (click)="removeGrouping()"
+      <mat-icon class="grouping-remove-icon" matTooltip="Remove" matTooltipPosition="above" (click)="removeGrouping()"
         >close</mat-icon
       >
     </div>
     <mat-form-field class="grouping-select" appearance="outline">
       <mat-label>{{ selectGroupingLabel }}</mat-label>
-      <mat-select
-        name="grouping-select"
-        [value]="grouping?.definition"
-        (valueChange)="setGrouping($event)"
-      >
+      <mat-select name="grouping-select" [value]="grouping?.definition" (valueChange)="setGrouping($event)">
         <mat-option>--</mat-option>
         <mat-option *ngIf="grouping?.definition" [value]="grouping.definition"
           >{{ grouping.definition.name }}</mat-option
         >
-        <mat-option *ngFor="let def of definitions" [value]="def"
-          >{{ def.name }}</mat-option
-        >
+        <mat-option *ngFor="let def of definitions" [value]="def">{{ def.name }}</mat-option>
       </mat-select>
     </mat-form-field>
     <div *ngIf="!grouping?.definition" class="bd-hint-text pb-2.5">
@@ -44,19 +30,13 @@
     </div>
 
     <div *ngIf="!!groupingValues?.length" class="flex">
-      <mat-form-field
-        class="grouping-panel-filter flex-auto"
-        appearance="outline"
-      >
+      <mat-form-field class="grouping-panel-filter flex-auto" appearance="outline">
         <mat-label>{{ filterPlaceholder }}</mat-label>
         <input matInput [(ngModel)]="filter" />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
-    <div
-      *ngIf="!!groupingValues?.length"
-      class="grouping-values-container flex flex-col gap-1 pl-2.5 pb-2.5"
-    >
+    <div *ngIf="!!groupingValues?.length" class="grouping-values-container flex flex-col gap-1 pl-2.5 pb-2.5">
       <mat-checkbox
         *ngFor="let group of filteredGroupingValues"
         [checked]="!grouping?.selected?.length || grouping.selected.includes(group)"

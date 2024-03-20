@@ -64,7 +64,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestr
             }
           }
         }
-      })
+      }),
     );
   }
 
@@ -93,7 +93,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestr
 
         this.content = '';
         this.originalContent = '';
-      })
+      }),
     );
   }
 

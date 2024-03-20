@@ -112,7 +112,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     const model = this.globalMonaco.editor.createModel(
       this.editorContent,
       undefined,
-      this.globalMonaco.Uri.parse(this.editorPath)
+      this.globalMonaco.Uri.parse(this.editorPath),
     );
     this.monaco.setModel(model);
   }

@@ -20,7 +20,7 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
           return of(null);
         }
         return throwError(() => err);
-      })
+      }),
     );
   }
 

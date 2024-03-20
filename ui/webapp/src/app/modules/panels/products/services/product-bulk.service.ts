@@ -42,8 +42,8 @@ export class ProductBulkService {
   public delete() {
     return concat(
       this.selection$.value.map((p) =>
-        this.http.delete(`${this.apiPath(this.groups.current$.value.name)}/${p.key.name}/${p.key.tag}`)
-      )
+        this.http.delete(`${this.apiPath(this.groups.current$.value.name)}/${p.key.name}/${p.key.tag}`),
+      ),
     ).pipe(concatAll());
   }
 }

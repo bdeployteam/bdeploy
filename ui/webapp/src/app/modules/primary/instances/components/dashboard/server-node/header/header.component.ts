@@ -140,7 +140,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
         }
 
         this.events = eventsToRender;
-      })
+      }),
     );
   }
 

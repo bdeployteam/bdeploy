@@ -65,7 +65,7 @@ export class SystemsService {
     this.loading$.next(true);
     return this.http.get<SystemConfigurationDto[]>(`${this.apiPath(group)}`).pipe(
       finalize(() => this.loading$.next(false)),
-      measure(`Systems of ${group}`)
+      measure(`Systems of ${group}`),
     );
   }
 

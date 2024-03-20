@@ -52,7 +52,7 @@ export class UserGroupBulkService {
         return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/delete`, ids);
       }),
       tap((r) => this.logResult(r)),
-      finalize(() => this.frozen$.next(false))
+      finalize(() => this.frozen$.next(false)),
     );
   }
 
@@ -65,7 +65,7 @@ export class UserGroupBulkService {
         return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/inactive/${inactive}`, ids);
       }),
       tap((r) => this.logResult(r)),
-      finalize(() => this.frozen$.next(false))
+      finalize(() => this.frozen$.next(false)),
     );
   }
 
@@ -79,7 +79,7 @@ export class UserGroupBulkService {
         return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/assign-permission`, data);
       }),
       tap((r) => this.logResult(r)),
-      finalize(() => this.frozen$.next(false))
+      finalize(() => this.frozen$.next(false)),
     );
   }
 
@@ -93,7 +93,7 @@ export class UserGroupBulkService {
         return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/remove-permission`, data);
       }),
       tap((r) => this.logResult(r)),
-      finalize(() => this.frozen$.next(false))
+      finalize(() => this.frozen$.next(false)),
     );
   }
 

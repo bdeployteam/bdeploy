@@ -117,16 +117,11 @@ export interface BdDataGrouping<T> {
  *
  * Note that null is a possible value returned, which will be translated to "No Group" by the filter panel.
  */
-export function bdExtractGroups<T>(
-  grouping: BdDataGroupingDefinition<T>,
-  records: T[]
-): string[] {
+export function bdExtractGroups<T>(grouping: BdDataGroupingDefinition<T>, records: T[]): string[] {
   if (!records) {
     return [];
   }
-  const allGroups = records
-    .map((r) => grouping.group(r))
-    .map((r) => (r ? r : UNMATCHED_GROUP));
+  const allGroups = records.map((r) => grouping.group(r)).map((r) => (r ? r : UNMATCHED_GROUP));
   return allGroups.filter((v, i, s) => s.indexOf(v) === i); // unique.
 }
 
@@ -147,11 +142,7 @@ export function bdSortGroups(a: string, b: string) {
 }
 
 /** The default sorting algorithm which should be fine for almost all cases */
-export function bdDataDefaultSort<T>(
-  data: T[],
-  column: BdDataColumn<T>,
-  direction: SortDirection
-) {
+export function bdDataDefaultSort<T>(data: T[], column: BdDataColumn<T>, direction: SortDirection) {
   return data.sort((a, b) => {
     const dir = direction === 'asc' ? 1 : -1;
 
@@ -178,11 +169,7 @@ export function bdDataDefaultSort<T>(
 }
 
 /** The default search which uses case insensitive search in all fields of the record. */
-export function bdDataDefaultSearch<T>(
-  search: string,
-  records: T[],
-  columns: BdDataColumn<T>[]
-): T[] {
+export function bdDataDefaultSearch<T>(search: string, records: T[], columns: BdDataColumn<T>[]): T[] {
   if (!search) {
     return records;
   }

@@ -32,7 +32,7 @@ export class BdActionsComponent {
       const inst = this.instances.instances$.pipe(
         skipWhile((i) => !i),
         take(1),
-        map((i) => i.find((x) => x.instanceConfiguration.id === dto.action.instance))
+        map((i) => i.find((x) => x.instanceConfiguration.id === dto.action.instance)),
       );
 
       // if the item is a process, we want to load this one as well!
@@ -47,12 +47,12 @@ export class BdActionsComponent {
               ?.find((n) => n.nodeConfiguration?.applications?.findIndex((a) => a.id === dto.action.item) !== -1)
               ?.nodeConfiguration?.applications?.find((x) => x.id === dto.action.item)?.name,
           ]),
-          map(filteredJoiner)
+          map(filteredJoiner),
         );
       } else {
         return inst.pipe(
           map((i) => [dto.description, dto.action.bhive, i.instanceConfiguration.name, dto.action.item]),
-          map(filteredJoiner)
+          map(filteredJoiner),
         );
       }
     }

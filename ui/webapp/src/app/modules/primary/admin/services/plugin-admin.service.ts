@@ -35,7 +35,7 @@ export class PluginAdminService {
       .get<PluginInfoDto[]>(`${this.apiPath()}/list`)
       .pipe(
         measure('Load Plugins'),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe((p) => this.plugins$.next(p));
   }

@@ -42,7 +42,7 @@ export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableD
         this.tempGroup = cloneDeep(group);
         this.origGroup = cloneDeep(group);
         this.loading$.next(false);
-      })
+      }),
     );
   }
 
@@ -53,7 +53,7 @@ export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableD
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.isDirty$.next(this.isDirty());
-      })
+      }),
     );
   }
 

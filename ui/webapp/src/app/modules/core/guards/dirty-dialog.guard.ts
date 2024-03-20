@@ -108,7 +108,7 @@ export class DirtyDialogGuard {
             // ask confirmation on the actual component (the primary one in this case).
             return this.confirmAndSavePrimaryComponent(panelSave, component);
           }
-        })
+        }),
       );
     }
 
@@ -146,17 +146,17 @@ export class DirtyDialogGuard {
               }
               this.areas.forcePanelClose$.next(closeDialog);
               return of(closeDialog);
-            })
+            }),
           );
         }
         return of(true);
-      })
+      }),
     );
   }
 
   private confirmAndSavePrimaryComponent(
     panelSave: Observable<boolean>,
-    component: DirtyableDialog
+    component: DirtyableDialog,
   ): Observable<boolean> {
     return panelSave.pipe(
       switchMap(() =>
@@ -177,9 +177,9 @@ export class DirtyDialogGuard {
               this.areas.closePanel(true);
               return of(false);
             }
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   }
 
@@ -198,7 +198,7 @@ export class DirtyDialogGuard {
           if (result === DirtyActionType.DISCARD) {
             console.warn('User confirmed discarding pending changes.');
           }
-        })
+        }),
       );
   }
 }

@@ -79,7 +79,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
           ? () => {
               this.areas.navigateBoth(
                 ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
-                ['panels', 'instances', 'settings', 'product']
+                ['panels', 'instances', 'settings', 'product'],
               );
             }
           : null,
@@ -98,7 +98,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       combineLatest([this.ports.activePortStates$, this.processes.processStates$]).subscribe(([ports, states]) => {
         this.updateAllProcesses(states);
         this.updateAllPortsRating(ports, states);
-      })
+      }),
     );
   }
 
@@ -140,12 +140,12 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       !runningApps
         ? 'The instance is stopped'
         : !stoppedApps && !deadApps
-        ? 'All applications OK'
-        : `${stoppedApps} 'Instance' type ${
-            stoppedApps === 1 ? 'application is' : 'applications are'
-          } not running.\n${deadApps} 'Instance' type ${
-            deadApps === 1 ? 'application reports' : 'applications are reporting'
-          } problems.`
+          ? 'All applications OK'
+          : `${stoppedApps} 'Instance' type ${
+              stoppedApps === 1 ? 'application is' : 'applications are'
+            } not running.\n${deadApps} 'Instance' type ${
+              deadApps === 1 ? 'application reports' : 'applications are reporting'
+            } problems.`,
     );
   }
 
@@ -170,7 +170,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     this.portsTooltip.next(
       !badPorts
         ? `All ${appPorts.length} server ports OK`
-        : `${badPorts} of ${appPorts.length} server ports are rated bad.`
+        : `${badPorts} of ${appPorts.length} server ports are rated bad.`,
     );
   }
 }

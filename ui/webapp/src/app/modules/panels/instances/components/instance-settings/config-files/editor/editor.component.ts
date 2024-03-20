@@ -63,7 +63,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
         i.config,
         s?.find((s) => s.key.name === i.config.config.system?.name)?.config,
         null,
-        a
+        a,
       );
     });
   }
@@ -86,12 +86,12 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
         this.cfgFiles.edit(
           this.file$.value,
           Base64.encode(this.content),
-          false // cannot be binary, we're editing it.
+          false, // cannot be binary, we're editing it.
         );
 
         this.content = '';
         this.originalContent = '';
-      })
+      }),
     );
   }
 

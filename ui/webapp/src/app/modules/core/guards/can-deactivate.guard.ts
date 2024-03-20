@@ -23,7 +23,7 @@ export class CanDeactivateGuard {
     component: CanComponentDeactivate,
     currentRoute: ActivatedRouteSnapshot,
     currentState: RouterStateSnapshot,
-    nextState?: RouterStateSnapshot
+    nextState?: RouterStateSnapshot,
   ) {
     if (nextState.url === '/login') {
       return true; // always allow forced logout.
@@ -41,7 +41,7 @@ export class CanDeactivateGuard {
               const currentUrl = currentUrlTree.toString();
               this.location.go(currentUrl);
             }
-          })
+          }),
         )
       : true;
   }

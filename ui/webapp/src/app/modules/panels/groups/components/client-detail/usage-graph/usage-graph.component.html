@@ -3,12 +3,7 @@
   <!-- This is *required* as paths cannot position with percent values, only absolute is supported. We can still place *other* elements -->
   <!-- Outside of the graph using percent values later on without distortion. -->
   <!-- Each element must use vector-effect="non-scaling-stroke" to keep the strokes from scaling. -->
-  <svg
-    width="100%"
-    height="100%"
-    viewBox="0 0 100 100"
-    preserveAspectRatio="none"
-  >
+  <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
     <g *ngIf="hasVisiblePoint">
       <!-- The actual curve -->
       <path
@@ -48,9 +43,6 @@
     ></circle>
   </g>
 </svg>
-<div
-  *ngIf="!appId || !hasVisiblePoint"
-  class="bd-hint-text local-no-data flex flex-col justify-center items-center"
->
+<div *ngIf="!appId || !hasVisiblePoint" class="bd-hint-text local-no-data flex flex-col justify-center items-center">
   <div>No data to show.</div>
 </div>

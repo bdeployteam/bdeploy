@@ -42,7 +42,7 @@ export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog
         this.tempUser = cloneDeep(user);
         this.origUser = cloneDeep(user);
         this.loading$.next(false);
-      })
+      }),
     );
   }
 
@@ -53,7 +53,7 @@ export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.isDirty$.next(this.isDirty());
-      })
+      }),
     );
   }
 
@@ -82,7 +82,7 @@ export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog
           return this.authAdmin.updateLocalUserPassword(this.tempUser.name, this.tempUser.password);
         }
         return of(null);
-      })
+      }),
     );
   }
 

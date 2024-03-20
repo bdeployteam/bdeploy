@@ -99,7 +99,7 @@ export class UploadService {
     url: string,
     files: File[],
     urlParameter: UrlParameter[][],
-    formDataParam: string
+    formDataParam: string,
   ): Map<string, UploadStatus> {
     const result: Map<string, UploadStatus> = new Map();
 
@@ -143,7 +143,7 @@ export class UploadService {
       reportProgress: true,
       headers: suppressGlobalErrorHandling(
         // TODO: this is no longer supported.
-        new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })
+        new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope }),
       ),
     };
 

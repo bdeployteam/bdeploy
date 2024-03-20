@@ -49,7 +49,7 @@ export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
             this.originalContent = this.content;
             this.contentTemplate = Base64.decode(t);
           });
-      }
+      },
     );
   }
 
@@ -76,11 +76,11 @@ export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
         this.cfgFiles.edit(
           this.file$.value,
           Base64.encode(this.content),
-          false // cannot be binary, we're editing it.
+          false, // cannot be binary, we're editing it.
         );
         this.content = '';
         this.originalContent = '';
-      })
+      }),
     );
   }
 }

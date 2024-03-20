@@ -1,9 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Edit Instance Group"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit Instance Group" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
@@ -14,17 +10,8 @@
             [image]="origImage$ | async"
             (unsupportedDrop)="onUnsupportedFile($event)"
           ></app-bd-image-upload>
-          <app-bd-form-input
-            label="Title"
-            name="title"
-            [(ngModel)]="group.title"
-            required
-          ></app-bd-form-input>
-          <app-bd-form-input
-            label="Description"
-            name="description"
-            [(ngModel)]="group.description"
-          ></app-bd-form-input>
+          <app-bd-form-input label="Title" name="title" [(ngModel)]="group.title" required></app-bd-form-input>
+          <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
           <app-bd-form-toggle
             label="Automatic Cleanup"
             name="autoDelete"

@@ -50,7 +50,7 @@ export class AddGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyable
       .pipe(
         finalize(() => {
           this.saving$.next(false);
-        })
+        }),
       )
       .subscribe(() => {
         this.areas.closePanel();

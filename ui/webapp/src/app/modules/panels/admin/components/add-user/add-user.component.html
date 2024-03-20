@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Add User"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add User" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
       <app-bd-form-input
@@ -12,16 +9,8 @@
         required
         appIdentifier
       ></app-bd-form-input>
-      <app-bd-form-input
-        name="fullName"
-        label="Full Name"
-        [(ngModel)]="addUser.fullName"
-      ></app-bd-form-input>
-      <app-bd-form-input
-        name="email"
-        label="E-Mail Address"
-        [(ngModel)]="addUser.email"
-      ></app-bd-form-input>
+      <app-bd-form-input name="fullName" label="Full Name" [(ngModel)]="addUser.fullName"></app-bd-form-input>
+      <app-bd-form-input name="email" label="E-Mail Address" [(ngModel)]="addUser.email"></app-bd-form-input>
       <app-bd-form-input
         name="pass"
         label="New Password"
@@ -43,9 +32,7 @@
         required
         [appPasswordVerification]="addUser.password"
       ></app-bd-form-input>
-      <password-strength-meter
-        [password]="addUser.password"
-      ></password-strength-meter>
+      <password-strength-meter [password]="addUser.password"></password-strength-meter>
       <app-bd-button
         color="primary"
         [collapsed]="false"

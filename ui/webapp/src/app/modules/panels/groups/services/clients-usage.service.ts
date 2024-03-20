@@ -44,7 +44,7 @@ export class ClientsUsageService {
     return this.http.get<ClientUsageData>(`${this.apiPath(this.groups.current$.value.name)}/${id}/clientUsage`).pipe(
       finalize(() => this.loading$.next(false)),
       measure('Load Client Usage'),
-      map((usage) => this.transform(usage))
+      map((usage) => this.transform(usage)),
     );
   }
 

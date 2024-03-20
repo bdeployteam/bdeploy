@@ -58,7 +58,7 @@ export class ProcessDetailsService implements OnDestroy {
 
       // find the configuration for the application we're showing details for
       const appsPerNode = nodes.nodeConfigDtos.map((x) =>
-        x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : []
+        x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [],
       );
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
       const app = allApps.find((a) => a?.id === process);
@@ -83,7 +83,7 @@ export class ProcessDetailsService implements OnDestroy {
           `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.id)}/processes/${
             app2node[process]
           }/${process}`,
-          NO_LOADING_BAR
+          NO_LOADING_BAR,
         )
         .pipe(
           finalize(() => {
@@ -92,7 +92,7 @@ export class ProcessDetailsService implements OnDestroy {
               this.loading$.next(false);
             });
           }),
-          measure(`Process Details`)
+          measure(`Process Details`),
         )
         .subscribe((d) => {
           this.processDetail$.next(d);
@@ -115,9 +115,9 @@ export class ProcessDetailsService implements OnDestroy {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instances.active$.value.instanceConfiguration.id
+          this.instances.active$.value.instanceConfiguration.id,
         )}/processes/${detail.status.appId}/stdin`,
-        value
+        value,
       )
       .subscribe();
   }
@@ -130,12 +130,12 @@ export class ProcessDetailsService implements OnDestroy {
         `${this.apiPath(this.groups.current$.value.name, detail.status.instanceId)}/output/${
           detail.status.instanceTag
         }/${detail.status.appId}`,
-        NO_LOADING_BAR
+        NO_LOADING_BAR,
       )
       .pipe(
         map((e) => {
           return [e, e.entries[0]];
-        })
+        }),
       );
   }
 }

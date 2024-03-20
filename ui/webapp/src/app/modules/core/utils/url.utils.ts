@@ -24,8 +24,7 @@ export class URLish {
    *
    * We simply have to use groups 1, 3, 5, 6 and 9 :)
    */
-  private regex =
-    /(\S+:\/\/)?((.+(?=:\d))(:(\d+))|(([^/]+(?=\/))|([^/]+)))?(\/.*)?/;
+  private regex = /(\S+:\/\/)?((.+(?=:\d))(:(\d+))|(([^/]+(?=\/))|([^/]+)))?(\/.*)?/;
 
   constructor(url: string) {
     const result = this.regex.exec(url);

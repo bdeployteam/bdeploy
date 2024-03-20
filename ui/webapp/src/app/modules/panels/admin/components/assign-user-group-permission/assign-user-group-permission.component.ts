@@ -60,7 +60,7 @@ export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.authAdmin.updateUserGroup(group).subscribe(() => {
         this.areas.closePanel();
-      })
+      }),
     );
   }
 }

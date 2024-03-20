@@ -33,17 +33,13 @@
 
       <!-- Nodes. -->
       <ng-container *ngFor="let node of cfg.nodes?.nodeConfigDtos">
-        <div
-          class="bd-rect-card"
-          *ngIf="!!node.nodeConfiguration?.applications?.length"
-        >
+        <div class="bd-rect-card" *ngIf="!!node.nodeConfiguration?.applications?.length">
           <div class="flex flex-col">
             <div class="bd-default-padding flex pb-0">
               <div class="flex flex-col">
                 <div class="bd-type-text">NODE</div>
                 <div class="bd-title-text">
-                  {{ node?.nodeName === clientNodeName ? 'Client Applications' :
-                  node?.nodeName }}
+                  {{ node?.nodeName === clientNodeName ? 'Client Applications' : node?.nodeName }}
                 </div>
               </div>
             </div>

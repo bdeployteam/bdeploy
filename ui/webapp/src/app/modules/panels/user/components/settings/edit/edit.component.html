@@ -1,31 +1,14 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Edit User"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit User" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
       <div class="flex justify-center items-center">
-        <app-user-avatar
-          [avatarSize]="64"
-          [hostSize]="64"
-          [mail]="mail$ | async"
-        ></app-user-avatar>
+        <app-user-avatar [avatarSize]="64" [hostSize]="64" [mail]="mail$ | async"></app-user-avatar>
       </div>
       <div class="flex flex-col gap-2.5" *ngIf="!!user && !user.external">
-        <app-bd-form-input
-          [(ngModel)]="user.name"
-          name="name"
-          label="Username"
-          [disabled]="true"
-        ></app-bd-form-input>
-        <app-bd-form-input
-          [(ngModel)]="user.fullName"
-          name="fullName"
-          label="Full Name"
-        ></app-bd-form-input>
+        <app-bd-form-input [(ngModel)]="user.name" name="name" label="Username" [disabled]="true"></app-bd-form-input>
+        <app-bd-form-input [(ngModel)]="user.fullName" name="fullName" label="Full Name"></app-bd-form-input>
         <app-bd-form-input
           [(ngModel)]="user.email"
           (ngModelChange)="updateMail()"

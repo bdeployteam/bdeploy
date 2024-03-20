@@ -9,23 +9,11 @@
       [route]="['panels', 'admin', 'logging', 'config']"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-button
-      icon="refresh"
-      text="Refresh"
-      (click)="loggingAdmin.reload()"
-      tooltip="below"
-    ></app-bd-button>
+    <app-bd-button icon="refresh" text="Refresh" (click)="loggingAdmin.reload()" tooltip="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <mat-tab-group
-      #tabGroup
-      [(selectedIndex)]="selectedIndex"
-      animationDuration="0ms"
-    >
-      <mat-tab
-        *ngFor="let logDirectory of loggingAdmin.directories$ | async"
-        label="{{ logDirectory.minion }}"
-      >
+    <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex" animationDuration="0ms">
+      <mat-tab *ngFor="let logDirectory of loggingAdmin.directories$ | async" label="{{ logDirectory.minion }}">
         <app-bd-data-table
           [records]="logDirectory.entries"
           [columns]="columns"

@@ -78,7 +78,7 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
       .confirm(
         `Discard unsaved changes?`,
         `Discard <strong>${this.edit.undos.length}</strong> unsaved local changes? This cannot be undone.`,
-        'undo'
+        'undo',
       )
       .subscribe((confirm) => {
         if (confirm) {

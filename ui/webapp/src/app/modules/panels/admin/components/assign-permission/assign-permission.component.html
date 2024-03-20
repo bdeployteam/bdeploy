@@ -1,9 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Assign Permission"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Assign Permission" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
       <ng-container *ngIf="!(loading$ | async)">

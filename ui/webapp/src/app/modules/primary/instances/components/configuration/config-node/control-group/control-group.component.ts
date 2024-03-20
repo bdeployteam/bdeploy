@@ -69,8 +69,8 @@ export class ControlGroupComponent implements OnInit, OnDestroy {
           } else {
             this.borderClass = 'bd-status-border-none';
           }
-        }
-      )
+        },
+      ),
     );
   }
 

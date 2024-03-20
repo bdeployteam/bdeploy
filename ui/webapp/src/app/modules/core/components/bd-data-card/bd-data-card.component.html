@@ -1,14 +1,8 @@
 <ng-template #cardContents>
   <div class="flex">
     <div class="flex flex-col">
-      <div
-        *ngIf="!!colType"
-        class="bd-type-text truncate"
-        [ngClass]="colType.classes ? colType.classes(record) : []"
-      >
-        <ng-container *ngIf="!colType.component" class="truncate"
-          >{{ colType.data(record) }}</ng-container
-        >
+      <div *ngIf="!!colType" class="bd-type-text truncate" [ngClass]="colType.classes ? colType.classes(record) : []">
+        <ng-container *ngIf="!colType.component" class="truncate">{{ colType.data(record) }}</ng-container>
         <app-bd-data-component-cell
           *ngIf="!!colType.component"
           [componentType]="colType.component"
@@ -23,9 +17,7 @@
         [matTooltip]="!!colTitle.tooltip ? colTitle.tooltip(record) : colTitle.data(record)"
         [matTooltipShowDelay]="1000"
       >
-        <ng-container *ngIf="!colTitle.component" class="truncate"
-          >{{ colTitle.data(record) }}</ng-container
-        >
+        <ng-container *ngIf="!colTitle.component" class="truncate">{{ colTitle.data(record) }}</ng-container>
         <app-bd-data-component-cell
           *ngIf="!!colTitle.component"
           [componentType]="colTitle.component"
@@ -52,14 +44,8 @@
       </div>
     </div>
     <div class="flex-auto"></div>
-    <div
-      *ngIf="!!colStatus"
-      class="truncate"
-      [ngClass]="colStatus.classes ? colStatus.classes(record) : []"
-    >
-      <ng-container *ngIf="!colStatus.component" class="truncate"
-        >{{ colStatus.data(record) }}</ng-container
-      >
+    <div *ngIf="!!colStatus" class="truncate" [ngClass]="colStatus.classes ? colStatus.classes(record) : []">
+      <ng-container *ngIf="!colStatus.component" class="truncate">{{ colStatus.data(record) }}</ng-container>
       <app-bd-data-component-cell
         *ngIf="!!colStatus.component"
         [componentType]="colStatus.component"
@@ -85,12 +71,9 @@
               class="bd-small-icon"
               [matTooltip]="detail.description ? detail.description : detail.name"
               [matTooltipShowDelay]="1000"
-              >{{ detail.icon ? detail.icon(record) : 'error_outline'
-              }}</mat-icon
+              >{{ detail.icon ? detail.icon(record) : 'error_outline' }}</mat-icon
             >
-            <span *ngIf="!detail.component" class="truncate"
-              >{{ detail.data(record) }}</span
-            >
+            <span *ngIf="!detail.component" class="truncate">{{ detail.data(record) }}</span>
             <div *ngIf="!!detail.component">
               <app-bd-data-component-cell
                 [componentType]="detail.component"
@@ -100,9 +83,7 @@
             </div>
           </ng-container>
         </ng-container>
-        <ng-container
-          *ngTemplateOutlet="extraCardDetails; context: { record }"
-        ></ng-container>
+        <ng-container *ngTemplateOutlet="extraCardDetails; context: { record }"></ng-container>
       </div>
     </div>
 
@@ -138,9 +119,7 @@
     [matTooltip]="!!colFooter.tooltip ? colFooter.tooltip(record) : colFooter.data(record)"
     [matTooltipShowDelay]="1000"
   >
-    <ng-container *ngIf="!colFooter.component" class="truncate"
-      >{{ colFooter.data(record) }}</ng-container
-    >
+    <ng-container *ngIf="!colFooter.component" class="truncate">{{ colFooter.data(record) }}</ng-container>
     <app-bd-data-component-cell
       *ngIf="!!colFooter.component"
       [componentType]="colFooter.component"
@@ -158,9 +137,7 @@
   *ngIf="!recordRoute"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
-  <ng-container
-    *ngTemplateOutlet="extraCardDetails; context: { record }"
-  ></ng-container>
+  <ng-container *ngTemplateOutlet="extraCardDetails; context: { record }"></ng-container>
 </mat-card>
 
 <mat-card

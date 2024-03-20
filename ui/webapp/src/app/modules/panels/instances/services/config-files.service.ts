@@ -62,7 +62,7 @@ export class ConfigFilesService {
           return;
         }
         this.loadFiles(group.name, instance, state).subscribe((f) => this.persistent$.next(f));
-      }
+      },
     );
 
     this.editSvc.saving$.subscribe((s) => {
@@ -75,20 +75,17 @@ export class ConfigFilesService {
 
   private loadFiles(group: string, instance: InstanceDto, state: GlobalEditState): Observable<ConfigFileDto[]> {
     return this.http
-      .get<ConfigFileDto[]>(
-        `${this.apiPath(group, instance.instanceConfiguration.id)}/${instance.instance.tag}/${
-          state.config.config.product.name
-        }/${state.config.config.product.tag}`,
-        { headers: suppressGlobalErrorHandling(new HttpHeaders()) }
-      )
+      .get<
+        ConfigFileDto[]
+      >(`${this.apiPath(group, instance.instanceConfiguration.id)}/${instance.instance.tag}/${state.config.config.product.name}/${state.config.config.product.tag}`, { headers: suppressGlobalErrorHandling(new HttpHeaders()) })
       .pipe(
         catchError((err) => {
           console.log(
             `Cannot load configuration files for ${instance.instance.name}:${instance.instance.tag} (${state.config.config.product.tag})`,
-            err
+            err,
           );
           return of([]);
-        })
+        }),
       );
   }
 
@@ -188,7 +185,7 @@ export class ConfigFilesService {
         `${this.apiPath(this.groups.current$.value.name, this.editSvc.current$.value.instanceConfiguration.id)}/load/${
           this.editSvc.current$.value.instance.tag
         }/${path}`,
-        { responseType: 'text' }
+        { responseType: 'text' },
       )
       .pipe(map((s) => s, measure(`Load ${path}`)));
   }
@@ -198,12 +195,12 @@ export class ConfigFilesService {
       .get(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.editSvc.current$.value.instanceConfiguration.id
+          this.editSvc.current$.value.instanceConfiguration.id,
         )}/loadTemplate/${path}`,
         {
           responseType: 'text',
           params: { prodName: product.name, prodTag: product.tag },
-        }
+        },
       )
       .pipe(map((s) => s, measure(`Load Template ${path}`)));
   }

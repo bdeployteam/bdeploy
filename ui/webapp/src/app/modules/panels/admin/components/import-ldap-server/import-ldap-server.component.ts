@@ -32,7 +32,7 @@ export class ImportLdapServerComponent implements OnInit, OnDestroy {
         this.auth.importAccountsLdapServer(server).subscribe((r) => {
           this.checkResult$.next(r);
         });
-      }
+      },
     );
   }
 

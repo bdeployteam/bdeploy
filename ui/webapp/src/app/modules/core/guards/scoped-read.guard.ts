@@ -46,14 +46,14 @@ export class ScopedReadGuard {
         }
         this.snackbar.open(
           `Unfortunately, ${route.url.join(
-            '/'
+            '/',
           )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
           'DISMISS',
-          { panelClass: 'error-snackbar' }
+          { panelClass: 'error-snackbar' },
         );
         this.router.navigate(['/groups/browser']);
         return false;
-      })
+      }),
     );
   }
 }

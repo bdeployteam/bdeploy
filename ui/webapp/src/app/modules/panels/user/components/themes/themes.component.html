@@ -3,9 +3,7 @@
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <div class="bd-description-text">
-        The selected theme is stored in the browser's local storage.
-      </div>
+      <div class="bd-description-text">The selected theme is stored in the browser's local storage.</div>
       <div
         *ngFor="let t of themeService.getThemes()"
         class="local-theme-item cursor-pointer flex gap-2.5 justify-start items-center"
@@ -19,10 +17,7 @@
         </div>
         <div class="flex-auto">{{ themeService.getThemeDescription(t) }}</div>
         <div class="flex justify-center items-center w-9">
-          <div
-            class="preview-selected"
-            *ngIf="t === themeService.getCurrentTheme()"
-          >
+          <div class="preview-selected" *ngIf="t === themeService.getCurrentTheme()">
             <mat-icon>check_circle_outline</mat-icon>
           </div>
         </div>

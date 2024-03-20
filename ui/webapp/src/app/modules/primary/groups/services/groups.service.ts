@@ -161,8 +161,8 @@ export class GroupsService {
       switchMap((g) =>
         this.http.get(`${this.apiPath}/${g.name}/new-uuid`, {
           responseType: 'text',
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -188,7 +188,7 @@ export class GroupsService {
     })
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Group Load')
+        measure('Group Load'),
       )
       .subscribe((result) => {
         this.groups$.next(result.groups);
@@ -233,7 +233,7 @@ export class GroupsService {
     this.snackbar.open(
       `Unfortunately, ${this.router.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
       'DISMISS',
-      { panelClass: 'error-snackbar' }
+      { panelClass: 'error-snackbar' },
     );
     this.areas.forcePanelClose$.next(true);
     this.router.navigate(['/groups/browser'], {

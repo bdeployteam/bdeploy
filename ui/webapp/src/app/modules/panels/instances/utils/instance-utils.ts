@@ -21,10 +21,7 @@ export const DEF_CONTROL_GROUP: ProcessControlGroupConfiguration = {
   stopType: ProcessControlGroupHandlingType.SEQUENTIAL,
 };
 
-export function getNodeOfApplication(
-  nodes: InstanceNodeConfigurationDto[],
-  id: string
-): InstanceNodeConfigurationDto {
+export function getNodeOfApplication(nodes: InstanceNodeConfigurationDto[], id: string): InstanceNodeConfigurationDto {
   for (const node of nodes) {
     const app = node.nodeConfiguration.applications.find((a) => a.id === id);
     if (app) {
@@ -39,7 +36,7 @@ export function getNodeOfApplication(
  */
 export function getProcessControlGroupOfApplication(
   groups: ProcessControlGroupConfiguration[],
-  id: string
+  id: string,
 ): ProcessControlGroupConfiguration {
   for (const group of groups) {
     const app = group.processOrder.find((a) => a === id);

@@ -24,7 +24,7 @@ export class UpdateActionComponent implements OnInit {
     this.curIndex = products.findIndex(
       (r) =>
         this.edit.state$.value?.config.config.product.name === r.key.name &&
-        this.edit.state$.value?.config.config.product.tag === r.key.tag
+        this.edit.state$.value?.config.config.product.tag === r.key.tag,
     );
     this.isUpgrade = this.index < this.curIndex;
     this.isCurrent = this.index === this.curIndex;

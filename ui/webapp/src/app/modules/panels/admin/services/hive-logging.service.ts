@@ -40,7 +40,7 @@ export class HiveLoggingService {
       .get<RemoteDirectory[]>(`${this.apiPath(this.bhive$.value)}/logDirs`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('List Hive Logs')
+        measure('List Hive Logs'),
       )
       .subscribe((dirs) => {
         this.bhive$.next(this.bhive$.value);
@@ -53,7 +53,7 @@ export class HiveLoggingService {
             } else {
               return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
             }
-          })
+          }),
         );
       });
   }
@@ -73,7 +73,7 @@ export class HiveLoggingService {
     rde: RemoteDirectoryEntry,
     offset: number,
     limit: number,
-    silent: boolean
+    silent: boolean,
   ): Observable<StringEntryChunkDto> {
     const options = {
       headers: null,

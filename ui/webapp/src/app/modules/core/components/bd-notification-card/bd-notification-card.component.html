@@ -9,13 +9,8 @@
     *ngIf="!collapsed"
   >
     <mat-icon *ngIf="!!icon && type === 'generic'">{{ icon }}</mat-icon>
-    <mat-icon
-      *ngIf="!!svgIcon && type === 'generic'"
-      [svgIcon]="svgIcon"
-    ></mat-icon>
-    <mat-icon *ngIf="type !== 'generic'">
-      {{ type === 'error' ? 'error' : 'warning' }}</mat-icon
-    >
+    <mat-icon *ngIf="!!svgIcon && type === 'generic'" [svgIcon]="svgIcon"></mat-icon>
+    <mat-icon *ngIf="type !== 'generic'"> {{ type === 'error' ? 'error' : 'warning' }}</mat-icon>
   </div>
   <div
     class="grow flex flex-col gap-2.5 justify-center items-stretch"
@@ -25,13 +20,8 @@
     <div class="flex gap-1 justify-start items-center">
       <ng-container *ngIf="collapsed">
         <mat-icon *ngIf="!!icon && type === 'generic'">{{ icon }}</mat-icon>
-        <mat-icon
-          *ngIf="!!svgIcon && type === 'generic'"
-          [svgIcon]="svgIcon"
-        ></mat-icon>
-        <mat-icon *ngIf="type !== 'generic'">
-          {{ type === 'error' ? 'error' : 'warning' }}</mat-icon
-        >
+        <mat-icon *ngIf="!!svgIcon && type === 'generic'" [svgIcon]="svgIcon"></mat-icon>
+        <mat-icon *ngIf="type !== 'generic'"> {{ type === 'error' ? 'error' : 'warning' }}</mat-icon>
       </ng-container>
       <div class="truncate">
         <strong>{{ header }}</strong>
@@ -41,14 +31,8 @@
       <ng-content></ng-content>
     </div>
   </div>
-  <div
-    class="local-dismiss-area flex-none flex justify-center items-center"
-    *ngIf="dismissable"
-  >
-    <app-bd-micro-icon-button
-      data-cy="notification-dismiss"
-      (click)="dismiss.emit(null)"
-      [disabled]="disabled"
+  <div class="local-dismiss-area flex-none flex justify-center items-center" *ngIf="dismissable">
+    <app-bd-micro-icon-button data-cy="notification-dismiss" (click)="dismiss.emit(null)" [disabled]="disabled"
       >close</app-bd-micro-icon-button
     >
   </div>

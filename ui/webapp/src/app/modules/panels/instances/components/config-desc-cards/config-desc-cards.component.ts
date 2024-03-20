@@ -31,12 +31,7 @@ export type InstFields =
   | 'inst.systemId'
   | 'inst.systemTag';
 
-export type AllFields =
-  | AppBaseFields
-  | AppProcessCtrlFields
-  | AppCommandFields
-  | AppEndpointFields
-  | InstFields;
+export type AllFields = AppBaseFields | AppProcessCtrlFields | AppCommandFields | AppEndpointFields | InstFields;
 
 @Component({
   selector: 'app-config-desc-cards',

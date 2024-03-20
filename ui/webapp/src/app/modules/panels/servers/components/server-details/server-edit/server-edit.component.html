@@ -1,28 +1,12 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Edit Details"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit Details" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
       <div *ngIf="server" class="flex flex-col gap-2.5">
-        <app-bd-form-input
-          name="description"
-          label="Description"
-          [(ngModel)]="server.description"
-        ></app-bd-form-input>
-        <app-bd-form-input
-          name="uri"
-          label="URI"
-          [(ngModel)]="server.uri"
-          appTrimmed
-        ></app-bd-form-input>
-        <div>
-          <strong>Advanced Users Only:</strong> Replace authorization token with
-          a new one. Handle with care!
-        </div>
+        <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
+        <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri" appTrimmed></app-bd-form-input>
+        <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
         <app-bd-form-input
           name="token"
           label="Authorization Token"

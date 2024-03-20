@@ -1,20 +1,7 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, Observable, isObservable, of } from 'rxjs';
 
-export type StateType =
-  | 'ok'
-  | 'info'
-  | 'warning'
-  | 'product'
-  | 'update'
-  | 'unknown';
+export type StateType = 'ok' | 'info' | 'warning' | 'product' | 'update' | 'unknown';
 
 export interface StateItem {
   name: string | Observable<string>;

@@ -1,19 +1,8 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Authentication Test"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Authentication Test" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      class="authentication-test-content flex gap-2.5 justify-center items-center"
-    >
-      <app-bd-form-input
-        class="flex-auto"
-        name="user"
-        label="User"
-        [(ngModel)]="testUser"
-        required
-      ></app-bd-form-input>
+    <div class="authentication-test-content flex gap-2.5 justify-center items-center">
+      <app-bd-form-input class="flex-auto" name="user" label="User" [(ngModel)]="testUser" required></app-bd-form-input>
       <app-bd-form-input
         class="flex-auto"
         name="pass"
@@ -32,9 +21,6 @@
         (click)="performTest()"
       ></app-bd-button>
     </div>
-    <app-bd-terminal
-      class="authentication-test-terminal"
-      [content$]="testResult$"
-    ></app-bd-terminal>
+    <app-bd-terminal class="authentication-test-terminal" [content$]="testResult$"></app-bd-terminal>
   </app-bd-dialog-content>
 </app-bd-dialog>

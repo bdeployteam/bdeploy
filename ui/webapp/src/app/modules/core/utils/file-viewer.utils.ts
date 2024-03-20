@@ -1,18 +1,7 @@
 import { TextWriter, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
 import * as Pako from 'pako';
-import {
-  Observable,
-  catchError,
-  forkJoin,
-  from,
-  map,
-  of,
-  switchMap,
-} from 'rxjs';
-import {
-  RemoteDirectoryEntry,
-  StringEntryChunkDto,
-} from 'src/app/models/gen.dtos';
+import { Observable, catchError, forkJoin, from, map, of, switchMap } from 'rxjs';
+import { RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
 
 const MAX_FILE_SIZE = 1048576; // 1 MB
 
@@ -37,10 +26,7 @@ export function isOversized(file: RemoteDirectoryEntry): boolean {
  * and pasted into content property.
  * Otherwise chunk will be left untouched
  */
-export function unwrap(
-  file: RemoteDirectoryEntry,
-  chunk: StringEntryChunkDto
-): Observable<StringEntryChunkDto> {
+export function unwrap(file: RemoteDirectoryEntry, chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
   if (isZip(file)) {
     return unzip(chunk);
   } else if (isGZip(file)) {
@@ -59,12 +45,10 @@ function unzip(chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
     map((c) => binaryContentToUint8Array(c)),
     map((data) => new ZipReader(new Uint8ArrayReader(data))),
     switchMap((zipReader) => from(zipReader.getEntries())),
-    switchMap((es) =>
-      forkJoin(es.map((e) => e.getData<string>(new TextWriter())))
-    ),
+    switchMap((es) => forkJoin(es.map((e) => e.getData<string>(new TextWriter())))),
     map((ss) => ss.join('\n')),
     catchError((e) => of(`failed to fetch content. ${e}`)),
-    map((content) => ({ ...chunk, content }))
+    map((content) => ({ ...chunk, content })),
   );
 }
 
@@ -73,6 +57,6 @@ function ungzip(chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
     map((c) => binaryContentToUint8Array(c)),
     map((data) => Pako.ungzip(data, { to: 'string' })),
     catchError((e) => of(`failed to decompress. ${e}`)),
-    map((content) => ({ ...chunk, content }))
+    map((content) => ({ ...chunk, content })),
   );
 }

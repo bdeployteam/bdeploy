@@ -149,8 +149,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
     this.subscription.add(
       combineLatest([this.edit.node$.pipe(distinctUntilChanged()), this.instanceEdit.nodes$, interval(1000)]).subscribe(
-        ([node, nodeConfigs]) => this.readFromClipboard(node, nodeConfigs[node.nodeName])
-      )
+        ([node, nodeConfigs]) => this.readFromClipboard(node, nodeConfigs[node.nodeName]),
+      ),
     );
   }
 
@@ -172,7 +172,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       // change browser behaviour in tests.
       this.clipBoardCfg$.next(null);
       this.clipBoardError$.next(
-        'Clipboard access is not supported in this browser. Pasting applications is not possible.'
+        'Clipboard access is not supported in this browser. Pasting applications is not possible.',
       );
       return;
     }
@@ -192,7 +192,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       (reason) => {
         this.clipBoardCfg$.next(null);
         this.clipBoardError$.next(`Cannot check clipboard permission (${reason}).`);
-      }
+      },
     );
 
     // in ANY case we try to read, and ignore any error, since the attempt to read prompts the user for permission.
@@ -284,7 +284,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   private validateHasAllVariables(
     template: FlattenedApplicationTemplateConfiguration,
-    variables: { [key: string]: string }
+    variables: { [key: string]: string },
   ) {
     for (const v of template.templateVariables) {
       if (!variables[v.id]) {

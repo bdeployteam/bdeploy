@@ -1,8 +1,5 @@
 <div class="flex flex-col">
-  <div
-    class="bd-form-toggle-appearance-fill flex flex-col"
-    [ngClass]="disabled ? ['bd-form-toggle-disabled'] : []"
-  >
+  <div class="bd-form-toggle-appearance-fill flex flex-col" [ngClass]="disabled ? ['bd-form-toggle-disabled'] : []">
     <div
       class="bd-form-toggle-form-field-wrapper bd-form-toggle-flex flex justify-start items-center"
       matRipple
@@ -13,9 +10,7 @@
       <div *ngIf="prefix" class="max-h-[21px]">
         <ng-container *ngTemplateOutlet="prefix"></ng-container>
       </div>
-      <div class="bd-form-toggle-label mat-mdc-floating-label flex-auto">
-        {{ label }}
-      </div>
+      <div class="bd-form-toggle-label mat-mdc-floating-label flex-auto">{{ label }}</div>
       <div class="bd-form-toggle-suffix">
         <ng-content></ng-content>
       </div>

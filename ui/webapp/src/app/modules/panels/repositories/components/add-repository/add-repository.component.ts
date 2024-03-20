@@ -64,7 +64,7 @@ export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialo
     return this.repositories.create(this.repository).pipe(
       finalize(() => {
         this.saving$.next(false);
-      })
+      }),
     );
   }
 }

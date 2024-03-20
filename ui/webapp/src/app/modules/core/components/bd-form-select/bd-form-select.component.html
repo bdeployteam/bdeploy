@@ -10,9 +10,7 @@
       [errorStateMatcher]="this"
     >
       <ng-container *ngIf="!component">
-        <mat-option *ngIf="!values || !values.length || allowNone"
-          >--</mat-option
-        >
+        <mat-option *ngIf="!values || !values.length || allowNone">--</mat-option>
         <mat-option *ngFor="let value of values; let i = index" [value]="value"
           >{{ !!labels && !!labels[i] ? labels[i] : values[i] }}</mat-option
         >
@@ -30,8 +28,6 @@
     <div *ngIf="prefix" matPrefix>
       <ng-container *ngTemplateOutlet="prefix"></ng-container>
     </div>
-    <mat-error *ngIf="ngControl && ngControl.invalid"
-      >{{ getErrorMessage() }}</mat-error
-    >
+    <mat-error *ngIf="ngControl && ngControl.invalid">{{ getErrorMessage() }}</mat-error>
   </mat-form-field>
 </div>

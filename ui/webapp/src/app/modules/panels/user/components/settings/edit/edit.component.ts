@@ -41,7 +41,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
       .pipe(
         skipWhile((u) => !u),
         first(),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe((u) => {
         if (u) {
@@ -59,7 +59,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.disableSave = this.isDirty();
-      })
+      }),
     );
   }
 

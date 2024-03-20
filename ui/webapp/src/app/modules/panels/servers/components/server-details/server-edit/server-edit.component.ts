@@ -24,7 +24,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected loading$ = combineLatest([this.saving$, this.servers.loading$, this.details.loading$]).pipe(
-    map(([a, b, c]) => a || b || c)
+    map(([a, b, c]) => a || b || c),
   );
 
   protected server: ManagedMasterDto;
@@ -42,7 +42,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
       this.details.server$.subscribe((s) => {
         this.server = cloneDeep(s);
         this.orig = cloneDeep(s);
-      })
+      }),
     );
   }
 
@@ -53,7 +53,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.disableSave = this.isDirty();
-      })
+      }),
     );
   }
 

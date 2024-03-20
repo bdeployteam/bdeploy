@@ -60,7 +60,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
             reader.readAsDataURL(data);
           });
         }
-      })
+      }),
     );
   }
 
@@ -71,7 +71,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.disableSave = this.isDirty();
-      })
+      }),
     );
   }
 
@@ -111,8 +111,10 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
         .update(this.group)
         .pipe(
           concatMap(() =>
-            this.image ? this.groups.updateImage(this.group.name, this.image) : this.groups.removeImage(this.group.name)
-          )
+            this.image
+              ? this.groups.updateImage(this.group.name, this.image)
+              : this.groups.removeImage(this.group.name),
+          ),
         );
     }
     return this.details.update(this.group);

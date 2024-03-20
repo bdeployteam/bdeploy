@@ -40,21 +40,21 @@ export class BulkControlComponent implements OnInit {
     this.startingMulti$,
     null,
     null,
-    this.bulkSelection$
+    this.bulkSelection$,
   );
   protected mappedStopMulti$ = this.actions.action(
     [Actions.STOP_PROCESS],
     this.stoppingMulti$,
     null,
     null,
-    this.bulkSelection$
+    this.bulkSelection$,
   );
   protected mappedRestartMulti$ = this.actions.action(
     [Actions.START_PROCESS, Actions.STOP_PROCESS],
     this.restartingMulti$,
     null,
     null,
-    this.bulkSelection$
+    this.bulkSelection$,
   );
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -68,7 +68,7 @@ export class BulkControlComponent implements OnInit {
       }
 
       this.bulkContainsConfirmed = Object.keys(s).some(
-        (k) => s[k].filter((c) => c?.processControl?.startType === ApplicationStartType.MANUAL_CONFIRM).length > 0
+        (k) => s[k].filter((c) => c?.processControl?.startType === ApplicationStartType.MANUAL_CONFIRM).length > 0,
       );
 
       const result: string[] = [];
@@ -83,7 +83,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Start',
-        `This will start all processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+        `This will start all processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
       )
       .subscribe((b) => {
         if (b) {
@@ -100,7 +100,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Stop',
-        `This will stop all currently running processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+        `This will stop all currently running processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
       )
       .subscribe((b) => {
         if (b) {
@@ -117,7 +117,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Restart',
-        `This will restart all running, and start all other processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+        `This will restart all running, and start all other processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
       )
       .subscribe((b) => {
         if (b) {
@@ -134,7 +134,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Start',
-        `This will start selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+        `This will start selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
       )
       .subscribe((b) => {
         if (b) {
@@ -151,7 +151,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Stop',
-        `This will stop selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+        `This will stop selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
       )
       .subscribe((b) => {
         if (b) {
@@ -168,7 +168,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Restart',
-        `This will restart selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+        `This will restart selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
       )
       .subscribe((b) => {
         if (b) {

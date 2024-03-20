@@ -58,7 +58,7 @@ export class UpdateBrowserComponent implements OnInit {
     this.dialog
       .confirm(
         'Restart Server',
-        'Are you sure you want to restart the server? This will interrupt existing operations and connections.'
+        'Are you sure you want to restart the server? This will interrupt existing operations and connections.',
       )
       .subscribe((x) => {
         if (!x) return;

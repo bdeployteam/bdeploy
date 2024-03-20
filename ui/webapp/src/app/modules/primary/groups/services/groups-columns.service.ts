@@ -63,7 +63,7 @@ export class GroupsColumnsService {
       this.groups.getLogoUrlOrDefault(
         r.instanceGroupConfiguration.name,
         r.instanceGroupConfiguration.logo,
-        '/assets/no-image.svg'
+        '/assets/no-image.svg',
       ),
   };
 

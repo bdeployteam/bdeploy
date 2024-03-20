@@ -48,7 +48,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
     this.deleting$,
     null,
     null,
-    this.tag$
+    this.tag$,
   );
 
   protected isCreate: boolean;
@@ -75,15 +75,15 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
           this.isInstalled = !!state?.installedTags?.find((s) => s === entry?.instanceTag);
           this.isActive = state?.activeTag === entry?.instanceTag;
         }
-      }
+      },
     );
     this.subscription.add(
       this.entry$
         .pipe(
           skipWhile((entry) => !entry),
-          switchMap((entry) => this.details.getVersionDetails(entry.instanceTag))
+          switchMap((entry) => this.details.getVersionDetails(entry.instanceTag)),
         )
-        .subscribe((cache) => (this.product = cache.config.product))
+        .subscribe((cache) => (this.product = cache.config.product)),
     );
   }
 
@@ -124,7 +124,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
       .confirm(
         `Delete Version`,
         `This instance version and all its history will be deleted and <strong>cannot be restored</strong>. Are you sure you want to do this?`,
-        'delete'
+        'delete',
       )
       .subscribe((r) => {
         if (!r) {
@@ -142,7 +142,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
     const group = this.groups.current$.value.name;
     this.areas.navigateBoth(
       ['products', 'browser', group],
-      ['panels', 'products', 'details', this.product.name, this.product.tag]
+      ['panels', 'products', 'details', this.product.name, this.product.tag],
     );
   }
 }

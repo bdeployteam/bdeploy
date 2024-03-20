@@ -64,7 +64,7 @@ export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable 
             this.compareConfig$.next(config);
           });
         }
-      })
+      }),
     );
 
     this.subscription.add(
@@ -75,7 +75,7 @@ export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable 
         } else {
           this.configPair$.next(null);
         }
-      })
+      }),
     );
 
     this.subscription.add(this.searchService.register(this));

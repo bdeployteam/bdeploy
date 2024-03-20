@@ -36,7 +36,7 @@ export class InstanceSettingsComponent {
       .confirm(
         `Delete ${inst.instanceConfiguration.name}`,
         `Really delete the instance <strong>${inst.instanceConfiguration.name}</strong> with ID <strong>${inst.instanceConfiguration.id}</strong>? This cannot be undone and will delete all associated data files!`,
-        'delete'
+        'delete',
       )
       .subscribe((confirm) => {
         if (confirm) {

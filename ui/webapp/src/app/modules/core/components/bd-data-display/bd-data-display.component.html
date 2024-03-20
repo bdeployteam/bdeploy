@@ -34,10 +34,7 @@
   (recordClick)="recordClick.emit($event)"
 >
   <ng-template #dataGridExtraCardDetails let-record="record">
-    <ng-container
-      *ngTemplateOutlet="dataDisplayExtraCardDetails; context: { record }"
-    >
-    </ng-container>
+    <ng-container *ngTemplateOutlet="dataDisplayExtraCardDetails; context: { record }"> </ng-container>
   </ng-template>
 </app-bd-data-grid>
 

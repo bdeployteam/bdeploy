@@ -8,12 +8,7 @@
       [route]="['panels', 'admin', 'software', 'bulk-manipulation']"
       tooltip="below"
     ></app-bd-panel-button>
-    <app-bd-button
-      text="Restart Server"
-      icon="restart_alt"
-      (click)="restartServer()"
-      tooltip="below"
-    ></app-bd-button>
+    <app-bd-button text="Restart Server" icon="restart_alt" (click)="restartServer()" tooltip="below"></app-bd-button>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Software"
@@ -21,12 +16,7 @@
       [route]="['panels', 'admin', 'software', 'upload']"
       tooltip="below"
     ></app-bd-panel-button>
-    <app-bd-button
-      icon="refresh"
-      text="Refresh"
-      (click)="software.load()"
-      tooltip="below"
-    ></app-bd-button>
+    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()" tooltip="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-data-table

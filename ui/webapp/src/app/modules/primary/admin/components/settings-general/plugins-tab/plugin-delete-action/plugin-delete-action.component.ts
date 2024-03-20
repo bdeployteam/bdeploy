@@ -18,7 +18,7 @@ export class PluginDeleteActionComponent {
       .confirm(
         `Delete ${this.record.name} ${this.record.version}`,
         'Are you sure? The plugin will be deleted permanently.',
-        'warning'
+        'warning',
       )
       .subscribe((r) => {
         if (r) {

@@ -12,8 +12,7 @@
   align-items: center;
 }
 
-.local-toggle-group
-  .mat-button-toggle-checked:not(.mat-button-toggle-disabled) {
+.local-toggle-group .mat-button-toggle-checked:not(.mat-button-toggle-disabled) {
   background-color: var(--bd-accent);
   color: var(--bd-accent-contrast) !important;
 }

@@ -22,125 +22,86 @@ const routes: Routes = [
   },
   {
     path: 'admin',
-    loadChildren: () =>
-      import('./modules/primary/admin/admin.module').then((x) => x.AdminModule),
+    loadChildren: () => import('./modules/primary/admin/admin.module').then((x) => x.AdminModule),
     canActivate: [AdminGuard],
   },
   {
     path: 'panels/admin',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/admin/admin.module').then((m) => m.AdminModule),
+    loadChildren: () => import('./modules/panels/admin/admin.module').then((m) => m.AdminModule),
     canActivate: [AdminGuard],
   },
   {
     path: 'groups',
-    loadChildren: () =>
-      import('./modules/primary/groups/groups.module').then(
-        (x) => x.GroupsModule
-      ),
+    loadChildren: () => import('./modules/primary/groups/groups.module').then((x) => x.GroupsModule),
     canActivate: [AuthGuard], // Permission is granted to all users to view the things in here.
   },
   {
     path: 'panels/groups',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/groups/groups.module').then(
-        (x) => x.GroupsModule
-      ),
+    loadChildren: () => import('./modules/panels/groups/groups.module').then((x) => x.GroupsModule),
     canActivate: [AuthGuard],
   },
   {
     path: 'repositories',
-    loadChildren: () =>
-      import('./modules/primary/repositories/repositories.module').then(
-        (x) => x.RepositoriesModule
-      ),
+    loadChildren: () => import('./modules/primary/repositories/repositories.module').then((x) => x.RepositoriesModule),
     canActivate: [AuthGuard],
   },
   {
     path: 'panels/repositories',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/repositories/repositories.module').then(
-        (x) => x.RepositoriesModule
-      ),
+    loadChildren: () => import('./modules/panels/repositories/repositories.module').then((x) => x.RepositoriesModule),
     canActivate: [AuthGuard],
   },
   {
     path: 'instances',
-    loadChildren: () =>
-      import('./modules/primary/instances/instances.module').then(
-        (x) => x.InstancesModule
-      ),
+    loadChildren: () => import('./modules/primary/instances/instances.module').then((x) => x.InstancesModule),
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'panels/instances',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/instances/instances.module').then(
-        (x) => x.InstancesModule
-      ),
+    loadChildren: () => import('./modules/panels/instances/instances.module').then((x) => x.InstancesModule),
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'products',
-    loadChildren: () =>
-      import('./modules/primary/products/products.module').then(
-        (x) => x.ProductsModule
-      ),
+    loadChildren: () => import('./modules/primary/products/products.module').then((x) => x.ProductsModule),
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'panels/products',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/products/products.module').then(
-        (x) => x.ProductsModule
-      ),
+    loadChildren: () => import('./modules/panels/products/products.module').then((x) => x.ProductsModule),
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'systems',
-    loadChildren: () =>
-      import('./modules/primary/systems/systems.module').then(
-        (x) => x.SystemsModule
-      ),
+    loadChildren: () => import('./modules/primary/systems/systems.module').then((x) => x.SystemsModule),
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'panels/systems',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/systems/systems.module').then(
-        (x) => x.SystemsModule
-      ),
+    loadChildren: () => import('./modules/panels/systems/systems.module').then((x) => x.SystemsModule),
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'servers',
-    loadChildren: () =>
-      import('./modules/primary/servers/servers.module').then(
-        (x) => x.ServersModule
-      ),
+    loadChildren: () => import('./modules/primary/servers/servers.module').then((x) => x.ServersModule),
     canActivate: [AuthGuard, ServerCentralGuard, ScopedAdminGuard],
   },
   {
     path: 'panels/servers',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/servers/servers.module').then(
-        (x) => x.ServersModule
-      ),
+    loadChildren: () => import('./modules/panels/servers/servers.module').then((x) => x.ServersModule),
     canActivate: [AuthGuard, ScopedAdminGuard],
   },
 
   {
     path: 'panels/user',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/panels/user/user.module').then((x) => x.UserModule),
+    loadChildren: () => import('./modules/panels/user/user.module').then((x) => x.UserModule),
     canActivate: [AuthGuard],
   },
 
@@ -154,9 +115,9 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-    useHash: true,
-    preloadingStrategy: PreloadAllModules
-}),
+      useHash: true,
+      preloadingStrategy: PreloadAllModules,
+    }),
   ],
   exports: [RouterModule],
 })

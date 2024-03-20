@@ -108,7 +108,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
       combineLatest([this.edit.validating$, this.edit.issues$]).subscribe(() => {
         // update in case validation is run in the background - this means something may have changed
         this.data?.forEach((t) => t?.redraw());
-      })
+      }),
     );
   }
 
@@ -153,12 +153,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
           // don't use groupedProcesses keys, as this will not contain *empty* groups.
           this.allowedSources$.next(
-            nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name)
+            nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name),
           );
           this.groupedProcesses$.next(grouped);
           this.data.forEach((t) => t.update());
         });
-      })
+      }),
     );
   }
 
@@ -187,8 +187,8 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
         order.previousIndex,
         order.currentIndex,
         sourceGroup,
-        targetGroup
-      )
+        targetGroup,
+      ),
     );
     this.data.forEach((t) => t.update());
   }

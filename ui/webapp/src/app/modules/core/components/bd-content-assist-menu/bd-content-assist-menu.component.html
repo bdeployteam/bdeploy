@@ -16,18 +16,12 @@
     >
       <div class="flex gap-1">
         <div class="w-[18px] h-[18px]">
-          <mat-icon *ngIf="match.icon" class="local-icon"
-            >{{match.icon}}</mat-icon
-          >
+          <mat-icon *ngIf="match.icon" class="local-icon">{{match.icon}}</mat-icon>
         </div>
         <div>{{match.value}}</div>
-        <div class="bd-description-text truncate text-right grow basis-0">
-          {{match.description}}
-        </div>
+        <div class="bd-description-text truncate text-right grow basis-0">{{match.description}}</div>
       </div>
     </div>
-    <div class="bd-hint-text" *ngIf="tooManyMatches">
-      Further matches hidden. Filter to find more.
-    </div>
+    <div class="bd-hint-text" *ngIf="tooManyMatches">Further matches hidden. Filter to find more.</div>
   </mat-card>
 </ng-template>

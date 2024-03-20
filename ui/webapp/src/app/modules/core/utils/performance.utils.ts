@@ -21,10 +21,7 @@ export const measure = function <T>(name: string) {
   const nativeWindow = window;
   const fullName = prefix + name;
   return (source: Observable<T>) => {
-    if (
-      'performance' in nativeWindow &&
-      nativeWindow.performance !== undefined
-    ) {
+    if ('performance' in nativeWindow && nativeWindow.performance !== undefined) {
       return defer(() => {
         nativeWindow.performance.mark(`${fullName}:subscribe`);
         return source.pipe(
@@ -35,19 +32,12 @@ export const measure = function <T>(name: string) {
           finalize(() => {
             nativeWindow.performance.mark(`${fullName}:complete`);
             try {
-              nativeWindow.performance.measure(
-                `${fullName}`,
-                `${fullName}:subscribe`,
-                `${fullName}:complete`
-              );
-              logMeasurements(
-                name,
-                nativeWindow.performance.getEntriesByName(fullName, 'measure')
-              );
+              nativeWindow.performance.measure(`${fullName}`, `${fullName}:subscribe`, `${fullName}:complete`);
+              logMeasurements(name, nativeWindow.performance.getEntriesByName(fullName, 'measure'));
             } catch (err) {
               console.warn(`Error while measuring ${fullName}.`, err);
             }
-          })
+          }),
         );
       });
     }
@@ -57,8 +47,7 @@ export const measure = function <T>(name: string) {
 
 function logMeasurements(name: string, entries: PerformanceEntryList) {
   const last = entries[entries.length - 1];
-  const avg =
-    entries.map((p) => p.duration).reduce((p, c) => p + c) / entries.length;
+  const avg = entries.map((p) => p.duration).reduce((p, c) => p + c) / entries.length;
   console.group(name);
   try {
     logTiming('Total Duration [ms]', last.duration);

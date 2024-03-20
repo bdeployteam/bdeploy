@@ -22,7 +22,7 @@ export class HttpReplayService {
           resetOnError: true,
           resetOnComplete: false,
           resetOnRefCountZero: false,
-        })
+        }),
       );
       setTimeout(() => delete this.cache[url], resetTimeMs);
     }

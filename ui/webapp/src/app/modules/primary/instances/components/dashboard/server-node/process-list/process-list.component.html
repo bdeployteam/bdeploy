@@ -12,15 +12,8 @@
   (checkedChange)="bulk.update(node.nodeName, $event)"
 >
   <ng-template #dataDisplayExtraCardDetails let-record="record">
-    <ng-container
-      *ngFor="let param of getPinnedParameters(record); trackBy: doTrack"
-    >
-      <mat-icon
-        class="bd-small-icon"
-        matTooltip="Pinned Parameter"
-        [matTooltipShowDelay]="1000"
-        >push_pin</mat-icon
-      >
+    <ng-container *ngFor="let param of getPinnedParameters(record); trackBy: doTrack">
+      <mat-icon class="bd-small-icon" matTooltip="Pinned Parameter" [matTooltipShowDelay]="1000">push_pin</mat-icon>
       <span class="truncate">{{ param.name }} = {{ param.value }}</span>
     </ng-container>
   </ng-template>

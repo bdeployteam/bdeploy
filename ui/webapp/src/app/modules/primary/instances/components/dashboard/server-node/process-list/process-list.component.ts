@@ -82,7 +82,7 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
 
   protected getPinnedParameters(record: ApplicationConfiguration): PinnedParameter[] {
     const app = this.nodes?.applications?.find(
-      (a) => a.key.name === record.application?.name && a.key.tag === record.application?.tag
+      (a) => a.key.name === record.application?.name && a.key.tag === record.application?.tag,
     );
     const params = app?.descriptor?.startCommand?.parameters;
     return record.start.parameters
@@ -109,7 +109,7 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
         config: instanceConfiguration,
         nodeDtos,
       },
-      system?.config
+      system?.config,
     );
   }
 

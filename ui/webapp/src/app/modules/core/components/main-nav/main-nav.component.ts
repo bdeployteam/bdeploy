@@ -36,7 +36,7 @@ export class MainNavComponent implements OnInit {
           .open(
             'There seems to be an issue with WebSockets on your System. Communication with the server is restricted. New data will not be received without refresh.',
             'ACKNOWLEDGE',
-            { panelClass: 'error-snackbar' }
+            { panelClass: 'error-snackbar' },
           )
           .afterDismissed()
           .subscribe(() => {

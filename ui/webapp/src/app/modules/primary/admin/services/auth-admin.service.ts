@@ -42,7 +42,7 @@ export class AuthAdminService {
       .get<UserInfo[]>(`${this.apiPath()}/users`)
       .pipe(
         measure('Get All Users'),
-        finalize(() => this.loadingUsers$.next(false))
+        finalize(() => this.loadingUsers$.next(false)),
       )
       .subscribe((users) => this.users$.next(users));
   }
@@ -71,7 +71,7 @@ export class AuthAdminService {
       .get<UserGroupInfo[]>(`${this.apiPath()}/user-groups`)
       .pipe(
         measure('Get All User Groups'),
-        finalize(() => this.loadingUserGroups$.next(false))
+        finalize(() => this.loadingUserGroups$.next(false)),
       )
       .subscribe((userGroups) => this.userGroups$.next(userGroups));
   }
@@ -102,7 +102,7 @@ export class AuthAdminService {
       { user: username, password: password } as CredentialsApi,
       {
         headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      }
+      },
     );
   }
 

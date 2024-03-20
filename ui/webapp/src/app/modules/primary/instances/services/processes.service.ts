@@ -92,7 +92,7 @@ export class ProcessesService {
           });
 
           this.reload();
-        }
+        },
       );
   }
 
@@ -146,7 +146,7 @@ export class ProcessesService {
     const call = this.http
       .get<InstanceProcessStatusDto>(
         `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}`,
-        NO_LOADING_BAR
+        NO_LOADING_BAR,
       )
       .pipe(
         finalize(() => {
@@ -157,7 +157,7 @@ export class ProcessesService {
             this.loading$.next(false);
           });
         }),
-        measure('Load Process States')
+        measure('Load Process States'),
       )
       .subscribe((p) => {
         this.zone.run(() => {
@@ -193,14 +193,14 @@ export class ProcessesService {
   public verify(pid: string): Observable<VerifyOperationResultDto> {
     return this.http.post<VerifyOperationResultDto>(
       `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/verify/${pid}`,
-      null
+      null,
     );
   }
 
   public reinstall(pid: string): Observable<any> {
     return this.http.post<boolean>(
       `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/reinstall/${pid}`,
-      null
+      null,
     );
   }
 

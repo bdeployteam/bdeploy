@@ -16,9 +16,7 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <app-config-process-header
-        (checkIsInvalid)="checkIsInvalid($event, true)"
-      ></app-config-process-header>
+      <app-config-process-header (checkIsInvalid)="checkIsInvalid($event, true)"></app-config-process-header>
       <app-config-process-param-group
         [dialog]="dialog"
         (checkIsInvalid)="checkIsInvalid($event, false)"

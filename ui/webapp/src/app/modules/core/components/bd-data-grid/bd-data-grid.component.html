@@ -1,24 +1,12 @@
 <div>
-  <mat-tab-group
-    *ngIf="grouping"
-    class="w-full"
-    animationDuration="0ms"
-    (selectedTabChange)="onTabChange($event)"
-  >
+  <mat-tab-group *ngIf="grouping" class="w-full" animationDuration="0ms" (selectedTabChange)="onTabChange($event)">
     <ng-container *ngFor="let group of groupValues">
-      <mat-tab
-        *ngIf="!grouping.selected?.length || grouping.selected.includes(group)"
-        [label]="group"
-      >
-      </mat-tab>
+      <mat-tab *ngIf="!grouping.selected?.length || grouping.selected.includes(group)" [label]="group"> </mat-tab>
     </ng-container>
   </mat-tab-group>
 </div>
 <div *ngIf="(recordsToDisplay$ | async) as recordsToDisplay">
-  <div
-    class="flex-auto flex flex-wrap justify-start max-w-full"
-    *ngIf="recordsToDisplay.length"
-  >
+  <div class="flex-auto flex flex-wrap justify-start max-w-full" *ngIf="recordsToDisplay.length">
     <app-bd-data-card
       *ngFor="let record of recordsToDisplay"
       class="grow-0 shrink-0 basis-full flex flex-col items-stretch p-1"
@@ -30,17 +18,11 @@
       (recordClick)="onRecordClick($event)"
     >
       <ng-template #extraCardDetails let-record="record">
-        <ng-container
-          *ngTemplateOutlet="dataGridExtraCardDetails; context: { record }"
-        >
-        </ng-container>
+        <ng-container *ngTemplateOutlet="dataGridExtraCardDetails; context: { record }"> </ng-container>
       </ng-template>
     </app-bd-data-card>
   </div>
-  <div
-    *ngIf="!recordsToDisplay.length"
-    class="bd-hint-text mt-5 flex-auto flex flex-col justify-center items-center"
-  >
+  <div *ngIf="!recordsToDisplay.length" class="bd-hint-text mt-5 flex-auto flex flex-col justify-center items-center">
     No data to show.
   </div>
 </div>

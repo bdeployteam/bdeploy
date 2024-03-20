@@ -8,21 +8,11 @@
     [labels]="defLabels"
     required
   ></app-bd-form-select>
-  <app-bd-form-input
-    [(ngModel)]="newValue"
-    name="value"
-    label="Attribute Value"
-    required
-  ></app-bd-form-input>
+  <app-bd-form-input [(ngModel)]="newValue" name="value" label="Attribute Value" required></app-bd-form-input>
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Group Attribute Values"
-    [panel]="true"
-    [route]="['..', '..']"
-  >
-  </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Group Attribute Values" [panel]="true" [route]="['..', '..']"> </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">

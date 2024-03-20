@@ -69,7 +69,7 @@ export class ClientsService {
       .get<InstanceAllClientsDto>(`${this.apiGroupPath(group)}/all-clients`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Load all Clients')
+        measure('Load all Clients'),
       )
       .subscribe((result) => {
         this.launcher$.next(result.launchers);
@@ -78,7 +78,7 @@ export class ClientsService {
         this.instances.instances$
           .pipe(
             skipWhile((i) => !i?.length),
-            take(1)
+            take(1),
           )
           .subscribe((insts) => {
             const r: ClientApp[] = [];
@@ -91,7 +91,7 @@ export class ClientsService {
                   instanceName: iname,
                   client: a,
                   endpoint: null,
-                }))
+                })),
               );
             }
             for (const eps of result.endpoints) {
@@ -103,7 +103,7 @@ export class ClientsService {
                   instanceName: iname,
                   client: null,
                   endpoint: e,
-                }))
+                })),
               );
             }
             this.apps$.next(r);
@@ -209,7 +209,7 @@ export class ClientsService {
       {
         responseType: 'text',
         headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      }
+      },
     );
   }
 }

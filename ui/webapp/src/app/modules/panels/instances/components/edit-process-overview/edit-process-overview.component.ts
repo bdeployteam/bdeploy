@@ -37,7 +37,7 @@ export class EditProcessOverviewComponent {
       () =>
         this.snackbar.open('Unable to write to clipboard.', null, {
           duration: 1000,
-        })
+        }),
     );
   }
 }

@@ -1,11 +1,7 @@
 <app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
   <app-bd-dialog-toolbar header="Nodes">
     <div class="flex-auto"></div>
-    <app-bd-button
-      text="Refresh"
-      icon="refresh"
-      (click)="nodesAdmin.reload()"
-    ></app-bd-button>
+    <app-bd-button text="Refresh" icon="refresh" (click)="nodesAdmin.reload()"></app-bd-button>
     <app-bd-panel-button
       [collapsed]="false"
       color="primary"

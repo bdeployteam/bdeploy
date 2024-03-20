@@ -61,7 +61,7 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
             ? () => {
                 this.areas.navigateBoth(
                   ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
-                  ['panels', 'instances', 'settings', 'product']
+                  ['panels', 'instances', 'settings', 'product'],
                 );
               }
             : null,

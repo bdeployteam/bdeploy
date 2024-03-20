@@ -27,7 +27,7 @@ export class SoftwareVersionBulkService {
     this.frozen$.next(true);
     return this.software.deleteVersion(manifestKeys).pipe(
       finalize(() => this.frozen$.next(false)),
-      tap(() => this.selection$.next([]))
+      tap(() => this.selection$.next([])),
     );
   }
 }

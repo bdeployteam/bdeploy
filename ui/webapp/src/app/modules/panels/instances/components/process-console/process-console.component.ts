@@ -59,13 +59,13 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
           cfg.processControl.attachStdin &&
             detail.hasStdin &&
             ProcessesService.isRunning(detail.status.processState) &&
-            this.auth.isCurrentScopeWrite()
+            this.auth.isCurrentScopeWrite(),
         );
         this.follow$.next(ProcessesService.isRunning(detail.status.processState));
         this.available$.next(true);
 
         this.nextChunk(); // initial
-      })
+      }),
     );
   }
 

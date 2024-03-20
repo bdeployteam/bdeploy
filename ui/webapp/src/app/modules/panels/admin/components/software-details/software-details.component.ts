@@ -29,7 +29,7 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
     this.deleting$,
     null,
     null,
-    this.software$.pipe(map((s) => s?.version))
+    this.software$.pipe(map((s) => s?.version)),
   );
   protected mappedInstall$ = this.actions.action([Actions.UPDATE, Actions.RESTART_SERVER], this.installing$); // global!
 
@@ -63,7 +63,7 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
       .confirm(
         'Delete Version',
         `This will delete all associated system and launcher versions for each operating system.`,
-        'delete'
+        'delete',
       )
       .subscribe((r) => {
         if (!r) return;
@@ -84,7 +84,7 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
       .confirm(
         'Install Version',
         `Installing this version will cause a short downtime, typically a few seconds.`,
-        'system_update'
+        'system_update',
       )
       .subscribe((r) => {
         if (!r) return;

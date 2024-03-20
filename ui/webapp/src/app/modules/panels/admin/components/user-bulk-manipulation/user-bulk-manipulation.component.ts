@@ -19,7 +19,7 @@ export class UserBulkManipulationComponent {
   protected loading$ = new BehaviorSubject<boolean>(false);
 
   protected currentUserSelected$ = this.bulk.selection$.pipe(
-    map((users) => users.some((user) => user.name === this.auth.getCurrentUsername()))
+    map((users) => users.some((user) => user.name === this.auth.getCurrentUsername())),
   );
 
   protected bulkOpResult: BulkOperationResultDto;
@@ -33,7 +33,7 @@ export class UserBulkManipulationComponent {
         `This will delete <strong>${this.bulk.selection$.value.length}</strong> users. This action is irreversible. If you want to continue, confirm using <em>I UNDERSTAND</em>. Continue?`,
         'warning',
         'I UNDERSTAND',
-        null
+        null,
       )
       .subscribe((r) => {
         if (r) {
@@ -55,7 +55,7 @@ export class UserBulkManipulationComponent {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe();
   }
@@ -73,7 +73,7 @@ export class UserBulkManipulationComponent {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe();
   }

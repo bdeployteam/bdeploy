@@ -50,7 +50,7 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
         of(false),
         null,
         null,
-        this.selected$.pipe(map((p) => p.map((x) => `${x.key.name}:${x.key.tag}`)))
+        this.selected$.pipe(map((p) => p.map((x) => `${x.key.name}:${x.key.tag}`))),
       );
 
       this.server$.next(server);
@@ -80,11 +80,11 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
         .subscribe((x) => {
           if (target === MinionMode.CENTRAL) {
             this.records$.next(
-              x.filter((rp) => !p.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag))
+              x.filter((rp) => !p.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag)),
             );
           } else {
             this.records$.next(
-              p.filter((rp) => !x.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag))
+              p.filter((rp) => !x.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag)),
             );
           }
         });

@@ -49,7 +49,7 @@ export class AddUserGroupComponent implements OnInit, OnDestroy {
       .pipe(
         finalize(() => {
           this.saving$.next(false);
-        })
+        }),
       )
       .subscribe(() => {
         this.areas.closePanel();

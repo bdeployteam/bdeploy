@@ -1,38 +1,16 @@
 <div class="flex gap-1 justify-start items-center">
   <ng-container [ngSwitch]="record.type">
-    <mat-checkbox
-      *ngSwitchCase="'BOOLEAN'"
-      [checked]="booleanValue"
-      disabled
-    ></mat-checkbox>
-    <div *ngSwitchCase="'PASSWORD'" class="truncate">
-      {{ '*'.repeat(record.value?.length) }}
-    </div>
-    <div
-      *ngSwitchDefault
-      class="truncate"
-      [matTooltip]="record.value"
-      matTooltipShowDelay="500"
-    >
+    <mat-checkbox *ngSwitchCase="'BOOLEAN'" [checked]="booleanValue" disabled></mat-checkbox>
+    <div *ngSwitchCase="'PASSWORD'" class="truncate">{{ '*'.repeat(record.value?.length) }}</div>
+    <div *ngSwitchDefault class="truncate" [matTooltip]="record.value" matTooltipShowDelay="500">
       {{ record.value }}
     </div>
   </ng-container>
   <ng-container *ngIf="record.type === 'SERVER_PORT'">
-    <mat-icon
-      *ngIf="(portState$ | async)?.state === false"
-      matTooltip="Port is not in open state."
-      class="local-greyed"
+    <mat-icon *ngIf="(portState$ | async)?.state === false" matTooltip="Port is not in open state." class="local-greyed"
       >link_off</mat-icon
     >
-    <mat-icon
-      *ngIf="(portState$ | async)?.state === true"
-      matTooltip="Port is in open state."
-      >link</mat-icon
-    >
-    <mat-icon
-      *ngIf="(portState$ | async)?.state === undefined"
-      class="local-greyed"
-      >help</mat-icon
-    >
+    <mat-icon *ngIf="(portState$ | async)?.state === true" matTooltip="Port is in open state.">link</mat-icon>
+    <mat-icon *ngIf="(portState$ | async)?.state === undefined" class="local-greyed">help</mat-icon>
   </ng-container>
 </div>

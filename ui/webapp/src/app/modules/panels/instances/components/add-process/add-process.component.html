@@ -13,19 +13,13 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Add Process Configuration"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Process Configuration" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div
       class="flex flex-col gap-2.5"
       *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized"
     >
-      <div>
-        Click an application or application template from the list below to add
-        it to the selected node.
-      </div>
+      <div>Click an application or application template from the list below to add it to the selected node.</div>
       <div *ngIf="clipBoardCfg$ | async as cfg">
         <app-bd-button
           [text]="'Paste ' + cfg.name"
@@ -42,11 +36,7 @@
         *ngIf="clipBoardError$ | async as error"
         >{{ error }}</app-bd-notification-card
       >
-      <app-bd-data-table
-        [records]="records$ | async"
-        [columns]="columns"
-        [sortData]="null"
-      ></app-bd-data-table>
+      <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
     </div>
     <ng-template #currentInstanceIsNotSynchronized>
       <app-bd-notification-card
@@ -56,8 +46,8 @@
         header="Server Not Synchronized"
       >
         <div class="text-justify">
-          The managed server responsible for the selected node is not
-          synchronized. Please synchronize the server to continue editing.
+          The managed server responsible for the selected node is not synchronized. Please synchronize the server to
+          continue editing.
         </div>
       </app-bd-notification-card>
     </ng-template>

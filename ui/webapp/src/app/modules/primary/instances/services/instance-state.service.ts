@@ -32,14 +32,14 @@ export class InstanceStateService {
         resetOnError: true,
         resetOnComplete: false,
         resetOnRefCountZero: false,
-      })
+      }),
     );
   }
 
   private getLoadCall(
     i: InstanceDto,
     g: InstanceGroupConfiguration,
-    is: InstanceDto[]
+    is: InstanceDto[],
   ): Observable<InstanceStateRecord> {
     return !i || !g || !is || !is.some((instance) => instance.instanceConfiguration.id === i.instanceConfiguration.id) // sometimes instance is removed from instances$ faster than current$ is nulled
       ? of(null)
@@ -53,7 +53,7 @@ export class InstanceStateService {
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
           this.instances.current$.value.instanceConfiguration.id
-        }/${version}/install`
+        }/${version}/install`,
       )
       .pipe(measure(`Install ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }
@@ -63,7 +63,7 @@ export class InstanceStateService {
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
           this.instances.current$.value.instanceConfiguration.id
-        }/${version}/uninstall`
+        }/${version}/uninstall`,
       )
       .pipe(measure(`Uninstall ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }
@@ -73,7 +73,7 @@ export class InstanceStateService {
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
           this.instances.current$.value.instanceConfiguration.id
-        }/${version}/activate`
+        }/${version}/activate`,
       )
       .pipe(measure(`Activate ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }

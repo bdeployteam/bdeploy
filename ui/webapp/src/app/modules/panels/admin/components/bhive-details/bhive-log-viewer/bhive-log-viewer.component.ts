@@ -64,7 +64,7 @@ export class BhiveLogViewerComponent implements OnInit, OnDestroy {
             this.followInterval = setInterval(() => this.hiveLogging.reload(), 2000);
           });
         }
-      })
+      }),
     );
   }
 
@@ -99,7 +99,7 @@ export class BhiveLogViewerComponent implements OnInit, OnDestroy {
       .getLogContentChunk(dir, entry, this.offset, 0, true)
       .pipe(
         skipWhile((chunk) => !chunk),
-        switchMap((chunk) => unwrap(entry, chunk))
+        switchMap((chunk) => unwrap(entry, chunk)),
       )
       .subscribe((chunk) => {
         this.content$.next(chunk.content);

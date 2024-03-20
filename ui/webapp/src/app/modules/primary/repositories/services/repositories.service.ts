@@ -63,7 +63,7 @@ export class RepositoriesService {
       .get<SoftwareRepositoryConfiguration[]>(this.apiPath)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Software Repositories Load')
+        measure('Software Repositories Load'),
       )
       .subscribe((result) => {
         this.repositories$.next(result);
@@ -92,7 +92,7 @@ export class RepositoriesService {
     this.snackbar.open(
       `Unfortunately, ${this.router.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
       'DISMISS',
-      { panelClass: 'error-snackbar' }
+      { panelClass: 'error-snackbar' },
     );
     this.areas.forcePanelClose$.next(true);
     this.router.navigate(['repositories', 'browser'], {

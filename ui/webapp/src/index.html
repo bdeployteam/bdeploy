@@ -1,28 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>BDeploy</title>
     <base href="/" />
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=0.86, minimum-scale=0.86"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=0.86, minimum-scale=0.86" />
     <meta description="BDeploy - Software Deployment" />
     <link rel="icon" type="image/x-icon" href="assets/logo.ico" />
     <script lang="javascript">
       // used in download.service.ts
       var downloadLocation = {
         // used when assigning the target URL to the browser location directly
-        assign: function(loc) {
+        assign: function (loc) {
           document.location.href = loc;
         },
 
         // used when clicking a temporary link element to download a blob from browser's memory.
-        click: function(link) {
+        click: function (link) {
           link.click();
-        }
+        },
       };
     </script>
 

@@ -10,32 +10,21 @@
       (click)="item.click ? item.click() : null"
     >
       <ng-container *ngIf="item.type | async as type">
-        <mat-icon class="bd-warning-text" *ngIf="type === 'warning'"
-          >warning</mat-icon
-        >
+        <mat-icon class="bd-warning-text" *ngIf="type === 'warning'">warning</mat-icon>
         <mat-icon class="local-ok" *ngIf="type === 'ok'">done</mat-icon>
         <mat-icon class="local-info" *ngIf="type === 'info'">info</mat-icon>
         <mat-icon class="local-hint" *ngIf="type === 'product'">apps</mat-icon>
-        <mat-icon class="local-hint" *ngIf="type === 'update'"
-          >system_update</mat-icon
-        >
+        <mat-icon class="local-hint" *ngIf="type === 'update'">system_update</mat-icon>
         <mat-icon class="local-hint" *ngIf="type === 'unknown'">help</mat-icon>
       </ng-container>
       <div *ngIf="(narrowWhen$ | async) === false">{{ item.name | async }}</div>
     </div>
   </ng-container>
   <div class="flex-auto"></div>
-  <div
-    *ngIf="lastRefreshAt$"
-    class="bd-secondary-text flex gap-1 justify-start items-center"
-  >
-    <div>
-      Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}
-    </div>
+  <div *ngIf="lastRefreshAt$" class="bd-secondary-text flex gap-1 justify-start items-center">
+    <div>Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}</div>
     <ng-template #refreshButton>
-      <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)"
-        >refresh</app-bd-micro-icon-button
-      >
+      <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)">refresh</app-bd-micro-icon-button>
     </ng-template>
     <ng-container *ngIf="refreshingWhen$ | async; else refreshButton">
       <mat-spinner [diameter]="16"></mat-spinner>

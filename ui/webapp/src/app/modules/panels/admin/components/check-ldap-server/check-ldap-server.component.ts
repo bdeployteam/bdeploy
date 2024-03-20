@@ -33,7 +33,7 @@ export class CheckLdapServerComponent implements OnInit, OnDestroy {
         this.auth.testLdapServer(server).subscribe((r) => {
           this.checkResult$.next(r);
         });
-      }
+      },
     );
   }
 

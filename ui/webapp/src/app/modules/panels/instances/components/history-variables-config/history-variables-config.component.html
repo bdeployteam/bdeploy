@@ -5,9 +5,7 @@
       <div class="flex flex-wrap gap-1 justify-start items-center">
         <ng-container *ngFor="let diff of diffs.diffs; let i = index">
           <ng-template #varPopup>
-            <app-variable-desc-card
-              [variable]="diff.base"
-            ></app-variable-desc-card>
+            <app-variable-desc-card [variable]="diff.base"></app-variable-desc-card>
           </ng-template>
           <div class="mr-1">{{diff.key}}:</div>
           <strong>

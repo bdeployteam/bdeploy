@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="instanceEdit.loading$">
-  <app-bd-dialog-toolbar
-    header="Edit {{ (edit.process$ | async)?.name }}"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit {{ (edit.process$ | async)?.name }}" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div
       class="flex flex-col gap-2.5"
@@ -55,8 +52,8 @@
         header="Server Not Synchronized"
       >
         <div class="text-justify">
-          The managed server responsible for the selected node is not
-          synchronized. Please synchronize the server to continue editing.
+          The managed server responsible for the selected node is not synchronized. Please synchronize the server to
+          continue editing.
         </div>
       </app-bd-notification-card>
     </ng-template>

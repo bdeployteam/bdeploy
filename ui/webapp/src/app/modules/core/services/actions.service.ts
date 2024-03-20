@@ -87,7 +87,7 @@ export class ActionsService {
           this.actions$
             .pipe(
               skipWhile((a) => !a),
-              take(1)
+              take(1),
             )
             .subscribe((actions) => {
               if (c.event === ObjectEvent.CREATED) {
@@ -159,7 +159,7 @@ export class ActionsService {
      * A list of items which are matched on server actions to determine whether the action is running.
      * If not given, the item field on events is ignored and any value will match.
      */
-    item?: Observable<string | string[]>
+    item?: Observable<string | string[]>,
   ) {
     // take into account all given observables of the request and provide defaults in case they are not set.
     const groupObs = groups || this.areas.groupContext$;
@@ -175,9 +175,9 @@ export class ActionsService {
     ]).pipe(
       skipWhile(([actions]) => !actions?.length),
       map(([actions, groups, instances, items]) =>
-        actions.filter((a) => this.actionMatches(a, groups, instances, items))
+        actions.filter((a) => this.actionMatches(a, groups, instances, items)),
       ),
-      map((a) => !!a?.length)
+      map((a) => !!a?.length),
     );
 
     // now provide a combined observable for local and server state
@@ -188,7 +188,7 @@ export class ActionsService {
     action: ActionBroadcastDto,
     groups: string | string[] | null,
     instances: string | string[] | null,
-    items: string | string[] | null
+    items: string | string[] | null,
   ): boolean {
     return (
       this.actionAttributeMatch(action.action.bhive, groups) &&

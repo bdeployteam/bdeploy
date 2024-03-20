@@ -74,8 +74,8 @@ export class PortsComponent implements OnInit {
     for (const port of this.portEdit.ports$.value.filter((p) => p.type === ParameterType.SERVER_PORT && p.app)) {
       const node = nodeConfigDtos?.find((nodeCfg) =>
         nodeCfg.nodeConfiguration.applications.some(
-          (a) => a.application.name === port.app.application.name && a.application.tag === port.app.application.tag
-        )
+          (a) => a.application.name === port.app.application.name && a.application.tag === port.app.application.tag,
+        ),
       );
       csv +=
         '\n' +

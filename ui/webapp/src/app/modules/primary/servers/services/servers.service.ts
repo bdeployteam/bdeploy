@@ -81,7 +81,7 @@ export class ServersService {
       .get<ManagedMasterDto[]>(`${this.apiPath}/list/${group}`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Managed Server Load')
+        measure('Managed Server Load'),
       )
       .subscribe((s) => {
         this.servers$.next(s);
@@ -96,12 +96,12 @@ export class ServersService {
             this.servers$.value.splice(
               this.servers$.value.findIndex((o) => o.hostName === s.server.hostName),
               1,
-              s.server
+              s.server,
             );
 
             this.servers$.next(this.servers$.value);
           }
-        })
+        }),
       );
     }
     return of(null);

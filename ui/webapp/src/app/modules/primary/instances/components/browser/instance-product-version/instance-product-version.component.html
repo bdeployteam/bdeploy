@@ -1,9 +1,6 @@
 <div class="flex justify-start items-center">
   <div class="truncate">{{ record.instanceConfiguration.product.tag }}</div>
-  <mat-icon
-    *ngIf="record.newerVersionAvailable"
-    class="bd-small-icon"
-    matTooltip="A newer product version is available"
+  <mat-icon *ngIf="record.newerVersionAvailable" class="bd-small-icon" matTooltip="A newer product version is available"
     >system_update</mat-icon
   >
   <div

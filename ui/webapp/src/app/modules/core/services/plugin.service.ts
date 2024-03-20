@@ -19,7 +19,7 @@ export class PluginService {
       product,
       {
         headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      }
+      },
     );
   }
 
@@ -48,7 +48,7 @@ export class PluginService {
           delegate.http.get(delegate.buildPluginUrl(plugin, path), {
             params: params,
             responseType: 'text',
-          })
+          }),
         );
       },
       put(path, body, params?) {
@@ -56,7 +56,7 @@ export class PluginService {
           delegate.http.put(delegate.buildPluginUrl(plugin, path), body, {
             params: params,
             responseType: 'text',
-          })
+          }),
         );
       },
       post(path, body, params?) {
@@ -64,7 +64,7 @@ export class PluginService {
           delegate.http.post(delegate.buildPluginUrl(plugin, path), body, {
             params: params,
             responseType: 'text',
-          })
+          }),
         );
       },
       delete(path, params?) {
@@ -72,7 +72,7 @@ export class PluginService {
           delegate.http.delete(delegate.buildPluginUrl(plugin, path), {
             params: params,
             responseType: 'text',
-          })
+          }),
         );
       },
       getResourceUrl() {

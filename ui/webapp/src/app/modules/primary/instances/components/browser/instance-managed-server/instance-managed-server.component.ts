@@ -17,7 +17,7 @@ export class InstanceManagedServerComponent {
   protected goToServerPage() {
     this.areas.navigateBoth(
       ['/servers', 'browser', this.areas.groupContext$.value],
-      ['panels', 'servers', 'details', this.record.managedServer.hostName]
+      ['panels', 'servers', 'details', this.record.managedServer.hostName],
     );
   }
 }

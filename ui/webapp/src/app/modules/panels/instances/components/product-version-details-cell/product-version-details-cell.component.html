@@ -1,26 +1,16 @@
 <ng-template #detailsPopup>
   <div class="flex">
-    <mat-card
-      appearance="outlined"
-      class="local-details-popup-sizing flex flex-col gap-1 p-2.5"
-    >
+    <mat-card appearance="outlined" class="local-details-popup-sizing flex flex-col gap-1 p-2.5">
       <h2>Product Details</h2>
       <mat-chip-listbox>
-        <mat-chip-option *ngFor="let label of labels"
-          ><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip-option
-        >
+        <mat-chip-option *ngFor="let label of labels"><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip-option>
       </mat-chip-listbox>
     </mat-card>
   </div>
 </ng-template>
 
 <div class="flext justify-start items-center">
-  <div
-    [appBdPopup]="detailsPopup"
-    [appBdPopupDelay]="500"
-    appBdPopupTrigger="hover"
-    appBdPopupPosition="below-left"
-  >
+  <div [appBdPopup]="detailsPopup" [appBdPopupDelay]="500" appBdPopupTrigger="hover" appBdPopupPosition="below-left">
     {{ column.data(record) }}
   </div>
 </div>

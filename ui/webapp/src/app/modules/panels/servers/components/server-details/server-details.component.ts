@@ -72,19 +72,19 @@ export class ServerDetailsComponent implements OnInit {
     this.transfering$,
     null,
     null,
-    this.s$
+    this.s$,
   );
   protected mappedInstall$ = this.actions.action(
     [Actions.MANAGED_UPDATE_INSTALL],
     this.installing$,
     null,
     null,
-    this.s$
+    this.s$,
   );
   private mappedDelete$ = this.actions.action([Actions.REMOVE_MANAGED], this.deleting$, null, null, this.s$);
 
   protected loading$ = combineLatest([this.mappedDelete$, this.servers.loading$, this.serverDetails.loading$]).pipe(
-    map(([a, b, c]) => a || b || c)
+    map(([a, b, c]) => a || b || c),
   );
 
   protected columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
@@ -125,7 +125,7 @@ export class ServerDetailsComponent implements OnInit {
           (!this.serverDetails.instances$.value?.length
             ? ''
             : ` This will delete <strong>${this.serverDetails.instances$.value.length} instance(s)</strong> from the central server ` +
-              '- they will <strong>not</strong> be deleted from the managed server.')
+              '- they will <strong>not</strong> be deleted from the managed server.'),
       )
       .subscribe((del) => {
         if (del) {
@@ -156,7 +156,7 @@ export class ServerDetailsComponent implements OnInit {
           this.dialog
             .info(
               'Update complete',
-              `The server has come back online after updating, the current server version is ${this.version}`
+              `The server has come back online after updating, the current server version is ${this.version}`,
             )
             .subscribe();
         },

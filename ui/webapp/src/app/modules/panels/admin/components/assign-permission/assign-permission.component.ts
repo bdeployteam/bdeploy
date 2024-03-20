@@ -60,7 +60,7 @@ export class AssignPermissionComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.authAdmin.updateUser(user).subscribe(() => {
         this.areas.closePanel();
-      })
+      }),
     );
   }
 }

@@ -38,7 +38,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
     this.subscription = combineLatest([this.nav.panelRoute$, this.groups.current$, this.clients.apps$])
       .pipe(
         skipWhile(([r, g, a]) => !r?.params?.endpoint || !r?.params?.app || !g || !a?.length),
-        first() // only calculate this *ONCE* when all data is there.
+        first(), // only calculate this *ONCE* when all data is there.
       )
       .subscribe(([route, group, apps]) => {
         if (route.params.returnPanel) {
@@ -50,7 +50,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
         }
 
         this.app = apps.find(
-          (a) => a.endpoint?.id === route.params.app && a.endpoint.endpoint.id === route.params.endpoint
+          (a) => a.endpoint?.id === route.params.app && a.endpoint.endpoint.id === route.params.endpoint,
         );
 
         if (!this.app) {
@@ -85,10 +85,10 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) => instances?.find((i) => i.instanceConfiguration.id === app.instanceId)),
-      skipWhile((instance) => !instance || !instance.activeVersion)
+      skipWhile((instance) => !instance || !instance.activeVersion),
     );
     const activeNodeCfgs$ = instance$.pipe(
-      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag))
+      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag)),
     );
     return combineLatest([instance$, this.systems.systems$, activeNodeCfgs$]).pipe(
       skipWhile(([i, s, n]) => !i || (i?.instanceConfiguration?.system && !s?.length) || !n?.nodeConfigDtos?.length),
@@ -107,9 +107,9 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
             config: instance?.instanceConfiguration,
             nodeDtos: nodes.nodeConfigDtos,
           },
-          system?.config
+          system?.config,
         );
-      })
+      }),
     );
   }
 

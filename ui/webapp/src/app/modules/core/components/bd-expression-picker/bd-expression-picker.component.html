@@ -1,10 +1,7 @@
 <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[750px]">
   <div class="flex flex-col gap-2.5 w-full h-full">
     <mat-tab-group class="h-[400px]" [animationDuration]="0">
-      <mat-tab
-        label="Instance & System Variables"
-        [disabled]="!varRecords?.length"
-      >
+      <mat-tab label="Instance & System Variables" [disabled]="!varRecords?.length">
         <app-bd-data-table
           [records]="varRecords"
           [columns]="varColumns"

@@ -1,18 +1,11 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Move Process"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Move Process" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <div>Select a node to move the process to:</div>
       <div class="bd-description-text">
         Note that only
-        <a
-          [routerLink]="['', { outlets: { panel: ['panels', 'instances', 'settings', 'nodes'] } }]"
-          >configured</a
-        >
+        <a [routerLink]="['', { outlets: { panel: ['panels', 'instances', 'settings', 'nodes'] } }]">configured</a>
         and eligible (e.g. OS supported) nodes are shown.
       </div>
       <app-bd-data-table

@@ -34,7 +34,7 @@ export class SoftwareUpdateService {
     forkJoin([this.listBDeployVersions(), this.listLauncherVersions()])
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Load Available Software')
+        measure('Load Available Software'),
       )
       .subscribe(([b, l]) => {
         const tags: { [key: string]: SoftwareVersion } = {};
@@ -69,7 +69,7 @@ export class SoftwareUpdateService {
               return 1;
             }
             return 0;
-          })
+          }),
         );
       });
   }

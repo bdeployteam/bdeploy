@@ -64,7 +64,7 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
       .confirm(
         `Remove ${nodeName}?`,
         'The node will be removed. This cannot be undone. Any Instance configured to this node will <strong>stop working until configured differently.</strong>',
-        'delete'
+        'delete',
       )
       .subscribe((r) => {
         if (r) {

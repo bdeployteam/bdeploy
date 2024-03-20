@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Add User Group"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add User Group" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
       <app-bd-form-input

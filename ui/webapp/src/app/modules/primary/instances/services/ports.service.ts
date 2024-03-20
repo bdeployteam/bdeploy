@@ -67,7 +67,7 @@ export class PortsService {
         instance,
         nodes,
         nodeStates,
-        systems?.find((s) => s.key.name === instance?.instanceConfiguration?.system?.name)
+        systems?.find((s) => s.key.name === instance?.instanceConfiguration?.system?.name),
       );
     });
   }
@@ -76,7 +76,7 @@ export class PortsService {
     instance: InstanceDto,
     cfgs: InstanceNodeConfigurationListDto,
     nodeStates: { [key: string]: MinionStatusDto },
-    system: SystemConfigurationDto
+    system: SystemConfigurationDto,
   ) {
     if (!instance || !cfgs) {
       this.activePortStates$.next(null);
@@ -123,8 +123,8 @@ export class PortsService {
                   config: instance.instanceConfiguration,
                   nodeDtos: cfgs.nodeConfigDtos,
                 },
-                system?.config
-              )
+                system?.config,
+              ),
             ),
             state: false,
           });
@@ -143,7 +143,7 @@ export class PortsService {
                 {
                   headers: suppressGlobalErrorHandling(new HttpHeaders()),
                   context: NO_LOADING_BAR_CONTEXT,
-                }
+                },
               )
               .pipe(measure(`Ports of ${instance.instanceConfiguration.id}/${node.nodeName}`))
               .subscribe({
@@ -160,7 +160,7 @@ export class PortsService {
                   s.complete();
                 },
               });
-          })
+          }),
         );
       }
     }

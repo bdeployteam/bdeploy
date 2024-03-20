@@ -57,11 +57,11 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
       this.dirTransformer,
       (n) => n.level,
       (n) => n.expandable,
-      (n) => n.children
+      (n) => n.children,
     );
     this.dirTreeControl = new FlatTreeControl(
       (n) => n.level,
-      (n) => n.expandable
+      (n) => n.expandable,
     );
     this.dirDataSource = new MatTreeFlatDataSource(this.dirTreeControl, this.dirFlattener);
 
@@ -76,7 +76,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
         this.dirDataSource.data = !i.configRoot ? [] : [i.configRoot];
         this.dirTreeControl.dataNodes.filter((n) => n.level === 0).forEach((n) => this.dirTreeControl.expand(n));
         this.dirFlatAllowedValues = ['/', ...this.buildFlatAllowedValues(i.configRoot, [''])];
-      })
+      }),
     );
   }
 
@@ -87,7 +87,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
     this.subscription.add(
       this.form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
         this.checkIsInvalid.emit(status !== 'VALID');
-      })
+      }),
     );
     this.checkIsInvalid.emit(this.form.status !== 'VALID');
   }

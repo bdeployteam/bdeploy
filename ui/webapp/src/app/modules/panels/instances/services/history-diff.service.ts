@@ -45,11 +45,7 @@ function getChangeType(base: any, compare: any): DiffType {
 }
 
 /** Given two complex objects and the DiffTypes of all the contained child objects, calculate a "outer" DiffType for the complex object */
-function getParentChangeType(
-  base: any,
-  compare: any,
-  ...types: DiffType[]
-): DiffType {
+function getParentChangeType(base: any, compare: any, ...types: DiffType[]): DiffType {
   const noBase = base === null || base === undefined;
   const noCompare = compare === null || compare === undefined;
   if (noBase && !noCompare) {
@@ -59,9 +55,7 @@ function getParentChangeType(
   }
 
   // changed if there is a single diff !== UNCHANGED.
-  return types.every((e) => e === DiffType.UNCHANGED || e === undefined)
-    ? DiffType.UNCHANGED
-    : DiffType.CHANGED;
+  return types.every((e) => e === DiffType.UNCHANGED || e === undefined) ? DiffType.UNCHANGED : DiffType.CHANGED;
 }
 
 /** Maintains information about the difference in an object. The given value is the base value is set, otherwise the compare value. */
@@ -75,13 +69,9 @@ export class Difference {
   constructor(
     private base: string | number | boolean,
     private compare: string | number | boolean,
-    valueOverride?: any
+    valueOverride?: any,
   ) {
-    this.value = valueOverride
-      ? valueOverride
-      : base === null || base === undefined
-      ? compare
-      : base;
+    this.value = valueOverride ? valueOverride : base === null || base === undefined ? compare : base;
     this.type = getChangeType(base, compare);
   }
 }
@@ -96,10 +86,7 @@ export class ProcessControlDiff {
   public gracePeriod: Difference;
   public attachStdin: Difference;
 
-  constructor(
-    base: ProcessControlConfiguration,
-    compare: ProcessControlConfiguration
-  ) {
+  constructor(base: ProcessControlConfiguration, compare: ProcessControlConfiguration) {
     this.startType = new Difference(base?.startType, compare?.startType);
     this.keepAlive = new Difference(base?.keepAlive, compare?.keepAlive);
     this.noOfRetries = new Difference(base?.noOfRetries, compare?.noOfRetries);
@@ -113,7 +100,7 @@ export class ProcessControlDiff {
       this.keepAlive.type,
       this.noOfRetries.type,
       this.gracePeriod.type,
-      this.attachStdin.type
+      this.attachStdin.type,
     );
   }
 }
@@ -125,27 +112,18 @@ export class CommandDiff {
   public parameters: ParameterDiff[] = [];
   public environment: ParameterDiff[] = [];
 
-  constructor(
-    base: CommandConfiguration,
-    compare: CommandConfiguration,
-    baseDescriptor: ExecutableDescriptor
-  ) {
+  constructor(base: CommandConfiguration, compare: CommandConfiguration, baseDescriptor: ExecutableDescriptor) {
     this.executable = new Difference(base?.executable, compare?.executable);
 
     if (!!base && !!base.parameters?.length) {
       for (const param of base.parameters) {
-        const compareParam = compare?.parameters?.find(
-          (p) => p.id === param.id
-        );
-        (param.target === ParameterConfigurationTarget.ENVIRONMENT
-          ? this.environment
-          : this.parameters
-        ).push(
+        const compareParam = compare?.parameters?.find((p) => p.id === param.id);
+        (param.target === ParameterConfigurationTarget.ENVIRONMENT ? this.environment : this.parameters).push(
           new ParameterDiff(
             param,
             compareParam,
-            baseDescriptor?.parameters?.find((p) => p.id === param.id)
-          )
+            baseDescriptor?.parameters?.find((p) => p.id === param.id),
+          ),
         );
       }
     }
@@ -165,7 +143,7 @@ export class CommandDiff {
       this.executable.type,
       newParamChange,
       ...this.parameters.map((p) => p.type),
-      ...this.environment.map((p) => p.type)
+      ...this.environment.map((p) => p.type),
     );
   }
 }
@@ -178,21 +156,17 @@ export class ParameterDiff {
   constructor(
     base: ParameterConfiguration,
     compare: ParameterConfiguration,
-    public descriptor: ParameterDescriptor
+    public descriptor: ParameterDescriptor,
   ) {
     // in case this is an environment variable, we can shorten things.
     if (descriptor?.type === ParameterType.ENVIRONMENT) {
       this.values.push(
         new Difference(
           `${descriptor.parameter}=${getPreRenderable(base?.value)}`,
-          `${descriptor.parameter}=${getPreRenderable(compare?.value)}`
-        )
+          `${descriptor.parameter}=${getPreRenderable(compare?.value)}`,
+        ),
       );
-      this.type = getParentChangeType(
-        base,
-        compare,
-        ...this.values.map((d) => d.type)
-      );
+      this.type = getParentChangeType(base, compare, ...this.values.map((d) => d.type));
       return;
     }
 
@@ -210,41 +184,26 @@ export class ParameterDiff {
       if (base.preRendered.length !== compare?.preRendered?.length) {
         // DIFFERENT length, we cannot *directly* compare the values.
         for (const val of base.preRendered) {
-          const masked = maskingValue
-            ? val.replace(maskingValue, '*'.repeat(maskingValue.length))
-            : val;
-          this.values.push(
-            new Difference(val, getPreRenderable(compare?.value), masked)
-          );
+          const masked = maskingValue ? val.replace(maskingValue, '*'.repeat(maskingValue.length)) : val;
+          this.values.push(new Difference(val, getPreRenderable(compare?.value), masked));
         }
       } else {
         for (let i = 0; i < base.preRendered.length; ++i) {
           const masked = maskingValue
-            ? base.preRendered[i].replace(
-                maskingValue,
-                '*'.repeat(maskingValue.length)
-              )
+            ? base.preRendered[i].replace(maskingValue, '*'.repeat(maskingValue.length))
             : base.preRendered[i];
-          this.values.push(
-            new Difference(base.preRendered[i], compare.preRendered[i], masked)
-          );
+          this.values.push(new Difference(base.preRendered[i], compare.preRendered[i], masked));
         }
       }
     } else if (compare?.preRendered?.length) {
       // we don't have anything, but they got some.
       for (const compareVal of compare.preRendered) {
-        const masked = maskingValue
-          ? compareVal.replace(maskingValue, '*'.repeat(maskingValue.length))
-          : compareVal;
+        const masked = maskingValue ? compareVal.replace(maskingValue, '*'.repeat(maskingValue.length)) : compareVal;
         this.values.push(new Difference(null, compareVal, masked));
       }
     }
 
-    this.type = getParentChangeType(
-      base,
-      compare,
-      ...this.values.map((d) => d.type)
-    );
+    this.type = getParentChangeType(base, compare, ...this.values.map((d) => d.type));
   }
 }
 
@@ -267,11 +226,7 @@ export class EndpointsDiff {
         }
       }
     }
-    this.type = getParentChangeType(
-      base,
-      compare,
-      ...this.http.map((d) => d.type)
-    );
+    this.type = getParentChangeType(base, compare, ...this.http.map((d) => d.type));
   }
 }
 
@@ -291,35 +246,17 @@ export class HttpEndpointDiff {
 
   constructor(base: HttpEndpoint, compare: HttpEndpoint) {
     this.path = new Difference(base?.path, compare?.path);
-    this.port = new Difference(
-      getPreRenderable(base?.port),
-      getPreRenderable(compare?.port)
-    );
-    this.secure = new Difference(
-      getPreRenderable(base?.secure),
-      getPreRenderable(compare?.secure)
-    );
+    this.port = new Difference(getPreRenderable(base?.port), getPreRenderable(compare?.port));
+    this.secure = new Difference(getPreRenderable(base?.secure), getPreRenderable(compare?.secure));
     this.trustAll = new Difference(base?.trustAll, compare?.trustAll);
-    this.trustStore = new Difference(
-      getPreRenderable(base?.trustStore),
-      getPreRenderable(compare?.trustStore)
-    );
+    this.trustStore = new Difference(getPreRenderable(base?.trustStore), getPreRenderable(compare?.trustStore));
     this.trustStorePass = new Difference(
       getPreRenderable(base?.trustStorePass),
-      getPreRenderable(compare?.trustStorePass)
+      getPreRenderable(compare?.trustStorePass),
     );
-    this.authType = new Difference(
-      getPreRenderable(base?.authType),
-      getPreRenderable(compare?.authType)
-    );
-    this.authUser = new Difference(
-      getPreRenderable(base?.authUser),
-      getPreRenderable(compare?.authUser)
-    );
-    this.authPass = new Difference(
-      getPreRenderable(base?.authPass),
-      getPreRenderable(compare?.authPass)
-    );
+    this.authType = new Difference(getPreRenderable(base?.authType), getPreRenderable(compare?.authType));
+    this.authUser = new Difference(getPreRenderable(base?.authUser), getPreRenderable(compare?.authUser));
+    this.authPass = new Difference(getPreRenderable(base?.authPass), getPreRenderable(compare?.authPass));
 
     this.type = getParentChangeType(
       base,
@@ -332,7 +269,7 @@ export class HttpEndpointDiff {
       this.trustStorePass.type,
       this.authType.type,
       this.authUser.type,
-      this.authPass.type
+      this.authPass.type,
     );
   }
 }
@@ -351,21 +288,14 @@ export class ApplicationConfigurationDiff {
   constructor(
     base: ApplicationConfiguration,
     compare: ApplicationConfiguration,
-    public descriptor: ApplicationDescriptor
+    public descriptor: ApplicationDescriptor,
   ) {
     this.id = new Difference(base?.id, compare?.id);
     this.name = new Difference(base?.name, compare?.name);
     if (descriptor?.type !== ApplicationType.CLIENT) {
-      this.processControl = new ProcessControlDiff(
-        base?.processControl,
-        compare?.processControl
-      );
+      this.processControl = new ProcessControlDiff(base?.processControl, compare?.processControl);
     }
-    this.start = new CommandDiff(
-      base?.start,
-      compare?.start,
-      descriptor?.startCommand
-    );
+    this.start = new CommandDiff(base?.start, compare?.start, descriptor?.startCommand);
     this.endpoints = new EndpointsDiff(base?.endpoints, compare?.endpoints);
     this.type = getParentChangeType(
       base,
@@ -373,13 +303,10 @@ export class ApplicationConfigurationDiff {
       this.name.type,
       this.processControl?.type,
       this.start.type,
-      this.endpoints.type
+      this.endpoints.type,
     );
 
-    this.os =
-      base === null || base === undefined
-        ? getAppOs(compare.application)
-        : getAppOs(base.application);
+    this.os = base === null || base === undefined ? getAppOs(compare.application) : getAppOs(base.application);
   }
 }
 
@@ -403,14 +330,8 @@ export class InstanceConfigurationDiff {
     this.autoStart = new Difference(base?.autoStart, compare?.autoStart);
     this.purpose = new Difference(base?.purpose, compare?.purpose);
     this.productTag = new Difference(base?.product?.tag, compare?.product?.tag);
-    this.configTree = new Difference(
-      base?.configTree?.id,
-      compare?.configTree?.id
-    );
-    this.autoUninstall = new Difference(
-      base?.autoUninstall,
-      compare?.autoUninstall
-    );
+    this.configTree = new Difference(base?.configTree?.id, compare?.configTree?.id);
+    this.autoUninstall = new Difference(base?.autoUninstall, compare?.autoUninstall);
     this.system = new Difference(base?.system?.name, compare?.system?.name);
     this.systemTag = new Difference(base?.system?.tag, compare?.system?.tag);
 
@@ -425,7 +346,7 @@ export class InstanceConfigurationDiff {
       this.configTree.type,
       this.autoUninstall.type,
       this.system.type,
-      this.systemTag.type
+      this.systemTag.type,
     );
   }
 }
@@ -441,25 +362,18 @@ export class VariableValueDiff {
   constructor(
     public key: string,
     public base: VariableConfiguration,
-    public compare: VariableConfiguration
+    public compare: VariableConfiguration,
   ) {
     this.value = new Difference(
       getPreRenderable(base?.value),
       getPreRenderable(compare?.value),
-      base?.type === ParameterType.PASSWORD ||
-      compare?.type === ParameterType.PASSWORD
+      base?.type === ParameterType.PASSWORD || compare?.type === ParameterType.PASSWORD
         ? '*'.repeat(getPreRenderable(base.value)?.length)
-        : null
+        : null,
     );
     this.description = new Difference(base?.description, compare?.description);
-    this.type = new Difference(
-      base?.type || ParameterType.STRING,
-      compare?.type || ParameterType.STRING
-    ); // default is STRING
-    this.customEditor = new Difference(
-      base?.customEditor,
-      compare?.customEditor
-    );
+    this.type = new Difference(base?.type || ParameterType.STRING, compare?.type || ParameterType.STRING); // default is STRING
+    this.customEditor = new Difference(base?.customEditor, compare?.customEditor);
 
     this.diffType = getParentChangeType(
       base,
@@ -467,7 +381,7 @@ export class VariableValueDiff {
       this.value.type,
       this.description.type,
       this.type.type,
-      this.customEditor.type
+      this.customEditor.type,
     );
   }
 }
@@ -484,8 +398,8 @@ export class VariablesDiff {
           new VariableValueDiff(
             v.id,
             v,
-            compare.find((x) => x.id === v.id)
-          )
+            compare.find((x) => x.id === v.id),
+          ),
         );
       }
     }
@@ -500,12 +414,7 @@ export class VariablesDiff {
       }
     }
 
-    this.type = getParentChangeType(
-      base,
-      compare,
-      newVarChange,
-      ...this.diffs.map((d) => d.diffType)
-    );
+    this.type = getParentChangeType(base, compare, newVarChange, ...this.diffs.map((d) => d.diffType));
   }
 }
 
@@ -516,22 +425,16 @@ export class HistoryDiffService {
   public diffAppConfig(
     base: ApplicationConfiguration,
     compare: ApplicationConfiguration,
-    baseDescriptor: ApplicationDescriptor
+    baseDescriptor: ApplicationDescriptor,
   ): ApplicationConfigurationDiff {
     return new ApplicationConfigurationDiff(base, compare, baseDescriptor);
   }
 
-  public diffInstanceConfig(
-    base: InstanceConfiguration,
-    compare: InstanceConfiguration
-  ): InstanceConfigurationDiff {
+  public diffInstanceConfig(base: InstanceConfiguration, compare: InstanceConfiguration): InstanceConfigurationDiff {
     return new InstanceConfigurationDiff(base, compare);
   }
 
-  public diffInstanceVariables(
-    base: InstanceConfiguration,
-    compare: InstanceConfiguration
-  ): VariablesDiff {
+  public diffInstanceVariables(base: InstanceConfiguration, compare: InstanceConfiguration): VariablesDiff {
     return new VariablesDiff(base.instanceVariables, compare.instanceVariables);
   }
 }

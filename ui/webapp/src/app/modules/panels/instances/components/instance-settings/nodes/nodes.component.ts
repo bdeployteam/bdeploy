@@ -71,7 +71,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
             this.checked.push(row);
           }
         }
-      })
+      }),
     );
   }
 
@@ -117,7 +117,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
       return this.dialog.confirm(
         `Remove Node`,
         `Removing the node <strong>${row.name}</strong> will also remove <strong>${row.config.nodeConfiguration.applications.length}</strong> applications.`,
-        'delete'
+        'delete',
       );
     }
 

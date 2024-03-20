@@ -14,10 +14,7 @@
               <div class="bd-title-text">{{ group.name }}</div>
             </div>
             <div class="flex-auto"></div>
-            <div
-              class="local-config flex flex-wrap justify-start items-center gap-1"
-              *ngIf="!(narrow$ | async)"
-            >
+            <div class="local-config flex flex-wrap justify-start items-center gap-1" *ngIf="!(narrow$ | async)">
               <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
               <div>{{ group.startType }} - {{ group.startWait }}</div>
               <mat-divider [vertical]="true"></mat-divider>

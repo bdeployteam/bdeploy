@@ -40,7 +40,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
-      (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH
+      (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH,
     );
   }
 

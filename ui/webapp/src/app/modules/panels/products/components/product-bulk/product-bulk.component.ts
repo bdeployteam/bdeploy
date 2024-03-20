@@ -21,7 +21,7 @@ export class ProductBulkComponent {
         `This will delete <strong>${this.bulk.selection$.value.length}</strong> product versions. This action is irreversible. If you want to continue, confirm using <em>I UNDERSTAND</em>. Continue?`,
         'warning',
         'I UNDERSTAND',
-        null
+        null,
       )
       .subscribe((r) => {
         if (!r) {

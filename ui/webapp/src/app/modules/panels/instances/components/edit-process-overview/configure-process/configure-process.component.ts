@@ -52,7 +52,7 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
       tap(() => {
         this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
         this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
-      })
+      }),
     );
   }
 

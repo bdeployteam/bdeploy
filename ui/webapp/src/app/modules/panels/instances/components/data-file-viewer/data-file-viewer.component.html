@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Viewing {{ (file$ | async)?.path }}"
-    [panel]="true"
-  >
+  <app-bd-dialog-toolbar header="Viewing {{ (file$ | async)?.path }}" [panel]="true">
     <div class="flex-auto"></div>
     <app-bd-panel-button
       icon="edit"
@@ -14,12 +11,7 @@
       appClickStopPropagation
       [matTooltip]="oversized ? 'The file is too large for online editing.' : null"
     ></app-bd-panel-button>
-    <app-bd-button
-      text="Download File"
-      tooltip="left"
-      icon="cloud_download"
-      (click)="doDownload()"
-    ></app-bd-button>
+    <app-bd-button text="Download File" tooltip="left" icon="cloud_download" (click)="doDownload()"></app-bd-button>
     <app-bd-button
       text="Follow Changes"
       tooltip="left"

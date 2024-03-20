@@ -1,12 +1,4 @@
-import {
-  animate,
-  animateChild,
-  group,
-  query,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { animate, animateChild, group, query, style, transition, trigger } from '@angular/animations';
 
 export const routerAnimation = trigger('routerAnimation', [
   transition('* <=> *', [
@@ -23,12 +15,9 @@ export const routerAnimation = trigger('routerAnimation', [
             opacity: 0,
             transform: 'scale(1.05)',
           }),
-          group([
-            animate('200ms ease', style({ opacity: 1, transform: 'scale(1)' })),
-            animateChild(),
-          ]),
+          group([animate('200ms ease', style({ opacity: 1, transform: 'scale(1)' })), animateChild()]),
         ],
-        { optional: true }
+        { optional: true },
       ),
       query(
         ':leave',
@@ -41,15 +30,9 @@ export const routerAnimation = trigger('routerAnimation', [
             opacity: 1,
             transform: 'scale(1)',
           }),
-          group([
-            animate(
-              '150ms ease',
-              style({ opacity: 0, transform: 'scale(0.95)' })
-            ),
-            animateChild(),
-          ]),
+          group([animate('150ms ease', style({ opacity: 0, transform: 'scale(0.95)' })), animateChild()]),
         ],
-        { optional: true }
+        { optional: true },
       ),
     ]),
   ]),

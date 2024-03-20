@@ -18,19 +18,12 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Instance Attribute Definitions"
-    [panel]="true"
-    [route]="['..', '..']"
-  >
+  <app-bd-dialog-toolbar header="Instance Attribute Definitions" [panel]="true" [route]="['..', '..']">
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="groups.current$ | async as group">
-      <app-bd-data-display
-        [columns]="columns"
-        [records]="group.instanceAttributes"
-      >
+      <app-bd-data-display [columns]="columns" [records]="group.instanceAttributes">
         <app-bd-no-data>
           <div>No attribute definitions</div>
         </app-bd-no-data>

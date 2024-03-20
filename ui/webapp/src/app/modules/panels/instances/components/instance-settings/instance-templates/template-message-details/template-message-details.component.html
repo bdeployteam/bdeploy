@@ -1,10 +1,5 @@
 <div class="flex justify-center items-center">
-  <app-bd-button-popup
-    text="Details"
-    icon="info"
-    tooltip="below"
-    preferredPosition="left-below"
-  >
+  <app-bd-button-popup text="Details" icon="info" tooltip="below" preferredPosition="left-below">
     <app-bd-notification-card
       header="Problem Details"
       [dismissable]="false"
@@ -14,10 +9,8 @@
     >
       <div class="bd-default-padding flex flex-col gap-1">
         <div>
-          While applying <strong>{{ record.group }}</strong> to
-          <strong>{{ record.node }}</strong
-          ><span *ngIf="!!record.appname"
-            >, when processing <strong>{{ record.appname }}</strong></span
+          While applying <strong>{{ record.group }}</strong> to <strong>{{ record.node }}</strong
+          ><span *ngIf="!!record.appname">, when processing <strong>{{ record.appname }}</strong></span
           >:
         </div>
         <div>

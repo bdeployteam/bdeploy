@@ -47,12 +47,12 @@ export class NodeUpdateComponent implements OnDestroy {
         this.nodeName$.next(r.params.node);
         this.node = n.find((n) => n.name === this.nodeName$.value);
         this.version = s.find(
-          (v) => this.hasSystemFor(this.node.status.config.os, v.system) && v.version === currentVersion
+          (v) => this.hasSystemFor(this.node.status.config.os, v.system) && v.version === currentVersion,
         );
         this.isCurrent =
           !(this.node.status.config?.version && this.version?.version) ||
           convert2String(this.node.status.config.version) === this.version.version;
-      }
+      },
     );
 
     // trigger loading software...

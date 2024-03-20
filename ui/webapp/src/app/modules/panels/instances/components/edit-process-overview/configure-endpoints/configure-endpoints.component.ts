@@ -72,7 +72,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
           this.system = null;
         } else {
           this.system = s.find(
-            (x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag
+            (x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag,
           )?.config;
         }
 
@@ -81,7 +81,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
           this.instance,
           this.system,
           this.process,
-          this.instanceEdit.stateApplications$.value
+          this.instanceEdit.stateApplications$.value,
         );
 
         if (p?.endpoints?.http?.length) {
@@ -90,7 +90,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
             this.calculateDisabledStatus(p.endpoints.http[i]);
           }
         }
-      }
+      },
     );
 
     this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
@@ -105,7 +105,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
         form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
           this.isFromInvalid = status === 'INVALID';
           this.hasPendingChanges = this.isDirty();
-        })
+        }),
       );
     });
   }
@@ -134,7 +134,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
     return of(true).pipe(
       tap(() => {
         this.instanceEdit.conceal('Change endpoint configuration');
-      })
+      }),
     );
   }
 

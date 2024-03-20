@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Add Software Repository"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Software Repository" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()">

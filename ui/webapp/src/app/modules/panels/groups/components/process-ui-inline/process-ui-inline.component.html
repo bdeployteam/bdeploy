@@ -1,10 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [header]="app?.endpoint?.endpoint?.id"
-    [panel]="true"
-    [route]="returnPanel"
-    [relative]="false"
-  >
+  <app-bd-dialog-toolbar [header]="app?.endpoint?.endpoint?.id" [panel]="true" [route]="returnPanel" [relative]="false">
     <div class="flex-auto"></div>
     <app-bd-button
       text="Reload"
@@ -41,17 +36,12 @@
 
   <app-bd-dialog-content>
     <div class="local-group flex flex-col w-full h-full">
-      <div class="local-loading" *ngIf="!app">
-        Application or Endpoint not found.
-      </div>
+      <div class="local-loading" *ngIf="!app">Application or Endpoint not found.</div>
       <div
         *ngIf="!app?.endpoint?.endpoint?.proxying"
         class="flex flex-col gap-2.5 justify-center items-center w-full h-full"
       >
-        <span
-          >This endpoint does not support proxying and can thus not be displayed
-          inline.</span
-        >
+        <span>This endpoint does not support proxying and can thus not be displayed inline.</span>
         <app-bd-button
           *ngIf="directUri"
           [collapsed]="false"
@@ -61,9 +51,7 @@
         ></app-bd-button>
       </div>
       <ng-container *ngIf="app?.endpoint?.endpoint?.proxying">
-        <div class="local-loading" [class.local-loading-done]="frameLoaded">
-          Loading...
-        </div>
+        <div class="local-loading" [class.local-loading-done]="frameLoaded">Loading...</div>
         <iframe
           #iframe
           title="Inline Application"

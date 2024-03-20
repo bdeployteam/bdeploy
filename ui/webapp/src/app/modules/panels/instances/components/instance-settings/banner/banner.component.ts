@@ -57,7 +57,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
             confirm = this.dialog.confirm(
               'Banner Changed',
               'The banner has been changed in another session. You can update to those changes but will loose local modifications.',
-              'merge_type'
+              'merge_type',
             );
           }
         }
@@ -78,7 +78,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
             this.disableApply = this.isDirty();
           }
         });
-      })
+      }),
     );
   }
 

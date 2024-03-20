@@ -8,17 +8,8 @@
   <div class="flex flex-col gap-2.5">
     <div>{{ data.message }}</div>
     <app-bd-action-row>
-      <app-bd-button
-        text="No"
-        [collapsed]="false"
-        (click)="confirm(false)"
-      ></app-bd-button>
-      <app-bd-button
-        text="Yes"
-        [collapsed]="false"
-        color="primary"
-        (click)="confirm(true)"
-      ></app-bd-button>
+      <app-bd-button text="No" [collapsed]="false" (click)="confirm(false)"></app-bd-button>
+      <app-bd-button text="Yes" [collapsed]="false" color="primary" (click)="confirm(true)"></app-bd-button>
     </app-bd-action-row>
   </div>
 </app-bd-notification-card>

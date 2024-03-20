@@ -52,7 +52,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
       }
 
       this.currentNode = state.config.nodeDtos.find(
-        (n) => !!n.nodeConfiguration.applications.find((a) => a.id === process.id)
+        (n) => !!n.nodeConfiguration.applications.find((a) => a.id === process.id),
       );
 
       const result: NodeRow[] = [];
@@ -106,7 +106,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
     const cfg = this.edit.process$.value;
 
     const targetNode = this.instanceEdit.state$.value?.config?.nodeDtos?.find(
-      (n) => n.nodeName === node.name
+      (n) => n.nodeName === node.name,
     )?.nodeConfiguration;
     const targetApps = targetNode?.applications;
 

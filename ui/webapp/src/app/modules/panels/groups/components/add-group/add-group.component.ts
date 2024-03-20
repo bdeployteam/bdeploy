@@ -87,7 +87,7 @@ export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
     return this.groups.create(this.group).pipe(
       finalize(() => {
         this.saving$.next(false);
-      })
+      }),
     );
   }
 }

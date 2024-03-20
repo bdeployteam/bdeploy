@@ -71,7 +71,7 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) =>
       this.products.products$.value.find(
-        (p) => p.key.name === r.instanceConfiguration.product.name && p.key.tag === r.instanceConfiguration.product.tag
+        (p) => p.key.name === r.instanceConfiguration.product.name && p.key.tag === r.instanceConfiguration.product.tag,
       )?.name || r.instanceConfiguration.product.name,
     icon: () => 'apps',
     showWhen: '(min-width: 600px)',

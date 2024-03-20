@@ -15,10 +15,10 @@ export class DelayForAuthInterceptor implements HttpInterceptor {
         (u) =>
           !u && // as long as there is no user
           !req.headers.has(NO_UNAUTH_DELAY_HDR) && // or we're in the process of logging in
-          req.url.includes('/api/') // or we're loading resources and not trying to talk to the api.
+          req.url.includes('/api/'), // or we're loading resources and not trying to talk to the api.
       ),
       take(1),
-      switchMap((u) => next.handle(req))
+      switchMap((u) => next.handle(req)),
     );
   }
 }

@@ -1,34 +1,17 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Instance Banner"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Banner" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      class="flex flex-col gap-2.5"
-      *ngIf="servers.isCurrentInstanceSynchronized$ | async"
-    >
-      <div>
-        A banner provides a version independent way of bringing information to
-        other users attention.
-      </div>
+    <div class="flex flex-col gap-2.5" *ngIf="servers.isCurrentInstanceSynchronized$ | async">
+      <div>A banner provides a version independent way of bringing information to other users attention.</div>
 
       <app-bd-banner [banner]="banner"></app-bd-banner>
 
       <mat-form-field appearance="fill">
         <mat-label>Banner Text</mat-label>
-        <textarea
-          matInput
-          [(ngModel)]="banner.text"
-          class="!h-28"
-          (ngModelChange)="onChange()"
-        ></textarea>
+        <textarea matInput [(ngModel)]="banner.text" class="!h-28" (ngModelChange)="onChange()"></textarea>
       </mat-form-field>
 
-      <app-color-select-group
-        (colorChanged)="doChangeColor($event)"
-      ></app-color-select-group>
+      <app-color-select-group (colorChanged)="doChangeColor($event)"></app-color-select-group>
 
       <mat-divider></mat-divider>
 
@@ -59,8 +42,8 @@
       header="Server Not Synchronized"
     >
       <div class="text-justify">
-        The managed server responsible for the current instance is not
-        synchronized. Please synchronize the server to continue editing.
+        The managed server responsible for the current instance is not synchronized. Please synchronize the server to
+        continue editing.
       </div>
     </app-bd-notification-card>
   </app-bd-dialog-content>

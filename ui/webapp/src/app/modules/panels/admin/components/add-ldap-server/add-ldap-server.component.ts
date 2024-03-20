@@ -60,7 +60,7 @@ export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialo
       .pipe(
         finalize(() => {
           this.saving$.next(false);
-        })
+        }),
       )
       .subscribe(() => {
         this.areas.closePanel();

@@ -10,18 +10,7 @@ import { ServerEditComponent } from './components/server-details/server-edit/ser
 import { ServersRoutingModule } from './servers-routing.module';
 
 @NgModule({
-  declarations: [
-    LinkCentralComponent,
-    LinkManagedComponent,
-    ServerDetailsComponent,
-    ServerEditComponent,
-  ],
-  imports: [
-    CommonModule,
-    CoreModule,
-    ServersRoutingModule,
-    MatExpansionModule,
-    MatCardModule,
-  ],
+  declarations: [LinkCentralComponent, LinkManagedComponent, ServerDetailsComponent, ServerEditComponent],
+  imports: [CommonModule, CoreModule, ServersRoutingModule, MatExpansionModule, MatCardModule],
 })
 export class ServersModule {}

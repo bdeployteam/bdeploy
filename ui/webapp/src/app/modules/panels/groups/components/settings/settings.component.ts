@@ -66,7 +66,7 @@ export class SettingsComponent {
           `This will permanently delete any associated instances (currently: ${this.instances.instances$.value.length}).`,
         'delete',
         group.name,
-        `Confirm using Instance Group ID`
+        `Confirm using Instance Group ID`,
       )
       .subscribe((r) => {
         if (r) {

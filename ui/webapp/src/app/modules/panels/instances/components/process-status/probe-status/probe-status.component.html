@@ -1,31 +1,17 @@
 <div class="local-wrapper flex justify-start items-center">
-  <div
-    class="flex-auto grid grid-cols-[auto_24px_auto_36px] gap-1 items-center"
-  >
+  <div class="flex-auto grid grid-cols-[auto_24px_auto_36px] gap-1 items-center">
     <div>{{ probe.type }}</div>
-    <mat-icon
-      class="material-symbols-filled"
-      [matTooltip]="'Status: ' + probe.status"
-      [ngClass]="class"
+    <mat-icon class="material-symbols-filled" [matTooltip]="'Status: ' + probe.status" [ngClass]="class"
       >{{ icon }}</mat-icon
     >
     <div>{{ probe.time | date: 'HH:mm:ss' }}</div>
     <app-bd-button-popup text="Details" icon="info">
       <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5">
-        <div class="bd-description-text">
-          {{ probe.type }} - Status {{ probe.status }}
-        </div>
+        <div class="bd-description-text">{{ probe.type }} - Status {{ probe.status }}</div>
         <mat-divider class="relative"></mat-divider>
         <div class="bd-description-text">Probe Response:</div>
-        <div
-          [style.width.px]="(narrow$ | async) ? 400 : 800"
-          class="flex h-[400px]"
-        >
-          <app-bd-editor
-            class="w-full h-full"
-            [readonly]="true"
-            [content]="content$ | async"
-          ></app-bd-editor>
+        <div [style.width.px]="(narrow$ | async) ? 400 : 800" class="flex h-[400px]">
+          <app-bd-editor class="w-full h-full" [readonly]="true" [content]="content$ | async"></app-bd-editor>
         </div>
       </mat-card>
     </app-bd-button-popup>

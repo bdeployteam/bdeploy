@@ -42,9 +42,7 @@
               errorDisplay="immediate"
               [required]="!!tempUser.password?.length"
             ></app-bd-form-input>
-            <password-strength-meter
-              [password]="tempUser.password"
-            ></password-strength-meter>
+            <password-strength-meter [password]="tempUser.password"></password-strength-meter>
           </ng-container>
         </ng-container>
       </form>
@@ -53,12 +51,9 @@
         <ng-container *ngIf="tempUser.externalSystem === 'LDAP'">
           <p>
             The user is currently authenticated by
-            <strong
-              >{{tempUser.externalTag ? tempUser.externalTag : 'any configured
-              server'}}</strong
-            >
-            using LDAP. You can switch the external authentication provider,
-            provided the user can authenticate using another provider as well.
+            <strong>{{tempUser.externalTag ? tempUser.externalTag : 'any configured server'}}</strong>
+            using LDAP. You can switch the external authentication provider, provided the user can authenticate using
+            another provider as well.
           </p>
           <app-bd-button
             text="Switch to OIDC Provider"
@@ -68,9 +63,8 @@
           ></app-bd-button>
           <mat-divider></mat-divider>
           <p>
-            You can also reset the association to a certain LDAP server, which
-            will make BDeploy contact all configured LDAP servers to
-            authenticate the user the next time he logs on.
+            You can also reset the association to a certain LDAP server, which will make BDeploy contact all configured
+            LDAP servers to authenticate the user the next time he logs on.
           </p>
           <app-bd-button
             text="Reset LDAP Server Association"

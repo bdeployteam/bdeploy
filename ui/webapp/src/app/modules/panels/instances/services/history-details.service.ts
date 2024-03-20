@@ -39,7 +39,7 @@ export class HistoryDetailsService {
         .get<InstanceVersionDto[]>(`${this.apiPath(group.name)}/${instance.instanceConfiguration.id}/versions`)
         .pipe(
           finalize(() => this.loading$.next(false)),
-          measure('Load Historic Versions')
+          measure('Load Historic Versions'),
         )
         .subscribe((r) => {
           this.versions$.next(r);
@@ -52,7 +52,7 @@ export class HistoryDetailsService {
       this.instances.current$
         .pipe(
           skipWhile((i) => !i),
-          first()
+          first(),
         )
         .subscribe((instance) => {
           const group = this.groups.current$.value;
@@ -73,19 +73,19 @@ export class HistoryDetailsService {
             loadConfig = this.instances.active$.pipe(
               skipWhile((i) => i === null),
               map((c) => c.instanceConfiguration),
-              first()
+              first(),
             );
             loadNodes = this.instances.activeNodeCfgs$.pipe(
               skipWhile((n) => n === null),
-              first()
+              first(),
             );
           } else {
             // this is a version we do not normally need, except for history viewing. load it from the server.
             loadConfig = this.http.get<InstanceConfiguration>(
-              `${this.apiPath(group.name)}/${instance.instanceConfiguration.id}/${version}`
+              `${this.apiPath(group.name)}/${instance.instanceConfiguration.id}/${version}`,
             );
             loadNodes = this.http.get<InstanceNodeConfigurationListDto>(
-              `${this.apiPath(group.name)}/${instance.instanceConfiguration.id}/${version}/nodeConfiguration`
+              `${this.apiPath(group.name)}/${instance.instanceConfiguration.id}/${version}/nodeConfiguration`,
             );
           }
 
@@ -96,7 +96,7 @@ export class HistoryDetailsService {
           })
             .pipe(
               finalize(() => this.loading$.next(false)),
-              measure('Load Historic Configuration')
+              measure('Load Historic Configuration'),
             )
             .subscribe({
               next: ({ config, nodes }) => {

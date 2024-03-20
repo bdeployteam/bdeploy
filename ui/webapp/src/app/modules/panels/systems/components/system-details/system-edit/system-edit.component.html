@@ -1,21 +1,9 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [panel]="true"
-    header="Configure System"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="Configure System" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="system">
-      <app-bd-form-input
-        name="name"
-        label="Name"
-        [(ngModel)]="system.config.name"
-      ></app-bd-form-input>
-      <app-bd-form-input
-        name="desc"
-        label="Description"
-        [(ngModel)]="system.config.description"
-      ></app-bd-form-input>
+      <app-bd-form-input name="name" label="Name" [(ngModel)]="system.config.name"></app-bd-form-input>
+      <app-bd-form-input name="desc" label="Description" [(ngModel)]="system.config.description"></app-bd-form-input>
       <app-bd-button
         text="Save"
         icon="save"

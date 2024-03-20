@@ -22,12 +22,6 @@ import { ProductsRoutingModule } from './products-routing.module';
     ProductBulkComponent,
     ProductTransferRepoComponent,
   ],
-  imports: [
-    CommonModule,
-    CoreModule,
-    ProductsRoutingModule,
-    MatStepperModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, CoreModule, ProductsRoutingModule, MatStepperModule, MatProgressSpinnerModule],
 })
 export class ProductsModule {}

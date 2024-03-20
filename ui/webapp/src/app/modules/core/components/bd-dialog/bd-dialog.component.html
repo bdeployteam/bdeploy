@@ -11,10 +11,7 @@
       (scroll)="onScrollContent($event)"
       cdkScrollable
     >
-      <ng-content
-        *ngIf="showContent$ | async"
-        select="app-bd-dialog-content"
-      ></ng-content>
+      <ng-content *ngIf="showContent$ | async" select="app-bd-dialog-content"></ng-content>
     </div>
   </div>
 </app-bd-loading-overlay>

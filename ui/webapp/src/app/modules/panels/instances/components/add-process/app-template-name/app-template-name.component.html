@@ -8,10 +8,7 @@
 </div>
 
 <div class="flex gap-1 justify-start items-center" *ngIf="!record.template">
-  <div
-    class="local-app"
-    [matTooltip]="'Creates a plain, unconfigured process from ' + record.app.appDisplayName + '.'"
-  >
+  <div class="local-app" [matTooltip]="'Creates a plain, unconfigured process from ' + record.app.appDisplayName + '.'">
     {{ column.data(record) }}
   </div>
 </div>

@@ -34,7 +34,7 @@ export class CleanupService {
       .get<CleanupGroup[]>(`${this.apiPath()}`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Calculate Cleanup')
+        measure('Calculate Cleanup'),
       )
       .subscribe((groups) => {
         const g = groups.filter((c) => !!c.actions?.length);
@@ -68,7 +68,7 @@ export class CleanupService {
           this.internalPerforming$.next(false);
           this.cleanup$.next(null);
         }),
-        measure('Perform Cleanup')
+        measure('Perform Cleanup'),
       )
       .subscribe();
   }

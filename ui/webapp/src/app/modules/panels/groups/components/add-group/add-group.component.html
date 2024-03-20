@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Add Instance Group"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Instance Group" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()">
@@ -21,18 +18,8 @@
           appEditUniqueValueValidator
           [disallowedValues]="usedNames"
         ></app-bd-form-input>
-        <app-bd-form-input
-          label="Title"
-          name="title"
-          [(ngModel)]="group.title"
-          required
-          appTrimmed
-        ></app-bd-form-input>
-        <app-bd-form-input
-          label="Description"
-          name="description"
-          [(ngModel)]="group.description"
-        ></app-bd-form-input>
+        <app-bd-form-input label="Title" name="title" [(ngModel)]="group.title" required appTrimmed></app-bd-form-input>
+        <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
         <app-bd-form-toggle
           label="Automatic Cleanup"
           name="autoDelete"

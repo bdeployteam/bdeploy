@@ -14,16 +14,9 @@
 <ng-template #replaceDialog>
   <div class="flex flex-col gap-2.5 min-w-[400px]">
     <span
-      >Replace
-      <strong
-        >{{record.persistent?.path ? record.persistent.path :
-        record.modification.file}}</strong
-      ></span
+      >Replace <strong>{{record.persistent?.path ? record.persistent.path : record.modification.file}}</strong></span
     >
-    <app-bd-file-drop
-      (fileAdded)="doAddFileContent($event)"
-      hintText="Drop file to replace content"
-    ></app-bd-file-drop>
+    <app-bd-file-drop (fileAdded)="doAddFileContent($event)" hintText="Drop file to replace content"></app-bd-file-drop>
     <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
     <div *ngIf="tempFileError" class="bd-warning-text">{{ tempFileError }}</div>
     <div *ngIf="tempFileContent">Loaded {{tempFileContent.length}} bytes</div>

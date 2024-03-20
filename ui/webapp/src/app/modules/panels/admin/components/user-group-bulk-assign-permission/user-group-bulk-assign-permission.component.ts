@@ -64,7 +64,7 @@ export class UserGroupBulkAssignPermissionComponent implements OnInit, OnDestroy
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe(() => {
         this.router.navigate(['..'], { relativeTo: this.route });

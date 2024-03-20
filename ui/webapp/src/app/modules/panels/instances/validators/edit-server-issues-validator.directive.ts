@@ -32,7 +32,7 @@ export class EditServerIssuesValidatorDirective implements AsyncValidator {
     return this.instanceEdit.requestValidation().pipe(
       map((iu) => {
         const validation = iu?.filter(
-          (v) => v.appId === this.edit.process$.value.id && v.paramId === this.appServerIssuesValidator
+          (v) => v.appId === this.edit.process$.value.id && v.paramId === this.appServerIssuesValidator,
         );
         if (!validation?.length) {
           return null;
@@ -41,7 +41,7 @@ export class EditServerIssuesValidatorDirective implements AsyncValidator {
         const errors = {};
         errors[ID] = validation[0].message; // we can only show one message per parameter.
         return errors;
-      })
+      }),
     );
   }
 }

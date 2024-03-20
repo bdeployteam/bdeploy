@@ -51,7 +51,7 @@ export class ServerDetailsService implements OnDestroy {
           this.loading$.next(true);
           this.http
             .get<InstanceConfiguration[]>(
-              `${this.apiPath}/controlled-instances/${this.areas.groupContext$.value}/${server.hostName}`
+              `${this.apiPath}/controlled-instances/${this.areas.groupContext$.value}/${server.hostName}`,
             )
             .pipe(finalize(() => this.loading$.next(false)))
             .subscribe((inst) => {
@@ -78,7 +78,7 @@ export class ServerDetailsService implements OnDestroy {
       this.http
         .post(
           `${this.apiPath}/minion-transfer-updates/${this.areas.groupContext$.value}/${server.hostName}`,
-          server.update
+          server.update,
         )
         .subscribe({
           next: () => {
@@ -98,7 +98,7 @@ export class ServerDetailsService implements OnDestroy {
       this.http
         .post(
           `${this.apiPath}/minion-transfer-updates/${this.areas.groupContext$.value}/${server.hostName}`,
-          server.update
+          server.update,
         )
         .subscribe({
           next: () => {
@@ -106,7 +106,7 @@ export class ServerDetailsService implements OnDestroy {
             this.http
               .post(
                 `${this.apiPath}/minion-install-updates/${this.areas.groupContext$.value}/${server.hostName}`,
-                server.update
+                server.update,
               )
               .subscribe({
                 next: () =>
@@ -139,7 +139,7 @@ export class ServerDetailsService implements OnDestroy {
             throw new Error(`Server is running but reports the wrong version: ${convert2String(v)}`);
           }
         }),
-        retryWithDelay()
+        retryWithDelay(),
       );
   }
 

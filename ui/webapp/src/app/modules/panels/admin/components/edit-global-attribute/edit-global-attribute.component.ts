@@ -45,7 +45,7 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
           .map((a) => a.name)
           .filter((a) => a !== this.initialAttribute.name);
         this.loading$.next(false);
-      })
+      }),
     );
   }
 

@@ -1,21 +1,15 @@
 <app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
-  <app-bd-dialog-toolbar
-    header="Convert to Node"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Convert to Node" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm">
       <div class="flex flex-col gap-2.5">
         <span
-          >Drag the <strong>identification card</strong> below to another
-          <code>STANDALONE</code> or <code>MANAGED</code> server to convert this
-          server to a <code>NODE</code> attached to that server.</span
+          >Drag the <strong>identification card</strong> below to another <code>STANDALONE</code> or
+          <code>MANAGED</code> server to convert this server to a <code>NODE</code> attached to that server.</span
         >
         <span
-          >Existing Instances will be moved to the target server. This server
-          will become a node which is configured in all migrated
-          instances.</span
+          >Existing Instances will be moved to the target server. This server will become a node which is configured in
+          all migrated instances.</span
         >
         <mat-card
           appearance="outlined"

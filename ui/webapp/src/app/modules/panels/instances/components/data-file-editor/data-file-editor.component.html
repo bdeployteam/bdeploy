@@ -16,19 +16,14 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      *ngIf="!(loading$ | async) && file$ | async as file"
-      class="flex flex-col h-full"
-    >
+    <div *ngIf="!(loading$ | async) && file$ | async as file" class="flex flex-col h-full">
       <app-bd-editor
         *ngIf="!(binary$ | async)"
         class="grow basis-0"
         [(content)]="content"
         [path]="file.path"
       ></app-bd-editor>
-      <app-bd-no-data *ngIf="binary$ | async"
-        >Binary data cannot be edited online.</app-bd-no-data
-      >
+      <app-bd-no-data *ngIf="binary$ | async">Binary data cannot be edited online.</app-bd-no-data>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

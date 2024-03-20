@@ -25,7 +25,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
     this.repairing$,
     null,
     null,
-    this.nodeName$
+    this.nodeName$,
   );
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;

@@ -1,9 +1,8 @@
 <div class="bd-default-padding">
   <p>
-    Configure one or more LDAP servers to enable LDAP authentication. Users will
-    be created on first login. The order of the servers in the configuration
-    determines the order in which they are queried. Once a user is associated
-    with a server, it will always prefer to authenticate against that server.
+    Configure one or more LDAP servers to enable LDAP authentication. Users will be created on first login. The order of
+    the servers in the configuration determines the order in which they are queried. Once a user is associated with a
+    server, it will always prefer to authenticate against that server.
   </p>
   <app-bd-data-table
     [records]="(settings.settings$ | async).auth.ldapSettings"

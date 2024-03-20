@@ -16,40 +16,26 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form form #epForm="ngForm">
-      <div
-        *ngIf="process?.endpoints?.http?.length"
-        class="flex flex-col gap-2.5 pt-0.5"
-      >
-        <div
-          *ngFor="let endpoint of process.endpoints.http; let i = index;"
-          class="bd-rect-card flex flex-col"
-        >
+      <div *ngIf="process?.endpoints?.http?.length" class="flex flex-col gap-2.5 pt-0.5">
+        <div *ngFor="let endpoint of process.endpoints.http; let i = index;" class="bd-rect-card flex flex-col">
           <div class="bd-bg-toolbar flex">
             <div class="bd-default-padding">
               Endpoint
               <strong
-                >{{ endpoint.id }} - {{ endpoint.path }} {{
-                endpoint.contextPath.value ? ('(' + endpoint.contextPath.value +
-                ')') : '' }}{{ endpoint.contextPath.linkExpression ? ('(' +
+                >{{ endpoint.id }} - {{ endpoint.path }} {{ endpoint.contextPath.value ? ('(' +
+                endpoint.contextPath.value + ')') : '' }}{{ endpoint.contextPath.linkExpression ? ('(' +
                 endpoint.contextPath.linkExpression + ')') : '' }}</strong
               >
-              <span
-                *ngIf="endpointDisabledStatus.get(endpoint).disabled"
-                class="bd-warning-text"
-                >&nbsp;-&nbsp;{{ endpointDisabledStatus.get(endpoint).reason
-                }}</span
+              <span *ngIf="endpointDisabledStatus.get(endpoint).disabled" class="bd-warning-text"
+                >&nbsp;-&nbsp;{{ endpointDisabledStatus.get(endpoint).reason }}</span
               >
             </div>
             <div class="flex-auto"></div>
-            <div class="bd-default-padding bd-description-text">
-              {{ endpoint.type }}
-            </div>
+            <div class="bd-default-padding bd-description-text">{{ endpoint.type }}</div>
           </div>
           <div class="bd-default-padding">
             <div>
-              <div
-                class="pt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-2.5 gap-y-1"
-              >
+              <div class="pt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-2.5 gap-y-1">
                 <app-config-desc-element card="cfg.ep.port">
                   <app-bd-value-editor
                     [name]="'epPort' + i"

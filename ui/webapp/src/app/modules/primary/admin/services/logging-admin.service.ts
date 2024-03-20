@@ -26,7 +26,7 @@ export class LoggingAdminService {
       .get<RemoteDirectory[]>(`${this.apiPath()}/logDirs`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('List Server Logs')
+        measure('List Server Logs'),
       )
       .subscribe((dirs) =>
         this.directories$.next(
@@ -38,8 +38,8 @@ export class LoggingAdminService {
             } else {
               return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
             }
-          })
-        )
+          }),
+        ),
       );
   }
 
@@ -58,7 +58,7 @@ export class LoggingAdminService {
     rde: RemoteDirectoryEntry,
     offset: number,
     limit: number,
-    silent: boolean
+    silent: boolean,
   ): Observable<StringEntryChunkDto> {
     const options = {
       headers: null,

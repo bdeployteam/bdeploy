@@ -51,7 +51,7 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
           showDeploymentEvents: deploy,
           showRuntimeEvents: runtime,
         });
-      }
+      },
     );
 
     // runtime events rely on live data from the server which is not allowed if not synchronized.
@@ -61,14 +61,14 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
           this.showRuntime$.next(false);
         }
         this.runtimeLocked$.next(!sync);
-      })
+      }),
     );
 
     this.subscription.add(this.search.register(this));
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
-      })
+      }),
     );
 
     this.history.begin();

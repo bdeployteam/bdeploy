@@ -27,7 +27,7 @@ export class UserGroupBulkManipulationComponent {
         `This will delete <strong>${this.bulk.selection$.value.length}</strong> user groups. This action is irreversible. If you want to continue, confirm using <em>I UNDERSTAND</em>. Continue?`,
         'warning',
         'I UNDERSTAND',
-        null
+        null,
       )
       .subscribe((r) => {
         if (r) {
@@ -49,7 +49,7 @@ export class UserGroupBulkManipulationComponent {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe();
   }
@@ -67,7 +67,7 @@ export class UserGroupBulkManipulationComponent {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loading$.next(false)),
       )
       .subscribe();
   }

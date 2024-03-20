@@ -5,10 +5,7 @@ export function isDirty(a: any, b: any) {
   if (!a || !b) {
     return false;
   }
-  return !isEqual(
-    mapEmptyValueToNull(cloneDeep(a)),
-    mapEmptyValueToNull(cloneDeep(b))
-  );
+  return !isEqual(mapEmptyValueToNull(cloneDeep(a)), mapEmptyValueToNull(cloneDeep(b)));
 }
 
 function mapEmptyValueToNull(object) {

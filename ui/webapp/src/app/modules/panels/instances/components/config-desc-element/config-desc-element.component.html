@@ -2,11 +2,6 @@
   <app-config-desc-cards [field]="card"></app-config-desc-cards>
 </ng-template>
 
-<div
-  [appBdPopup]="popup"
-  appBdPopupTrigger="hover"
-  [appBdPopupDelay]="1000"
-  [appBdPopupPosition]="position"
->
+<div [appBdPopup]="popup" appBdPopupTrigger="hover" [appBdPopupDelay]="1000" [appBdPopupPosition]="position">
   <ng-content></ng-content>
 </div>

@@ -42,7 +42,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     this.synchronizing$,
     null, // default: use current
     of(null), // we *dont* want to fire on current instance change.
-    this.hostName$.pipe(distinctUntilChanged())
+    this.hostName$.pipe(distinctUntilChanged()),
   );
 
   protected sync$ = new BehaviorSubject<boolean>(false);
@@ -89,7 +89,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
       .pipe(
         finalize(() => {
           this.synchronizing$.next(false);
-        })
+        }),
       )
       .subscribe((result) => {
         this.instancesService.updateStatusDtos(result.states);

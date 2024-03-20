@@ -53,7 +53,7 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
         if (i.config.config.system) {
           this.systemSel = this.systemKeys.find((k) => k.name === i.config.config.system.name);
         }
-      })
+      }),
     );
   }
 
@@ -64,7 +64,7 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.hasPendingChanges = this.isDirty();
-      })
+      }),
     );
   }
 
@@ -92,7 +92,7 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Change Instance Configuration');
-      })
+      }),
     );
   }
 }

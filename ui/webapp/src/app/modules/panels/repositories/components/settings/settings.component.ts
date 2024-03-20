@@ -30,7 +30,7 @@ export class SettingsComponent {
           `This will permanently delete all products and external software packages that are stored in this repository.`,
         'delete',
         repository.name,
-        `Confirm using Software Repository Name`
+        `Confirm using Software Repository Name`,
       )
       .subscribe((r) => {
         if (r) {
