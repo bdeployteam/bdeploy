@@ -70,10 +70,7 @@ describe('System Template Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('[data-cy=step-done]').within(() => {
         cy.contains('Instances have been created').should('exist');
-        cy.get('tr:contains("Successfully created instance")').should(
-          'have.length',
-          4
-        );
+        cy.get('tr:contains("Successfully created instance")').should('have.length', 4);
       });
     });
 

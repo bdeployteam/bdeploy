@@ -46,9 +46,7 @@ describe('Central/Managed Basic Test', function () {
     cy.pressMainNavButton('Managed Servers');
     cy.get('app-servers-browser').should('exist');
     cy.inMainNavContent(() => {
-      cy.contains('tr', 'Description of managed server')
-        .should('have.length', 1)
-        .click();
+      cy.contains('tr', 'Description of managed server').should('have.length', 1).click();
     });
     cy.inMainNavFlyin('app-server-details', () => {
       cy.get(`app-bd-button[text="Delete"]`).click();
@@ -181,11 +179,9 @@ describe('Central/Managed Basic Test', function () {
 
     // create some from a template
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
-        () => {
-          cy.get('button[data-cy^="Apply Instance Template"]').click();
-        }
-      );
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
+        cy.get('button[data-cy^="Apply Instance Template"]').click();
+      });
     });
 
     cy.inMainNavFlyin('app-instance-templates', () => {

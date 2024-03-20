@@ -50,9 +50,7 @@ describe('Groups Tests (Permissions)', () => {
     // create test users - CLIENT permission has its separate test.
     ['read', 'write'].forEach((perm) => {
       cy.pressToolbarButton('Create User');
-      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as(
-        'createUser'
-      );
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
       cy.inMainNavFlyin('add-user', () => {
         cy.fillFormInput('name', perm);
         cy.fillFormInput('fullName', `${perm} User`);

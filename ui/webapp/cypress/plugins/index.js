@@ -25,9 +25,7 @@ module.exports = (on, config) => {
             .got(args.url, { dnsLookupIpVersion: 4 })
             .then((res) => {
               if (!res || res?.statusCode !== 200) {
-                return reject(
-                  new Error('No or bad response: ' + res?.statusCode)
-                );
+                return reject(new Error('No or bad response: ' + res?.statusCode));
               }
 
               fs.outputFileSync(fileName, res.rawBody);
@@ -35,7 +33,7 @@ module.exports = (on, config) => {
             })
             .catch((err) => {
               return reject(new Error('Error in request: ' + err));
-            })
+            }),
         );
       });
     },
@@ -90,9 +88,7 @@ module.exports = (on, config) => {
       console.log('zip file %s has entries %o', filename, names);
 
       if (!names.includes(expectedEntry)) {
-        throw new Error(
-          `Expected Entry ${expectedEntry} not found in ${filename}`
-        );
+        throw new Error(`Expected Entry ${expectedEntry} not found in ${filename}`);
       }
 
       return null;

@@ -79,19 +79,16 @@ Cypress.Commands.add('forceVisit', (url) => {
   });
 });
 
-Cypress.Commands.add(
-  'authenticatedRequest',
-  function (opts, mode = 'STANDALONE') {
-    let lg;
-    if (mode === 'STANDALONE') {
-      lg = cy.login();
-    } else if (mode === 'MANAGED') {
-      lg = cy.loginManaged();
-    } else {
-      lg = cy.loginCentral();
-    }
-    return lg.then(() => {
-      return cy.request(opts);
-    });
+Cypress.Commands.add('authenticatedRequest', function (opts, mode = 'STANDALONE') {
+  let lg;
+  if (mode === 'STANDALONE') {
+    lg = cy.login();
+  } else if (mode === 'MANAGED') {
+    lg = cy.loginManaged();
+  } else {
+    lg = cy.loginCentral();
   }
-);
+  return lg.then(() => {
+    return cy.request(opts);
+  });
+});

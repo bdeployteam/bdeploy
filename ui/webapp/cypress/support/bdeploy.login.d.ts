@@ -25,7 +25,7 @@ declare namespace Cypress {
     /** performs an authenticated request */
     authenticatedRequest(
       req: Partial<RequestOptions>,
-      mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL'
+      mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL',
     ): Chainable<Cypress.Response<any>>;
   }
 }

@@ -15,9 +15,7 @@ describe('Admin UI Tests (Accounts ASVS)', () => {
     // test password rules
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User');
-      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as(
-        'createUser'
-      );
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
     });
 
     cy.inMainNavFlyin('add-user', () => {
@@ -27,13 +25,9 @@ describe('Admin UI Tests (Accounts ASVS)', () => {
       cy.fillFormInput('pass', 'p');
       cy.fillFormInput('passConfirm', 'p');
 
-      cy.contains('New Password must be at least 12 characters.').should(
-        'exist'
-      );
+      cy.contains('New Password must be at least 12 characters.').should('exist');
       cy.fillFormInput('pass', 'p'.repeat(129));
-      cy.contains('New Password must be at maximum 128 characters.').should(
-        'exist'
-      );
+      cy.contains('New Password must be at maximum 128 characters.').should('exist');
 
       cy.fillFormInput('pass', 'NewPassword1');
       cy.fillFormInput('passConfirm', 'NewPassword1');

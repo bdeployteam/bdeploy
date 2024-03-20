@@ -11,17 +11,12 @@ export const deleteDownloadsFolder = () => {
 };
 
 export const validateZip = (zip, expectedEntry, fixture = false) => {
-  const downloadsFolder = fixture
-    ? Cypress.config('fixturesFolder')
-    : Cypress.config('downloadsFolder');
+  const downloadsFolder = fixture ? Cypress.config('fixturesFolder') : Cypress.config('downloadsFolder');
   const downloadedFilename = downloadsFolder + '/' + zip;
 
   // wait for the file to be fully downloaded by reading it (as binary)
   // and checking its length
-  cy.readFile(downloadedFilename, 'binary', { timeout: 15000 }).should(
-    'have.length.gt',
-    300
-  );
+  cy.readFile(downloadedFilename, 'binary', { timeout: 15000 }).should('have.length.gt', 300);
 
   // unzipping and validating a zip file requires the direct access to the file system
   // thus it is easier to perform the checks from the plugins file that runs in Node
