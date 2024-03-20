@@ -6,6 +6,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -109,6 +110,8 @@ public class BrowserDialog extends BaseDialog {
         // Footer displaying some progress
         JPanel footer = createFooter();
         add(footer, BorderLayout.PAGE_END);
+
+        doUpdateButtonState();
     }
 
     /**
@@ -137,54 +140,26 @@ public class BrowserDialog extends BaseDialog {
         header.setBorder(new EmptyBorder(10, 10, 10, 10));
         header.setLayout(new BorderLayout());
 
-        launchButton = new JButton();
-        launchButton.setText("Launch");
-        launchButton.setToolTipText("Launches the selected application.");
-        launchButton.setIcon(WindowHelper.loadIcon("/launch.png", 24, 24));
-        launchButton.addActionListener(this::onLaunchButtonClicked);
-        launchButton.setBackground(Color.WHITE);
+        launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
+                "Launches the selected application");
 
-        refreshButton = new JButton();
-        refreshButton.setText("Refresh");
-        refreshButton.setToolTipText("Updates the locally stored information (name, version...) of the selected applications.");
-        refreshButton.setIcon(WindowHelper.loadIcon("/refresh.png", 24, 24));
-        refreshButton.addActionListener(this::onRefreshButtonClicked);
-        refreshButton.setBackground(Color.WHITE);
+        refreshButton = createHeaderButton("refresh", "Refresh", this::onRefreshButtonClicked,//
+                "Updates the locally stored information (name, version...) of the selected applications");
 
-        uninstallButton = new JButton();
-        uninstallButton.setText("Uninstall");
-        uninstallButton.setToolTipText("Removes the selected application.");
-        uninstallButton.setIcon(WindowHelper.loadIcon("/uninstall.png", 24, 24));
-        uninstallButton.addActionListener(this::onUninstallButtonClicked);
-        uninstallButton.setBackground(Color.WHITE);
+        uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
+                "Launches the selected application");
 
-        pruneButton = new JButton();
-        pruneButton.setText("Prune");
-        pruneButton.setToolTipText("Remove unused elements from the BHive.");
-        pruneButton.setIcon(WindowHelper.loadIcon("/prune.png", 24, 24));
-        pruneButton.addActionListener(this::onPruneButtonClicked);
-        pruneButton.setBackground(Color.WHITE);
+        pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
+                "Removes the selected application");
 
-        fsckButton = new JButton();
-        fsckButton.setText("Fix Errors");
-        fsckButton.setToolTipText("Fix any errors in the BHive.");
-        fsckButton.setIcon(WindowHelper.loadIcon("/fixErrors.png", 20, 20));
-        fsckButton.addActionListener(this::onFsckButtonClicked);
-        fsckButton.setBackground(Color.WHITE);
+        fsckButton = createHeaderButton("fixErrors", "Fix Errors", this::onFsckButtonClicked,//
+                "Fix any errors in the BHive");
 
-        verifyButton = new JButton();
-        verifyButton.setText("Verify");
-        verifyButton.setToolTipText("Check if selected application has missing or modified files.");
-        verifyButton.setIcon(WindowHelper.loadIcon("/verify.png", 20, 20));
-        verifyButton.addActionListener(this::onVerifyButtonClicked);
-        verifyButton.setBackground(Color.WHITE);
+        verifyButton = createHeaderButton("verify", "Verify", this::onVerifyButtonClicked,//
+                "Check if selected application has missing or modified files");
 
-        reinstallButton = new JButton();
-        reinstallButton.setText("Reinstall");
-        reinstallButton.setToolTipText("Reinstall selected application");
-        reinstallButton.setIcon(WindowHelper.loadIcon("/reinstall.png", 20, 20));
-        reinstallButton.addActionListener(this::onReinstallButtonClicked);
-        reinstallButton.setBackground(Color.WHITE);
+        reinstallButton = createHeaderButton("reinstall", "Reinstall", this::onReinstallButtonClicked,//
+                "Reinstall selected application");
 
         // Toolbar on the left side
         JToolBar toolbar = new JToolBar();
@@ -223,6 +198,16 @@ public class BrowserDialog extends BaseDialog {
         });
         searchPanel.add(searchField);
         return header;
+    }
+
+    private static JButton createHeaderButton(String iconName, String text, ActionListener listener, String tooltip) {
+        JButton btn = new JButton();
+        btn.setText(text);
+        btn.setToolTipText(tooltip);
+        btn.setIcon(WindowHelper.loadIcon('/' + iconName + ".png", 24, 24));
+        btn.addActionListener(listener);
+        btn.setBackground(Color.WHITE);
+        return btn;
     }
 
     /** Creates the widgets shown in the content */
@@ -279,11 +264,11 @@ public class BrowserDialog extends BaseDialog {
 
         updateItem = new JMenuItem("Update");
         updateItem.setIcon(WindowHelper.loadIcon("/update.png", 16, 16));
-        updateItem.setToolTipText("Installs the latest available version the selected application.");
+        updateItem.setToolTipText("Installs the latest available version of the selected application");
         updateItem.addActionListener(this::onUpdateButtonClicked);
 
         customizeAndLaunchItem = new JMenuItem("Customize & Launch");
-        customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching.");
+        customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching");
         customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/customizeAndLaunch.png", 16, 16));
         customizeAndLaunchItem.addActionListener(this::onLaunchButtonClicked);
 
@@ -610,7 +595,7 @@ public class BrowserDialog extends BaseDialog {
         // --updateOnly flag needs at least version 3.6.5
         updateItem.setEnabled(!readonlyRoot && checkVersion(apps, new Version(3, 6, 5, null)));
 
-        // FSCK and PRUNE requires write permissions
+        // Error fixing and pruning require write permissions
         if (!readonlyRoot) {
             fsckButton.setEnabled(true);
             pruneButton.setEnabled(true);
