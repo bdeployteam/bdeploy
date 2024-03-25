@@ -17,7 +17,7 @@ import io.bdeploy.ui.utils.WindowsExecutableUtils;
 /**
  * Verifies that a given executable is properly signed, e.g. for pre-release checks.
  */
-@Help("Verifies that the given binary has a valid signature.")
+@Help("Verifies that the given binary has a valid signature")
 @ToolCategory(MinionServerCli.UTIL_TOOLS)
 @CliName("verify-signature")
 public class VerifySignatureTool extends ConfiguredCliTool<VerifyConfig> {

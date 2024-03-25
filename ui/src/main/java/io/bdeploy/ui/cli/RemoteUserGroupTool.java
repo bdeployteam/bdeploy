@@ -24,7 +24,7 @@ import io.bdeploy.ui.cli.RemoteUserGroupTool.UserGroupConfig;
 /**
  * Manages users.
  */
-@Help("Manage (configuration UI) users groups on a master.")
+@Help("Manage (configuration UI) users groups on a master")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-user-group")
 public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {

@@ -12,7 +12,7 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.cli.RemoteDeploymentTool.RemoteDeployConfig;
 
-@Help("Install/activate/uninstall on a remote server")
+@Help("Install, activate and uninstall on a remote server")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-deployment")
 public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> {

@@ -22,7 +22,7 @@ import io.bdeploy.ui.cli.RemoteUserTool.UserConfig;
 /**
  * Manages users.
  */
-@Help("Manage (configuration UI) users on a master.")
+@Help("Manage (configuration UI) users on a master")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-user")
 public class RemoteUserTool extends RemoteServiceTool<UserConfig> {

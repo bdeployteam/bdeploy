@@ -19,7 +19,7 @@ import io.bdeploy.minion.cli.SchemaTool.SchemaConfig;
 import io.bdeploy.schema.PublicSchemaGenerator;
 import io.bdeploy.schema.PublicSchemaValidator;
 
-@Help("Generate and validate YAML/JSON schemas.")
+@Help("Generate and validate YAML/JSON schemas")
 @ToolCategory(MinionServerCli.UTIL_TOOLS)
 @CliName(value = "schema")
 public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {

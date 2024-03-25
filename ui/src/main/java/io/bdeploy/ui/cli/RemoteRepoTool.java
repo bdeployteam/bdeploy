@@ -15,7 +15,7 @@ import io.bdeploy.ui.cli.RemoteRepoTool.RepoConfig;
 /**
  * Manages storage locations.
  */
-@Help("Manage software repositories for the minion.")
+@Help("Manage software repositories for the minion")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-repo")
 public class RemoteRepoTool extends RemoteServiceTool<RepoConfig> {

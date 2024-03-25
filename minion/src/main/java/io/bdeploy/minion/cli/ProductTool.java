@@ -34,7 +34,7 @@ import io.bdeploy.minion.cli.ProductTool.ProductConfig;
 /**
  * Manages product manifests.
  */
-@Help("Create and manage product manifests locally.")
+@Help("Create and manage product manifests locally")
 @ToolCategory(MinionServerCli.PRODUCT_TOOLS)
 @CliName("product")
 public class ProductTool extends RemoteServiceTool<ProductConfig> {

@@ -82,7 +82,7 @@ import jakarta.inject.Singleton;
 /**
  * Starts a HTTPS server which accepts API calls depending on the mode of the given root directory.
  */
-@Help("Start a node or master node.")
+@Help("Start a node or master node")
 @ToolCategory(MinionServerCli.SERVER_TOOLS)
 @CliName(value = "start", alias = { "master", "slave" })
 public class StartTool extends ConfiguredCliTool<MasterConfig> {

@@ -28,7 +28,7 @@ import io.bdeploy.ui.dto.NodeAttachDto;
 /**
  * Manages nodes.
  */
-@Help("Manage nodes in a remote master.")
+@Help("Manage nodes in a remote master")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-node")
 public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {

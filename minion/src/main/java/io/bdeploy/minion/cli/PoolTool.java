@@ -25,7 +25,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.PoolTool.PoolConfig;
 import io.bdeploy.minion.job.OrganizePoolJob;
 
-@Help("Manage Pool settings")
+@Help("Manage pool settings")
 @ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("pool")
 public class PoolTool extends ConfiguredCliTool<PoolConfig> {

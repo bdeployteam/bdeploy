@@ -177,11 +177,11 @@ public abstract class ToolBase {
                 System.out.println(LOGO[logo++] + "Usage: $0 <options...> <tool> <args...>");
                 System.out.println(LOGO[logo++]);
                 System.out.println(LOGO[logo++] + "Options:");
-                System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting.");
-                System.out.println(LOGO[logo++] + "  -v|-vv  Be verbose. No effect if -q is given as well.");
-                System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f>. No effect on progress output.");
-                System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file <f>. No");
-                System.out.println(LOGO[logo++] + "          effect on normal output.");
+                System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting");
+                System.out.println(LOGO[logo++] + "  -v|-vv  Be verbose - no effect if -q is given as well");
+                System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f> - no effect on progress output");
+                System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file <f> - no");
+                System.out.println(LOGO[logo++] + "          effect on normal output");
                 System.out.println(LOGO[logo++] + "  --csv   Write data tables in CSV format");
                 System.out.println(LOGO[logo++] + "  --json  Write data tables in JSON format");
                 System.out.println(LOGO[logo++]);
@@ -202,7 +202,7 @@ public abstract class ToolBase {
                             Help h = e.getValue().getAnnotation(Help.class);
                             table.row().cell(e.getKey()).cell(h.value() != null ? h.value() : "").build();
                         } else {
-                            table.row().cell(e.getKey()).cell("DEPRECATED. Alias for '" + names.get(0) + "'").build();
+                            table.row().cell(e.getKey()).cell("DEPRECATED - alias for '" + names.get(0) + "'").build();
                         }
                     });
                     table.render();

@@ -24,7 +24,7 @@ import jakarta.ws.rs.core.UriBuilder;
 /**
  * Manages storage locations.
  */
-@Help("Manage minion basic configuration.")
+@Help("Manage minion basic configuration")
 @ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("config")
 public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {

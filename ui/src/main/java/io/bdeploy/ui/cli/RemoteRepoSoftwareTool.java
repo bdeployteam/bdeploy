@@ -15,7 +15,7 @@ import io.bdeploy.ui.cli.RemoteRepoSoftwareTool.SoftwareConfig;
 /**
  * Manages storage locations.
  */
-@Help("View contents of software repositories.")
+@Help("View contents of software repositories")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-repo-software")
 public class RemoteRepoSoftwareTool extends RemoteServiceTool<SoftwareConfig> {

@@ -59,7 +59,7 @@ import io.bdeploy.ui.dto.SystemConfigurationDto;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status.Family;
 
-@Help("List, create, import and export  instance configurations")
+@Help("List, create, import and export instance configurations")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-instance")
 public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {

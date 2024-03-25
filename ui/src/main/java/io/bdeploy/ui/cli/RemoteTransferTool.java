@@ -23,7 +23,7 @@ import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.cli.RemoteTransferTool.TransferConfig;
 import jakarta.ws.rs.core.UriBuilder;
 
-@Help("Transfer products and software from one server to another.")
+@Help("Transfer products and software from one server to another")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-transfer")
 public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {

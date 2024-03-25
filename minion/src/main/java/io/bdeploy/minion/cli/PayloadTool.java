@@ -18,7 +18,7 @@ import io.bdeploy.ui.utils.WindowsExecutableUtils;
 /**
  * Manages PE executable payloads.
  */
-@Help("Attach a payload to a signed PE/COFF executable.")
+@Help("Attach a payload to a signed PE/COFF executable")
 @ToolCategory(MinionServerCli.UTIL_TOOLS)
 @CliName("payload")
 public class PayloadTool extends ConfiguredCliTool<PayloadConfig> {

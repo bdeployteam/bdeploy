@@ -24,7 +24,7 @@ import io.bdeploy.minion.cli.StorageTool.StorageConfig;
 /**
  * Manages storage locations.
  */
-@Help("Manage storage locations for the minion.")
+@Help("Manage storage locations for the minion")
 @ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("storage")
 public class StorageTool extends ConfiguredCliTool<StorageConfig> {

@@ -20,7 +20,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.minion.cli.InteractiveShell.ShellConfig;
 
-@Help("An interactive shell. Reads commands from the console and executes them.")
+@Help("An interactive shell - reads commands from the console and executes them")
 @ToolCategory(MinionServerCli.LOCAL_SESSION_TOOLS)
 @CliName("shell")
 public class InteractiveShell extends ConfiguredCliTool<ShellConfig> {
