@@ -2,13 +2,14 @@
 order: 4
 icon: container
 ---
+
 # Integration of a new product
 
 This chapter is intended for those who want to integrate their own **Product** to be deployed with **BDeploy**. Therefore a couple of YAML files are required. These files describe your product and all its applications together with some additional meta-data. These artifacts are required:
 
 [app-info.yaml](#app-infoyaml)
 :::
-&emsp;YAML file to describe one single **Application**. It is required once for every client and server **Application** of the product. 
+&emsp;YAML file to describe one single **Application**. It is required once for every client and server **Application** of the product.
 :::
 [product-info.yaml](#product-infoyaml)
 :::
@@ -243,7 +244,7 @@ _Default:_
 
 _Mandatory:_ no
 
-_Description:_ An optional list of suggested values for paremters of type `STRING` (the default). The Web UI will present this list when editing the parameter value. 
+_Description:_ An optional list of suggested values for paremters of type `STRING` (the default). The Web UI will present this list when editing the parameter value.
 !!!warning Caution
 Although parameters in the UI are grouped together (and thus might change order), the order in which parameters appear on the final command line is exactly the order in which they are defined in the `app-info.yaml` file.
 !!!
@@ -253,7 +254,7 @@ _Default:_
 
 _Mandatory:_ yes
 
-_Description:_ The actual parameter, e.g. `--parameter`, `-Dmy.system.prop`, etc. 
+_Description:_ The actual parameter, e.g. `--parameter`, `-Dmy.system.prop`, etc.
 !!!info Note
 The value of the parameter is not part of this definition, nor is any potential value separator (e.g. `=`).
 !!!
@@ -291,7 +292,7 @@ _Default:_ `false`
 
 _Mandatory:_ no
 
-_Description:_ Whether this parameter is `global`. This means that inside a single **Instance**, every process requiring this parameter will receive the same value. The configuration UI will provide input fields for the parameter for every **Application** which requires the parameter, and propagate value changes to all other **Applications** requiring it. 
+_Description:_ Whether this parameter is `global`. This means that inside a single **Instance**, every process requiring this parameter will receive the same value. The configuration UI will provide input fields for the parameter for every **Application** which requires the parameter, and propagate value changes to all other **Applications** requiring it.
 
 === **Attribute**: `mandatory`
 _Default:_ `false`
@@ -339,7 +340,7 @@ _Default:_ `STRING`
 
 _Mandatory:_ no
 
-_Description:_ Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. Since *5.6.0*, `ENVIRONMENT` is available as an additional type.
+_Description:_ Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. Since _5.6.0_, `ENVIRONMENT` is available as an additional type.
 
 The `CLIENT_PORT` and `SERVER_PORT` types are treated like `NUMERIC` parameters throughout the whole application, with the exception of the dialogs that deal with ports specifically.
 
@@ -431,7 +432,7 @@ Attribute   | Description
 `authPass` | The password to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.
 
 !!!info Note
-Endpoints which are not considered *enabled* are not required to be configured by the user, but are still reported via public API.
+Endpoints which are not considered _enabled_ are not required to be configured by the user, but are still reported via public API.
 !!!
 
 ## product-info.yaml
@@ -659,7 +660,7 @@ groups: <7>
 - name: "Client Apps"
   type: CLIENT <13>
   description: "All client applications"
-  
+
   applications:
   - application: client-app
     description: "A default client application."
@@ -729,7 +730,7 @@ Attribute   | Description
 `type` | Either `SERVER` or `CLIENT` right now. The target node where the group is applied must match this type.
 `applications` | A list of templates. A template can either be a reference to an [`application-template.yaml`](#application-templateyaml) defined template, or - alternatively - can be defined inline. In this case all attributes of an [`application-template.yaml`](#application-templateyaml) apply to a single item in the `applications` list.
 
-## parameter-template.yaml ##
+## parameter-template.yaml
 
 A `parameter-template.yaml` allows products to define re-usable blocks of parameters associated to a unique ID. These can then be applied in `app-info.yaml` files. For the user of **BDeploy**, those parameters will appear as if they were defined directly in the [`app-info.yaml`](#app-infoyaml) of the application.
 
@@ -754,7 +755,7 @@ Inlining of templates into applications happens **before** anything else. Parame
 To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](#product-infoyaml) so it is included at build time.
 !!!
 
-## instance-variable-template.yaml ##
+## instance-variable-template.yaml
 
 An `instance-variable-template.yaml` works the same as a `parameter-template.yaml` in that it provides common definitions for instance variables, which can be re-used in [`instance-template.yaml`](#instance-templateyaml) files. Those definitions are inlined early on, so variables from `instance-variable-template.yaml` files can do exactly the same things as `instanceVariables` in a [`instance-template.yaml`](#instance-templateyaml).
 
@@ -775,7 +776,7 @@ instanceVariables: <2>
 To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](#product-infoyaml) so it is included at build time.
 !!!
 
-## system-template.yaml ##
+## system-template.yaml
 
 A (freestanding) `system-template.yaml` allows you to specify a broader scoped template than a (product-bound) `instance-template.yaml`. A `system-template.yaml` can reference multiple products, and **Instance Templates** therin to create systems containing of many instances from different products.
 
@@ -815,7 +816,7 @@ instances:
 2. Template variables in **System Templates** work similar to template variables in [`instance-template.yaml`](#instance-templateyaml). They can be used within the `system-template.yaml` in instance names, `fixedVariables` and `defaultMappings`.
 3. A simple instance reference **must** consist of a `name`, a `productId` and a `templateName`, meaning "create an instance with name `name`, from the product `productId` using the template `templateName`".
 4. `fixedVariables` allows you to specify a "fixed" value for template variables used in the referenced **Instance Template**. This will skip querying the user for a value for that variable, and instead use this fixed value.
-5. `defaultMappings` can be used to pre-assign **Instance Template** groups to available nodes. If a node with the specified name is not available during application of the **System Template**, no node will be preselected. To specify the **Client Application** node, you can either specify 'Client Applications' or the internal name '__ClientApplications'.
+5. `defaultMappings` can be used to pre-assign **Instance Template** groups to available nodes. If a node with the specified name is not available during application of the **System Template**, no node will be preselected. To specify the **Client Application** node, you can either specify 'Client Applications' or the internal name '\_\_ClientApplications'.
 
 !!!info Note
 When applying a **System Template** from the CLI, all mappings need to be provided through `defaultMappings`, and all **Template Variables** of the **System Template** as well as  downstream **Template Variables** (required by the individual **Instance Templates**) need to either have a default value or be provided using `fixedVariables`, as the CLI is non-interactive when applying **System Templates**
@@ -855,7 +856,7 @@ Attribute   | Description
 `defaultMappings` | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset.
 `fixedVariables` | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.
 
-## product-validation.yaml ##
+## product-validation.yaml
 
 The `product-validation.yaml` file contains references to all files that should be sent to the server when performing a product pre-validation. This validation can be used to verify that the product and all its applications contain valid **BDeploy** YAML.
 
@@ -881,15 +882,15 @@ The well-defined **Product** directory including **Applications** can be zipped 
 
 The following conditions must be fulfilled for a successful import:
 
-* ZIP files must be self-contained, e.g. only relative paths are allowed and no leaving of the zipped structure via ".." paths.
-* YAML files must follow standard naming (product-info.yaml).
+- ZIP files must be self-contained, e.g. only relative paths are allowed and no leaving of the zipped structure via ".." paths.
+- YAML files must follow standard naming (product-info.yaml).
 
 ## Via CLI
 
 Once you have a `product-info.yaml` with it's `product-version.yaml` and all the `app-info.yaml` files in their respective **Application** directories, you can use the CLI to import the product as a single piece.
 
-* Use `bdeploy product` to import the product by specifying a local **BHive** and the `product-info.yaml` to import from.
-* Use `bhive push` to push the resulting **Product Manifest** from the local **BHive** to an **Instance Group** on a remote **BDeploy** server.
+- Use `bdeploy product` to import the product by specifying a local **BHive** and the `product-info.yaml` to import from.
+- Use `bhive push` to push the resulting **Product Manifest** from the local **BHive** to an **Instance Group** on a remote **BDeploy** server.
 
 ## Via Gradle
 
@@ -898,7 +899,7 @@ Once you have a `product-info.yaml` with it's `product-version.yaml` and all the
 Given a sample Java application which has been created from the default gradle template using `gradle init`, these are the changes you need to build a **BDeploy** product for this single application. For this demo, the application is named `test`.
 
 !!!info Note
-Add the below code to your *existing* `build.gradle`
+Add the below code to your _existing_ `build.gradle`
 !!!
 
 ```groovy build.gradle
@@ -974,7 +975,7 @@ The `repositoryServer` will be queried for additionally specified `runtimeDepend
 
 Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
 
-Lets start off with the [`app-info.yaml`](#app-infoyaml), which describes the `test` application. 
+Lets start off with the [`app-info.yaml`](#app-infoyaml), which describes the `test` application.
 
 !!!info Note
 This file **must** be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
@@ -1100,7 +1101,7 @@ applications:
     includeOs: [WINDOWS, LINUX]
     application:
       product: App1ProdBuild
-        
+
   - name: my-app2
     type: RCP_PRODUCT
     includeOs: [WINDOWS, LINUX]

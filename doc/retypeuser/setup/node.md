@@ -2,12 +2,14 @@
 order: 3
 icon: git-branch
 ---
+
 # Nodes
 
-**Nodes** are optional and only required in case that the application that you want to deploy should run on different servers but be managed from a certain master. By default a master is itself a node as well where applications can be deployed to. 
+**Nodes** are optional and only required in case that the application that you want to deploy should run on different servers but be managed from a certain master. By default a master is itself a node as well where applications can be deployed to.
 
 ## Initializing
-**Nodes** must be initialized on the according machines (or on the same machine using non-default ports; the default port is 7701). 
+
+**Nodes** must be initialized on the according machines (or on the same machine using non-default ports; the default port is 7701).
 The command is similar to the one used to initialize the **master**. Pass (for example) `--port=7702` to change the
 default port to some other value to avoid conflicts. Running multiple **BDeploy** nodes on the same machine is
 supported for testing, but not recommended for productive setups (as the **master** can be deployed to directly anyway - no need for an explicit **node**).
@@ -19,6 +21,7 @@ bdeploy init --root=/path/to/node/root --hostname=<hostname> --nodeIdentFile=nod
 Note the `--nodeIdentFile` parameter given to the `init` command: this file is created during `init`, and will contain the required access information for this **node**. You need it to register the **node** with the **master**, so make sure you will have it available when doing so.
 
 ## Launch
+
 After the initialization - which needs to be done only once - the **node** can be started with the following command:
 
 ```
@@ -26,6 +29,7 @@ bdeploy start --root=/path/to/node/root
 ```
 
 ## Administration
+
 To register, remove or manage a **node** on the **master** you can either use the command line interface or the administrative Web UI on the **master**.
 
 ### Command line interface

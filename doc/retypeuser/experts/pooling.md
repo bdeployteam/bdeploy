@@ -2,6 +2,7 @@
 order: 5
 icon: database
 ---
+
 # Storage Pooling
 
 **BDeploy** can be configured to use a dedicated object database to pool common objects from several **BHives**. This can be done on individual BHive basis, or be configured to automatically setup new **BHives** to use pooling.
@@ -23,12 +24,12 @@ In case the **BHive** is currently being served by **BDeploy**, pooling will onl
 :::
 
 !!!info Note
-Pooling naturally only makes sense if more that one **BHive** is configured to use the *same* pool directory.
+Pooling naturally only makes sense if more that one **BHive** is configured to use the _same_ pool directory.
 !!!
 
 ## Global Default Pool
 
-**BDeploy** can be configured to provide a global default pool directory which is automatically configured on *new* BHives (e.g. new **Instance Group**, new **Software Repository**), but not on existing BHives. This setup can be performed during init:
+**BDeploy** can be configured to provide a global default pool directory which is automatically configured on _new_ BHives (e.g. new **Instance Group**, new **Software Repository**), but not on existing BHives. This setup can be performed during init:
 
 ```
 bdeploy init --root=/path/to/root ... --pooling [--pool=/path/to/somewhere/pool]
@@ -41,7 +42,7 @@ bdeploy pool --root=/path/to/root --defaultPool=/path/to/pool
 ```
 
 !!!info Note
-By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. what you pass as `--root=/path/to/root`) called `objpool`. This is the path used when `--pooling` is enabled, but `--pool=` is *not* given. This is not technically required, and the pool can even reside on different filesystems when set using `--pool=` during `init` or later using `--defaultPool=`.
+By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. what you pass as `--root=/path/to/root`) called `objpool`. This is the path used when `--pooling` is enabled, but `--pool=` is _not_ given. This is not technically required, and the pool can even reside on different filesystems when set using `--pool=` during `init` or later using `--defaultPool=`.
 !!!
 
 ### Global Usage Threshold
@@ -52,13 +53,13 @@ The _global usage threshold_ specifies how often a certain object has to be seen
 bdeploy pool --root=/path/to/root --usageThreshold=3
 ```
 
-## Pooling the *default* BHive
+## Pooling the _default_ BHive
 
-The *default* **BHive** created during `init` will be configured to use pooling if `--pooling` is given. Otherwise this can be changed using the [Per-BHive Pool Setup](#per-bhive-pool-setup) later on.
+The _default_ **BHive** created during `init` will be configured to use pooling if `--pooling` is given. Otherwise this can be changed using the [Per-BHive Pool Setup](#per-bhive-pool-setup) later on.
 
 ## Re-organizing Pools
 
-Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as *read-only* additional data-source. The _Pool Re-organization_ Job will (at some configured point in time or when triggered manually) re-organize pool storage by finding all objects eligible to be moved to the pool and doing so. Thereafter those objects are removed from their origin **BHives**. As a last step, the job will find objects in the pool which are no longer referenced by any of the **BHives**, and delete them.
+Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as _read-only_ additional data-source. The _Pool Re-organization_ Job will (at some configured point in time or when triggered manually) re-organize pool storage by finding all objects eligible to be moved to the pool and doing so. Thereafter those objects are removed from their origin **BHives**. As a last step, the job will find objects in the pool which are no longer referenced by any of the **BHives**, and delete them.
 
 :::{align=center}
 ![Jobs](/images/Doc_Admin_Jobs.png){width=480}

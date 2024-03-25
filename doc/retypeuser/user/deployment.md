@@ -2,6 +2,7 @@
 order: 5
 icon: repo-push
 ---
+
 # Deployment
 
 The process of making one **instance version** up and running is called **deployment**. This includes the steps **installation**, **activation** and **process control**.
@@ -10,7 +11,7 @@ A **Deployment** can be performed on the **current** **instance version** or on 
 
 ## Installation
 
-All available **instance versions** can be installed via the action [ **Install** ] on the [Instance History](/user/history/#instance-history) page or the [Instance Dashboard](/user/instance/#instance-dashboard). Clicking on that button will transfer all files that the application requires to the configured target nodes. More specific that means the applications are extracted from the internal storage that **BDeploy** is using and written to the hard disk. 
+All available **instance versions** can be installed via the action [ **Install** ] on the [Instance History](/user/history/#instance-history) page or the [Instance Dashboard](/user/instance/#instance-dashboard). Clicking on that button will transfer all files that the application requires to the configured target nodes. More specific that means the applications are extracted from the internal storage that **BDeploy** is using and written to the hard disk.
 
 Installed versions occupy additional disk space on the target node. Applications are installed in a shared **pool** directory on the target node. Thus multiple different **processes** referring to the same **application** are written only once to the hard disk. This minimizes the required disk space and leads to faster **installation** times as only the first **process** needs to be be written to the hard disk. The kind of pooling used can be configured in [app-info.yaml](/power/product/#app-infoyaml) by the product vendor.
 

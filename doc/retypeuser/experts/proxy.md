@@ -2,6 +2,7 @@
 order: 1
 icon: rss
 ---
+
 # Endpoint Proxying
 
 **BDeploy** supports proxying (tunnelling) to application endpoints as defined in the [app-info.yaml](/power/product/#app-infoyaml).
@@ -10,11 +11,11 @@ The application hosting the endpoint to call can be hosted on any node in the sy
 
 You will need these information to be able to call an Endpoint of a remote application through the **BDeploy** public API:
 
-* A **BDeploy** _slim_ token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`. You can obtain this token from the Web UI for the logged in user.
-* The `id` of the instance group hosting the application you want to tunnel to.
-* The `id` of the instance hosting the application you want to tunnel to. You can see this id for instance from the browsers URL when on the instance overview page for the instance in question.
-* The `id` of the applications endpoint as defined in the [app-info.yaml](/power/product/#app-infoyaml).
-* The `id` of the application which hosts the endpoint identified by the endpoint `id` above.
+- A **BDeploy** _slim_ token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`. You can obtain this token from the Web UI for the logged in user.
+- The `id` of the instance group hosting the application you want to tunnel to.
+- The `id` of the instance hosting the application you want to tunnel to. You can see this id for instance from the browsers URL when on the instance overview page for the instance in question.
+- The `id` of the applications endpoint as defined in the [app-info.yaml](/power/product/#app-infoyaml).
+- The `id` of the application which hosts the endpoint identified by the endpoint `id` above.
 
 A typical proxy call using the public API would look like this, when using **cURL**:
 
@@ -76,7 +77,7 @@ curl -k -H "Accept: application/json" \
 2. **MyGroup** is the name of one of the instance groups as obtained by the first API. You can fetch the `id` of each instance from the returned JSON.
 3. **xxxx-111-xxxx** is the instance `id` as obtained by the second API. The returned JSON will include the application `id` hosting the endpoint along with the actual specific configuration of that endpoint (including its `id`).
 
-## UI Endpoints ##
+## UI Endpoints
 
 UI Endpoints can be defined to allow simple access to hosted web applications in a similar manner than client applications. This means that **BDeploy** will provide a link to the web application in much the same way as it provides access to client applications in its own UI, both on the (server) process status panel, as well as on the client applications page.
 
@@ -106,7 +107,7 @@ The differenciation between `path` and `contextPath` is that while `path` define
 
 The `enabled` flag controls whether the endpoint is configured and visible to the end user. The expression is evaluate agains the current configuration, and the endpoint is hidden in case the `enabled` condition evaluates to `null`, empty, `false` or cannot be resolved at all.
 
-### UI Endpoint Proxying ###
+### UI Endpoint Proxying
 
 Much like "normal" [Endpoint Proxying](#endpoint-proxying), **BDeploy** also provides proxying for UI endpoints - when enabled using the `proxying` attribute on the endpoint. A UI endpoint will be reachable on any participating **BDeploy** server (`STANDALONE` only or `CENTRAL` and `MANAGED` if used). **BDeploy** handles all the traffic from and to the actual web application. There is no direct access to the **actual** application required.
 

@@ -2,6 +2,7 @@
 order: 2
 icon: hourglass
 ---
+
 # How can I see what's up and running?
 
 The status of an **Instance** is visualized in the **Instance Dashboard**.

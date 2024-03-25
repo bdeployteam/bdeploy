@@ -2,6 +2,7 @@
 order: 3
 icon: terminal
 ---
+
 # Command Line Interface
 
 **BDeploy** provides a rich CLI which allows automating most interactions with **BDeploy**, e.g. for use in build pipelines, etc.
@@ -10,15 +11,15 @@ The same binaries used to run a **BDeploy** server provide a set of _commands_ a
 
 ## Common Options
 
-Option | Description
----    | ---
-`-q` | Quiet - no progess reporting on long running operations.
-`-v` | Verbose - some tools may include additional information.
-`-vv` | Very verbose - enable progress reporting for every tool, show timing summary at the end.
-`-o FILE` | Redirect output to the given `FILE`.
-`-op FILE` | Redirect progress reporting output to the given `FILE`.
-`--csv` | Output any data in CSV format.
-`--json` | Output any data in JSON format.
+| Option     | Description                                                                              |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `-q`       | Quiet - no progess reporting on long running operations.                                 |
+| `-v`       | Verbose - some tools may include additional information.                                 |
+| `-vv`      | Very verbose - enable progress reporting for every tool, show timing summary at the end. |
+| `-o FILE`  | Redirect output to the given `FILE`.                                                     |
+| `-op FILE` | Redirect progress reporting output to the given `FILE`.                                  |
+| `--csv`    | Output any data in CSV format.                                                           |
+| `--json`   | Output any data in JSON format.                                                          |
 
 ## BDeploy CLI
 

@@ -2,6 +2,7 @@
 order: 1
 icon: verified
 ---
+
 # Verify Setup
 
 Make sure that all **BDeploys** services are running on the according physical nodes by starting the created services or by starting them manually.

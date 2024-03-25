@@ -17,16 +17,16 @@ icon: info
 BDeploy has a some important terms and concepts which should be known before diving into details of the application itself. These terms will be used all over the documentation to cross-reference other parts of the application.
 
 :::t1
-Term   | Meaning
----    | ---
+Term | Meaning
+--- | ---
 **Instance Group** | An **Instance Group** is the main top-level element used in **BDeploy**. It provides a grouping of **Instances** (as the name suggests).
 **Product** | A piece of software that can be deployed with **BDeploy**. A product is a bundle of **Applications** along with some meta-information.
-**Application** | A part of a **Product** that can be started and stopped separately. Applications either run as **Process** on a server machine or as **Client Application** on a desktop computer. 
+**Application** | A part of a **Product** that can be started and stopped separately. Applications either run as **Process** on a server machine or as **Client Application** on a desktop computer.
 **Client Application** | An **Application** that can be distributed on desktop computers.
 **Instance** | An **Instance** is the actual deployment configuration of a **Product**. In one instance, the **Applications** of a **Product** can be distributed as **Processes** on one or more **Nodes**.<br/><br/>The **Product** (and it's **Applications**) describes the _possible_ configuration values (e.g. configuration files, command line parameters, etc.) - the **Instance** provides _actual_ values for these.
 **Instance Version** | An **Instance Version** describes the configuration state of an **Instance** at a given time. Each change that is done by the user results in a new instance version. Versions are immutable and cannot be changed. Each new change results in a new version of an **Instance**.
 **Process** | A server **Application** that is configured to be started on one of the server **Nodes** of an **Instance**.
-**Build** | A **Build** represents the immutable collection of all runtime artifacts   (binary files, configuration files, templates etc.) of a **Product**. As a **Build** is immutable, the build tool (Maven, Gradle, Eclipse) creates a new one on every execution.
+**Build** | A **Build** represents the immutable collection of all runtime artifacts (binary files, configuration files, templates etc.) of a **Product**. As a **Build** is immutable, the build tool (Maven, Gradle, Eclipse) creates a new one on every execution.
 **Product Version** | A **Product Version** represents a **Build** that is marked with a **Tag**.
 **Tag** | A **Tag** identifies a **Product Version**. The structure of a tag is defined by the **Product** itself. The only obligation is, that a tag has to be unique for different **Builds** of the same **Product**.
 **Node** | A server machine (virtual machine or bare metal) that is used in an **Instance** to run the configured **Processes** on it. **BDeploy** supports Windows and Linux nodes, even mixed in one instance.

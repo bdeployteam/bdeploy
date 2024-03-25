@@ -2,6 +2,7 @@
 order: 9
 icon: unlock
 ---
+
 # Login
 
 Each user needs to authenticate with a username and password in order to get access to all parts of the system. An anonymous access is not available.

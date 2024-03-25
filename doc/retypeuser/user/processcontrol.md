@@ -34,11 +34,11 @@ Using the **bulk control** actions with a single process selected is the same as
 The process status is visualized using an icon for each process. Hover over the icon to get details about the current status.
 
 :::t1
-Icon   | Description
----    | ---
+Icon | Description
+--- | ---
 ![](/images/ManualDoc_ProcessStopped.png){width=32} | Process is **stopped**.
 ![](/images/ManualDoc_ProcessStarting.png){width=32} | Process is **starting**.
-![](/images/ManualDoc_ProcessRunning.png){width=32} | Process is **running**.  If the process defined a _startup probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)), this status is reached as soon as the startup probe indicates a successful startup of the application. Otherwise - without probe - the process immediatly reaches the **running** state automatically.
+![](/images/ManualDoc_ProcessRunning.png){width=32} | Process is **running**. If the process defined a _startup probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)), this status is reached as soon as the startup probe indicates a successful startup of the application. Otherwise - without probe - the process immediatly reaches the **running** state automatically.
 ![](/images/ManualDoc_ProcessStopPlanned.png){width=32} | Process is **running** but **stopping** has been **requested** by the user.
 ![](/images/ManualDoc_ProcessLifenessFailed.png){width=32} | Process is **running**, but a defined _lifeness probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)) indicates that the process has a problem.
 ![](/images/ManualDoc_ProcessCrashed.png){width=32} | Process **crashed** unexpectedly. **Process Control** scheduled an automatic restart. No interaction required.
@@ -53,7 +53,7 @@ The life cycle of a process is visualized in the following state graph:
 
 ## Process Outdated
 
-An warning message - **Outdated** - is displayed whenever one or more **Processes** are running in a version that is currently not **active**. This happens when **deploying** a new version while **Processes** are still running. 
+An warning message - **Outdated** - is displayed whenever one or more **Processes** are running in a version that is currently not **active**. This happens when **deploying** a new version while **Processes** are still running.
 
 :::{align=center}
 ![Outdated Process](/images/ManualDoc_ProcessOutdated.png)
@@ -65,11 +65,11 @@ In principle this is nothing to worry about. It is just a remainder that the con
 
 The **Start Type** of a **Process** can be configured in the **Process Configuration** dialog. The available options are depending on the **Application**. That means the publisher of an **Application** defines which **Start Types** are supported. The following types are available:
 
-Name   | Description
----    | ---
-`MANUAL` | Process must be started manually. No automatic startup will be done.
-`MANUAL_CONFIRM` | Process must be started manually and an additional confirmation is required. These kind of processes **cannot** take part in bulk control actions.
-`INSTANCE` | Process will be started automatically **if** the _Automatic Startup_ flag of the **Instance** is set. 
+| Name             | Description                                                                                                                                        |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MANUAL`         | Process must be started manually. No automatic startup will be done.                                                                               |
+| `MANUAL_CONFIRM` | Process must be started manually and an additional confirmation is required. These kind of processes **cannot** take part in bulk control actions. |
+| `INSTANCE`       | Process will be started automatically **if** the _Automatic Startup_ flag of the **Instance** is set.                                              |
 
 It is a common requirement that certain **Processes** of an **Instance** should be automatically started whenever the **BDeploy** server itself is started. To accomplish that, the _Automatic Startup_ flag of the **Instance** must be set. This can be done in the [Instance Configuration](/user/instance/#instance-configuration). Additionally the **start type** of the **Process** must set to `INSTANCE`. This can be done in the **parameter configuration** of the **Process**.
 

@@ -2,6 +2,7 @@
 order: 4
 icon: file-badge
 ---
+
 # Custom Certificate
 
 By default **BDeploy** uses a self signed certificate for both TLS (HTTPS) traffic encryption as well as token issuing. Tokens can be issued on the command line and from the User menu in the Web UI. These tokens are used to authenticate and authorize any actions performed remotely (command line, third party software, Web UI, client application launcher, etc.).

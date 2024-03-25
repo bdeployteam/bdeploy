@@ -2,16 +2,17 @@
 order: 5
 icon: server
 ---
+
 # Master
 
 ## Modes of Operation
 
 **BDeploy** may be set up in different modes, making a few different overall usage scenarios possible:
 
-* `STANDALONE` mode: A standalone **BDeploy** master which is responsible for itself, its nodes, and every application deployed thereon.
-* `MANAGED` mode: A **BDeploy** master which is controlled by a `CENTRAL` **BDeploy** master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can **additionally** be controlled indirectly through the attached `CENTRAL` master
-* `CENTRAL` mode: Allows a central **BDeploy** master to control/manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities, but _just_ the ability to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master directly.
-* `NODE` mode: A **node** which can be attached to either a `STANDALONE` or `MANAGED` server as additional target location to run applications on.
+- `STANDALONE` mode: A standalone **BDeploy** master which is responsible for itself, its nodes, and every application deployed thereon.
+- `MANAGED` mode: A **BDeploy** master which is controlled by a `CENTRAL` **BDeploy** master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can **additionally** be controlled indirectly through the attached `CENTRAL` master
+- `CENTRAL` mode: Allows a central **BDeploy** master to control/manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities, but _just_ the ability to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master directly.
+- `NODE` mode: A **node** which can be attached to either a `STANDALONE` or `MANAGED` server as additional target location to run applications on.
 
 :::{align=center}
 ![STANDALONE Deployment Scenario](/images/Scenario_Standalone.svg){width=480}
@@ -34,11 +35,12 @@ See [Central/Managed Specific Configuration](/user/central/#centralmanaged-speci
 !!!
 
 ## Initialization
+
 To start using BDeploy you will at least need a single **master**. The **master** needs to be initialized before it can be started.
 
-The **root directory** contains all the runtime data. Best to select an empty directory in the data area of your system 
+The **root directory** contains all the runtime data. Best to select an empty directory in the data area of your system
 (e.g. /var/bdeploy on Linux) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
-binary installation. Make sure that there is enough space available. 
+binary installation. Make sure that there is enough space available.
 
 ```
 bdeploy init --root=/path/to/root --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=username --initPassword=usersPassword
@@ -65,6 +67,7 @@ Be aware that the user running the **start** command later on **must** be the ow
 !!!
 
 ## Launch
+
 After the initialization - which needs to be done only once - the **master** can be started with the following command:
 
 ```

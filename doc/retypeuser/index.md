@@ -1,6 +1,7 @@
 ---
 icon: home
 ---
+
 # User Documentation
 
 :::{align=center}

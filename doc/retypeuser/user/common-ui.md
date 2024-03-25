@@ -2,6 +2,7 @@
 order: 8
 icon: commit
 ---
+
 # Common UI Elements
 
 **BDeploy** tries to follow a few quite simple patterns regarding UI/UX. The common parts of the UI which is the same for nearly all pages is described in this section.

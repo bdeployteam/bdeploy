@@ -2,14 +2,15 @@
 order: 2
 icon: package-dependencies
 ---
+
 # Runtime Dependencies
 
 As you saw before ([`app-info.yaml`](/power/product/#app-infoyaml)), **Applications** can declare dependencies to third-party **Manifests**. These **Manifests** are hosted in **Software Repositories** on the **BDeploy** Server.
 
 To make them available on the server, you need to:
 
-* Use `bhive import` to import the directory containing the third-party software into a local **BHive**.
-* Use `bhive push` to push the created **Manifest** to the **Software Repository** of your choice.
+- Use `bhive import` to import the directory containing the third-party software into a local **BHive**.
+- Use `bhive push` to push the created **Manifest** to the **Software Repository** of your choice.
 
 Alternatively the Web UI provides a mechanism to upload arbitrary software to **Software Repositories**.
 
@@ -17,8 +18,8 @@ Alternatively the Web UI provides a mechanism to upload arbitrary software to **
 
 Third party software **Manifests** can have basically any name. If you want to provide different **Manifests** per target operating system though, you will have to follow a simple naming rule: append the operating system name to the **Manifest** name part, e.g.:
 
-* `my/external/software/windows:1.0.0`
-* `my/external/software/linux:1.0.0`
+- `my/external/software/windows:1.0.0`
+- `my/external/software/linux:1.0.0`
 
 It can then be referenced by an `app-info.yaml` using the short-hand syntax `my/external/software:1.0.0` and **BDeploy** will choose the correct one depending on the target operating system.
 
@@ -57,7 +58,7 @@ After all requested information is entered, click **Import** to finally import t
 
 If the upload was succesful, the software for each operating system will show up.
 
-The available software packages and products can be viewed and **downloaded** if required. 
+The available software packages and products can be viewed and **downloaded** if required.
 
 :::{align=center}
 ![Software Details](/images/Doc_SoftwareRepoDetails.png){width=480}
