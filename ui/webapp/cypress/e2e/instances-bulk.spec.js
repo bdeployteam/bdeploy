@@ -32,23 +32,15 @@ describe('Instance Bulk Tests', () => {
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Bulk Manipulation');
 
-      cy.contains('tr', 'Demo A')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo B')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo C')
-        .find('input[type=checkbox]')
-        .check({ force: true });
+      cy.contains('tr', 'Demo A').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo B').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo C').find('input[type=checkbox]').check({ force: true });
     });
 
     cy.screenshot('Doc_InstancesBulkPanel');
 
     cy.inMainNavFlyin('app-bulk-manipulation', () => {
-      cy.contains('div', 'instances selected')
-        .find('strong:contains("3")')
-        .should('exist');
+      cy.contains('div', 'instances selected').find('strong:contains("3")').should('exist');
 
       cy.get('button[data-cy^=Install]').should('be.enabled').click();
 
@@ -80,21 +72,13 @@ describe('Instance Bulk Tests', () => {
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Bulk Manipulation');
 
-      cy.contains('tr', 'Demo A')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo B')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo C')
-        .find('input[type=checkbox]')
-        .check({ force: true });
+      cy.contains('tr', 'Demo A').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo B').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo C').find('input[type=checkbox]').check({ force: true });
     });
 
     cy.inMainNavFlyin('app-bulk-manipulation', () => {
-      cy.contains('div', 'instances selected')
-        .find('strong:contains("3")')
-        .should('exist');
+      cy.contains('div', 'instances selected').find('strong:contains("3")').should('exist');
 
       cy.get('button[data-cy^=Start]').should('be.enabled').click();
       cy.get('button[data-cy^=Stop]').should('be.enabled').click();
@@ -108,30 +92,17 @@ describe('Instance Bulk Tests', () => {
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Bulk Manipulation');
 
-      cy.contains('tr', 'Demo A')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo B')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo C')
-        .find('input[type=checkbox]')
-        .check({ force: true });
+      cy.contains('tr', 'Demo A').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo B').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo C').find('input[type=checkbox]').check({ force: true });
     });
 
     cy.inMainNavFlyin('app-bulk-manipulation', () => {
-      cy.contains('div', 'instances selected')
-        .find('strong:contains("3")')
-        .should('exist');
+      cy.contains('div', 'instances selected').find('strong:contains("3")').should('exist');
 
-      cy.get('button[data-cy^="Set Product Version"]')
-        .should('be.enabled')
-        .click();
+      cy.get('button[data-cy^="Set Product Version"]').should('be.enabled').click();
 
-      cy.contains(
-        'app-bd-notification-card',
-        'Choose Target Product Version'
-      ).within(() => {
+      cy.contains('app-bd-notification-card', 'Choose Target Product Version').within(() => {
         cy.fillFormSelect('prodVersion', '1.0.0');
         cy.get('button[data-cy=Apply]').click();
       });
@@ -141,23 +112,15 @@ describe('Instance Bulk Tests', () => {
         cy.get('button[data-cy=OK]').click();
       });
 
-      cy.get('button[data-cy^="Set Product Version"]')
-        .should('be.enabled')
-        .click();
+      cy.get('button[data-cy^="Set Product Version"]').should('be.enabled').click();
 
-      cy.contains(
-        'app-bd-notification-card',
-        'Choose Target Product Version'
-      ).within(() => {
+      cy.contains('app-bd-notification-card', 'Choose Target Product Version').within(() => {
         cy.fillFormSelect('prodVersion', '2.0.0');
         cy.get('button[data-cy=Apply]').click();
       });
 
       cy.contains('app-bd-notification-card', 'Result').within(() => {
-        cy.get('span:contains("Created instance version")').should(
-          'have.length',
-          3
-        );
+        cy.get('span:contains("Created instance version")').should('have.length', 3);
       });
     });
 
@@ -177,18 +140,12 @@ describe('Instance Bulk Tests', () => {
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Bulk Manipulation');
 
-      cy.contains('tr', 'Demo A')
-        .find('input[type=checkbox]')
-        .check({ force: true });
-      cy.contains('tr', 'Demo B')
-        .find('input[type=checkbox]')
-        .check({ force: true });
+      cy.contains('tr', 'Demo A').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'Demo B').find('input[type=checkbox]').check({ force: true });
     });
 
     cy.inMainNavFlyin('app-bulk-manipulation', () => {
-      cy.contains('div', 'instances selected')
-        .find('strong:contains("2")')
-        .should('exist');
+      cy.contains('div', 'instances selected').find('strong:contains("2")').should('exist');
 
       cy.get('button[data-cy^="Delete"]').should('be.enabled').click();
 

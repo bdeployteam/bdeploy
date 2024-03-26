@@ -14,22 +14,14 @@ declare namespace Cypress {
      * @param groupName the name of the group.
      * @param fileName the file within the fixtures directory to use.
      */
-    uploadProductIntoGroup(
-      groupName: string,
-      fileName: string,
-      screenshots?: boolean
-    );
+    uploadProductIntoGroup(groupName: string, fileName: string, screenshots?: boolean);
 
     /**
      * @param groupName the name of the group.
      * @param productName the name of the product to look for
      * @param version the version which is expected to exist.
      */
-    verifyProductVersion(
-      groupName: string,
-      productName: string,
-      version: string
-    );
+    verifyProductVersion(groupName: string, productName: string, version: string);
 
     /**
      * Enters an instance group. This expects the web app to be on the group browser.

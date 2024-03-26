@@ -30,14 +30,8 @@ describe('Current User Tests', function () {
 
     cy.inMainNavFlyin('app-settings', () => {
       cy.contains('button', 'Logout').should('exist');
-      cy.contains('div', 'Full Name:')
-        .parent()
-        .contains('div', `${currentUserFullName} (*)`)
-        .should('exist');
-      cy.contains('div', 'E-Mail:')
-        .parent()
-        .contains('div', `${currentUserEmail} (*)`)
-        .should('exist');
+      cy.contains('div', 'Full Name:').parent().contains('div', `${currentUserFullName} (*)`).should('exist');
+      cy.contains('div', 'E-Mail:').parent().contains('div', `${currentUserEmail} (*)`).should('exist');
 
       // 2nd change
       cy.get(`app-bd-panel-button[text="Edit User..."]`).click();
@@ -55,14 +49,8 @@ describe('Current User Tests', function () {
     cy.inMainNavFlyin('app-settings', () => {
       // finish
       cy.contains('button', 'Logout').should('exist');
-      cy.contains('div', 'Full Name:')
-        .parent()
-        .contains('div', currentUserFullName)
-        .should('exist');
-      cy.contains('div', 'E-Mail:')
-        .parent()
-        .contains('div', currentUserEmail)
-        .should('exist');
+      cy.contains('div', 'Full Name:').parent().contains('div', currentUserFullName).should('exist');
+      cy.contains('div', 'E-Mail:').parent().contains('div', currentUserEmail).should('exist');
 
       cy.pressToolbarButton('Close');
     });
@@ -86,9 +74,7 @@ describe('Current User Tests', function () {
 
         // 1st change
         cy.get(`app-bd-panel-button[text="Change Password..."]`).click();
-        cy.get('app-bd-dialog-toolbar[header="Change Password"]').should(
-          'exist'
-        );
+        cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
         cy.contains('button', 'Save').should('exist').and('be.disabled');
 
         cy.fillFormInput('passOrig', currentUserPassword);
@@ -99,9 +85,7 @@ describe('Current User Tests', function () {
 
         // 2nd change
         cy.get(`app-bd-panel-button[text="Change Password..."]`).click();
-        cy.get('app-bd-dialog-toolbar[header="Change Password"]').should(
-          'exist'
-        );
+        cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
         cy.contains('button', 'Save').should('exist').and('be.disabled');
 
         cy.fillFormInput('passOrig', newPassword);

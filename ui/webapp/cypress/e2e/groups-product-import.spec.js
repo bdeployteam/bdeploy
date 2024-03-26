@@ -44,10 +44,7 @@ describe('Instance Group Product Import Test', () => {
     // upload product.
     cy.inMainNavFlyin('app-software-upload', () => {
       cy.fillFileDrop('test-product-1-direct.zip');
-      cy.contains(
-        'app-bd-file-upload-raw',
-        'Success: test-product-1-direct.zip'
-      ).should('exist');
+      cy.contains('app-bd-file-upload-raw', 'Success: test-product-1-direct.zip').should('exist');
     });
 
     cy.contains('tr', 'io.bdeploy/demo/product').should('exist');

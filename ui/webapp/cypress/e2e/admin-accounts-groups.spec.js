@@ -33,9 +33,7 @@ describe('Admin UI Tests (User Groups)', () => {
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User');
-      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as(
-        'createUser'
-      );
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
     });
 
     cy.inMainNavFlyin('add-user', () => {
@@ -57,9 +55,7 @@ describe('Admin UI Tests (User Groups)', () => {
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User Group');
-      cy.intercept({ method: 'PUT', url: '/api/auth/admin/user-groups' }).as(
-        'createUserGroup'
-      );
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/user-groups' }).as('createUserGroup');
     });
 
     cy.inMainNavFlyin('add-user-group', () => {
@@ -236,11 +232,9 @@ describe('Admin UI Tests (User Groups)', () => {
 
     cy.inMainNavFlyin('app-user-group-admin-detail', () => {
       cy.get('button[data-cy^="Delete Group"]').click();
-      cy.contains('app-bd-notification-card', 'Delete User Group').within(
-        () => {
-          cy.get('button[data-cy^=Yes]').click();
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Delete User Group').within(() => {
+        cy.get('button[data-cy^=Yes]').click();
+      });
     });
   });
 });
