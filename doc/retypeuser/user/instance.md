@@ -4,6 +4,7 @@ icon: project
 ---
 
 # Instances
+
 ## Instance Dashboard
 
 The [Instance Dashboard](/user/instance/#instance-dashboard) is the central location for managing an instance. It provides an overview about all configured **Processes** and on which nodes they are running. Each **Process** is represented by an entry on the according node.
@@ -224,7 +225,7 @@ Changes done in configuration files must be **saved** and they result in a new *
 
 ### Change Product Version
 
-**Instances** are based on a **product version**. While the **Product** of the **Instance** cannot be changed afterwards, the **Version** can be chosen from the available **product versions** (upgrade to a newer version / downgrade to an older version). 
+**Instances** are based on a **product version**. While the **Product** of the **Instance** cannot be changed afterwards, the **Version** can be chosen from the available **product versions** (upgrade to a newer version / downgrade to an older version).
 
 If there's a newer **product version** available (newer than the one that is configured for the latest **instance version**), a notification is shown in the [Instance Configuration](/user/instance/#instance-configuration) pages toolbar.
 
@@ -342,13 +343,13 @@ Each **Process Control Group** has configurable behavior for contained processes
 
 Possible values for the **Start Type** and **Stop Type** handling configuration are:
 
-* `SEQUENTIAL`: Each **Process** in the group is handled (started/stopped) sequentially. Any potential waiting (for startup and or shutdown, depending on the capabilities of the process) is done before proceeding to the next **Process** or **Process Control Group**.
-* `PARALLEL`: Each **Process** in the group is handled (started/stopped) in parallel. Only once all **Process** operations within the group have finished, the group is considered finished and processing continues with the next **Process Control Group**. Be aware that in conjunction with `CONTINUE` wait mode for process startup, this will make a group complete immediately and continue on to the next group immediately as well.
+- `SEQUENTIAL`: Each **Process** in the group is handled (started/stopped) sequentially. Any potential waiting (for startup and or shutdown, depending on the capabilities of the process) is done before proceeding to the next **Process** or **Process Control Group**.
+- `PARALLEL`: Each **Process** in the group is handled (started/stopped) in parallel. Only once all **Process** operations within the group have finished, the group is considered finished and processing continues with the next **Process Control Group**. Be aware that in conjunction with `CONTINUE` wait mode for process startup, this will make a group complete immediately and continue on to the next group immediately as well.
 
 Additionally, each **Process Control Group** can be configured to wait for process startup, i.e. startup probes. Each **Process Control Group** has a **Start Wait** configuration:
 
-* `WAIT`: When starting a **Process** in the group, wait for its startup to be complete. This is either once the **Startup Probe** signals process startup if available and configured, or once the process has been created if no probe is available.
-* `CONTINUE`: When starting a **Process** in the group, do not wait for its startup to be complete, instead move on to the next process immediately. This makes the startup handling types (`SEQUENTIAL`, `PARALLEL`) essentially irrelevant, as processes are typically created so fast that it does not make any difference anymore.
+- `WAIT`: When starting a **Process** in the group, wait for its startup to be complete. This is either once the **Startup Probe** signals process startup if available and configured, or once the process has been created if no probe is available.
+- `CONTINUE`: When starting a **Process** in the group, do not wait for its startup to be complete, instead move on to the next process immediately. This makes the startup handling types (`SEQUENTIAL`, `PARALLEL`) essentially irrelevant, as processes are typically created so fast that it does not make any difference anymore.
 
 :::{align=center}
 ![Edit Process Control Groups](/images/Doc_InstanceConfigAddProcessControlGroup.png){width=480}

@@ -2,20 +2,22 @@
 order: 1
 icon: gear
 ---
+
 # Central/Managed Specific Configuration
+
 The [Central/Managed Mode](/setup/master/#modes-of-operation) requires some configuration to attach `CENTRAL` and `MANAGED` servers.
 
 On the `CENTRAL` server side:
 
-* Each **Instance Group** has a list of `MANAGED` servers attached to it.
-* Each **Instance** is associated with exactly **one** of those `MANAGED` servers.
-* Synchonization to the `CENTRAL` servers data store is done on demand (through a button in the Web UI). When synchonizing from a `MANAGED` to a `CENTRAL` server, only _configuration_ data is synchronized. Actual **Product** and **Application** data is only synchronized when explicitly requested through the [Product Synchronization](/user/central/#product-synchronization) page on the `CENTRAL` server.
-* It is possible to create a new **instance version** on the `CENTRAL` server from a **product version** which has been pushed only to the `CENTRAL` server (but not to the `MANAGED`). In this case, the required product data is sent to the `MANAGED` server once **install** is performed on this **instance version**. In this scenarion **install** **has to be** performed on the `CENTRAL` server.
+- Each **Instance Group** has a list of `MANAGED` servers attached to it.
+- Each **Instance** is associated with exactly **one** of those `MANAGED` servers.
+- Synchonization to the `CENTRAL` servers data store is done on demand (through a button in the Web UI). When synchonizing from a `MANAGED` to a `CENTRAL` server, only _configuration_ data is synchronized. Actual **Product** and **Application** data is only synchronized when explicitly requested through the [Product Synchronization](/user/central/#product-synchronization) page on the `CENTRAL` server.
+- It is possible to create a new **instance version** on the `CENTRAL` server from a **product version** which has been pushed only to the `CENTRAL` server (but not to the `MANAGED`). In this case, the required product data is sent to the `MANAGED` server once **install** is performed on this **instance version**. In this scenarion **install** **has to be** performed on the `CENTRAL` server.
 
 On The `MANAGED` server side:
 
-* Creation and editing of **Instance Group** (title, description, logo, etc.) is not possible locally. This has to happen on the `CENTRAL` server, as information **must** match.
-* Creation and editing of **Instances** (applications, parameters, etc.) is possible just the same as with a `STANDALONE` server. New data will be synchronized to the `CENTRAL` server the next time the `CENTRAL` server requests such a synchronization.
+- Creation and editing of **Instance Group** (title, description, logo, etc.) is not possible locally. This has to happen on the `CENTRAL` server, as information **must** match.
+- Creation and editing of **Instances** (applications, parameters, etc.) is possible just the same as with a `STANDALONE` server. New data will be synchronized to the `CENTRAL` server the next time the `CENTRAL` server requests such a synchronization.
 
 !!!info Note
 **BDeploy** is built for restrictive networks. The assumption is that the `CENTRAL` server can contact `MANAGED` servers, but never the other way around.
@@ -31,11 +33,11 @@ You will notice that a `MANAGED` server will greet slightly different on the wel
 
 Attaching an **Instance Group** is a two way operation.
 
-* The `MANAGED` server needs to share some details about itself with the `CENTRAL` server. This happens either via drag & drop of an element from the `MANAGED` servers Web UI to the `CENTRAL` servers Web UI, or manually by downloading the `MANAGED` servers information and dropping that file to the `CENTRAL` servers Web UI.
-* On the `CENTRAL` server, you will choose the **Instance Group** which should be attached. The **Instance Group** _must_ exist on the `CENTRAL` server. If the `MANAGED` server happens to have an **Instance Group** of the same name already (i.e. if the `MANAGED` server was migrated from `STANDALONE`), this is perfectly fine - **Instances** in this **Instance Group** will not be lost, they will be attached to the `CENTRAL` server instead.
-* The `CENTRAL` server will try to contact the `MANAGED` server. You can provide an alternate URL to accomodate for hostname differences (different DNS, NAT, VPN, etc.) before it does so.
-* Once contacted, the `CENTRAL` server will push the **Instance Group** meta-data to the `MANAGED` server, as the information on the `CENTRAL` is the single source of **Instance Group** configuration.
-* Finally, the `CENTRAL` server will fetch all potentially existing **Instance** information from the `MANAGED` server. This is only relevant if the `MANAGED` server was migrated from `STANDALONE` mode before.
+- The `MANAGED` server needs to share some details about itself with the `CENTRAL` server. This happens either via drag & drop of an element from the `MANAGED` servers Web UI to the `CENTRAL` servers Web UI, or manually by downloading the `MANAGED` servers information and dropping that file to the `CENTRAL` servers Web UI.
+- On the `CENTRAL` server, you will choose the **Instance Group** which should be attached. The **Instance Group** _must_ exist on the `CENTRAL` server. If the `MANAGED` server happens to have an **Instance Group** of the same name already (i.e. if the `MANAGED` server was migrated from `STANDALONE`), this is perfectly fine - **Instances** in this **Instance Group** will not be lost, they will be attached to the `CENTRAL` server instead.
+- The `CENTRAL` server will try to contact the `MANAGED` server. You can provide an alternate URL to accomodate for hostname differences (different DNS, NAT, VPN, etc.) before it does so.
+- Once contacted, the `CENTRAL` server will push the **Instance Group** meta-data to the `MANAGED` server, as the information on the `CENTRAL` is the single source of **Instance Group** configuration.
+- Finally, the `CENTRAL` server will fetch all potentially existing **Instance** information from the `MANAGED` server. This is only relevant if the `MANAGED` server was migrated from `STANDALONE` mode before.
 
 To attach in **Instance Group**, you need both Web UIs of `CENTRAL` and `MANAGED` server. Make sure you have both available and open in browsers next to each other (on the same machine, so drag & drop will work).
 
@@ -61,7 +63,7 @@ You will be prompted to drop `MANAGED` server information on a drop-zone. You ca
 ![Link Instance Group](/images/Doc_ManagedLinkGroup.png){width=480}
 :::
 
-The `MANAGED` server provides the card to drag to the counterpiece on the `CENTRAL` server. Drag it over to fill out information on the `CENTRAL` server automatically. 
+The `MANAGED` server provides the card to drag to the counterpiece on the `CENTRAL` server. Drag it over to fill out information on the `CENTRAL` server automatically.
 
 !!!info Note
 Alternatively, use the _Manual and Offline Linking_ panel to download the information in an encrypted form. This can be uploaded on the `CENTRAL` by dropping the file on the very same drop-zone.

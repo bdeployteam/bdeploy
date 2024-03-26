@@ -2,9 +2,10 @@
 order: 7
 icon: rows
 ---
+
 # Instance Group
 
-An **Instance Group** acts as logical container for **Instances**. It typically contains several **Instances** for different purposes (productive, test, development). Adding them to the same group provides a better overview which of them are belonging together. An empty page is displayed if no instance group has been created. 
+An **Instance Group** acts as logical container for **Instances**. It typically contains several **Instances** for different purposes (productive, test, development). Adding them to the same group provides a better overview which of them are belonging together. An empty page is displayed if no instance group has been created.
 
 :::{align=center}
 ![Empty Instance Group Overview](/images/Doc_EmptyGroups.png){width=480}
@@ -103,18 +104,18 @@ Once a **Product** is available, you can click it to open the **Product** detail
 :::
 
 !!!info Note
-There are two distinct **Download** actions available on the details panel; **Download BHive** will download a re-importable ZIP file which contains all required data in a **BDeploy** internal data format. This file can be transferred to another **BDeploy** server and imported. **Download Content** on the other hand will give you a ZIP file which contains the plain, exported files as they would ultimately end up on the target. This is primarliy useful for inspection of the content, access to individual files and such. However this is *not* meant for transfer and import on another server.
+There are two distinct **Download** actions available on the details panel; **Download BHive** will download a re-importable ZIP file which contains all required data in a **BDeploy** internal data format. This file can be transferred to another **BDeploy** server and imported. **Download Content** on the other hand will give you a ZIP file which contains the plain, exported files as they would ultimately end up on the target. This is primarliy useful for inspection of the content, access to individual files and such. However this is _not_ meant for transfer and import on another server.
 !!!
 
 ## Create New Instances
 
-To create a new **Instance**, click the [ **+** ] button at the bottom of the page. After giving the new **Instance** a name, purpose and description, the most important thing is to select the **Product** you want to deploy. Additionally, the initial **product version** has to be chosen. It can be changed later at any time (_up-_ and _downgrade_). 
+To create a new **Instance**, click the [ **+** ] button at the bottom of the page. After giving the new **Instance** a name, purpose and description, the most important thing is to select the **Product** you want to deploy. Additionally, the initial **product version** has to be chosen. It can be changed later at any time (_up-_ and _downgrade_).
 
 :::{align=center}
 ![Create a new Instance](/images/Doc_InstanceAdd.png){width=480}
 :::
 
-It is a common requirement that certain **processes** of an **Instance** should be automatically started whenever the **BDeploy** server itself is started. To accomplish that, the _Automatic Startup_ flag of the **Instance** must be set. 
+It is a common requirement that certain **processes** of an **Instance** should be automatically started whenever the **BDeploy** server itself is started. To accomplish that, the _Automatic Startup_ flag of the **Instance** must be set.
 
 The **Instance** determines whether it is included in the automatic cleanup job. If the option _Automatic Uninstallation_ is enabled, the cleanup job will uninstall all **instance versions** that are older than the activated and the previously activated **instance version**. Due to this automatic uninstallation some of the old **product versions** might become unused. If the option _Automatic Cleanup_ is activated on the instance group, these unused **product versions** are deleted too (see [Instance Group](/user/instancegroup/#instance-group)).
 

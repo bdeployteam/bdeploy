@@ -2,6 +2,7 @@
 order: 3
 icon: history
 ---
+
 # Instance History
 
 Whenever saving the [Instance Configuration](/user/instance/#instance-configuration), **BDeploy** creates a new **instance version**. Each historic version is avilable from the [Instance History](/user/history/#instance-history). You can **view** all those changes, **who** made them and **when** they were made here.

@@ -2,9 +2,11 @@
 order: 2
 icon: codespaces
 ---
+
 # Service
 
 ## Linux Service (SYSTEMD)
+
 The `bdeploy-linux64-x.x.x.zip` package contains a template file from which a systemd service can be created. It is
 located in the `etc` directory and named `bdeploy-minion.service`.
 
@@ -13,21 +15,21 @@ The template itself contains instructions on how to create a valid service from 
 You can copy the service template to a different filename while installing into the systemd service directory. The
 filename will later on be the service name. This allows to install multiple **BDeploy** services on a single machine.
 
-!!!info Note 
+!!!info Note
 To get systemd to recognize the service(s) after copying the service file(s) use the `systemctl daemon-reload` command (as root).
 Once installed, you can control the service using `systemctl`.
 !!!
 
 ## Windows Service
 
-The `bdeploy-win64-x.x.x.zip` package contains a batch script to create a new Windows service. The script is located in 
+The `bdeploy-win64-x.x.x.zip` package contains a batch script to create a new Windows service. The script is located in
 the `etc` directory and is named `bdeploy-service-install.bat`
 
 The script must be called with administrative privileges and it expects the following arguments:
 
 ```
 --master | --node      Start a master or node (only controls the name of the service.)
-<Path-to-minion-bat>   Absolute path to the bdeploy batch file. 
+<Path-to-minion-bat>   Absolute path to the bdeploy batch file.
                        Sample: C:\BDeploy\server\bin\bdeploy.bat
 <Path-to-store-files>  Absolute path to the data directory. Make sure to not include a trailing backslash.
                        Sample: C:\BDeploy\data

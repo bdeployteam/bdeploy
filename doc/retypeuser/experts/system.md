@@ -7,7 +7,7 @@ icon: table
 
 There are several components in the Web UI which allow maintenance of **BDeploy**. These are not to be used during _normal_ operation by users. They _are_ required during setup and to maintain current software versions of **BDeploy** itself if not done using the [`bdeploy remote-master`](/experts/cli/#bdeploy-cli) CLI.
 
-The administration dialogs are grouped into a Configuration section  and a Housekeeping and Maintenance section.
+The administration dialogs are grouped into a Configuration section and a Housekeeping and Maintenance section.
 
 ## Settings
 
@@ -97,10 +97,11 @@ Using the _Check_ action prior to _Import_ can help verify the connectivity to t
 !!!
 
 ##### LDAP Synchronization Job
+
 _LDAP Synchronization Job_ periodically imports users and groups for LDAP connections with selected **Periodically sync users and groups** flag.  
 The job is identical to _Import_ action.  
 By default job starts every midnight, but its schedule can be reconfigured via CLI.  
-To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. 0 0 0 * * ? for midnight)  
+To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. 0 0 0 \* \* ? for midnight)  
 To check current schedule and last run timestamp use `ldap --root=... --showSyncInfo`
 
 #### LDAP Certificate Trust
@@ -149,7 +150,7 @@ Use the [ **Create User** ] button to create a local user.
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Add.png){width=480}
 :::
 
-Once a **User** is available, you can click it to open **User Details** panel where detail information is shown on top as well as the list of permissions. 
+Once a **User** is available, you can click it to open **User Details** panel where detail information is shown on top as well as the list of permissions.
 
 !!!info Note
 To protect against accidental lockout from the system, the currently logged in user cannot be changed, disabled or deleted.
@@ -198,11 +199,11 @@ Use the [ **Create User Group** ] button to create a local user group.
 ![BDeploy User Groups](/images/Doc_Admin_User_Groups_Add.png){width=480}
 :::
 
-Once a **User Group** is available, you can click it to open **User Group Details** panel where detail information is shown on top along with users that belong to the group as well as the list of permissions. 
+Once a **User Group** is available, you can click it to open **User Group Details** panel where detail information is shown on top along with users that belong to the group as well as the list of permissions.
 
 The [ **Deactivate Group** ] resp. [ **Activate Group** ] allows to deactivate/activate the selected user.
 
-Use [ **Add user to the group** ] input to add user to the group. Enter user's login name and press [ **+** ] icon. 
+Use [ **Add user to the group** ] input to add user to the group. Enter user's login name and press [ **+** ] icon.
 
 :::{align=center}
 ![BDeploy User Groups](/images/Doc_Admin_User_Groups_Add_Test_User.png){width=480}
@@ -216,7 +217,7 @@ The [ **Assign Permission** ] opens a popup for adding a permission entry. Globa
 
 ## Manual Cleanup
 
-You can use the **Manual Cleanup** page from the **Administration** menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night: 
+You can use the **Manual Cleanup** page from the **Administration** menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night:
 
 Target | Description
 ---    | ---
@@ -245,7 +246,7 @@ The dialog automatically resets itself after a certain timeout. This is to preve
 !!!
 
 ## Hive Browser
-The **BHive** page from the **Administration** menu is an internal tool for administrative purposes. It allows access to the internals of the **BDeploy** storage. 
+The **BHive** page from the **Administration** menu is an internal tool for administrative purposes. It allows access to the internals of the **BDeploy** storage.
 
 The table shows all available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.
 
@@ -275,4 +276,4 @@ The **BDeploy Update** page from the **Administration** menu offers a mechanism 
 ![BDeploy System Software](/images/Doc_System_BDeploy_Update.png){width=480}
 :::
 
-It also offers a way to _upload_ **BDeploy Launcher** binaries. These binaries are included within a full **BDeploy** distribution and are required when [`CLIENT` **Applications**](/power/product/#app-infoyaml) are configured. Usually, a manual upload is not required. In case launchers have been removed by mistake, they can be re-added this way. Use the [ **Upload** ] button to upload full **BDeploy** versions or **Bdeploy Launcher** binaries from the binary distributions (_ZIP_). 
+It also offers a way to _upload_ **BDeploy Launcher** binaries. These binaries are included within a full **BDeploy** distribution and are required when [`CLIENT` **Applications**](/power/product/#app-infoyaml) are configured. Usually, a manual upload is not required. In case launchers have been removed by mistake, they can be re-added this way. Use the [ **Upload** ] button to upload full **BDeploy** versions or **Bdeploy Launcher** binaries from the binary distributions (_ZIP_).

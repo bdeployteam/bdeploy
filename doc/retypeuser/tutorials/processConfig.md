@@ -2,6 +2,7 @@
 order: 3
 icon: gear
 ---
+
 # How can I change a process configuration?
 
 Changing the configuration of a **Process** is done in the **Process Configuration Panel**:
@@ -17,12 +18,12 @@ Changing the configuration of a **Process** is done in the **Process Configurati
 9. You can undo/redo changes to multiple processes and/or instance configurations. You can also view any local changes using the [ **Local Changes** ] button.
 10. Repeat the steps 5-8 with every **Process** that should be adopted.
 11. Click on **Save** in the top right corner.
- 
+
 The changes are now saved but they are not yet **active**. The new version must now be **Deployed** and all **Processes** must be restarted so that the changes have an effect.
 
 1. Saving **Instance Configuration** will automatically redirect you to the **Instance Dashboard**. You can also access the dashboard from the **Instance Overview** page by clicking an **Instance**.
 2. If the current **Instance Version** is _not_ the currently active one, a banner will show a hint and the required buttons to **install** and **activate** the current version.
-    a. Access to _older_ **Instance Versions** is provided from the [ **Instance History** ] button in the main menu.
+   a. Access to _older_ **Instance Versions** is provided from the [ **Instance History** ] button in the main menu.
 3. Click on **install** and wait for the operation to complete.
 4. Click on **activate**, this operation is typically very fast.
 5. A hint (`OUTDATED`) will be displayed if a **Process** is running in an older version, for instance the version which was active until moments ago.
@@ -33,4 +34,3 @@ The changes are now saved but they are not yet **active**. The new version must 
 10. It can be desirable and OK to **not** restart certain processes, and leave them in the `OUTDATED` state. This highly depends on the software being deployed.
 
 The configuration changes are now live and all **Processes** are running again. The [Process Settings](/user/instance/#process-settings) and the [Process Control](/user/processcontrol/#process-control) chapters provide more details about the step outlined in this tutorial.
- 
