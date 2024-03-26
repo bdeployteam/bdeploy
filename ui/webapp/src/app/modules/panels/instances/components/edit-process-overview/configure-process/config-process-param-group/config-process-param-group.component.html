@@ -14,9 +14,8 @@
       appTrimmed
     ></app-bd-form-input>
     <div>
-      You can choose a predecessor from the list of existing parameters. The
-      custom parameter will be added <em>after</em> the selected parameter, or
-      at the start of the list if none is selected.
+      You can choose a predecessor from the list of existing parameters. The custom parameter will be added
+      <em>after</em> the selected parameter, or at the start of the list if none is selected.
     </div>
     <app-bd-form-select
       label="Predecessor"
@@ -27,15 +26,10 @@
       [(ngModel)]="customTemp.predecessor"
     ></app-bd-form-select>
     <div>
-      You may also provide a value right away, or edit the value later on. The
-      value is put on the final command line <strong>as is</strong>, so make
-      sure to give a propper command line argument.
+      You may also provide a value right away, or edit the value later on. The value is put on the final command line
+      <strong>as is</strong>, so make sure to give a propper command line argument.
     </div>
-    <app-bd-form-input
-      name="value"
-      label="Custom Parameter Value"
-      [(ngModel)]="customTemp.value"
-    ></app-bd-form-input>
+    <app-bd-form-input name="value" label="Custom Parameter Value" [(ngModel)]="customTemp.value"></app-bd-form-input>
   </div>
 </ng-template>
 
@@ -47,13 +41,8 @@
         <mat-expansion-panel-header>
           <mat-panel-title> {{ group.name }} </mat-panel-title>
           <mat-panel-description *ngIf="!(narrow$ | async)">
-            <span *ngIf="!search"
-              >{{ getValueCount(group) }}/{{ group.pairs.length }} parameters
-              configured.</span
-            >
-            <span *ngIf="!!search"
-              >Configured or optional parameters match search.</span
-            >
+            <span *ngIf="!search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
+            <span *ngIf="!!search">Configured or optional parameters match search.</span>
             <span
               *ngIf="(groupForm.invalid || hasMissingRequired(group)) && !panel.expanded"
               class="bd-warning-text text-xs"
@@ -80,15 +69,10 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <form #groupForm="ngForm" class="flex flex-col">
-          <div
-            *ngIf="group.isSelectMode"
-            class="flex justify-start items-center pt-5 self-center bd-hint-text"
-          >
+          <div *ngIf="group.isSelectMode" class="flex justify-start items-center pt-5 self-center bd-hint-text">
             <span class="local-edit-desc">
-              Use the <mat-icon>add</mat-icon> and
-              <mat-icon>delete</mat-icon> buttons in front of each optional
-              parameter to add or remove them. Mandatory parameters cannot be
-              removed. When you are done, press the
+              Use the <mat-icon>add</mat-icon> and <mat-icon>delete</mat-icon> buttons in front of each optional
+              parameter to add or remove them. Mandatory parameters cannot be removed. When you are done, press the
               <mat-icon>check</mat-icon> button to confirm.
             </span>
           </div>
@@ -97,8 +81,7 @@
             *ngIf="hasMissingRequired(group) && !group.isSelectMode && groupForm.valid"
           >
             <div class="flex justify-center items-center gap-1">
-              Use the <mat-icon>tune</mat-icon> buttons to add missing mandatory
-              parameter(s).
+              Use the <mat-icon>tune</mat-icon> buttons to add missing mandatory parameter(s).
             </div>
           </span>
           <div
@@ -106,10 +89,7 @@
             [ngClass]="getValueCount(group) <= 1 && !group.isSelectMode ? [] : ['md:grid-cols-2']"
           >
             <!-- Empty group hint -->
-            <div
-              *ngIf="getValueCount(group) === 0 && !group.isSelectMode"
-              class="bd-hint-text"
-            >
+            <div *ngIf="getValueCount(group) === 0 && !group.isSelectMode" class="bd-hint-text">
               No parameters are currently configured in this group.
             </div>
 
@@ -121,16 +101,11 @@
                 *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
               >
                 <ng-template #popup>
-                  <app-param-desc-card
-                    [descriptor]="p.descriptor"
-                  ></app-param-desc-card>
+                  <app-param-desc-card [descriptor]="p.descriptor"></app-param-desc-card>
                 </ng-template>
 
                 <!-- Checkbox for select mode... -->
-                <div
-                  class="local-select-wrapper flex flex-col justify-center items-center"
-                  *ngIf="group.isSelectMode"
-                >
+                <div class="local-select-wrapper flex flex-col justify-center items-center" *ngIf="group.isSelectMode">
                   <mat-icon
                     *ngFor="let canToggle of [canAddRemove(p) | async]"
                     (click)="!canToggle ? null : doAddRemoveParameter(group, p)"
@@ -140,8 +115,7 @@
                     matRipple
                     class="local-add-remove cursor-pointer"
                     [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value && edit.meetsConditionOnGiven(p.descriptor, app.descriptor.startCommand, process)"
-                    >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add'
-                    }}</mat-icon
+                    >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add' }}</mat-icon
                   >
                 </div>
 
@@ -202,8 +176,8 @@
                   [suggested]="p.descriptor?.suggestedValues"
                   class="local-form-input flex-auto"
                   [process]="process"
-                  [instance]="instance"
-                  [system]="system"
+                  [instance]="instance$ | async"
+                  [system]="system$ | async"
                   [applications]="instances.stateApplications$ | async"
                   [type]="p.descriptor?.type"
                   [completionPrefixes]="completionPrefixes"
@@ -228,13 +202,29 @@
   <mat-divider></mat-divider>
   <mat-expansion-panel>
     <mat-expansion-panel-header>
-      <mat-panel-title> Command Line Preview </mat-panel-title>
+      <mat-panel-title>
+        Command Line Preview
+        <mat-button-toggle-group
+          class="local-toggle-group ml-2"
+          [value]="expandPreview ? '1' : '2'"
+          (change)="toggleExpandPreview($event)"
+          appClickStopPropagation
+        >
+          <mat-button-toggle value="1" matTooltip="Expand linked expressions" matTooltipShowDelay="1000">
+            <mat-icon>visibility</mat-icon></mat-button-toggle
+          >
+          <mat-button-toggle value="2" matTooltip="Show linked expresssions" matTooltipShowDelay="1000"
+            ><mat-icon>data_object</mat-icon></mat-button-toggle
+          >
+        </mat-button-toggle-group>
+      </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="pt-5">
       <app-history-process-config
-        [baseConfig]="edit.process$ | async"
+        *ngIf="previewProcess$ | async as process"
+        [baseConfig]="process"
         [baseDescriptor]="(edit.application$ | async).descriptor"
-        [compareConfig]="edit.process$ | async"
+        [compareConfig]="process"
         [onlyCommand]="true"
       ></app-history-process-config>
     </div>

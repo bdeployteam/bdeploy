@@ -14,6 +14,7 @@ import {
   inject,
 } from '@angular/core';
 import { NgControl, NgForm } from '@angular/forms';
+import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { debounceTime, map, skipWhile } from 'rxjs/operators';
 import {
@@ -37,7 +38,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -82,8 +83,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   protected process: ApplicationConfiguration;
   protected app: ApplicationDto;
 
-  protected instance: InstanceConfigurationDto;
-  protected system: SystemConfiguration;
+  protected instance$ = new BehaviorSubject<InstanceConfigurationDto>(null);
+  protected system$ = new BehaviorSubject<SystemConfiguration>(null);
   protected linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
 
   protected completions: ContentCompletion[];
@@ -107,8 +108,11 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   };
 
   private updatePreview$ = new BehaviorSubject<boolean>(false);
+  protected expandPreview = true;
   private subscription: Subscription;
   private formsLoaded = false;
+
+  protected previewProcess$ = new BehaviorSubject<ApplicationConfiguration>(null);
 
   ngOnInit(): void {
     this.subscription = combineLatest([this.edit.process$, this.edit.application$]).subscribe(([process, app]) => {
@@ -191,10 +195,32 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     this.subscription.add(this.groups$.subscribe(() => setTimeout(() => this.checkFormsStatus())));
 
     this.subscription.add(
-      this.updatePreview$
+      combineLatest([
+        this.edit.process$,
+        this.edit.application$,
+        this.instance$,
+        this.system$,
+        this.updatePreview$.pipe(debounceTime(400)),
+      ])
+        .pipe(skipWhile(([p, a, i]) => !p || !a || !i))
+        .subscribe(([process, application, instance, system]) => {
+          const previewProcess = JSON.parse(JSON.stringify(process)) as ApplicationConfiguration;
+          previewProcess.start.parameters.forEach((p) => {
+            const descriptor = application.descriptor.startCommand.parameters.find((appParam) => appParam.id === p.id);
+            const lv = this.expandPreview
+              ? createLinkedValue(getRenderPreview(p.value, process, instance, system))
+              : p.value;
+            p.preRendered = this.edit.preRenderParameter(descriptor, lv);
+          });
+          this.previewProcess$.next(previewProcess);
+        }),
+    );
+
+    this.subscription.add(
+      this.previewProcess$
         .pipe(
           skipWhile((x) => !x),
-          debounceTime(500),
+          debounceTime(100),
         )
         .subscribe(() => this.preview.update()),
     );
@@ -207,17 +233,17 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
     this.subscription.add(
       combineLatest([this.instances.state$, this.systems.systems$]).subscribe(([i, s]) => {
-        this.instance = i?.config;
+        this.instance$.next(i?.config);
 
         if (!i?.config?.config?.system || !s?.length) {
-          this.system = null;
+          this.system$.next(null);
           this.completions = this.buildCompletions();
           return;
         }
 
-        this.system = s.find(
-          (x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag,
-        )?.config;
+        this.system$.next(
+          s.find((x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag)?.config,
+        );
         this.completions = this.buildCompletions();
       }),
     );
@@ -228,8 +254,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   private buildCompletions(): ContentCompletion[] {
     return buildCompletions(
       this.completionPrefixes,
-      this.instance,
-      this.system,
+      this.instance$.value,
+      this.system$.value,
       this.process,
       this.instances.stateApplications$.value,
     );
@@ -494,6 +520,11 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       p.descriptor?.type === ParameterType.ENVIRONMENT
         ? ParameterConfigurationTarget.ENVIRONMENT
         : ParameterConfigurationTarget.COMMAND;
+    this.updatePreview$.next(true);
+  }
+
+  protected toggleExpandPreview(event: MatButtonToggleChange) {
+    this.expandPreview = event.value == '1';
     this.updatePreview$.next(true);
   }
 

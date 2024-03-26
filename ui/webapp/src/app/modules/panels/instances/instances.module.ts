@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -171,6 +172,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     MatButtonModule,
     MatRadioModule,
     MatTabsModule,
+    MatButtonToggleModule,
   ],
 })
 export class InstancesModule {}
