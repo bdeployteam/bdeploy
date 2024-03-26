@@ -46,9 +46,9 @@ export class DataFilesService {
         first(),
         mergeMap((i) =>
           this.http
-            .get<RemoteDirectory[]>(
-              `${this.apiPath(this.groups.current$.value.name, i.instanceConfiguration.id)}/processes/dataDirSnapshot`,
-            )
+            .get<
+              RemoteDirectory[]
+            >(`${this.apiPath(this.groups.current$.value.name, i.instanceConfiguration.id)}/processes/dataDirSnapshot`)
             .pipe(measure('Load Instance Data Files.')),
         ),
       )

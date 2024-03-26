@@ -13,6 +13,15 @@ export function decodeDataFilePath(encodedPath: string): { minion: string; path:
   }
 }
 
+export function getDescendants(dfp: DataFilePath): DataFilePath[] {
+  if (!dfp) {
+    return null;
+  }
+  const arr = [dfp];
+  dfp.children?.flatMap((child) => getDescendants(child)).forEach((descendant) => arr.push(descendant));
+  return arr;
+}
+
 export function findDataFilePath(dfp: DataFilePath, path: string): DataFilePath {
   if (!dfp) {
     return null;

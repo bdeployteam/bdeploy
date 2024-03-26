@@ -53,6 +53,7 @@
         <app-bd-data-table
           [records]="records$ | async"
           [columns]="columns"
+          [searchable]="false"
           (recordClick)="onClick($event)"
           [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
           [(checked)]="dataFilesBulkService.selection"
