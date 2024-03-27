@@ -374,7 +374,7 @@ describe('Instance Process Config Tests', () => {
 
     cy.inMainNavFlyin('app-product-update', () => {
       cy.contains('tr', '2.0.0').within(() => {
-        cy.get('button[data-cy^="Use"]').click();
+        cy.get('button[data-cy^="Upgrade to this product version"]').click();
       });
     });
 

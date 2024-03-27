@@ -28,6 +28,7 @@
               [disabled]="isTop"
               (click)="onMoveUp()"
               appClickStopPropagation
+              tooltip="below"
             ></app-bd-button>
             <app-bd-button
               text="Move Down"
@@ -35,12 +36,14 @@
               [disabled]="isBottom"
               (click)="onMoveDown()"
               appClickStopPropagation
+              tooltip="below"
             ></app-bd-button>
             <app-bd-panel-button
               text="Edit Control Group"
               icon="edit"
               [route]="['panels', 'instances', 'config', 'edit-control-group', (node$ | async)?.nodeName, group.name]"
               appClickStopPropagation
+              tooltip="below"
             ></app-bd-panel-button>
           </div>
         </div>
