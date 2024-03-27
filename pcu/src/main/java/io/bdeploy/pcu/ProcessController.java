@@ -100,7 +100,7 @@ public class ProcessController {
     /** Task scheduled to monitor process startup probe */
     private Future<?> startupTask;
 
-    /** Task scheduled to monitor process lifeness probe */
+    /** Task scheduled to monitor process liveness probe */
     private Future<?> aliveTask;
 
     /** The native process. Only used to evaluate exit code */
