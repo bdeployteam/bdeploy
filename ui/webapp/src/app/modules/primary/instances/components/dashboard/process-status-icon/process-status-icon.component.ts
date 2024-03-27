@@ -78,7 +78,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
         return this.next(
           'heart_broken',
           null,
-          'Process lifeness probe reported a problem in the running process',
+          'Process liveness probe reported a problem in the running process',
           'local-crashed',
         );
       case ProcessState.RUNNING_STOP_PLANNED:

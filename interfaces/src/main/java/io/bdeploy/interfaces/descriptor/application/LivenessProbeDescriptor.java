@@ -2,7 +2,7 @@ package io.bdeploy.interfaces.descriptor.application;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
-public class LifenessProbeDescriptor {
+public class LivenessProbeDescriptor {
 
     /**
      * The endpoint to query. Once the endpoint responds with code 200, the process is considered RUNNING.

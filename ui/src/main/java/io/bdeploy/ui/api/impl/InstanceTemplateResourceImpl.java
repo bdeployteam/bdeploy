@@ -406,7 +406,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.processControl.gracePeriod = appDesc.processControl.gracePeriod;
         cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
         cfg.processControl.startupProbe = appDesc.processControl.startupProbe;
-        cfg.processControl.lifenessProbe = appDesc.processControl.lifenessProbe;
+        cfg.processControl.livenessProbe = appDesc.processControl.livenessProbe;
         cfg.processControl.configDirs = appDesc.processControl.configDirs;
         cfg.processControl.autostart = appDesc.processControl.supportsAutostart;
 

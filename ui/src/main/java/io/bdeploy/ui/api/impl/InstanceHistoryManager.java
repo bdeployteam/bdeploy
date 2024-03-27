@@ -220,7 +220,7 @@ public class InstanceHistoryManager {
             case RUNNING_UNSTABLE:
                 return process + " restarted";
             case RUNNING_NOT_ALIVE:
-                return process + " lifeness probe failed";
+                return process + " liveness probe failed";
             case STOPPED:
                 return process + " stopped";
             case CRASHED_WAITING:

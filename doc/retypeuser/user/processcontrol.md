@@ -39,7 +39,7 @@ Icon | Description
 ![](/images/ManualDoc_ProcessStarting.png){width=32} | Process is **starting**.
 ![](/images/ManualDoc_ProcessRunning.png){width=32} | Process is **running**. If the process defined a _startup probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)), this status is reached as soon as the startup probe indicates a successful startup of the application. Otherwise - without probe - the process reaches the **running** state immideately.
 ![](/images/ManualDoc_ProcessStopPlanned.png){width=32} | Process is **running** but **stopping** has been **requested** by the user.
-![](/images/ManualDoc_ProcessLifenessFailed.png){width=32} | Process is **running**, but a defined _lifeness probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)) indicates that the process has a problem.
+![](/images/ManualDoc_ProcessLivenessFailed.png){width=32} | Process is **running**, but a defined _liveness probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)) indicates that the process has a problem.
 ![](/images/ManualDoc_ProcessCrashed.png){width=32} | Process **crashed** unexpectedly. **Process Control** scheduled an automatic restart. No interaction is required.
 ![](/images/ManualDoc_ProcessCrashedPermanent.png){width=32} | Process **crashed** unexpectedly. **Process Control** gave up restarting as the last 5 attempts failed. **Manual interaction is required**.
 

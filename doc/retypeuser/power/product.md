@@ -110,8 +110,8 @@ processControl: <6>
   noOfRetries: 5
   startupProbe: <7>
      endpoint: "Startup Endpoint"
-  lifenessProbe: <8>
-     endpoint: "Lifeness Endpoint"
+  livenessProbe: <8>
+     endpoint: "Liveness Endpoint"
      initialDelaySeconds: 5
      periodSeconds: 10
   configDirs: "/dir1,/dir2" <9>
@@ -160,9 +160,9 @@ endpoints: <15>
       path: "startup/endpoint"
       port: "{{V:port-param}}"
       secure: false
-    - id: "Lifeness Endpoint"
+    - id: "Liveness Endpoint"
       type: PROBE_ALIVE <18>
-      path: "lifeness/endpoint"
+      path: "liveness/endpoint"
       port: "{{V:port-param}}"
       secure: false
 
@@ -177,7 +177,7 @@ runtimeDependencies: <19>
 5. Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type **Applications** when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the [Launcher CLI](/experts/cli/#launcher-cli). Paths are interpreted relative to the root folder of the **Application**.
 6. Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type **Applications** are started and kept alive by **BDeploy**. For details, see the list of [processControl](#supported-processcontrol-attributes) attributes.
 7. A _startup probe_ can specify an HTTP Endpoint of type `PROBE_STARTUP` which is queried by **BDeploy** if specified until the endpoint returns a status code >= 200 and < 400. Once this happens, the _startup probe_ is considered to be successful and the **Process** state advances from _starting_ to _running_. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
-8. A _lifeness probe_ can specify an HTTP Endpoint of type `PROBE_ALIVE` along with an initial delay in seconds and an interval in which the probe is queried. **BDeploy** starts querying _lifeness probes_ only after the application entered _running_ state. This happens either automatically when the process is started (if no _startup probe_ is configured), or once the existing _startup probe_ succeeded. The _lifeness probe_ is queried every `periodSeconds` seconds, and the application is considered to be alive if the endpoint returns a status code >= 200 and < 400. If the probe fails, the **Process** status is updated to indicate the problem. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
+8. A _liveness probe_ can specify an HTTP Endpoint of type `PROBE_ALIVE` along with an initial delay in seconds and an interval in which the probe is queried. **BDeploy** starts querying _liveness probes_ only after the application entered _running_ state. This happens either automatically when the process is started (if no _startup probe_ is configured), or once the existing _startup probe_ succeeded. The _liveness probe_ is queried every `periodSeconds` seconds, and the application is considered to be alive if the endpoint returns a status code >= 200 and < 400. If the probe fails, the **Process** status is updated to indicate the problem. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
 9. Allowed Configuration Directories preset - only valid for `CLIENT` applications. These relative sub-directories of the configuration files directory tree will be made available to this application when run on a client PC. This can later also be configured per process using the [Allowable Configuration Directories](/user/instance/#allowable-configuration-directories) configuration.
 10. The start command of the **Application**. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of [parameter](#supported-parameters-attributes) attributes. To apply e.g. instance-specific values, [Variable Expansion](/power/variables/#variable-expansions) is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
 11. [Variable Expansion](/power/variables/#variable-expansions) can also be used to expand to [Instance Variables](/user/instance/#instance-variables) in default values. These instance variables are required to exist once this application is configured in an instance. They can either be pre-provided using [Instance Templates](/user/instance/#instance-templates) or need to be manually created when required.
@@ -203,7 +203,7 @@ Attribute   | Description
 `noOfRetries` | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.
 `gracePeriod` | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.
 `startupProbe` | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.
-`lifenessProbe` | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a lifeness probe fails. It will only report the failure to the user.
+`livenessProbe` | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.
 
 ### Supported `parameters` attributes
 
@@ -420,7 +420,7 @@ Attribute   | Description
 ---         | ---
 `id` | The unique ID of the endpoint. This ID can be used by an authorized third-party application to instruct **BDeploy** to call this endpoint and return the result.
 `enabled` | Any [Link Expression](/user/instance/#link-expressions). If the expression evaluates to a non-empty value which does _not_ equal `false`, the endpoint is considered available/enabled and presented to the user both for configuration and usage. This can be used to tie an endpoint to the configuration of a certain parameter, e.g. the server port configuration which will host the endpoint. 
-`type` | Currently `DEFAULT`, `PROBE_STARTUP` and `PROBE_ALIVE` are supported. Endpoints referenced by _startup_ or _lifeness probes_ in the `processControl` section of a server process need to have the according type. If not specified, the `DEFAULT` type is assumed.
+`type` | Currently `DEFAULT`, `PROBE_STARTUP` and `PROBE_ALIVE` are supported. Endpoints referenced by _startup_ or _liveness probes_ in the `processControl` section of a server process need to have the according type. If not specified, the `DEFAULT` type is assumed.
 `path` | The path of the endpoint on the target process. **BDeploy** uses this and other parameters (`port`) to construct an URI to the local server.
 `port` | The port this endpoint is hosted on. [Variable Expansion](/power/variables/#variable-expansions) can be used, for instance to reference a parameter of the application (using `{{V:port-param}}` where `port-param` is the ID of a parameter on the `startCommand`).
 `secure` | Whether HTTPS should be used when calling the endpoint

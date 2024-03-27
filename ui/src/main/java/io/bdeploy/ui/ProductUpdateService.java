@@ -125,7 +125,7 @@ public class ProductUpdateService {
 
         // update process control data - this is not configurable by user.
         app.processControl.startupProbe = targetDesc.processControl.startupProbe;
-        app.processControl.lifenessProbe = targetDesc.processControl.lifenessProbe;
+        app.processControl.livenessProbe = targetDesc.processControl.livenessProbe;
 
         if (app.start != null && app.start.parameters != null && !app.start.parameters.isEmpty()) {
             // update existing parameter order (just the order)
