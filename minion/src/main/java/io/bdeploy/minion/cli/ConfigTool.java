@@ -10,6 +10,7 @@ import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.MinionManifest;
@@ -60,8 +61,15 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
     protected RenderableResult run(ConfigToolConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
+        DataResult result = createSuccess();
+
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
-            if (config.hostname() != null || config.port() != -1) {
+            String newHostname = config.hostname();
+            int newPort = config.port();
+            boolean newHostnameSet = newHostname != null;
+            boolean newPortSet = newPort != -1;
+
+            if (newHostnameSet || newPortSet) {
                 MinionManifest mm = new MinionManifest(r.getHive());
                 MinionConfiguration cfg = mm.read();
 
@@ -71,8 +79,8 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                 }
                 RemoteService oldRemote = minion.remote;
 
-                String hostname = config.hostname() == null ? oldRemote.getUri().getHost() : config.hostname();
-                int port = config.port() == -1 ? oldRemote.getUri().getPort() : config.port();
+                String hostname = newHostnameSet ? newHostname : oldRemote.getUri().getHost();
+                int port = newPortSet ? newPort : oldRemote.getUri().getPort();
 
                 minion.remote = new RemoteService(UriBuilder.fromUri(oldRemote.getUri()).host(hostname).port(port).build(),
                         oldRemote.getAuthPack());
@@ -87,13 +95,21 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                     s.officialName = hostname;
                     s.port = port;
                 });
+
+                if (newHostnameSet) {
+                    result.addField("Hostname", hostname);
+                }
+                if (newPortSet) {
+                    result.addField("Port", port);
+                }
             }
-            if (config.mode() != null) {
+
+            MinionMode newMode = config.mode();
+            if (newMode != null) {
                 r.getAuditor()
                         .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("set-mode").build());
 
                 MinionMode oldMode = r.getMode();
-                MinionMode newMode = config.mode();
 
                 if (oldMode == MinionMode.CENTRAL || oldMode == MinionMode.NODE) {
                     throw new UnsupportedOperationException("Cannot convert " + oldMode + " root to anything else");
@@ -104,12 +120,16 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                 }
 
                 r.modifyState(s -> s.mode = config.mode());
+                result.addField("Mode", newMode);
             }
-            if (config.sessionTimeout() != -1) {
-                r.modifyState(s -> s.webSessionTimeoutHours = config.sessionTimeout());
+
+            int newSessionTimeout = config.sessionTimeout();
+            if (newSessionTimeout != -1) {
+                r.modifyState(s -> s.webSessionTimeoutHours = newSessionTimeout);
+                result.addField("Session timeout (hours)", newSessionTimeout);
             }
         }
-        return createSuccess();
-    }
 
+        return result;
+    }
 }

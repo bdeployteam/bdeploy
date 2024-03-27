@@ -128,8 +128,9 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                     config.skipConnectionCheck());
 
             if (config.tokenFile() != null) {
-                Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
-                result.addField("Token File", config.tokenFile());
+                Path tokenPath = Paths.get(config.tokenFile());
+                Files.write(tokenPath, pack.getBytes(StandardCharsets.UTF_8));
+                result.addField("Token File", tokenPath);
             }
 
             if (config.mode() != MinionMode.NODE) {

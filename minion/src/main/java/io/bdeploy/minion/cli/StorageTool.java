@@ -36,15 +36,15 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
         @Validator({ MinionRootValidator.class, PathOwnershipValidator.class })
         String root();
 
+        @Help(value = "When given, list all storage locations.", arg = false)
+        boolean list() default false;
+
         @Help("Adds a storage location at the given path.")
         @Validator(PathOwnershipValidator.class)
         String add();
 
         @Help("Removes a storage location with the given path.")
         String remove();
-
-        @Help(value = "When given, list all storage locations.", arg = false)
-        boolean list() default false;
     }
 
     public StorageTool() {
@@ -57,7 +57,14 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
 
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
             List<Path> original = r.getStorageLocations();
-            if (config.add() != null) {
+            if (config.list()) {
+                DataTable t = createDataTable();
+                t.column("Storage Path", 100).column("Free Space", 20);
+                FileSystemSpaceService fsss = new FileSystemSpaceService();
+                r.getStorageLocations()
+                        .forEach(l -> t.row().cell(l).cell(FormatHelper.formatFileSize(fsss.getFreeSpace(l))).build());
+                return t;
+            } else if (config.add() != null) {
                 Path p = Paths.get(config.add());
                 if (original.contains(p)) {
                     return createResultWithErrorMessage(p + " already registered.");
@@ -66,24 +73,16 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("add-storage").build());
                 r.modifyState(s -> s.storageLocations.add(p));
-                return createSuccess();
+                return createResultWithSuccessMessage("The following path got added to the storage locations: " + p);
             } else if (config.remove() != null) {
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("remove-storage").build());
                 Path p = Paths.get(config.remove());
                 r.modifyState(s -> s.storageLocations.remove(p));
-                return createSuccess();
-            } else if (config.list()) {
-                DataTable t = createDataTable();
-                t.column("Storage Path", 100).column("Free Space", 20);
-                FileSystemSpaceService fsss = new FileSystemSpaceService();
-                r.getStorageLocations()
-                        .forEach(l -> t.row().cell(l).cell(FormatHelper.formatFileSize(fsss.getFreeSpace(l))).build());
-                return t;
+                return createResultWithSuccessMessage("The following path got removed from the storage locations: " + p);
             } else {
                 return createNoOp();
             }
         }
     }
-
 }
