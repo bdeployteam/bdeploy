@@ -769,6 +769,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return create(dir).normalize();
     }
 
+    public Path getLogDataDir() {
+        Path dir = getState().logDataDir;
+        if (dir == null) {
+            return null;
+        }
+        return create(dir).normalize();
+    }
+
     public Path getLogDir() {
         return logDir;
     }
@@ -915,7 +923,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private void initProcessControllerForInstance(SortedMap<String, Manifest.Key> activeVersions, Key key) {
         try {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentDir(), inm, new TaskSynchronizer());
+            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentDir(), getLogDataDir(), inm,
+                    new TaskSynchronizer());
             if (!inc.isInstalled()) {
                 return;
             }

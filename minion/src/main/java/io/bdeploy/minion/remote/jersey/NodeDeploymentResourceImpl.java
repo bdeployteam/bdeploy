@@ -80,7 +80,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
             throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(), Status.SERVICE_UNAVAILABLE);
         }
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
         inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
 
         if (inc.isInstalled()) {
@@ -102,7 +102,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         BHive hive = root.getHive();
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
+        InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm,
+                ts);
         if (!toActivate.isInstalled()) {
             throw new WebApplicationException("Key " + key + " is not deployed", Status.NOT_FOUND);
         }
@@ -169,7 +170,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         }
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
 
         // check currently active deployment
         MinionProcessController processController = root.getProcessController();
@@ -226,7 +227,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         Key activeKey = new Manifest.Key(newest.getKey().getName(), activeTag);
 
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(),
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(),
                 InstanceNodeManifest.of(hive, activeKey), ts);
 
         Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
@@ -253,8 +254,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     }
 
     @Override
-    public void updateDataEntries(String id, List<FileStatusDto> updates) {
-        Path dataDir = new DeploymentPathProvider(root.getDeploymentDir().resolve(id), null).get(SpecialDirectory.DATA);
+    public void updateDataEntries(String instanceId, List<FileStatusDto> updates) {
+        Path dataDir = new DeploymentPathProvider(root.getDeploymentDir(), null, instanceId, null).get(SpecialDirectory.DATA);
 
         for (FileStatusDto update : updates) {
             Path actual = dataDir.resolve(update.file);
@@ -282,7 +283,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
                         break;
                 }
             } catch (IOException e) {
-                throw new WebApplicationException("Cannot update " + update.file + " in " + id, e, Status.BAD_REQUEST);
+                throw new WebApplicationException("Cannot update " + update.file + " in " + instanceId, e, Status.BAD_REQUEST);
             }
         }
     }
@@ -328,7 +329,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     private InstanceNodeController getInstanceNodeController(Manifest.Key nodeKey) {
         BHive hive = root.getHive();
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeKey);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
         if (!inc.isInstalled()) {
             throw new WebApplicationException("Key " + nodeKey + " is not deployed", Status.NOT_FOUND);
         }

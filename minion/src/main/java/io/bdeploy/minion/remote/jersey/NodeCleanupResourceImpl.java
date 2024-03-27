@@ -120,7 +120,8 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
         }
 
         // after manifests, cleanup dist (deployment dir, temp, download, ...).
-        notExecuted.addAll(InstanceNodeController.cleanup(hive, root.getDeploymentDir(), toClean));
+        notExecuted
+                .addAll(InstanceNodeController.cleanup(hive, root.getDeploymentDir(), root.getLogDataDir(), toClean));
 
         return notExecuted;
     }

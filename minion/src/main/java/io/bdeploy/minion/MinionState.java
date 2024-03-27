@@ -136,4 +136,9 @@ public class MinionState {
      * manually or if setup continue to use the already configured path.
      */
     public Path poolDefaultPath;
+
+    /**
+     * A {@link Path} which points to the log data directory.
+     */
+    public Path logDataDir;
 }

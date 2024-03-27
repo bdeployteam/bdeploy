@@ -53,7 +53,9 @@ class InstanceProcessControllerParallelTest {
 
         // Create controller with the two applications
         InstanceProcessController controller = new InstanceProcessController(group.id);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.id), null, null, "1", group, null);
+        controller.createProcessControllers(
+                new DeploymentPathProvider(tmp.resolve("fakeDeploy"), tmp.resolve("fakeLogData"), group.id, "1"), null, null, "1",
+                group, null);
         controller.setActiveTag("1");
 
         // create a control group and directly assign it - usually this comes from the configuration.

@@ -112,7 +112,7 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
 
     @Override
     public RemoteDirectoryEntry getOutputEntry(String instanceId, String tag, String applicationId) {
-        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(instanceId), tag);
+        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir(), root.getLogDataDir(), instanceId, tag);
         Path runtime = dpp.get(SpecialDirectory.RUNTIME);
         Path out = runtime.resolve(applicationId).resolve(RollingStreamGobbler.OUT_TXT);
         File file = out.toFile();

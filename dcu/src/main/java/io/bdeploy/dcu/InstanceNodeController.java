@@ -81,20 +81,24 @@ public class InstanceNodeController {
     private final TaskSynchronizer syncOps;
     private final InstanceNodeManifest manifest;
     private final CompositeResolver resolvers = new CompositeResolver();
-    private final Path root;
+    private final Path deploymentDir;
+    private final Path logDataDir;
     private final DeploymentPathProvider paths;
 
     /**
      * @param hive the hive to export artifacts from
-     * @param root the root directory used for deployment/runtime
+     * @param deploymentDir the root directory used for deployment/runtime
+     * @param logDataDir the external data files directory
      * @param manifest the instance node manifest
      */
-    public InstanceNodeController(BHive hive, Path root, InstanceNodeManifest manifest, TaskSynchronizer syncOps) {
+    public InstanceNodeController(BHive hive, Path deploymentDir, Path logDataDir, InstanceNodeManifest manifest,
+            TaskSynchronizer syncOps) {
         this.hive = hive;
         this.syncOps = syncOps;
-        this.root = root;
+        this.deploymentDir = deploymentDir;
+        this.logDataDir = logDataDir;
         this.manifest = manifest;
-        this.paths = new DeploymentPathProvider(root.resolve(manifest.getId()), manifest.getKey().getTag());
+        this.paths = new DeploymentPathProvider(deploymentDir, logDataDir, manifest);
 
         // Setup default resolvers for this node
         InstanceNodeConfiguration config = manifest.getConfiguration();
@@ -217,8 +221,7 @@ public class InstanceNodeController {
      * only be done if the node is fully deployed.
      */
     public ProcessGroupConfiguration getProcessGroupConfiguration() {
-        Path deploymentRoot = root.resolve(manifest.getId());
-        DeploymentPathProvider dpp = new DeploymentPathProvider(deploymentRoot, manifest.getKey().getTag());
+        DeploymentPathProvider dpp = new DeploymentPathProvider(deploymentDir, logDataDir, manifest);
 
         Path processConfigFile = dpp.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON);
         if (!Files.exists(processConfigFile)) {
@@ -234,8 +237,8 @@ public class InstanceNodeController {
         // write root config tree to the according target location
         ObjectId rootTree = manifest.getConfigTrees().get(InstanceNodeManifest.ROOT_CONFIG_NAME);
         if (rootTree != null) {
-            syncOps.perform(targetDir, () -> hive.execute(new ExportTreeOperation().setSourceTree(rootTree)
-                    .setTargetPath(targetDir.resolve(SpecialDirectory.CONFIG.getDirName()))));
+            syncOps.perform(targetDir, () -> hive.execute(
+                    new ExportTreeOperation().setSourceTree(rootTree).setTargetPath(paths.get(SpecialDirectory.CONFIG))));
         }
 
         // write all required applications to the pool
@@ -313,9 +316,11 @@ public class InstanceNodeController {
      *
      * @param source the source {@link BHive} to scan for available
      *            {@link InstanceNodeController}s.
-     * @param root the {@link Path} where all deployments reside.
+     * @param deploymentDir the {@link Path} where all deployments reside.
+     * @param logData the log data directory
      */
-    public static List<CleanupAction> cleanup(BHive source, Path root, SortedSet<Manifest.Key> toBeRemoved) {
+    public static List<CleanupAction> cleanup(BHive source, Path deploymentDir, Path logData,
+            SortedSet<Manifest.Key> toBeRemoved) {
         List<CleanupAction> toRemove = new ArrayList<>();
         SortedSet<Manifest.Key> inHive = InstanceNodeManifest.scan(source);
 
@@ -326,7 +331,7 @@ public class InstanceNodeController {
         List<InstanceNodeController> toKeep = new ArrayList<>();
         for (Manifest.Key key : inHive) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
-            InstanceNodeController inc = new InstanceNodeController(source, root, inmf, new TaskSynchronizer());
+            InstanceNodeController inc = new InstanceNodeController(source, deploymentDir, logData, inmf, new TaskSynchronizer());
 
             if (inc.isInstalled()) {
                 if (log.isDebugEnabled()) {
@@ -337,7 +342,7 @@ public class InstanceNodeController {
         }
 
         log.info("Collecting garbage in instance node deployments...");
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root,
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(deploymentDir,
                 p -> !p.getFileName().toString().equals(SpecialDirectory.MANIFEST_POOL.getDirName()))) {
             // name of each directory is an instance UUID.
             for (Path dir : stream) {
@@ -347,7 +352,7 @@ public class InstanceNodeController {
             throw new IllegalStateException("Cannot scan deployment directories", e);
         }
 
-        cleanupPoolDirs(source, root, toRemove, toKeep);
+        cleanupPoolDirs(source, deploymentDir, toRemove, toKeep);
 
         return toRemove;
     }

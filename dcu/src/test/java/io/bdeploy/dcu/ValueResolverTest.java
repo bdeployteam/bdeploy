@@ -49,11 +49,12 @@ class ValueResolverTest {
         mfs.put(keyA2, Paths.get("path/to/a-v2"));
         mfs.put(keyB1, Paths.get("path/to/b"));
 
-        Path fakeDeploy = tmp.resolve("fake");
-        DeploymentPathProvider dpp = new DeploymentPathProvider(fakeDeploy, "fakeId");
         InstanceNodeConfiguration dc = new InstanceNodeConfiguration();
         dc.name = "Fake Deployment";
         dc.id = "fakeId";
+
+        DeploymentPathProvider dpp = new DeploymentPathProvider(tmp.resolve("fakeDeploy"), tmp.resolve("fakeLogData"), dc.id,
+                "1");
 
         ApplicationConfiguration a1c = new ApplicationConfiguration();
         a1c.application = keyA1;
