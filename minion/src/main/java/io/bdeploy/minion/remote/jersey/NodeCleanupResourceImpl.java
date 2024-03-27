@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -24,7 +25,6 @@ import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
@@ -48,17 +48,18 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
 
         BHive hive = root.getHive();
 
-        Set<String> newestLauncherTags = hive.execute(new ManifestListOperation().setManifestName("meta/launcher")).stream() //
-                .map(Key::getTag) //
-                .collect(Collectors.toCollection(() -> new TreeSet<>((a, b) -> VersionHelper.compare(b, a)))) // reverse order
-                .stream().limit(2).collect(Collectors.toSet());
+        // by default, filter well known things except for launchers, we want to clean them.
+        Predicate<Key> wellKnownFilter = this::isNotWellKnownExcludingLauncher;
+        if (root.getSelfConfig().master) {
+            // I am a master, I need launchers. Don't remove ANY launcher.
+            wellKnownFilter = this::isNotWellKnown;
+        }
 
         Set<Key> allMfs = hive.execute(new ManifestListOperation()); // list ALL
 
         // filter some well-known things.
         SortedSet<Key> toClean = allMfs.stream() //
-                .filter(this::isNotWellKnown) //
-                .filter(key -> !newestLauncherTags.contains(key.getTag())) //
+                .filter(wellKnownFilter) //
                 .collect(Collectors.toCollection(TreeSet::new));
 
         SortedSet<Key> allRefs = new TreeSet<>();
@@ -124,9 +125,14 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
         return notExecuted;
     }
 
-    private boolean isNotWellKnown(Key key) {
+    private boolean isNotWellKnownExcludingLauncher(Key key) {
         return !((key.getName().startsWith("meta/") && !key.getName().startsWith("meta/launcher"))
                 || key.getName().startsWith("users/") || key.getName().startsWith("usergroups/"));
+    }
+
+    private boolean isNotWellKnown(Key key) {
+        return !((key.getName().startsWith("meta/")) || key.getName().startsWith("users/")
+                || key.getName().startsWith("usergroups/"));
     }
 
     @Override
