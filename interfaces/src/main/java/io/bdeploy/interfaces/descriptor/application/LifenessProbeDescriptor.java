@@ -13,7 +13,7 @@ public class LifenessProbeDescriptor {
     public String endpoint;
 
     /**
-     * The initial delay after starting the container before beginning with lifeness queries.
+     * The initial delay after starting the container before beginning with liveness queries.
      * <p>
      * The initial delay begins after the process is considered RUNNING. This can be either instantly after starting the process
      * (not startup probe configure), or after the configured startup probe considers the process RUNNING.

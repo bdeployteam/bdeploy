@@ -49,7 +49,7 @@ public class ProcessControlConfiguration {
     public StartupProbeDescriptor startupProbe;
 
     /**
-     * Copy of the original lifeness probe descriptor.
+     * Copy of the original liveness probe descriptor.
      */
     public LifenessProbeDescriptor lifenessProbe;
 
