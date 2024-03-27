@@ -94,7 +94,7 @@ The **Launcher** (_BDeploy.exe_) can also be launched directly without any argum
 ![Client Application Browser](/images/ManualDoc_ClientBrowserApp.png){width=480}
 :::
 
-The **Customize & Launch** context menu entry allows the user to to modify the command line argumements that is used to start the application. A new dialog is opened that lists the existing command line arguments as currently defined by the **active instance version**.
+The **Customize & Launch** context menu entry allows the user to to modify the command line arguments that is used to start the application. A new dialog is opened that lists the existing command line arguments as currently defined by the **active instance version**.
 
 Additional arguments can be added or existing ones can be modified or deleted as desired. This option is especially useful for testing. Arguments can be modified locally without the need to change the global [Instance Configuration](/user/instance/#instance-configuration). The modified arguments are not saved and they need to be re-done the next time the application is launched.
 
@@ -128,7 +128,7 @@ When the **Installation Area** is read-only the environment variable **BDEPLOY_U
 
 ### Installing new software
 
-New software is typically installed by the **Administrator** that has full permissions in the **Installation Area**. The administrator is either using the provided **Installer** or a **Click & Start** file in order to install the new application. After that step the application is available and can be launched by each new user by using the **CLick & Start** file.
+New software is typically installed by the **Administrator** that has full permissions in the **Installation Area**. The administrator is either using the provided **Installer** or a **Click & Start** file in order to install the new application. After that step the application is available and can be launched by each new user by using the **Click & Start** file.
 
 ### Updating software
 
@@ -164,7 +164,7 @@ _Solution:_ Make sure to also revoke the `Write` permissions to make the install
 _Description:_ Permissions of the root directory are invalid. Typically happens when the _'Advanced Security'_ options are used.
 
 _Solution:_ Make sure that the permissions are set to `Modify` or to `Read, Execute`.
-=== **Error Message**: `Inconsistent file and folder permissions. Missing permission to modify files.`
+=== **Error Message**: `Inconsistent file and folder permissions: Missing permission to modify files.`
 _Description:_ Permissions of the root directory are invalid. Typically happens when the _'Advanced Security'_ options are used.
 
 _Solution:_ Make sure that the permissions are set to `Modify` or to `Read, Execute`.

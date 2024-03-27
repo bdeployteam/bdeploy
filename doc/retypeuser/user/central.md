@@ -11,8 +11,8 @@ On the `CENTRAL` server side:
 
 - Each **Instance Group** has a list of `MANAGED` servers attached to it.
 - Each **Instance** is associated with exactly **one** of those `MANAGED` servers.
-- Synchonization to the `CENTRAL` servers data store is done on demand (through a button in the Web UI). When synchonizing from a `MANAGED` to a `CENTRAL` server, only _configuration_ data is synchronized. Actual **Product** and **Application** data is only synchronized when explicitly requested through the [Product Synchronization](/user/central/#product-synchronization) page on the `CENTRAL` server.
-- It is possible to create a new **instance version** on the `CENTRAL` server from a **product version** which has been pushed only to the `CENTRAL` server (but not to the `MANAGED`). In this case, the required product data is sent to the `MANAGED` server once **install** is performed on this **instance version**. In this scenarion **install** **has to be** performed on the `CENTRAL` server.
+- Synchronization to the `CENTRAL` servers data store is done on demand (through a button in the Web UI). When synchronizing from a `MANAGED` to a `CENTRAL` server, only _configuration_ data is synchronized. Actual **Product** and **Application** data is only synchronized when explicitly requested through the [Product Synchronization](/user/central/#product-synchronization) page on the `CENTRAL` server.
+- It is possible to create a new **instance version** on the `CENTRAL` server from a **product version** which has been pushed only to the `CENTRAL` server (but not to the `MANAGED`). In this case, the required product data is sent to the `MANAGED` server once **install** is performed on this **instance version**. In this scenario **install** **must be** performed on the `CENTRAL` server.
 
 On The `MANAGED` server side:
 
@@ -42,7 +42,7 @@ Attaching an **Instance Group** is a two way operation.
 To attach in **Instance Group**, you need both Web UIs of `CENTRAL` and `MANAGED` server. Make sure you have both available and open in browsers next to each other (on the same machine, so drag & drop will work).
 
 !!!info Note
-You can distiguish `CENTRAL` and `MANAGED` servers by the according banner in the expanded main menu in the Web UI.
+You can distinguish `CENTRAL` and `MANAGED` servers by the according banner in the expanded main menu in the Web UI.
 !!!
 
 On the `CENTRAL` server, choose [ **Managed Servers** ] on the main menu after selecting an **Instance Group** you want to attach. This will take you to the **Managed Servers** page for that **Instance Group**. Initially, this page will be empty.
@@ -111,7 +111,7 @@ It is not required to synchronize the other way (`CENTRAL` to `MANAGED`) as this
 
 ## Migrating between Modes
 
-There is a limited possibility to change the _purpose_ of an already intialized **BDeploy** server root directory. It is only possible to migrate from `STANDALONE` to `MANAGED` and vice versa, as data is _mostly_ compatible. A command line tooling exists for this purpose:
+There is a limited possibility to change the _purpose_ of an already initialized **BDeploy** server root directory. It is only possible to migrate from `STANDALONE` to `MANAGED` and vice versa, as data is _mostly_ compatible. A command line tooling exists for this purpose:
 
 !!!info Note
 Migration from `STANDALONE` or `MANAGED` to `NODE` is available using a dedicated workflow from the Web UI. This allows to start off an installation as `STANDALONE` and later on migrate that to be a `NODE` in a larger setup. See [Convert/Migrate to Node](/setup/node/#convertmigrate-to-node)

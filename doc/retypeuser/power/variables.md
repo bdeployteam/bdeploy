@@ -5,14 +5,14 @@ icon: arrow-both
 
 # Variable Expansions
 
-**BDeploy** provides a mechanism for variable expansion, used in [Link Expressions](/user/instance/#link-expressions) and [Configuration Files](/user/instance/#configuration-files). Variable expansion can happen on the following:
+**BDeploy** provides a mechanism for variable expansion, used in [Link Expressions](/user/instance/#link-expressions) and [Configuration Files](/user/instance/#configuration-files). Variable expansion can happen at the following locations:
 
-- Launcher path specified in [`app-info.yaml`](/power/product/#app-infoyaml).
-- Any parameter value. Either user-set value or the `defaultValue` specified in [`app-info.yaml`](/power/product/#app-infoyaml).
-- Any configuration file content.
-- Most of the [HTTP Endpoints](/power/product/#supported-endpointshttp-attributes) attributes.
-- Instance Variables.
-- System Variables (limited to certain expansions which are available globally).
+- Launcher path specified in [`app-info.yaml`](/power/product/#app-infoyaml)
+- Any parameter value - either user-set value or the `defaultValue` specified in [`app-info.yaml`](/power/product/#app-infoyaml)
+- Any configuration file content
+- Most of the [HTTP Endpoints](/power/product/#supported-endpointshttp-attributes) attributes
+- Instance Variables
+- System Variables (limited to certain expansions which are available globally)
 
 Any of the above will be processed _as late as possible_, i.e. on the target node, right before writing the final content to the target directories.
 
@@ -24,7 +24,7 @@ Since 4.6.0, **BDeploy** has a _link expression editor_ built in. All elements i
 
 ## M: Manifest Reference
 
-Used whenever it is required to get the absolute installation path to another manifest’s path on the target system. The name of the variable indicates the manifest which should be references. An optional tag - separated with a ':' - can be added to refer to a specific version.
+Used whenever it is required to get the absolute installation path to another manifest’s path on the target system. The name of the variable indicates the manifest which should be referenced. An optional tag - separated with a ':' - can be added to refer to a specific version.
 
 ```
 {{M:<Name of Manifest>:<Optional Manifest Tag>}}
@@ -52,7 +52,7 @@ Used to expand to one of the special directories that are defined.
 
 ## V: Parameter Value
 
-Used to reference a parameter within the same application or withing any other application from the same instance. Typically used when one application publishes a service on a specific port (_server_) and other applications (_clients_) should then connect to this port. The configuration of the _client_ applications would then refer to the port of the _server_ application. Thus when changing the port only the configuration of the _server_ application must be adopted.
+Used to reference a parameter within the same application or withing any other application from the same instance. Typically used when one application publishes a service on a specific port (_server_) and other applications (_clients_) should then connect to this port. The configuration of the _client_ applications would then refer to the port of the _server_ application. Thus, when changing the port, only the configuration of the _server_ application has to be adopted.
 
 ```
 {{V:<PARAM_ID>}} - Refers to a parameter defined in the same application
@@ -122,11 +122,11 @@ this variable allows the usage of different arguments for different operating sy
 {{OSNAME:<conditional output>}}
 ```
 
-| Variable             | Description                                         |
-| -------------------- | --------------------------------------------------- |
-| {{LINUX:java}}       | Expands to _java_ on on _Linux_                     |
-| {{WINDOWS:java.exe}} | Expands to _java.exe_ on on _Windows_               |
-| java{{WINDOWS:.exe}} | Expands to _java_ on Linux and _java.exe_ _Windows_ |
+| Variable             | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| {{LINUX:java}}       | Expands to _java_ on _Linux_                           |
+| {{WINDOWS:java.exe}} | Expands to _java.exe_ on _Windows_                     |
+| java{{WINDOWS:.exe}} | Expands to _java_ on Linux and _java.exe_ on _Windows_ |
 
 ## Environmental Values
 
@@ -159,7 +159,7 @@ Used to expand to instance and system variables. The same prefix is used for bot
 
 ## IF: Conditional Expansion
 
-The conditional expansion can be use to convert a boolean expression to any given value. The format of the conditional is
+The conditional expansion can be used to convert a boolean expression to any given value. The format of the conditional is
 
 ```
 {{IF:condition?value-if-true:value-if-false}}

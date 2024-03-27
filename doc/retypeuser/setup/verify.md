@@ -5,15 +5,14 @@ icon: verified
 
 # Verify Setup
 
-Make sure that all **BDeploys** services are running on the according physical nodes by starting the created services or by starting them manually.
-To verify that the setup is OK, run on the master:
+Make sure that all **BDeploy** services are running on the corresponding physical nodes by starting the created services or by starting them manually. To verify that the setup is OK, run on the master:
 
 ```
 bdeploy login --add=MyServer --remote=https://localhost:7701/api
 bdeploy remote-master --minions
 ```
 
-This will provide output like this:
+This will provide output similar to the following:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────┐

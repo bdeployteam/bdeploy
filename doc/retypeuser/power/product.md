@@ -5,15 +5,15 @@ icon: container
 
 # Integration of a new product
 
-This chapter is intended for those who want to integrate their own **Product** to be deployed with **BDeploy**. Therefore a couple of YAML files are required. These files describe your product and all its applications together with some additional meta-data. These artifacts are required:
+This chapter is intended for those who want to integrate their own **Product** to be deployed with **BDeploy**. Therefore a couple of YAML files are required. These files describe your product and all its applications together with some additional metadata. These artifacts are required:
 
 [app-info.yaml](#app-infoyaml)
 :::
-&emsp;YAML file to describe one single **Application**. It is required once for every client and server **Application** of the product.
+&emsp;YAML file to describe a single **Application**. It is required once for every client and server **Application** of the product.
 :::
 [product-info.yaml](#product-infoyaml)
 :::
-&emsp;YAML file with meta-data for the whole product.
+&emsp;YAML file with metadata for the whole product.
 :::
 [product-version.yaml](#product-versionyaml)
 :::
@@ -44,7 +44,7 @@ This chapter is intended for those who want to integrate their own **Product** t
 &emsp;A configuration file which references all the YAML files which should be part of a product pre-validation.
 :::
 
-This chapter will walk you through these artifacs, what they are for and how to define them.
+This chapter will walk you through these artifacts, what they are for and how to define them.
 
 !!!info Note
 On the BDeploy Releases page you will find some zipped sample products for each release, see https://github.com/bdeployteam/bdeploy/releases
@@ -172,7 +172,7 @@ runtimeDependencies: <19>
 
 1. A human readable name of the **Application**. Will be displayed in the **Configure Application** pane, and is also used as _default_ name for any process _instantiated_ from this **Application**.
 2. The type of the application, may be `SERVER` or `CLIENT`. `SERVER` applications can be deployed to **Nodes** (including the **master**) and there be started as server processes. `CLIENT` applications in comparison cannot be deployed on a **Node**, but run on a client PC instead.
-3. The supported pooling type for server applications. Supported values are `GLOBAL`, `LOCAL` and `NONE`. `GLOBAL` means that the application is fully poolable and may be installed once (per application version) and used by multiple instance versions of multiple instances. `LOCAL` means that there is limited pooling support, and the application may only be re-used inside a single instance (by multiple instance versions of that instance, e.g. when changin only configuration). `NONE` means that there is no pooling support and the application will be installed fresh per instance version, even if just configuration values changed. This gives some control on how to deploy applications which write data into their installation directory at runtime - which should be avoided of course for better pool-ability. This setting is currently ignored by the client application launcher. Client applications are always globally pooled.
+3. The supported pooling type for server applications. Supported values are `GLOBAL`, `LOCAL` and `NONE`. `GLOBAL` means that the application is fully poolable and may be installed once (per application version) and used by multiple instance versions of multiple instances. `LOCAL` means that there is limited pooling support, and the application may only be re-used inside a single instance (by multiple instance versions of that instance, e.g. when changing only configuration). `NONE` means that there is no pooling support and the application will be installed freshly per instance version, even if just configuration values changed. This gives some control on how to deploy applications which write data into their installation directory at runtime - which should be avoided of course for better pool-ability. This setting is currently ignored by the client application launcher. Client applications are always globally pooled.
 4. List of supported operating systems. This list is solely used to verify during import of the **Product**, that the **Application** actually supports the operating system under which it is listed in the `product-version.yaml`.
 5. Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type **Applications** when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the [Launcher CLI](/experts/cli/#launcher-cli). Paths are interpreted relative to the root folder of the **Application**.
 6. Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type **Applications** are started and kept alive by **BDeploy**. For details, see the list of [processControl](#supported-processcontrol-attributes) attributes.
@@ -200,7 +200,7 @@ Attribute   | Description
 ---         | ---
 `supportedStartTypes` | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`).
 `supportsKeepAlive` | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.
-`noOfRetries` | The number of time **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.
+`noOfRetries` | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.
 `gracePeriod` | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.
 `startupProbe` | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.
 `lifenessProbe` | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a lifeness probe fails. It will only report the failure to the user.
@@ -208,7 +208,7 @@ Attribute   | Description
 ### Supported `parameters` attributes
 
 !!!info Note
-Parameters appear on the final command line in **exact** the order as they appear in the `app-info.yaml` file, regardless of how they are presented in the Web UI, or how they are grouped using the `groupName` attribute. This allows to build complex command lines with positional parameters through `app-info.yaml`.
+Parameters appear on the final command line in the **exact** order as they appear in the `app-info.yaml` file, regardless of how they are presented in the Web UI, or how they are grouped using the `groupName` attribute. This allows to build complex command lines with positional parameters through `app-info.yaml`.
 !!!
 
 === **Attribute**: `id`
@@ -418,7 +418,7 @@ Endpoints definitions are templates which can later on be configured by the user
 
 Attribute   | Description
 ---         | ---
-`id` | The unique ID of the endpoint. This ID can be used by an authorized third-pary application to instruct **BDeploy** to call this endpoint and return the result.
+`id` | The unique ID of the endpoint. This ID can be used by an authorized third-party application to instruct **BDeploy** to call this endpoint and return the result.
 `enabled` | Any [Link Expression](/user/instance/#link-expressions). If the expression evaluates to a non-empty value which does _not_ equal `false`, the endpoint is considered available/enabled and presented to the user both for configuration and usage. This can be used to tie an endpoint to the configuration of a certain parameter, e.g. the server port configuration which will host the endpoint. 
 `type` | Currently `DEFAULT`, `PROBE_STARTUP` and `PROBE_ALIVE` are supported. Endpoints referenced by _startup_ or _lifeness probes_ in the `processControl` section of a server process need to have the according type. If not specified, the `DEFAULT` type is assumed.
 `path` | The path of the endpoint on the target process. **BDeploy** uses this and other parameters (`port`) to construct an URI to the local server.
@@ -441,7 +441,7 @@ Endpoints which are not considered _enabled_ are not required to be configured b
 There is no actual requirement for the file to be named `product-info.yaml`. This is just the default, but you can specify another name on the command line or in build tool integrations.
 !!!
 
-The `product-info.yaml` file describes which **Applications** are part of the final **Product**, as well as some additional **Product** meta-data.
+The `product-info.yaml` file describes which **Applications** are part of the final **Product**, as well as some additional **Product** metadata.
 
 ```yaml product-info.yaml
 name: My Product <1>
@@ -473,7 +473,7 @@ versionFile: my-versions.yaml <11>
 3. The vendor of the product. Displayed in the Web UI and used when installing client applications.
 4. The list of **Applications** which are part of the **Product**. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
 5. Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an **Instance** from the resulting **Product**.
-6. Optioanl: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
+6. Optional: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
 7. A reference to an application template YAML file which defines an [`application-template.yaml`](#application-templateyaml).
 8. A reference to an instance template YAML file which defines an [`instance-template.yaml`](#instance-templateyaml).
 9. A reference to a parameter template YAML file which defines a [`parameter-template.yaml`](#parameter-templateyaml).
@@ -488,7 +488,7 @@ There is no actual requirement for the file to be named `product-version.yaml` a
 
 The `product-version.yaml` file associates **Application** IDs used in the `product-info.yaml` with actual locations on the local disc. This is used to find an import each included **Application** when importing the **Product**.
 
-The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product **Build** . Therfore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually.
+The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product **Build** . Therefore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually.
 
 ```yaml product-version.yaml
 version: "2.1.0.201906141135" <1>
@@ -672,7 +672,7 @@ groups: <7>
 4. [Instance Variables](/user/instance/#instance-variables) can also be defined in an [`instance-variable-template.yaml`](#instance-variable-templateyaml) file externally, and referenced via its ID.
 5. `instanceVariableDefaults` allows to override the value of a previous [Instance Variables](/user/instance/#instance-variables) definition in the same template. This is most useful when applying [`instance-variable-template.yaml`](#instance-variable-templateyaml) files using the `template` syntax in `instanceVariables`. The instance variable template can be shared more easily if instance templates have means of providing distinct values per instance template.
 6. **Process Control Groups** can be pre-configured for an instance template. If an application template later on wishes to be put into a certain **Process Control Group**, the group is created based on the template provided in the instance template. Note that the defaults for a **Process Control Group** in a template are slightly different from the implicit 'Default' **Process Control Group** in **BDeploy**. The defaults are: `startType`: `PARALLEL`, `startWait`: `WAIT`, `stopType`: `PARALLEL`.
-7. A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
+7. A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same physical node.
 8. **Instance Templates** can reference **Application Templates** by their `id`. The **Instance Templates** can further refine an **Application Template** by setting any of the valid application fields in addition to the template reference.
 9. When referencing an application template, it is possible to define _overrides_ for the template variables (`{{X:...}}`) used in the template. Use provided values will **not** be taken into account for this variable when applying the template, instead the _fixed_ value will be used.
 10. A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for **Application Tempaltes** - except for the `id` which is not required.
@@ -842,7 +842,7 @@ Attribute   | Description
 Defined `templateVariables` can be used in each `instances` `name`, `description` and `defaultMapping` `node` attributes. `fixedVariables` on each `instances` value can be used to propagate values further down the line into [`instance-template.yaml`](#instance-templateyaml).
 !!!
 
-### Supported `instances` Attributes
+### Supported `instance` Attributes
 
 Each element provides a description of an instance to be created from a specific product and a specific instance template.
 
@@ -1056,7 +1056,7 @@ Enter a description and a URL. You will then be able to use the [ **Login** ] bu
 ![TEA BDeploy Login](/images/TEA_login.png){width=480}
 :::
 
-Now you can use the [ **Load Groups** ] to fetch a list of existing instance groups from the server to choose from. Finally, use the verity button to check whether the entered information is correct.
+Now you can use the [ **Load Groups** ] to fetch a list of existing instance groups from the server to choose from. Finally, use the verify button to check whether the entered information is correct.
 
 When confirming the build dialog, on first run you will be prompted to login to the Software Repositories **BDeploy** server configured in the TEA **BDeploy** preferences.
 

@@ -95,7 +95,7 @@ After the release has been made, we need to update the documentation on the offi
 
 Prerequisites:
 
-* The **BDeploy** main repository, having the `Release X.X.X` release commit/tag checked out (!).
+* The **BDeploy** main repository, having the `Release X.Y.Z` release commit/tag checked out (!).
 * A clone of the official **BDeploy** homepage repository.
 
 In the **BDeploy** source repository, change into the `doc` directory and run

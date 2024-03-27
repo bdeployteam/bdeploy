@@ -7,12 +7,12 @@ icon: package-dependencies
 
 As you saw before ([`app-info.yaml`](/power/product/#app-infoyaml)), **Applications** can declare dependencies to third-party **Manifests**. These **Manifests** are hosted in **Software Repositories** on the **BDeploy** Server.
 
-To make them available on the server, you need to:
+To make these **Manifests** available on the server, you need to:
 
 - Use `bhive import` to import the directory containing the third-party software into a local **BHive**.
 - Use `bhive push` to push the created **Manifest** to the **Software Repository** of your choice.
 
-Alternatively the Web UI provides a mechanism to upload arbitrary software to **Software Repositories**.
+Alternatively, the Web UI provides a mechanism to upload arbitrary software to **Software Repositories**.
 
 ## Manifest Naming
 
@@ -28,7 +28,7 @@ It can then be referenced by an `app-info.yaml` using the short-hand syntax `my/
 **BDeploy** will always make sure that your products are self contained. This means that [Runtime Dependencies](/power/runtimedependencies/#runtime-dependencies) are packaged with the product data at build time. The result is a product which contains all dependencies. This also means that pushing a product to a target server does not require **any** prerequisites on that target server.
 
 !!!info Note
-Included runtime dependencies will not show up on the target server's Web UI anywhere. Especially there is no [Software Repository](/power/runtimedependencies/#software-repositories) created automatically for any third-party software. It is simply included in the product.
+Included runtime dependencies will not show up on the target server's Web UI anywhere. There is no [Software Repository](/power/runtimedependencies/#software-repositories) created automatically for any third-party software. It is simply included in the product.
 !!!
 
 # Software Repositories
@@ -43,7 +43,7 @@ Included runtime dependencies will not show up on the target server's Web UI any
 
 To upload external software, open a software repository and click on the [ **Upload Software** ] button in the toolbar. Then click on **browse** or **drop files**. You can upload zip packages.
 
-After uploading arbitraty content, you need to specify the **name** of the software, the **version** and the supported **operating systems**.
+After uploading arbitrary content, you need to specify the **name** of the software, the **version** and the supported **operating systems**.
 If you already have a package in a BHive format or a package including a product descriptor containing all of this metadata, the available information will be used automatically.
 
 :::{align=center}
@@ -56,7 +56,7 @@ After all requested information is entered, click **Import** to finally import t
 ![External Software Import](/images/Doc_SoftwareRepoUploadSuccess.png){width=480}
 :::
 
-If the upload was succesful, the software for each operating system will show up.
+If the upload was successful, the software for each operating system will show up.
 
 The available software packages and products can be viewed and **downloaded** if required.
 
@@ -66,10 +66,10 @@ The available software packages and products can be viewed and **downloaded** if
 
 ## Software Repositories Access
 
-**Software Repositories** are created and managed by global administrators. A **Software Repository** is always visible and readable for all users (exception: `CLIENT` permission users). `WRITE` permissions are required to manage the software packages in the repository. To be able to upload software, a user therefore requires `ADMIN` or `WRITE` permissions either globally, or assigned in the **Software Repository Permissions** panel.
+**Software Repositories** are created and managed by global administrators. A **Software Repository** is always visible and readable for all users (exception: `CLIENT` permission users). `WRITE` permissions are required to manage the software packages in the repository. Therefore, to upload software, a user requires `ADMIN` or `WRITE` permissions either globally or assigned in the **Software Repository Permissions** panel.
 
 :::{align=center}
 ![Software Repository Permissions](/images/Doc_SoftwareRepoPermissions.png){width=480}
 :::
 
-The **Software Repository Permissions** panel works very similar to the [**Instance Group Permissions**](/user/instancegroup/#instance-group-access).
+The **Software Repository Permissions** panel works similarly to the [**Instance Group Permissions**](/user/instancegroup/#instance-group-access).

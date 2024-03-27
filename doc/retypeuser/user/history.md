@@ -5,7 +5,7 @@ icon: history
 
 # Instance History
 
-Whenever saving the [Instance Configuration](/user/instance/#instance-configuration), **BDeploy** creates a new **instance version**. Each historic version is avilable from the [Instance History](/user/history/#instance-history). You can **view** all those changes, **who** made them and **when** they were made here.
+Whenever saving the [Instance Configuration](/user/instance/#instance-configuration), **BDeploy** creates a new **instance version**. Each historic version is available from the [Instance History](/user/history/#instance-history). You can **view** all those changes, **who** made them and **when** they were made here.
 
 There are three types of history entries: _Creation_, _Deployment_ and _Runtime_ events. Each event has a title, the corresponding **version**, as well as the **time** the event happened.
 
@@ -55,7 +55,7 @@ _Deployment_ events will show up once you **enabled** them using the toolbar. _D
 
 _Runtime_ events are: `STARTED`, `STOPPED`, `CRASHED`, `RESTARTED`, `CRASHED PERMANENTLY`.
 
-_Runtime_ events will show up once you **enabled** them using the toolbar. _Runtime_ events can be used to track **process** state history. You will be able to see who started/stopped **processes** and when. Events not induced by a user action are shown using _BDeploy System_ as user, e.g. when a **proces** is restarted after a crash.
+_Runtime_ events will show up once you **enabled** them using the toolbar. _Runtime_ events can be used to track **process** state history. You will be able to see who started/stopped **processes** and when. Events not induced by a user action are shown using _BDeploy System_ as user, e.g. when a **process** is restarted after a crash.
 
 !!!info Note
 The **Process ID** and **Exit Code** will also show up given that the information was available at the **moment** the event happened. This can be influenced for instance by a **restart** of **BDeploy** itself, in which case limited information about running **processes** is available.

@@ -7,7 +7,7 @@ icon: project
 
 ## Instance Dashboard
 
-The [Instance Dashboard](/user/instance/#instance-dashboard) is the central location for managing an instance. It provides an overview about all configured **Processes** and on which nodes they are running. Each **Process** is represented by an entry on the according node.
+The [Instance Dashboard](/user/instance/#instance-dashboard) is the central location for managing an instance. It provides an overview about all configured **Processes** and on which nodes they are running. Each **Process** is represented by an entry on the respective node.
 
 If the instance has no active version yet, the dashboard is empty and shows a shortcut to the [Instance Configuration](/user/instance/#instance-configuration) instead.
 
@@ -209,7 +209,7 @@ The **configuration files** of an **Instance** can be compared with the original
 
 New configuration files can be be created using the [ **+** ] button. Prompt for a file name and an optional initial content to upload. When dropping a file onto the drop zone, the filename is updated automatically to match the dropped file.
 
-The [ **Edit** ] button on each file can be used to edt the content of the file using an online rich editor.
+The [ **Edit** ] button on each file can be used to edit the content of the file using an online rich editor.
 
 :::{align=center}
 ![Edit Instance Configuration Files](/images/Doc_InstanceConfigFilesEdit.png){width=480}
@@ -246,7 +246,7 @@ Changing the version can be done by clicking on the [ **Upgrade** ] or [ **Downg
 :::
 
 !!!info Note
-Changing the **product version** will never change the **Configuration Files** of the **Instance**. In case configuration file templates change from one product version to the other, an update hint will be shown. You can then manully update configuration files as needed, see chapter [Configuration Files](/user/instance/#configuration-files).
+Changing the **product version** will never change the **Configuration Files** of the **Instance**. In case configuration file templates change from one product version to the other, an update hint will be shown. You can then manually update configuration files as needed, see chapter [Configuration Files](/user/instance/#configuration-files).
 !!!
 
 ### Banner Message
@@ -339,7 +339,7 @@ The [ **Export CSV** ] action allows to export a CSV list of all ports configure
 
 **Processes** can be grouped into **Process Control Groups**. Those groups dictate the order in which processes are started and stopped, as well as whether process startup is awaited - or not.
 
-Each **Process Control Group** has configurable behavior for contained processes regarding starting and stopping. Groups are processed in the configured order when starting, and the reverse configured order when stopping. Processes **within** each group are processed according to the groups configuration. Each group can have configuration for startup and stop behaviour.
+Each **Process Control Group** has configurable behavior for contained processes regarding starting and stopping. Groups are processed in the configured order when starting, and the reversed configured order when stopping. Processes **within** each group are processed according to the groups configuration. Each group can have configuration for startup and stop behaviour.
 
 Possible values for the **Start Type** and **Stop Type** handling configuration are:
 

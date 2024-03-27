@@ -47,14 +47,14 @@ The Client ID and Client Secret are used to authenticate with the OpenID Connect
 
 ### LDAP Auth.
 
-On the **LDAP Auth** tab, you can configure a list of LDAP servers which are queried when authenticating a user. Use drag and drop to to specify the sort order in which the LDAP servers are queried for users that log on.
+On the **LDAP Auth** tab, you can configure a list of LDAP servers which are queried when authenticating a user. Use drag and drop to specify the sort order in which the LDAP servers are queried for users that log on.
 
 :::{align=center}
 ![BDeploy LDAP Servers](/images/Doc_Admin_Ldap_Servers.png){width=480}
 :::
 
 !!!info Tip
-Technical experts can use the _Check_ action to test a single LDAP server entry: **BDeploy** tries to establish a connection to the configured server. Some logging information, esp. Java Exceptions are shown in a popup window. Simmilarly, the _Test Auth._ action can be used to trace the entire authentication of a user.
+Technical experts can use the _Check_ action to test a single LDAP server entry: **BDeploy** tries to establish a connection to the configured server. Some logging information, especially Java Exceptions, are shown in a popup window. Similarly, the _Test Auth._ action can be used to trace the entire authentication of a user.
 !!!
 
 **BDeploy** uses simple bind to authenticate users. First, a simple bind is made with the configured _User_. This user must have permissions to list other users that should be able to log into **BDeploy**. This bind is used to query for a user where the `Account User Field` matches the user name to be authenticated. This can be any field like `user`, `sAMAccountName`, or even `mail` if you want users to log on using their E-Mail Address. Once the user to log on is found, it's distinguished name is used to perform another simple bind using the provided password. Once this succeeds the user is authenticated and an according record is created in **BDeploy**. From that point on, permissions can be granted to this user.
@@ -175,7 +175,7 @@ Permission | Meaning
 **WRITE** | The **WRITE** permission allows a user to maintain the contents of an **Instance Group** without modifying the **Instance Group** itself. The **WRITE** permission contains the **READ** permission. Users with global **WRITE** permission can maintain all **Instance Groups**.
 **ADMIN** | The **ADMIN** permission contains the **WRITE** and **READ** permission and allows full access to an **Instance Group**. Users with global **ADMIN** permission have full access to all **Instance Groups** and additionally to the **BDeploy** system configuration.
 
-The [ **Edit User** ] opens a popup for editing the main user properties and also for changing the password.
+The [ **Edit User** ] opens a popup for editing the main user properties, as well as changing the password.
 
 :::{align=center}
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Edit.png){width=480}
@@ -183,7 +183,7 @@ The [ **Edit User** ] opens a popup for editing the main user properties and als
 
 ## User Groups
 
-**BDeploy** supports user groups. Their purpose is to simplify security management. By adding users to groups, administrators can efficiantly manage access levels for multiple users in one place. All the permissions of an active user group will propagate to its users.
+**BDeploy** supports user groups. Their purpose is to simplify security management. By adding users to groups, administrators can efficiently manage access levels for multiple users in one place. All the permissions of an active user group will propagate to its users.
 
 **User Groups** are managed the same way as **User Accounts**
 
