@@ -9,6 +9,8 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.Threads;
 
 /**
@@ -23,7 +25,13 @@ public class BaseDialog extends JFrame {
 
     static {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else {
+                // looks a little ... sub-optimal but prevents GTK high contrast legacy themes from
+                // destroying the UI color wise.
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            }
         } catch (Exception e) {
             throw new IllegalStateException("Cannot set system look&feel", e);
         }
