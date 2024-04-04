@@ -170,6 +170,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         @Help(value = "Run the launcher in unattended mode where no splash screen and error dialog is shown.", arg = false)
         boolean unattended() default false;
+
+        @Help(value = "Write log output to stdout instead of the log file.", arg = false)
+        boolean consoleLog() default false;
     }
 
     /** The currently running launcher version */
@@ -489,6 +492,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Check where to put local data.
         rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
+
+        // setup logging into files.
+        if (!config.consoleLog()) {
+            // always log into logs directory.
+            LauncherLoggingContextDataProvider.setLogDir(rootDir.resolve("logs").toAbsolutePath().normalize().toString());
+            LauncherLoggingContextDataProvider.setLogFileBaseName("launcher");
+        }
 
         // Check for inconsistent file and folder permissions
         Path versionsFile = rootDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve("version.properties");

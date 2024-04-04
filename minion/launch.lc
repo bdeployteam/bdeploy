@@ -250,6 +250,7 @@ java configuration Launcher {
 	argument "launcher";
 	argument "--launch=${file_prompt:.bdeploy file to launch}";
 	argument "--homeDir=${workspace_loc}/runtime/launcher";
+	argument "--consoleLog";
 	
 //	vm-argument "-Dsun.java2d.debugfonts=true";
 //	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
@@ -264,6 +265,7 @@ java configuration Browser {
 	argument "-v";
 	argument "browser";
 	argument "--homeDir=${workspace_loc}/runtime/launcher";
+	argument "--consoleLog";
 }
 
 java configuration VerifyLauncher : minion-base {

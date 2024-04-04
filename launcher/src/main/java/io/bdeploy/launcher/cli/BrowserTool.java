@@ -23,6 +23,9 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
         @Help("Directory where the launcher stores the hive as well as all applications.")
         String homeDir();
 
+        @Help(value = "Write log output to stdout instead of the log file.", arg = false)
+        boolean consoleLog() default false;
+
     }
 
     @Override
@@ -30,6 +33,12 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
         Path rootDir = PathHelper.ofNullableStrig(config.homeDir());
         if (rootDir == null) {
             throw new IllegalStateException("Missing --homeDir argument");
+        }
+
+        if (!config.consoleLog()) {
+            // always log into logs directory.
+            LauncherLoggingContextDataProvider.setLogDir(rootDir.resolve("logs").toAbsolutePath().normalize().toString());
+            LauncherLoggingContextDataProvider.setLogFileBaseName("browser");
         }
 
         // Try to get a user-area if the root is readonly
