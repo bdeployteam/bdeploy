@@ -1,11 +1,15 @@
 package io.bdeploy.launcher.cli.ui.browser;
 
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
@@ -14,6 +18,8 @@ import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
  * A worker that launches the application
  */
 public class AppLauncher extends SwingWorker<Object, Void> {
+
+    private static final Logger log = LoggerFactory.getLogger(AppLauncher.class);
 
     private final Path rootDir;
     private final List<String> args;
@@ -35,13 +41,9 @@ public class AppLauncher extends SwingWorker<Object, Void> {
         command.add(launchFile.toFile().getAbsolutePath());
         command.addAll(args);
         ProcessBuilder b = new ProcessBuilder(command);
-        Process process = b.start();
-
-        // We are not interested in the output
-        process.getErrorStream().close();
-        process.getInputStream().close();
-        process.getOutputStream().close();
-
+        b.redirectError(Redirect.DISCARD);
+        b.redirectOutput(Redirect.DISCARD);
+        b.start();
         return null;
     }
 
@@ -54,6 +56,7 @@ public class AppLauncher extends SwingWorker<Object, Void> {
             JOptionPane.showMessageDialog(null, "Failed to launch application: " + ie.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            log.warn("Failed to launch application", ex);
             JOptionPane.showMessageDialog(null, "Failed to launch application: " + ex.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
