@@ -37,6 +37,8 @@ import { PortsComponent } from './components/instance-settings/ports/ports.compo
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
+import { LogDataBulkManipulationComponent } from './components/log-data-bulk-manipulation/log-data-bulk-manipulation.component';
+import { LogDataViewerComponent } from './components/log-data-viewer/log-data-viewer.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
 import { ProcessNativesComponent } from './components/process-natives/process-natives.component';
@@ -141,6 +143,11 @@ const INSTANCES_ROUTES: Route[] = [
   {
     path: 'data-files/bulk-manip',
     component: DataFilesBulkManipulationComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'log-files/bulk-manip',
+    component: LogDataBulkManipulationComponent,
     canActivate: [ScopedWriteGuard],
   },
   {
@@ -256,6 +263,12 @@ const INSTANCES_ROUTES: Route[] = [
     component: AddDataFileComponent,
     canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'log-files/:node/:file/view',
+    component: LogDataViewerComponent,
+    canActivate: [ScopedReadGuard],
+    data: { max: true },
   },
 ];
 

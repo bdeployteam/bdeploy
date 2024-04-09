@@ -133,6 +133,14 @@
 
   <app-main-nav-button
     [visible]="!!(areas.instanceContext$ | async)"
+    icon="folder_special"
+    text="Log Files"
+    [collapsed]="!scope.expanded"
+    [route]="['/instances', 'log-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
+    [visible]="!!(areas.instanceContext$ | async)"
     icon="history"
     text="Instance History"
     [collapsed]="!scope.expanded"

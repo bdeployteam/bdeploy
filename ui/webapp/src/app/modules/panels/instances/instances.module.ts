@@ -64,6 +64,8 @@ import { ProductUpdateComponent } from './components/instance-settings/product-u
 import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
+import { LogDataBulkManipulationComponent } from './components/log-data-bulk-manipulation/log-data-bulk-manipulation.component';
+import { LogDataViewerComponent } from './components/log-data-viewer/log-data-viewer.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ParamDescCardComponent } from './components/param-desc-card/param-desc-card.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
@@ -112,6 +114,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     AppTemplateNameComponent,
     EditProcessOverviewComponent,
     ConfigureProcessComponent,
+    LogDataBulkManipulationComponent,
     InstanceTemplatesComponent,
     TemplateMessageDetailsComponent,
     ConfigProcessHeaderComponent,
@@ -131,6 +134,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     EditorComponent,
     CompareComponent,
     DataFileViewerComponent,
+    LogDataViewerComponent,
     PortsComponent,
     ConfigureEndpointsComponent,
     PortShiftComponent,

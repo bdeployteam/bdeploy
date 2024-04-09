@@ -214,7 +214,15 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
     @Override
     public List<RemoteDirectoryEntry> getDataDirectoryEntries(String instanceId) {
-        List<RemoteDirectoryEntry> result = new ArrayList<>();
+        return getDirectoryEntires(instanceId, SpecialDirectory.DATA);
+    }
+
+    @Override
+    public List<RemoteDirectoryEntry> getLogDataDirectoryEntries(String instanceId) {
+        return getDirectoryEntires(instanceId, SpecialDirectory.LOG_DATA);
+    }
+
+    private List<RemoteDirectoryEntry> getDirectoryEntires(String instanceId, SpecialDirectory dir) {
         InstanceNodeManifest newest = findInstanceNodeManifest(instanceId);
         if (newest == null) {
             throw new WebApplicationException("Cannot find instance " + instanceId, Status.NOT_FOUND);
@@ -230,8 +238,9 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(),
                 InstanceNodeManifest.of(hive, activeKey), ts);
 
-        Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
+        Path dataRoot = inc.getDeploymentPathProvider().getAndCreate(dir);
 
+        List<RemoteDirectoryEntry> result = new ArrayList<>();
         try (Stream<Path> paths = Files.walk(dataRoot, FileVisitOption.FOLLOW_LINKS)) {
             paths.filter(Files::isRegularFile).forEach(f -> {
                 RemoteDirectoryEntry entry = new RemoteDirectoryEntry();
@@ -240,7 +249,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
                 entry.path = PathHelper.separatorsToUnix(dataRoot.relativize(f));
                 entry.lastModified = asFile.lastModified();
                 entry.size = asFile.length();
-                entry.root = SpecialDirectory.DATA;
+                entry.root = dir;
                 entry.id = instanceId;
                 entry.tag = activeKey.getTag(); // providing the tag of the active version here
 

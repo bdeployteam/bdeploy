@@ -60,6 +60,17 @@ public class DeploymentPathProvider {
     }
 
     /**
+     * @param dir the directory to get
+     * @return the directory which is guaranteed to exist.
+     * @see #get(SpecialDirectory)
+     */
+    public Path getAndCreate(SpecialDirectory dir) {
+        Path p = get(dir);
+        PathHelper.mkdirs(p);
+        return p;
+    }
+
+    /**
      * @param dir the {@link SpecialDirectory} to look up.
      * @return the {@link Path} to the {@link SpecialDirectory}
      */
@@ -87,14 +98,4 @@ public class DeploymentPathProvider {
         throw new IllegalArgumentException("Unhandled special directory: " + dir);
     }
 
-    /**
-     * @param dir the directory to get
-     * @return the directory which is guaranteed to exist.
-     * @see #get(SpecialDirectory)
-     */
-    public Path getAndCreate(SpecialDirectory dir) {
-        Path p = get(dir);
-        PathHelper.mkdirs(p);
-        return p;
-    }
 }

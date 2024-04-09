@@ -233,7 +233,7 @@ describe('Instance Data Files Tests', () => {
     });
 
     cy.inMainNavFlyin('app-data-files-bulk-manipulation', () => {
-      cy.get('button[data-cy="Delete Selected Data Files"]').should('be.enabled').click();
+      cy.get('button[data-cy="Delete Selected Files"]').should('be.enabled').click();
     });
 
     cy.contains('app-bd-notification-card', 'Delete 1 data files?').within(() => {

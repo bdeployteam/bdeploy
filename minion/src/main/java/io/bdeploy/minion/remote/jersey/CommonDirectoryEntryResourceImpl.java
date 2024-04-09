@@ -181,7 +181,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         });
 
         // Load and attach metadata to give the file a nice name
-        var contentDisposition = ContentDisposition.type("attachement").fileName("DataFiles.zip").build();
+        var contentDisposition = ContentDisposition.type("attachement").fileName("Files.zip").build();
         responseBuilder.header("Content-Disposition", contentDisposition);
         return responseBuilder.build();
     }

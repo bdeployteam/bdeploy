@@ -74,6 +74,10 @@ public interface ProcessResource {
     @Path("/dataDirSnapshot")
     public List<RemoteDirectory> getDataDirSnapshot();
 
+    @GET
+    @Path("/logDataDirSnapshot")
+    public List<RemoteDirectory> getLogDataDirSnapshot();
+
     @POST
     @Path("/{appId}/stdin")
     @Consumes(MediaType.TEXT_PLAIN)

@@ -1,0 +1,18 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Viewing {{ (file$ | async)?.path }}" [panel]="true">
+    <div class="flex-auto"></div>
+    <app-bd-button text="Download File" tooltip="left" icon="cloud_download" (click)="doDownload()"></app-bd-button>
+    <app-bd-button
+      text="Follow Changes"
+      tooltip="left"
+      icon="sync"
+      [isToggle]="true"
+      [toggle]="follow$ | async"
+      (toggleChange)="follow$.next($event)"
+    ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-terminal [content$]="content$"></app-bd-terminal>
+  </app-bd-dialog-content>
+</app-bd-dialog>

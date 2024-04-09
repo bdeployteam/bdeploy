@@ -69,6 +69,14 @@ public interface NodeDeploymentResource {
     public List<RemoteDirectoryEntry> getDataDirectoryEntries(@QueryParam("u") String instanceId);
 
     /**
+     * @param instanceId the instance ID to fetch LOG_DATA directory content for
+     * @return a list of the entries of the LOG_DATA directory.
+     */
+    @GET
+    @Path("/logDataDir")
+    public List<RemoteDirectoryEntry> getLogDataDirectoryEntries(@QueryParam("u") String instanceId);
+
+    /**
      * Add/edit/delete files in the DATA directory.
      */
     @PUT
