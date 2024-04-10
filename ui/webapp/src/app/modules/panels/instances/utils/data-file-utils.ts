@@ -1,5 +1,5 @@
 import { Base64 } from 'js-base64';
-import { DataFilePath, FileListEntry } from 'src/app/modules/primary/instances/services/data-files.service';
+import { FileListEntry, FilePath } from 'src/app/modules/primary/instances/services/files.service';
 
 export function encodeDataFilePath(dfp: { minion: string; path: string }): string {
   return Base64.encode(JSON.stringify({ minion: dfp.minion, path: dfp.path }));
@@ -13,7 +13,7 @@ export function decodeDataFilePath(encodedPath: string): { minion: string; path:
   }
 }
 
-export function getDescendants(dfp: DataFilePath): DataFilePath[] {
+export function getDescendants(dfp: FilePath): FilePath[] {
   if (!dfp) {
     return null;
   }
@@ -22,7 +22,7 @@ export function getDescendants(dfp: DataFilePath): DataFilePath[] {
   return arr;
 }
 
-export function findDataFilePath(dfp: DataFilePath, path: string): DataFilePath {
+export function findDataFilePath(dfp: FilePath, path: string): FilePath {
   if (!dfp) {
     return null;
   }
@@ -32,7 +32,7 @@ export function findDataFilePath(dfp: DataFilePath, path: string): DataFilePath 
   return dfp.children.map((child) => findDataFilePath(child, path)).find((i) => !!i);
 }
 
-export function toFileList(dfp: DataFilePath): FileListEntry[] {
+export function toFileList(dfp: FilePath): FileListEntry[] {
   if (dfp.children.length === 0) {
     return [dfp];
   }
@@ -42,9 +42,9 @@ export function toFileList(dfp: DataFilePath): FileListEntry[] {
 export function constructDataFilePaths(
   minion: string,
   entries: FileListEntry[],
-  selectPath: (p: DataFilePath) => void,
-): DataFilePath {
-  const root: DataFilePath = {
+  selectPath: (p: FilePath) => void,
+): FilePath {
+  const root: FilePath = {
     minion,
     name: minion,
     path: '',
@@ -65,7 +65,7 @@ export function constructDataFilePaths(
   return root;
 }
 
-function calculateSizeAndLastModifiedDate(node: DataFilePath) {
+function calculateSizeAndLastModifiedDate(node: FilePath) {
   if (node.entry) return; // for file lastModified and size are already set
   node.children.forEach((child) => calculateSizeAndLastModifiedDate(child));
   node.lastModified = Math.max(...node.children.map((child) => child.lastModified));
@@ -74,15 +74,15 @@ function calculateSizeAndLastModifiedDate(node: DataFilePath) {
 
 function addNode(
   minion: string,
-  parent: DataFilePath,
+  parent: FilePath,
   entry: FileListEntry,
   paths: string[],
-  selectPath: (p: DataFilePath) => void,
+  selectPath: (p: FilePath) => void,
 ) {
   const name = paths.shift();
   const path = [parent.path, name].filter((i) => !!i).join('/');
   if (paths.length === 0) {
-    const leaf: DataFilePath = {
+    const leaf: FilePath = {
       crumbs: [...parent.crumbs],
       minion,
       name,
@@ -98,7 +98,7 @@ function addNode(
     return;
   }
 
-  let node: DataFilePath = parent.children.find((node) => node.path === path);
+  let node: FilePath = parent.children.find((node) => node.path === path);
   if (!node) {
     node = {
       crumbs: [...parent.crumbs],
@@ -122,7 +122,7 @@ function addNode(
   Folders are sorted by names asc
   Files are sorted by lastModified desc
   */
-function sortDataFiles(dfp: DataFilePath) {
+function sortDataFiles(dfp: FilePath) {
   dfp.children.sort((a, b) => {
     const aIsFolder = a.children.length;
     const bIsFolder = b.children.length;

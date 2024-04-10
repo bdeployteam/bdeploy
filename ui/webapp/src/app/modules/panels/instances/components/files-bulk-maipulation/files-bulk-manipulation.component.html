@@ -1,0 +1,25 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="File Bulk Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="flex flex-col gap-2.5">
+      <div><strong>{{ filesBulkService.selectedFiles.length }}</strong> files selected</div>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!filesBulkService.selection.length || (deleting$ | async)"
+        text="Download Selected Files"
+        icon="cloud_download"
+        (click)="filesBulkService.downloadFiles(filesBulkService.selectedFiles)"
+      ></app-bd-button>
+      <app-bd-button
+        *ngIf="showDelete"
+        [collapsed]="false"
+        [disabled]="!filesBulkService.selection.length || (deleting$ | async)"
+        [loadingWhen$]="deleting$"
+        text="Delete Selected Files"
+        icon="delete"
+        (click)="onDelete()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

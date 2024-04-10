@@ -1,15 +1,24 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Log Files">
+  <app-bd-dialog-toolbar header="{{isDataFiles?'Data':'Log'}} Files">
     <div class="flex-auto"></div>
     <ng-container *ngIf="cfg.isCentral$ | async">
       <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <app-bd-panel-button
+      *ngIf="isDataFiles"
+      icon="add"
+      text="Add File..."
+      [collapsed]="false"
+      color="primary"
+      [disabled]="(loading$ | async) || (noactive$ | async) || !(authService.isCurrentScopeWrite$ | async)"
+      [route]="['panels', 'instances', 'data-files', 'add']"
+    ></app-bd-panel-button>
+    <app-bd-panel-button
       #bulkMode
       icon="library_add_check"
       text="Bulk Manipulation"
-      [route]="['panels', 'instances', 'log-files', 'bulk-manip']"
+      [route]="['panels', 'instances', 'files', 'bulk-manip']"
       tooltip="below"
       [disabled]="(loading$ | async) || (noactive$ | async)"
     ></app-bd-panel-button>
@@ -25,7 +34,8 @@
   <app-bd-dialog-content>
     <ng-container *ngIf="noactive$ | async; else active">
       <app-bd-no-data
-        >The current instance does not have an active version yet. Log data is not yet available.</app-bd-no-data
+        >The current instance does not have an active version yet. {{isDataFiles?'Data':'Log'}} files are not yet
+        available.</app-bd-no-data
       >
     </ng-container>
     <ng-template #active>
@@ -48,7 +58,7 @@
           [searchable]="false"
           (recordClick)="onClick($event)"
           [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
-          [(checked)]="dataFilesBulkService.selection"
+          [(checked)]="filesBulkService.selection"
         >
           <app-bd-no-data>
             <p>No data available. This either means that the instance has no active version, or no files exist.</p>
@@ -71,7 +81,7 @@
           <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
           <strong>{{ instance?.managedServer?.hostName }}</strong>
         </p>
-        <p>Synchronize the instance to view log data.</p>
+        <p>Synchronize the instance to view {{isDataFiles?'data':'log'}} files.</p>
         <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
       </app-bd-no-data>
     </ng-template>

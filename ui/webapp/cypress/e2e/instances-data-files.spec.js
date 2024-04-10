@@ -133,7 +133,7 @@ describe('Instance Data Files Tests', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_DataFilesView');
 
-    cy.inMainNavFlyin('app-data-file-viewer', () => {
+    cy.inMainNavFlyin('app-file-viewer', () => {
       cy.pressToolbarButton('Edit');
     });
 
@@ -147,7 +147,7 @@ describe('Instance Data Files Tests', () => {
       cy.pressToolbarButton('Back');
     });
 
-    cy.inMainNavFlyin('app-data-file-viewer', () => {
+    cy.inMainNavFlyin('app-file-viewer', () => {
       cy.pressToolbarButton('Close');
     });
   });
@@ -173,7 +173,7 @@ describe('Instance Data Files Tests', () => {
       cy.contains('tr', 'test.txt').should('exist').click();
     });
 
-    cy.inMainNavFlyin('app-data-file-viewer', () => {
+    cy.inMainNavFlyin('app-file-viewer', () => {
       cy.pressToolbarButton('Edit');
     });
 
@@ -183,7 +183,7 @@ describe('Instance Data Files Tests', () => {
     });
 
     cy.waitUntilContentLoaded();
-    cy.inMainNavFlyin('app-data-file-viewer', () => {
+    cy.inMainNavFlyin('app-file-viewer', () => {
       cy.pressToolbarButton('Edit');
     });
 
@@ -232,11 +232,11 @@ describe('Instance Data Files Tests', () => {
       });
     });
 
-    cy.inMainNavFlyin('app-data-files-bulk-manipulation', () => {
+    cy.inMainNavFlyin('app-files-bulk-manipulation', () => {
       cy.get('button[data-cy="Delete Selected Files"]').should('be.enabled').click();
     });
 
-    cy.contains('app-bd-notification-card', 'Delete 1 data files?').within(() => {
+    cy.contains('app-bd-notification-card', 'Delete 1 files?').within(() => {
       cy.fillFormInput('confirm', 'I UNDERSTAND');
       cy.get('button[data-cy="Yes"]').should('be.enabled').click();
       cy.contains('tr', 'test.txt').should('not.exist');
