@@ -544,7 +544,7 @@ startParameters: <5>
 ```
 
 1. An **Application Template** must have an ID. This can be used to reference it from an **Instance Template**.
-2. `name` is the value user sees when he chooses the template in UI. `processName` is the name of the resulting process configuration.
+2. `name` is the value user sees when they choose the template in UI. `processName` is the name of the resulting process configuration.
 3. The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a **Process Control Group** with this name exists in the instance configuration. **Process Control Groups** can be pre-configured in an [`instance-template.yaml`](#instance-templateyaml).
 4. A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
 5. A template can define arbitrary process control parameters to further control the default process control settings.
@@ -575,7 +575,7 @@ Attribute   | Description
 `name` | The user visible name of the variable, used when querying user input while applying the template.
 `description` | Further detailed description of the template variable, explaining to the user the purpose of the variable.
 `defaultValue` | An optional default value which is pre-filled when querying the user for template variable values.
-`suggestedValues` | A list of values which will be suggested to the user once he begins providing a value for this variable.
+`suggestedValues` | A list of values which will be suggested to the user once they begin providing a value for this variable.
 
 !!!info Note
 Defined `templateVariables` can be used in the `name` of the application template, as well as in each `startParameter`s `value` attribute.

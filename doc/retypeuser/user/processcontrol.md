@@ -73,7 +73,7 @@ The **Start Type** of a **Process** can be configured in the **Process Configura
 
 It is a common requirement that certain **Processes** of an **Instance** should be automatically started whenever the **BDeploy** server itself is started. To accomplish that, the _Automatic Startup_ flag of the **Instance** must be set. This can be done in the [Instance Configuration](/user/instance/#instance-configuration). Additionally the **start type** of the **Process** must set to `INSTANCE`. This can be done in the **parameter configuration** of the **Process**.
 
-**Processes** that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (dropping a database, deleting files) should be configured with the start type `MANUAL_CONFIRM`. Doing that results in an additional popup dialog that enforces the user to enter the name of the **Process** before it is started. The idea is, that the user takes an additional moment to ensure that he is really starting the desired **Process**.
+**Processes** that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (dropping a database, deleting files) should be configured with the start type `MANUAL_CONFIRM`. Doing that results in an additional popup dialog that enforces the user to enter the name of the **Process** before it is started. The idea is, that the user takes an additional moment to ensure that they are really starting the desired **Process**.
 
 :::{align=center}
 ![Manual Confirmation On Startup](/images/Doc_DashboardProcessManualConfirm.png){width=480}
