@@ -357,7 +357,7 @@ _Default:_ `STRING`
 
 _Mandatory:_ no
 
-_Description:_ The id of a custom editor to be used when editing this parameter through the **BDeploy** web UI. Custom editors can be contributed by [Plugins](/experts/system/#plugins) which are either globally installed in the **BDeploy** server, or contributed dynamically by the product.
+_Description:_ The id of a custom editor to be used when editing this parameter through the **BDeploy** Web UI. Custom editors can be contributed by [Plugins](/experts/system/#plugins) which are either globally installed in the **BDeploy** server, or contributed dynamically by the product.
 
 === **Attribute**: `condition`
 _Default:_
