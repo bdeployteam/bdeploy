@@ -5,7 +5,7 @@ icon: history
 
 # Instance History
 
-Whenever saving the [Instance Configuration](/user/instance/#instance-configuration), **BDeploy** creates a new **instance version**. Each historic version is available from the [Instance History](/user/history/#instance-history). You can **view** all those changes, **who** made them and **when** they were made here.
+Whenever saving the [Instance Configuration](/user/instance/#instance-configuration), **BDeploy** creates a new **instance version**. Each historic version is available from the [Instance History](/user/history/#instance-history). Here you can **view** all those changes and see **who** made them and **when** they were made.
 
 There are three types of history entries: _Creation_, _Deployment_ and _Runtime_ events. Each event has a title, the corresponding **version**, as well as the **time** the event happened.
 
@@ -14,21 +14,21 @@ _Deployments_ and _Runtime_ events are not displayed by default. You can enable 
 !!!
 
 !!!info Note
-If you haven't made any changes, only one entry will be shown: _Version 1: Created_. This is the initial (empty) **instance version**.
+If you have not made any changes, only one entry will be shown: _Version 1: Created_. This is the initial (empty) **instance version**.
 !!!
 
 :::{align=center}
-![Instance history](/images/Doc_History.png){width=480}
+![Instance History](/images/Doc_History.png){width=480}
 :::
 
 To see details for a certain **history entry**, click it. This will open the details panel. This panel offers different kinds of information and actions depending on the type of history entry.
 
-_Creation_ events are special in that they represent a specific **instance version**, and allow you to **install**, **activate** and **compare** them to other **instance versions**. Given the proper permissions, you can also **delete** them - which will remove this specific version completely from the server, no restoring possible.
+_Creation_ events are special in that they represent a specific **instance version** and allow you to **install**, **activate** and **compare** them to other **instance versions**. Given the proper permissions, you can also **delete** them - which will remove this specific version completely from the server, **no restoring possible**.
 
 **Instance versions** can also be **exported** from the details. The export produces a _ZIP_ file which contains **all** data that represents an instance version. This can be used to create a new **instance version** on a **different** instance from the current configuration of **this** instance by importing the _ZIP_ in the [Instance Configuration](/user/instance/#instance-configuration) of the other instance.
 
 :::{align=center}
-![History Entry](/images/Doc_HistoryEntry.png){width=480}
+![Instance History Entry Details](/images/Doc_HistoryEntry.png){width=480}
 :::
 
 You can compare either to the **current** version, the **active** version or any chosen version available from the history.
@@ -48,7 +48,7 @@ _Deployment_ events are: `INSTALLED`,`ACTIVATED`,`DEACTIVATED`,`UNINSTALLED`.
 _Deployment_ events will show up once you **enabled** them using the toolbar. _Deployment_ events allow tracking of who deployed what and when.
 
 :::{align=center}
-![Runtime Events](/images/Doc_HistoryDeployment.png){width=480}
+![Creation and Deployment Events](/images/Doc_HistoryDeployment.png){width=480}
 :::
 
 ## Runtime Events
@@ -62,5 +62,5 @@ The **Process ID** and **Exit Code** will also show up given that the informatio
 !!!
 
 :::{align=center}
-![Runtime Events](/images/Doc_HistoryRuntime.png){width=480}
+![Creation and Runtime Events](/images/Doc_HistoryRuntime.png){width=480}
 :::

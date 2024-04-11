@@ -16,7 +16,7 @@ On the `CENTRAL` server side:
 
 On The `MANAGED` server side:
 
-- Creation and editing of **Instance Group** (title, description, logo, etc.) is not possible locally. This has to happen on the `CENTRAL` server, as information **must** match.
+- Creation and editing of **Instance Groups** (title, description, logo, etc.) is not possible locally. This has to happen on the `CENTRAL` server, as information **must** match.
 - Creation and editing of **Instances** (applications, parameters, etc.) is possible just the same as with a `STANDALONE` server. New data will be synchronized to the `CENTRAL` server the next time the `CENTRAL` server requests such a synchronization.
 
 !!!info Note
@@ -25,7 +25,7 @@ On The `MANAGED` server side:
 
 ## Attaching an Instance Group to a Central Server
 
-You will notice that a `MANAGED` server will greet slightly different on the welcome page. Instead of a [ **Add Instance Group** ] button, there is a [ **Link Instance Group** ] button, and the text reads accordingly.
+You will notice that a `MANAGED` server will greet slightly differently on the welcome page. Instead of an [ **Add Instance Group** ] button, there is a [ **Link Instance Group** ] button.
 
 :::{align=center}
 ![Managed Server Welcome Page](/images/Doc_ManagedEmpty.png){width=480}
@@ -35,7 +35,7 @@ Attaching an **Instance Group** is a two way operation.
 
 - The `MANAGED` server needs to share some details about itself with the `CENTRAL` server. This happens either via drag & drop of an element from the `MANAGED` servers Web UI to the `CENTRAL` servers Web UI, or manually by downloading the `MANAGED` servers information and dropping that file to the `CENTRAL` servers Web UI.
 - On the `CENTRAL` server, you will choose the **Instance Group** which should be attached. The **Instance Group** _must_ exist on the `CENTRAL` server. If the `MANAGED` server happens to have an **Instance Group** of the same name already (i.e. if the `MANAGED` server was migrated from `STANDALONE`), this is perfectly fine - **Instances** in this **Instance Group** will not be lost, they will be attached to the `CENTRAL` server instead.
-- The `CENTRAL` server will try to contact the `MANAGED` server. You can provide an alternate URL to accomodate for hostname differences (different DNS, NAT, VPN, etc.) before it does so.
+- The `CENTRAL` server will try to contact the `MANAGED` server. You can provide an alternative URL to accomodate for hostname differences (different DNS, NAT, VPN, etc.) before it does so.
 - Once contacted, the `CENTRAL` server will push the **Instance Group** meta-data to the `MANAGED` server, as the information on the `CENTRAL` is the single source of **Instance Group** configuration.
 - Finally, the `CENTRAL` server will fetch all potentially existing **Instance** information from the `MANAGED` server. This is only relevant if the `MANAGED` server was migrated from `STANDALONE` mode before.
 
@@ -60,7 +60,7 @@ Click the [ **Link Managed Server** ] button to initiate attaching a `MANAGED` s
 You will be prompted to drop `MANAGED` server information on a drop-zone. You can find the counterpiece on the `MANAGED` server. To initiate attaching on the `MANAGED` server, click the [ **Link Instance Group** ] button on the main **Instance Group** page (which is the initial start page of the Web UI). This will open the _Link Instance Group_ panel.
 
 :::{align=center}
-![Link Instance Group](/images/Doc_ManagedLinkGroup.png){width=480}
+![Link Instance Group Panel](/images/Doc_ManagedLinkGroup.png){width=480}
 :::
 
 The `MANAGED` server provides the card to drag to the counterpiece on the `CENTRAL` server. Drag it over to fill out information on the `CENTRAL` server automatically.
@@ -72,13 +72,13 @@ Alternatively, use the _Manual and Offline Linking_ panel to download the inform
 Once the information is dropped on the according drop zone on the `CENTRAL` server, it will fill out the information. Adapt the URL if required and fill in a human readable description of the `MANAGED` server. The URL should be reachable from the `CENTRAL` server and accomodate for any hostname mapping required (NAT, VPN, DNS, ...).
 
 :::{align=center}
-![Filled out Link panel](/images/Doc_CentralLinkServerFilled.png){width=480}
+![Filled out Link Panel](/images/Doc_CentralLinkServerFilled.png){width=480}
 :::
 
 Clicking [ **Save** ] will initiate the actual attachment process. The `CENTRAL` server will contact the `MANAGED` server using the provided URL. It will then perform the initial synchronization of data. Once this is done, the panels close on both servers. The attached server appears on the `CENTRAL`, and the attached **Instance Group** appears on the `MANAGED` server. In case attaching is not possible automatically, you will be provided with the possibility to download synchronization information from the `CENTRAL` server. You can drop this in the _Manual and Offline Linking_ panel on the `MANAGED` server to complete linking without actual contact to the server.
 
 !!!info Note
-Servers which do not have an actual connection to each other, but are linked manually, will not be able to synchronize instance information. The link is purely _informational_, to hint that the server _exists_. More possibilities for synchronization may be added in the future.
+Servers which do not have an actual connection to each other, but are linked manually, will not be able to synchronize instance information unless a mail configuration is set up. See [E-Mail Sending and Receiving](/experts/mail/) for details.
 !!!
 
 :::{align=center}
@@ -90,7 +90,7 @@ Servers which do not have an actual connection to each other, but are linked man
 Once a `MANAGED` server is attached to the `CENTRAL` server, **Instance** data can be synchronized from the `MANAGED` server on demand by the `CENTRAL` server. This can happen either from the **Managed Servers** page you saw before, by pressing [ **Synchronize** ] on the according server or directly from the **Instance Overview** and **Instance Dashboard**/**Instance Configuration** pages.
 
 !!!info Note
-The [ **Synchronize** ] **only** exists on the `CENTRAL` server.
+The [ **Synchronize** ] button **only** exists on the `CENTRAL` server.
 !!!
 
 :::{align=center}
@@ -114,7 +114,7 @@ It is not required to synchronize the other way (`CENTRAL` to `MANAGED`) as this
 There is a limited possibility to change the _purpose_ of an already initialized **BDeploy** server root directory. It is only possible to migrate from `STANDALONE` to `MANAGED` and vice versa, as data is _mostly_ compatible. A command line tooling exists for this purpose:
 
 !!!info Note
-Migration from `STANDALONE` or `MANAGED` to `NODE` is available using a dedicated workflow from the Web UI. This allows to start off an installation as `STANDALONE` and later on migrate that to be a `NODE` in a larger setup. See [Convert/Migrate to Node](/setup/node/#convertmigrate-to-node)
+Migration from `STANDALONE` or `MANAGED` to `NODE` is available using a dedicated workflow from the Web UI. This allows to start off an installation as `STANDALONE` and later on migrate that to be a `NODE` in a larger setup. See [Convert/Migrate to Node](/setup/node/#convertmigrate-to-node).
 !!!
 
 ```
@@ -129,24 +129,24 @@ When working with `CENTRAL` and `MANAGED` servers, products can be uploaded to e
 
 The recommended way of working is to exclusively use the `CENTRAL` server for all tasks, e.g. pushing new product versions, changing configuration, etc. When _installing_ an **Instance** version to the target server, the required product data is automatically transferred as part of the process.
 
-Sometimes it might still be necessary to transfer product versions from one server to another. For instance, a product version was directly pushed to `MANAGED` server _A_, but is required as well on `MANAGED` server _B_. In this case you can use the **Product Synchronization** wizard to copy product versions from one server to another from the `CENTRAL` server.
+Sometimes, it might be necessary to transfer product versions from one server to another. For instance, a product version was directly pushed to `MANAGED` server _A_, but is required as well on `MANAGED` server _B_. In this case you can use the **Product Synchronization** wizard to copy product versions from one server to another from the `CENTRAL` server.
 
 You can find the _Product Synchronization_ panel on the **Products** page on the `CENTRAL` server inside a given **Instance Group**. The additional [ **Synchronize Product Versions** ] button is only available on the `CENTRAL` server.
 
 :::{align=center}
-![Synchronize Product Versions](/images/Doc_CentralProdSync.png){width=480}
+![Synchronize Product Versions Panel](/images/Doc_CentralProdSync.png){width=480}
 :::
 
 Clicking it will open the _Product Synchronization_ panel. First you need to choose a _direction_ of transfer. Either transfer products _to_ or _from_ the `CENTRAL` server. After selecting a direction, you will have to choose the `MANAGED` server to transfer from or to.
 
 :::{align=center}
-![Choose Server](/images/Doc_CentralProdSyncServer.png){width=480}
+![Choose Server Panel](/images/Doc_CentralProdSyncServer.png){width=480}
 :::
 
 Clicking a server will fetch available products from that server. The list will contain product versions which are not yet present on the target server. Check all you want to transfer and click [ **Transfer** ].
 
 :::{align=center}
-![Choose Product Versions](/images/Doc_CentralProdSyncVersion.png){width=480}
+![Choose Product Versions Panel](/images/Doc_CentralProdSyncVersion.png){width=480}
 :::
 
 The panel will initialize the transfer of the product version(s) in the background. You can keep track of transfers using the global activity report available from the main menu. Once a product version is transferred, it will appear in the list of available products on the target server.
