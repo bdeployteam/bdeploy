@@ -48,6 +48,11 @@ A `STANDALONE` master can be initialized like this:
 bdeploy init --root=</path/to/root> --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=<username> --initPassword=<password>
 ```
 
+!!!info Note
+It is possible to append --logData=\<path\> to the init command to set an external directory that will be useable via variable expansion of `P:LOG_DATA`.  
+See [Variable Expansions](/power/variable) for further details.
+!!!
+
 The `init` command will create the initial administrator user from the `--initUser` and `--initPassword` parameters. This user has full administrative privileges. You can use the `bdeploy login` command to authorize all other CLI commands for your user.
 
 !!!warning Warning

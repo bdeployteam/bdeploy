@@ -43,12 +43,13 @@ Used to expand to one of the special directories that are defined.
 {{P:<PATH_ID>}}
 ```
 
-| Variable      | Description                                                               |
-| ------------- | ------------------------------------------------------------------------- |
-| {{P:CONFIG}}  | Directory where all configuration files are stored.                       |
-| {{P:BIN}}     | Directory where all binaries are are stored.                              |
-| {{P:RUNTIME}} | Directory with runtime data (e.d. stdout/stderr capture files) is stored. |
-| {{P:DATA}}    | Directory shared by multiple deployments of the same instance.            |
+| Variable       | Description                                                               |
+| -------------- | ------------------------------------------------------------------------- |
+| {{P:CONFIG}}   | Directory where all configuration files are stored.                       |
+| {{P:BIN}}      | Directory where all binaries are are stored.                              |
+| {{P:RUNTIME}}  | Directory with runtime data (e.d. stdout/stderr capture files) is stored. |
+| {{P:DATA}}     | Directory shared by multiple deployments of the same instance.            |
+| {{P:LOG_DATA}} | Configurable directory for log files on the server. The log data directory is shared by all instances, however, each instance has its own subdirectory therein. This expansion references the unique subdirectory applicable for the current instance. Configuration can be done via the [cli](/experts/cli/#initialization-and-local-configuration-management-commands). If not configured, the expansion defaults to be equal to {{P:DATA}}. |
 
 ## V: Parameter Value
 

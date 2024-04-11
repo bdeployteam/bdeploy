@@ -158,3 +158,17 @@ Files can also be manually added and edited online. Use the [ **Add File** ] but
 !!!warning Caution
 It is possible to put symbolic links inside the data directory to access directories **not** directly within the data directory through the **BDeploy** UI. This possibility must be used with care. It is the responsibility of the user to assure that manually created symlinks will be safe to read _and_ write by **BDeploy** and/or its controlled applications.
 !!!
+
+## Log Files
+
+The **Log Files** page lists all files that are stored in the designated log files directory of the **BDeploy** server. The table is by default sorted by the last modification timestamp. Thus the newest files are displayed first.
+
+:::{align=center}
+![Log Files](/images/Doc_LogFiles.png){width=480}
+:::
+
+:::{align=center}
+![View Log File](/images/Doc_LogFilesView.png){width=480}
+:::
+
+This behaves exactly the same as the aforementioned **Data Files**, with the one exceptions that **Log Files** are read only - it is not possible to edit or delete them via the browser, and it is also not possible to manually create new files.
