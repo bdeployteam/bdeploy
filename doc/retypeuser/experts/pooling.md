@@ -47,7 +47,7 @@ By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. w
 
 ### Global Usage Threshold
 
-The _global usage threshold_ specifies how often a certain object has to be seen in **BHives** participating in a particular pool. Only once this threshold is reached will an object be moved to the pool. The threshold can be set on the CLI, its default value if **2**:
+The _global usage threshold_ specifies how often a certain object has to be seen in **BHives** participating in a particular pool. Only once this threshold is reached will an object be moved to the pool. The threshold can be set on the CLI, its default value is **2**:
 
 ```
 bdeploy pool --root=</path/to/root> --usageThreshold=<threshold>
