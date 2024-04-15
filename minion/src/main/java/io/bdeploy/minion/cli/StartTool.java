@@ -9,7 +9,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -27,13 +26,11 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.MinionManifest;
-import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -268,15 +265,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {
-        Function<BHive, Permission> hivePermissionClassifier = h -> {
-            if (new SoftwareRepositoryManifest(h).read() != null) {
-                // in case of software repos, we want to grant read access to ANYBODY.
-                return null;
-            }
-            return Permission.READ;
-        };
-
-        BHiveRegistry r = new BHiveRegistry(reporter, hivePermissionClassifier);
+        BHiveRegistry r = new BHiveRegistry(reporter);
 
         root.setupServerTasks(root.getMode(), r);
 

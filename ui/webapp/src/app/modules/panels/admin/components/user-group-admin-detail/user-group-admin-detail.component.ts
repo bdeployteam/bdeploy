@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { ScopedPermission, UserGroupInfo, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PermissionColumnsService } from 'src/app/modules/core/services/permission-columns.service';
 import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
+import { ALL_USERS_GROUP_ID } from 'src/app/modules/core/utils/user-group.utils';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
@@ -53,6 +54,8 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   private subscription: Subscription;
+
+  protected isNotAllUsersGroup$: Observable<boolean> = this.group$.pipe(map((g) => g?.id !== ALL_USERS_GROUP_ID));
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.authAdmin.userGroups$]).subscribe(

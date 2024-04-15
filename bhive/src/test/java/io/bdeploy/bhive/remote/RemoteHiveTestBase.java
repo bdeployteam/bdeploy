@@ -29,7 +29,7 @@ class RemoteHiveTestBase {
 
     @BeforeEach
     void startRemoteServer(RemoteService svc, BHive hive, ActivityReporter r) throws Exception {
-        registry = new BHiveRegistry(r, null);
+        registry = new BHiveRegistry(r);
 
         // requires TestHive extension on subclass.
         registry.register(JerseyRemoteBHive.DEFAULT_NAME, hive);

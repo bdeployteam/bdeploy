@@ -93,7 +93,7 @@ export class UserPermissionsComponent {
           definition: {
             group: (r) => {
               const permissions = [...r.permissions, ...getInheritedPermissions(r, userGroups)];
-              return getGlobalOrLocalPermission(permissions, scope) || Permission.READ; // implicit READ permission on repos for everybody.
+              return getGlobalOrLocalPermission(permissions, scope);
             },
             name: 'Permission',
             sort: (a, b) => this.groupNames.indexOf(b) - this.groupNames.indexOf(a),
@@ -129,11 +129,7 @@ export class UserPermissionsComponent {
   }
 
   private getGlobalPermissionLevel(user: UserInfo): Permission {
-    const p = user.permissions.find((c) => !c.scope)?.permission;
-    if (!p) {
-      return Permission.READ; // implicit READ permission on repos for everybody.
-    }
-    return p;
+    return user.permissions.find((c) => !c.scope)?.permission;
   }
 
   private doModify(tpl: TemplateRef<any>, user: UserInfo) {
@@ -162,11 +158,11 @@ export class UserPermissionsComponent {
 
     // only permissions HIGHER than the current global permission are avilable.
     const glob = this.getGlobalPermissionLevel(user);
-    const allPerms = [Permission.WRITE, Permission.ADMIN];
+    const allPerms = [Permission.READ, Permission.WRITE, Permission.ADMIN];
 
     if (!glob) return allPerms;
-    if (glob === Permission.READ) return allPerms;
-    if (glob === Permission.WRITE) return allPerms.slice(1);
+    if (glob === Permission.READ) return allPerms.slice(1);
+    if (glob === Permission.WRITE) return allPerms.slice(2);
 
     return [];
   }

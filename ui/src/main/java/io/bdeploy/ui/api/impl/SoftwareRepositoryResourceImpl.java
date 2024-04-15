@@ -11,6 +11,8 @@ import java.util.SortedSet;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
+import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.UserGroupInfo;
@@ -19,6 +21,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
@@ -30,14 +33,22 @@ import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResource {
 
     @Context
     private ResourceContext rc;
+
+    @Context
+    private ContainerRequestContext crq;
+
+    @Context
+    private SecurityContext context;
 
     @Inject
     private BHiveRegistry registry;
@@ -59,11 +70,24 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         List<SoftwareRepositoryConfiguration> result = new ArrayList<>();
         for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
             SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryManifest(entry.getValue()).read();
-            if (cfg != null) {
-                result.add(cfg);
+            if (cfg == null || !isAuthorized(new ScopedPermission(cfg.name, Permission.READ))) {
+                continue;
             }
+            result.add(cfg);
         }
         return result;
+    }
+
+    private boolean isAuthorized(ScopedPermission requiredPermission) {
+        // need to obtain from request to avoid SecurityContextInjectee wrapper.
+        SecurityContext ctx = crq.getSecurityContext();
+        if (!(ctx instanceof JerseySecurityContext)) {
+            return false;
+        }
+        JerseySecurityContext securityContext = (JerseySecurityContext) ctx;
+
+        return securityContext.isAuthorized(requiredPermission)
+                || auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission);
     }
 
     @Override

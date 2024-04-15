@@ -129,7 +129,7 @@ public class MasterCleanupJob implements Job {
         log.info("Performing cleanup on all nodes");
 
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).
-        try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {
+        try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null())) {
             mr.getStorageLocations().forEach(s -> registry.scanLocation(s, RollingFileAuditor.getFactory()));
 
             CleanupHelper ch = new CleanupHelper(null, mr, registry, new SelfMasterProvider(mr.getSelf()),

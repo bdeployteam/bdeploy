@@ -100,7 +100,7 @@ public class PoolTool extends ConfiguredCliTool<PoolConfig> {
             if (config.reorganize().length < 2) {
                 return createResultWithErrorMessage("At least two hives must be given to reorganize");
             }
-            BHiveRegistry reg = new BHiveRegistry(getActivityReporter(), null);
+            BHiveRegistry reg = new BHiveRegistry(getActivityReporter());
             for (String hivePath : config.reorganize()) {
                 Path path = Paths.get(hivePath);
                 reg.register(hivePath, new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter()));

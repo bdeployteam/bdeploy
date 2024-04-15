@@ -215,6 +215,10 @@ The [ **Assign Permission** ] opens a popup for adding a permission entry. Globa
 ![BDeploy User Groups](/images/Doc_Admin_User_Groups_Permissions_Add.png){width=480}
 :::
 
+### All Users Group
+
+There is a special **All Users Group** that cannot be deleted or deactivated, but its permissions can be edited. Every user, both present and future, is automatically enlisted in this group. You can make any **Instance Group/Software Repository** effectively public by assigning **READ** permission to **All Users Group** for **Instance Group/Software Repository** of your choice. 
+
 ## Manual Cleanup
 
 You can use the **Manual Cleanup** page from the **Administration** menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night:

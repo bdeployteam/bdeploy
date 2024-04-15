@@ -73,7 +73,6 @@ public interface SoftwareRepositoryResource {
     @POST
     @Path("/{repo}/user-group-permissions")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void updateUserGroupPermissions(@Scope @PathParam("repo") String repo,
-            UserGroupPermissionUpdateDto[] permissions);
+    public void updateUserGroupPermissions(@Scope @PathParam("repo") String repo, UserGroupPermissionUpdateDto[] permissions);
 
 }

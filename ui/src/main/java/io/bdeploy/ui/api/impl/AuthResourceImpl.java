@@ -145,10 +145,10 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     private void trimUserGroups(UserInfo info) {
-        Set<UserGroupInfo> groups = authGroup.getUserGroups(info.groups);
+        Set<UserGroupInfo> groups = authGroup.getUserGroups(info.getGroups());
         // if user holds ids of deleted groups update user with trimmed group ids
-        if (info.groups.size() != groups.size()) {
-            info.groups = groups.stream().map(g -> g.id).collect(Collectors.toSet());
+        if (info.getGroups().size() != groups.size()) {
+            info.setGroups(groups.stream().map(g -> g.id).collect(Collectors.toSet()));
             auth.updateUserInfo(info);
         }
     }
@@ -169,7 +169,7 @@ public class AuthResourceImpl implements AuthResource {
     public UserProfileInfo getCurrentUserProfile() {
         UserProfileInfo profile = new UserProfileInfo();
         UserInfo user = getCurrentUser();
-        profile.userGroups = authGroup.getUserGroups(user.groups);
+        profile.userGroups = authGroup.getUserGroups(user.getGroups());
         return profile;
     }
 

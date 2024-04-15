@@ -170,6 +170,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.hiveDir = root.resolve("hive");
         this.hive = new BHive(hiveDir.toUri(), RollingFileAuditor.getFactory().apply(hiveDir), reporter);
         this.userGroups = new UserGroupDatabase(this);
+        this.userGroups.addAllUsersGroup();
         this.users = new UserDatabase(this, userGroups);
         this.tmpDir = root.resolve("tmp");
 

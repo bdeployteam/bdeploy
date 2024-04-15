@@ -1,5 +1,6 @@
 package io.bdeploy.minion.user;
 
+import static io.bdeploy.interfaces.UserGroupInfo.ALL_USERS_GROUP_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -86,5 +87,28 @@ class UserGroupDatabaseTest {
         // merged permissions have global permission from group
         assertTrue(groups.getCloneWithMergedPermissions(info).mergedPermissions.contains(permission));
 
+    }
+
+    @Test
+    void allUsersGroupIsPresentByDefault(MinionRoot root) {
+        UserDatabase users = root.getUsers();
+        UserGroupDatabase groups = root.getUserGroups();
+        String userName = "JunitTest";
+        ScopedPermission permission = new ScopedPermission(null, Permission.ADMIN);
+
+        users.createLocalUser(userName, "JunitTestJunitTest", Collections.emptyList());
+
+        UserGroupPermissionUpdateDto groupPermissionUpdateDto = new UserGroupPermissionUpdateDto(ALL_USERS_GROUP_ID,
+                permission.permission);
+        groups.updatePermissions(null, new UserGroupPermissionUpdateDto[] { groupPermissionUpdateDto });
+
+        UserInfo info = users.getUser(userName);
+
+        // user info itself does not hold merged permissions
+        assertNull(info.mergedPermissions);
+        // user contains all users group by default
+        assertTrue(info.getGroups().contains(ALL_USERS_GROUP_ID));
+        // merged permissions have global permission from all users group
+        assertTrue(groups.getCloneWithMergedPermissions(info).mergedPermissions.contains(permission));
     }
 }

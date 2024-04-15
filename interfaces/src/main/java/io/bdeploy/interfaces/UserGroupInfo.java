@@ -11,6 +11,9 @@ import jakarta.annotation.Generated;
  */
 public class UserGroupInfo implements Comparable<UserGroupInfo> {
 
+    // hard-coded id for special non-deletable group for all users
+    public static final String ALL_USERS_GROUP_ID = "all-users-group";
+
     public String id;
     public String name;
     public String description;
@@ -19,6 +22,12 @@ public class UserGroupInfo implements Comparable<UserGroupInfo> {
 
     @Override
     public int compareTo(UserGroupInfo o) {
+        if (ALL_USERS_GROUP_ID.equals(this.id)) {
+            return -1;
+        }
+        if (ALL_USERS_GROUP_ID.equals(o.id)) {
+            return 1;
+        }
         return name.compareTo(o.name);
     }
 

@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces;
 
+import static io.bdeploy.interfaces.UserGroupInfo.ALL_USERS_GROUP_ID;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +39,7 @@ public class UserInfo implements Comparable<UserInfo> {
     public Set<ScopedPermission> permissions = new HashSet<>();
 
     /** User group ids the user belongs to */
-    public Set<String> groups = new HashSet<>();
+    private Set<String> groups = new HashSet<>();
 
     /** Calculated set of user permissions and user's active groups permissions */
     public Set<ScopedPermission> mergedPermissions;
@@ -45,10 +47,12 @@ public class UserInfo implements Comparable<UserInfo> {
     @JsonCreator
     public UserInfo(@JsonProperty("name") String name) {
         this.name = normalizeName(name);
+        groups.add(ALL_USERS_GROUP_ID);
     }
 
     public UserInfo(String name, boolean normalize) {
         this.name = normalize ? normalizeName(name) : name;
+        groups.add(ALL_USERS_GROUP_ID);
     }
 
     @Override
@@ -63,6 +67,21 @@ public class UserInfo implements Comparable<UserInfo> {
      */
     public Collection<ScopedPermission> getGlobalPermissions() {
         return mergedPermissions.stream().filter(ScopedPermission::isGlobal).toList();
+    }
+
+    /** ALL_USERS_GROUP_ID is always a part of user groups */
+    @JsonProperty("groups")
+    public Set<String> getGroups() {
+        return groups;
+    }
+
+    @JsonProperty("groups")
+    public void setGroups(Set<String> groups) {
+        this.groups = new HashSet<>();
+        if (groups != null) {
+            this.groups.addAll(groups);
+        }
+        this.groups.add(ALL_USERS_GROUP_ID);
     }
 
     /**

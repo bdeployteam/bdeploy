@@ -155,7 +155,7 @@ public class UserBulkResourceImpl implements UserBulkResource {
                 result.add(new OperationResult(name, OperationResultType.ERROR, "Cannot find user with name " + name));
                 continue;
             }
-            if (user.groups.contains(groupId)) {
+            if (user.getGroups().contains(groupId)) {
                 result.add(new OperationResult(name, OperationResultType.INFO, "Skipped, already in group " + group.name));
                 continue;
             }
