@@ -8,7 +8,7 @@
    version="1.1"
    id="svg5"
    xml:space="preserve"
-   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
    sodipodi:docname="yamls-overview-raw.svg"
    inkscape:export-filename="yaml-overview.png"
    inkscape:export-xdpi="96"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="false"
-     inkscape:zoom="0.98898723"
-     inkscape:cx="595.55875"
-     inkscape:cy="392.8261"
+     inkscape:zoom="0.49449362"
+     inkscape:cx="406.47643"
+     inkscape:cy="444.89958"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
      inkscape:window-x="0"
@@ -39,7 +39,8 @@
      inkscape:pageshadow="2"
      inkscape:snap-bbox="true"
      showguides="true"
-     inkscape:guide-bbox="true" /><defs
+     inkscape:guide-bbox="true"
+     inkscape:export-bgcolor="#ffffffff" /><defs
      id="defs2"><marker
        style="overflow:visible"
        id="TriangleOutM"
@@ -943,7 +944,7 @@
          d="M 12.507007,63.672037 H 2.9428252 v -31.30096 h 8.6947108"
          id="path63533" /></g><path
        style="fill:none;stroke:#d35f5f;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleOutM-7)"
-       d="M 12.507007,71.111888 H 2.9428252 v 32.371082 h 8.6947108"
+       d="M 12.507007,71.111888 H 2.9428252 l 0,90.652812 h 8.6947108"
        id="path63533-8"
        sodipodi:nodetypes="cccc" /><g
        id="g64651"
