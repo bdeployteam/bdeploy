@@ -9,10 +9,12 @@ icon: server
 
 **BDeploy** may be set up in different modes, making a few different overall usage scenarios possible:
 
-- `STANDALONE` mode: A standalone **BDeploy** master which is responsible for itself, its nodes, and every application deployed thereon.
-- `MANAGED` mode: A **BDeploy** master which is controlled by a `CENTRAL` **BDeploy** master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can **additionally** be controlled indirectly through the attached `CENTRAL` master
-- `CENTRAL` mode: Allows a central **BDeploy** master to control/manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities, but _just_ the ability to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master directly.
-- `NODE` mode: A **node** which can be attached to either a `STANDALONE` or `MANAGED` server as additional target location to run applications on.
+Mode | Function
+--- | ---
+`STANDALONE` | A standalone **BDeploy** master which is responsible for itself, its nodes, and every application deployed thereon.
+`MANAGED` | A **BDeploy** master which is controlled by a `CENTRAL` **BDeploy** master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can **additionally** be controlled indirectly through the attached `CENTRAL` master
+`CENTRAL` | Allows a central **BDeploy** master to control and manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities. Its purpose ist _exclusively_ to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master.
+`NODE` | A **node** which can be attached to either a `STANDALONE` or `MANAGED` server as additional target location to run applications on.
 
 :::{align=center}
 ![STANDALONE Deployment Scenario](/images/Scenario_Standalone.svg){width=480}
@@ -40,6 +42,8 @@ To start using BDeploy you will at least need a single **master**. The **master*
 
 The **root directory** contains all the runtime data. It is adviseable to select an empty directory in the data area of your system (e.g. /var/bdeploy on Linux) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy binary installation. Make sure that there is enough space available.
 
+A `STANDALONE` master can be initialized like this:
+
 ```
 bdeploy init --root=</path/to/root> --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=<username> --initPassword=<password>
 ```
@@ -47,15 +51,15 @@ bdeploy init --root=</path/to/root> --hostname=<hostname> --mode=STANDALONE --po
 The `init` command will create the initial administrator user from the `--initUser` and `--initPassword` parameters. This user has full administrative privileges. You can use the `bdeploy login` command to authorize all other CLI commands for your user.
 
 !!!warning Warning
-Don't use the depicted user and password, these are just samples.
+Make sure to choose a secure password!
 !!!
 
-The `init` command will write an access token to a file if given with `--tokenFile`. This tokens main purpose is automation (scripting) and testing. The token is a _system_ token which is not associated with any actual user. This token is important when initializing a root for a `NODE`, as it will be required when attaching the `NODE` to a `STANDALONE` or `MANAGED` master. On the master you can generate a token for any user from the **BDeploy** UI anytime later on.
+The `init` command will write an access token to a file if given with `--tokenFile`. The main purpose of this tokens is automation (scripting) and testing. The token is a _system_ token which is not associated with any actual user. This token is important when initializing a root for a `NODE`, as it will be required when attaching the `NODE` to a `STANDALONE` or `MANAGED` master. On the master you can generate a token for any user from the **BDeploy** UI anytime later on.
 
-The `--mode` parameter of the `init` command is used to determine the future purpose of the **BDeploy** root. The mode can be `STANDALONE`, `MANAGED`, `CENTRAL` (or `NODE` - see [Node](/setup/node/#nodes)).
+The `--mode` parameter of the `init` command is used to determine the future purpose of the **BDeploy** root. The mode can be `STANDALONE`, `MANAGED`, `CENTRAL` or `NODE` (also see [Node](/setup/node/#nodes)).
 
 !!!info Note
-It is not recommended ([but possible](/user/central/#migrating-between-modes)) to change the mode of an initialized root later, so take care to use the correct mode for the intended use.
+It is not recommended ([but possible](/user/central/#migrating-between-modes)) to change the mode of an initialized root retroactively, so take care to use the correct mode for the intended use.
 !!!
 
 The result of the `init` command is a **root directory** which can be used by the **start** command.
@@ -72,7 +76,7 @@ After the initialization - which needs to be done only once - the **master** can
 bdeploy master --root=</path/to/root>
 ```
 
-This will start the **master** server which also hosts the web UI: [https://localhost:7701](https://localhost:7701)
+This will start the **master** server which also hosts the Web UI: [https://localhost:7701](https://localhost:7701)
 
 !!!info Note
 The server is using a self-signed certificate by default. Thus you need to instruct your browser to accept it. See [Custom Certificate](/setup/certificate/#custom-certificate) for instructions on how to provide a better certificate.
@@ -80,4 +84,4 @@ The server is using a self-signed certificate by default. Thus you need to instr
 
 ## User
 
-Only authenticated users have access to the web UI. The initial user has been created by the `init` command. Use this user to log in to the Web UI, and create additional users (or provide external authentication mechanisms) from the [User Accounts](/experts/system/#user-accounts) administration page.
+Only authenticated users have access to the Web UI. The initial user has been created by the `init` command. Use this user to log in to the Web UI and create additional users (or provide external authentication mechanisms) from the [User Accounts](/experts/system/#user-accounts) administration page.

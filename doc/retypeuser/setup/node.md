@@ -7,7 +7,7 @@ icon: git-branch
 
 **Nodes** are optional and only required in the case that the application that you want to deploy should run on different servers but be managed from a certain master. By default a master is itself a node as well where applications can be deployed to.
 
-## Initializing
+## Initialization
 
 **Nodes** must be initialized on the corresponding machines (or on the same machine using non-default ports; the default port is 7701).
 The command is similar to the one used to initialize the **master**. Pass (for example) `--port=7702` to change the
@@ -22,7 +22,7 @@ Note the `--nodeIdentFile` parameter given to the `init` command: this file is c
 
 ## Launch
 
-After the initialization - which needs to be done only once - the **node** can be started with the following command:
+After the initialization - which only has to be done once - the **node** can be started with the following command:
 
 ```
 bdeploy start --root=</path/to/root>
@@ -30,18 +30,18 @@ bdeploy start --root=</path/to/root>
 
 ## Administration
 
-To register, remove or manage a **node** on the **master** you can either use the command line interface or the administrative Web UI on the **master**.
+To register, remove or manage a **node** on the **master** you can either use the command line interface or the administrative web UI on the **master**.
 
 ### Command line interface
 
-Use the CLI to register, remove or manage a **node** on the **master** (see the `bdeploy remote-node --help` command for more information).
+Use the CLI to register, remove and manage a **node** on the **master** (see the `bdeploy remote-node --help` command for more information).
 
 ```
 bdeploy remote-node --remote=https://<hostname>:7701/api --tokenFile=master-token.txt --add=<node-name> --nodeIdentFile=node-ident.txt
 ```
 
 !!!info Note
-Both the `https` (beware the `s`) prefix and the `/api` suffix are required in all **BDeploy** URIs.
+Both the `https` (note the `s`) prefix and the `/api` suffix are required in all **BDeploy** URIs.
 !!!
 
 The **node** is now registered as 'node-name'. This is the name which is reported when querying **nodes** from the **master**.
@@ -79,11 +79,11 @@ Replacing can be performed via the [Administrative Web UI](/setup/node/#administ
 4. Drag & drop the `node-ident.txt` file to the drop zone in the _Replace Node_ panel. The URI and authentication information will be prefilled.
 5. Click the [ **Save** ] button. The panel will enter loading state. You can follow the progress of the operation in the _Activities_ panel from the main menu.
 6. Once the operation completes, you will be brought back to the node details panel.
-7. Replacing and restoring has been performed, and all instances which use this node are available again.
+7. Replacing and restoring has been performed and all instances which use this node are available again.
 
 ### Convert/Migrate to Node
 
-Existing `STANDALONE` and `MANAGED` servers can be migrated to type `NODE`. This can be handy in case software needs to run standalone on a `NODE` before the actual master server is available. In this case, setup a `STANDALONE` server on the node, configure all the required software, and migrate the server to `NODE` type later.
+Existing `STANDALONE` and `MANAGED` servers can be migrated to type `NODE`. This can be handy if software needs to run standalone on a `NODE` before the actual master server is available. In this case, setup a `STANDALONE` server on the node, configure all the required software, and migrate the server to `NODE` type later.
 
 To convert an existing server:
 

@@ -12,7 +12,7 @@ bdeploy login --add=<server-name> --remote=https://localhost:7701/api
 bdeploy remote-master --minions
 ```
 
-This will provide output similar to the following:
+This will produce output similar to the following:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────┐
