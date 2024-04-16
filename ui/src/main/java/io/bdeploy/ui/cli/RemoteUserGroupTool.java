@@ -40,7 +40,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
         @Help("Set description for user group during add/update operation")
         String description();
 
-        @Help("Add global admin permission to the user group. Shortcut for --permission=ADMIN")
+        @Help(value = "Add global admin permission to the user group. Shortcut for --permission=ADMIN", arg = false)
         boolean admin() default false;
 
         @Help(value = "Mark user group as active during add/update", arg = false)
