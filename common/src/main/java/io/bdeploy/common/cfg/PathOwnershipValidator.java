@@ -15,6 +15,9 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 
+/**
+ * Checks if the current user has access to the given {@link Path}.
+ */
 @ValidationMessage("The given root directory does not belong to the current user: %s")
 public class PathOwnershipValidator implements ConfigValidator<String> {
 
@@ -51,5 +54,4 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
             return false; // Not OK, something is too wrong to validate.
         }
     }
-
 }

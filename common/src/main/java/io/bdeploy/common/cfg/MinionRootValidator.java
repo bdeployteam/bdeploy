@@ -2,22 +2,22 @@ package io.bdeploy.common.cfg;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 
+/**
+ * Checks if the given {@link Path} exists and contains either the file <code>etc/state.json</code> or
+ * <code>etc/state.json.bak</code>.
+ */
 @ValidationMessage("Path is not an initialized BDeploy root directory, run 'bdeploy init': %s")
-public class MinionRootValidator implements ConfigValidator<String> {
+public class MinionRootValidator extends ExistingDirectoryValidator {
 
     @Override
     public boolean validate(String value) {
-        Path target = Paths.get(value);
-        if (!Files.isDirectory(target)) {
-            return false;
-        }
-
-        return Files.isRegularFile(target.resolve("etc/state.json")) || Files.isRegularFile(target.resolve("etc/state.json.bak"));
+        return super.validate(value) ? isRegularFile("etc/state.json") || isRegularFile("etc/state.json.bak") : false;
     }
 
+    private boolean isRegularFile(String s) {
+        return Files.isRegularFile(p.resolve(s));
+    }
 }

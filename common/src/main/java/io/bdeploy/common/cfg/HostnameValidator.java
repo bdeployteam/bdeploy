@@ -6,7 +6,9 @@ import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 
 /**
- * Validate hostname value according to https://tools.ietf.org/html/rfc1123 2.1 which extends
+ * Checks hostname value according to https://tools.ietf.org/html/rfc1123 2.1
+ *
+ * @see #HOSTNAME_PATTERN
  */
 @ValidationMessage("Not a valid host name: %s")
 public class HostnameValidator implements ConfigValidator<String> {
@@ -18,5 +20,4 @@ public class HostnameValidator implements ConfigValidator<String> {
     public boolean validate(String value) {
         return HOSTNAME_PATTERN.matcher(value.toLowerCase()).matches();
     }
-
 }
