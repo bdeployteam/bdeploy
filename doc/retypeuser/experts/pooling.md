@@ -12,7 +12,7 @@ icon: database
 Each **BHive** can have a configured _pool directory_, which must be non-existent or an existing object database. You can enable pooling on a single **BHive** from the CLI using:
 
 ```
-bdeploy bhive --hive=/path/to/hive --pool=/path/to/pool
+bdeploy bhive --hive=</path/to/hive> --pool=</path/to/pool>
 ```
 
 !!!warning Caution
@@ -32,13 +32,13 @@ Pooling naturally only makes sense if more than one **BHive** is configured to u
 **BDeploy** can be configured to provide a global default pool directory which is automatically configured on _new_ BHives (e.g. new **Instance Group**, new **Software Repository**), but not on existing BHives. This setup can be performed during init:
 
 ```
-bdeploy init --root=/path/to/root ... --pooling [--pool=/path/to/somewhere/pool]
+bdeploy init --root=</path/to/root> ... --pooling [--pool=</path/to/somewhere/pool>]
 ```
 
 You can also setup the global default after init using:
 
 ```
-bdeploy pool --root=/path/to/root --defaultPool=/path/to/pool
+bdeploy pool --root=</path/to/root> --defaultPool=</path/to/pool>
 ```
 
 !!!info Note
@@ -50,7 +50,7 @@ By convention, the pool should be a subdirectory of the **BDeploy** root (i.e. w
 The _global usage threshold_ specifies how often a certain object has to be seen in **BHives** participating in a particular pool. Only once this threshold is reached will an object be moved to the pool. The threshold can be set on the CLI, its default value if **2**:
 
 ```
-bdeploy pool --root=/path/to/root --usageThreshold=3
+bdeploy pool --root=</path/to/root> --usageThreshold=<threshold>
 ```
 
 ## Pooling the _default_ BHive
@@ -70,7 +70,7 @@ Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as _re
 Pooling can be disabled on **BHives** if pooling is currently enabled. However, this operation requires to _unpool_ required objects from the currently set pool back into the **BHive** local storage. You can do this using:
 
 ```
-bdeploy bhive pool --hive=/path/to/hive --unpool
+bdeploy bhive pool --hive=</path/to/hive> --unpool
 ```
 
 ## Managing Pool through Administrative UI

@@ -41,7 +41,7 @@ To start using BDeploy you will at least need a single **master**. The **master*
 The **root directory** contains all the runtime data. It is adviseable to select an empty directory in the data area of your system (e.g. /var/bdeploy on Linux) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy binary installation. Make sure that there is enough space available.
 
 ```
-bdeploy init --root=/path/to/root --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=username --initPassword=usersPassword
+bdeploy init --root=</path/to/root> --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=<username> --initPassword=<password>
 ```
 
 The `init` command will create the initial administrator user from the `--initUser` and `--initPassword` parameters. This user has full administrative privileges. You can use the `bdeploy login` command to authorize all other CLI commands for your user.
@@ -69,7 +69,7 @@ Be aware that the user running the **start** command later on **must** be the ow
 After the initialization - which needs to be done only once - the **master** can be started with the following command:
 
 ```
-bdeploy master --root=/path/to/root
+bdeploy master --root=</path/to/root>
 ```
 
 This will start the **master** server which also hosts the web UI: [https://localhost:7701](https://localhost:7701)

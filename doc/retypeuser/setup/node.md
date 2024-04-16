@@ -15,7 +15,7 @@ default port to some other value to avoid conflicts. Running multiple **BDeploy*
 supported for testing, but not recommended for productive setups (as the **master** can be deployed to directly anyway - no need for an explicit **node**).
 
 ```
-bdeploy init --root=/path/to/node/root --hostname=<hostname> --nodeIdentFile=node-ident.txt --port=7702 --mode=node
+bdeploy init --root=</path/to/root> --hostname=<hostname> --nodeIdentFile=node-ident.txt --port=7702 --mode=node
 ```
 
 Note the `--nodeIdentFile` parameter given to the `init` command: this file is created during `init`, and will contain the required access information for this **node**. You need it to register the **node** with the **master**, so make sure you will have it available when doing so.
@@ -25,7 +25,7 @@ Note the `--nodeIdentFile` parameter given to the `init` command: this file is c
 After the initialization - which needs to be done only once - the **node** can be started with the following command:
 
 ```
-bdeploy start --root=/path/to/node/root
+bdeploy start --root=</path/to/root>
 ```
 
 ## Administration
@@ -37,7 +37,7 @@ To register, remove or manage a **node** on the **master** you can either use th
 Use the CLI to register, remove or manage a **node** on the **master** (see the `bdeploy remote-node --help` command for more information).
 
 ```
-bdeploy remote-node --remote=https://master-host:7701/api --tokenFile=master-token.txt --add=node-name --nodeIdentFile=node-ident.txt
+bdeploy remote-node --remote=https://<hostname>:7701/api --tokenFile=master-token.txt --add=<node-name> --nodeIdentFile=node-ident.txt
 ```
 
 !!!info Note

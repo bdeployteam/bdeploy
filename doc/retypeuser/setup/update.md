@@ -12,8 +12,8 @@ For more information about the Web UI, please see [BDeploy Update](/experts/syst
 To remotely update an existing server, use a command similar to the following:
 
 ```
-bdeploy login --add=MyServer --remote=https://host:port/api
-bdeploy remote-master --update=<path-to-update.zip> --useLogin=MyServer
+bdeploy login --add=<server-name> --remote=https://<hostname>:<port>/api
+bdeploy remote-master --update=<path/to/update.zip> --useLogin=<server-name>
 ```
 
 Updating a local server through the command line is done in the same way.

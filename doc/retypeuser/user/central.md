@@ -118,7 +118,7 @@ Migration from `STANDALONE` or `MANAGED` to `NODE` is available using a dedicate
 !!!
 
 ```
-bdeploy config --root=<root-directory> --mode=MANAGED
+bdeploy config --root=</path/to/root> --mode=MANAGED
 ```
 
 The value for mode may be `MANAGED` or `STANDALONE`. The actual migration of data may be performed later on when first accessing them. For instance, when clicking an **Instance Group**, you might be prompted that an **Instance Group** requires to be attached to a `CENTRAL` server in `MANAGED` mode, and the **Attach to Central Server** wizard is launched.

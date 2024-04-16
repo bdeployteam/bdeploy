@@ -26,24 +26,24 @@ The script must be called with administrative privileges and it expects the foll
 
 ```
 --master | --node      Start a master or node (only controls the name of the service).
-<Path-to-minion-bat>   Absolute path to the bdeploy batch file.
+<\path\to\minon\bat>   Absolute path to the bdeploy batch file.
                        Sample: C:\BDeploy\server\bin\bdeploy.bat
-<Path-to-store-files>  Absolute path to the data directory. Make sure to not include a trailing backslash.
+<\path\to\store\files> Absolute path to the data directory. Make sure to not include a trailing backslash.
                        Sample: C:\BDeploy\data
 ```
 
 !!!warning Warning
-By default the service runs as _Local System_ but you can and should change that afterwards by using the services.msc application. Simply configure the desired account in the _Log On_ tab of the services management console. We **strongly** recommend to use a non-privileged user to run the **BDeploy** service.
+By default the service runs as _Local System_ but you can and should change that afterwards by using the _services.msc_ application. Configure the desired account in the _Log On_ tab of the services management console. We **strongly** recommend to use a non-privileged user to run the **BDeploy** service.
 !!!
 
-Once installed, you can start the service using services.msc or by calling `net start BDeployMaster | BDeployNode`.
+Once installed, you can start the service using _services.msc_ or by calling `net start <BDeployMaster|BDeployNode>`.
 
 !!!info Note
 Use the _Event Viewer_ (Windows Logs->System) to get more information when the service fails to start.
 !!!
 
 !!!info Note
-Application logs (stdout, stderror) are written to a log file that is stored in `<path-to-store-files>\log\service.log`
+Application logs (stdout, stderror) are written to a log file that is stored in `<\path\to\store\files>\log\service.log`
 !!!
 
 !!!info Note
