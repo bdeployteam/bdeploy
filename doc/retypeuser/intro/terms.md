@@ -16,7 +16,6 @@ icon: info
 
 BDeploy has a some important terms and concepts which should be known before diving into details of the application itself. These terms will be used all over the documentation to cross-reference other parts of the application.
 
-:::t1
 Term | Meaning
 --- | ---
 **Instance Group** | An **Instance Group** is the main top-level element used in **BDeploy**. It provides a grouping of **Instances** (as the name suggests).
@@ -36,4 +35,3 @@ Term | Meaning
 **Activation** | The **Activation** marks a previously **Installed** **Instance Version** as the one to be started by the **Process Control**. Only one instance version can be active for one instance at the same time.
 **Process Control** | The **Process Control** is responsible for starting, keep-alive and stopping the **Processes** of the active **Instance Version**.
 **System** | A **System** is a bracket around multiple **Instances** using potentially different **Products**. A **System** is a logical group of individual pieces of deployed software.
-:::
