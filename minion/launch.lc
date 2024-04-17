@@ -1,7 +1,7 @@
 abstract java configuration minion-base {
 	project minion;
 	main-class io.bdeploy.minion.cli.MinionServerCli;
-	
+
 	argument "-v";
 }
 
@@ -191,7 +191,6 @@ java configuration Master-RelDir : minion-base {
 	argument "--consoleLog";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
 //	vm-argument "-Dbdeploy.version.override=4.1.3"; // TESTING
-
 	working-dir '${workspace_loc}/runtime';
 
 	memory max=256 MB;
@@ -248,25 +247,24 @@ java configuration Managed-Master : minion-base {
 java configuration Launcher {
 	project launcher;
 	main-class io.bdeploy.launcher.cli.LauncherCli;
-	
+
 	working-dir "${workspace_loc}/runtime";
-	
+
 	argument "-v";
 	argument "launcher";
 	argument "--launch=${file_prompt:.bdeploy file to launch}";
 	argument "--homeDir=${workspace_loc}/runtime/launcher";
 	argument "--consoleLog";
-	
+
 //	vm-argument "-Dsun.java2d.debugfonts=true";
-//	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
 }
 
 java configuration Browser {
 	project launcher;
 	main-class io.bdeploy.launcher.cli.LauncherCli;
-	
+
 	working-dir "${workspace_loc}/runtime";
-	
+
 	argument "-v";
 	argument "browser";
 	argument "--homeDir=${workspace_loc}/runtime/launcher";
@@ -282,9 +280,9 @@ java configuration VerifyLauncher : minion-base {
 java configuration Uninstaller {
 	project launcher;
 	main-class io.bdeploy.launcher.cli.LauncherCli;
-	
+
 	working-dir "${workspace_loc}/runtime";
-	
+
 	argument "-v";
 	argument "uninstaller";
 	argument "--app=${string_prompt:Enter application UID}";
