@@ -260,8 +260,9 @@ public class InstanceNodeController {
             throw new IllegalStateException("Cannot write PCU information", e);
         }
 
-        // make sure that the data directory always exists
+        // make sure that the data and log directories always exists
         paths.getAndCreate(SpecialDirectory.DATA);
+        paths.getAndCreate(SpecialDirectory.LOG_DATA);
     }
 
     private SortedMap<Key, Path> installPooledApplicationsFor(InstanceNodeConfiguration dc) {

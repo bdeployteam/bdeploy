@@ -1,23 +1,15 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Data Files">
+  <app-bd-dialog-toolbar header="Log Files">
     <div class="flex-auto"></div>
     <ng-container *ngIf="cfg.isCentral$ | async">
       <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <app-bd-panel-button
-      icon="add"
-      text="Add File..."
-      [collapsed]="false"
-      color="primary"
-      [disabled]="(loading$ | async) || (noactive$ | async) || !(authService.isCurrentScopeWrite$ | async)"
-      [route]="['panels', 'instances', 'data-files', 'add']"
-    ></app-bd-panel-button>
-    <app-bd-panel-button
       #bulkMode
       icon="library_add_check"
       text="Bulk Manipulation"
-      [route]="['panels', 'instances', 'data-files', 'bulk-manip']"
+      [route]="['panels', 'instances', 'log-files', 'bulk-manip']"
       tooltip="below"
       [disabled]="(loading$ | async) || (noactive$ | async)"
     ></app-bd-panel-button>
@@ -33,7 +25,7 @@
   <app-bd-dialog-content>
     <ng-container *ngIf="noactive$ | async; else active">
       <app-bd-no-data
-        >The current instance does not have an active version yet. Data files are not yet available.</app-bd-no-data
+        >The current instance does not have an active version yet. Log data is not yet available.</app-bd-no-data
       >
     </ng-container>
     <ng-template #active>
@@ -79,7 +71,7 @@
           <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
           <strong>{{ instance?.managedServer?.hostName }}</strong>
         </p>
-        <p>Synchronize the instance to view data files.</p>
+        <p>Synchronize the instance to view log data.</p>
         <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
       </app-bd-no-data>
     </ng-template>

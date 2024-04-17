@@ -1,0 +1,16 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Log Files Bulk Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="flex flex-col gap-2.5">
+      <div><strong>{{ dataFilesBulkService.selectedDataFiles.length }}</strong> files selected</div>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!dataFilesBulkService.selection.length"
+        text="Download Selected Files"
+        icon="cloud_download"
+        (click)="onDownload()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

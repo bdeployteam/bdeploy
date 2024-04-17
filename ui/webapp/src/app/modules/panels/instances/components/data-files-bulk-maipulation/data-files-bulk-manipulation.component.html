@@ -2,20 +2,20 @@
   <app-bd-dialog-toolbar header="Data Files Bulk Manipulation" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <div><strong>{{ dataFilesBulkService.selectedDataFiles.length }}</strong> data files selected.</div>
+      <div><strong>{{ dataFilesBulkService.selectedDataFiles.length }}</strong> files selected</div>
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"
         [disabled]="!dataFilesBulkService.selection.length || (deleting$ | async)"
         [loadingWhen$]="deleting$"
-        text="Delete Selected Data Files"
+        text="Delete Selected Files"
         icon="delete"
         (click)="onDelete()"
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
         [disabled]="!dataFilesBulkService.selection.length || (deleting$ | async)"
-        text="Download Selected Data Files"
+        text="Download Selected Files"
         icon="cloud_download"
         (click)="onDownload()"
       ></app-bd-button>

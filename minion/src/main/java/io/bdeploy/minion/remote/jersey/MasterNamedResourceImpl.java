@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
@@ -876,6 +877,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public List<RemoteDirectory> getDataDirectorySnapshots(String instanceId) {
+        return getDirectorySnapshots(instanceId, ndr -> ndr.getDataDirectoryEntries(instanceId));
+    }
+
+    @Override
+    public List<RemoteDirectory> getLogDataDirectorySnapshots(String instanceId) {
+        return getDirectorySnapshots(instanceId, ndr -> ndr.getLogDataDirectoryEntries(instanceId));
+    }
+
+    private List<RemoteDirectory> getDirectorySnapshots(String instanceId,
+            Function<NodeDeploymentResource, List<RemoteDirectoryEntry>> extractor) {
         List<RemoteDirectory> result = new CopyOnWriteArrayList<>();
 
         try (var handle = af.run(Actions.READ_DATA_DIRS, name, instanceId)) {
@@ -898,9 +909,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         if (node == null) {
                             idd.problem = "Node is offline";
                         } else {
-                            NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(node.remote,
-                                    NodeDeploymentResource.class, context);
-                            List<RemoteDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
+                            List<RemoteDirectoryEntry> iddes = extractor.apply(
+                                    ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class, context));
                             idd.entries.addAll(iddes);
                         }
                     } catch (Exception e) {

@@ -103,13 +103,20 @@ public interface MasterNamedResource {
     public InstanceStateRecord getInstanceState(@QueryParam("i") String instance);
 
     /**
-     * @param instanceId the instance ID to fetch directory content for
-     * @return a snapshot of the DATA directory for the given instance for each
-     *         minion.
+     * @param instanceId the instance ID to fetch the DATA directory content for
+     * @return a snapshot of the DATA directory for the given instance for each minion.
      */
     @GET
     @Path("/dataDir")
     public List<RemoteDirectory> getDataDirectorySnapshots(@QueryParam("u") String instanceId);
+
+    /**
+     * @param instanceId the instance ID to fetch the LOG_DATA directory content for
+     * @return a snapshot of the LOG_DATA directory for the given instance for each minion.
+     */
+    @GET
+    @Path("/logDataDir")
+    public List<RemoteDirectory> getLogDataDirectorySnapshots(@QueryParam("u") String instanceId);
 
     /**
      * Delegates to the specified minion to receive a file.

@@ -118,6 +118,12 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
+    public List<RemoteDirectory> getLogDataDirSnapshot() {
+        MasterNamedResource master = getMasterResource();
+        return master.getLogDataDirectorySnapshots(instance);
+    }
+
+    @Override
     public void writeToStdin(String processId, String data) {
         MasterNamedResource master = getMasterResource();
         master.writeToStdin(instance, processId, data);

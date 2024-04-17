@@ -28,6 +28,7 @@ import { NodeStatePanelComponent } from './components/dashboard/state-panel/stat
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryStateColumnComponent } from './components/history-state-column/history-state-column.component';
 import { HistoryComponent } from './components/history/history.component';
+import { LogDataComponent } from './components/log-data/log-data.component';
 import { PortStatusColumnComponent } from './components/port-status-column/port-status-column.component';
 import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
 import { RatingStatusColumnComponent } from './components/rating-status-column/rating-status-column.component';
@@ -54,6 +55,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     HistoryComponent,
     ConfigNodeComponent,
     DataFilesComponent,
+    LogDataComponent,
     ProcessNameAndOsComponent,
     PortStatusColumnComponent,
     HistoryStateColumnComponent,
