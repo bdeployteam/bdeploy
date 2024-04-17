@@ -33,7 +33,6 @@ Using the **bulk control** actions with a single process selected is the same as
 
 The process status is visualized using an icon for each process. Hover over the icon to get details about the current status.
 
-:::t1
 Icon | Description
 --- | ---
 ![](/images/ManualDoc_ProcessStopped.png){width=32} | Process is **stopped**.
@@ -43,7 +42,6 @@ Icon | Description
 ![](/images/ManualDoc_ProcessLifenessFailed.png){width=32} | Process is **running**, but a defined _lifeness probe_ (see [`app-info.yaml`](/power/product/#app-infoyaml)) indicates that the process has a problem.
 ![](/images/ManualDoc_ProcessCrashed.png){width=32} | Process **crashed** unexpectedly. **Process Control** scheduled an automatic restart. No interaction required.
 ![](/images/ManualDoc_ProcessCrashedPermanent.png){width=32} | Process **crashed** unexpectedly. **Process Control** gave up restarting as the last 5 attempts failed. **Manual interaction required**.
-:::
 
 The life cycle of a process is visualized in the following state graph:
 
