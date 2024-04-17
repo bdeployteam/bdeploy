@@ -161,7 +161,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
 
     private DataTable listUsers(UserGroupConfig config, AuthAdminResource admin) {
         UserGroupInfo group = getGroup(config.listUsers(), admin);
-        List<UserInfo> users = admin.getAllUser().stream().filter(user -> user.groups.contains(group.id)).toList();
+        List<UserInfo> users = admin.getAllUser().stream().filter(user -> user.getGroups().contains(group.id)).toList();
 
         DataTable table = createDataTable();
         table.setCaption("User accounts that belong to group " + group.name);

@@ -32,7 +32,6 @@
         [records]="authAdmin.userGroups$ | async"
         [columns]="columns"
         [recordRoute]="getRecordRoute"
-        [sort]="sort"
         [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
         [checked]="bulk.selection$ | async"
         (checkedChange)="bulk.selection$.next($event)"

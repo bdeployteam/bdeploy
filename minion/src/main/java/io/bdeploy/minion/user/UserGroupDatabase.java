@@ -1,5 +1,7 @@
 package io.bdeploy.minion.user;
 
+import static io.bdeploy.interfaces.UserGroupInfo.ALL_USERS_GROUP_ID;
+
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Optional;
@@ -57,6 +59,17 @@ public class UserGroupDatabase implements AuthGroupService {
 
     public UserGroupDatabase(MinionRoot root) {
         this.target = root.getHive();
+    }
+
+    public void addAllUsersGroup() {
+        if (getUserGroup(ALL_USERS_GROUP_ID) != null) {
+            return;
+        }
+        UserGroupInfo allUsersGroup = new UserGroupInfo();
+        allUsersGroup.id = ALL_USERS_GROUP_ID;
+        allUsersGroup.name = "all";
+        allUsersGroup.description = "All Users Group";
+        internalUpdate(allUsersGroup);
     }
 
     @Override
@@ -120,6 +133,9 @@ public class UserGroupDatabase implements AuthGroupService {
 
     @Override
     public void updateUserGroup(UserGroupInfo info) {
+        if (ALL_USERS_GROUP_ID.equals(info.id) && info.inactive) {
+            throw new IllegalStateException("Cannot deactivate " + ALL_USERS_GROUP_ID);
+        }
         internalUpdate(info);
     }
 
@@ -144,7 +160,9 @@ public class UserGroupDatabase implements AuthGroupService {
     }
 
     private void internalUpdate(UserGroupInfo info) {
-        validateUniqueName(info);
+        if (!ALL_USERS_GROUP_ID.equals(info.id)) {
+            validateUniqueName(info);
+        }
         try (Transaction t = target.getTransactions().begin()) {
             Long id = target.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + info.id));
             Manifest.Key key = new Manifest.Key(NAMESPACE + info.id, String.valueOf(id));
@@ -174,6 +192,9 @@ public class UserGroupDatabase implements AuthGroupService {
 
     @Override
     public void deleteUserGroup(String groupId) {
+        if (ALL_USERS_GROUP_ID.equals(groupId)) {
+            throw new IllegalStateException("Cannot delete " + ALL_USERS_GROUP_ID);
+        }
         Set<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + groupId));
         log.info("Deleting {} manifests for user group {}", mfs.size(), groupId);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
@@ -186,7 +207,7 @@ public class UserGroupDatabase implements AuthGroupService {
             return null;
         }
 
-        Set<UserGroupInfo> groups = getUserGroups(info.groups);
+        Set<UserGroupInfo> groups = getUserGroups(info.getGroups());
 
         // calculate merged permissions
         Set<ScopedPermission> groupPermissions = groups.stream().filter(g -> !g.inactive).flatMap(g -> g.permissions.stream())

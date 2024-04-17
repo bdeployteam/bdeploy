@@ -1,5 +1,7 @@
 package io.bdeploy.minion.user;
 
+import static io.bdeploy.interfaces.UserGroupInfo.ALL_USERS_GROUP_ID;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -443,7 +445,7 @@ public class UserDatabase implements AuthService {
                 // apply permissions from existing user to keep them intact.
                 newU.permissions = existing.permissions;
                 newU.inactive = existing.inactive;
-                newU.groups = existing.groups;
+                newU.setGroups(existing.getGroups());
             }
 
             newU.lastActiveLogin = System.currentTimeMillis();
@@ -520,17 +522,20 @@ public class UserDatabase implements AuthService {
         if (info == null) {
             throw new IllegalStateException("Cannot find user " + user);
         }
-        info.groups.add(groupId);
+        info.getGroups().add(groupId);
         internalUpdate(info.name, info);
     }
 
     @Override
     public void removeUserFromGroup(String group, String user) {
+        if (ALL_USERS_GROUP_ID.equals(group)) {
+            throw new IllegalStateException("Cannot remove user " + user + " from " + ALL_USERS_GROUP_ID);
+        }
         UserInfo info = getUser(user);
         if (info == null) {
             throw new IllegalStateException("Cannot find user " + user);
         }
-        info.groups.remove(group);
+        info.getGroups().remove(group);
         internalUpdate(info.name, info);
     }
 

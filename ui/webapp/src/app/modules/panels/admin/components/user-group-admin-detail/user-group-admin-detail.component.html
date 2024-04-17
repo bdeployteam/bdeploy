@@ -17,22 +17,30 @@
         </div>
       </div>
 
-      <app-add-user-to-group [suggestedUsers]="suggestedUsers" (userSelected)="addUser($event)"></app-add-user-to-group>
-      <app-bd-data-table [records]="users" [columns]="userColumns"></app-bd-data-table>
+      <app-add-user-to-group
+        *ngIf="isNotAllUsersGroup$ | async"
+        [suggestedUsers]="suggestedUsers"
+        (userSelected)="addUser($event)"
+      ></app-add-user-to-group>
+      <app-bd-data-table
+        *ngIf="isNotAllUsersGroup$ | async"
+        [records]="users"
+        [columns]="userColumns"
+      ></app-bd-data-table>
 
       <mat-divider></mat-divider>
 
       <app-bd-data-table [records]="group.permissions" [columns]="permColumns"></app-bd-data-table>
 
       <app-bd-button
-        *ngIf="!group.inactive"
+        *ngIf="!group.inactive && (isNotAllUsersGroup$ | async)"
         [collapsed]="false"
         icon="person_off"
         text="Deactivate Group"
         (click)="onSetInactive(group, true)"
       ></app-bd-button>
       <app-bd-button
-        *ngIf="group.inactive"
+        *ngIf="group.inactive && (isNotAllUsersGroup$ | async)"
         [collapsed]="false"
         icon="person"
         text="Activate Group"
@@ -50,7 +58,13 @@
         icon="edit"
         [route]="['panels', 'admin', 'user-group-detail', group.id, 'edit']"
       ></app-bd-panel-button>
-      <app-bd-button icon="delete" text="Delete Group" [collapsed]="false" (click)="onDelete(group)"></app-bd-button>
+      <app-bd-button
+        *ngIf="isNotAllUsersGroup$ | async"
+        icon="delete"
+        text="Delete Group"
+        [collapsed]="false"
+        (click)="onDelete(group)"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

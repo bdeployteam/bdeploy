@@ -1,5 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
+import static io.bdeploy.interfaces.UserGroupInfo.ALL_USERS_GROUP_ID;
+
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +37,10 @@ public class UserGroupBulkResourceImpl implements UserGroupBulkResource {
         BulkOperationResultDto result = new BulkOperationResultDto();
 
         for (String groupId : groupIds) {
+            if (ALL_USERS_GROUP_ID.equals(groupId)) {
+                result.add(new OperationResult(groupId, OperationResultType.ERROR, "Cannot delete " + ALL_USERS_GROUP_ID));
+                continue;
+            }
             UserGroupInfo group = authGroup.getUserGroup(groupId);
             if (group == null) {
                 result.add(new OperationResult(groupId, OperationResultType.ERROR, "Cannot find group with id " + groupId));
@@ -60,6 +66,10 @@ public class UserGroupBulkResourceImpl implements UserGroupBulkResource {
         String status = inactive ? "Deactivated" : "Activated";
 
         for (String groupId : groupIds) {
+            if (ALL_USERS_GROUP_ID.equals(groupId) && inactive) {
+                result.add(new OperationResult(groupId, OperationResultType.ERROR, "Cannot deactivate " + ALL_USERS_GROUP_ID));
+                continue;
+            }
             UserGroupInfo group = authGroup.getUserGroup(groupId);
             if (group == null) {
                 result.add(new OperationResult(groupId, OperationResultType.ERROR, "Cannot find group with id " + groupId));

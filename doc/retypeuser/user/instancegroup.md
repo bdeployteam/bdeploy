@@ -59,6 +59,10 @@ The local permission will be shown next to the global permission. The highest av
 
 The user table is grouped by permission assignment, either global, local or unassigned.
 
+!!!info Note
+You can make **Instance Group** public by assigning local `READ` permission to [**All Users Group**](/experts/system/#all-users-group).
+!!!
+
 ## Initial Steps
 
 Click on an **Instance Group** to open the **Instance Browser** of this group. Here you can see all **Instances** grouped by their _purpose_ (can be `Development`, `Test` or `Productive`).

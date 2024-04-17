@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { Sort } from '@angular/material/sort';
 import { combineLatest, map } from 'rxjs';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
 import { UserGroupInfo } from 'src/app/models/gen.dtos';
@@ -56,6 +55,5 @@ export class UserGroupsBrowserComponent {
     ];
   };
 
-  protected sort: Sort = { active: 'name', direction: 'asc' };
   protected grouping: BdDataGroupingDefinition<UserGroupInfo>[] = [];
 }

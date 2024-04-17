@@ -66,10 +66,14 @@ The available software packages and products can be viewed and **downloaded** if
 
 ## Software Repositories Access
 
-**Software Repositories** are created and managed by global administrators. A **Software Repository** is always visible and readable for all users (exception: `CLIENT` permission users). `WRITE` permissions are required to manage the software packages in the repository. Therefore, to upload software, a user requires `ADMIN` or `WRITE` permissions either globally or assigned in the **Software Repository Permissions** panel.
+**Software Repositories** are created and managed by global administrators. A **Software Repository** needs `READ` permission to be visible and readable. `WRITE` permissions are required to manage the software packages in the repository. Therefore, to upload software, a user requires `ADMIN` or `WRITE` permissions either globally or assigned in the **Software Repository Permissions** panel.
 
 :::{align=center}
 ![Software Repository Permissions](/images/Doc_SoftwareRepoPermissions.png){width=480}
 :::
 
 The **Software Repository Permissions** panel works similarly to the [**Instance Group Permissions**](/user/instancegroup/#instance-group-access).
+
+!!!info Note
+You can make **Software Repository** public by assigning local `READ` permission to [**All Users Group**](/experts/system/#all-users-group).
+!!!

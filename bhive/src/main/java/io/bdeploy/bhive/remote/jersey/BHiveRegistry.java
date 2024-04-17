@@ -47,27 +47,19 @@ public class BHiveRegistry implements AutoCloseable {
     private final Set<Path> locations = new TreeSet<>();
     private final Map<String, BHive> hives = new TreeMap<>();
     private final ActivityReporter reporter;
-    private final Function<BHive, Permission> permissionClassifier;
     private final List<MultiManifestSpawnListener> listeners = new ArrayList<>();
     private final Map<String, ManifestSpawnListener> internalListeners = new TreeMap<>();
 
     /**
      * @param reporter the {@link ActivityReporter} used for all {@link BHive} discovered by the registry
-     * @param permissionClassifier a classifier which determines the required access permission per BHive. It is allowed to return
-     *            <code>null</code> (no permission required).
      */
-    public BHiveRegistry(ActivityReporter reporter, Function<BHive, Permission> permissionClassifier) {
+    public BHiveRegistry(ActivityReporter reporter) {
         this.reporter = reporter;
-        this.permissionClassifier = permissionClassifier;
     }
 
     public Permission getRequiredPermission(BHive hive) {
-        if (permissionClassifier == null) {
-            // default is to require read permission on a hive.
-            return Permission.READ;
-        }
-
-        return permissionClassifier.apply(hive);
+        // default is to require read permission on a hive.
+        return Permission.READ;
     }
 
     /**
