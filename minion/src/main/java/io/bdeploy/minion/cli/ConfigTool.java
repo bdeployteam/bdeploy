@@ -7,6 +7,7 @@ import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingDirectoryValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -40,6 +41,7 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
         String root();
 
         @Help("Logging root directory")
+        @Validator(ExistingDirectoryValidator.class)
         String logData();
 
         @Help("Changes the name under which the minion advertises (and contacts) itself.")

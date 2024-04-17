@@ -17,6 +17,7 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.Configuration.ValueMapping;
+import io.bdeploy.common.cfg.ExistingDirectoryValidator;
 import io.bdeploy.common.cfg.HostnameValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -57,6 +58,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         String root();
 
         @Help("Logging root directory")
+        @Validator(ExistingDirectoryValidator.class)
         String logData();
 
         @Help("Optional directory where to deploy applications to, defaults to root/deploy")

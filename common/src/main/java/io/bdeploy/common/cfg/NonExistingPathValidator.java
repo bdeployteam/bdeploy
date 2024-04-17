@@ -10,6 +10,9 @@ import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 import io.bdeploy.common.util.PathHelper;
 
+/**
+ * Checks if the given {@link Path} does not exist. Empty directories are also considered valid.
+ */
 @ValidationMessage("Path exists, but should not exist (or be an empty directory): %s")
 public class NonExistingPathValidator implements ConfigValidator<String> {
 
@@ -19,12 +22,11 @@ public class NonExistingPathValidator implements ConfigValidator<String> {
         if (Files.isDirectory(p)) {
             // Empty directories are OK.
             try (Stream<Path> list = Files.list(p)) {
-                return !list.findAny().isPresent();
+                return list.findAny().isEmpty();
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot determine directory contents: " + p, e);
             }
         }
         return !PathHelper.exists(p);
     }
-
 }

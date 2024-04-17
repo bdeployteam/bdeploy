@@ -3,6 +3,9 @@ package io.bdeploy.common.cfg;
 import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 
+/**
+ * Checks if the given input is a valid remote reference.
+ */
 @ValidationMessage("Invalid remote: '%s'. A remote must be a local path or start with 'https://' and end with '/api'")
 public class RemoteValidator implements ConfigValidator<String> {
 
@@ -19,5 +22,4 @@ public class RemoteValidator implements ConfigValidator<String> {
 
         return lower.startsWith("https://") && lower.endsWith(API_SUFFIX);
     }
-
 }
