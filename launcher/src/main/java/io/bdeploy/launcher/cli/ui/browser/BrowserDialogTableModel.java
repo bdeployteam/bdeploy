@@ -16,14 +16,6 @@ class BrowserDialogTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = 1L;
 
-    public static final int COL_APP = 0;
-    public static final int COL_IG = 1;
-    public static final int COL_INSTANCE = 2;
-    public static final int COL_PURPOSE = 3;
-    public static final int COL_PRODUCT = 4;
-    public static final int COL_REMOTE = 5;
-    public static final int COL_LVERSION = 6;
-
     private final List<ClientSoftwareConfiguration> apps = new ArrayList<>();
 
     /**
@@ -80,79 +72,39 @@ class BrowserDialogTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 7;
+        return BrowserDialogTableColumn.values().length;
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        switch (columnIndex) {
-            case COL_APP:
-                return "Application";
-            case COL_IG:
-                return "Instance Group";
-            case COL_INSTANCE:
-                return "Instance";
-            case COL_PURPOSE:
-                return "Purpose";
-            case COL_PRODUCT:
-                return "Product";
-            case COL_REMOTE:
-                return "Remote";
-            case COL_LVERSION:
-                return "Launcher Version";
-            default:
-                return null;
-        }
+        return BrowserDialogTableColumn.fromIndex(columnIndex).getColumnName();
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == COL_PURPOSE) {
-            return Enum.class;
-        }
-        return String.class;
+        return BrowserDialogTableColumn.fromIndex(columnIndex).getColumnClass();
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         ClientSoftwareConfiguration app = apps.get(rowIndex);
         ClientApplicationDto metadata = app.metadata;
-        switch (columnIndex) {
-            case COL_APP:
-                if (metadata == null) {
-                    return app.clickAndStart.applicationId;
-                }
-                return metadata.appName;
-            case COL_INSTANCE:
-                if (metadata == null) {
-                    return app.clickAndStart.instanceId;
-                }
-                return metadata.instanceName;
-            case COL_IG:
-                if (metadata == null) {
-                    return app.clickAndStart.groupId;
-                }
-                return metadata.instanceGroupTitle;
-            case COL_PURPOSE:
-                if (metadata == null) {
-                    return "N/A";
-                }
-                return metadata.purpose;
-            case COL_PRODUCT:
-                if (metadata == null) {
-                    return "N/A";
-                }
-                return metadata.product.getTag();
-            case COL_REMOTE:
+        switch (BrowserDialogTableColumn.fromIndex(columnIndex)) {
+            case APP:
+                return metadata != null ? metadata.appName : app.clickAndStart.applicationId;
+            case INSTANCE:
+                return metadata != null ? metadata.instanceName : app.clickAndStart.instanceId;
+            case IG:
+                return metadata != null ? metadata.instanceGroupTitle : app.clickAndStart.groupId;
+            case PURPOSE:
+                return metadata != null ? metadata.purpose : "N/A";
+            case PRODUCT:
+                return metadata != null ? metadata.product.getTag() : "N/A";
+            case REMOTE:
                 return app.clickAndStart.host.getUri().toString();
-            case COL_LVERSION:
-                if (app.launcher == null) {
-                    return "";
-                }
-                return app.launcher.getTag();
-            default:
-                return null;
+            case LVERSION:
+                return app.launcher != null ? app.launcher.getTag() : "";
         }
+        return null;
     }
-
 }
