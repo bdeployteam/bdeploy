@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
@@ -8,53 +8,50 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { toFileList } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { GroupsService } from '../../groups/services/groups.service';
-import { DataFilePath, FileListEntry } from './data-files.service';
+import { FileListEntry, FilePath } from './files.service';
 import { InstancesService } from './instances.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class DataFilesBulkService {
+export class FilesBulkService {
   private areas = inject(NavAreasService);
   private cfg = inject(ConfigService);
   private groups = inject(GroupsService);
   private instances = inject(InstancesService);
   private downloads = inject(DownloadService);
   private http = inject(HttpClient);
+  private apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
 
-  public selection: DataFilePath[] = [];
+  public selection: FilePath[] = [];
 
-  public frozen$ = new BehaviorSubject<boolean>(false);
-
-  private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
-
+  /** Clears the selection when the primary route changes. */
   constructor() {
-    // clear selection when the primary route changes
     this.areas.primaryRoute$.subscribe(() => (this.selection = []));
   }
 
-  get selectedDataFiles(): FileListEntry[] {
+  get selectedFiles(): FileListEntry[] {
     return this.selection.flatMap((dfp) => toFileList(dfp));
   }
 
-  public deleteFiles(minion: string, dataFiles: FileListEntry[]): Observable<any> {
+  public deleteFiles(minion: string, files: FileListEntry[]): Observable<any> {
     return this.http
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instances.current$.value.instanceConfiguration.id,
         )}/delete/${minion}`,
-        dataFiles.map((file) => file.entry),
+        files.map((file) => file.entry),
       )
       .pipe(measure('Delete Instance Data Files'));
   }
 
-  public downloadDataFiles(dataFiles: FileListEntry[]) {
+  public downloadFiles(files: FileListEntry[]) {
     const path = this.apiPath(this.groups.current$.value.name, this.instances.current$.value.instanceConfiguration.id);
-
-    const minion = dataFiles[0]?.directory?.minion;
+    const minion = files[0]?.directory?.minion;
     const entries: RemoteDirectoryEntry[] = [];
-    for (const sel of dataFiles) {
+
+    for (const sel of files) {
       if (sel.directory.minion !== minion) {
         throw new Error('Cannot download files from multiple minions');
       }

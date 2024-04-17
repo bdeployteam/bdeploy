@@ -11,13 +11,13 @@ import { AddProcessComponent } from './components/add-process/add-process.compon
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
 import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
-import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
-import { DataFilesBulkManipulationComponent } from './components/data-files-bulk-maipulation/data-files-bulk-manipulation.component';
 import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
+import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
+import { FilesBulkManipulationComponent } from './components/files-bulk-maipulation/files-bulk-manipulation.component';
 import { HistoryCompareSelectComponent } from './components/history-compare-select/history-compare-select.component';
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
 import { HistoryEntryComponent } from './components/history-entry/history-entry.component';
@@ -37,8 +37,6 @@ import { PortsComponent } from './components/instance-settings/ports/ports.compo
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
-import { LogDataBulkManipulationComponent } from './components/log-data-bulk-manipulation/log-data-bulk-manipulation.component';
-import { LogDataViewerComponent } from './components/log-data-viewer/log-data-viewer.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
 import { ProcessNativesComponent } from './components/process-natives/process-natives.component';
@@ -141,16 +139,6 @@ const INSTANCES_ROUTES: Route[] = [
     data: { max: true },
   },
   {
-    path: 'data-files/bulk-manip',
-    component: DataFilesBulkManipulationComponent,
-    canActivate: [ScopedWriteGuard],
-  },
-  {
-    path: 'log-files/bulk-manip',
-    component: LogDataBulkManipulationComponent,
-    canActivate: [ScopedWriteGuard],
-  },
-  {
     path: 'settings/config-files/compare/:file',
     component: CompareComponent,
     canActivate: [ScopedWriteGuard],
@@ -246,13 +234,18 @@ const INSTANCES_ROUTES: Route[] = [
     data: { max: true },
   },
   {
-    path: 'data-files/:node/:file/view',
-    component: DataFileViewerComponent,
+    path: 'files/bulk-manip',
+    component: FilesBulkManipulationComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'files/:node/:file/view',
+    component: FileViewerComponent,
     canActivate: [ScopedReadGuard],
     data: { max: true },
   },
   {
-    path: 'data-files/:node/:file/edit',
+    path: 'files/:node/:file/edit',
     component: DataFileEditorComponent,
     canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
@@ -263,12 +256,6 @@ const INSTANCES_ROUTES: Route[] = [
     component: AddDataFileComponent,
     canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
-  },
-  {
-    path: 'log-files/:node/:file/view',
-    component: LogDataViewerComponent,
-    canActivate: [ScopedReadGuard],
-    data: { max: true },
   },
 ];
 

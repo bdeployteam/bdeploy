@@ -25,8 +25,6 @@ import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-m
 import { ConfigDescCardsComponent } from './components/config-desc-cards/config-desc-cards.component';
 import { ConfigDescElementComponent } from './components/config-desc-element/config-desc-element.component';
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
-import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
-import { DataFilesBulkManipulationComponent } from './components/data-files-bulk-maipulation/data-files-bulk-manipulation.component';
 import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
@@ -34,6 +32,8 @@ import { ConfigProcessParamGroupComponent } from './components/edit-process-over
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
+import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
+import { FilesBulkManipulationComponent } from './components/files-bulk-maipulation/files-bulk-manipulation.component';
 import { HistoryCompareSelectComponent } from './components/history-compare-select/history-compare-select.component';
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
 import { HistoryDiffFieldComponent } from './components/history-diff-field/history-diff-field.component';
@@ -64,8 +64,6 @@ import { ProductUpdateComponent } from './components/instance-settings/product-u
 import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
-import { LogDataBulkManipulationComponent } from './components/log-data-bulk-manipulation/log-data-bulk-manipulation.component';
-import { LogDataViewerComponent } from './components/log-data-viewer/log-data-viewer.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ParamDescCardComponent } from './components/param-desc-card/param-desc-card.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
@@ -114,7 +112,6 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     AppTemplateNameComponent,
     EditProcessOverviewComponent,
     ConfigureProcessComponent,
-    LogDataBulkManipulationComponent,
     InstanceTemplatesComponent,
     TemplateMessageDetailsComponent,
     ConfigProcessHeaderComponent,
@@ -133,8 +130,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     ConfigFilesComponent,
     EditorComponent,
     CompareComponent,
-    DataFileViewerComponent,
-    LogDataViewerComponent,
+    FileViewerComponent,
     PortsComponent,
     ConfigureEndpointsComponent,
     PortShiftComponent,
@@ -143,7 +139,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     ColorSelectComponent,
     ColorSelectGroupComponent,
     ProductVersionDetailsCellComponent,
-    DataFilesBulkManipulationComponent,
+    FilesBulkManipulationComponent,
     ProbeStatusComponent,
     AddControlGroupComponent,
     EditControlGroupComponent,

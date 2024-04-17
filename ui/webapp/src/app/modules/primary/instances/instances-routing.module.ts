@@ -7,9 +7,8 @@ import { setRouteId } from '../../core/utils/routeId-generator';
 import { InstancesBrowserComponent as BrowserComponent } from './components/browser/browser.component';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { DataFilesComponent } from './components/data-files/data-files.component';
+import { FilesDisplayComponent } from './components/files-display/files-display.component';
 import { HistoryComponent } from './components/history/history.component';
-import { LogDataComponent } from './components/log-data/log-data.component';
 import { SystemTemplateComponent } from './components/system-template/system-template.component';
 
 const INSTANCES_ROUTES: Route[] = [
@@ -39,15 +38,17 @@ const INSTANCES_ROUTES: Route[] = [
   },
   {
     path: 'data-files/:group/:instance/:path',
-    component: DataFilesComponent,
+    component: FilesDisplayComponent,
     canActivate: [ScopedReadGuard],
     canDeactivate: [DirtyDialogGuard],
+    data: { isDataFiles: true },
   },
   {
     path: 'log-files/:group/:instance/:path',
-    component: LogDataComponent,
+    component: FilesDisplayComponent,
     canActivate: [ScopedReadGuard],
     canDeactivate: [DirtyDialogGuard],
+    data: { isDataFiles: false },
   },
   {
     path: 'system-template/:group',

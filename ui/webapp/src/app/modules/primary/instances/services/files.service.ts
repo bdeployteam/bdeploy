@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { first, mergeMap, skipWhile } from 'rxjs/operators';
-import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { FileStatusDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { CrumbInfo } from 'src/app/modules/core/components/bd-breadcrumbs/bd-breadcrumbs.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -14,12 +14,12 @@ export interface FileListEntry {
   entry: RemoteDirectoryEntry;
 }
 
-export interface LogDataPath {
+export interface FilePath {
   crumbs: CrumbInfo[];
   minion: string;
   name: string;
   path: string;
-  children: LogDataPath[];
+  children: FilePath[];
   directory: RemoteDirectory;
   entry: RemoteDirectoryEntry;
   lastModified: number;
@@ -29,17 +29,36 @@ export interface LogDataPath {
 @Injectable({
   providedIn: 'root',
 })
-export class LogDataService {
+export class FilesService {
   private cfg = inject(ConfigService);
   private http = inject(HttpClient);
   private groups = inject(GroupsService);
   private instances = inject(InstancesService);
+  private apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
 
   public directories$ = new BehaviorSubject<RemoteDirectory[]>(null);
 
-  private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
+  public updateFile(rd: RemoteDirectory, file: FileStatusDto): Observable<any> {
+    return this.http
+      .post(
+        `${this.apiPath(
+          this.groups.current$.value.name,
+          this.instances.current$.value.instanceConfiguration.id,
+        )}/data/update/${rd.minion}`,
+        [file],
+      )
+      .pipe(measure('Update Instance File'));
+  }
 
-  public load() {
+  public loadDataFiles() {
+    this.loadFiles('dataDirSnapshot', 'Load Instance Data Files.');
+  }
+
+  public loadLogFiles() {
+    this.loadFiles('logDataDirSnapshot', 'Load Instance Log Files.');
+  }
+
+  private loadFiles(api: string, txt: string) {
     this.instances.current$
       .pipe(
         skipWhile((i) => !i),
@@ -48,8 +67,8 @@ export class LogDataService {
           this.http
             .get<
               RemoteDirectory[]
-            >(`${this.apiPath(this.groups.current$.value.name, i.instanceConfiguration.id)}/processes/logDataDirSnapshot`)
-            .pipe(measure('Load Instance Log Data Files.')),
+            >(`${this.apiPath(this.groups.current$.value.name, i.instanceConfiguration.id)}/processes/${api}`)
+            .pipe(measure(txt)),
         ),
       )
       .subscribe((d) => this.directories$.next(d));

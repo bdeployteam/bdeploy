@@ -7,7 +7,7 @@ import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dia
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
+import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
 @Component({
@@ -15,7 +15,7 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
   templateUrl: './data-file-editor.component.html',
 })
 export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestroy {
-  protected df = inject(DataFilesService);
+  protected filesService = inject(FilesService);
   private instances = inject(InstancesService);
   private areas = inject(NavAreasService);
 
@@ -34,7 +34,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestr
   ngOnInit() {
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([this.df.directories$, this.areas.panelRoute$]).subscribe(([d, r]) => {
+      combineLatest([this.filesService.directories$, this.areas.panelRoute$]).subscribe(([d, r]) => {
         if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
           return;
         }
@@ -89,7 +89,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestr
           content: Base64.encode(this.content),
         };
 
-        this.df.updateFile(this.directory$.value, f).subscribe(() => this.df.load());
+        this.filesService.updateFile(this.directory$.value, f).subscribe(() => this.filesService.loadDataFiles());
 
         this.content = '';
         this.originalContent = '';

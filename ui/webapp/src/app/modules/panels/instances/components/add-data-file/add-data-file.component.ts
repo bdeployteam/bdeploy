@@ -5,7 +5,7 @@ import { FileStatusDto, FileStatusType, RemoteDirectory } from 'src/app/models/g
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
+import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
 import { decodeDataFilePath } from '../../utils/data-file-utils';
 
 @Component({
@@ -14,7 +14,7 @@ import { decodeDataFilePath } from '../../utils/data-file-utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
-  public df = inject(DataFilesService);
+  public filesService = inject(FilesService);
   private areas = inject(NavAreasService);
 
   protected minions$ = new BehaviorSubject<string[]>([]);
@@ -37,7 +37,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
   ngOnInit(): void {
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      this.df.directories$.subscribe((dd) => {
+      this.filesService.directories$.subscribe((dd) => {
         if (!dd) {
           return;
         }
@@ -89,10 +89,10 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
       type: FileStatusType.ADD,
       content: this.tempFileContent,
     };
-    this.directory = this.df.directories$.value.find((d) => d.minion === this.fileMinion$.value);
+    this.directory = this.filesService.directories$.value.find((d) => d.minion === this.fileMinion$.value);
 
     // standard update
-    let update: Observable<any> = this.df.updateFile(this.directory, this.fileToSave).pipe(
+    let update: Observable<any> = this.filesService.updateFile(this.directory, this.fileToSave).pipe(
       switchMap(() => {
         return of(true);
       }),
@@ -106,7 +106,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
         }),
         switchMap((confirm) => {
           if (this.shouldReplace() && confirm) {
-            return this.df.updateFile(this.directory, this.fileToSave).pipe(map(() => true));
+            return this.filesService.updateFile(this.directory, this.fileToSave).pipe(map(() => true));
           }
           return of(false);
         }),
@@ -122,7 +122,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
   }
 
   public doReplace(): Observable<any> {
-    return this.df.updateFile(this.directory, this.fileToSave);
+    return this.filesService.updateFile(this.directory, this.fileToSave);
   }
 
   private shouldReplace() {
@@ -154,7 +154,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
   }
 
   private reset() {
-    this.df.load();
+    this.filesService.loadDataFiles();
     this.areas.closePanel();
     this.subscription.unsubscribe();
   }

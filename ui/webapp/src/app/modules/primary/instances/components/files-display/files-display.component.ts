@@ -22,23 +22,23 @@ import {
   toFileList,
 } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { ServersService } from '../../../servers/services/servers.service';
-import { DataFilesBulkService } from '../../services/data-files-bulk.service';
-import { DataFilePath, DataFilesService, FileListEntry } from '../../services/data-files.service';
+import { FilesBulkService } from '../../services/files-bulk.service';
+import { FileListEntry, FilePath, FilesService } from '../../services/files.service';
 import { InstancesService } from '../../services/instances.service';
 
-const colName: BdDataColumn<DataFilePath> = {
+const colName: BdDataColumn<FilePath> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
 };
 
-const colPath: BdDataColumn<DataFilePath> = {
+const colPath: BdDataColumn<FilePath> = {
   id: 'path',
   name: 'Path',
   data: (r) => r.path,
 };
 
-const colSize: BdDataColumn<DataFilePath> = {
+const colSize: BdDataColumn<FilePath> = {
   id: 'size',
   name: 'Size',
   data: (r) => r.size,
@@ -47,14 +47,14 @@ const colSize: BdDataColumn<DataFilePath> = {
   component: BdDataSizeCellComponent,
 };
 
-const colItems: BdDataColumn<DataFilePath> = {
+const colItems: BdDataColumn<FilePath> = {
   id: 'items',
   name: 'Items',
   data: (r) => (!r.children?.length ? '' : r.children.length === 1 ? '1 item' : `${r.children.length} items`),
   width: '100px',
 };
 
-const colModTime: BdDataColumn<DataFilePath> = {
+const colModTime: BdDataColumn<FilePath> = {
   id: 'lastMod',
   name: 'Last Modification',
   data: (r) => r.lastModified,
@@ -63,7 +63,7 @@ const colModTime: BdDataColumn<DataFilePath> = {
   component: BdDataDateCellComponent,
 };
 
-const colAvatar: BdDataColumn<DataFilePath> = {
+const colAvatar: BdDataColumn<FilePath> = {
   id: 'avatar',
   name: '',
   data: (r) => (!r.entry ? 'topic' : 'insert_drive_file'),
@@ -72,25 +72,25 @@ const colAvatar: BdDataColumn<DataFilePath> = {
 };
 
 @Component({
-  selector: 'app-data-files',
-  templateUrl: './data-files.component.html',
+  selector: 'app-files-display',
+  templateUrl: './files-display.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
+export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private instances = inject(InstancesService);
-  private df = inject(DataFilesService);
+  private filesService = inject(FilesService);
   private areas = inject(NavAreasService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   private searchService = inject(SearchService);
-  protected cfg = inject(ConfigService);
-  protected servers = inject(ServersService);
-  protected authService = inject(AuthenticationService);
-  protected dataFilesBulkService = inject(DataFilesBulkService);
 
   private searchTerm = '';
+  private subscription: Subscription;
 
-  private readonly colDownload: BdDataColumn<DataFilePath> = {
+  private searchColumns: BdDataColumn<FilePath>[] = [colAvatar, colPath, colItems, colModTime, colSize];
+  private defaultColumns: BdDataColumn<FilePath>[];
+
+  private readonly colDownload: BdDataColumn<FilePath> = {
     id: 'download',
     name: 'Downl.',
     data: (r) => `Download ${r.children.length ? 'Folder' : 'File'}`,
@@ -98,8 +98,7 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
     icon: () => 'cloud_download',
     width: '50px',
   };
-
-  private readonly colDelete: BdDataColumn<DataFilePath> = {
+  private readonly colDelete: BdDataColumn<FilePath> = {
     id: 'delete',
     name: 'Delete',
     data: () => 'Delete File',
@@ -108,32 +107,31 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
     width: '50px',
     actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
-  private defaultColumns: BdDataColumn<DataFilePath>[] = [
-    colAvatar,
-    colName,
-    colItems,
-    colModTime,
-    colSize,
-    this.colDownload,
-    this.colDelete,
-  ];
-  private searchColumns: BdDataColumn<DataFilePath>[] = [colAvatar, colPath, colItems, colModTime, colSize];
 
-  protected columns = this.defaultColumns;
-
+  protected cfg = inject(ConfigService);
+  protected servers = inject(ServersService);
+  protected authService = inject(AuthenticationService);
+  protected filesBulkService = inject(FilesBulkService);
   protected loading$ = new BehaviorSubject<boolean>(true);
-  protected records$ = new BehaviorSubject<DataFilePath[]>(null);
+  protected records$ = new BehaviorSubject<FilePath[]>(null);
   protected noactive$ = new BehaviorSubject<boolean>(true);
-
-  protected nodes$ = new BehaviorSubject<DataFilePath[]>(null);
+  protected nodes$ = new BehaviorSubject<FilePath[]>(null);
   protected tabIndex: number = -1;
-  protected selectedPath: DataFilePath;
-  protected crumbs: CrumbInfo[] = [];
 
+  protected selectedPath: FilePath;
+  protected crumbs: CrumbInfo[] = [];
   protected instance: InstanceDto;
-  private subscription: Subscription;
+  protected columns: BdDataColumn<FilePath>[];
+  protected isDataFiles: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+
+  constructor() {
+    this.isDataFiles = this.activatedRoute.snapshot.data['isDataFiles'];
+    this.defaultColumns = this.isDataFiles
+      ? [colAvatar, colName, colItems, colModTime, colSize, this.colDownload, this.colDelete]
+      : [colAvatar, colName, colItems, colModTime, colSize, this.colDownload];
+  }
 
   ngOnInit(): void {
     this.subscription = combineLatest([this.instances.current$, this.servers.servers$, this.cfg.isCentral$]).subscribe(
@@ -146,7 +144,7 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
     );
 
     this.subscription.add(
-      this.df.directories$.subscribe((dd) => {
+      this.filesService.directories$.subscribe((dd) => {
         if (!dd) {
           this.nodes$.next(null);
           return;
@@ -225,10 +223,14 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
     }
 
     this.loading$.next(true);
-    this.df.load();
+    if (this.isDataFiles) {
+      this.filesService.loadDataFiles();
+    } else {
+      this.filesService.loadLogFiles();
+    }
   }
 
-  protected onClick(row: DataFilePath) {
+  protected onClick(row: FilePath) {
     if (!row.entry) {
       this.selectPath(row);
     } else {
@@ -236,14 +238,14 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
         '',
         {
           outlets: {
-            panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path, 'view'],
+            panel: ['panels', 'instances', 'files', row.directory.minion, row.entry.path, 'view'],
           },
         },
       ]);
     }
   }
 
-  protected selectPath(path: DataFilePath) {
+  protected selectPath(path: FilePath) {
     this.router.navigate(['..', encodeDataFilePath(path)], { relativeTo: this.activatedRoute });
   }
 
@@ -253,7 +255,7 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
     }
   }
 
-  private doDelete(r: DataFilePath) {
+  private doDelete(r: FilePath) {
     const dataFiles = r.children.length ? toFileList(r) : [r];
     this.dialog
       .confirm(
@@ -265,7 +267,7 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
       )
       .subscribe((confirm) => {
         if (confirm) {
-          this.dataFilesBulkService
+          this.filesBulkService
             .deleteFiles(r.minion, dataFiles)
             .pipe(finalize(() => this.load(this.instance)))
             .subscribe();
@@ -273,10 +275,10 @@ export class DataFilesComponent implements OnInit, OnDestroy, BdSearchable {
       });
   }
 
-  private doDownload(r: DataFilePath) {
+  private doDownload(r: FilePath) {
     if (r.children.length) {
       const dataFiles = toFileList(r);
-      this.dataFilesBulkService.downloadDataFiles(dataFiles);
+      this.filesBulkService.downloadFiles(dataFiles);
     } else {
       this.instances.download(r.directory, r.entry);
     }
