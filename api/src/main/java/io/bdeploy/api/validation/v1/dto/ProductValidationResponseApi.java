@@ -9,8 +9,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bdeploy.api.validation.v1.PublicProductValidationResource;
 
 /**
- * The response object used in {@link PublicProductValidationResource#validate(java.io.InputStream)} to wrap around multiple
- * {@link ProductValidationIssueApi}.
+ * The response object used in
+ * {@link PublicProductValidationResource#validate(org.glassfish.jersey.media.multipart.FormDataMultiPart)} to wrap around
+ * multiple {@link ProductValidationIssueApi}.
  */
 public class ProductValidationResponseApi {
 
@@ -23,5 +24,4 @@ public class ProductValidationResponseApi {
     public ProductValidationResponseApi(@JsonProperty("issues") List<ProductValidationIssueApi> issues) {
         this.issues = issues;
     }
-
 }

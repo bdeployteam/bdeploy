@@ -85,7 +85,6 @@ public interface PluginResource {
     public void loadGlobalPlugin(ObjectId id);
 
     /**
-     * @param inputStream the data for the plugin.
      * @return the info the the uploaded, installed and loaded plugin.
      */
     @POST
