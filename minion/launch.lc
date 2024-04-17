@@ -30,6 +30,7 @@ group configuration CentralMasterNode {
 java configuration Master-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/master";
+	argument "--logData=${workspace_loc}/runtime/master/external";
 	argument "--hostname=localhost";
 	argument "--port=7701";
 	argument "--dist=ignore";
@@ -46,6 +47,7 @@ java configuration Master-Init : minion-base {
 java configuration Node-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/node";
+	argument "--logData=${workspace_loc}/runtime/node/external";
 	argument "--hostname=localhost";
 	argument "--port=7702";
 	argument "--dist=ignore";
@@ -59,6 +61,7 @@ java configuration Node-Init : minion-base {
 java configuration Central-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/central";
+	argument "--logData=${workspace_loc}/runtime/central/external";
 	argument "--hostname=localhost";
 	argument "--port=7705";
 	argument "--dist=ignore";
@@ -73,6 +76,7 @@ java configuration Central-Init : minion-base {
 java configuration Managed-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/managed";
+	argument "--logData=${workspace_loc}/runtime/managed/external";
 	argument "--hostname=localhost";
 	argument "--port=7706";
 	argument "--dist=ignore";
@@ -88,6 +92,7 @@ java configuration Managed-Init : minion-base {
 java configuration Managed-Node-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/managed-node";
+	argument "--logData=${workspace_loc}/runtime/managed-node/external";
 	argument "--hostname=localhost";
 	argument "--port=7707";
 	argument "--dist=ignore";

@@ -1,5 +1,6 @@
 package io.bdeploy.minion.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import io.bdeploy.common.audit.AuditRecord;
@@ -13,6 +14,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -37,6 +39,9 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
         @Validator(MinionRootValidator.class)
         String root();
 
+        @Help("Logging root directory")
+        String logData();
+
         @Help("Changes the name under which the minion advertises (and contacts) itself.")
         String hostname();
 
@@ -59,6 +64,11 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
 
     @Override
     protected RenderableResult run(ConfigToolConfig config) {
+        if (config.logData() == null && config.hostname() == null && config.port() == -1 && config.sessionTimeout() == -1
+                && config.mode() == null) {
+            return createNoOp();
+        }
+
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         DataResult result = createSuccess();
@@ -127,6 +137,13 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
             if (newSessionTimeout != -1) {
                 r.modifyState(s -> s.webSessionTimeoutHours = newSessionTimeout);
                 result.addField("Session timeout (hours)", newSessionTimeout);
+            }
+
+            String logDataDir = config.logData();
+            if (!StringHelper.isNullOrEmpty(logDataDir)) {
+                Path logDataDirPath = Paths.get(logDataDir).toAbsolutePath().normalize();
+                r.modifyState(s -> s.logDataDir = logDataDirPath);
+                result.addField("Logging directory", logDataDirPath);
             }
         }
 

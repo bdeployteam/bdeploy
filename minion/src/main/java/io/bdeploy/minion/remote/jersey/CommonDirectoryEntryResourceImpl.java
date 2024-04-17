@@ -81,15 +81,20 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
     static Path getEntryPath(MinionRoot root, RemoteDirectoryEntry entry) {
         Path rootDir;
         if (entry.root != null) {
-            DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.id), entry.tag);
+            DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir(), root.getLogDataDir(), entry.id,
+                    entry.tag);
             rootDir = dpp.get(entry.root).toAbsolutePath();
         } else {
             rootDir = root.getRootDir();
         }
-        Path actual = rootDir.resolve(entry.path);
 
-        if (!actual.normalize().startsWith(rootDir)) {
-            throw new WebApplicationException("Trying to escape " + rootDir, Status.BAD_REQUEST);
+        Path actual = rootDir.resolve(entry.path).normalize();
+
+        if (!actual.startsWith(rootDir)) {
+            Path externalDataFilesDir = root.getLogDataDir();
+            if (externalDataFilesDir == null || !actual.startsWith(externalDataFilesDir)) {
+                throw new WebApplicationException("Trying to escape the scope of the minion.", Status.BAD_REQUEST);
+            }
         }
 
         if (!Files.exists(actual)) {

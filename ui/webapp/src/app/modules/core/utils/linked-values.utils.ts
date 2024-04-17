@@ -335,6 +335,13 @@ export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVa
     group: null,
   });
   result.push({
+    name: 'P:LOG_DATA',
+    description: 'The logging directory which may be outside the usual scope of the application.',
+    preview: `/log_data/${instance.config.id}`,
+    link: '{{P:LOG_DATA}}',
+    group: null,
+  });
+  result.push({
     name: 'P:MANIFEST_POOL',
     description: 'The directory where globally pooled applications are installed.',
     preview: `/deploy/pool`,

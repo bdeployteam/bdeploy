@@ -202,6 +202,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** The user-directory for the hive */
     private Path userArea;
 
+    /** The {@link DeploymentPathProvider} for this {@link LauncherTool} */
+    private DeploymentPathProvider dpp;
+
     /** The launch descriptor */
     private ClickAndStartDescriptor clickAndStart;
 
@@ -521,10 +524,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read " + config.launch(), e);
         }
+
         bhiveDir = rootDir.resolve("bhive");
         appsDir = rootDir.resolve("apps");
-        poolDir = appsDir.resolve("pool");
-        appDir = appsDir.resolve(clickAndStart.applicationId);
+        dpp = new DeploymentPathProvider(appsDir, null, clickAndStart.applicationId, "1");
+        appDir = dpp.get(SpecialDirectory.ROOT);
+        poolDir = dpp.get(SpecialDirectory.MANIFEST_POOL);
 
         // Enrich log messages with the application that is about to be launched
         String pid = String.format("PID: %1$5s", ProcessHandle.current().pid());
@@ -743,8 +748,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         PathHelper.mkdirs(appDir);
 
         // Download and install the current configuration tree if required.
-        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
-        Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
+        Path cfgPath = dpp.get(SpecialDirectory.CONFIG);
         PathHelper.deleteRecursiveRetry(cfgPath); // get rid of *any* existing config
 
         if (clientAppCfg.configTree != null) {
@@ -837,8 +841,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // configuration files need to be installed in the correct version
-        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
-        Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
+        Path cfgPath = dpp.get(SpecialDirectory.CONFIG);
 
         if (clientAppCfg.configTree != null) {
             boolean isCurrent = checkForCurrentConfigFiles(clientAppCfg.configTree, cfgPath);
@@ -946,13 +949,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     private CompositeResolver createResolver(ClientApplicationConfiguration clientCfg) {
         // General resolvers
-        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
         CompositeResolver resolvers = new CompositeResolver();
         resolvers.add(new InstanceAndSystemVariableResolver(clientCfg.instanceConfig));
         resolvers.add(new ConditionalExpressionResolver(resolvers));
         resolvers.add(new ApplicationVariableResolver(clientCfg.appConfig));
         resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider, clientCfg.activeTag));
+        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, dpp, clientCfg.activeTag));
         resolvers.add(new OsVariableResolver());
         resolvers.add(new EnvironmentVariableResolver());
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
@@ -961,7 +963,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         resolvers.add(new EscapeYamlCharactersResolver(resolvers));
 
         // Enable resolving of path variables
-        resolvers.add(new DeploymentPathResolver(pathProvider));
+        resolvers.add(new DeploymentPathResolver(dpp));
 
         // Enable resolving of manifest variables
         Map<Key, Path> pooledSoftware = new HashMap<>();
@@ -970,7 +972,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         for (Manifest.Key key : clientCfg.resolvedRequires) {
             pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
         }
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pathProvider, pooledSoftware)));
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(dpp, pooledSoftware)));
 
         // Resolver for local hostname - with client warning enabled.
         resolvers.add(new LocalHostnameResolver(true));
@@ -1176,5 +1178,4 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             return VersionHelper.UNDEFINED;
         }
     }
-
 }

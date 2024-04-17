@@ -172,9 +172,12 @@ class SpecialManifestsTest {
 
             assertEquals(1, im.getInstanceNodeManifests().size());
 
+            Path deploymentDir = tmp.resolve("fakeDeploy");
+
             Manifest.Key ifmRoot = im.getInstanceNodeManifests().values().iterator().next();
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, ifmRoot);
-            InstanceNodeController inmf = new InstanceNodeController(hive, tmp.resolve("d"), inm, new TaskSynchronizer());
+            InstanceNodeController inmf = new InstanceNodeController(hive, tmp.resolve(deploymentDir), tmp.resolve("fakeLogData"),
+                    inm, new TaskSynchronizer());
             assertEquals("Test", inm.getConfiguration().name);
             assertEquals(1, inm.getConfiguration().applications.size());
             assertEquals("My Dummy", inm.getConfiguration().applications.iterator().next().name);
@@ -182,21 +185,21 @@ class SpecialManifestsTest {
 
             inmf.install();
 
+            Path checkDir = deploymentDir.resolve("pool").resolve(appKey.directoryFriendlyName());
+
             // paths may change in the future, this is a little internal :)
-            ContentHelper.checkDirsEqual(app, tmp.resolve("d/pool/" + appKey.directoryFriendlyName()));
+            ContentHelper.checkDirsEqual(app, checkDir);
 
             // try to re-use the pooled application.
             inmf.uninstall();
 
             // right now, the pooled things stay alive - this might change in the future.
-            ContentHelper.checkDirsEqual(app, tmp.resolve("d/pool/" + appKey.directoryFriendlyName()));
+            ContentHelper.checkDirsEqual(app, checkDir);
 
             inmf.install();
 
             // right now, the pooled things stay alive - this might change in the future.
-            ContentHelper.checkDirsEqual(app, tmp.resolve("d/pool/" + appKey.directoryFriendlyName()));
+            ContentHelper.checkDirsEqual(app, checkDir);
         }
-
     }
-
 }

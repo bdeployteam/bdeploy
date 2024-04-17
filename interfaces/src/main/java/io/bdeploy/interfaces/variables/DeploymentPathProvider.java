@@ -3,7 +3,7 @@ package io.bdeploy.interfaces.variables;
 import java.nio.file.Path;
 
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 
 /**
  * Handles references to special paths in the deployment.
@@ -19,6 +19,7 @@ public class DeploymentPathProvider {
         RUNTIME("runtime"),
         BIN("bin"),
         DATA("data"),
+        LOG_DATA("log_data"),
         MANIFEST_POOL("pool"),
         INSTANCE_MANIFEST_POOL("pool");
 
@@ -33,17 +34,29 @@ public class DeploymentPathProvider {
         }
     }
 
-    private final Path deploymentDir;
-    private final String installationId;
+    private final Path rootDir;
+    private final Path logDataDir;
+    private final String tagId;
 
     /**
-     * @param deploymentDir the root directory for all installations/versions of a
-     *            {@link InstanceNodeConfiguration}.
-     * @param installationId the ID of the concrete installation in question.
+     * @param deploymentDir The deployment directory which contains all instances
+     * @param logDataDir The root directory for all log data
+     * @param inm The {@link InstanceNodeManifest} that describes the concrete instance
      */
-    public DeploymentPathProvider(Path deploymentDir, String installationId) {
-        this.deploymentDir = deploymentDir;
-        this.installationId = installationId;
+    public DeploymentPathProvider(Path deploymentDir, Path logDataDir, InstanceNodeManifest inm) {
+        this(deploymentDir, logDataDir, inm.getId(), inm.getKey().getTag());
+    }
+
+    /**
+     * @param deploymentDir The deployment directory which contains all instances
+     * @param logDataDir The root directory for all log data
+     * @param itemId The ID of the concrete item (e.g. the ID of the instance)
+     * @param tagId The ID of the concrete installation of the instance in question
+     */
+    public DeploymentPathProvider(Path deploymentDir, Path logDataDir, String itemId, String tagId) {
+        this.rootDir = deploymentDir.resolve(itemId);
+        this.logDataDir = logDataDir == null ? null : logDataDir.resolve(itemId);
+        this.tagId = tagId;
     }
 
     /**
@@ -53,20 +66,23 @@ public class DeploymentPathProvider {
     public Path get(SpecialDirectory dir) {
         switch (dir) {
             case ROOT:
-                return deploymentDir;
+                return rootDir;
             case DATA:
-                return deploymentDir.resolve(dir.dirName);
+                return get(SpecialDirectory.ROOT).resolve(dir.dirName);
             case BIN:
-                return deploymentDir.resolve(dir.dirName).resolve(installationId);
+                return get(SpecialDirectory.ROOT).resolve(dir.dirName).resolve(tagId);
             case MANIFEST_POOL:
                 // Note: this reaches outside of the given "root" deploymentDir - assumes that the parent is shared by all instances
-                return deploymentDir.getParent().resolve(dir.dirName);
+                return get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName);
             case INSTANCE_MANIFEST_POOL:
-                return deploymentDir.resolve(dir.dirName);
+                return get(SpecialDirectory.ROOT).resolve(dir.dirName);
             case CONFIG:
                 return get(SpecialDirectory.BIN).resolve(dir.dirName);
             case RUNTIME:
                 return get(SpecialDirectory.BIN).resolve(dir.dirName);
+            case LOG_DATA:
+                // Note: Default path of logData is equal to DATA for compatibility with older versions
+                return logDataDir != null ? logDataDir : get(SpecialDirectory.DATA);
         }
         throw new IllegalArgumentException("Unhandled special directory: " + dir);
     }
@@ -77,12 +93,8 @@ public class DeploymentPathProvider {
      * @see #get(SpecialDirectory)
      */
     public Path getAndCreate(SpecialDirectory dir) {
-        return create(get(dir));
-    }
-
-    private Path create(Path p) {
+        Path p = get(dir);
         PathHelper.mkdirs(p);
         return p;
     }
-
 }

@@ -28,6 +28,7 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -54,6 +55,9 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @EnvironmentFallback("BDEPLOY_ROOT")
         @Validator(NonExistingPathValidator.class)
         String root();
+
+        @Help("Logging root directory")
+        String logData();
 
         @Help("Optional directory where to deploy applications to, defaults to root/deploy")
         String deployments();
@@ -131,6 +135,13 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 Path tokenPath = Paths.get(config.tokenFile());
                 Files.write(tokenPath, pack.getBytes(StandardCharsets.UTF_8));
                 result.addField("Token File", tokenPath);
+            }
+
+            String logDataDir = config.logData();
+            if (!StringHelper.isNullOrEmpty(logDataDir)) {
+                Path logDataDirPath = Paths.get(logDataDir).toAbsolutePath().normalize();
+                mr.modifyState(s -> s.logDataDir = logDataDirPath);
+                result.addField("Logging directory", logDataDirPath);
             }
 
             if (config.mode() != MinionMode.NODE) {

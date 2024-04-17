@@ -80,8 +80,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                     .build());
         }
 
-        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(inm.getId()),
-                inm.getKey().getTag());
+        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir(), root.getLogDataDir(), inm);
 
         ApplicationConfiguration app = inm.getConfiguration().applications.stream()
                 .filter(a -> a.id.equals(wrapper.applicationId)).findFirst().orElseThrow();
