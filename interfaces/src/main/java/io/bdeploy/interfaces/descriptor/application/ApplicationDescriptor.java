@@ -94,8 +94,8 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
     /**
      * Some combinations of settings are invalid. Fix them up, so defaults change depending in the settings.
      * <p>
-     * The first and currently only expample is a parameter with 'hasValue = false'. This should implicitly
-     * make the parameter BOOLEAN (present or not present). Another type is not allowed.
+     * The first and currently only example is a parameter with 'hasValue = false'. This should implicitly make the parameter
+     * BOOLEAN (present or not present). Another type is not allowed.
      */
     public void fixupDefaults() {
         if (startCommand != null) {
@@ -191,5 +191,4 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
         }
         return true;
     }
-
 }
