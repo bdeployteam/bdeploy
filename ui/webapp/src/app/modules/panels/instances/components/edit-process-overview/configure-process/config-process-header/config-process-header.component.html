@@ -112,6 +112,14 @@
         </app-config-desc-element>
       </ng-container>
       <ng-container *ngIf="app.descriptor.type === 'CLIENT'">
+        <app-config-desc-element card="cfg.control.autostart" class="local-field" position="above-right">
+          <app-bd-form-toggle
+            label="Autostart"
+            name="autostart"
+            [(ngModel)]="process.processControl.autostart"
+            [disabled]="!app.descriptor.processControl.supportsAutostart"
+          ></app-bd-form-toggle>
+        </app-config-desc-element>
         <app-bd-form-input
           class="local-field grow-[2]"
           label="Allowed Configuration Directory Paths"

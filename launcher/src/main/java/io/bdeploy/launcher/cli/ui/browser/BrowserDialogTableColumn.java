@@ -14,7 +14,8 @@ enum BrowserDialogTableColumn {
     PURPOSE("Purpose", InstancePurpose.class),
     PRODUCT("Product", String.class),
     REMOTE("Remote", String.class),
-    LVERSION("Launcher Version", String.class);
+    LVERSION("Launcher Version", String.class),
+    AUTOSTART("Autostart", Boolean.class);
 
     private final String columnName;
     private final Class<?> columnClass;

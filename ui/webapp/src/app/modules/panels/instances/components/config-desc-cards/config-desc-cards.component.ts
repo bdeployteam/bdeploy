@@ -1,13 +1,16 @@
 import { Component, Input } from '@angular/core';
 
 export type AppBaseFields = 'cfg.name' | 'cfg.id';
+
 export type AppCommandFields = 'cfg.executable';
+
 export type AppProcessCtrlFields =
   | 'cfg.control.startType'
   | 'cfg.control.keepAlive'
   | 'cfg.control.noRetries'
   | 'cfg.control.gracePeriod'
-  | 'cfg.control.attachStdin';
+  | 'cfg.control.attachStdin'
+  | 'cfg.control.autostart';
 
 export type AppEndpointFields =
   | 'cfg.ep.path'

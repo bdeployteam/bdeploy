@@ -405,9 +405,10 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.processControl.noOfRetries = (int) appDesc.processControl.noOfRetries;
         cfg.processControl.gracePeriod = appDesc.processControl.gracePeriod;
         cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
-        cfg.processControl.configDirs = appDesc.processControl.configDirs;
         cfg.processControl.startupProbe = appDesc.processControl.startupProbe;
         cfg.processControl.lifenessProbe = appDesc.processControl.lifenessProbe;
+        cfg.processControl.configDirs = appDesc.processControl.configDirs;
+        cfg.processControl.autostart = appDesc.processControl.supportsAutostart;
 
         // now apply from template in case things are set.
         applyFromPCTplMap(cfg.processControl, reqApp.processControl);

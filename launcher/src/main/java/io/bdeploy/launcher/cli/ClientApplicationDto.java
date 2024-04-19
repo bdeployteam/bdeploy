@@ -21,6 +21,7 @@ public class ClientApplicationDto {
         dto.instanceName = cfg.instanceConfig.name;
         dto.purpose = cfg.instanceConfig.purpose;
         dto.product = cfg.instanceConfig.product;
+        dto.autostart = cfg.appConfig.processControl.autostart;
 
         // Older versions do not provide a title so we fallback to the group
         dto.instanceGroupTitle = cfg.instanceGroupTitle;
@@ -36,14 +37,14 @@ public class ClientApplicationDto {
     public String appName;
 
     /**
-     * The human readable name of the instance group
-     */
-    public String instanceGroupTitle;
-
-    /**
      * The human readable name of the instance
      */
     public String instanceName;
+
+    /**
+     * The human readable name of the instance group
+     */
+    public String instanceGroupTitle;
 
     /**
      * The purpose of the instance
@@ -51,8 +52,12 @@ public class ClientApplicationDto {
     public InstancePurpose purpose;
 
     /**
-     * The product version.
+     * The product version
      */
     public Manifest.Key product;
 
+    /**
+     * Whether the application should autostart on system boot
+     */
+    public boolean autostart;
 }

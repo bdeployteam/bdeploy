@@ -1,11 +1,19 @@
 <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[400px]">
-  <!-- not using switch intentionally as there is no type checking on it. ngIf has full type checking -->
+  <!-- Intentionally not using ngSwitch because there is no type checking on it. ngIf has full type checking. -->
 
-  <!-- APPLICATION -->
+  <!-- AppBaseFields -->
+
   <div *ngIf="field === 'cfg.name'">
     The name of the process configuration, not to be confused with the name of the application launched by the process.
   </div>
   <div *ngIf="field === 'cfg.id'">The ID of the process, which is unique within the instance.</div>
+
+  <!-- AppCommandFields -->
+
+  <div *ngIf="field === 'cfg.executable'">The main command executed by BDeploy when running the process.</div>
+
+  <!-- AppProcessCtrlFields -->
+
   <div *ngIf="field === 'cfg.control.startType'">
     The start type of the process. This controls how a process can be started and whether it is considered
     <em>vital</em> for the instance.
@@ -41,9 +49,11 @@
     Determines whether the console in the UI should be attached remotely to the processes <em>stdin</em> stream. This
     allows to send commands to the process if the process supports this.
   </div>
-  <div *ngIf="field === 'cfg.executable'">The main command executed by BDeploy when running the process.</div>
+  <div *ngIf="field === 'cfg.control.autostart'">
+    Determines whether the application automatically starts upon system bootup.
+  </div>
 
-  <!-- ENDPOINTS -->
+  <!-- AppEndpointFields -->
 
   <div *ngIf="field === 'cfg.ep.path'">
     The endpoints path. The final <em>URI</em> is constructed using by appending this path to the constructed base
@@ -67,7 +77,8 @@
     If authentication is required, the password to send to the endpoint for authentication.
   </div>
 
-  <!-- INSTANCE -->
+  <!-- InstFields -->
+
   <div *ngIf="field === 'inst.name'">The name of the instance.</div>
   <div *ngIf="field === 'inst.description'">A descriptive text for humans.</div>
   <div *ngIf="field === 'inst.purpose'">

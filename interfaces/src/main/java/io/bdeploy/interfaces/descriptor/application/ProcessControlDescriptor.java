@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
  */
 public class ProcessControlDescriptor {
 
+    // ################################################# only for server applications #################################################
+
     public enum ApplicationStartType {
         /**
          * Manual-only start using explicit process controls
@@ -44,12 +46,17 @@ public class ProcessControlDescriptor {
     @JsonPropertyDescription("Specifies if a process expects (and can/wants to handle) input on stdin.")
     public boolean attachStdin = false;
 
-    @JsonPropertyDescription("Client applications only; Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.")
-    public String configDirs;
-
     @JsonPropertyDescription("Optional startup probe which is queried to find out when a process completed startup.")
     public StartupProbeDescriptor startupProbe;
 
     @JsonPropertyDescription("Optional lifeness probe which is queried to check on a process whether it is (still) alive.")
     public LifenessProbeDescriptor lifenessProbe;
+
+    // ################################################# only for client applications #################################################
+
+    @JsonPropertyDescription("Client applications only; Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.")
+    public String configDirs;
+
+    @JsonPropertyDescription("Whether the application is allowed to automatically start upon system bootup. Defaults to 'false'.")
+    public boolean supportsAutostart = false;
 }

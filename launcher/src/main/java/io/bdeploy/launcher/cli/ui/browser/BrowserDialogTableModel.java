@@ -104,6 +104,8 @@ class BrowserDialogTableModel extends AbstractTableModel {
                 return app.clickAndStart.host.getUri().toString();
             case LVERSION:
                 return app.launcher != null ? app.launcher.getTag() : "";
+            case AUTOSTART:
+                return metadata != null ? metadata.autostart : false;
         }
         return null;
     }

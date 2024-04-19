@@ -219,6 +219,7 @@ export class ProcessEditService {
         startupProbe: application.descriptor.processControl.startupProbe,
         lifenessProbe: application.descriptor.processControl.lifenessProbe,
         configDirs: application.descriptor.processControl.configDirs,
+        autostart: application.descriptor.processControl.supportsAutostart,
       },
       start: start,
       stop: stop,

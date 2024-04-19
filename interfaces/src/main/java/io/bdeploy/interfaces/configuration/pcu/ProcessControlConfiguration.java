@@ -10,6 +10,8 @@ import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
  */
 public class ProcessControlConfiguration {
 
+    // ################################################# only for server applications #################################################
+
     /**
      * The configured start type of the application.
      */
@@ -37,13 +39,6 @@ public class ProcessControlConfiguration {
     public boolean attachStdin;
 
     /**
-     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
-     * <p>
-     * Only listed directories will be provisioned to the client.
-     */
-    public String configDirs;
-
-    /**
      * Copy of the original startup probe descriptor.
      */
     public StartupProbeDescriptor startupProbe;
@@ -53,4 +48,17 @@ public class ProcessControlConfiguration {
      */
     public LifenessProbeDescriptor lifenessProbe;
 
+    // ################################################# only for client applications #################################################
+
+    /**
+     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
+     * <p>
+     * Only listed directories will be provisioned to the client.
+     */
+    public String configDirs;
+
+    /**
+     * Whether the application should autostart on system boot
+     */
+    public boolean autostart;
 }
