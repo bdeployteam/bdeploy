@@ -10,6 +10,7 @@ import io.bdeploy.logging.audit.RollingFileAuditor;
 public class LauncherCli extends ToolBase {
 
     public LauncherCli() {
+        register(AutostartTool.class);
         register(BrowserTool.class);
         register(LauncherTool.class);
         register(UninstallerTool.class);

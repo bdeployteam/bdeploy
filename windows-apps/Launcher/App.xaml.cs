@@ -1,4 +1,5 @@
-﻿using Bdeploy.Launcher.Views;
+﻿using Bdeploy.Launcher.Src;
+using Bdeploy.Launcher.Views;
 using Bdeploy.Shared;
 using Serilog;
 using System;
@@ -38,6 +39,8 @@ namespace Bdeploy.Launcher {
             } else if (Utils.HasArgument(e.Args, "/Uninstall")) {
                 bool forAllUsers = Utils.HasArgument(e.Args, "/ForAllUsers");
                 exitCode = DoUninstall(e.Args, forAllUsers);
+            } else if (Utils.HasArgument(e.Args, "/Autostart")) {
+                exitCode = DoHandleAutostart();
             } else {
                 exitCode = await DoLaunch(e.Args);
             }
@@ -85,6 +88,14 @@ namespace Bdeploy.Launcher {
                 return -1;
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Launches all applications which are configured for autostart
+        /// </summary>
+        private int DoHandleAutostart() {
+            AppAutostarter appBrowser = new AppAutostarter();
+            return appBrowser.Start();
         }
 
         /// <summary>

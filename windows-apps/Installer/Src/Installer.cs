@@ -1,11 +1,13 @@
 ﻿using Bdeploy.FileAssoc;
 using Bdeploy.Installer.Models;
 using Bdeploy.Shared;
+using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -227,7 +229,7 @@ namespace Bdeploy.Installer {
 
                 // Download and extract if not available
                 if (!IsLauncherInstalled()) {
-                    bool success = await DownloadAndExtractLauncher();
+                    bool success = await SetupLauncher();
                     if (!success) {
                         return -1;
                     }
@@ -308,9 +310,9 @@ namespace Bdeploy.Installer {
         }
 
         /// <summary>
-        /// Downloads and extracts the launcher.
+        /// Downloads and extracts the launcher and registers it to be automatically started on bootup.
         /// </summary>
-        private async Task<bool> DownloadAndExtractLauncher() {
+        private async Task<bool> SetupLauncher() {
             // Launcher directory must not exist. 
             // Otherwise ZIP extraction fails
             FileHelper.DeleteDir(launcherHome);
@@ -323,11 +325,19 @@ namespace Bdeploy.Installer {
             if (launcherZip == null) {
                 return false;
             }
-
             ExtractLauncher(launcherZip, launcherHome);
 
             // Cleanup. Download not required any more
             FileHelper.DeleteDir(tmpDir);
+
+            // Add the laucher to autostart
+            RegistryKey baseKey = forAllUsers ? Registry.LocalMachine : Registry.CurrentUser;
+            RegistryKey autorunKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            if (autorunKey == null) {
+                return false;
+            }
+            autorunKey.SetValue("BDeploy Launcher Autostart", '"' + launcherExe + "\" /autostart");
+
             return true;
         }
 

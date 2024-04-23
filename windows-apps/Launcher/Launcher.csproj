@@ -99,6 +99,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Src\AppAutostarter.cs" />
     <Compile Include="Src\AppBrowser.cs" />
     <Compile Include="Src\ClickAndStartLauncher.cs" />
     <Compile Include="Src\Events.cs" />
