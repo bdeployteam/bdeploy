@@ -48,6 +48,7 @@ namespace Bdeploy.FileAssoc {
             // Create or update ProgID entry
             using (RegistryKey bDeployKey = rootKey.CreateSubKey(PROG_ID)) {
                 bDeployKey.SetValue("FriendlyTypeName", "BDeploy Application");
+                bDeployKey.SetValue("PreviewDetails", "prop:System.ItemNameDisplay;System.ItemTypeText;System.DateCreated;System.DateModified;System.FileOwner;System.Size;System.FileAttributes;");
 
                 using (RegistryKey commandKey = bDeployKey.CreateSubKey("Shell\\Open\\Command")) {
                     commandKey.SetValue("", path + " \"%1\" %*");
