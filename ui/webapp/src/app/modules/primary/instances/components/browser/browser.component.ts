@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { CustomDataGrouping, InstanceDto, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -12,6 +12,7 @@ import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
 import { InstanceBulkService } from 'src/app/modules/panels/instances/services/instance-bulk.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { GroupsService } from '../../../groups/services/groups.service';
+import { ServersService } from '../../../servers/services/servers.service';
 import { InstancesColumnsService } from '../../services/instances-columns.service';
 import { InstancesService } from '../../services/instances.service';
 import { BdDataDisplayComponent } from './../../../../core/components/bd-data-display/bd-data-display.component';
@@ -31,6 +32,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   protected areas = inject(NavAreasService);
   protected authService = inject(AuthenticationService);
   protected bulk = inject(InstanceBulkService);
+  protected servers = inject(ServersService);
 
   protected initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
     {
@@ -55,6 +57,8 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   ];
   protected grouping: BdDataGroupingDefinition<InstanceDto>[];
   protected hasProducts$ = new BehaviorSubject<boolean>(false);
+  protected allowInstanceCreation$ = new BehaviorSubject<boolean>(false);
+  protected instanceCreationDisabledReason$ = new BehaviorSubject<string>('');
 
   private defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
   private defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
@@ -108,6 +112,34 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
     this.subscription.add(this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length)));
+    this.subscription.add(
+      combineLatest([
+        this.authService.isCurrentScopeWrite$,
+        this.hasProducts$,
+        this.config.isCentral$,
+        this.servers.servers$,
+      ]).subscribe(([scopeWrite, hasProducts, isCentral, servers]) => {
+        if (!scopeWrite) {
+          this.allowInstanceCreation$.next(false);
+          this.instanceCreationDisabledReason$.next(
+            'You do not have the necesarry permissions to create a new instance',
+          );
+          return;
+        }
+        if (!hasProducts) {
+          this.allowInstanceCreation$.next(false);
+          this.instanceCreationDisabledReason$.next('No products are configured');
+          return;
+        }
+        if (isCentral && servers.length < 1) {
+          this.allowInstanceCreation$.next(false);
+          this.instanceCreationDisabledReason$.next('No managed servers are configured');
+          return;
+        }
+        this.allowInstanceCreation$.next(true);
+        this.instanceCreationDisabledReason$.next('');
+      }),
+    );
     this.subscription.add(
       this.groups.current$.subscribe((g) => {
         if (!g) {
