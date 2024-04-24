@@ -100,14 +100,16 @@
         "
         [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        text="Delete"
-        icon="delete"
-        (click)="doDelete(prod)"
-        [loadingWhen$]="singleProduct.usedInLoading$"
-        [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (singleProduct.usedInLoading$ | async) || !!(singleProduct.getUsedIn() | async).length"
-      ></app-bd-button>
+      <div matTooltip="{{deletionButtonDisabledReason$ | async}}" [matTooltipDisabled]="allowDeletion$ | async">
+        <app-bd-button
+          [collapsed]="false"
+          text="Delete"
+          icon="delete"
+          (click)="doDelete(prod)"
+          [loadingWhen$]="singleProduct.usedInLoading$"
+          [disabled]="!(allowDeletion$ | async)"
+        ></app-bd-button>
+      </div>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>
