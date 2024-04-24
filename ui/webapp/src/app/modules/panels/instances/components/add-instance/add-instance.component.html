@@ -77,15 +77,19 @@
         required
         (ngModelChange)="delayRevalidateSystem(form.controls['system'])"
       ></app-bd-form-select>
-
-      <app-bd-button
-        type="submit"
-        text="Save"
-        [collapsed]="false"
-        icon="save"
-        color="primary"
-        [disabled]="form.invalid"
-      ></app-bd-button>
+      <div
+        matTooltip="Either a mandatory field is missing or a given value is invalid"
+        [matTooltipDisabled]="!form.invalid"
+      >
+        <app-bd-button
+          type="submit"
+          text="Save"
+          [collapsed]="false"
+          icon="save"
+          color="primary"
+          [disabled]="form.invalid"
+        ></app-bd-button>
+      </div>
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>
