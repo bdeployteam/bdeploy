@@ -254,9 +254,7 @@ namespace Bdeploy.Installer {
                 return -1;
             } finally {
                 // Release lock
-                if (lockStream != null) {
-                    lockStream.Dispose();
-                }
+                lockStream?.Dispose();
                 FileHelper.DeleteFile(lockFile);
             }
         }
@@ -279,10 +277,7 @@ namespace Bdeploy.Installer {
             File.WriteAllText(appDescriptor, config.ClickAndStartDescriptor);
 
             // Read existing registry entry
-            SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid, forAllUsers);
-            if (data == null) {
-                data = new SoftwareEntryData();
-            }
+            SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid, forAllUsers) ?? new SoftwareEntryData();
 
             // Only create desktop shortcut if we just have written the descriptor
             Shortcut shortcut = new Shortcut(appDescriptor, launcherHome, appName, icon);

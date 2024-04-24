@@ -153,9 +153,7 @@ namespace Bdeploy.Launcher {
                 return false;
             } finally {
                 // Release lock
-                if (lockStream != null) {
-                    lockStream.Dispose();
-                }
+                lockStream?.Dispose();
                 FileHelper.DeleteFile(UPDATE_LOCK);
             }
         }

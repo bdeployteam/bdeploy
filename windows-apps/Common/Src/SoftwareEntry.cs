@@ -57,17 +57,18 @@ namespace Bdeploy.Shared {
                     if (appKey == null) {
                         return null;
                     }
-                    SoftwareEntryData entry = new SoftwareEntryData();
-                    entry.DisplayName = (string)appKey.GetValue("DisplayName");
-                    entry.DisplayIcon = (string)appKey.GetValue("DisplayIcon");
-                    entry.DisplayVersion = (string)appKey.GetValue("DisplayVersion");
-                    entry.Publisher = (string)appKey.GetValue("Publisher");
-                    entry.UninstallString = (string)appKey.GetValue("UninstallString");
-                    entry.QuietUninstallString = (string)appKey.GetValue("QuietUninstallString");
-                    entry.InstallLocation = (string)appKey.GetValue("InstallLocation");
-                    entry.InstallDate = (string)appKey.GetValue("InstallDate");
-                    entry.DesktopShortcut = (string)appKey.GetValue("DesktopShortcut");
-                    entry.StartMenuShortcut = (string)appKey.GetValue("StartMenuShortcut");
+                    SoftwareEntryData entry = new SoftwareEntryData {
+                        DisplayName = (string)appKey.GetValue("DisplayName"),
+                        DisplayIcon = (string)appKey.GetValue("DisplayIcon"),
+                        DisplayVersion = (string)appKey.GetValue("DisplayVersion"),
+                        Publisher = (string)appKey.GetValue("Publisher"),
+                        UninstallString = (string)appKey.GetValue("UninstallString"),
+                        QuietUninstallString = (string)appKey.GetValue("QuietUninstallString"),
+                        InstallLocation = (string)appKey.GetValue("InstallLocation"),
+                        InstallDate = (string)appKey.GetValue("InstallDate"),
+                        DesktopShortcut = (string)appKey.GetValue("DesktopShortcut"),
+                        StartMenuShortcut = (string)appKey.GetValue("StartMenuShortcut")
+                    };
                     int noModify = (int)appKey.GetValue("NoModify", 0);
                     int noRepair = (int)appKey.GetValue("NoRepair", 0);
                     if (noModify == 1 && noRepair == 1) {
