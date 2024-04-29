@@ -3,6 +3,7 @@ package io.bdeploy.minion.nodes;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -46,6 +47,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     private MinionRoot root;
     private String self;
     private MinionConfiguration config;
+    private NodeSynchronizer nodeSynchronizer;
 
     private ChangeEventManager changes;
 
@@ -65,6 +67,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         this.root = root;
         this.config = new MinionManifest(root.getHive()).read();
         this.self = root.getState().self;
+        this.nodeSynchronizer = new NodeSynchronizer(this.config.getMinion(this.self));
 
         // initially, all nodes are offline.
         this.config.entrySet().forEach(e -> this.status.put(e.getKey(), createStarting(e.getValue())));
@@ -161,6 +164,12 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 }
 
                 msd.lastRoundtrip = duration;
+
+                boolean isStandaloneOrManaged = root.getMode() == MinionMode.MANAGED || root.getMode() == MinionMode.STANDALONE;
+                if (isStandaloneOrManaged && !Objects.equals(node, self) && status.get(node).offline && !msd.offline) {
+                    nodeSynchronizer.sync(node);
+                }
+
                 status.put(node, msd);
 
                 // previously inhibited contact warning means node was not reachable. log recovery

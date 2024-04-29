@@ -202,8 +202,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 Manifest.Key toDeploy = entry.getValue();
                 MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
-                assertNotNull(node, "Node not available: " + nodeName);
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
+
+                if (node == null) {
+                    log.info("Node {} is offline. Skipping install", nodeName);
+                    continue;
+                }
 
                 Runnable r = () -> {
                     // grab all required manifests from the applications
@@ -245,14 +249,102 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public void syncNode(String nodeName, String instanceId) {
+        MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+
+        if (node == null) {
+            log.info("Node {} is offline. Skipping sync of instance {}.", nodeName, instanceId);
+            return;
+        }
+
+        InstanceManifest imf = InstanceManifest.load(hive, instanceId, null);
+        InstanceStateRecord state = imf.getState(hive).read();
+        String instanceActiveTag = state.activeTag;
+
+        NodeProcessResource npr = nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context);
+        InstanceNodeStatusDto nodeStatus = npr.getStatus(instanceId);
+
+        NodeDeploymentResource deployment = ResourceProvider.getResource(node.remote, NodeDeploymentResource.class, context);
+
+        // if node active tag is different from current active tag -> deactivate
+        String nodeActiveTag = nodeStatus.activeTag;
+        if (nodeActiveTag != null && !nodeActiveTag.equals(instanceActiveTag)) {
+            Manifest.Key toDeactivate = getNodeKey(nodeName, instanceId, nodeActiveTag);
+            log.debug("Deactivating {}", toDeactivate);
+            deployment.deactivate(toDeactivate);
+        }
+
+        // make sure every installed version is installed on the node if applicable
+        for (String installedTag : state.installedTags) {
+            Manifest.Key toInstall = getNodeKey(nodeName, instanceId, installedTag);
+            if (toInstall == null) {
+                continue;
+            }
+            try (var handle = af.run(Actions.INSTALL, name, imf.getConfiguration().id, toInstall.getTag())) {
+                log.debug("Installing {}", toInstall);
+                installOnNode(nodeName, toInstall);
+            }
+        }
+
+        // activate current active version on node if applicable
+        if (instanceActiveTag != null && !instanceActiveTag.equals(nodeActiveTag)) {
+            Manifest.Key toActivate = getNodeKey(nodeName, instanceId, instanceActiveTag);
+            if (toActivate != null) {
+                try (var handle = af.run(Actions.ACTIVATE, name, imf.getConfiguration().id, instanceActiveTag)) {
+                    log.debug("Activating {}", toActivate);
+                    deployment.activate(toActivate);
+                }
+            }
+        }
+
+        log.info("Done syncing instance {} on node {}", imf.getManifest(), nodeName);
+    }
+
+    // returns null if node is not present in instance version
+    private Manifest.Key getNodeKey(String nodeName, String instanceId, String versionTag) {
+        InstanceManifest imf = InstanceManifest.load(hive, instanceId, versionTag);
+        SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
+        return fragmentReferences.get(nodeName);
+    }
+
+    private void installOnNode(String nodeName, Manifest.Key toDeploy) {
+        MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+        if (node == null) {
+            log.info("Skipping install of {}. {} is offline", toDeploy, nodeName);
+            return;
+        }
+        NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class,
+                context);
+
+        // grab all required manifests from the applications
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
+        LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
+        PushOperation pushOp = new PushOperation().setRemote(node.remote);
+        for (ApplicationConfiguration app : inm.getConfiguration().applications) {
+            pushOp.addManifest(app.application);
+            ApplicationManifest amf = ApplicationManifest.of(hive, app.application, null);
+
+            // applications /must/ follow the ScopedManifestKey rules.
+            ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+
+            // the dependency must be here. it has been pushed here with the product,
+            // since the product /must/ reference all direct dependencies.
+            localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()).forEach(pushOp::addManifest);
+        }
+
+        // Make sure the node has the manifest
+        pushOp.addManifest(toDeploy);
+
+        // Create the task that pushes all manifests and then installs them on the remote
+        hive.execute(pushOp);
+
+        deployment.install(toDeploy);
+    }
+
+    @Override
     @WriteLock
     public void activate(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
-
-        if (!isFullyDeployed(imf)) {
-            throw new WebApplicationException(
-                    "Given manifest for ID " + imf.getConfiguration().id + " is not fully deployed: " + key, Status.NOT_FOUND);
-        }
 
         try (var handle = af.run(Actions.ACTIVATE, name, imf.getConfiguration().id, key.getTag())) {
             // record de-activation
@@ -295,8 +387,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 Manifest.Key toDeploy = entry.getValue();
                 MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
-                assertNotNull(node, "Node not available: " + nodeName);
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
+                if (node == null) {
+                    log.info("Skipping activation on node {}. Node is offline", nodeName);
+                    continue;
+                }
 
                 NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
                         NodeDeploymentResource.class, context);
@@ -312,57 +407,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             getState(imf, hive).activate(key.getTag());
             imf.getHistory(hive).recordAction(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
         }
-    }
-
-    /**
-     * @param imf the {@link InstanceManifest} to check.
-     * @param ignoreOffline whether to regard an instance as deployed even if a
-     *            participating node is offline.
-     * @return whether the given {@link InstanceManifest} is fully deployed to all
-     *         required minions.
-     */
-    private boolean isFullyDeployed(InstanceManifest imf) {
-        SortedMap<String, Key> imfs = imf.getInstanceNodeManifests();
-        // No configuration -> no requirements, so always fully deployed.
-        if (imfs.isEmpty()) {
-            return true;
-        }
-        // check all minions for their respective availability.
-        String instanceId = imf.getConfiguration().id;
-        for (Map.Entry<String, Manifest.Key> entry : imfs.entrySet()) {
-            String nodeName = entry.getKey();
-            if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
-                continue;
-            }
-            Manifest.Key toDeploy = entry.getValue();
-            MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
-
-            assertNotNull(node, "Node not available: " + nodeName);
-            assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
-
-            InstanceStateRecord deployments;
-            try {
-                NodeDeploymentResource ndr = ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class,
-                        context);
-                deployments = ndr.getInstanceState(instanceId);
-            } catch (Exception e) {
-                throw new IllegalStateException("Node offline while checking state: " + nodeName, e);
-            }
-
-            if (deployments.installedTags.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Node {} does not contain any deployment for {}", nodeName, instanceId);
-                }
-                return false;
-            }
-            if (!deployments.installedTags.contains(toDeploy.getTag())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Node {} does not have {} available", nodeName, toDeploy);
-                }
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override

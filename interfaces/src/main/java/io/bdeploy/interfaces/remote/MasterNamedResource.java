@@ -395,4 +395,16 @@ public interface MasterNamedResource {
     @POST
     @Path("/reinstall")
     public void reinstall(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
+
+    /**
+     * Synchronizes instance for master and node.
+     * Makes sure every instance version installed on master that includes the node is installed on the node as well
+     * Makes sure node's active version is not outdated
+     *
+     * @param nodeName - name of the node that will be synchronized with master
+     * @param instanceId - id of the instance that will be synchronized
+     */
+    @POST
+    @Path("/sync-node")
+    public void syncNode(@QueryParam("nodeName") String nodeName, @QueryParam("instanceId") String instanceId);
 }
