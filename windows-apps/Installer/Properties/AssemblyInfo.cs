@@ -5,12 +5,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Installer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("BDeploy Installer")]
+[assembly: AssemblyDescription("Tool for installing BDeploy applications")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BDeploy Team")]
 [assembly: AssemblyProduct("BDeploy: Installer")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright © 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

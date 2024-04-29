@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Shared")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Contains shared classes for other BDeploy applications")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BDeploy Team")]
 [assembly: AssemblyProduct("BDeploy: Shared")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright © 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

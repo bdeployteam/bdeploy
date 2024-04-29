@@ -5,12 +5,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FileAssoc")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("BDeploy File Association")]
+[assembly: AssemblyDescription("Tool for associating .bdeploy files with the BDeploy executeable")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BDeploy Team")]
 [assembly: AssemblyProduct("BDeploy: FileAssoc")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright © 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
