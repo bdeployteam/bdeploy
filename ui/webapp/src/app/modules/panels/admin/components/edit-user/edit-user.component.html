@@ -19,6 +19,9 @@
             label="E-Mail Address"
             [(ngModel)]="tempUser.email"
             [disabled]="tempUser.external"
+            type="email"
+            email
+            appTrimmed
           ></app-bd-form-input>
           <ng-container *ngIf="!tempUser.external">
             <app-bd-form-input

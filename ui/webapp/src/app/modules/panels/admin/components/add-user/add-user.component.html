@@ -10,7 +10,14 @@
         appIdentifier
       ></app-bd-form-input>
       <app-bd-form-input name="fullName" label="Full Name" [(ngModel)]="addUser.fullName"></app-bd-form-input>
-      <app-bd-form-input name="email" label="E-Mail Address" [(ngModel)]="addUser.email"></app-bd-form-input>
+      <app-bd-form-input
+        name="email"
+        label="E-Mail Address"
+        [(ngModel)]="addUser.email"
+        type="email"
+        email
+        appTrimmed
+      ></app-bd-form-input>
       <app-bd-form-input
         name="pass"
         label="New Password"
