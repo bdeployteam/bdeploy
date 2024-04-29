@@ -24,7 +24,7 @@ Once the instance has been [configured](/user/instance/#instance-configuration),
 :::
 
 !!!info Note
-For more information, see [Process Control](/user/processcontrol/#process-control)
+For more information, see [Process Control](/user/processcontrol/#process-control).
 !!!
 
 ## Instance Configuration
@@ -43,7 +43,7 @@ Next up, you can assign **processes** to **nodes** by selecting **applications**
 
 The panel will display all **applications** along with their **process templates** if available. You can click the [ **Add** ] button to add a new, unconfigured **process** to the **node**. Using the [ **Add template** ] button, you can add a new **process** from a **template**, which typically includes a complete configuration of the selected **application**, see [Application Templates](/user/instance/#application-templates) for more information.
 
-In any case, the **process** will appear in the selected **node**. You can use drag & drop to re-order **processes** within a **node**. This has currently mostly cosmetic impact, but can be important in a single scenario: when stopping processes, **BDeploy** will stop them in **reverse** order as configured on the **node**. It will stop one process after another, starting from the bottom of the list.
+In any case, the **process** will appear in the selected **node**. You can use drag & drop to re-order **processes** within a **node**. The order of the processes is relevant - please see [Process Control Groups](/user/instance/#process-control-groups) for details.
 
 :::{align=center}
 ![New Process](/images/Doc_InstanceNewProcess.png){width=480}
@@ -53,7 +53,7 @@ In any case, the **process** will appear in the selected **node**. You can use d
 The virtual **Client Application Node** is not available if the product does not contain any client applications.
 !!!
 
-When changing configuration of processes, you will note a colored border next to new or modified processes, which indicate the current state the process is in. A newly added process receives a **green** border, a modified process receives a border in the current themes **accent** color, a process which has validation issues receives a border in the current themes **warning** color. Additionally, validation issues are displayed above any **node**.
+When changing the configuration of processes, you might notice a colored border next to new or modified processes. This indicate the current state the process is in. A newly added process receives a **green** border, a modified process receives a border in the **accent** color of the current theme and a process which has validation issues receives a border in the **warning** color of the current theme. Additionally, validation issues are displayed above any **node**.
 
 :::{align=center}
 ![Configuration Validation](/images/Doc_InstanceConfigValidation.png){width=480}
@@ -64,13 +64,13 @@ When changing configuration of processes, you will note a colored border next to
 **BDeploy** keeps track of any changes performed on any of the [Instance Configuration](/user/instance/#instance-configuration) pages panels. These changes can be viewed by pressing the [ **Local Changes** ] toolbar button.
 
 :::{align=center}
-![Local Changes](/images/Doc_InstanceConfigLocalChanges.png){width=480}
+![Local Changes Panel](/images/Doc_InstanceConfigLocalChanges.png){width=480}
 :::
 
 You can [ **Undo** ] and [ **Redo** ] changes. Even dismissable messages (on product update) can be brought back by [ **Undo** ] and [ **Redo** ]. To view the current changes compared to the state you started from, use the [ **Compare Local with Base** ] button.
 
 :::{align=center}
-![Local Changes](/images/Doc_InstanceConfigCompareChanges.png){width=480}
+![Local Changes Comparison](/images/Doc_InstanceConfigCompareChanges.png){width=480}
 :::
 
 ### Process Settings
@@ -90,7 +90,7 @@ The available parameters, their type and whether or not they are mandatory or op
 :::
 
 !!!info Note
-The **Application** defines in which order the parameters are passed to the **Process** this order cannot be changed for predefined parameters.
+The **Application** defines in which order the parameters are passed to the **Process**. This order cannot be changed for predefined parameters.
 !!!
 
 Hovering the mouse over a parameter will show a small popup that contains a thorough description of the selected parameter. This also works in the **command line preview** section, as well as in any **compare** views throughout **BDeploy**.
@@ -98,7 +98,7 @@ Hovering the mouse over a parameter will show a small popup that contains a thor
 **Validation issues** are displayed per group in the respective title and next to the affected parameter.
 
 !!!info Tip
-You can use the _Search Bar_ to search for and filter parameters even though they are not shown as table. Groups will be hidden from the page unless a parameter matches - this includes optional (not yet configured) parameters.
+You can use the _Search Bar_ to search and filter for parameters even if they are not shown in the table. Groups will be hidden from the page unless a parameter matches - this includes optional (not yet configured) parameters.
 !!!
 
 #### Copy & Paste
@@ -139,7 +139,7 @@ Click the [ **Add** ] button in the **Custom Parameters** group to add a new **c
 
 #### Conditional Parameters
 
-**Conditional parameters** are parameters which are only configurable if a specific dependent parameter exists or has a certain value. These parameters are hidden until the dependent parameter meets the conditions requirements.
+**Conditional parameters** are parameters which are only configurable if a specific dependent parameter exists or has a certain value. These parameters are hidden until the dependent parameter meets requirements of the condition.
 
 #### Link Expressions
 
@@ -149,13 +149,13 @@ Link expressions can be used on all process parameters (as well as for endpoint 
 ![Content Asssist for Link Expressions](/images/Doc_InstVar_InParameter.png){width=480}
 :::
 
-The content assist will propose categories of [Variable Expansions](/power/variables/#variable-expansions) first, and once the category is determined will continue to provide more detailed assistence.
+The content assist will propose categories of [Variable Expansions](/power/variables/#variable-expansions) first, and, once the category is determined, will continue to provide more detailed assistence.
 
 See [Variable Expansions](/power/variables/#variable-expansions) for more details.
 
 #### Command Line Preview
 
-A preview of the command that is executed to launch this process can be viewed by expanding the **Command Line Preview** section. The preview is especially useful in case of custom parameters to ensure that they are added as expected in the correct order.
+A preview of the command that is executed to launch this process can be viewed by expanding the **Command Line Preview** section. The preview is especially useful in case of custom parameters to ensure that they are added in the correct order.
 
 :::{align=center}
 ![Preview Command Line with Custom Parameter](/images/Doc_InstanceConfigPreview.png){width=480}
@@ -167,9 +167,7 @@ A preview of the command that is executed to launch this process can be viewed b
 This section applies to `CLIENT` applications only.
 !!!
 
-`CLIENT` applications by default do not receive any [Configuration Files](/user/instance/#configuration-files) from the instance configuration. The reason for this is simple: security. Client PCs are typically less secure than the server running `SERVER` applications. Nevertheless, also `CLIENT` applications may _require_ configuration files.
-
-Thus it is possible to **whitelist** certain configuration directories in the configuration of _each_ `CLIENT` process in the instance configuration.
+`CLIENT` applications do not receive any [Configuration Files](/user/instance/#configuration-files) from the instance configuration by default. The reason for this is simple: security. Client PCs are typically less secure than the server running `SERVER` applications. Regardless, `CLIENT` applications may _require_ configuration files. It is therefore possible to **whitelist** certain configuration directories in the configuration of _each_ `CLIENT` process in the instance configuration.
 
 :::{align=center}
 ![Allowed Configuration Directories](/images/Doc_InstanceConfig_ClientConfigDirs.png){width=480}
@@ -186,36 +184,36 @@ Select one or more directories to have those installed to the PC running the `CL
 To add **Instance Variables**, use the [ **Instance Variables...** ] option in the **Instance Settings** panel. Add a new **Instance Variable** using the [ **+** ] button in the panels toolbar.
 
 :::{align=center}
-![A new Instance Variable](/images/Doc_InstVar_Plain.png){width=480}
+![Creation of a new Instance Variable](/images/Doc_InstVar_Plain.png){width=480}
 :::
 
 The value of an **Instance Variable** can not only be a plain value of the selected type, but it can also be a _link expression_, which is a value consisting of a combination of plain text components and one or more [Variable Expansions](/power/variables/#variable-expansions). In this mode, the editor will provide content assist for expansions and a dedicated variable list popup.
 
 :::{align=center}
-![A new Instance Variable (Link Expression)](/images/Doc_InstVar_Link.png){width=480}
+![Creation of a new Instance Variable (Link Expression)](/images/Doc_InstVar_Link.png){width=480}
 :::
 
 Once created **Instance Variables** can be referenced from all other [Link Expressions](/user/instance/#link-expressions), e.g. on process parameters, configuration files, etc.
 
 ### Configuration Files
 
-The **configuration files** of all **Processes** of an **Instance** are maintained together in one place. It can be opened by clicking on the [ **Configuration Files** ] button in the **Instance Settings** panel. The initial set of **configuration files** is derived from the default set delivered with the product, see [`product-info.yaml`](/power/product/#product-infoyaml).
+The **configuration files** of all **Processes** of an **Instance** are maintained together in one place. It can be opened by clicking on the [ **Configuration Files** ] button in the **Instance Settings** panel. The initial set of **configuration files** is derived from the default set delivered with the product; see [`product-info.yaml`](/power/product/#product-infoyaml).
 
 :::{align=center}
 ![Instance Configuration Files](/images/Doc_InstanceConfigFiles.png){width=480}
 :::
 
-The **configuration files** of an **Instance** can be compared with the original **configuration file templates** of the **Product** at any time, an according up to date hint is shown next to each configuration file if applicable. The [ **Compare with product template** ] button starts the comparison. Files which are present in the **product** but not in the **instance configuration** are marked, same is true the other way round.
+The **configuration files** of an **Instance** can be compared with the original **configuration file templates** of the **Product** at any time, an according up to date hint is shown next to each configuration file if applicable. The [ **Compare with product template** ] button starts the comparison. Files which are present in the **product** but not in the **instance configuration** are marked - the same is true the other way around.
 
 New configuration files can be be created using the [ **+** ] button. Prompt for a file name and an optional initial content to upload. When dropping a file onto the drop zone, the filename is updated automatically to match the dropped file.
 
 The [ **Edit** ] button on each file can be used to edit the content of the file using an online rich editor.
 
 :::{align=center}
-![Edit Instance Configuration Files](/images/Doc_InstanceConfigFilesEdit.png){width=480}
+![Editing an Instance Configuration File](/images/Doc_InstanceConfigFilesEdit.png){width=480}
 :::
 
-Online editing is only possible for text files. Binary files like ZIP, PDF, etc. can not be edited online. Instead, you can download and later on replace them.
+Online editing is only possible for text files. Binary files like ZIP, PDF, etc. cannot be edited online. However, it is possible to download them, modify them locally, and then reupload (and thus replace) them.
 
 [Variable Expansions](/power/variables/#variable-expansions) can be used in configuration files. The variables will be expanded when the file is written on disc on the target node. The editor for configuration files provides content assist for [Variable Expansions](/power/variables/#variable-expansions) on [ **CTRL** ] + [ **Space** ] if the current word in the editor contains `{{`.
 
@@ -233,13 +231,13 @@ If there's a newer **product version** available (newer than the one that is con
 ![Update Notification](/images/Doc_InstanceProductUpdateAvail.png){width=480}
 :::
 
-Clicking on the notification opens the **product version** sidebar. The same sidebar can also be opened opened by clicking on the [ **Update Product Version** ] button in the **Instance Settings** panel.
+Clicking on the notification opens the **Update Product** panel. The same panel can also be opened opened by clicking on the [ **Update Product Version** ] button in the **Instance Settings** panel.
 
 :::{align=center}
 ![Change Current Product Version](/images/Doc_InstanceProductUpdate.png){width=480}
 :::
 
-Changing the version can be done by clicking on the [ **Upgrade** ] or [ **Downgrade** ] button displayed at the right side of the product version. Changing the product version will trigger an automated migration. This migration will also validate changes. It gives **hints** about potentially relevant (but not blocking) changes, and additionally validation issues in case the migration could not be performed fully automatically. You then have the chance to fix issues manually before saving the resulting **instance version**.
+Changing the version can be done by clicking on the [ **Upgrade** ] or [ **Downgrade** ] button displayed at the right side of the product version. Changing the product version will trigger an automated migration. This migration will also validate changes. It gives **hints** about potentially relevant (but not blocking) changes and validation issues in case the migration could not be performed fully automatically. You then have the chance to fix issues manually before saving the resulting **instance version**.
 
 :::{align=center}
 ![Product Update Hints](/images/Doc_InstanceProductUpdateHints.png){width=480}
@@ -270,7 +268,7 @@ The banner is shown in the [Instance Overview](/user/instancegroup/#create-new-i
 Instance versions can be exported and downloaded from the [Instance History](/user/history/#instance-history). This will download this specific instance version's raw data as a _ZIP_. The _ZIP_ can be re-imported using the **Instance Settings** panel to create a new **instance version** which has that exported instances content.
 
 !!!warning Warning
-This mechanism allows access to the most internal data structures of **BDeploy**. Great care has to be taken to not damage any of the data when manipulating the _ZIP_ files content manually.
+This mechanism allows access to the internal data structures of **BDeploy**. Great care has to be taken to not damage any of the data when manipulating the content of the _ZIP_ manually.
 !!!
 
 ### Application Templates
@@ -321,7 +319,7 @@ Next you will be presented with the template variables which need to be provided
 ![Instance Templates Variable Assignment](/images/Doc_InstanceTemplatesVars.png){width=480}
 :::
 
-Clicking [ **Confirm** ] will create the processes defined in the template. The configuration will **not** be saved automatically, to allow further tuning of the configuration before doing so. Applying **templates** can be undone by clicking [ **Undo** ] like any other change.
+Clicking [ **Confirm** ] will create the processes defined in the template. The configuration will **not** be saved automatically in order to allow further tuning of the configuration. Applying **templates** can be undone by clicking [ **Undo** ] like any other change.
 
 :::{align=center}
 ![Applied Instance Templates](/images/Doc_InstanceTemplatesDone.png){width=480}
@@ -333,26 +331,28 @@ The **Manage Network Ports** panel can be reached from the **Instance Settings**
 
 The [ **Shift Ports** ] action allows to bulk edit selected port parameters and shift them upwards or downwards by a given offset.
 
-The [ **Export CSV** ] action allows to export a CSV list of all ports configured in the system. This can be used to pass on information to external partners, for instance for further firewall configuration, etc.
+The [ **Export CSV** ] action allows to export a CSV list of all ports configured in the system. This can be used to forward information to external partners, e.g. for further firewall configuration, etc.
 
 ### Process Control Groups
 
-**Processes** can be grouped into **Process Control Groups**. Those groups dictate the order in which processes are started and stopped, as well as whether process startup is awaited - or not.
+**Processes** can be grouped into **Process Control Groups**. Those groups dictate the order in which processes are started and stopped, as well as whether or not process startup is awaited.
 
-Each **Process Control Group** has configurable behavior for contained processes regarding starting and stopping. Groups are processed in the configured order when starting, and the reversed configured order when stopping. Processes **within** each group are processed according to the groups configuration. Each group can have configuration for startup and stop behaviour.
+Each **Process Control Group** has configurable behavior for contained processes regarding starting and stopping. Groups are processed in the configured order when starting, and the reversed configured order when stopping. Processes **within** each group are processed according to the groups configuration. Each group has its own configuration for startup and stop behaviour.
 
 Possible values for the **Start Type** and **Stop Type** handling configuration are:
 
-- `SEQUENTIAL`: Each **Process** in the group is handled (started/stopped) sequentially. Any potential waiting (for startup and or shutdown, depending on the capabilities of the process) is done before proceeding to the next **Process** or **Process Control Group**.
+- `SEQUENTIAL`: Each **Process** in the group is handled (started/stopped) sequentially. Any potential waiting (for startup and or shutdown, depending on the capabilities of the process) is done before proceeding to the next **Process** or **Process Control Group**. The precise behavior is determined by the **Start Wait** configuration (see below).
 - `PARALLEL`: Each **Process** in the group is handled (started/stopped) in parallel. Only once all **Process** operations within the group have finished, the group is considered finished and processing continues with the next **Process Control Group**. Be aware that in conjunction with `CONTINUE` wait mode for process startup, this will make a group complete immediately and continue on to the next group immediately as well.
 
 Additionally, each **Process Control Group** can be configured to wait for process startup, i.e. startup probes. Each **Process Control Group** has a **Start Wait** configuration:
 
-- `WAIT`: When starting a **Process** in the group, wait for its startup to be complete. This is either once the **Startup Probe** signals process startup if available and configured, or once the process has been created if no probe is available.
-- `CONTINUE`: When starting a **Process** in the group, do not wait for its startup to be complete, instead move on to the next process immediately. This makes the startup handling types (`SEQUENTIAL`, `PARALLEL`) essentially irrelevant, as processes are typically created so fast that it does not make any difference anymore.
+- `CONTINUE`: When starting a **Process** in the group, do not wait for its startup to be complete, instead move on to the next process immediately. This makes the startup handling types (`SEQUENTIAL`, `PARALLEL`) essentially irrelevant, as processes are typically created so fast that it does not make any difference.
+- `WAIT`: When starting a **Process** in the group, wait for its startup to be complete before continuing to the next **Process**. The startup of the process is considered complete once the **Startup Probe** becomes live. If no **Startup Probe** is configured, this mode is equal to `CONTINUE`.
+- `WAIT_UNTIL_STOPPED`: When starting a **Process** in the group, wait for it to finish before continuing to the next **Process**. A process is considered finished once its state is **STOPPED**.
+
 
 :::{align=center}
-![Edit Process Control Groups](/images/Doc_InstanceConfigAddProcessControlGroup.png){width=480}
+![Add Process Control Groups](/images/Doc_InstanceConfigAddProcessControlGroup.png){width=480}
 :::
 
 Each `SERVER` node automatically uses **Process Control Groups** and is initialized with a 'Default' group. Adding a new **Process** to a **Node** will always add that **Process** to the last **Process Control Group**. It can then be moved by drag and drop to another **Process Control Group** if required.

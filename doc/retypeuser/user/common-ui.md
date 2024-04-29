@@ -5,9 +5,9 @@ icon: commit
 
 # Common UI Elements
 
-**BDeploy** tries to follow a few quite simple patterns regarding UI/UX. The common parts of the UI which is the same for nearly all pages is described in this section.
+**BDeploy** tries to follow a few simple patterns regarding UI/UX. The common parts of the UI, which are the same for nearly all pages, are described in this section.
 
-## Search
+## Search Bar
 
 The search bar at the top of the screen can be used to search in the current page. It will filter all tables and lists in the current page, regardless of where the table is located.
 
@@ -15,7 +15,7 @@ The search bar at the top of the screen can be used to search in the current pag
 ![Search Bar](/images/Doc_SearchBarEnabled.png){width=480}
 :::
 
-The search bar might be disabled in case there is no element on the screen currently which can be filtered.
+The search bar might be disabled if no elements on the current screen can be filtered.
 
 :::{align=center}
 ![Disabled Search Bar](/images/Doc_SearchBarDisabled.png){width=480}
@@ -23,7 +23,7 @@ The search bar might be disabled in case there is no element on the screen curre
 
 ## Panel
 
-The panel is the area on the left side of the screen which typically contains content related to the content in the main area. This panel is invisible by default, and slides into view when the according content is available. This is typically triggered by clicking an entry in a table or a toolbar button. An example for a panel is the _Create Instance Group_ panel, which will also be one of the first panels you'll see in the application.
+The panel is the area on the right side of the screen which typically contains details related to the content in the main area. This panel is hidden by default and slides into view whenever necessarry. This is typically triggered by clicking an entry in a table or a toolbar button. An example for a panel is the _Add Instance Group_ panel, which will also be one of the first panels you'll see in the application.
 
 :::{align=center}
 ![Panel](/images/Doc_AddGroupPanelEmpty.png){width=480}
@@ -50,7 +50,7 @@ Most tables offer the possibility to group the entries by a certain criteria. Th
 
 Groups are represented as collapsable sections in the table. Multiple levels of grouping are supported in table mode. Press the [ **+** ] button to add an additional level of grouping and choose a criteria to group. Pressing the [ **-** ] button will remove the last level of grouping.
 
-The _Save as local preset_ button will save the current data grouping settings as preset in the browser storage. This will be the default grouping settings whenever you open the same page again.
+The _Save preset_ button will save the current data grouping settings as preset in the browser storage. This will be the default grouping settings whenever you open the same page again.
 
 !!!info Note
 Grouping works differently in _Card Mode_. Only one level of grouping is supported in card mode, and groups are displayed as tabs instead of sections.
