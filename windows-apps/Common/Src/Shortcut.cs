@@ -31,18 +31,7 @@ namespace Bdeploy.Shared {
             string desktop = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.Create);
             string linkFile = Path.Combine(desktop, linkName + ".lnk");
 
-            // setup shortcut information
-            IShellLink link = (IShellLink)new ShellLink();
-            link.SetDescription(appName);
-            link.SetPath(targetPath);
-            link.SetWorkingDirectory(workingDir);
-            if (appIcon != null) {
-                link.SetIconLocation(appIcon, 0);
-            }
-
-            // save it
-            IPersistFile file = (IPersistFile)link;
-            file.Save(linkFile, false);
+            CreateAndSaveShortcut(linkFile);
             return linkFile;
         }
 
@@ -56,6 +45,11 @@ namespace Bdeploy.Shared {
             string linkFile = Path.Combine(linkPath, linkName + ".lnk");
             Directory.CreateDirectory(linkPath);
 
+            CreateAndSaveShortcut(linkFile);
+            return linkFile;
+        }
+
+        private void CreateAndSaveShortcut(string linkFile) {
             // setup shortcut information
             IShellLink link = (IShellLink)new ShellLink();
             link.SetDescription(appName);
@@ -68,7 +62,6 @@ namespace Bdeploy.Shared {
             // save it
             IPersistFile file = (IPersistFile)link;
             file.Save(linkFile, false);
-            return linkFile;
         }
     }
 
