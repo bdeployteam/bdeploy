@@ -68,15 +68,6 @@
         [loadingWhen$]="downloadingLauncher$"
         [matTooltip]="!(clients.loading$ | async) && !hasLauncher ? 'No Launcher available for the selected operating system' : null"
       ></app-bd-button>
-      <app-bd-button
-        icon="archive"
-        text="Download Portable Launcher"
-        [collapsed]="false"
-        [disabled]="!hasLauncher || (downloadingLauncherZip$ | async)"
-        (click)="downloadLauncherZip(app.client.os)"
-        [loadingWhen$]="downloadingLauncherZip$"
-        [matTooltip]="!(clients.loading$ | async) && !hasLauncher ? 'No Launcher available for the selected operating system' : null"
-      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

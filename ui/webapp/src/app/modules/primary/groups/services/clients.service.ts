@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { debounceTime, finalize, skipWhile, take } from 'rxjs/operators';
 import {
   ClientApplicationDto,
@@ -187,18 +187,6 @@ export class ClientsService {
           },
         });
     });
-  }
-
-  /** Download the unbranded launcher as ZIP */
-  public downloadLauncherZip(os: OperatingSystem): Observable<any> {
-    const launchers = this.launcher$.value?.launchers;
-    if (!launchers || !launchers[os]) {
-      return of(null);
-    }
-
-    // TODO: To allow better progress reporting, we should use our prepare/token/download mechanism instead.
-    this.downloads.download(`${this.apiSwupPath}/download/${launchers[os].name}/${launchers[os].tag}`);
-    return of(null);
   }
 
   public getDirectUiURI(app: ClientApp): Observable<string> {
