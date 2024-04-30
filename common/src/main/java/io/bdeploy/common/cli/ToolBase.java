@@ -103,45 +103,44 @@ public abstract class ToolBase {
     }
 
     public void toolMain(String... args) throws Exception {
-        ActivityReporter.Stream streamReporter = new ActivityReporter.Stream(System.out);
-        ActivityReporter defaultReporter = new ActivityReporter.Null();
-        ActivityReporter reporter = defaultReporter;
-        PrintStream output = null;
-        PrintStream reporterOutput = null;
-        DataFormat dataMode = DataFormat.TEXT;
         RenderableResult result = null;
 
-        boolean verbose = false;
-        boolean closeOutput = false;
+        PrintStream output = null;
+        PrintStream reporterOutput = null;
+        ActivityReporter.Stream streamReporter = null;
         RuntimeException exc = null;
+
+        boolean q = false;
+        boolean v = false;
+        boolean vv = false;
+        String oArg = null;
+        String opArg = null;
+        DataFormat dataMode = DataFormat.TEXT;
         try {
             int toolArgNum = 0;
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].startsWith("-")) {
                     switch (args[i]) {
-                        case "-vv":
-                            streamReporter.setVerboseSummary(true);
-                            reporter = null;
-                            verbose = true;
+                        case "-q":
+                            q = true;
+                            v = false;
+                            vv = false;
                             break;
                         case "-v":
-                            verbose = true;
+                            q = false;
+                            v = true;
+                            vv = false;
                             break;
-                        case "-q":
-                            // explicit new instance to signal explicit quiet-ness
-                            reporter = new ActivityReporter.Null();
-                            verbose = false;
+                        case "-vv":
+                            q = false;
+                            v = false;
+                            vv = true;
                             break;
                         case "-o":
-                            String of = args[++i];
-                            closeOutput = true;
-                            output = new PrintStream(new File(of), StandardCharsets.UTF_8.name());
+                            oArg = args[++i];
                             break;
                         case "-op":
-                            String opf = args[++i];
-                            reporterOutput = new PrintStream(new File(opf), StandardCharsets.UTF_8.name());
-                            streamReporter = new ActivityReporter.Stream(reporterOutput);
-                            streamReporter.setVerboseSummary(reporter == null);
+                            opArg = args[++i];
                             break;
                         case "--csv":
                             dataMode = DataFormat.CSV;
@@ -150,8 +149,7 @@ public abstract class ToolBase {
                             dataMode = DataFormat.JSON;
                             break;
                         case "--version":
-                            String version = VersionHelper.getVersion().toString();
-                            System.out.println(version);
+                            System.out.println(VersionHelper.getVersion().toString());
                             return;
                         default:
                             break;
@@ -162,12 +160,11 @@ public abstract class ToolBase {
                 }
             }
 
-            if (reporter == null) {
-                reporter = streamReporter;
-            }
-            if (output == null) {
-                output = System.out;
-            }
+            output = oArg == null ? System.out : new PrintStream(new File(oArg), StandardCharsets.UTF_8.name());
+            reporterOutput = opArg == null ? System.out : new PrintStream(new File(opArg), StandardCharsets.UTF_8.name());
+            streamReporter = new ActivityReporter.Stream(reporterOutput);
+            streamReporter.setVerboseSummary(vv);
+            ActivityReporter reporter = vv ? streamReporter : new ActivityReporter.Null();
 
             if (args.length <= toolArgNum || tools.get(args[toolArgNum]) == null) {
                 int logo = 0;
@@ -220,28 +217,22 @@ public abstract class ToolBase {
             CliTool instance = getTool(Arrays.copyOfRange(args, toolArgNum, args.length));
             Class<? extends CliTool> clazz = instance.getClass();
             ToolDefaultVerbose defVerbose = clazz.getAnnotation(ToolDefaultVerbose.class);
-            if (defVerbose != null) {
-                // switch to verbose, if we aren't already explicitly set up.
-                if (verbose || (verbose && reporter == streamReporter)) {
-                    // explicit verbose -v || -vv
-                } else if (reporter != defaultReporter) {
-                    // explicit quiet -q
+            if (!q && !v && !vv && defVerbose != null) {
+                // no explicit verbosity argument has been given AND we have a default verbosity -> set up according to the value
+                if (defVerbose.value()) {
+                    reporter = streamReporter;
+                    vv = true;
                 } else {
-                    // nothing explicit, respect annotation.
-                    verbose = true;
-
-                    if (defVerbose.value()) {
-                        reporter = streamReporter;
-                    }
+                    v = true;
                 }
             }
 
-            if (reporter == streamReporter) {
+            if (vv) {
                 streamReporter.beginReporting();
             }
 
             instance.setOutput(output);
-            instance.setVerbose(verbose);
+            instance.setVerbose(v || vv);
             instance.setActivityReporter(reporter);
             instance.setDataFormat(dataMode);
 
@@ -262,13 +253,14 @@ public abstract class ToolBase {
         } catch (RuntimeException t) {
             exc = t;
         } finally {
-            if (closeOutput && output != null) {
-                output.close();
+            if (streamReporter != null) {
+                streamReporter.stopReporting();
             }
-
-            streamReporter.stopReporting();
-            if (reporterOutput != null) {
+            if (reporterOutput != null && reporterOutput != System.out) {
                 reporterOutput.close();
+            }
+            if (output != null && output != System.out) {
+                output.close();
             }
         }
 

@@ -16,7 +16,8 @@ import java.lang.annotation.Target;
 public @interface ToolDefaultVerbose {
 
     /**
-     * @return whether to turn on activity reporting as well.
+     * @return <code>true</code> for <i>very verbose</i> (= with activity reporting), <code>false</code> for <i>verbose</i> (=
+     *         without activity reporting)
      */
     boolean value() default false;
 }
