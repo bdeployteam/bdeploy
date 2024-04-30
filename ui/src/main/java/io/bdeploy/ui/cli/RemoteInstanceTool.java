@@ -56,6 +56,7 @@ import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
+import io.bdeploy.ui.utils.BrowserHelper;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status.Family;
 
@@ -141,6 +142,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help(value = "Use this flag to avoid confirmation prompt when deleting instance.", arg = false)
         boolean yes() default false;
 
+        @Help(value = "Use this flag to open the dashboard of the current instance in the web UI.", arg = false)
+        boolean open() default false;
     }
 
     public RemoteInstanceTool() {
@@ -169,6 +172,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
 
         helpAndFailIfMissing(config.uuid(), "--uuid missing");
+
+        if (config.open()) {
+            return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + config.uuid())//
+                    ? createResultWithSuccessMessage("Successfully opened the dashboard")//
+                    : createResultWithErrorMessage("Failed to open the dashboard");
+        }
 
         if (config.exportTo() != null) {
             return doExport(ir, config);
