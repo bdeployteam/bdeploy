@@ -78,7 +78,9 @@ public class ClientSoftwareManifest {
     public ClientSoftwareConfiguration read(Manifest.Key key) {
         Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = hive.execute(new TreeEntryLoadOperation().setRootTree(mf.getRoot()).setRelativePath(FILE_NAME))) {
-            return StorageHelper.fromStream(is, ClientSoftwareConfiguration.class);
+            ClientSoftwareConfiguration config = StorageHelper.fromStream(is, ClientSoftwareConfiguration.class);
+            config.key = mf.getKey();
+            return config;
         } catch (Exception e) {
             log.error("Failed to read software configuration '" + key + "'", e);
             return null;

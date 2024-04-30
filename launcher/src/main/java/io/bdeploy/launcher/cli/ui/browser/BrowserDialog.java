@@ -75,14 +75,14 @@ public class BrowserDialog extends BaseDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private final BrowserDialogTableModel model = new BrowserDialogTableModel();
-
     private final transient Path rootDir;
+    private final transient Path bhiveDir;
     private final transient boolean readonlyRoot;
     private final transient Auditor auditor;
-    private final transient TableRowSorter<BrowserDialogTableModel> sortModel = new TableRowSorter<>(model);
 
-    private final JTable table = new JTable(model);
+    private final BrowserDialogTableModel model;
+    private final transient TableRowSorter<BrowserDialogTableModel> sortModel;
+    private final JTable table;
 
     private JButton launchButton;
     private JButton refreshButton;
@@ -102,9 +102,16 @@ public class BrowserDialog extends BaseDialog {
 
     public BrowserDialog(Path rootDir, Path userArea) {
         super(new Dimension(1024, 768));
+
         this.rootDir = rootDir;
+        this.bhiveDir = rootDir.resolve("bhive");
         this.readonlyRoot = userArea != null;
         this.auditor = userArea != null ? RollingFileAuditor.getFactory().apply(userArea) : null;
+
+        this.model = new BrowserDialogTableModel(bhiveDir, auditor);
+        this.sortModel = new TableRowSorter<>(model);
+        this.table = new JTable(model);
+
         setTitle("Client Applications");
 
         // Header area displaying a search field
@@ -127,13 +134,12 @@ public class BrowserDialog extends BaseDialog {
      * ignored since we cannot launch them.
      */
     public void searchApps() {
-        Path hivePath = rootDir.resolve("bhive");
-        if (!hivePath.toFile().isDirectory()) {
+        if (!bhiveDir.toFile().isDirectory()) {
             return;
         }
         model.clear();
 
-        try (BHive hive = new BHive(hivePath.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hivePath),
+        try (BHive hive = new BHive(bhiveDir.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir),
                 new ActivityReporter.Null())) {
             ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
             model.addAll(manifest.list().stream().filter(mf -> mf.clickAndStart != null).toList());
@@ -249,6 +255,9 @@ public class BrowserDialog extends BaseDialog {
 
         TableColumn columnR = columnModel.getColumn(BrowserDialogTableColumn.REMOTE.ordinal());
         columnR.setPreferredWidth(150);
+
+        TableColumn columnA = columnModel.getColumn(BrowserDialogTableColumn.AUTOSTART.ordinal());
+        columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(bhiveDir, auditor));
 
         // Launch on double click
         table.addMouseListener(new DoubleClickListener());

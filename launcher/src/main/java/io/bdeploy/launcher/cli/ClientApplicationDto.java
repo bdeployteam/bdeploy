@@ -21,6 +21,7 @@ public class ClientApplicationDto {
         dto.instanceName = cfg.instanceConfig.name;
         dto.purpose = cfg.instanceConfig.purpose;
         dto.product = cfg.instanceConfig.product;
+        dto.supportsAutostart = cfg.appDesc.processControl.supportsAutostart;
         dto.autostart = cfg.appConfig.processControl.autostart;
 
         // Older versions do not provide a title so we fallback to the group
@@ -57,7 +58,12 @@ public class ClientApplicationDto {
     public Manifest.Key product;
 
     /**
-     * Whether the application should autostart on system boot
+     * Whether the application supports autostart
+     */
+    public boolean supportsAutostart;
+
+    /**
+     * Whether the server wants the application to autostart on system boot
      */
     public boolean autostart;
 }

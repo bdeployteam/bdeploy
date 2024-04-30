@@ -1,5 +1,6 @@
 package io.bdeploy.launcher.cli.ui.browser;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,14 +10,26 @@ import java.util.TreeMap;
 
 import javax.swing.table.AbstractTableModel;
 
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.meta.MetaManifest;
+import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 class BrowserDialogTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = 1L;
 
     private final List<ClientSoftwareConfiguration> apps = new ArrayList<>();
+    private final Path bhiveDir;
+    private final Auditor auditor;
+
+    public BrowserDialogTableModel(Path bhiveDir, Auditor auditor) {
+        this.bhiveDir = bhiveDir;
+        this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
+    }
 
     /**
      * Appends all applications to the list of applications.
@@ -86,6 +99,25 @@ class BrowserDialogTableModel extends AbstractTableModel {
     }
 
     @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        if (BrowserDialogTableColumn.fromIndex(columnIndex) != BrowserDialogTableColumn.AUTOSTART) {
+            return false;
+        }
+        ClientApplicationDto metadata = apps.get(rowIndex).metadata;
+        return metadata == null ? false : metadata.supportsAutostart;
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (BrowserDialogTableColumn.fromIndex(columnIndex) == BrowserDialogTableColumn.AUTOSTART) {
+            try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
+                new MetaManifest<>(apps.get(rowIndex).key, false, Boolean.class).write(hive, (boolean) aValue);
+            }
+            fireTableCellUpdated(rowIndex, columnIndex);
+        }
+    }
+
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         ClientSoftwareConfiguration app = apps.get(rowIndex);
         ClientApplicationDto metadata = app.metadata;
@@ -105,6 +137,12 @@ class BrowserDialogTableModel extends AbstractTableModel {
             case LVERSION:
                 return app.launcher != null ? app.launcher.getTag() : "";
             case AUTOSTART:
+                try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
+                    Boolean storedValue = new MetaManifest<>(app.key, false, Boolean.class).read(hive);
+                    if (storedValue != null) {
+                        return storedValue.booleanValue();
+                    }
+                }
                 return metadata != null ? metadata.autostart : false;
         }
         return null;
