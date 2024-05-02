@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -106,7 +106,7 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
   styleUrls: ['./product-details.component.css'],
   providers: [ProductDetailsService],
 })
-export class ProductDetailsComponent implements OnInit {
+export class ProductDetailsComponent implements OnInit, OnDestroy {
   private actions = inject(ActionsService);
   protected products = inject(ProductsService);
   protected singleProduct = inject(ProductDetailsService);
@@ -122,6 +122,10 @@ export class ProductDetailsComponent implements OnInit {
   protected refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
   protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
+  private subscription: Subscription;
+
+  protected allowDeletion$ = new BehaviorSubject<boolean>(false);
+  protected deletionButtonDisabledReason$ = new BehaviorSubject<string>('');
   private deleting$ = new BehaviorSubject<boolean>(false);
 
   private p$ = this.singleProduct.product$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
@@ -135,6 +139,41 @@ export class ProductDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.singleProductPlugins$ = this.singleProduct.getPlugins();
+    this.subscription = combineLatest([
+      this.auth.isCurrentScopeAdmin$,
+      this.singleProduct.usedInLoading$,
+      this.singleProduct.getUsedIn(),
+    ]).subscribe(([currentScopeAdmin, usedInLoading, usedIn]) => {
+      if (!currentScopeAdmin) {
+        this.allowDeletion$.next(false);
+        this.deletionButtonDisabledReason$.next('You do not have the necesarry permissions to delete a product');
+        return;
+      }
+
+      if (usedInLoading) {
+        this.allowDeletion$.next(false);
+        this.deletionButtonDisabledReason$.next('Loading product usage information');
+        return;
+      }
+
+      const count = usedIn?.length | 0;
+      if (count > 0) {
+        this.allowDeletion$.next(false);
+        this.deletionButtonDisabledReason$.next(
+          count === 1
+            ? 'Product is still in use by instance ' + usedIn[0].name
+            : 'Product is still in use by multiple instances',
+        );
+        return;
+      }
+
+      this.allowDeletion$.next(true);
+      this.deletionButtonDisabledReason$.next('');
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   protected doDelete(prod: ProductDto) {
