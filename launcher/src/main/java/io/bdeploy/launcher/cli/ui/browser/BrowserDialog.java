@@ -235,11 +235,11 @@ public class BrowserDialog extends BaseDialog {
         // Setup default column properties
         TableColumnModel columnModel = table.getColumnModel();
 
-        TableColumn columnP = columnModel.getColumn(BrowserDialogTableModel.COL_PURPOSE);
+        TableColumn columnP = columnModel.getColumn(BrowserDialogTableColumn.PURPOSE.ordinal());
         columnP.setPreferredWidth(25);
         columnP.setCellRenderer(new BrowserDialogPurposeCellRenderer());
 
-        TableColumn columnR = columnModel.getColumn(BrowserDialogTableModel.COL_REMOTE);
+        TableColumn columnR = columnModel.getColumn(BrowserDialogTableColumn.REMOTE.ordinal());
         columnR.setPreferredWidth(150);
 
         // Launch on double click
@@ -252,7 +252,7 @@ public class BrowserDialog extends BaseDialog {
 
         // Sort and filter
         table.setRowSorter(sortModel);
-        RowSorter.SortKey sortKey = new RowSorter.SortKey(BrowserDialogTableModel.COL_APP, SortOrder.ASCENDING);
+        RowSorter.SortKey sortKey = new RowSorter.SortKey(BrowserDialogTableColumn.APP.ordinal(), SortOrder.ASCENDING);
         sortModel.setMaxSortKeys(1);
         sortModel.setSortKeys(Collections.singletonList(sortKey));
 
