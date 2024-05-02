@@ -25,7 +25,6 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   protected downloadingClickAndStart$ = new BehaviorSubject<boolean>(false);
 
   protected downloadingLauncher$ = new BehaviorSubject<boolean>(false);
-  protected downloadingLauncherZip$ = new BehaviorSubject<boolean>(false);
   protected hasLauncher: boolean;
 
   private subscription: Subscription;
@@ -77,14 +76,6 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
     this.clients
       .downloadLauncherInstaller(os)
       .pipe(finalize(() => this.downloadingLauncher$.next(false)))
-      .subscribe();
-  }
-
-  protected downloadLauncherZip(os: OperatingSystem) {
-    this.downloadingLauncherZip$.next(true);
-    this.clients
-      .downloadLauncherZip(os)
-      .pipe(finalize(() => this.downloadingLauncherZip$.next(false)))
       .subscribe();
   }
 
