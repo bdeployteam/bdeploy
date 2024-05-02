@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.workers;
 
 import java.io.IOException;
 import java.nio.file.Path;

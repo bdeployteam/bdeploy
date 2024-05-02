@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.workers;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -15,6 +15,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.ExceptionHelper;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
+import io.bdeploy.launcher.cli.ui.browser.PropertyChangeActivityReporter;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
 /**

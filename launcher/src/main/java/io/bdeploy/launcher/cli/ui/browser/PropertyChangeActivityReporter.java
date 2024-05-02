@@ -8,7 +8,7 @@ import io.bdeploy.common.ActivityReporter;
 /**
  * Activity reporter that fires a property change event for each new activity.
  */
-class PropertyChangeActivityReporter extends ActivityReporter.Null {
+public class PropertyChangeActivityReporter extends ActivityReporter.Null {
 
     public static final String ACTIVITY_NAME = "activityName";
 
