@@ -58,6 +58,14 @@ import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
 import io.bdeploy.launcher.cli.ui.WindowHelper;
+import io.bdeploy.launcher.cli.ui.browser.workers.AppLauncher;
+import io.bdeploy.launcher.cli.ui.browser.workers.AppRefresher;
+import io.bdeploy.launcher.cli.ui.browser.workers.AppReinstaller;
+import io.bdeploy.launcher.cli.ui.browser.workers.AppUninstaller;
+import io.bdeploy.launcher.cli.ui.browser.workers.AppUpdater;
+import io.bdeploy.launcher.cli.ui.browser.workers.FsckTask;
+import io.bdeploy.launcher.cli.ui.browser.workers.PruneTask;
+import io.bdeploy.launcher.cli.ui.browser.workers.VerifyTask;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
 /**
