@@ -48,8 +48,7 @@ class RepoCliTest {
     }
 
     @Test
-    void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root)
-            throws IOException {
+    void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root) throws IOException {
         tools.execute(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
                 "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc");
 
