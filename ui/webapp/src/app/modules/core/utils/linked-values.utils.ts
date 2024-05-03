@@ -302,42 +302,42 @@ export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVa
   result.push({
     name: 'P:ROOT',
     description: 'The root directory of the instance version installation.',
-    preview: `/deploy/${instance.config.id}`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}`,
     link: '{{P:ROOT}}',
     group: null,
   });
   result.push({
     name: 'P:CONFIG',
     description: 'Resolved path to the configuration folder.',
-    preview: `/deploy/${instance.config.id}/bin/N/config`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/N/config`,
     link: '{{P:CONFIG}}',
     group: null,
   });
   result.push({
     name: 'P:RUNTIME',
     description: 'The directory where version specific runtime information is stored.',
-    preview: `/deploy/${instance.config.id}/bin/N/runtime`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/N/runtime`,
     link: '{{P:RUNTIME}}',
     group: null,
   });
   result.push({
     name: 'P:BIN',
     description: 'The directory where binaries are installed without pooling (per instance version).',
-    preview: `/deploy/${instance.config.id}/bin/N`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/N`,
     link: '{{P:BIN}}',
     group: null,
   });
   result.push({
     name: 'P:DATA',
     description: 'The directory where applications can place version independant data.',
-    preview: `/deploy/${instance.config.id}/data`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/data`,
     link: '{{P:DATA}}',
     group: null,
   });
   result.push({
     name: 'P:LOG_DATA',
     description: 'The logging directory which may be outside the usual scope of the application.',
-    preview: `/log_data/${instance.config.id}`,
+    preview: `/log_data/${getInstanceIdOrMock(instance)}`,
     link: '{{P:LOG_DATA}}',
     group: null,
   });
@@ -351,11 +351,15 @@ export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVa
   result.push({
     name: 'P:INSTANCE_MANIFEST_POOL',
     description: 'The directory where instance-locally pooled applications are installed.',
-    preview: `/deploy/${instance.config.id}/pool`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/pool`,
     link: '{{P:INSTANCE_MANIFEST_POOL}}',
     group: null,
   });
   return result;
+}
+
+function getInstanceIdOrMock(instance: InstanceConfigurationDto): string {
+  return instance?.config?.id || 'xxxx-xxx-xxxx';
 }
 
 export function gatherSpecialExpansions(
@@ -408,7 +412,7 @@ export function gatherSpecialExpansions(
   result.push({
     name: 'I:UUID',
     description: `The instance ID`,
-    preview: instance?.config?.id,
+    preview: getInstanceIdOrMock(instance),
     link: '{{I:UUID}}',
     group: null,
   });
