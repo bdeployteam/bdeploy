@@ -120,14 +120,12 @@ public interface ManagedServersResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.READ)
-    public MinionSyncResultDto synchronize(@Scope @PathParam("group") String groupName,
-            @PathParam("server") String serverName);
+    public MinionSyncResultDto synchronize(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @GET
     @Path("/list-products/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public List<ProductDto> listProducts(@Scope @PathParam("group") String groupName,
-            @PathParam("server") String serverName);
+    public List<ProductDto> listProducts(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @POST
     @Path("/transfer-products/{group}")

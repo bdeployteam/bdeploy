@@ -28,8 +28,8 @@ public class MinionRuntimeHistoryManager {
      * </p>
      */
     public synchronized void recordEvent(long processId, int exitCode, ProcessState action, String applicationId, String user) {
-        store(readOrCreate().recordEvent(new MinionRuntimeHistoryRecord(processId, exitCode, action, user, System.currentTimeMillis()),
-                applicationId));
+        store(readOrCreate().recordEvent(
+                new MinionRuntimeHistoryRecord(processId, exitCode, action, user, System.currentTimeMillis()), applicationId));
     }
 
     private MinionRuntimeHistory readOrCreate() {

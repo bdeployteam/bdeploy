@@ -95,8 +95,7 @@ class EndpointsTest {
 
         // manually construct request to be able to pass additional parameters
         WebTarget wt = ResourceProvider.of(remote).getBaseTarget().path("/master/common/proxy/test")
-                .queryParam("BDeploy_group", "demo").queryParam("BDeploy_instance", id)
-                .queryParam("BDeploy_application", "app");
+                .queryParam("BDeploy_group", "demo").queryParam("BDeploy_instance", id).queryParam("BDeploy_application", "app");
 
         HelloResult input = new HelloResult();
         input.hello = "put";
