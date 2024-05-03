@@ -18,7 +18,7 @@ import javax.swing.table.TableModel;
 
 import io.bdeploy.launcher.cli.ui.WindowHelper;
 
-public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCellRenderer {
+class BrowserDialogTableHeaderRenderer extends JLabel implements TableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,5 +69,4 @@ public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCel
         }
         return SortOrder.UNSORTED;
     }
-
 }
