@@ -2,8 +2,6 @@ package io.bdeploy.minion.cli;
 
 import java.util.Map;
 
-import com.vaadin.open.Open;
-
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -21,6 +19,7 @@ import io.bdeploy.jersey.cli.LocalLoginManager;
 import io.bdeploy.jersey.cli.LocalLoginServer;
 import io.bdeploy.minion.cli.LocalLoginTool.LoginConfig;
 import io.bdeploy.ui.api.AuthResource;
+import io.bdeploy.ui.utils.BrowserHelper;
 import jakarta.ws.rs.core.UriBuilder;
 
 @Help("Manage local login sessions")
@@ -98,7 +97,14 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             }
             return table;
         } else if (config.open() != null) {
-            return openInBrowser(config, llm);
+            String serverName = config.open();
+            RemoteService service = llm.getNamedService(serverName);
+            if (service == null) {
+                return createResultWithErrorMessage("Unknown server: " + serverName);
+            }
+            return BrowserHelper.openUrl(service, null)//
+                    ? createResultWithSuccessMessage("Successfully opened the web UI")//
+                    : createResultWithErrorMessage("Failed to open the web UI");
         } else {
             return createNoOp();
         }
@@ -151,30 +157,6 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             return createResultWithErrorMessage("Failed to validate login " + serverName).setException(e);
         }
         return createSuccess();
-    }
-
-    private DataResult openInBrowser(LoginConfig config, LocalLoginManager llm) {
-        String serverName = config.open();
-        RemoteService service = llm.getNamedService(serverName);
-        if (service == null) {
-            return createResultWithErrorMessage("Unknown server: " + serverName);
-        }
-
-        String otp;
-        try {
-            otp = getAuthRes(service).createSessionWithOtp();
-        } catch (RuntimeException e) {
-            return createResultWithErrorMessage("Failed to create one time password for server " + serverName).setException(e);
-        }
-
-        String url = service.getUri().toString();
-        if (url.endsWith(RemoteValidator.API_SUFFIX)) {
-            url = url.substring(0, url.length() - RemoteValidator.API_SUFFIX.length());
-        }
-
-        return Open.open(url + "?otp=" + otp)//
-                ? createResultWithSuccessMessage("Successfully opened " + url)//
-                : createResultWithErrorMessage("Failed to open " + url);
     }
 
     private static AuthResource getAuthRes(RemoteService service) {
