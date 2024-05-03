@@ -70,8 +70,8 @@ public class BrowserDialog extends BaseDialog {
     private final BrowserDialogTableModel model = new BrowserDialogTableModel();
 
     private final transient Path rootDir;
-    private final transient Auditor auditor;
     private final transient boolean readonlyRoot;
+    private final transient Auditor auditor;
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel = new TableRowSorter<>(model);
 
     private final JTable table = new JTable(model);
@@ -85,9 +85,9 @@ public class BrowserDialog extends BaseDialog {
     private JButton reinstallButton;
 
     private JMenuItem launchItem;
-    private JMenuItem updateItem;
     private JMenuItem customizeAndLaunchItem;
     private JMenuItem refreshItem;
+    private JMenuItem updateItem;
     private JMenuItem uninstallItem;
 
     private JProgressBar progressBar;
@@ -262,25 +262,25 @@ public class BrowserDialog extends BaseDialog {
         launchItem.setToolTipText(launchButton.getToolTipText());
         launchItem.addActionListener(this::onLaunchButtonClicked);
 
-        updateItem = new JMenuItem("Update");
-        updateItem.setIcon(WindowHelper.loadIcon("/update.png", 16, 16));
-        updateItem.setToolTipText("Installs the latest available version of the selected application");
-        updateItem.addActionListener(this::onUpdateButtonClicked);
-
         customizeAndLaunchItem = new JMenuItem("Customize & Launch");
         customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching");
         customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/customizeAndLaunch.png", 16, 16));
         customizeAndLaunchItem.addActionListener(this::onLaunchButtonClicked);
 
-        uninstallItem = new JMenuItem(uninstallButton.getText());
-        uninstallItem.setIcon(WindowHelper.loadIcon("/uninstall.png", 16, 16));
-        uninstallItem.setToolTipText(uninstallButton.getToolTipText());
-        uninstallItem.addActionListener(this::onUninstallButtonClicked);
-
         refreshItem = new JMenuItem(refreshButton.getText());
         refreshItem.setIcon(WindowHelper.loadIcon("/refresh.png", 16, 16));
         refreshItem.setToolTipText(refreshButton.getToolTipText());
         refreshItem.addActionListener(this::onRefreshButtonClicked);
+
+        updateItem = new JMenuItem("Update");
+        updateItem.setIcon(WindowHelper.loadIcon("/update.png", 16, 16));
+        updateItem.setToolTipText("Installs the latest available version of the selected application");
+        updateItem.addActionListener(this::onUpdateButtonClicked);
+
+        uninstallItem = new JMenuItem(uninstallButton.getText());
+        uninstallItem.setIcon(WindowHelper.loadIcon("/uninstall.png", 16, 16));
+        uninstallItem.setToolTipText(uninstallButton.getToolTipText());
+        uninstallItem.addActionListener(this::onUninstallButtonClicked);
 
         verifyItem = new JMenuItem(verifyButton.getText());
         verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
@@ -662,5 +662,4 @@ public class BrowserDialog extends BaseDialog {
             doLaunch(apps.get(0), Collections.emptyList());
         }
     }
-
 }
