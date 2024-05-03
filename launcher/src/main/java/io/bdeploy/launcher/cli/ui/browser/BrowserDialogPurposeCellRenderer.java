@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 
-public class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
+class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,5 +27,4 @@ public class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
         }
         return this;
     }
-
 }

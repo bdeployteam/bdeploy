@@ -6,7 +6,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
-public class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel, Integer> {
+class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel, Integer> {
 
     private final String filterText;
 
@@ -68,5 +68,4 @@ public class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel,
         }
         return value.toLowerCase().contains(filterText);
     }
-
 }
