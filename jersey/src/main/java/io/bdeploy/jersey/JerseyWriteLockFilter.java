@@ -5,6 +5,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
+import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -15,12 +20,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
-import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 
 /**
  * Queries annotations on resource implementations for {@link LockingResource} and {@link WriteLock} annotations and locks

@@ -1,11 +1,10 @@
 package io.bdeploy.bhive.remote.jersey;
 
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 
 /**
  * Root resource location for all hives.

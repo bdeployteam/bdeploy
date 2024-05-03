@@ -2,10 +2,6 @@ package io.bdeploy.jersey.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -13,6 +9,9 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.ClientSslContextAccessor;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 class SecurityTest {
 

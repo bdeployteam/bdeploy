@@ -5,13 +5,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.core.UriInfo;
-
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
 import io.bdeploy.api.remote.v1.PublicProxyResource;
 import io.bdeploy.api.remote.v1.dto.EndpointsConfigurationApi;
@@ -23,6 +16,12 @@ import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 public class PublicInstanceResourceImpl implements PublicInstanceResource {
 

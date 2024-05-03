@@ -4,12 +4,11 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import io.bdeploy.common.metrics.Metrics.MetricGroup;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.common.metrics.Metrics.MetricGroup;
 
 /**
  * A resource which allows remote access to server metrics.

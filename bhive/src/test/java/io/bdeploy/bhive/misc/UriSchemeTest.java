@@ -7,9 +7,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.junit.jupiter.api.Test;
+
+import jakarta.ws.rs.core.UriBuilder;
 
 class UriSchemeTest {
 

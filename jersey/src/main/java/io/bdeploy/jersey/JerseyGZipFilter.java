@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.client.ClientRequestContext;
-import jakarta.ws.rs.client.ClientRequestFilter;
-import jakarta.ws.rs.core.HttpHeaders;
-
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.internal.inject.InjectionManager;
 import org.glassfish.jersey.spi.ContentEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.core.HttpHeaders;
 
 /**
  * Client filter adding support for {@link org.glassfish.jersey.spi.ContentEncoder content encoding}. The filter adds

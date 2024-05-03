@@ -1,13 +1,12 @@
 package io.bdeploy.ui.api;
 
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 
 @Path("/download")
 public interface DownloadService {

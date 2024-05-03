@@ -2,6 +2,12 @@ package io.bdeploy.ui.api;
 
 import java.util.List;
 
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.StringEntryChunkDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -11,13 +17,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.bdeploy.common.security.RequiredPermission;
-import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.interfaces.directory.RemoteDirectory;
-import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.StringEntryChunkDto;
 
 @Path("/logging-admin")
 @Consumes(MediaType.APPLICATION_JSON)
