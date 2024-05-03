@@ -6,10 +6,11 @@ bin
 .project
 .settings
 
-**/.vscode
 **/*.swp
+**/firefox-debug-profile
 
 .vs
+.nx
 
 .idea/
 io.bdeploy.iml

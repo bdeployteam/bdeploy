@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Init (Standalone)",
+            "request": "launch",
+            "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+            "projectName": "minion",
+            "args": ["-vv", "init", "--root=${workspaceFolder}/../runtime/master", "--hostname=localhost", "--port=7701", "--dist=ignore", "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin", "--pool=${workspaceFolder}/../runtime/master-pool"],
+            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+        },
+        {
+            "type": "java",
+            "name": "Master (Standalone)",
+            "request": "launch",
+            "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+            "projectName": "minion",
+            "args": ["-vv", "start", "--root=${workspaceFolder}/../runtime/master", "--allowCors", "--consoleLog"],
+            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Chrome (Standalone)",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/ui/webapp",
+            "outFiles": ["${workspaceFolder}/ui/webapp/**/*.js", "!**/node_modules/**"],
+            "runtimeArgs": ["--allow-insecure-localhost"]
+          },
+    ]
+}
