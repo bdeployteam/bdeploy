@@ -17,6 +17,7 @@ public class ExistingPathValidator implements ConfigValidator<String> {
 
     @Override
     public boolean validate(String value) {
-        return PathHelper.exists(p = Paths.get(value));
+        p = Paths.get(value);
+        return PathHelper.exists(p);
     }
 }

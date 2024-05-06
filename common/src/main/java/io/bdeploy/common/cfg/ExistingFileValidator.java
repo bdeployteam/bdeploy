@@ -13,6 +13,6 @@ public class ExistingFileValidator extends ExistingPathValidator {
 
     @Override
     public boolean validate(String value) {
-        return super.validate(value) ? p.toFile().isFile() : false;
+        return super.validate(value) && p.toFile().isFile();
     }
 }
