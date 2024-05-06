@@ -1,3 +1,5 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.format.enabled": true,
+    "java.format.settings.url": ".vscode/Eclipse-CodeFormatter.xml"
 }

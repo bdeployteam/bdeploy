@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "johnpapa.angular-essentials",
+    "vscjava.vscode-java-pack",
+    "vscjava.vscode-gradle",
+    "pkief.material-icon-theme",
+    "bradlc.vscode-tailwindcss"
+  ]
+}
