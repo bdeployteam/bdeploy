@@ -116,12 +116,14 @@ else
     chmod +x ${L_HOME}/jre/bin/*
     chmod +x ${L_HOME}/bin/launcher
     chmod +x ${L_HOME}/bin/file-assoc.sh
+    chmod +x ${L_HOME}/bin/autostart-launcher.sh
 
     rm -f ${T_DL}
 
     if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
-        echo "Creating file association..."
+        echo "Creating file association and autostart entry..."
         ${L_HOME}/bin/file-assoc.sh
+        ${L_HOME}/bin/autostart-launcher.sh
     fi
 fi
 

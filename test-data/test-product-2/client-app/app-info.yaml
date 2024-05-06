@@ -19,6 +19,9 @@ branding:
       height: 12
       foreground: "#fbf315"
 
+processControl:
+  supportsAutostart: true
+
 supportedOperatingSystems:
   - LINUX
   - WINDOWS
