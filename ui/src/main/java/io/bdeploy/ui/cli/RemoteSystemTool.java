@@ -8,9 +8,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -23,18 +28,24 @@ import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.cli.RemoteSystemTool.SystemConfig;
+import io.bdeploy.ui.dto.InstanceDto;
+import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.dto.SystemTemplateDto;
@@ -59,8 +70,17 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         @Help(value = "List systems on the remote", arg = false)
         boolean list() default false;
 
-        @Help(value = "Show details about a system", arg = false)
+        @Help(value = "Show information about a system", arg = false)
+        boolean info() default false;
+
+        @Help(value = "Show the current status of a system", arg = false)
+        boolean status() default false;
+
+        @Help(value = "Includes more details in the status-command - this implies --sync", arg = false)
         boolean details() default false;
+
+        @Help(value = "Force a syncronization before displaying the status", arg = false)
+        boolean sync() default false;
 
         @Help(value = "Create a system with a new ID", arg = false)
         boolean create() default false;
@@ -105,14 +125,17 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     protected RenderableResult run(SystemConfig config, RemoteService remote) {
         helpAndFailIfMissing(config.instanceGroup(), "--instanceGroup missing");
 
-        SystemResource sr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
-                .getSystemResource(config.instanceGroup());
+        InstanceGroupResource igr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext());
+        SystemResource sr = igr.getSystemResource(config.instanceGroup());
 
         if (config.list()) {
             return doShowList(remote, sr, config);
-        } else if (config.details()) {
+        } else if (config.info()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doShowDetails(sr, config);
+            return doShowInfo(sr, config);
+        } else if (config.status()) {
+            helpAndFailIfMissing(config.uuid(), "--uuid missing");
+            return doShowStatus(igr, sr, config);
         } else if (config.create()) {
             return doCreate(remote, sr, config);
         } else if (config.update()) {
@@ -160,7 +183,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         return table;
     }
 
-    private RenderableResult doShowDetails(SystemResource sr, SystemConfig config) {
+    private RenderableResult doShowInfo(SystemResource sr, SystemConfig config) {
         String uuid = config.uuid();
         for (var system : sr.list()) {
             var cfg = system.config;
@@ -170,7 +193,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             }
 
             var result = createEmptyResult();
-            result.setMessage("Details for System " + cfg.id + " - " + cfg.name);
+            result.setMessage("Info for System " + cfg.id + " - " + cfg.name);
             result.addField("Description", cfg.description);
             result.addField(" -- Config Variables --", "");
 
@@ -182,6 +205,97 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         }
         return createResultWithErrorMessage(
                 "Instance group " + config.instanceGroup() + " does not contain a system with the id " + uuid);
+    }
+
+    private RenderableResult doShowStatus(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
+        String systemUuid = config.uuid();
+        Optional<SystemConfigurationDto> selectedSystemOpt = sr.list().stream()
+                .filter(systemDto -> systemUuid.equals(systemDto.config.id)).findFirst();
+        if (selectedSystemOpt.isEmpty()) {
+            return createResultWithErrorMessage(
+                    "Instance group " + config.instanceGroup() + " does not contain a system with the id " + systemUuid);
+        }
+
+        SystemConfigurationDto systemConfigDto = selectedSystemOpt.get();
+        Manifest.Key systemKey = systemConfigDto.key;
+        SystemConfiguration systemConfig = systemConfigDto.config;
+
+        InstanceResource ir = igr.getInstanceResource(config.instanceGroup());
+
+        List<InstanceDto> instances = ir.list().stream()//
+                .filter(instanceDto -> systemKey.equals(instanceDto.instanceConfiguration.system))//
+                .collect(Collectors.toUnmodifiableList());
+
+        SortedMap<InstanceDto, InstanceOverallStatusDto> instancesAndOverallStates = new TreeMap<>(
+                (a, b) -> a.instance.compareTo(b.instance));
+
+        boolean includeDetails = config.details();
+        if (includeDetails || config.sync()) {
+            List<InstanceOverallStatusDto> syncedStates = ir.getBulkResource()
+                    .syncBulk(instances.stream().map(dto -> dto.instance).collect(Collectors.toSet()));
+            for (InstanceDto dto : instances) {
+                for (InstanceOverallStatusDto statusDto : syncedStates) {
+                    if (dto.instanceConfiguration.id.equals(statusDto.id)) {
+                        instancesAndOverallStates.put(dto, statusDto);
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (InstanceDto dto : instances) {
+                instancesAndOverallStates.put(dto, new InstanceOverallStatusDto(dto.instanceConfiguration.id, dto.overallState));
+            }
+        }
+
+        DataTable resultTable = createDataTable();
+        resultTable.column("Instance Name", 30).column("Instance UUID", 15).column("Process Name", 30).column("Process UUID", 15)
+                .column("Status", 20).column("Last Sync", 20).column("Messages", 100);
+        resultTable.setCaption("Status of System " + systemConfig.id + " - " + systemConfig.name);
+
+        Set<Entry<InstanceDto, InstanceOverallStatusDto>> entrySet = instancesAndOverallStates.entrySet();
+        int i = 1;
+        int max = entrySet.size();
+
+        for (Entry<InstanceDto, InstanceOverallStatusDto> entry : entrySet) {
+            InstanceConfiguration instanceConfig = entry.getKey().instanceConfiguration;
+            InstanceOverallStatusDto overallStatusDto = entry.getValue();
+
+            resultTable.row()//
+                    .cell(instanceConfig.name)//
+                    .cell(instanceConfig.id)//
+                    .cell(null)//
+                    .cell(null)//
+                    .cell(overallStatusDto.status)//
+                    .cell(overallStatusDto.timestamp <= 0 ? "Never" : FormatHelper.format(overallStatusDto.timestamp))//
+                    .cell(String.join(" | ", overallStatusDto.messages))//
+                    .build();
+
+            if (includeDetails) {
+                Set<Entry<String, ProcessStatusDto>> processes = ir.getProcessResource(instanceConfig.id)
+                        .getStatus().processStates.entrySet();
+                if (!processes.isEmpty()) {
+                    for (Entry<String, ProcessStatusDto> processEntry : processes) {
+                        ProcessStatusDto processStatusDto = processEntry.getValue();
+                        resultTable.row()//
+                                .cell(instanceConfig.name)//
+                                .cell(instanceConfig.id)//
+                                .cell(processStatusDto.appName)//
+                                .cell(processEntry.getKey())//
+                                .cell(processStatusDto.processState)//
+                                .cell(null)//
+                                .cell(null)//
+                                .build();
+
+                    }
+                }
+                if (i < max) {
+                    resultTable.addHorizontalRuler();
+                }
+                i++;
+            }
+        }
+
+        return resultTable;
     }
 
     private DataResult doCreate(RemoteService remote, SystemResource sr, SystemConfig config) {
