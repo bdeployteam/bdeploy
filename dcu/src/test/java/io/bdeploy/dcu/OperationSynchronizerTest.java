@@ -11,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHive.Operation;
-import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.bhive.TestHive;
+import io.bdeploy.common.TaskSynchronizer;
 
 @ExtendWith(TestHive.class)
 class OperationSynchronizerTest {

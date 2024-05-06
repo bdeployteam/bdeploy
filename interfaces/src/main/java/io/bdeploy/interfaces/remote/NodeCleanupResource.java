@@ -4,16 +4,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.interfaces.cleanup.CleanupAction;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.interfaces.cleanup.CleanupAction;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 
 @Path("/cleanup")
 @Produces(MediaType.APPLICATION_JSON)

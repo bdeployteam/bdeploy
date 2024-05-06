@@ -1,10 +1,9 @@
 package io.bdeploy.minion.cli.shutdown;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyServer;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public class RemoteShutdownImpl implements RemoteShutdown {
 

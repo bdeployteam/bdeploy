@@ -5,10 +5,11 @@ import java.net.URI;
 import java.security.KeyStore;
 
 import javax.annotation.Generated;
-import jakarta.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Represents data about a single known minion.

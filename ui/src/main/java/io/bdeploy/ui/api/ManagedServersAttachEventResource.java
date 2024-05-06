@@ -1,9 +1,8 @@
 package io.bdeploy.ui.api;
 
+import io.bdeploy.jersey.Scope;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-
-import io.bdeploy.jersey.Scope;
 
 @Path("/attach-events")
 public interface ManagedServersAttachEventResource {
