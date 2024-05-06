@@ -109,12 +109,12 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
                 .getSystemResource(config.instanceGroup());
 
         if (config.list()) {
-            return list(remote, sr, config);
-        } else if (config.create()) {
-            return doCreate(remote, sr, config);
+            return doShowList(remote, sr, config);
         } else if (config.details()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
             return doShowDetails(sr, config);
+        } else if (config.create()) {
+            return doCreate(remote, sr, config);
         } else if (config.update()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
             return doUpdate(sr, config);
@@ -126,9 +126,38 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         return createNoOp();
     }
 
-    private RenderableResult doDelete(SystemResource sr, SystemConfig config) {
-        sr.delete(config.uuid());
-        return createSuccess();
+    private DataTable doShowList(RemoteService remote, SystemResource sr, SystemConfig config) {
+        BackendInfoResource bir = ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, getLocalContext());
+        boolean central = false;
+        if (bir.getVersion().mode == MinionMode.CENTRAL) {
+            central = true;
+        }
+
+        DataTable table = createDataTable();
+        table.setCaption("Systems of " + config.instanceGroup() + " on " + remote.getUri());
+
+        table.column("ID", 15).column("Name", 20).column("Description", 40);
+
+        if (central) {
+            table.column("Target Server", 20);
+        }
+
+        for (var system : sr.list()) {
+            if (config.uuid() != null && !config.uuid().isBlank() && !system.config.id.equals(config.uuid())) {
+                continue;
+            }
+
+            DataTableRowBuilder row = table.row();
+
+            row.cell(system.config.id).cell(system.config.name).cell(system.config.description);
+
+            if (central) {
+                row.cell(system.minion);
+            }
+
+            row.build();
+        }
+        return table;
     }
 
     private RenderableResult doShowDetails(SystemResource sr, SystemConfig config) {
@@ -150,56 +179,6 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
             break;
         }
-        return result;
-    }
-
-    private DataResult doUpdate(SystemResource sr, SystemConfig config) {
-        if (config.name() == null && config.description() == null && config.setVariable() == null
-                && config.removeVariable() == null) {
-            helpAndFail("ERROR: Missing --name, --description, --setKey or --removeKey");
-        }
-
-        if (config.setVariable() != null && config.setValue() == null) {
-            helpAndFail("ERROR: Got --setKey but missing --setVariable");
-        }
-
-        Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.uuid())).findAny();
-        if (sys.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find system with ID " + config.uuid());
-        }
-
-        DataResult result = createSuccess();
-        SystemConfiguration cfg = sys.get().config;
-
-        if (config.name() != null && !config.name().isBlank()) {
-            cfg.name = config.name();
-            result.addField("New Name", config.name());
-        }
-        if (config.description() != null && !config.description().isBlank()) {
-            cfg.description = config.description();
-            result.addField("New Description", config.description());
-        }
-        if (config.removeVariable() != null) {
-            var existing = cfg.systemVariables.stream().filter(v -> v.id.equals(config.setVariable())).findFirst().orElse(null);
-            if (existing != null) {
-                cfg.systemVariables.remove(existing);
-            }
-            result.addField("Remove Variable", config.removeVariable());
-        }
-        if (config.setVariable() != null) {
-            var existing = cfg.systemVariables.stream().filter(v -> v.id.equals(config.setVariable())).findFirst().orElse(null);
-            if (existing != null) {
-                cfg.systemVariables.set(cfg.systemVariables.indexOf(existing),
-                        new VariableConfiguration(config.setVariable(), config.setValue()));
-            } else {
-                cfg.systemVariables.add(new VariableConfiguration(config.setVariable(), config.setValue()));
-            }
-            Collections.sort(cfg.systemVariables, (v1, v2) -> v1.id.compareTo(v2.id));
-            result.addField("Set Variable", config.setVariable());
-        }
-
-        sr.update(sys.get());
-
         return result;
     }
 
@@ -290,38 +269,58 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         }
     }
 
-    private DataTable list(RemoteService remote, SystemResource sr, SystemConfig config) {
-        BackendInfoResource bir = ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, getLocalContext());
-        boolean central = false;
-        if (bir.getVersion().mode == MinionMode.CENTRAL) {
-            central = true;
+    private DataResult doUpdate(SystemResource sr, SystemConfig config) {
+        if (config.name() == null && config.description() == null && config.setVariable() == null
+                && config.removeVariable() == null) {
+            helpAndFail("ERROR: Missing --name, --description, --setKey or --removeKey");
         }
 
-        DataTable table = createDataTable();
-        table.setCaption("Systems of " + config.instanceGroup() + " on " + remote.getUri());
-
-        table.column("ID", 15).column("Name", 20).column("Description", 40);
-
-        if (central) {
-            table.column("Target Server", 20);
+        if (config.setVariable() != null && config.setValue() == null) {
+            helpAndFail("ERROR: Got --setKey but missing --setVariable");
         }
 
-        for (var system : sr.list()) {
-            if (config.uuid() != null && !config.uuid().isBlank() && !system.config.id.equals(config.uuid())) {
-                continue;
+        Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.uuid())).findAny();
+        if (sys.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find system with ID " + config.uuid());
+        }
+
+        DataResult result = createSuccess();
+        SystemConfiguration cfg = sys.get().config;
+
+        if (config.name() != null && !config.name().isBlank()) {
+            cfg.name = config.name();
+            result.addField("New Name", config.name());
+        }
+        if (config.description() != null && !config.description().isBlank()) {
+            cfg.description = config.description();
+            result.addField("New Description", config.description());
+        }
+        if (config.removeVariable() != null) {
+            var existing = cfg.systemVariables.stream().filter(v -> v.id.equals(config.setVariable())).findFirst().orElse(null);
+            if (existing != null) {
+                cfg.systemVariables.remove(existing);
             }
-
-            DataTableRowBuilder row = table.row();
-
-            row.cell(system.config.id).cell(system.config.name).cell(system.config.description);
-
-            if (central) {
-                row.cell(system.minion);
-            }
-
-            row.build();
+            result.addField("Remove Variable", config.removeVariable());
         }
-        return table;
+        if (config.setVariable() != null) {
+            var existing = cfg.systemVariables.stream().filter(v -> v.id.equals(config.setVariable())).findFirst().orElse(null);
+            if (existing != null) {
+                cfg.systemVariables.set(cfg.systemVariables.indexOf(existing),
+                        new VariableConfiguration(config.setVariable(), config.setValue()));
+            } else {
+                cfg.systemVariables.add(new VariableConfiguration(config.setVariable(), config.setValue()));
+            }
+            Collections.sort(cfg.systemVariables, (v1, v2) -> v1.id.compareTo(v2.id));
+            result.addField("Set Variable", config.setVariable());
+        }
+
+        sr.update(sys.get());
+
+        return result;
     }
 
+    private RenderableResult doDelete(SystemResource sr, SystemConfig config) {
+        sr.delete(config.uuid());
+        return createSuccess();
+    }
 }
