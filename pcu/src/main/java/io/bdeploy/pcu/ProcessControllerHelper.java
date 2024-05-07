@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -19,6 +22,8 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
  * Contains helpers for the {@linkplain ProcessController}
  */
 class ProcessControllerHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessControllerHelper.class);
 
     private ProcessControllerHelper() {
     }
@@ -115,8 +120,12 @@ class ProcessControllerHelper {
      * Returns the exit code or {@code null}
      */
     public static Integer getExitCode(Process process) {
-        if (process != null) {
-            return process.exitValue();
+        if (process != null && !process.isAlive()) {
+            try {
+                return process.exitValue();
+            } catch(IllegalThreadStateException e) {
+                log.warn("Exited Process is still not reporting exit code, PID {}", process.pid(), e);
+            }
         }
         return null;
     }
