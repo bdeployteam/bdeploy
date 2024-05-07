@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ManagedMasterDto, MinionMode, SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { BdDataSyncCellComponent } from 'src/app/modules/core/components/bd-data-sync-cell/bd-data-sync-cell.component';
+import { BdIdentifierCellComponent } from 'src/app/modules/core/components/bd-identifier-cell/bd-identifier-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ServersService } from '../../servers/services/servers.service';
 
@@ -17,9 +18,10 @@ export class SystemsColumnsService {
     name: 'ID',
     data: (r) => r.config.id,
     isId: true,
-    width: '120px',
+    width: '75px',
     hint: BdDataColumnTypeHint.FOOTER,
     showWhen: '(min-width: 1000px)',
+    component: BdIdentifierCellComponent,
   };
 
   public systemNameColumn: BdDataColumn<SystemConfigurationDto> = {
