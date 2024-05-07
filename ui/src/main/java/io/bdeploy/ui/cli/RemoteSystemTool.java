@@ -161,14 +161,15 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private RenderableResult doShowDetails(SystemResource sr, SystemConfig config) {
-        var result = createEmptyResult();
+        String uuid = config.uuid();
         for (var system : sr.list()) {
             var cfg = system.config;
 
-            if (!cfg.id.equals(config.uuid())) {
+            if (!cfg.id.equals(uuid)) {
                 continue;
             }
 
+            var result = createEmptyResult();
             result.setMessage("Details for System " + cfg.id + " - " + cfg.name);
             result.addField("Description", cfg.description);
             result.addField(" -- Config Variables --", "");
@@ -177,9 +178,10 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
                 result.addField(" " + entry.id, entry.value != null ? entry.value.getPreRenderable() : "");
             }
 
-            break;
+            return result;
         }
-        return result;
+        return createResultWithErrorMessage(
+                "Instance group " + config.instanceGroup() + " does not contain a system with the id " + uuid);
     }
 
     private DataResult doCreate(RemoteService remote, SystemResource sr, SystemConfig config) {
