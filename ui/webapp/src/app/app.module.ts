@@ -12,8 +12,8 @@ import { CoreModule } from './modules/core/core.module';
 
 const toggleOpts: MatButtonToggleDefaultOptions = {
   hideSingleSelectionIndicator: true,
-  hideMultipleSelectionIndicator: true
-}
+  hideMultipleSelectionIndicator: true,
+};
 
 @NgModule({
   declarations: [AppComponent],
@@ -26,7 +26,7 @@ const toggleOpts: MatButtonToggleDefaultOptions = {
     LoadingBarRouterModule,
     MatProgressBarModule,
   ],
-  providers: [{provide: MAT_BUTTON_TOGGLE_DEFAULT_OPTIONS, useValue: toggleOpts}],
+  providers: [{ provide: MAT_BUTTON_TOGGLE_DEFAULT_OPTIONS, useValue: toggleOpts }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
