@@ -1,5 +1,22 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "java.format.enabled": true,
-    "java.format.settings.url": ".vscode/Eclipse-CodeFormatter.xml"
+    "java.format.settings.url": ".vscode/Eclipse-CodeFormatter.xml",
+    "prettier.singleQuote": true,
+    "prettier.printWidth": 160,
+    "prettier.tabWidth": 2,
+    "prettier.semi": true,
+    "[typescript]": {
+        "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+        }
+    },
+    "workbench.colorCustomizations": {},
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "prettier.jsxSingleQuote": true,
+    "javascript.preferences.quoteStyle": "single",
+    "typescript.preferences.quoteStyle": "single",
+    "prettier.useEditorConfig": false,
+    "files.eol": "\n"
 }
