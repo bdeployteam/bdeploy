@@ -31,7 +31,6 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
     public @interface LoginConfig {
 
         @Help("URI of remote Server")
-        @EnvironmentFallback("BDEPLOY_REMOTE")
         @Validator(RemoteValidator.class)
         String remote();
 
