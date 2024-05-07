@@ -2,7 +2,7 @@
 
 describe('Current User Tests', function () {
   const currentUserFullName = 'John Doe';
-  const currentUserEmail = 'John Doe@example.com';
+  const currentUserEmail = 'JohnDoe@example.com';
 
   beforeEach(() => {
     cy.login();
@@ -24,14 +24,14 @@ describe('Current User Tests', function () {
       cy.contains('button', 'Save').should('exist').and('be.disabled');
 
       cy.fillFormInput('fullName', `${currentUserFullName} (*)`);
-      cy.fillFormInput('email', `${currentUserEmail} (*)`);
+      cy.fillFormInput('email', `${currentUserEmail}.temp`);
       cy.contains('button', 'Save').should('exist').and('be.enabled').click();
     });
 
     cy.inMainNavFlyin('app-settings', () => {
       cy.contains('button', 'Logout').should('exist');
       cy.contains('div', 'Full Name:').parent().contains('div', `${currentUserFullName} (*)`).should('exist');
-      cy.contains('div', 'E-Mail:').parent().contains('div', `${currentUserEmail} (*)`).should('exist');
+      cy.contains('div', 'E-Mail:').parent().contains('div', `${currentUserEmail}.temp`).should('exist');
 
       // 2nd change
       cy.get(`app-bd-panel-button[text="Edit User..."]`).click();
