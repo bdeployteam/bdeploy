@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -39,11 +40,14 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.BackendInfoResource;
+import io.bdeploy.ui.api.InstanceBulkResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.cli.RemoteSystemTool.SystemConfig;
+import io.bdeploy.ui.dto.BulkOperationResultDto;
+import io.bdeploy.ui.dto.BulkOperationResultDto.OperationResult;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
@@ -81,6 +85,15 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         @Help(value = "Force a syncronization before displaying the status", arg = false)
         boolean sync() default false;
+
+        @Help(value = "Start all instances of the system", arg = false)
+        boolean start() default false;
+
+        @Help(value = "Stop all instances of the system", arg = false)
+        boolean stop() default false;
+
+        @Help(value = "Restart all instances of the system", arg = false)
+        boolean restart() default false;
 
         @Help(value = "Create a system with a new ID", arg = false)
         boolean create() default false;
@@ -136,6 +149,15 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         } else if (config.status()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
             return doShowStatus(igr, sr, config);
+        } else if (config.start()) {
+            helpAndFailIfMissing(config.uuid(), "--uuid missing");
+            return doStart(igr, sr, config);
+        } else if (config.stop()) {
+            helpAndFailIfMissing(config.uuid(), "--uuid missing");
+            return doStop(igr, sr, config);
+        } else if (config.restart()) {
+            helpAndFailIfMissing(config.uuid(), "--uuid missing");
+            return doRestart(igr, sr, config);
         } else if (config.create()) {
             return doCreate(remote, sr, config);
         } else if (config.update()) {
@@ -298,6 +320,18 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         return resultTable;
     }
 
+    private RenderableResult doStart(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
+        return performBulkOperation(igr, sr, config, (res, list) -> res.startBulk(list));
+    }
+
+    private RenderableResult doStop(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
+        return performBulkOperation(igr, sr, config, (res, list) -> res.stopBulk(list));
+    }
+
+    private RenderableResult doRestart(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
+        return performBulkOperation(igr, sr, config, (res, list) -> res.restartBulk(list));
+    }
+
     private DataResult doCreate(RemoteService remote, SystemResource sr, SystemConfig config) {
         helpAndFailIfMissing(config.name(), "Missing --name");
 
@@ -438,5 +472,37 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     private RenderableResult doDelete(SystemResource sr, SystemConfig config) {
         sr.delete(config.uuid());
         return createSuccess();
+    }
+
+    private RenderableResult performBulkOperation(InstanceGroupResource igr, SystemResource sr, SystemConfig config,
+            BiFunction<InstanceBulkResource, List<String>, BulkOperationResultDto> bulkOperation) {
+        String systemUuid = config.uuid();
+        Optional<SystemConfigurationDto> selectedSystemOpt = sr.list().stream()
+                .filter(systemDto -> systemUuid.equals(systemDto.config.id)).findFirst();
+        if (selectedSystemOpt.isEmpty()) {
+            return createResultWithErrorMessage("Given UUID does not belong to any known system.");
+        }
+
+        SystemConfigurationDto systemConfigDto = selectedSystemOpt.get();
+        Manifest.Key systemKey = systemConfigDto.key;
+
+        InstanceResource ir = igr.getInstanceResource(config.instanceGroup());
+
+        List<String> instanceIds = ir.list().stream()//
+                .filter(instanceDto -> systemKey.equals(instanceDto.instanceConfiguration.system))//
+                .map(dto -> dto.instanceConfiguration.id)//
+                .collect(Collectors.toUnmodifiableList());
+
+        List<OperationResult> bulkOperationResults = bulkOperation.apply(ir.getBulkResource(), instanceIds).results;
+        if (bulkOperationResults.isEmpty()) {
+            return createSuccess();
+        }
+
+        DataTable resultTable = createDataTable();
+        resultTable.column("Target", 15).column("Type", 15).column("Message", 50);
+        for (OperationResult operationResult : bulkOperation.apply(ir.getBulkResource(), instanceIds).results) {
+            resultTable.row().cell(operationResult.target()).cell(operationResult.type()).cell(operationResult.message()).build();
+        }
+        return resultTable;
     }
 }
