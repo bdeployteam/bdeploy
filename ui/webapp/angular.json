@@ -30,8 +30,14 @@
       },
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "customWebpackConfig": {
+              "path": "./webpack-build.config.js",
+              "mergeRules": {
+                "externals": "replace"
+              }
+            },
             "allowedCommonJsDependencies": ["clone-deep"],
             "outputPath": "dist/webapp",
             "index": "src/index.html",
