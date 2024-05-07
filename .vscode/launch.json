@@ -23,6 +23,24 @@
             "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
         },
         {
+            "type": "java",
+            "name": "Launcher (Browser)",
+            "request": "launch",
+            "mainClass": "io.bdeploy.launcher.cli.LauncherCli",
+            "projectName": "launcher",
+            "args": ["--homeDir=${workspaceFolder}/../runtime/launcher-vsc"],
+            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+        },
+        {
+            "type": "java",
+            "name": "Launcher (Select .bdeploy)",
+            "request": "launch",
+            "mainClass": "io.bdeploy.launcher.cli.LauncherCli",
+            "projectName": "launcher",
+            "args": ["--homeDir=${workspaceFolder}/../runtime/launcher-vsc", "${input:pickBDeployFile}"],
+            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Chrome (Standalone)",
@@ -31,5 +49,19 @@
             "outFiles": ["${workspaceFolder}/ui/webapp/**/*.js", "!**/node_modules/**"],
             "runtimeArgs": ["--allow-insecure-localhost"]
           },
+    ],
+    "inputs": [
+        {
+            "id": "pickBDeployFile",
+            "type": "command",
+            "command": "extension.commandvariable.file.openDialog",
+            "args": {
+                "canSelect": "files",
+                "defaultUri": "${workspaceFolder}",
+                "filters": {
+                    "BDeploy": ["bdeploy"]
+                }
+            }
+        }
     ]
 }
