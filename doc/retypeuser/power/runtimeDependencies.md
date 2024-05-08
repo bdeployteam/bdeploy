@@ -39,7 +39,7 @@ Included runtime dependencies will not show up on the target server's Web UI any
 ![Software Repositories](/images/Doc_SoftwareRepo.png){width=480}
 :::
 
-## Upload software
+## Upload Software
 
 To upload external software, open a software repository and click on the [ **Upload Software** ] button in the toolbar. Then click on **browse** or **drop files**. You can upload zip packages.
 

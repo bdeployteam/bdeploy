@@ -11,7 +11,7 @@ This mechanism is used for _every_ remote communication, especially for every re
 
 As a consequence, a _security token_ is required for all CLI commands that communicate with a remote **BDeploy** server, when registering a _node_ with a _master_ minion (as they communicate), and for all toolings which communicate otherwise with **BDeploy** (e.g. build integrations which fetch dependencies and push **Products** to **BDeploy**).
 
-## Local account security
+## Local Account Security
 
 **BDeploy** implements the [OWASP ASVS Password Security Requirements](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v21-password-security) with a single exception.
 

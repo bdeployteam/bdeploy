@@ -32,7 +32,7 @@ bdeploy start --root=</path/to/root>
 
 To register, remove or manage a **node** on the **master** you can either use the command line interface or the administrative web UI on the **master**.
 
-### Command line interface
+### Command Line Interface
 
 Use the CLI to register, remove and manage a **node** on the **master** (see the `bdeploy remote-node --help` command for more information).
 

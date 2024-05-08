@@ -107,7 +107,7 @@ Once a **Product** is available, you can click it to open the **Product** detail
 ![Product Details Panel](/images/Doc_ProductDetailsPanel.png){width=480}
 :::
 
-## Create New Instances
+## Create new Instances
 
 To create a new **Instance**, click the [ **+** ]. After giving the new **Instance** a name, purpose and description, the most important thing is to select the **Product** you want to deploy. Additionally, the initial **product version** has to be chosen. It can be changed later at any time (_up-_ and _downgrade_).
 

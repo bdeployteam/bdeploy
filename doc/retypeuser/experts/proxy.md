@@ -32,7 +32,7 @@ curl -k -H "Accept: **/**" \
 5. **xxxx-111-xxxx** is the `id` of the instance which hosts the application to tunnel to.
 6. **yyyy-111-yyyy** is the `id` of the application which hosts an endpoint with the given endpoint `id`.
 
-## How to obtain required IDs
+## Obtaining required IDs
 
 There are two ways to obtain required IDs. You can use a purely manual approach and for example deduce ID's from URLs and the Web UI itself. Or you can use the public API to query **BDeploy** for available objects.
 

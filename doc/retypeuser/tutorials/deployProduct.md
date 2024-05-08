@@ -3,7 +3,7 @@ order: 1
 icon: repo-push
 ---
 
-# How can I deploy a new product version?
+# How can I deploy a new Product Version?
 
 Upgrading the **Product Version** that is used in an **Instance** requires two distinct steps:
 

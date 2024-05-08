@@ -23,7 +23,7 @@ The same binaries used to run a **BDeploy** server provide a set of _commands_ a
 
 ## BDeploy CLI
 
-### Initialization and local configuration management commands
+### Initialization and local Configuration Management Commands
 
 Command | Description
 ---    | ---
@@ -35,20 +35,20 @@ Command | Description
 `pool` | Manages object pooling related settings and the re-organization job schedule.
 `storage` | Manages available _storage locations_. A _storage location_ is a folder where the **BDeploy** _master_ puts the **BHives** required to store data for **Instance Groups** and **Software Repositories**.
 
-### Local session and scripting commands
+### Local Session and Scripting Commands
 
 Command | Description
 ---     | ---
 `login` | Manages local login sessions to remote servers. This command eliminates the need to manage URIs and tokens yourself. Login sessions are managed per user, can be created, switched, and removed. Validity of the login session is the same as for the Web UI. Subsequent commands will use the configured remote login session to perform remote communication.<br/><br/>:warning:**WARNING** Since login sessions are persistent, it can be easy to confuse which session/server is currently worked with. Always verify that the correct session is actively used by commands when performing modifications on the server, e.g. deleting an **Instance**.
 `shell` | Provides an interactive shell which can execute tools. The shell can also be fed with a script file which contains a series of commands.
 
-### Product management commands
+### Product Management Commands
 
 Command | Description
 ---     | ---
 `product` | List or create **Products** locally. Fetches required dependencies from the given remote **BDeploy** server. Has the ability to push the resulting **Product** to the target **BDeploy** server.
 
-### Remote server management commands
+### Remote Server Management Commands
 
 Command | Description
 ---     | ---
@@ -73,13 +73,13 @@ Command | Description
 `remote-user` | Manages users on a remote **BDeploy** server.
 `remote-user-group` | Manage user groups and associated users and permissions on a remote **BDeploy** server.
 
-### Server commands
+### Server Commands
 
 Command | Description
 ---     | ---
 `start` | Runs the **BDeploy** _minion_ in the mode determined by the given root directory. Requires a root directory initialized with the `init` command.<br/><br/>:information_source:**NOTE** A _master_ is always a _node_ as well. The _master_ just has the additional capability to control other _nodes_, and provides the configuration Web UI.
 
-### Utility commands
+### Utility Commands
 
 Command | Description
 ---     | ---
@@ -96,7 +96,7 @@ Command | Description
 
 Much like Git, **BHive** only knows two commands that actually perform remote communication: `fetch` and `push`. All other commands are performing their work locally.
 
-### Analysis and maintenance commands
+### Analysis and Maintenance Commands
 
 Command | Description
 ---     | ---
@@ -108,21 +108,21 @@ Command | Description
 `token` | Allows generation of new _access tokens_, see [Security](/experts/security/#security).
 `tree` | Read and diff **Manifests** from the given **BHive**. Allows to compare the contents of **Manifests**, view differences and the estimated data transfer required to perform a delta 'update' if a potential remote **BHive** already has one of them.
 
-### Filesystem interaction commands
+### Filesystem Interaction Commands
 
 Command | Description
 ---     | ---
 `export` | Reads a **Manifest** from the given **BHive** and writes it's content to a given target folder.
 `import` | Import a given folder into a given **BHive** and associate the given **Manifest** key with it.
 
-### Remote server interaction commands
+### Remote Server Interaction Commands
 
 Command | Description
 ---     | ---
 `fetch` | Fetches the given **Manifests** from a given remote **BHive**.
 `push` | Push the given **Manifests** to the given remote **BHive**
 
-### Server commands
+### Server Commands
 
 Command | Description
 ---     | ---

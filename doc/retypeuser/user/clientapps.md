@@ -126,11 +126,11 @@ There are two different locations that are important in the context of deploying
 
 When the **Installation Area** is read-only the environment variable **BDEPLOY_USER_AREA** must be set for each user and must point to a directory where the user has write permissions.
 
-### Installing new software
+### Installing new Software
 
 New software is typically installed by an **Administrator** who has full permissions in the **Installation Area**. The administrator is either using the provided **Installer** or a **Click & Start** file in order to install the new application. After this step the application is available and can be launched by each new user by using the **Click & Start** file.
 
-### Updating software
+### Updating Software
 
 Whenever a new **Product Version** is **Activated** on the server the administrator **must** launch the application **once** to deploy the new update. Not doing that will lead to an error that each user receives when trying to launch the application. The **Launcher** always checks for updates and tries to install them. Using an outdated application is not permitted and thus users will no longer be able to launch the application.
 
@@ -146,7 +146,7 @@ Configuration changes in a client application - like adding, removing or changin
 Changing the product version or changing the launcher version on the server require a manual interaction of the **Administrator**, otherwise **no** user can use the client application anymore.
 !!!
 
-### Application Could Not be Launched
+### Application could not be Launched
 
 Whenever the client application cannot be launched a generic error message is shown to the user. The root cause can be viewed when clicking on the **View Details** button. The error message is also logged to the **Application Log** file. The log file is located next to the installation directory in a folder called **logs**.
 
