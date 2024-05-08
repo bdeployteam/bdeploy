@@ -140,7 +140,8 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
     }
 
     private void addUser(UserConfig config, AuthAdminResource admin) {
-        UserInfo user = new UserInfo(config.add());
+        String userString = config.add();
+        UserInfo user = new UserInfo(userString);
 
         setInactive(user, config);
         if (config.admin()) {
@@ -149,7 +150,16 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         if (config.permission() != null) {
             user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
         }
-        user.password = config.password();
+
+        char[] pass;
+        if (config.password() != null) {
+            pass = config.password().toCharArray();
+        } else {
+            out().println("Please specify password for " + userString + ':');
+            pass = System.console().readPassword();
+        }
+
+        user.password = new String(pass);
         admin.createLocalUser(user);
     }
 
