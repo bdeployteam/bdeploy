@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class DataResultBase implements DataResult {
+abstract class DataResultBase implements DataResult {
 
     private String message;
     private ExitCode exitCode = ExitCode.OK;

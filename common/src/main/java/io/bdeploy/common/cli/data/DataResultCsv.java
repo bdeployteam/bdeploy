@@ -5,7 +5,7 @@ import java.util.Map;
 
 import io.bdeploy.common.util.ExceptionHelper;
 
-public class DataResultCsv extends DataResultBase {
+class DataResultCsv extends DataResultBase {
 
     public DataResultCsv(PrintStream output) {
         super(output);

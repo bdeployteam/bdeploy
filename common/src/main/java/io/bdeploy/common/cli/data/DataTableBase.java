@@ -9,7 +9,7 @@ import io.bdeploy.common.util.StringHelper;
 /**
  * Base class for {@link DataTable} implementations.
  */
-public abstract class DataTableBase implements DataTable {
+abstract class DataTableBase implements DataTable {
 
     private final PrintStream output;
 

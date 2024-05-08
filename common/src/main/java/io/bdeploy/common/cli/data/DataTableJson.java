@@ -3,7 +3,7 @@ package io.bdeploy.common.cli.data;
 import java.io.PrintStream;
 import java.util.List;
 
-public class DataTableJson extends DataTableBase {
+class DataTableJson extends DataTableBase {
 
     DataTableJson(PrintStream output) {
         super(output);
