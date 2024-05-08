@@ -18,10 +18,10 @@ public class DataTableCsv extends DataTableBase {
 
         for (List<DataTableCell> row : getRows()) {
             for (int y = 0; y < row.size(); ++y) {
-                out().print(quote(row.get(y).data));
+                out().print(quote(row.get(y).getData()));
 
                 if (y != (row.size() - 1)) {
-                    out().print(StringHelper.repeat(",", row.get(y).span));
+                    out().print(StringHelper.repeat(",", row.get(y).getSpan()));
                 } else {
                     out().println();
                 }

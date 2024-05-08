@@ -22,7 +22,7 @@ public class DataTableJson extends DataTableBase {
             for (int y = 0; y < row.size(); ++y) {
                 DataTableColumn col = getColumns().get(colIndex);
 
-                out().print(quote(col.getName()) + ": " + quote(row.get(y).data));
+                out().print(quote(col.getName()) + ": " + quote(row.get(y).getData()));
 
                 if (y == (row.size() - 1)) {
                     if (i == (getRows().size() - 1)) {
@@ -34,7 +34,7 @@ public class DataTableJson extends DataTableBase {
                     out().print(", ");
                 }
 
-                colIndex += row.get(y).span;
+                colIndex += row.get(y).getSpan();
             }
         }
 
