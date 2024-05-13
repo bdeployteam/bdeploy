@@ -9,7 +9,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Map;
 
-public class DataResultText extends DataResultBase {
+class DataResultText extends DataResultBase {
 
     public DataResultText(PrintStream output) {
         super(output);

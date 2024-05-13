@@ -5,7 +5,7 @@ import java.util.Map;
 
 import io.bdeploy.common.util.ExceptionHelper;
 
-public class DataResultJson extends DataResultBase {
+class DataResultJson extends DataResultBase {
 
     public DataResultJson(PrintStream output) {
         super(output);

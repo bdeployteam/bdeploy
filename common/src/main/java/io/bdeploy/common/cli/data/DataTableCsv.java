@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import io.bdeploy.common.util.StringHelper;
 
-public class DataTableCsv extends DataTableBase {
+class DataTableCsv extends DataTableBase {
 
     DataTableCsv(PrintStream output) {
         super(output);

@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import io.bdeploy.common.util.StringHelper;
 
-public class DataTableText extends DataTableBase {
+class DataTableText extends DataTableBase {
 
     private static final char CELL_NONE = '─';
     private static final char CELL_BOTTOM = '┬';
