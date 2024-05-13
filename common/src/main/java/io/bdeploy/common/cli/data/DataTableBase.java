@@ -135,7 +135,7 @@ public abstract class DataTableBase implements DataTable {
 
     @Override
     public DataTable row(List<DataTableCell> list) {
-        if (list.stream().map(i -> i.span).reduce(0, Integer::sum) != columns.size()) {
+        if (list.stream().map(i -> i.getSpan()).reduce(0, Integer::sum) != columns.size()) {
             throw new IllegalStateException("Column count mismatch in data table");
         }
         rows.add(list);

@@ -123,8 +123,8 @@ public class DataTableText extends DataTableBase {
                 row.append(StringHelper.repeat(" ", indent));
                 int colIndex = 0;
                 for (int i = 0; i < data.size(); ++i) {
-                    row.append(content(data.get(i).data, colIndex, data.get(i).span));
-                    colIndex += data.get(i).span;
+                    row.append(content(data.get(i).getData(), colIndex, data.get(i).getSpan()));
+                    colIndex += data.get(i).getSpan();
                 }
                 buffer.add(row.toString());
             }
@@ -154,8 +154,8 @@ public class DataTableText extends DataTableBase {
         for (List<DataTableCell> row : rows) {
             int colIdx = 0;
             for (DataTableCell cell : row) {
-                for (int i = 0; i < cell.span; i++) {
-                    int cellLength = cell.data.length() / cell.span;
+                for (int i = 0; i < cell.getSpan(); i++) {
+                    int cellLength = cell.getData().length() / cell.getSpan();
                     int currentMax = colIdxToMaxCellLength.getOrDefault(colIdx, -1);
                     colIdxToMaxCellLength.put(colIdx, Math.max(currentMax, cellLength));
                     colIdx++;
@@ -177,12 +177,12 @@ public class DataTableText extends DataTableBase {
         Map<Integer, List<DataTableCell>> perColumn = new TreeMap<>();
         int colIndex = 0;
         for (DataTableCell item : raw) {
-            List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + item.span);
+            List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + item.getSpan());
 
             // width of text per column and space for separators (3 * (num columns - 1))
             int width = spanning.stream().map(DataTableColumn::getWidth).reduce(0, Integer::sum) + (3 * (spanning.size() - 1));
 
-            String remaining = item.data;
+            String remaining = item.getData();
             while (remaining.length() > width || remaining.contains("\n")) {
                 int newLine = remaining.indexOf('\n');
                 int index = newLine == -1 ? width : newLine;
@@ -201,13 +201,13 @@ public class DataTableText extends DataTableBase {
                 }
 
                 perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>())
-                        .add(new DataTableCell(remaining.substring(0, index), item.span));
+                        .add(new DataTableCell(remaining.substring(0, index), item.getSpan()));
 
                 remaining = remaining.substring(index).trim();
             }
 
-            perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>()).add(new DataTableCell(remaining, item.span));
-            colIndex += item.span;
+            perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>()).add(new DataTableCell(remaining, item.getSpan()));
+            colIndex += item.getSpan();
         }
 
         // create all rows in the result.
@@ -219,7 +219,7 @@ public class DataTableText extends DataTableBase {
         // make all columns same length
         perColumn.forEach((idx, items) -> {
             while (items.size() < rowCount) {
-                items.add(new DataTableCell("", items.get(0).span));
+                items.add(new DataTableCell("", items.get(0).getSpan()));
             }
         });
 
