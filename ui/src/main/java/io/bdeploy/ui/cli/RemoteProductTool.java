@@ -2,8 +2,10 @@ package io.bdeploy.ui.cli;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -15,6 +17,7 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -42,6 +45,15 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         @Help(value = "List products on the remote", arg = false)
         boolean list() default false;
 
+        @Help(value = "The product key filter for --list result")
+        String key();
+
+        @Help(value = "The product version filter for --list result")
+        String version();
+
+        @Help(value = "Specifies that --version filter is a regular expression", arg = false)
+        boolean regex() default false;
+
         @Help(value = "The product version to delete")
         String delete();
 
@@ -68,13 +80,15 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     @Override
     protected RenderableResult run(ProductConfig config, RemoteService remote) {
+        if (config.list()) {
+            return list(remote, config);
+        }
+
         if (config.repository() == null && config.instanceGroup() == null) {
             helpAndFail("--instanceGroup or --repository missing");
         }
 
-        if (config.list()) {
-            return list(remote, config);
-        } else if (config.delete() != null) {
+        if (config.delete() != null) {
             return delete(remote, config);
         } else if (config.copy()) {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
@@ -138,21 +152,62 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     private DataTable list(RemoteService remote, ProductConfig config) {
         DataTable table = createDataTable();
-        table.setCaption("Products in " + (config.instanceGroup() != null ? config.instanceGroup() : config.repository()) + " on "
-                + remote.getUri());
 
+        String source = config.instanceGroup() != null ? config.instanceGroup()
+                : (config.repository() != null ? config.repository() : "all repositories");
+        table.setCaption("Products in " + source + " on " + remote.getUri());
+        boolean allRepos = config.instanceGroup() == null && config.repository() == null;
+        if (allRepos) {
+            table.column("Repository", 20);
+        }
         table.column("Name", 25).column("Key", 30).column("Version", 20);
         table.column(new DataTableColumn("NoOfInstanceTemplates", "# Ins.Templ.", 12));
         table.column(new DataTableColumn("NoOfApplicationTemplates", "# App.Templ.", 12));
 
-        ProductResource pr = getProductRsrc(remote, config);
-
-        for (ProductDto dto : pr.list(null)) {
-            table.row().cell(dto.name).cell(dto.key.getName()).cell(dto.key.getTag()).cell(dto.instanceTemplates.size())
-                    .cell(dto.applicationTemplates.size()).build();
+        Map<String, ProductResource> sources = getSources(remote, config);
+        for (Map.Entry<String, ProductResource> src : sources.entrySet()) {
+            List<ProductDto> products = src.getValue().list(config.key());
+            for (ProductDto dto : products) {
+                if (!matchesVersion(dto, config)) {
+                    continue;
+                }
+                var row = table.row();
+                if (allRepos) {
+                    row.cell(src.getKey());
+                }
+                row.cell(dto.name).cell(dto.key.getName()).cell(dto.key.getTag()).cell(dto.instanceTemplates.size())
+                        .cell(dto.applicationTemplates.size()).build();
+            }
         }
-
         return table;
+    }
+
+    private boolean matchesVersion(ProductDto dto, ProductConfig config) {
+        if (config.version() == null) {
+            return true;
+        }
+        if (config.regex()) {
+            return dto.key.getTag().matches(config.version());
+        }
+        return config.version().equalsIgnoreCase(dto.key.getTag());
+    }
+
+    private Map<String, ProductResource> getSources(RemoteService remote, ProductConfig config) {
+        if (config.instanceGroup() != null) {
+            return Map.of(config.instanceGroup(), getProductRsrc(remote, config));
+        }
+        if (config.repository() != null) {
+            return Map.of(config.repository(), getProductRsrc(remote, config));
+        }
+        Map<String, ProductResource> map = new TreeMap<>();
+        List<SoftwareRepositoryConfiguration> allRepos = ResourceProvider
+                .getResource(remote, SoftwareRepositoryResource.class, getLocalContext()).list();
+        for (SoftwareRepositoryConfiguration repo : allRepos) {
+            ProductResource resrc = ResourceProvider.getResource(remote, SoftwareRepositoryResource.class, getLocalContext())
+                    .getProductResource(repo.name);
+            map.put(repo.name, resrc);
+        }
+        return map;
     }
 
     private DataResult delete(RemoteService remote, ProductConfig config) {
