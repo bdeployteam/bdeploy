@@ -3,7 +3,7 @@ order: 3
 icon: gear
 ---
 
-# How can I change a process configuration?
+# How can I change a Process Configuration?
 
 Changing the configuration of a **Process** is done in the **Process Configuration Panel**:
 
