@@ -9,11 +9,11 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
+import { SearchAddon } from '@xterm/addon-search';
+import { WebglAddon } from '@xterm/addon-webgl';
+import { IDisposable } from '@xterm/xterm';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
-import { IDisposable } from 'xterm';
-import { SearchAddon } from 'xterm-addon-search';
-import { WebglAddon } from 'xterm-addon-webgl';
 import { SearchService } from '../../services/search.service';
 
 // TODO: Move to 'FunctionsUsingCSI' where possible.
