@@ -4,9 +4,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -21,6 +23,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthGroupService;
@@ -29,8 +32,12 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
+import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
+import io.bdeploy.ui.utils.ProductVersionMatchHelper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -64,6 +71,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Inject
     private ChangeEventManager changes;
+
+    @Inject
+    private VersionSorterService vss;
 
     @Override
     public List<SoftwareRepositoryConfiguration> list() {
@@ -200,6 +210,47 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         for (var perm : permissions) {
             changes.change(ObjectChangeType.USER_GROUP, key, Map.of(ObjectChangeDetails.USER_GROUP_ID, perm.group));
         }
+    }
+
+    @Override
+    public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req) {
+        Comparator<Manifest.Key> comparator = null;
+
+        List<String> repos = req.groupOrRepo != null ? List.of(req.groupOrRepo)
+                : list().stream().map(r -> r.name).collect(Collectors.toList());
+
+        List<ProductKeyWithSourceDto> versions = new ArrayList<>();
+
+        for (String repo : repos) {
+            ProductResource resource = getProductResource(repo);
+            // ProductResource.list(key) already returns sorted list (latest version first), so we only need to filter and grab first
+            ProductDto repoLatestProduct = resource.list(req.key).stream()
+                    .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex)).findFirst()
+                    .orElse(null);
+
+            if (repoLatestProduct == null) {
+                continue;
+            }
+
+            Comparator<Manifest.Key> repoComparator = vss.getKeyComparator(repo, repoLatestProduct.key);
+            if (comparator == null) {
+                comparator = repoComparator;
+            } else if (!comparator.getClass().equals(repoComparator.getClass())) {
+                throw new WebApplicationException("Cannot choose latest. Found different comparators: "
+                        + comparator.getClass().getName() + " and " + repoComparator.getClass().getName(), Status.BAD_REQUEST);
+            }
+            versions.add(new ProductKeyWithSourceDto(repo, repoLatestProduct.key));
+        }
+
+        if (comparator == null || versions.isEmpty()) {
+            throw new WebApplicationException("No product versions found for --key=" + req.key + " --version=" + req.version
+                    + " --repo=" + req.groupOrRepo + " --regex=" + req.regex, Status.NOT_FOUND);
+        }
+
+        // cannot use comparator in lambda (not effectively final)
+        Comparator<Manifest.Key> finalComparator = comparator;
+        versions.sort((a, b) -> finalComparator.compare(a.key, b.key));
+        return versions.get(0);
     }
 
 }

@@ -67,10 +67,14 @@ import io.bdeploy.ui.dto.InstanceAllClientsDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceUiEndpointsDto;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
+import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import io.bdeploy.ui.dto.UiEndpointDto;
+import io.bdeploy.ui.utils.ProductVersionMatchHelper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -523,5 +527,18 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             igc.groupingSinglePreset = preset;
         }
         update(group, igc);
+    }
+
+    @Override
+    public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req) {
+        ProductResource resource = getProductResource(req.groupOrRepo);
+        // ProductResource.list(key) already returns sorted list (latest version first), so we only need to filter and grab first
+        ProductDto latestProduct = resource.list(req.key).stream()
+                .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex)).findFirst().orElse(null);
+        if (latestProduct == null) {
+            throw new WebApplicationException("No product versions found for --key=" + req.key + " --version=" + req.version
+                    + " --group=" + req.groupOrRepo + " --regex=" + req.regex, Status.NOT_FOUND);
+        }
+        return new ProductKeyWithSourceDto(req.groupOrRepo, latestProduct.key);
     }
 }

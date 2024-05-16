@@ -12,6 +12,8 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.jersey.Scope;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -74,5 +76,9 @@ public interface SoftwareRepositoryResource {
     @Path("/{repo}/user-group-permissions")
     @RequiredPermission(permission = Permission.ADMIN)
     public void updateUserGroupPermissions(@Scope @PathParam("repo") String repo, UserGroupPermissionUpdateDto[] permissions);
+
+    @POST
+    @Path("/latest-product-version")
+    public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req);
 
 }

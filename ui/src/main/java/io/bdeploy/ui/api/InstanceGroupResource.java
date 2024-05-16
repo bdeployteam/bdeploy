@@ -20,6 +20,8 @@ import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.InstanceAllClientsDto;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -141,4 +143,7 @@ public interface InstanceGroupResource {
     public void updatePreset(@Scope @PathParam("group") String group, @QueryParam("multiple") boolean multiple,
             List<CustomDataGrouping> preset);
 
+    @POST
+    @Path("/latest-product-version")
+    public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req);
 }

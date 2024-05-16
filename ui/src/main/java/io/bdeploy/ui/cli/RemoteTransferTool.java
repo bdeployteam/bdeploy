@@ -17,10 +17,15 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.LocalLoginManager;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.cli.RemoteTransferTool.TransferConfig;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import jakarta.ws.rs.core.UriBuilder;
 
 @Help("Transfer products and software from one server to another")
@@ -30,7 +35,7 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
 
     public @interface TransferConfig {
 
-        @Help("Name of the source instance group or software repository.")
+        @Help("Name of the source instance group or software repository. If omitted, will search through all repositories.")
         String sourceGroup();
 
         @Help("Name of the target instance group or software repository.")
@@ -51,8 +56,12 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
         @Help("The Key of the product or external software to transfer, can be found using remote-product or remote-repo-software tools.")
         String key();
 
-        @Help("The version of the product or external software to transfer, can be found using remote-product or remote-repo-software tools.")
+        @Help("The version filter of the product or external software to transfer, can be found using remote-product or remote-repo-software tools. If omitted, will pick the latest available version")
         String version();
+
+        @Help(value = "Specifies that --version is a regular expression. If multiple matches are found, will pick the latest matching version",
+              arg = false)
+        boolean regex() default false;
 
         @Help("Path to the directory which contains the local login data")
         @EnvironmentFallback("BDEPLOY_LOGIN_STORAGE")
@@ -65,11 +74,9 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
 
     @Override
     protected RenderableResult run(TransferConfig config, RemoteService source) {
-        helpAndFailIfMissing(config.sourceGroup(), "--sourceGroup missing");
         helpAndFailIfMissing(config.targetGroup(), "--targetGroup missing");
 
         helpAndFailIfMissing(config.key(), "--key missing");
-        helpAndFailIfMissing(config.version(), "--version missing");
 
         RemoteService target = null;
 
@@ -93,13 +100,15 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
             }
         }
 
+        ProductKeyWithSourceDto latestVersion = getLatestVersion(config, source);
+
         try (BHive hive = new BHive(hivePath.toUri(), RollingFileAuditor.getFactory().apply(hivePath), getActivityReporter());
                 Transaction tx = hive.getTransactions().begin()) {
-            Manifest.Key k = new Manifest.Key(config.key(), config.version());
+            Manifest.Key k = latestVersion.key;
 
             // 1. fetch from source server
-            out().println("Fetching " + k + " from " + config.sourceGroup() + " on " + source.getUri());
-            hive.execute(new FetchOperation().setRemote(source).setHiveName(config.sourceGroup()).addManifest(k));
+            out().println("Fetching " + k + " from " + latestVersion.groupOrRepo + " on " + source.getUri());
+            hive.execute(new FetchOperation().setRemote(source).setHiveName(latestVersion.groupOrRepo).addManifest(k));
 
             // 2. push to target server
             out().println("Pushing " + k + " to " + config.targetGroup() + " on " + target.getUri());
@@ -111,5 +120,26 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
         }
 
         return createSuccess();
+    }
+
+    private ProductKeyWithSourceDto getLatestVersion(TransferConfig config, RemoteService source) {
+        LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
+        req.groupOrRepo = config.sourceGroup();
+        req.key = config.key();
+        req.version = config.version();
+        req.regex = config.regex();
+
+        InstanceGroupResource igr = ResourceProvider.getResource(source, InstanceGroupResource.class, getLocalContext());
+        SoftwareRepositoryResource srr = ResourceProvider.getResource(source, SoftwareRepositoryResource.class,
+                getLocalContext());
+
+        boolean isInstanceGroup = req.groupOrRepo != null
+                && igr.list().stream().anyMatch(g -> g.instanceGroupConfiguration.name.equals(req.groupOrRepo));
+
+        if (isInstanceGroup) {
+            return igr.getLatestProductVersion(req);
+        } else {
+            return srr.getLatestProductVersion(req);
+        }
     }
 }
