@@ -38,6 +38,11 @@ public class MinionStatusDto {
     public long lastRoundtrip;
 
     /**
+     * Whether or not the node is up to date with master in terms of installed and activated versions for every instance
+     */
+    public NodeSynchronizationStatus nodeSynchronizationStatus = NodeSynchronizationStatus.NOT_SYNCHRONIZED;
+
+    /**
      * Creates a new node status indicating that this node is offline.
      *
      * @param config
