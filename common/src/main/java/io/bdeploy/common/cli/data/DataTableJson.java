@@ -22,7 +22,8 @@ class DataTableJson extends DataTableBase {
             for (int y = 0; y < row.size(); ++y) {
                 DataTableColumn col = getColumns().get(colIndex);
 
-                out().print(quote(col.getName()) + ": " + quote(row.get(y).getData()));
+                out().print(DataRenderingHelper.quoteJson(col.getName()) + ": "
+                        + DataRenderingHelper.quoteJson(row.get(y).getData()));
 
                 if (y == (row.size() - 1)) {
                     if (i == (getRows().size() - 1)) {
@@ -40,9 +41,4 @@ class DataTableJson extends DataTableBase {
 
         out().println("]");
     }
-
-    static String quote(String data) {
-        return "\"" + data.replace("\"", "\\\"").replace("\n", "\\n").replace("\\", "\\\\") + "\"";
-    }
-
 }
