@@ -7,7 +7,7 @@ import io.bdeploy.common.util.ExceptionHelper;
 
 class DataResultJson extends DataResultBase {
 
-    public DataResultJson(PrintStream output) {
+    DataResultJson(PrintStream output) {
         super(output);
     }
 

@@ -7,7 +7,7 @@ import io.bdeploy.common.util.ExceptionHelper;
 
 class DataResultCsv extends DataResultBase {
 
-    public DataResultCsv(PrintStream output) {
+    DataResultCsv(PrintStream output) {
         super(output);
     }
 
