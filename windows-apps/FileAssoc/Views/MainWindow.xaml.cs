@@ -4,7 +4,8 @@ using System;
 using System.IO;
 using System.Windows;
 
-namespace Bdeploy.FileAssoc {
+namespace Bdeploy.FileAssoc
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

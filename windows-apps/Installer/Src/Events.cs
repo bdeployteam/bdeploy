@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace Bdeploy.Installer {
+namespace Bdeploy.Installer
+{
     /// <summary>
     /// Data to pupulate information about the app to be installed.
     /// </summary>

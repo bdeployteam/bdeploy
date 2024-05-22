@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
-using System;
 
-namespace Bdeploy.Shared {
+namespace Bdeploy.Shared
+{
 
     /// <summary>
     /// Provides static helpers to manage registry entries related to the "Apps & Features" section of the control center. 

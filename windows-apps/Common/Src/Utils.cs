@@ -7,7 +7,8 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 
-namespace Bdeploy.Shared {
+namespace Bdeploy.Shared
+{
     public class Utils {
 
         public static readonly int OPERATION_CANCELED = -2;

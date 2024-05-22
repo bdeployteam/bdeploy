@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
 
     /// <summary>
     /// Launches the Browser tool to see all installed applications

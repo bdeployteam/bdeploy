@@ -1,8 +1,8 @@
-﻿using System;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 
-namespace Bdeploy.Installer.Views {
+namespace Bdeploy.Installer.Views
+{
     /// <summary>
     /// Interaction logic for ProgressView.xaml
     /// </summary>

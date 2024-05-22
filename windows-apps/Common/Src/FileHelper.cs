@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 
-namespace Bdeploy.Shared {
+namespace Bdeploy.Shared
+{
     /// <summary>
     /// Utility methods to work with files
     /// </summary>

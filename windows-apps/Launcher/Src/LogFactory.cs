@@ -3,7 +3,8 @@ using Serilog;
 using System;
 using System.IO;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
     /// <summary>
     /// Responsible for creating and initializing loggers
     /// </summary>

@@ -1,12 +1,9 @@
 ﻿using Bdeploy.Shared;
-using Microsoft.Win32;
-using System;
-using System.Collections;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Bdeploy.Installer.Views {
+namespace Bdeploy.Installer.Views
+{
     /// <summary>
     /// Interaction logic for ErrorView.xaml
     /// </summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
     /// <summary>
     /// Enumeration defining whether to retry or cancel an operation
     /// </summary>

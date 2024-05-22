@@ -1,8 +1,8 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Security.AccessControl;
 
-namespace Bdeploy.FileAssoc {
+namespace Bdeploy.FileAssoc
+{
     /// <summary>
     /// Provides API to create or delete associations of a given executable with the .bdeploy extension.
     /// https://docs.microsoft.com/en-us/windows/desktop/shell/fa-sample-scenarios

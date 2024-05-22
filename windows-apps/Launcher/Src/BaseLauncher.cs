@@ -7,7 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
 
     /// <summary>
     /// Base class for all applications that are starting the Java LauncherCli

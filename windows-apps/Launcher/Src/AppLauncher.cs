@@ -8,7 +8,8 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
     /// <summary>
     /// Responsible for starting the Java Launcher as well as for applying updates.
     /// </summary>

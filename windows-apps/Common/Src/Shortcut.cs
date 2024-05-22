@@ -8,7 +8,8 @@ using System.Text;
 /// Creates shortcuts without a dependency against IWshRuntimeLibrary 
 /// https://stackoverflow.com/questions/4897655/create-a-shortcut-on-desktop/14632782#14632782
 /// </summary>
-namespace Bdeploy.Shared {
+namespace Bdeploy.Shared
+{
     public class Shortcut {
 
         private readonly string targetPath;

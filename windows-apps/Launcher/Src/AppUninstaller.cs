@@ -1,10 +1,10 @@
 ﻿using Bdeploy.Shared;
 using Serilog;
-using System.CodeDom;
 using System.IO;
 using System.Text;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
 
     /// <summary>
     /// Removes the application and all created registry entries and shortcuts

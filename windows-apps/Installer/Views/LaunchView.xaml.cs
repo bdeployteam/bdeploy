@@ -1,7 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace Bdeploy.Installer.Views {
+namespace Bdeploy.Installer.Views
+{
     /// <summary>
     /// Interaction logic for LaunchView.xaml
     /// </summary>

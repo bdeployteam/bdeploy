@@ -1,7 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
     /// <summary>
     /// Interaction logic for UpdateFailedWindow.xaml
     /// </summary>

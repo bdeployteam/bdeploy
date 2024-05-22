@@ -4,7 +4,8 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Bdeploy.Installer.Models {
+namespace Bdeploy.Installer.Models
+{
     class SecurityHelper {
         /// <summary>
         /// Loads the X509Certificate required to communicate with the given service.

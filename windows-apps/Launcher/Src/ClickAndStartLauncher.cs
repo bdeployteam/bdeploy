@@ -1,7 +1,8 @@
 ﻿using Bdeploy.Shared;
 using Serilog;
 
-namespace Bdeploy.Launcher {
+namespace Bdeploy.Launcher
+{
 
     /// <summary>
     /// Base class for all applications that are expecting a ClickAndStart file

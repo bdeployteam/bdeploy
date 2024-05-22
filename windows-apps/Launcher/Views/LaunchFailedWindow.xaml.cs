@@ -1,7 +1,8 @@
 ﻿using Bdeploy.Shared;
 using System.Windows;
 
-namespace Bdeploy.Launcher.Views {
+namespace Bdeploy.Launcher.Views
+{
     /// <summary>
     /// Interaction logic for LaunchFailedWindow.xaml
     /// </summary>

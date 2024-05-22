@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Bdeploy.Installer.Views {
+namespace Bdeploy.Installer.Views
+{
     /// <summary>
     /// Interaction logic for InstallNowView.xaml
     /// </summary>

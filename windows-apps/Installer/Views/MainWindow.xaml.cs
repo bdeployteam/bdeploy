@@ -4,7 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace Bdeploy.Installer {
+namespace Bdeploy.Installer
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

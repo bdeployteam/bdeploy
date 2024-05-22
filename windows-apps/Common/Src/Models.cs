@@ -4,7 +4,8 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace Bdeploy.Shared {
+namespace Bdeploy.Shared
+{
     /// <summary>
     /// Represents the configuration of the installer which is embedded into the executable.
     /// </summary>

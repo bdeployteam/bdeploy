@@ -4,7 +4,8 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Bdeploy.Installer {
+namespace Bdeploy.Installer
+{
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

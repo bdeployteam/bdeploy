@@ -6,7 +6,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 
-namespace Bdeploy.Installer.Models {
+namespace Bdeploy.Installer.Models
+{
     /// <summary>
     /// Knows how to read and write the embedded configuration. 
     /// 

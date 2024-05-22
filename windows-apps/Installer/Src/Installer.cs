@@ -7,13 +7,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bdeploy.Installer {
+namespace Bdeploy.Installer
+{
     /// <summary>
     /// Downloads and unpacks the launcher.
     /// </summary>
