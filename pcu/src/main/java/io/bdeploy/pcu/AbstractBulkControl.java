@@ -68,21 +68,21 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
                 case WAIT:
                     happyState = ProcessState.RUNNING;
                     listener.on(ProcessState.STOPPED,
-                            () -> future.completeExceptionally(new RuntimeException("Stopped while starting")));
+                            () -> future.completeExceptionally(new IllegalStateException("Stopped while starting")));
                     listener.on(ProcessState.RUNNING_STOP_PLANNED,
-                            () -> future.completeExceptionally(new RuntimeException("Stop planned while starting")));
+                            () -> future.completeExceptionally(new IllegalStateException("Stop planned while starting")));
                     break;
                 case WAIT_UNTIL_STOPPED:
                     happyState = ProcessState.STOPPED;
                     break;
                 default:
-                    throw new RuntimeException("Missing implementation of " + ProcessControlGroupWaitType.class.getSimpleName()
-                            + ' ' + waitType.name());
+                    throw new IllegalStateException("Missing implementation of "
+                            + ProcessControlGroupWaitType.class.getSimpleName() + ' ' + waitType.name());
             }
 
             listener.on(happyState, () -> future.complete(true));
             listener.on(ProcessState.CRASHED_PERMANENTLY,
-                    () -> future.completeExceptionally(new RuntimeException("Crashed permanently")));
+                    () -> future.completeExceptionally(new IllegalStateException("Crashed permanently")));
 
             controller.start(user);
 

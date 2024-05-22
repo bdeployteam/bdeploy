@@ -253,15 +253,12 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
       path.push({ name: r.mName, tag: r.mTag });
     } else if (r.type === TreeEntryType.TREE) {
       path.push({ name: r.name, id: r.id });
+    } else if (r.size <= 1024 * 1024 * 1024 /* limit for inline viewing of files */) {
+      this.hives.download(this.bhive$.value, r.id).subscribe((data) => {
+        this.showPreviewIfText(data, r.name);
+      });
     } else {
-      // limit for inline viewing of files.
-      if (r.size <= 1024 * 1024 * 1024) {
-        this.hives.download(this.bhive$.value, r.id).subscribe((data) => {
-          this.showPreviewIfText(data, r.name);
-        });
-      } else {
-        this.dialog.info(`Preview ${r.name}`, `${r.name} is too large to preview.`).subscribe();
-      }
+      this.dialog.info(`Preview ${r.name}`, `${r.name} is too large to preview.`).subscribe();
     }
 
     this.router.navigate([], {

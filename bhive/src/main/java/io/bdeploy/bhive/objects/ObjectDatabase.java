@@ -258,8 +258,14 @@ public class ObjectDatabase extends LockableDatabase {
             do {
                 try {
                     try (Stream<Path> walk = Files.walk(root)) {
-                        walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
-                                .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1)).forEach(consumer::accept);
+                        walk.filter(Files::isRegularFile)//
+                                .map(Path::getFileName)//
+                                .map(Object::toString)//
+                                .map(ObjectId::parse).filter(Objects::nonNull)//
+                                .forEach(e -> {
+                                    scan.workAndCancelIfRequested(1);
+                                    consumer.accept(e);
+                                });
 
                         // done. explicit return to escape the exception handling retry loop :)
                         return;

@@ -13,7 +13,6 @@ import com.google.common.cache.CacheBuilder;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
-import io.bdeploy.interfaces.settings.OktaSettingsDto;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.minion.user.AuthTrace;
@@ -87,7 +86,7 @@ public class OktaTokenAuthenticator implements Authenticator {
     private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
         trace.log("  verify okta token for " + user.name);
         try {
-            UserInfo found = performUserSearch(user, password, settings.oktaSettings, trace);
+            UserInfo found = performUserSearch(user, password, trace);
             if (found != null) {
                 return found;
             }
@@ -101,8 +100,7 @@ public class OktaTokenAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, OktaSettingsDto server, AuthTrace trace)
-            throws JacksonException {
+    private UserInfo performUserSearch(UserInfo user, char[] password, AuthTrace trace) throws JacksonException {
         // Credentials of the user to be authenticated
         OktaAccessTokenInfo info = JacksonHelper.getDefaultJsonObjectMapper().readValue(String.valueOf(password),
                 OktaAccessTokenInfo.class);

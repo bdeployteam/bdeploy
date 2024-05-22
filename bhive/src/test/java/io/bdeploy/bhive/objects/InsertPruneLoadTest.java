@@ -83,7 +83,7 @@ class InsertPruneLoadTest {
             threads.add(new Thread(() -> {
                 while (!stop.get()) {
                     try {
-                        prune(hive, errors);
+                        prune(hive);
                         prunes.increment();
                     } catch (Exception e) {
                         errors.increment();
@@ -109,7 +109,7 @@ class InsertPruneLoadTest {
         threads.forEach(t -> {
             if (t.isAlive()) {
                 errors.add(1);
-                log.error("Thread refused to stop: " + t.getName());
+                log.error("Thread refused to stop: {}", t.getName());
                 t.interrupt();
             }
         });
@@ -135,7 +135,7 @@ class InsertPruneLoadTest {
         assertEquals(0, errors.sum());
     }
 
-    void prune(BHive hive, LongAdder errors) {
+    void prune(BHive hive) {
         hive.execute(new PruneOperation());
         try {
             TimeUnit.MILLISECONDS.sleep((long) (Math.random() * 10));

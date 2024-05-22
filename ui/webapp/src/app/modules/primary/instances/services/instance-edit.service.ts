@@ -548,18 +548,15 @@ export class InstanceEditService {
       return ProcessEditState.NONE; // removed means it's no longer there - it has no state.
     } else if (baseComp === -1 && stateComp !== -1) {
       return ProcessEditState.ADDED;
+    } else if (
+      baseAppCg?.name === stateAppCg?.name &&
+      baseAppCgIndex === stateAppCgIndex &&
+      baseNode.nodeName === stateNode.nodeName &&
+      !this.hasChanges(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])
+    ) {
+      return ProcessEditState.NONE;
     } else {
-      // both are !== -1
-      if (
-        baseAppCg?.name === stateAppCg?.name &&
-        baseAppCgIndex === stateAppCgIndex &&
-        baseNode.nodeName === stateNode.nodeName &&
-        !this.hasChanges(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])
-      ) {
-        return ProcessEditState.NONE;
-      } else {
-        return ProcessEditState.CHANGED;
-      }
+      return ProcessEditState.CHANGED;
     }
   }
 

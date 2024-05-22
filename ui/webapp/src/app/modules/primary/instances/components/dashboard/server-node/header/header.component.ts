@@ -101,12 +101,6 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
         for (const ev of eventsInTimeframe) {
           switch (ev.type) {
             case HistoryEntryType.CREATE:
-              eventsToRender.push({
-                description: `${ev.title} by ${ev.user}`,
-                time: ev.timestamp,
-                type: 'info',
-              });
-              break;
             case HistoryEntryType.DEPLOYMENT:
               eventsToRender.push({
                 description: `${ev.title} by ${ev.user}`,

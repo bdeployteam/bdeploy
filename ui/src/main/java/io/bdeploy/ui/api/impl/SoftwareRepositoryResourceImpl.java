@@ -8,7 +8,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -216,8 +215,7 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req) {
         Comparator<Manifest.Key> comparator = null;
 
-        List<String> repos = req.groupOrRepo != null ? List.of(req.groupOrRepo)
-                : list().stream().map(r -> r.name).collect(Collectors.toList());
+        List<String> repos = req.groupOrRepo != null ? List.of(req.groupOrRepo) : list().stream().map(r -> r.name).toList();
 
         List<ProductKeyWithSourceDto> versions = new ArrayList<>();
 

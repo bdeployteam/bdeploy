@@ -64,10 +64,8 @@ export class BdFileUploadRawComponent implements OnInit {
         } else if (!dto.supportedOperatingSystems.includes(OperatingSystem.WINDOWS)) {
           dto.supportedOperatingSystems.push(OperatingSystem.WINDOWS);
         }
-      } else {
-        if (dto.supportedOperatingSystems !== undefined) {
-          dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((e) => e !== OperatingSystem.WINDOWS);
-        }
+      } else if (dto.supportedOperatingSystems !== undefined) {
+        dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((e) => e !== OperatingSystem.WINDOWS);
       }
     }
   }
@@ -86,10 +84,8 @@ export class BdFileUploadRawComponent implements OnInit {
         } else if (!dto.supportedOperatingSystems.includes(OperatingSystem.LINUX)) {
           dto.supportedOperatingSystems.push(OperatingSystem.LINUX);
         }
-      } else {
-        if (dto.supportedOperatingSystems !== undefined) {
-          dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((e) => e !== OperatingSystem.LINUX);
-        }
+      } else if (dto.supportedOperatingSystems !== undefined) {
+        dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((e) => e !== OperatingSystem.LINUX);
       }
     }
   }

@@ -87,7 +87,7 @@ public class HiveResourceImpl implements HiveResource {
             hid.pooling = hive.isPooling();
             Path pool = hive.getPoolPath();
             hid.poolPath = pool != null ? pool.toString() : null;
-            hid.minPermission = registry.getRequiredPermission(hive);
+            hid.minPermission = registry.getRequiredPermission();
 
             if (new InstanceGroupManifest(hive).read() != null) {
                 hid.type = HiveType.INSTANCE_GROUP;

@@ -6,7 +6,6 @@ import static io.bdeploy.bhive.op.VerifyOperation.VerifyOpStatus.UNMODIFIED;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.op.VerifyOperation;
 import io.bdeploy.bhive.op.VerifyOperation.VerifiedBlobView;
@@ -28,6 +27,6 @@ public class VerifyOperationResultDto {
     }
 
     private List<String> getByStatus(List<VerifiedBlobView> list, VerifyOpStatus status) {
-        return list.stream().filter(view -> view.status == status).map(blob -> blob.path).collect(Collectors.toList());
+        return list.stream().filter(view -> view.status == status).map(blob -> blob.path).toList();
     }
 }

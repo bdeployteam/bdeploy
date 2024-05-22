@@ -57,7 +57,7 @@ public class BHiveRegistry implements AutoCloseable {
         this.reporter = reporter;
     }
 
-    public Permission getRequiredPermission(BHive hive) {
+    public Permission getRequiredPermission() {
         // default is to require read permission on a hive.
         return Permission.READ;
     }

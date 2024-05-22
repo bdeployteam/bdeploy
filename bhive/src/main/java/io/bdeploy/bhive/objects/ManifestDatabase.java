@@ -162,11 +162,11 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      *         added (by this call).
      */
     public boolean addManifest(Manifest manifest, boolean ignoreExisting) {
-        AtomicBoolean added = new AtomicBoolean(true);
+        AtomicBoolean addedBool = new AtomicBoolean(true);
         locked(() -> {
             if (hasManifest(manifest.getKey())) {
                 if (ignoreExisting) {
-                    added.set(false);
+                    addedBool.set(false);
                     return;
                 } else {
                     throw new IllegalArgumentException("Manifest " + manifest.getKey() + " already present.");
@@ -195,7 +195,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
             updateListCaches(manifest.getKey(), c -> c.add(manifest.getKey()));
             scheduleNotify(manifest.getKey());
         });
-        return added.get();
+        return addedBool.get();
     }
 
     /**

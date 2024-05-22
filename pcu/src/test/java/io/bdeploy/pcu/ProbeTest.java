@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessProbeResultDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
@@ -50,12 +52,10 @@ class ProbeTest {
         while (true) {
             Thread.sleep(100);
 
-            if (!controller.getDetails().lastProbes.isEmpty()) {
-                // a probe was performed!
-                if (controller.getDetails().lastProbes.get(0).status == StartupProbe.STATUS_NOT_STARTED) {
-                    // ok, we continue with the test now.
-                    break;
-                }
+            List<ProcessProbeResultDto> lastProbes = controller.getDetails().lastProbes;
+            if (!lastProbes.isEmpty() && lastProbes.get(0).status == StartupProbe.STATUS_NOT_STARTED) {
+                // a probe was performed and the status is OK -> we continue with the test now
+                break;
             }
         }
 

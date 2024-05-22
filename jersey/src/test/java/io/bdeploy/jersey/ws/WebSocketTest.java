@@ -72,7 +72,7 @@ class WebSocketTest {
 
                         @Override
                         public void onMessage(String message) {
-                            log.info("Client message: " + message);
+                            log.info("Client message: {}", message);
 
                             result.complete(message);
 

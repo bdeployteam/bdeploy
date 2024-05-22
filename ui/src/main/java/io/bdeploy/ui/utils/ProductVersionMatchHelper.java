@@ -4,6 +4,9 @@ import io.bdeploy.ui.dto.ProductDto;
 
 public class ProductVersionMatchHelper {
 
+    private ProductVersionMatchHelper() {
+    }
+
     public static boolean matchesVersion(ProductDto dto, String version, boolean regex) {
         if (version == null || version.isBlank()) {
             return true;

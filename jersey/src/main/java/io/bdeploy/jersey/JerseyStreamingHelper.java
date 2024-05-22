@@ -9,6 +9,9 @@ import java.io.OutputStream;
  */
 public class JerseyStreamingHelper {
 
+    private JerseyStreamingHelper() {
+    }
+
     public static void streamWithProgress(InputStream in, OutputStream out, long length) throws IOException {
 
         // consume no more than length

@@ -64,7 +64,6 @@ public class BHiveLocatorImpl implements BHiveLocator {
         if (hive == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
-        return registry.getRequiredPermission(registry.get(name));
+        return registry.getRequiredPermission();
     }
-
 }

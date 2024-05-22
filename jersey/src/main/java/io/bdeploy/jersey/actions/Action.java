@@ -38,15 +38,13 @@ public class Action implements Comparable<Action> {
                 RuntimeAssert.assertNotNull(bhive, "BHive must be set");
                 RuntimeAssert.assertNull(instance, "Instance may not be set");
                 break;
+            case VERSION:
+            case PROCESS:
+                RuntimeAssert.assertNotNull(item, "Item must be set");
+                // Fall through
             case INSTANCE:
                 RuntimeAssert.assertNotNull(bhive, "BHive must be set");
                 RuntimeAssert.assertNotNull(instance, "Instance must be set");
-                break;
-            case VERSION:
-            case PROCESS:
-                RuntimeAssert.assertNotNull(bhive, "BHive must be set");
-                RuntimeAssert.assertNotNull(instance, "Instance must be set");
-                RuntimeAssert.assertNotNull(item, "Item must be set");
                 break;
         }
     }
@@ -88,7 +86,6 @@ public class Action implements Comparable<Action> {
             default:
                 return baseName + " in unknown scope";
         }
-
     }
 
     @Generated("Eclipse")

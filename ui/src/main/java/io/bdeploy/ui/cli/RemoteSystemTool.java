@@ -246,7 +246,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         List<InstanceDto> instances = ir.list().stream()//
                 .filter(instanceDto -> systemKey.equals(instanceDto.instanceConfiguration.system))//
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
 
         SortedMap<InstanceDto, InstanceOverallStatusDto> instancesAndOverallStates = new TreeMap<>(
                 (a, b) -> a.instance.compareTo(b.instance));
@@ -491,7 +491,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         List<String> instanceIds = ir.list().stream()//
                 .filter(instanceDto -> systemKey.equals(instanceDto.instanceConfiguration.system))//
                 .map(dto -> dto.instanceConfiguration.id)//
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
 
         List<OperationResult> bulkOperationResults = bulkOperation.apply(ir.getBulkResource(), instanceIds).results;
         if (bulkOperationResults.isEmpty()) {

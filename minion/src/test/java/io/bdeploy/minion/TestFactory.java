@@ -88,7 +88,7 @@ public class TestFactory {
 
         Manifest.Key instance;
         try (Transaction t = local.getTransactions().begin()) {
-            instance = createDemoInstance(local, prodKey, tmp, appKey, clientKey);
+            instance = createDemoInstance(local, prodKey, appKey, clientKey);
         }
 
         if (push) {
@@ -109,7 +109,7 @@ public class TestFactory {
     /**
      * Fakes the configuration UI.
      */
-    private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, Manifest.Key serverApp,
+    private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Manifest.Key serverApp,
             Manifest.Key clientApp) throws IOException {
         String id = "aaa-bbb-ccc";
 
