@@ -11,7 +11,7 @@ namespace Bdeploy.Installer
     /// </summary>
     public partial class App : Application
     {
-        async void App_Startup(object sender, StartupEventArgs e)
+        private async void App_Startup(object sender, StartupEventArgs e)
         {
             // Enforce usage of TLS 1.2
             // We target .NET 4.5 and therefore we need to explicitly change the default

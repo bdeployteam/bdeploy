@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Bdeploy.Installer.Models
 {
-    class SecurityHelper
+    internal class SecurityHelper
     {
         /// <summary>
         /// Loads the X509Certificate required to communicate with the given service.
@@ -46,7 +46,7 @@ namespace Bdeploy.Installer.Models
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.ExtraStore.Add(root);
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
-            var isValid = chain.Build(cert);
+            bool isValid = chain.Build(cert);
             isValid = isValid && cert.RawData.SequenceEqual(root.RawData);
             return isValid;
         }

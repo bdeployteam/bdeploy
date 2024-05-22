@@ -169,7 +169,9 @@ namespace Bdeploy.Shared
             try
             {
                 using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
                     return false;
+                }
             }
             catch (Exception)
             {
@@ -190,7 +192,7 @@ namespace Bdeploy.Shared
                 Directory.CreateDirectory(path);
 
                 // Create a random new file
-                var file = Path.Combine(path, Guid.NewGuid().ToString());
+                string file = Path.Combine(path, Guid.NewGuid().ToString());
                 FileStream stream = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 100);
 
                 // Dispose and remove if success -> write permissions

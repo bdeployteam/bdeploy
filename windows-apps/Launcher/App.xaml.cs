@@ -24,7 +24,7 @@ namespace Bdeploy.Launcher
         /// <summary>
         /// Callback method that is called on application startup
         /// </summary>
-        async void App_Startup(object sender, StartupEventArgs e)
+        private async void App_Startup(object sender, StartupEventArgs e)
         {
             // Set the shutdown mode. Otherwise we won't be able to 
             // Show the same window multiple times in our callback

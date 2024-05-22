@@ -123,13 +123,13 @@ namespace Bdeploy.Installer
         /// Launches the previously installed application. 
         /// </summary>
         /// <returns></returns>
-        public int Launch(String[] arguments, bool waitForTermination)
+        public int Launch(string[] arguments, bool waitForTermination)
         {
             string appUid = config.ApplicationUid;
 
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("\"{0}\" ", Path.Combine(appsHome, appUid, "launch.bdeploy"));
-            foreach (String argument in arguments)
+            foreach (string argument in arguments)
             {
                 builder.AppendFormat("\"{0}\" ", argument);
             }
@@ -530,7 +530,7 @@ namespace Bdeploy.Installer
             }
 
             // Rename to ZIP when finished
-            var zipFileName = Path.Combine(tmpDir, Guid.NewGuid() + ".zip");
+            string zipFileName = Path.Combine(tmpDir, Guid.NewGuid() + ".zip");
             File.Move(tmpFileName, zipFileName);
             return zipFileName;
         }
@@ -541,10 +541,10 @@ namespace Bdeploy.Installer
         /// <returns></returns>
         private async Task CopyStreamAsync(Stream contentStream, FileStream fileStream)
         {
-            var buffer = new byte[8192];
+            byte[] buffer = new byte[8192];
             while (true)
             {
-                var read = await contentStream.ReadAsync(buffer, 0, buffer.Length);
+                int read = await contentStream.ReadAsync(buffer, 0, buffer.Length);
                 if (read == 0)
                 {
                     return;

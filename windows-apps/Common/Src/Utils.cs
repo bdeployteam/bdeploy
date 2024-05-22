@@ -132,7 +132,7 @@ namespace Bdeploy.Shared
             }
         }
 
-        private static string ReadValueName(String valueName)
+        private static string ReadValueName(string valueName)
         {
             return Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", valueName, "").ToString();
         }

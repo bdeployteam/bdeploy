@@ -91,7 +91,7 @@ namespace Bdeploy.Installer.Models
         /// <returns></returns>
         public static string ReadEmbeddedConfig()
         {
-            var fileName = Process.GetCurrentProcess().MainModule.FileName;
+            string fileName = Process.GetCurrentProcess().MainModule.FileName;
 
             string config = "";
             bool markerDetected = false;

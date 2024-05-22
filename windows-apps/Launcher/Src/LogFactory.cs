@@ -8,7 +8,7 @@ namespace Bdeploy.Launcher
     /// <summary>
     /// Responsible for creating and initializing loggers
     /// </summary>
-    class LogFactory
+    internal class LogFactory
     {
         private static readonly string TEMPLATE = "{Timestamp:yyyy-MM-dd HH:mm:ss} | PID:{ProcessId} | User:{EnvironmentUserName} | {Level:u3} | {Message:l}{NewLine}{Exception}";
 
