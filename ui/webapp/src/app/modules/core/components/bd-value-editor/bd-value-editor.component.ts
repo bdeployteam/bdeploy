@@ -270,7 +270,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   }
 
   protected doChangeLink(val: string) {
-    this.writeValue({ value: null, linkExpression: val ? val : '' });
+    this.writeValue({ value: null, linkExpression: val || '' });
     this.fireChange(this.internalValue);
   }
 

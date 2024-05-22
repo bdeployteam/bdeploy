@@ -38,8 +38,8 @@ function getPermissionLevelForScope(arr: ScopedPermission[], scopePredicate: (sc
   }
   const permissions = arr.filter((sc) => scopePredicate(sc));
   let p = permissions.find((sc) => sc.permission === Permission.ADMIN);
-  p = p ? p : permissions.find((sc) => sc.permission === Permission.WRITE);
-  p = p ? p : permissions.find((sc) => sc.permission === Permission.READ);
-  p = p ? p : permissions.find((sc) => sc.permission === Permission.CLIENT);
+  p = p || permissions.find((sc) => sc.permission === Permission.WRITE);
+  p = p || permissions.find((sc) => sc.permission === Permission.READ);
+  p = p || permissions.find((sc) => sc.permission === Permission.CLIENT);
   return p ? p.permission : null;
 }

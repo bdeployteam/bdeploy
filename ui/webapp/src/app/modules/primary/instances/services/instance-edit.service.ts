@@ -279,7 +279,7 @@ export class InstanceEditService {
 
     // the current state
     const state = this.reBuild();
-    const fct = factory ? factory : this.createStdEdit();
+    const fct = factory || this.createStdEdit();
 
     // and the diff to it :)
     const change = fct(description, state, this.state$.value);
@@ -532,8 +532,8 @@ export class InstanceEditService {
     const stateAppCgIndex = stateAppCg?.processOrder?.findIndex((a) => a === id);
 
     // if undefined, we just switch to "not found" - the node might not even exist.
-    const baseComp = baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
-    const stateComp = stateAppIndex === undefined || stateAppIndex === null ? -1 : stateAppIndex;
+    const baseComp = baseAppIndex ?? -1;
+    const stateComp = stateAppIndex ?? -1;
 
     if (this.issues$.value?.length) {
       const issues = this.issues$.value.filter((i) => i.appId === id);

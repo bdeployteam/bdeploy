@@ -39,8 +39,8 @@ export class ConfigFilesService {
         this.files$.next(null);
       } else {
         // map both to ConfigFile, potentially associating modification with an existing file.
-        const m = state.files ? state.files : [];
-        const p = pers ? pers : [];
+        const m = state.files || [];
+        const p = pers || [];
 
         const modFiles = m.map((c) => ({
           persistent: pers.find((x) => x.path === c.file),

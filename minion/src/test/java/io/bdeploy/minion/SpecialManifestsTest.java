@@ -73,7 +73,7 @@ class SpecialManifestsTest {
     }
 
     @Test
-    void productAndApplicationManifest(BHive hive, @TempDir Path tmp) throws IOException {
+    void productAndApplicationManifest(BHive hive, @TempDir Path tmp) {
         Path app = TestAppFactory.createDummyApp("dummy", tmp);
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("app", OsHelper.getRunningOs()), "1.0");
 

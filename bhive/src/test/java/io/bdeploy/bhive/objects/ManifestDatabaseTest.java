@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import io.bdeploy.bhive.model.Manifest;
 class ManifestDatabaseTest extends DbTestBase {
 
     @Test
-    void storeAndRead(@TempDir Path tmp) throws IOException {
+    void storeAndRead(@TempDir Path tmp) {
         Path dbDir = tmp.resolve("manifests");
 
         Manifest.Key key = new Manifest.Key("test/app1", "v1.0");
@@ -50,5 +49,4 @@ class ManifestDatabaseTest extends DbTestBase {
             assertFalse(db.hasManifest(key));
         }
     }
-
 }

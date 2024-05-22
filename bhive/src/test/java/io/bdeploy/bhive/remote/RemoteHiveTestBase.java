@@ -28,7 +28,7 @@ class RemoteHiveTestBase {
     private URI uri;
 
     @BeforeEach
-    void startRemoteServer(RemoteService svc, BHive hive, ActivityReporter r) throws Exception {
+    void startRemoteServer(RemoteService svc, BHive hive, ActivityReporter r) {
         registry = new BHiveRegistry(r);
 
         // requires TestHive extension on subclass.
@@ -62,5 +62,4 @@ class RemoteHiveTestBase {
     public URI getUri() {
         return uri;
     }
-
 }

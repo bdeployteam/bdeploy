@@ -62,7 +62,7 @@ public class TestMinion extends TestServer {
         log.info("TestMinion mode = {}", finalMode);
 
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
-                (k) -> new CloseableMinionRoot(getServerPort(context), finalMode), CloseableMinionRoot.class);
+                k -> new CloseableMinionRoot(getServerPort(context), finalMode), CloseableMinionRoot.class);
 
         MinionState state = cmr.mr.getState();
 

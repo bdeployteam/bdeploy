@@ -39,7 +39,7 @@ import io.bdeploy.interfaces.variables.Variables;
 class ValueResolverTest {
 
     @Test
-    void testValueProvider(@TempDir Path tmp) throws Exception {
+    void testValueProvider(@TempDir Path tmp) {
         Manifest.Key keyA1 = new Manifest.Key("a", "v1");
         Manifest.Key keyA2 = new Manifest.Key("a", "v2");
         Manifest.Key keyB1 = new Manifest.Key("b", "v1");

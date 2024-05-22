@@ -32,7 +32,7 @@ class IMAPStoreConnectionHandlerTests {
     private static final URLName URL_IMAPS_NOFOLDER = new URLName(PROTOCOL_IMAPS, HOST, PORT_IMAPS, null, USERNAME, PASSWORD);
 
     @Test
-    void testClosingClosedHandler() throws Exception {
+    void testClosingClosedHandler() {
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler()) {
         }
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler()) {
@@ -53,7 +53,7 @@ class IMAPStoreConnectionHandlerTests {
 
     @Test
     @Disabled("Disabled because a IMAP folder must be configured.")
-    void testImap() throws Exception {
+    void testImap() {
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_ONLY)) {
             messageReceiver.connect(URL_IMAP);
             messageReceiver.connect(URL_IMAP_NOFOLDER);
@@ -62,7 +62,7 @@ class IMAPStoreConnectionHandlerTests {
 
     @Test
     @Disabled("Disabled because a IMAP folder must be configured.")
-    void testImaps() throws Exception {
+    void testImaps() {
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_ONLY)) {
             messageReceiver.connect(URL_IMAPS);
             messageReceiver.connect(URL_IMAPS_NOFOLDER);

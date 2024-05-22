@@ -28,7 +28,7 @@ class InstanceStateTest {
 
     @Test
     void writeRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
-            throws IOException, InterruptedException {
+            throws IOException {
         Key instanceKey = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, false);
 
         InstanceState state = InstanceManifest.of(local, instanceKey).getState(local);
@@ -53,5 +53,4 @@ class InstanceStateTest {
         assertNull(state.read().activeTag);
         assertEquals(0, state.read().installedTags.size());
     }
-
 }

@@ -24,7 +24,7 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 class InstanceProcessControllerTest {
 
     @Test
-    void testStartStopApps(@TempDir Path tmp) throws Exception {
+    void testStartStopApps(@TempDir Path tmp) {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", false, "{{SLEEP_TIME}}");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
@@ -61,7 +61,7 @@ class InstanceProcessControllerTest {
     }
 
     @Test
-    void testMultiVersionApp(@TempDir Path tmp) throws Exception {
+    void testMultiVersionApp(@TempDir Path tmp) {
         InstanceProcessController controller = new InstanceProcessController("MyInstance");
 
         // Create two applications in version 1 and add to the controller
@@ -114,7 +114,7 @@ class InstanceProcessControllerTest {
     }
 
     @Test
-    void testAutoStartAndRecover(@TempDir Path tmp) throws Exception {
+    void testAutoStartAndRecover(@TempDir Path tmp) {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", false, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
@@ -174,8 +174,8 @@ class InstanceProcessControllerTest {
         List<String> order = new ArrayList<>();
         ProcessController pc1 = processList.get("App1");
         ProcessController pc2 = processList.get("App2");
-        pc1.addStatusListener((s) -> order.add(pc1.getDescriptor().id));
-        pc2.addStatusListener((s) -> order.add(pc2.getDescriptor().id));
+        pc1.addStatusListener(s -> order.add(pc1.getDescriptor().id));
+        pc2.addStatusListener(s -> order.add(pc2.getDescriptor().id));
 
         StateListener pc1s = StateListener.createFor(pc1);
         StateListener pc2s = StateListener.createFor(pc2);

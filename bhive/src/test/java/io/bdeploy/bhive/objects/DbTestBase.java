@@ -3,7 +3,6 @@
  */
 package io.bdeploy.bhive.objects;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ public class DbTestBase {
     private ObjectDatabase db;
 
     @BeforeEach
-    void initDb(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    void initDb(@TempDir Path tmp, ActivityReporter r) {
         dbPath = tmp.resolve("objdb");
         db = new ObjectDatabase(dbPath, tmp.resolve("objtmp"), r, null);
     }

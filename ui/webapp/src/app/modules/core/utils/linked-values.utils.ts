@@ -76,7 +76,7 @@ function expand(expression: string, expansions: LinkVariable[]): string {
   let count = 0;
 
   while (expression) {
-    const match = expression.match(/{{[^}]+}}/);
+    const match = /{{[^}]+}}/.exec(expression);
     if (!match) {
       break; // expression contains no more link variables -> we are done
     }

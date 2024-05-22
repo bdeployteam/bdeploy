@@ -47,7 +47,7 @@ class SMTPTransportConnectionHandlerTests {
     private static final URLName URL_SMTPS = new URLName(PROTOCOL_SMTPS, HOST, PORT_SMTPS, null, USERNAME, PASSWORD);
 
     @Test
-    void testClosingClosedHandler() throws Exception {
+    void testClosingClosedHandler() {
         try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {
         }
         try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {

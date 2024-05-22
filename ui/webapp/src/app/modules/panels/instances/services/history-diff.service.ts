@@ -71,7 +71,7 @@ export class Difference {
     private compare: string | number | boolean,
     valueOverride?: any,
   ) {
-    this.value = valueOverride ? valueOverride : base === null || base === undefined ? compare : base;
+    this.value = valueOverride || (base ?? compare);
     this.type = getChangeType(base, compare);
   }
 }

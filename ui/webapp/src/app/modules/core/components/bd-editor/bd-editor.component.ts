@@ -139,7 +139,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
         const word = searchString.substring(wordBegin) as string;
 
-        if (!word.match(/^.*\{\{[^ \t]*/)) {
+        if (!/^.*\{\{[^ \t]*/.exec(word)) {
           return { suggestions: [] };
         }
 

@@ -50,7 +50,7 @@ class EndpointsTest {
 
     @Test
     void testEndpoint(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,
-            MinionRoot mr) throws IOException, InterruptedException {
+            MinionRoot mr) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true, server.getPort());
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()

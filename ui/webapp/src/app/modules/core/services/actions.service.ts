@@ -71,12 +71,12 @@ export class ActionsService {
         }
 
         let params = new HttpParams();
-        if (!!group) {
+        if (group) {
           params = params.set('group', group);
-        } else if (!!repo) {
+        } else if (repo) {
           params = params.set('group', repo);
         }
-        if (!!instance) {
+        if (instance) {
           params = params.set('instance', instance);
         }
         this.http.get<ActionBroadcastDto[]>(`${this.apiPath}`, { params }).subscribe((r) => {

@@ -40,11 +40,11 @@ class ObjectChangeTest {
         CompletableFuture<ObjectChangeDto> withScope = new CompletableFuture<>();
 
         AtomicReference<CompletableFuture<?>> barrier = new AtomicReference<>();
-        ocb.addListener((r) -> {
+        ocb.addListener(r -> {
             barrier.get().complete(null);
         });
 
-        try (ObjectChangeClientWebSocket occws = JerseyClientFactory.get(remote).getObjectChangeWebSocket((change) -> {
+        try (ObjectChangeClientWebSocket occws = JerseyClientFactory.get(remote).getObjectChangeWebSocket(change -> {
             receivedChanges.increment();
             if (new ObjectScope("SCOPE").matches(change.scope)) {
                 withScope.complete(change);
@@ -90,11 +90,11 @@ class ObjectChangeTest {
     void testWebSocketMatching(RemoteService remote) throws Exception {
         AtomicReference<CompletableFuture<ObjectChangeDto>> processed = new AtomicReference<>();
         AtomicReference<CompletableFuture<?>> barrier = new AtomicReference<>();
-        ocb.addListener((r) -> {
+        ocb.addListener(r -> {
             barrier.get().complete(null);
         });
 
-        try (ObjectChangeClientWebSocket occws = JerseyClientFactory.get(remote).getObjectChangeWebSocket((change) -> {
+        try (ObjectChangeClientWebSocket occws = JerseyClientFactory.get(remote).getObjectChangeWebSocket(change -> {
             processed.get().complete(change);
         })) {
             barrier.set(new CompletableFuture<>());

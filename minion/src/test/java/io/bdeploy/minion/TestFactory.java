@@ -110,7 +110,7 @@ public class TestFactory {
      * Fakes the configuration UI.
      */
     private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Manifest.Key serverApp,
-            Manifest.Key clientApp) throws IOException {
+            Manifest.Key clientApp) {
         String id = "aaa-bbb-ccc";
 
         /* STEP 1a: read available applications from product manifest */

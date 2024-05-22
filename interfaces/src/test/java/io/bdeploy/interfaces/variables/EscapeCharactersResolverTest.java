@@ -8,11 +8,11 @@ import io.bdeploy.common.util.VariableResolver;
 
 class EscapeCharactersResolverTest {
 
+    private static final VariableResolver parent = str -> str;
+
     @Test
     void testEscapeYamlCharactersResolver() {
-        VariableResolver parent = (str) -> str;
         EscapeYamlCharactersResolver yaml = new EscapeYamlCharactersResolver(parent);
-
         assertEquals("1", yaml.doResolve("1"));
         assertEquals("test", yaml.doResolve("test"));
         assertEquals("\"a_b\"", yaml.doResolve("a_b"));
@@ -21,9 +21,7 @@ class EscapeCharactersResolverTest {
 
     @Test
     void testEscapeXmlCharactersResovler() {
-        VariableResolver parent = (str) -> str;
         EscapeXmlCharactersResolver xml = new EscapeXmlCharactersResolver(parent);
-
         assertEquals("1", xml.doResolve("1"));
         assertEquals("test", xml.doResolve("test"));
         assertEquals("&lt;tag&gt;&amp;quot;fish &amp; chips&amp;quot;&lt;/tag&gt;", xml.doResolve("<tag>\"fish & chips\"</tag>"));
@@ -32,12 +30,9 @@ class EscapeCharactersResolverTest {
 
     @Test
     void testEscapeJsonCharactersResolver() {
-        VariableResolver parent = (str) -> str;
         EscapeJsonCharactersResolver json = new EscapeJsonCharactersResolver(parent);
-
         assertEquals("1", json.doResolve("1"));
         assertEquals("\\\\\"double quotes\\\\\"", json.doResolve("\"double quotes\""));
         assertEquals("\\\\\"\\\\ttab\\\\nnew line\\\\\"", json.doResolve("\"\ttab\nnew line\""));
     }
-
 }

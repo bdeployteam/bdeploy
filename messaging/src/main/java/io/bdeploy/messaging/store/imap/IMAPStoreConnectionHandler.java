@@ -190,13 +190,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             if (log.isTraceEnabled()) {
                 log.trace("Fallback idleing on {}", getFolderAndUrlLogString());
             }
-            if (!folder.isOpen()) {
-                log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
-                        getFolderAndUrlLogString());
-                Thread.sleep(IDLE_RETRY_TIME);
-                continue;
-            }
-            if (folder.getMessageCount() == -1) {
+            if (!folder.isOpen() || folder.getMessageCount() == -1) {
                 log.info("Fallback idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
                         getFolderAndUrlLogString());
                 Thread.sleep(IDLE_RETRY_TIME);

@@ -121,7 +121,7 @@ class BasicToolTest {
     }
 
     @Test
-    void helpTest(@TempDir Path tmp) throws Exception {
+    void helpTest(@TempDir Path tmp) {
         ToolBase.setTestMode(true);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -140,5 +140,4 @@ class BasicToolTest {
             BHiveCli.main("token");
         });
     }
-
 }

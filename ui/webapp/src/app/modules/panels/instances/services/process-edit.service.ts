@@ -200,7 +200,7 @@ export class ProcessEditService {
     );
     const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {}, status);
 
-    const templateProcessName = !!template?.processName ? template.processName : template?.name;
+    const templateProcessName = template?.processName ? template.processName : template?.name;
 
     const process: ApplicationConfiguration = {
       id: null, // calculated later
@@ -272,7 +272,7 @@ export class ProcessEditService {
 
   public preRenderParameter(desc: ParameterDescriptor, value: LinkedValueConfiguration): string[] {
     const lvv = getPreRenderable(value);
-    const strValue = lvv === null || lvv === undefined ? '' : lvv;
+    const strValue = lvv ?? '';
 
     if (!desc) {
       // custom parameter;

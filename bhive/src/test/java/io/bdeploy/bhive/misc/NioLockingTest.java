@@ -5,7 +5,6 @@ package io.bdeploy.bhive.misc;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -64,7 +63,7 @@ class NioLockingTest {
         }
     }
 
-    private synchronized long doLocked(Path lockFile) throws IOException, FileNotFoundException {
+    private synchronized long doLocked(Path lockFile) throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(lockFile.toFile(), "rw");
                 FileChannel channel = raf.getChannel();
                 FileLock lock = channel.lock()) {

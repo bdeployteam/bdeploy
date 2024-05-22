@@ -321,15 +321,15 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private RenderableResult doStart(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
-        return performBulkOperation(igr, sr, config, (res, list) -> res.startBulk(list));
+        return performBulkOperation(igr, sr, config, InstanceBulkResource::startBulk);
     }
 
     private RenderableResult doStop(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
-        return performBulkOperation(igr, sr, config, (res, list) -> res.stopBulk(list));
+        return performBulkOperation(igr, sr, config, InstanceBulkResource::stopBulk);
     }
 
     private RenderableResult doRestart(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
-        return performBulkOperation(igr, sr, config, (res, list) -> res.restartBulk(list));
+        return performBulkOperation(igr, sr, config, InstanceBulkResource::restartBulk);
     }
 
     private DataResult doCreate(RemoteService remote, SystemResource sr, SystemConfig config) {

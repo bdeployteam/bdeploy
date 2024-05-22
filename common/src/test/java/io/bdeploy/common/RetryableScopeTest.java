@@ -34,7 +34,7 @@ class RetryableScopeTest {
 
         assertDoesNotThrow(() -> {
             AtomicLong count = new AtomicLong(2);
-            RetryableScope.create().withMaxRetries(10).withExceptionHandler((e) -> {
+            RetryableScope.create().withMaxRetries(10).withExceptionHandler(e -> {
                 exceptions.increment();
             }).run(() -> {
                 if (count.getAndDecrement() <= 0) {

@@ -8,8 +8,6 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './mail-sending-tab.component.html',
 })
 export class MailSendingTabComponent {
-  protected static mailAddressPattern = new RegExp('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
-
   protected settings = inject(SettingsService);
   protected connectionTestStatusMsg$ = new BehaviorSubject<string>(null);
   protected mailSendingTestStatusMsg$ = new BehaviorSubject<string>(null);

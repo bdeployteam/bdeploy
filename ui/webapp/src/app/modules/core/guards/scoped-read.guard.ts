@@ -34,7 +34,7 @@ export class ScopedReadGuard {
     const group = findParam('group', route) || this.areas._tempNavGroupContext$.value || this.areas.groupContext$.value;
     const repo =
       findParam('repo', route) || this.areas._tempNavGroupContext$.value || this.areas.repositoryContext$.value;
-    const ctx = group ? group : repo;
+    const ctx = group || repo;
 
     this.areas._tempNavGroupContext$.next(group);
     this.areas._tempNavRepoContext$.next(group);

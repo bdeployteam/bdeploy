@@ -216,8 +216,7 @@ class MinionDeployTest {
 
     @Test
     void testImportedDeploy(BHive local, MasterRootResource master, CommonRootResource common, NodeCleanupResource scr,
-            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr)
-            throws IOException, InterruptedException {
+            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
         InstanceManifest im1 = InstanceManifest.of(local, instance);
 

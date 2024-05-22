@@ -200,7 +200,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   }
 
   bdOnSearch(value: string): void {
-    this.searchTerm = value ? value : '';
+    this.searchTerm = value || '';
     if (this.searchTerm) {
       this.columns = this.searchColumns;
       const records = this.selectedPath?.children

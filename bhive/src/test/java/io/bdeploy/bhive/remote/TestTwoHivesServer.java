@@ -39,7 +39,7 @@ class TestTwoHivesServer {
     private BHiveRegistry registry;
 
     @BeforeEach
-    void prepare(@TempDir Path tmp, ActivityReporter r) throws Exception {
+    void prepare(@TempDir Path tmp, ActivityReporter r) {
         BHive h1 = new BHive(tmp.resolve("1").toUri(), null, r);
         BHive h2 = new BHive(tmp.resolve("2").toUri(), null, r);
 

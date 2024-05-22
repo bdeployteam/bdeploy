@@ -36,7 +36,7 @@ class InstanceGroupResourceTest {
 
     @Test
     void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root, CommonRootResource common,
-            RemoteService remote, @TempDir Path tmp) throws IOException, InterruptedException {
+            RemoteService remote, @TempDir Path tmp) throws IOException {
         OperatingSystem runningOs = OsHelper.getRunningOs();
 
         // Create install a small demo instance
@@ -62,5 +62,4 @@ class InstanceGroupResourceTest {
         assertEquals(OsHelper.getRunningOs(), app.os);
         assertEquals("client", app.description);
     }
-
 }

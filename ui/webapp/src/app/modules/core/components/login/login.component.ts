@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (token !== null) {
         this.loading$.next(true);
         const ret = this.route.snapshot.queryParams['returnUrl'];
-        const returnUrl = ret ? ret : '/';
+        const returnUrl = ret || '/';
 
         this.router.navigateByUrl(returnUrl);
         this.snackbar.dismiss();

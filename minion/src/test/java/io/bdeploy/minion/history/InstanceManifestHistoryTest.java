@@ -40,7 +40,7 @@ class InstanceManifestHistoryTest {
 
     @Test
     void writeRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
-            throws IOException, InterruptedException {
+            throws IOException {
         Key instanceKey = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, false);
         InstanceManifestHistory history = new InstanceManifestHistory(instanceKey, local);
 
@@ -55,5 +55,4 @@ class InstanceManifestHistoryTest {
         assertTrue(findMostRecent(history, Action.INSTALL).timestamp >= now);
         assertEquals("comment2", findMostRecent(history, Action.INSTALL).comment);
     }
-
 }

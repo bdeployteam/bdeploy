@@ -121,7 +121,7 @@ export function bdExtractGroups<T>(grouping: BdDataGroupingDefinition<T>, record
   if (!records) {
     return [];
   }
-  const allGroups = records.map((r) => grouping.group(r)).map((r) => (r ? r : UNMATCHED_GROUP));
+  const allGroups = records.map((r) => grouping.group(r)).map((r) => r || UNMATCHED_GROUP);
   return allGroups.filter((v, i, s) => s.indexOf(v) === i); // unique.
 }
 

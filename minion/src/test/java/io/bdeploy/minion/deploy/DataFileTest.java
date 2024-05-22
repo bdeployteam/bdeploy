@@ -40,7 +40,7 @@ class DataFileTest {
 
     @Test
     void testDataFile(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,
-            MinionRoot mr) throws IOException, InterruptedException {
+            MinionRoot mr) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()

@@ -43,7 +43,7 @@ class ManifestSpawnListenerTest {
         List<Manifest.Key> allOnes = new ArrayList<>();
         CompletableFuture<Collection<Manifest.Key>> notifyTwo = new CompletableFuture<>();
 
-        ManifestSpawnListener l1 = (k) -> {
+        ManifestSpawnListener l1 = k -> {
             allOnes.addAll(k);
             k.forEach(x -> notifyOne.countDown());
         };
@@ -64,7 +64,7 @@ class ManifestSpawnListenerTest {
 
         test.removeSpawnListener(l1);
 
-        ManifestSpawnListener l2 = (k) -> {
+        ManifestSpawnListener l2 = k -> {
             notifyTwo.complete(k);
         };
 
@@ -86,7 +86,7 @@ class ManifestSpawnListenerTest {
     void faultyListener(BHive test) {
         Manifest.Key key1 = new Manifest.Key("test", "1");
 
-        ManifestSpawnListener l1 = (k) -> {
+        ManifestSpawnListener l1 = k -> {
             throw new RuntimeException("Ouch");
         };
 
@@ -106,13 +106,13 @@ class ManifestSpawnListenerTest {
     void parallelAddStorm(BHive test) throws Exception {
         LongAdder notifyCount = new LongAdder();
 
-        ManifestSpawnListener l1 = (k) -> {
+        ManifestSpawnListener l1 = k -> {
             notifyCount.add(k.size());
         };
 
         test.addSpawnListener(l1);
 
-        Consumer<String> creator = (name) -> {
+        Consumer<String> creator = name -> {
             try (Transaction t = test.getTransactions().begin()) {
                 Manifest.Key key1 = new Manifest.Key(name, "1");
                 ObjectId emptyTree = test.execute(new InsertArtificialTreeOperation().setTree(new Tree.Builder()));

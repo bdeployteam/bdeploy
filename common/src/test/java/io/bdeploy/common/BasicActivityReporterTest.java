@@ -30,7 +30,7 @@ class BasicActivityReporterTest {
 
     @ParameterizedTest
     @MethodSource
-    void basicTest(ActivityReporter reporter) throws Exception {
+    void basicTest(ActivityReporter reporter) {
         try (Activity indeterminate = reporter.start("Indeterminate")) {
             indeterminate.worked(1);
 
@@ -47,5 +47,4 @@ class BasicActivityReporterTest {
 
         // if we reach this, we're ok :)
     }
-
 }
