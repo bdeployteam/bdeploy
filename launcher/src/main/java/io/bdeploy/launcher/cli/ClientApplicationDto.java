@@ -1,8 +1,11 @@
 package io.bdeploy.launcher.cli;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 /**
@@ -17,18 +20,26 @@ public class ClientApplicationDto {
      */
     public static ClientApplicationDto create(ClickAndStartDescriptor desc, ClientApplicationConfiguration cfg) {
         ClientApplicationDto dto = new ClientApplicationDto();
-        dto.appName = cfg.appConfig.name;
-        dto.instanceName = cfg.instanceConfig.name;
-        dto.purpose = cfg.instanceConfig.purpose;
-        dto.product = cfg.instanceConfig.product;
-        dto.supportsAutostart = cfg.appDesc.processControl.supportsAutostart;
-        dto.autostart = cfg.appConfig.processControl.autostart;
 
-        // Older versions do not provide a title so we fallback to the group
         dto.instanceGroupTitle = cfg.instanceGroupTitle;
         if (dto.instanceGroupTitle == null) {
+            // Older versions do not provide a title so we fallback to the group
             dto.instanceGroupTitle = desc.groupId;
         }
+
+        InstanceNodeConfiguration instanceConfig = cfg.instanceConfig;
+        dto.instanceName = instanceConfig.name;
+        dto.purpose = instanceConfig.purpose;
+        dto.product = instanceConfig.product;
+
+        ProcessControlDescriptor processControlDescr = cfg.appDesc.processControl;
+        dto.supportsAutostart = processControlDescr.supportsAutostart;
+        dto.startScriptName = processControlDescr.startScriptName;
+
+        ApplicationConfiguration appConfig = cfg.appConfig;
+        dto.appName = appConfig.name;
+        dto.autostart = appConfig.processControl.autostart;
+
         return dto;
     }
 
@@ -66,4 +77,9 @@ public class ClientApplicationDto {
      * Whether the server wants the application to autostart on system boot
      */
     public boolean autostart;
+
+    /**
+     * The name of the start script of the client application
+     */
+    public String startScriptName;
 }

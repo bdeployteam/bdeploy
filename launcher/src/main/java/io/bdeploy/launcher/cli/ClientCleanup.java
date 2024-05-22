@@ -40,15 +40,17 @@ public class ClientCleanup {
     private final Path rootDir;
     private final Path appsDir;
     private final Path poolDir;
+    private final Path startScriptsDir;
 
     /**
      * Creates a new cleanup instance using the given hive
      */
-    public ClientCleanup(BHive hive, Path rootDir, Path appsDir, Path poolDir) {
+    public ClientCleanup(BHive hive, Path rootDir, Path appsDir, Path poolDir, Path startScriptsDir) {
         this.hive = hive;
         this.rootDir = rootDir;
         this.appsDir = appsDir;
         this.poolDir = poolDir;
+        this.startScriptsDir = startScriptsDir;
     }
 
     /**
@@ -159,17 +161,20 @@ public class ClientCleanup {
 
     }
 
-    /** Cleans the hive as well as the pool and apps directory */
+    /** Cleans the pool, scripts and apps directory */
     private void doCleanup() {
-        // Remove pool and apps directory if they are empty
-        if (PathHelper.exists(poolDir) && PathHelper.isDirEmpty(poolDir)) {
-            PathHelper.deleteRecursiveRetry(poolDir);
-            log.info("Removed empty pool folder {}", poolDir);
+        deleteDirIfEmpty(poolDir);
+        deleteDirIfEmpty(startScriptsDir);
+        deleteDirIfEmpty(appsDir);
+    }
+
+    private static boolean deleteDirIfEmpty(Path path) {
+        if (PathHelper.exists(path) && PathHelper.isDirEmpty(path)) {
+            PathHelper.deleteRecursiveRetry(path);
+            log.info("Removed empty folder: {}", path.getFileName());
+            return true;
         }
-        if (PathHelper.exists(appsDir) && PathHelper.isDirEmpty(appsDir)) {
-            PathHelper.deleteRecursiveRetry(appsDir);
-            log.info("Removed apps folder {}", appsDir);
-        }
+        return false;
     }
 
     /** Removes broken software manifest entries */
@@ -235,5 +240,4 @@ public class ClientCleanup {
     private static boolean isApp(Key key) {
         return !key.getName().startsWith("meta/");
     }
-
 }

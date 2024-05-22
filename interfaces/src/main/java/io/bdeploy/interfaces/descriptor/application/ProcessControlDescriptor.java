@@ -61,4 +61,7 @@ public class ProcessControlDescriptor {
 
     @JsonPropertyDescription("Whether the application is allowed to automatically start upon system bootup. Defaults to 'false'.")
     public boolean supportsAutostart = false;
+
+    @JsonPropertyDescription("The name of the script of the application in the PATH environment variable.")
+    public String startScriptName;
 }

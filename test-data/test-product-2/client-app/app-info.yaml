@@ -21,6 +21,7 @@ branding:
 
 processControl:
   supportsAutostart: true
+  startScriptName: "TestScriptName"
 
 supportedOperatingSystems:
   - LINUX

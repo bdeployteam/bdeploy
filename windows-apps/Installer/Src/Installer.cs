@@ -7,7 +7,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,6 +43,11 @@ namespace Bdeploy.Installer {
         /// Directory where the application are stored. (HOME_DIR\apps) 
         /// </summary>
         private readonly string appsHome;
+
+        /// <summary>
+        /// Directory that is included in the PATH. (HOME_DIR\path)
+        /// </summary>
+        private readonly string pathDir;
 
         /// <summary>
         /// Directory where the temporary files are stored. (HOME_DIR\tmp) 
@@ -111,6 +118,7 @@ namespace Bdeploy.Installer {
             this.bdeployHome = PathProvider.GetBdeployHome(forAllUsers);
             this.launcherHome = PathProvider.GetLauncherDir(bdeployHome);
             this.appsHome = PathProvider.GetApplicationsDir(bdeployHome);
+            this.pathDir = Path.Combine(appsHome, "start_scripts");
             this.tmpDir = PathProvider.GetTmpDir(bdeployHome);
             this.launcherExe = Path.Combine(launcherHome, "BDeploy.exe");
             this.lockFile = Path.Combine(bdeployHome, ".lock");
@@ -336,6 +344,16 @@ namespace Bdeploy.Installer {
                 return false;
             }
             autorunKey.SetValue("BDeploy Launcher Autostart", '"' + launcherExe + "\" /autostart");
+
+            // Create path directory and insert it into the PATH
+            Directory.CreateDirectory(pathDir);
+            string pathVariableName = "PATH";
+            EnvironmentVariableTarget scope = forAllUsers ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.User;
+            string currentValue = Environment.GetEnvironmentVariable(pathVariableName, scope);
+            if (!currentValue.Split(';').Contains(pathDir)) {
+                string newValue = currentValue + ';' + pathDir;
+                Environment.SetEnvironmentVariable(pathVariableName, newValue, scope);
+            }
 
             return true;
         }

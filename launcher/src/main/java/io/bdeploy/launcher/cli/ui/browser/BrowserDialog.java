@@ -52,10 +52,18 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.launcher.LocalClientApplicationSettings;
+import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
+import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
+import io.bdeploy.launcher.cli.LocalStartScriptHelper;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
 import io.bdeploy.launcher.cli.ui.WindowHelper;
 import io.bdeploy.launcher.cli.ui.browser.workers.AppLauncher;
@@ -97,6 +105,7 @@ public class BrowserDialog extends BaseDialog {
     private JMenuItem refreshItem;
     private JMenuItem updateItem;
     private JMenuItem uninstallItem;
+    private JMenuItem activateStartScriptItem;
 
     private JProgressBar progressBar;
 
@@ -260,6 +269,9 @@ public class BrowserDialog extends BaseDialog {
         columnA.setPreferredWidth(40);
         columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(bhiveDir, auditor, sortModel));
 
+        TableColumn columnS = columnModel.getColumn(BrowserDialogTableColumn.START_SCRIPT.ordinal());
+        columnS.setCellRenderer(new BrowserDialogStartScriptCellRenderer(bhiveDir, auditor, sortModel));
+
         // Launch on double click
         table.addMouseListener(new DoubleClickListener());
 
@@ -300,6 +312,11 @@ public class BrowserDialog extends BaseDialog {
         uninstallItem.setToolTipText(uninstallButton.getToolTipText());
         uninstallItem.addActionListener(this::onUninstallButtonClicked);
 
+        activateStartScriptItem = new JMenuItem("Activate Start Script");
+        activateStartScriptItem.setIcon(WindowHelper.loadIcon("/enable.png", 16, 16));
+        activateStartScriptItem.setToolTipText("Set this application to be started with its given script name.");
+        activateStartScriptItem.addActionListener(this::onActivateStartScriptButtonClicked);
+
         verifyItem = new JMenuItem(verifyButton.getText());
         verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
         verifyItem.setToolTipText(verifyButton.getToolTipText());
@@ -318,6 +335,8 @@ public class BrowserDialog extends BaseDialog {
         menu.add(updateItem);
         menu.add(new JSeparator());
         menu.add(uninstallItem);
+        menu.add(new JSeparator());
+        menu.add(activateStartScriptItem);
         menu.add(new JSeparator());
         menu.add(verifyItem);
         menu.add(reinstallItem);
@@ -500,6 +519,27 @@ public class BrowserDialog extends BaseDialog {
         }
     }
 
+    /** Activate the start script of the selected application */
+    private void onActivateStartScriptButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        String scriptName = app.metadata.startScriptName;
+
+        if (!StringHelper.isNullOrBlank(scriptName)) {
+            ClickAndStartDescriptor clickAndStart = app.clickAndStart;
+            DeploymentPathProvider dpp = new DeploymentPathProvider(rootDir.resolve("apps"), null, clickAndStart.applicationId,
+                    "1");
+            try {
+                new LocalStartScriptHelper(auditor, rootDir, dpp.get(SpecialDirectory.ROOT),
+                        dpp.get(SpecialDirectory.START_SCRIPTS)).createStartScript(scriptName, clickAndStart, true);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Failed to change active start script: " + ex.getMessage(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        doRefresh(model.getAll());
+    }
+
     /** Notification that the selected rows have changed */
     private void onSelectionChanged(ListSelectionEvent e) {
         doUpdateButtonState();
@@ -586,6 +626,8 @@ public class BrowserDialog extends BaseDialog {
             uninstallItem.setEnabled(false);
             uninstallButton.setEnabled(false);
 
+            activateStartScriptItem.setEnabled(false);
+
             refreshItem.setEnabled(false);
             refreshButton.setEnabled(false);
 
@@ -597,21 +639,40 @@ public class BrowserDialog extends BaseDialog {
             return;
         }
 
-        List<ClientSoftwareConfiguration> apps = getSelectedApps();
-        launchButton.setEnabled(apps.size() == 1);
-        launchItem.setEnabled(apps.size() == 1);
+        List<ClientSoftwareConfiguration> selectedApps = getSelectedApps();
+        boolean singleAppSelected = selectedApps.size() == 1;
 
-        uninstallItem.setEnabled(!readonlyRoot && apps.size() == 1);
-        uninstallButton.setEnabled(!readonlyRoot && apps.size() == 1);
+        launchButton.setEnabled(singleAppSelected);
+        launchItem.setEnabled(singleAppSelected);
+
+        uninstallItem.setEnabled(!readonlyRoot && singleAppSelected);
+        uninstallButton.setEnabled(!readonlyRoot && singleAppSelected);
+
+        boolean activateStartScriptItemEnabled = false;
+        if (singleAppSelected) {
+            ClientSoftwareConfiguration singleApp = selectedApps.iterator().next();
+            ClientApplicationDto singleAppMetadata = singleApp.metadata;
+            if (singleAppMetadata != null) {
+                LocalClientApplicationSettings settings = null;
+                try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
+                    settings = new LocalClientApplicationSettingsManifest(hive).read();
+                }
+                if (settings != null && !singleApp.clickAndStart
+                        .equals(settings.getStartScriptInfo(singleAppMetadata.startScriptName).getDescriptor())) {
+                    activateStartScriptItemEnabled = true;
+                }
+            }
+        }
+        activateStartScriptItem.setEnabled(activateStartScriptItemEnabled);
 
         refreshItem.setEnabled(!readonlyRoot);
         refreshButton.setEnabled(!readonlyRoot);
 
         // --customizeArgs and launch needs at version 3.3.0
-        customizeAndLaunchItem.setEnabled(checkVersion(apps, new Version(3, 3, 0, null)));
+        customizeAndLaunchItem.setEnabled(checkVersion(selectedApps, new Version(3, 3, 0, null)));
 
         // --updateOnly flag needs at least version 3.6.5
-        updateItem.setEnabled(!readonlyRoot && checkVersion(apps, new Version(3, 6, 5, null)));
+        updateItem.setEnabled(!readonlyRoot && checkVersion(selectedApps, new Version(3, 6, 5, null)));
 
         // Error fixing and pruning require write permissions
         if (!readonlyRoot) {
@@ -619,8 +680,8 @@ public class BrowserDialog extends BaseDialog {
             pruneButton.setEnabled(true);
         }
 
-        verifyButton.setEnabled(!readonlyRoot && apps.size() == 1);
-        reinstallButton.setEnabled(!readonlyRoot && apps.size() == 1);
+        verifyButton.setEnabled(!readonlyRoot && singleAppSelected);
+        reinstallButton.setEnabled(!readonlyRoot && singleAppSelected);
     }
 
     /** Returns if the selected applications have at least the given version */

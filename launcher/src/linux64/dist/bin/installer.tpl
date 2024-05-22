@@ -127,6 +127,19 @@ else
     fi
 fi
 
+# make sure the launcher start scripts directory is in the PATH
+(
+    . ~/.bashrc
+    if [[ "${PATH}" != *"${B_HOME}/apps/start_scripts"* ]]; then
+        echo "Adding launcher to PATH in ~/.bashrc"
+        cat >> ~/.bashrc << EOF
+
+# Add BDeploy launcher installed applications to PATH
+export PATH="\${PATH}:${B_HOME}/apps/start_scripts"
+EOF
+    fi
+)
+
 # stop here if only launcher install is requested
 if [[ -z "${BDEPLOY_APP_UID}" ]]; then
     echo "Done installing launcher."

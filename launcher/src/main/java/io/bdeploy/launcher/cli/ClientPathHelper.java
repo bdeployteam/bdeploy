@@ -29,9 +29,17 @@ public class ClientPathHelper {
     /**
      * Name of the launch files.
      */
-    private static final String LAUNCH_FILE_NAME = "launch.bdeploy";
-    private static final String LINUX_LAUNCHER = LAUNCHER_DIR;
-    private static final String WIN_LAUNCHER = "BDeploy.exe";
+    public static final String LAUNCH_FILE_NAME = "launch.bdeploy";
+
+    /**
+     * Name of the launcher on Windows
+     */
+    public static final String WIN_LAUNCHER = "BDeploy.exe";
+
+    /**
+     * Name of the launcher on Linux
+     */
+    public static final String LINUX_LAUNCHER = LAUNCHER_DIR;
 
     private ClientPathHelper() {
     }

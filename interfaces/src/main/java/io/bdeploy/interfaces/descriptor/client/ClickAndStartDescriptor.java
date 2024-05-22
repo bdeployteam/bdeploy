@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.client;
 
+import java.util.Objects;
+
 import io.bdeploy.common.security.RemoteService;
 
 /**
@@ -32,4 +34,24 @@ public class ClickAndStartDescriptor {
      */
     public String applicationId;
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(applicationId, groupId, host, instanceId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ClickAndStartDescriptor other = (ClickAndStartDescriptor) obj;
+        return Objects.equals(applicationId, other.applicationId) && Objects.equals(groupId, other.groupId)
+                && Objects.equals(host, other.host) && Objects.equals(instanceId, other.instanceId);
+    }
 }
