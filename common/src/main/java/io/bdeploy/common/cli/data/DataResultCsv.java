@@ -7,7 +7,7 @@ import io.bdeploy.common.util.ExceptionHelper;
 
 class DataResultCsv extends DataResultBase {
 
-    public DataResultCsv(PrintStream output) {
+    DataResultCsv(PrintStream output) {
         super(output);
     }
 
@@ -15,14 +15,16 @@ class DataResultCsv extends DataResultBase {
     public void render() {
         out().println("\"Result Field\",\"Result Value\"");
         if (getMessage() != null) {
-            out().println("\"Message\"," + DataTableCsv.quote(getMessage()));
+            out().println("\"Message\"," + DataRenderingHelper.quoteCsv(getMessage()));
         }
 
         if (getThrowable() != null) {
-            out().println("\"Error\"," + DataTableCsv.quote(ExceptionHelper.mapExceptionCausesToReason(getThrowable())));
+            out().println(
+                    "\"Error\"," + DataRenderingHelper.quoteCsv(ExceptionHelper.mapExceptionCausesToReason(getThrowable())));
         } else {
             for (Map.Entry<String, String> entry : getFields().entrySet()) {
-                out().println(DataTableCsv.quote(entry.getKey()) + "," + DataTableCsv.quote(entry.getValue()));
+                out().println(
+                        DataRenderingHelper.quoteCsv(entry.getKey()) + "," + DataRenderingHelper.quoteCsv(entry.getValue()));
             }
         }
     }

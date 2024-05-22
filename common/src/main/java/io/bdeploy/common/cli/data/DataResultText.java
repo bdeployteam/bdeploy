@@ -11,7 +11,7 @@ import java.util.Map;
 
 class DataResultText extends DataResultBase {
 
-    public DataResultText(PrintStream output) {
+    DataResultText(PrintStream output) {
         super(output);
     }
 

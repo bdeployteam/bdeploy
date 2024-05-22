@@ -14,11 +14,12 @@ class DataTableCsv extends DataTableBase {
 
     @Override
     public void render() {
-        out().println(String.join(",", getColumns().stream().map(c -> quote(c.getLabel())).collect(Collectors.toList())));
+        out().println(String.join(",",
+                getColumns().stream().map(c -> DataRenderingHelper.quoteCsv(c.getLabel())).collect(Collectors.toList())));
 
         for (List<DataTableCell> row : getRows()) {
             for (int y = 0; y < row.size(); ++y) {
-                out().print(quote(row.get(y).getData()));
+                out().print(DataRenderingHelper.quoteCsv(row.get(y).getData()));
 
                 if (y != (row.size() - 1)) {
                     out().print(StringHelper.repeat(",", row.get(y).getSpan()));
@@ -28,9 +29,4 @@ class DataTableCsv extends DataTableBase {
             }
         }
     }
-
-    static String quote(String data) {
-        return "\"" + data.replace("\"", "\"\"") + "\"";
-    }
-
 }
