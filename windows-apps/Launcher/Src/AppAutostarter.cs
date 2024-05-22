@@ -15,7 +15,8 @@ namespace Bdeploy.Launcher.Src
         /// <summary>
         /// Starts the LauncherCli 
         /// </summary>
-        public int Start() {
+        public int Start()
+        {
             // Build arguments to pass to the application
             StringBuilder builder = new StringBuilder();
             AppendCustomJvmArguments(builder);
@@ -30,7 +31,8 @@ namespace Bdeploy.Launcher.Src
             return StartLauncher(builder.ToString());
         }
 
-        protected override string GetAppLoggerName() {
+        protected override string GetAppLoggerName()
+        {
             return "autostart-log.txt";
         }
     }

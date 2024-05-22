@@ -5,11 +5,13 @@ namespace Bdeploy.Installer
     /// <summary>
     /// Data to pupulate information about the app to be installed.
     /// </summary>
-    public class AppInfoEventArgs : EventArgs {
+    public class AppInfoEventArgs : EventArgs
+    {
         public string AppName { get; private set; }
         public string VendorName { get; private set; }
 
-        public AppInfoEventArgs(string AppName, string VendorName) {
+        public AppInfoEventArgs(string AppName, string VendorName)
+        {
             this.AppName = AppName;
             this.VendorName = VendorName;
         }
@@ -18,10 +20,12 @@ namespace Bdeploy.Installer
     /// <summary>
     /// Data when icon has been loaded.
     /// </summary>
-    public class IconEventArgs : EventArgs {
+    public class IconEventArgs : EventArgs
+    {
         public string Icon { get; private set; }
 
-        public IconEventArgs(string Icon) {
+        public IconEventArgs(string Icon)
+        {
             this.Icon = Icon;
         }
     }
@@ -29,10 +33,12 @@ namespace Bdeploy.Installer
     /// <summary>
     /// The message to display.
     /// </summary>
-    public class MessageEventArgs : EventArgs {
+    public class MessageEventArgs : EventArgs
+    {
         public string Message { get; private set; }
 
-        public MessageEventArgs(string message) {
+        public MessageEventArgs(string message)
+        {
             this.Message = message;
         }
     }
@@ -40,10 +46,12 @@ namespace Bdeploy.Installer
     /// <summary>
     /// Data when some work has been done
     /// </summary>
-    public class WorkedEventArgs : EventArgs {
+    public class WorkedEventArgs : EventArgs
+    {
         public long Worked { get; private set; }
 
-        public WorkedEventArgs(long worked) {
+        public WorkedEventArgs(long worked)
+        {
             this.Worked = worked;
         }
     }
@@ -51,11 +59,13 @@ namespace Bdeploy.Installer
     /// <summary>
     /// Data when a new sub task is started
     /// </summary>
-    public class SubTaskEventArgs : EventArgs {
+    public class SubTaskEventArgs : EventArgs
+    {
         public string TaskName { get; private set; }
         public long TotalWork { get; private set; }
 
-        public SubTaskEventArgs(string taskName, long totalWork) {
+        public SubTaskEventArgs(string taskName, long totalWork)
+        {
             this.TaskName = taskName;
             this.TotalWork = totalWork;
         }

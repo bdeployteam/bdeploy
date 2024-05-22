@@ -6,7 +6,8 @@ namespace Bdeploy.Shared
     /// <summary>
     /// Provides static helpers to manage registry entries related to the "Apps & Features" section of the control center. 
     /// </summary>
-    public class SoftwareEntry {
+    public class SoftwareEntry
+    {
 
         /// <summary>
         /// Path where all installed apps are stored.
@@ -17,10 +18,12 @@ namespace Bdeploy.Shared
         /// Creates the required enttries so that the given app is listed in the control center.
         /// </summary>
         /// <param name="data"></param>
-        public static void Create(string appUid, SoftwareEntryData data, bool forAllUsers) {
+        public static void Create(string appUid, SoftwareEntryData data, bool forAllUsers)
+        {
             RegistryHive hive = forAllUsers ? RegistryHive.LocalMachine : RegistryHive.CurrentUser;
             using (RegistryKey root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
-            using (RegistryKey key = root.CreateSubKey(UNINSTALL_KEY + "\\BDeploy-App-" + appUid)) {
+            using (RegistryKey key = root.CreateSubKey(UNINSTALL_KEY + "\\BDeploy-App-" + appUid))
+            {
                 SetIfNotNull(key, "DisplayName", data.DisplayName);
                 SetIfNotNull(key, "DisplayIcon", data.DisplayIcon);
                 SetIfNotNull(key, "DisplayVersion", data.DisplayVersion);
@@ -31,10 +34,13 @@ namespace Bdeploy.Shared
                 SetIfNotNull(key, "InstallDate", data.InstallDate);
                 SetIfNotNull(key, "DesktopShortcut", data.DesktopShortcut);
                 SetIfNotNull(key, "StartMenuShortcut", data.StartMenuShortcut);
-                if (data.noModifyAndRepair) {
+                if (data.noModifyAndRepair)
+                {
                     key.SetValue("NoModify", 1, RegistryValueKind.DWord);
                     key.SetValue("NoRepair", 1, RegistryValueKind.DWord);
-                } else {
+                }
+                else
+                {
                     key.DeleteValue("NoModify");
                     key.DeleteValue("NoRepair");
                 }
@@ -46,18 +52,24 @@ namespace Bdeploy.Shared
         /// </summary>
         /// <param name="appUid">Unique identifier of the application</param>
         /// <param name="data">Data stored in the registry or null</param>
-        public static SoftwareEntryData Read(string appUid, bool forAllUsers) {
+        public static SoftwareEntryData Read(string appUid, bool forAllUsers)
+        {
             RegistryHive hive = forAllUsers ? RegistryHive.LocalMachine : RegistryHive.CurrentUser;
             using (RegistryKey root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
-            using (RegistryKey key = root.OpenSubKey(UNINSTALL_KEY)) {
-                if (key == null) {
+            using (RegistryKey key = root.OpenSubKey(UNINSTALL_KEY))
+            {
+                if (key == null)
+                {
                     return null;
                 }
-                using (RegistryKey appKey = key.OpenSubKey("BDeploy-App-" + appUid)) {
-                    if (appKey == null) {
+                using (RegistryKey appKey = key.OpenSubKey("BDeploy-App-" + appUid))
+                {
+                    if (appKey == null)
+                    {
                         return null;
                     }
-                    SoftwareEntryData entry = new SoftwareEntryData {
+                    SoftwareEntryData entry = new SoftwareEntryData
+                    {
                         DisplayName = (string)appKey.GetValue("DisplayName"),
                         DisplayIcon = (string)appKey.GetValue("DisplayIcon"),
                         DisplayVersion = (string)appKey.GetValue("DisplayVersion"),
@@ -71,7 +83,8 @@ namespace Bdeploy.Shared
                     };
                     int noModify = (int)appKey.GetValue("NoModify", 0);
                     int noRepair = (int)appKey.GetValue("NoRepair", 0);
-                    if (noModify == 1 && noRepair == 1) {
+                    if (noModify == 1 && noRepair == 1)
+                    {
                         entry.noModifyAndRepair = true;
                     }
                     return entry;
@@ -82,10 +95,12 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Removes the entries related to the given application from the registry.
         /// </summary>
-        public static void Remove(string appUid, bool forAllUsers) {
+        public static void Remove(string appUid, bool forAllUsers)
+        {
             RegistryHive hive = forAllUsers ? RegistryHive.LocalMachine : RegistryHive.CurrentUser;
             using (RegistryKey root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
-            using (RegistryKey key = root.OpenSubKey(UNINSTALL_KEY, true)) {
+            using (RegistryKey key = root.OpenSubKey(UNINSTALL_KEY, true))
+            {
                 key.DeleteSubKeyTree("BDeploy-App-" + appUid, false);
             }
         }
@@ -96,8 +111,10 @@ namespace Bdeploy.Shared
         /// <param name="key">Registry key</param>
         /// <param name="name">Name of the entry</param>
         /// <param name="value">Value of the entry</param>
-        private static void SetIfNotNull(RegistryKey key, string name, string value) {
-            if (value != null) {
+        private static void SetIfNotNull(RegistryKey key, string name, string value)
+        {
+            if (value != null)
+            {
                 key.SetValue(name, value);
             }
         }
@@ -107,7 +124,8 @@ namespace Bdeploy.Shared
     /// <summary>
     /// Data record required to write the registry key.
     /// </summary>
-    public class SoftwareEntryData {
+    public class SoftwareEntryData
+    {
 
         /// <summary>
         /// The text to display

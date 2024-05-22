@@ -8,18 +8,21 @@ namespace Bdeploy.Installer.Views
     /// <summary>
     /// Interaction logic for InstallNowView.xaml
     /// </summary>
-    public partial class InstallNowView : UserControl {
+    public partial class InstallNowView : UserControl
+    {
 
         private readonly Window window;
         private readonly AppInstaller installer;
 
-        public InstallNowView(Window window, AppInstaller installer) {
+        public InstallNowView(Window window, AppInstaller installer)
+        {
             InitializeComponent();
             this.installer = installer;
             this.window = window;
 
             Config config = installer.config;
-            if (installer.IsConfigValid()) {
+            if (installer.IsConfigValid())
+            {
                 ServerUrl.Text = config.RemoteService.Uri;
                 TargetDir.Text = installer.bdeployHome;
 
@@ -28,17 +31,20 @@ namespace Bdeploy.Installer.Views
             }
         }
 
-        private async void InstallNowButton_Click(object sender, RoutedEventArgs e) {
+        private async void InstallNowButton_Click(object sender, RoutedEventArgs e)
+        {
             InstallNow.IsEnabled = false;
             await Task.Run(() => installer.SetupAsync());
             InstallNow.IsEnabled = true;
         }
 
-        private void CloseHyperlink_Click(object sender, RoutedEventArgs e) {
+        private void CloseHyperlink_Click(object sender, RoutedEventArgs e)
+        {
             window.Close();
         }
 
-        private void CreateShortcuts_Click(object sender, RoutedEventArgs e) {
+        private void CreateShortcuts_Click(object sender, RoutedEventArgs e)
+        {
             installer.createShortcuts = CreateShortcuts.IsChecked.GetValueOrDefault(true);
         }
     }

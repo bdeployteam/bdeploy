@@ -13,7 +13,8 @@ namespace Bdeploy.Launcher
     /// <summary>
     /// Base class for all applications that are starting the Java LauncherCli
     /// </summary>
-    public abstract class BaseLauncher {
+    public abstract class BaseLauncher
+    {
 
         // The main class of the launcher to execute
         public static readonly string MAIN_CLASS = "io.bdeploy.launcher.cli.LauncherCli";
@@ -43,8 +44,10 @@ namespace Bdeploy.Launcher
         /// </summary>
         /// <param name="arguments">Arguments to pass to the process.</param>
         /// <returns></returns>
-        protected int StartLauncher(string arguments) {
-            if (Log.IsEnabled(LogEventLevel.Debug)) {
+        protected int StartLauncher(string arguments)
+        {
+            if (Log.IsEnabled(LogEventLevel.Debug))
+            {
                 Log.Debug("Starting launcher with arguments: {0}", arguments);
             }
 
@@ -53,8 +56,10 @@ namespace Bdeploy.Launcher
             ILogger appLogger = LogFactory.GetAppLogger(path);
 
             // Startup minion and wait for termination
-            try {
-                using (Process process = new Process()) {
+            try
+            {
+                using (Process process = new Process())
+                {
                     process.StartInfo.FileName = JRE;
                     process.StartInfo.CreateNoWindow = true;
                     process.StartInfo.UseShellExecute = false;
@@ -80,7 +85,9 @@ namespace Bdeploy.Launcher
                     Log.Information("Launcher terminated. ExitCode = {0}", exitCode);
                     return exitCode;
                 }
-            } catch (Win32Exception e) {
+            }
+            catch (Win32Exception e)
+            {
                 LaunchFailed?.Invoke(this, new MessageEventArgs(e.ToString()));
                 Log.Error("Failed to start launcher.", e);
                 return -1;
@@ -90,14 +97,16 @@ namespace Bdeploy.Launcher
         /// <summary>
         /// Callback method that logs the message that is written to the process error stream
         /// </summary>
-        private void Process_ErrorDataReceived(ILogger logger, DataReceivedEventArgs e) {
+        private void Process_ErrorDataReceived(ILogger logger, DataReceivedEventArgs e)
+        {
             logger.Error(e.Data);
         }
 
         /// <summary>
         /// Callback method that logs the message that is written to the process output stream
         /// </summary>
-        private void Process_OutputDataReceived(ILogger logger, DataReceivedEventArgs e) {
+        private void Process_OutputDataReceived(ILogger logger, DataReceivedEventArgs e)
+        {
             logger.Information(e.Data);
         }
 
@@ -111,18 +120,23 @@ namespace Bdeploy.Launcher
         /// Appends custom JVM arguments defined in the properties file
         /// </summary>
         /// <param name="builder"></param>
-        protected void AppendCustomJvmArguments(StringBuilder builder) {
+        protected void AppendCustomJvmArguments(StringBuilder builder)
+        {
             bool hasXmX = false;
-            if (File.Exists(JVM_PROPERTIES)) {
-                foreach (string line in File.ReadAllLines(JVM_PROPERTIES, UTF8Encoding.UTF8)) {
+            if (File.Exists(JVM_PROPERTIES))
+            {
+                foreach (string line in File.ReadAllLines(JVM_PROPERTIES, UTF8Encoding.UTF8))
+                {
                     // Ignore comments
                     string arg = line.Trim();
-                    if (arg.StartsWith("#")) {
+                    if (arg.StartsWith("#"))
+                    {
                         continue;
                     }
 
                     // Check if we have a max memory setting
-                    if (arg.StartsWith("-Xmx")) {
+                    if (arg.StartsWith("-Xmx"))
+                    {
                         hasXmX = true;
                     }
 
@@ -132,7 +146,8 @@ namespace Bdeploy.Launcher
             }
 
             // Ensure that a memory limit is configured
-            if (!hasXmX) {
+            if (!hasXmX)
+            {
                 builder.Append("-Xmx256m ");
             }
         }

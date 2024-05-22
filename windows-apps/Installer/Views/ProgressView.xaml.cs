@@ -6,8 +6,10 @@ namespace Bdeploy.Installer.Views
     /// <summary>
     /// Interaction logic for ProgressView.xaml
     /// </summary>
-    public partial class ProgressView : UserControl {
-        public ProgressView(AppInstaller installer) {
+    public partial class ProgressView : UserControl
+    {
+        public ProgressView(AppInstaller installer)
+        {
             InitializeComponent();
 
             // Show metadata when available
@@ -19,22 +21,28 @@ namespace Bdeploy.Installer.Views
             installer.Worked += Installer_Worked;
         }
 
-        
-        private void Installer_AppInfo(object sender, AppInfoEventArgs e) {
-            Dispatcher.Invoke(() => {
+
+        private void Installer_AppInfo(object sender, AppInfoEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
                 ApplicationName.Text = e.AppName ?? "";
                 ApplicationVendor.Text = e.VendorName ?? "";
             });
         }
 
-        private void Installer_IconLoaded(object sender, IconEventArgs e) {
-            Dispatcher.Invoke(() => {
+        private void Installer_IconLoaded(object sender, IconEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
                 ApplicationIcon.Source = BitmapFrame.Create(new System.Uri(e.Icon));
             });
         }
 
-        private void Installer_NewSubtask(object sender, SubTaskEventArgs e) {
-            Dispatcher.Invoke(() => {
+        private void Installer_NewSubtask(object sender, SubTaskEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
                 ProgressBar.IsIndeterminate = e.TotalWork == -1;
                 ProgressBar.Value = 0;
                 ProgressBar.Minimum = 0;
@@ -43,8 +51,10 @@ namespace Bdeploy.Installer.Views
             });
         }
 
-        private void Installer_Worked(object sender, WorkedEventArgs e) {
-            Dispatcher.Invoke(() => {
+        private void Installer_Worked(object sender, WorkedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
                 ProgressBar.Value += e.Worked;
             });
         }

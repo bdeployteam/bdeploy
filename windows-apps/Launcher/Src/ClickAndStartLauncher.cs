@@ -7,7 +7,8 @@ namespace Bdeploy.Launcher
     /// <summary>
     /// Base class for all applications that are expecting a ClickAndStart file
     /// </summary>
-    public abstract class ClickAndStartLauncher : BaseLauncher {
+    public abstract class ClickAndStartLauncher : BaseLauncher
+    {
 
         // The full path of the .bdeploy file to launch
         protected readonly string clickAndStartFile;
@@ -19,16 +20,19 @@ namespace Bdeploy.Launcher
         /// Creates a new instance of the launcher.
         /// </summary>
         /// <param name="clickAndStartFile">The .bdeploy file</param>
-        protected ClickAndStartLauncher(string clickAndStartFile) {
+        protected ClickAndStartLauncher(string clickAndStartFile)
+        {
             this.clickAndStartFile = clickAndStartFile;
         }
 
         /// <summary>
         /// Checks that the given file point to a valid application descriptor
         /// </summary>
-        protected bool ValidateDescriptor() {
+        protected bool ValidateDescriptor()
+        {
             descriptor = ClickAndStartDescriptor.FromFile(clickAndStartFile);
-            if (descriptor == null) {
+            if (descriptor == null)
+            {
                 Log.Fatal("Cannot deserialize application descriptor.", clickAndStartFile);
                 Log.Information("Exiting application.");
                 return false;
@@ -36,7 +40,8 @@ namespace Bdeploy.Launcher
             return true;
         }
 
-        protected override string GetAppLoggerName() {
+        protected override string GetAppLoggerName()
+        {
             return descriptor.ApplicationId + "-log.txt";
         }
 

@@ -10,7 +10,8 @@ namespace Bdeploy.Shared
     /// Represents the configuration of the installer which is embedded into the executable.
     /// </summary>
     [DataContract]
-    public class Config {
+    public class Config
+    {
         /// <summary>
         /// The minion URL as well as the access token. 
         /// </summary>
@@ -77,7 +78,8 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Returns a string representation of the object.
         /// </summary>
-        public override string ToString() {
+        public override string ToString()
+        {
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Id: {0}", ApplicationUid).AppendLine();
             builder.AppendFormat("Name: {0}", ApplicationName).AppendLine();
@@ -92,14 +94,16 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Returns whether or not the required parameters are set to download and install the launcher.
         /// </summary>
-        public bool CanInstallLauncher() {
+        public bool CanInstallLauncher()
+        {
             return RemoteService != null && LauncherUrl != null;
         }
 
         /// <summary>
         ///  Returns whether or not the required parameters are set to download and install an application.
         /// </summary>
-        public bool CanInstallApp() {
+        public bool CanInstallApp()
+        {
             return ApplicationUid != null && ApplicationName != null && ClickAndStartDescriptor != null;
         }
     }
@@ -109,7 +113,8 @@ namespace Bdeploy.Shared
     /// </summary>
     [DataContract]
     [KnownType(typeof(RemoteService))]
-    public class ClickAndStartDescriptor {
+    public class ClickAndStartDescriptor
+    {
         /// <summary>
         /// The remote service as well as the access token. 
         /// </summary>
@@ -137,7 +142,8 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Returns a string representation of the object.
         /// </summary>
-        public override string ToString() {
+        public override string ToString()
+        {
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Host: {0}", RemoteService).AppendLine();
             builder.AppendFormat("GroupId: {0}", GroupId).AppendLine();
@@ -149,20 +155,25 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Returns whether or not all required parameters are set to a non-null value. 
         /// </summary>
-        public bool IsValid() {
+        public bool IsValid()
+        {
             return RemoteService != null && GroupId != null && InstanceId != null && ApplicationId != null;
         }
 
         /// <summary>
         /// Deserializes the given JSON that represents the serialized descriptor. 
         /// </summary>
-        public static ClickAndStartDescriptor FromString(string input) {
-            try {
+        public static ClickAndStartDescriptor FromString(string input)
+        {
+            try
+            {
                 UTF8Encoding encoding = new UTF8Encoding(false);
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ClickAndStartDescriptor));
                 MemoryStream stream = new MemoryStream(encoding.GetBytes(input));
                 return (ClickAndStartDescriptor)ser.ReadObject(stream);
-            } catch (SerializationException) {
+            }
+            catch (SerializationException)
+            {
                 return null;
             }
         }
@@ -170,8 +181,10 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Deserializes the given JSON that represents the serialized descriptor. 
         /// </summary>
-        public static ClickAndStartDescriptor FromFile(string file) {
-            if(!File.Exists(file)) {
+        public static ClickAndStartDescriptor FromFile(string file)
+        {
+            if (!File.Exists(file))
+            {
                 return null;
             }
             UTF8Encoding encoding = new UTF8Encoding(false);
@@ -184,7 +197,8 @@ namespace Bdeploy.Shared
     /// Describes where the minion is running and contains the token to access it.
     /// </summary>
     [DataContract]
-    public class RemoteService {
+    public class RemoteService
+    {
         /// <summary>
         /// The URI under which the referenced minion is reachable.
         /// </summary>
@@ -200,7 +214,8 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Returns a string representation of the object.
         /// </summary>
-        public override string ToString() {
+        public override string ToString()
+        {
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Uri: {0}", Uri).AppendLine();
             builder.AppendFormat("SignaturePack: {0}", SignaturePack).AppendLine();
@@ -210,7 +225,8 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Returns whether or not all required parameters are set to a non-null value. 
         /// </summary>
-        public bool IsValid() {
+        public bool IsValid()
+        {
             return Uri != null && SignaturePack != null;
         }
     }
@@ -219,7 +235,8 @@ namespace Bdeploy.Shared
     /// Encapsulates all required certificates, keys and tokens to be able to communicate with a given minion via SSL/TLS.
     /// </summary>
     [DataContract]
-    public class SignaturePack {
+    public class SignaturePack
+    {
         [DataMember(Name = "c")]
         public string Certificate;
 
