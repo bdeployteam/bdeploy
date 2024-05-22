@@ -6,6 +6,7 @@ import {
   ApplicationStartType,
   InstanceNodeConfigurationDto,
   MinionStatusDto,
+  NodeSynchronizationStatus,
   ProcessState,
   ProcessStatusDto,
 } from 'src/app/models/gen.dtos';
@@ -38,6 +39,8 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
 
   protected nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
   protected nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
+  protected synchronized$ = new BehaviorSubject<boolean>(false);
+  protected collapsed$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
   private portsState = new BehaviorSubject<StateType>('unknown');
@@ -91,6 +94,16 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       items.push(this.processesItem);
       items.push(this.portsItem);
 
+      const isSynchronized = state.nodeSynchronizationStatus === NodeSynchronizationStatus.SYNCHRONIZED;
+      items.push({
+        name: state.nodeSynchronizationStatus
+          .split('_')
+          .map((word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase())
+          .join(' '),
+        type: isSynchronized ? 'ok' : 'warning',
+      });
+      this.synchronized$.next(isSynchronized);
+
       this.nodeStateItems$.next(items);
     });
 
@@ -98,6 +111,12 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       combineLatest([this.ports.activePortStates$, this.processes.processStates$]).subscribe(([ports, states]) => {
         this.updateAllProcesses(states);
         this.updateAllPortsRating(ports, states);
+      }),
+    );
+
+    this.subscription.add(
+      combineLatest([this.collapsedWhen$, this.synchronized$]).subscribe(([c, s]) => {
+        this.collapsed$.next(c || !s);
       }),
     );
   }

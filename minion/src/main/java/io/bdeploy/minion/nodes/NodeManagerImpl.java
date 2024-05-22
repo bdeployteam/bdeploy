@@ -67,7 +67,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         this.root = root;
         this.config = new MinionManifest(root.getHive()).read();
         this.self = root.getState().self;
-        this.nodeSynchronizer = new NodeSynchronizer(this.config.getMinion(this.self));
+        this.nodeSynchronizer = new NodeSynchronizer(this.self, this.config.getMinion(this.self));
 
         // initially, all nodes are offline.
         this.config.entrySet().forEach(e -> this.status.put(e.getKey(), createStarting(e.getValue())));
@@ -169,6 +169,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 if (isStandaloneOrManaged && !Objects.equals(node, self) && status.get(node).offline && !msd.offline) {
                     nodeSynchronizer.sync(node);
                 }
+                msd.nodeSynchronizationStatus = nodeSynchronizer.getStatus(node);
 
                 status.put(node, msd);
 

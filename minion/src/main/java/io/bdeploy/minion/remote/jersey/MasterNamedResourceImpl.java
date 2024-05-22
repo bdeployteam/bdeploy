@@ -253,8 +253,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
         if (node == null) {
-            log.info("Node {} is offline. Skipping sync of instance {}.", nodeName, instanceId);
-            return;
+            String msg = "Node " + nodeName + " is offline. Cannot sync instance " + instanceId;
+            log.info(msg);
+            throw new WebApplicationException(msg, Status.EXPECTATION_FAILED);
         }
 
         InstanceManifest imf = InstanceManifest.load(hive, instanceId, null);
