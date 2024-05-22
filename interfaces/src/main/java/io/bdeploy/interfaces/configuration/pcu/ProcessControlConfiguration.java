@@ -1,6 +1,8 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
-import io.bdeploy.interfaces.descriptor.application.LifenessProbeDescriptor;
+import com.fasterxml.jackson.annotation.JsonAlias;
+
+import io.bdeploy.interfaces.descriptor.application.LivenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
@@ -46,7 +48,8 @@ public class ProcessControlConfiguration {
     /**
      * Copy of the original liveness probe descriptor.
      */
-    public LifenessProbeDescriptor lifenessProbe;
+    @JsonAlias("lifenessProbe")
+    public LivenessProbeDescriptor livenessProbe;
 
     // ################################################# only for client applications #################################################
 

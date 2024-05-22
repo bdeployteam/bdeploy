@@ -3,6 +3,7 @@ package io.bdeploy.interfaces.descriptor.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
@@ -49,8 +50,9 @@ public class ProcessControlDescriptor {
     @JsonPropertyDescription("Optional startup probe which is queried to find out when a process completed startup.")
     public StartupProbeDescriptor startupProbe;
 
-    @JsonPropertyDescription("Optional lifeness probe which is queried to check on a process whether it is (still) alive.")
-    public LifenessProbeDescriptor lifenessProbe;
+    @JsonPropertyDescription("Optional liveness probe which is queried to check on a process whether it is (still) alive.")
+    @JsonAlias("lifenessProbe")
+    public LivenessProbeDescriptor livenessProbe;
 
     // ################################################# only for client applications #################################################
 

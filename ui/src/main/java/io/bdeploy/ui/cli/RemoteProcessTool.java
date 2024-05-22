@@ -152,7 +152,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                             .addField("Start Type", app.isPresent() ? app.get().processControl.startType : "?")
                             .addField("StdIn attached", (appStatus.hasStdin ? "Yes" : "No"))
                             .addField("Startup Status", getLastProbeStatus(appStatus, ProcessProbeType.STARTUP))
-                            .addField("Lifeness Status", getLastProbeStatus(appStatus, ProcessProbeType.LIFENESS));
+                            .addField("Liveness Status", getLastProbeStatus(appStatus, ProcessProbeType.LIVENESS));
 
             if (appStatus.handle != null) {
                 addProcessDetails(result, appStatus.handle, "");
@@ -241,7 +241,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         table.column("PID", 6);
         table.column(new DataTableColumn("ExitCode", "Exit", 4));
         table.column("Startup Status", 5);
-        table.column("Lifeness Status", 5);
+        table.column("Liveness Status", 5);
 
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
         Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();
@@ -334,7 +334,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //
                 .cell(Integer.toString(process.exitCode)) //
                 .cell(getLastProbeStatus(detail, ProcessProbeType.STARTUP)) //
-                .cell(getLastProbeStatus(detail, ProcessProbeType.LIFENESS)).build(); //
+                .cell(getLastProbeStatus(detail, ProcessProbeType.LIVENESS)).build(); //
     }
 
 }

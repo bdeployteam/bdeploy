@@ -44,7 +44,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
-import io.bdeploy.interfaces.descriptor.application.LifenessProbeDescriptor;
+import io.bdeploy.interfaces.descriptor.application.LivenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
 import io.bdeploy.logging.process.RollingStreamGobbler;
@@ -781,16 +781,16 @@ public class ProcessController {
                 processState = oldState == ProcessState.RUNNING_UNSTABLE ? ProcessState.RUNNING_UNSTABLE : ProcessState.RUNNING;
                 logger.log(l -> l.info("Application status is now {}, was {}.", processState, oldState));
 
-                LifenessProbeDescriptor lifeness = processConfig.processControl.lifenessProbe;
-                if (lifeness != null) {
+                LivenessProbeDescriptor liveness = processConfig.processControl.livenessProbe;
+                if (liveness != null) {
                     Optional<HttpEndpoint> aliveEp = processConfig.endpoints.http.stream()
-                            .filter(ep -> ep.id.equals(lifeness.endpoint)).findFirst();
+                            .filter(ep -> ep.id.equals(liveness.endpoint)).findFirst();
                     if (aliveEp.isEmpty() || aliveEp.get().type != HttpEndpointType.PROBE_ALIVE) {
-                        logger.log(l -> l.warn("Application defined lifeness probe endpoint {} missing or has wrong type.",
-                                lifeness.endpoint));
+                        logger.log(l -> l.warn("Application defined liveness probe endpoint {} missing or has wrong type.",
+                                liveness.endpoint));
                     } else {
-                        aliveTask = executorService.scheduleWithFixedDelay(this::doCheckAlive, lifeness.initialDelaySeconds,
-                                lifeness.periodSeconds, TimeUnit.SECONDS);
+                        aliveTask = executorService.scheduleWithFixedDelay(this::doCheckAlive, liveness.initialDelaySeconds,
+                                liveness.periodSeconds, TimeUnit.SECONDS);
                     }
                 }
 
@@ -801,17 +801,17 @@ public class ProcessController {
     }
 
     private void doCheckAlive() {
-        LifenessProbeDescriptor probe = processConfig.processControl.lifenessProbe;
+        LivenessProbeDescriptor probe = processConfig.processControl.livenessProbe;
         Optional<HttpEndpoint> aliveEp = processConfig.endpoints.http.stream().filter(ep -> ep.id.equals(probe.endpoint))
                 .findFirst();
 
         if (aliveEp.isEmpty()) {
             // systemic error, this should never happen as the endpoint has already be checked before scheduling this task.
-            throw new PcuRuntimeException("Unexpected error in retrieving lifeness endpoint.");
+            throw new PcuRuntimeException("Unexpected error in retrieving liveness endpoint.");
         }
 
         // Don't do this locked. If a probe blocks, we would like to be able to still stop the process (for example).
-        boolean alive = doProbe(ProcessProbeType.LIFENESS, probe.periodSeconds, aliveEp.get());
+        boolean alive = doProbe(ProcessProbeType.LIVENESS, probe.periodSeconds, aliveEp.get());
 
         executeLocked("Probe Alive", DEFAULT_USER, () -> {
             if (processState == ProcessState.RUNNING && !alive) {

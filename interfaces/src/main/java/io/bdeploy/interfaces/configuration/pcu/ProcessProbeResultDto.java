@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -7,7 +8,8 @@ public class ProcessProbeResultDto {
 
     public enum ProcessProbeType {
         STARTUP,
-        LIFENESS
+        @JsonAlias("LIFENESS")
+        LIVENESS
     }
 
     public ProcessProbeType type;
