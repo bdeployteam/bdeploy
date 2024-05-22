@@ -1,22 +1,18 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace Bdeploy.Launcher.Src
-{
-    internal class AppAutostarter : BaseLauncher
-    {
+namespace Bdeploy.Launcher.Src {
+    internal class AppAutostarter : BaseLauncher {
         /// <summary>
         /// Creates a new instance.
         /// </summary>
-        public AppAutostarter()
-        {
+        public AppAutostarter() {
         }
 
         /// <summary>
         /// Starts the LauncherCli 
         /// </summary>
-        public int Start()
-        {
+        public int Start() {
             // Build arguments to pass to the application
             StringBuilder builder = new StringBuilder();
             AppendCustomJvmArguments(builder);
@@ -31,8 +27,7 @@ namespace Bdeploy.Launcher.Src
             return StartLauncher(builder.ToString());
         }
 
-        protected override string GetAppLoggerName()
-        {
+        protected override string GetAppLoggerName() {
             return "autostart-log.txt";
         }
     }

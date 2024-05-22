@@ -4,16 +4,13 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Bdeploy.Installer.Models
-{
-    internal class SecurityHelper
-    {
+namespace Bdeploy.Installer.Models {
+    internal class SecurityHelper {
         /// <summary>
         /// Loads the X509Certificate required to communicate with the given service.
         /// </summary>
         /// <returns></returns>
-        public static X509Certificate2 LoadCertificate(RemoteService service)
-        {
+        public static X509Certificate2 LoadCertificate(RemoteService service) {
             byte[] decodedPack = System.Convert.FromBase64String(service.SignaturePack);
 
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(SignaturePack));
@@ -40,8 +37,7 @@ namespace Bdeploy.Installer.Models
         /// <param name="root">The baseline to compare.</param>
         /// <param name="cert">The certificate to validate.</param>
         /// <returns></returns>
-        public static bool Verify(X509Certificate2 root, X509Certificate2 cert)
-        {
+        public static bool Verify(X509Certificate2 root, X509Certificate2 cert) {
             X509Chain chain = new X509Chain();
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.ExtraStore.Add(root);

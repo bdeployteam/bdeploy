@@ -4,15 +4,12 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Bdeploy.Installer
-{
+namespace Bdeploy.Installer {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
-    {
-        private async void App_Startup(object sender, StartupEventArgs e)
-        {
+    public partial class App : Application {
+        private async void App_Startup(object sender, StartupEventArgs e) {
             // Enforce usage of TLS 1.2
             // We target .NET 4.5 and therefore we need to explicitly change the default
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -26,11 +23,9 @@ namespace Bdeploy.Installer
             AppInstaller installer = new AppInstaller(config, forAllUsers);
 
             // Download and install application without user interaction
-            if (unattended)
-            {
+            if (unattended) {
                 int setupCode = await Task.Run(() => installer.SetupAsync());
-                if (setupCode == 0 && config.CanInstallApp())
-                {
+                if (setupCode == 0 && config.CanInstallApp()) {
                     setupCode = installer.Launch(new string[] { "--updateOnly", "--unattended" }, true);
                 }
                 Current.Shutdown(setupCode);
@@ -41,7 +36,5 @@ namespace Bdeploy.Installer
             MainWindow mainWindow = new MainWindow(installer);
             mainWindow.Show();
         }
-
     }
-
 }

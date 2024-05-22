@@ -1,22 +1,18 @@
 ﻿using System;
 using System.IO;
 
-namespace Bdeploy.Shared
-{
+namespace Bdeploy.Shared {
     /// <summary>
     /// Helper class providing access to common folders.
     /// </summary>
-    public class PathProvider
-    {
+    public class PathProvider {
         /// <summary>
         /// Root directory of BDeploy. This location might be read-only for the current user.
         /// </summary>
-        public static string GetBdeployHome(bool forAllUsers)
-        {
+        public static string GetBdeployHome(bool forAllUsers) {
             // Check if BDEPLOY_HOME is set
             string home = Environment.GetEnvironmentVariable("BDEPLOY_HOME");
-            if (home != null)
-            {
+            if (home != null) {
                 return home;
             }
 
@@ -29,8 +25,7 @@ namespace Bdeploy.Shared
         /// Directory where the launcher is stored. (HOME_DIR\launcher) 
         /// </summary>
         /// <returns></returns>
-        public static string GetLauncherDir(string home)
-        {
+        public static string GetLauncherDir(string home) {
             return Path.Combine(home, "launcher");
         }
 
@@ -38,8 +33,7 @@ namespace Bdeploy.Shared
         /// Directory where the application are stored. (HOME_DIR\apps) 
         /// </summary>
         /// <returns></returns>
-        public static string GetApplicationsDir(string home)
-        {
+        public static string GetApplicationsDir(string home) {
             return Path.Combine(home, "apps");
         }
 
@@ -47,8 +41,7 @@ namespace Bdeploy.Shared
         /// Directory where temporary files are stored. (HOME_DIR\tmp)
         /// </summary>
         /// <returns></returns>
-        public static string GetTmpDir(string home)
-        {
+        public static string GetTmpDir(string home) {
             return Path.Combine(home, "tmp");
         }
     }
