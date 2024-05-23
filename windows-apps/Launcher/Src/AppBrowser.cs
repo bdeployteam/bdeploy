@@ -1,27 +1,23 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace Bdeploy.Launcher
-{
+namespace Bdeploy.Launcher {
 
     /// <summary>
     /// Launches the Browser tool to see all installed applications
     /// </summary>
-    public class AppBrowser : BaseLauncher
-    {
+    public class AppBrowser : BaseLauncher {
 
         /// <summary>
         /// Creates a new instance.
         /// </summary>
-        public AppBrowser()
-        {
+        public AppBrowser() {
         }
 
         /// <summary>
         /// Starts the LauncherCli 
         /// </summary>
-        public int Start()
-        {
+        public int Start() {
             // Build arguments to pass to the application
             StringBuilder builder = new StringBuilder();
             AppendCustomJvmArguments(builder);
@@ -36,8 +32,7 @@ namespace Bdeploy.Launcher
             return StartLauncher(builder.ToString());
         }
 
-        protected override string GetAppLoggerName()
-        {
+        protected override string GetAppLoggerName() {
             return "browser-log.txt";
         }
     }

@@ -8,13 +8,11 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace Bdeploy.Launcher
-{
+namespace Bdeploy.Launcher {
     /// <summary>
     /// Responsible for starting the Java Launcher as well as for applying updates.
     /// </summary>
-    public class AppLauncher : ClickAndStartLauncher
-    {
+    public class AppLauncher : ClickAndStartLauncher {
 
         // The full path to the directory where to store updates and backups
         private static readonly string UPDATES = Path.Combine(LAUNCHER, "updates");
@@ -50,8 +48,7 @@ namespace Bdeploy.Launcher
         /// Creates a new instance of the launcher.
         /// </summary>
         /// <param name="clickAndStartFile">The .bdeploy file to pass to the companion script</param>
-        public AppLauncher(string clickAndStartFile) : base(clickAndStartFile)
-        {
+        public AppLauncher(string clickAndStartFile) : base(clickAndStartFile) {
         }
 
         /// <summary>
@@ -59,11 +56,9 @@ namespace Bdeploy.Launcher
         /// </summary>
         /// <param name="args">Arguments to pass to the application</param>
         /// <returns> Exit code of the minion.</returns>
-        public int Start(string[] args)
-        {
+        public int Start(string[] args) {
             // Descriptor must be existing and valid
-            if (!ValidateDescriptor())
-            {
+            if (!ValidateDescriptor()) {
                 return -1;
             }
 
@@ -86,21 +81,17 @@ namespace Bdeploy.Launcher
             List<string> appArgs = new List<string>();
             List<string> launcherArgs = new List<string>();
             int argSeparator = Array.IndexOf(args, "--");
-            if (argSeparator != -1)
-            {
+            if (argSeparator != -1) {
                 launcherArgs.AddRange(args.Take(argSeparator));
                 appArgs.AddRange(args.Skip(argSeparator + 1));
-            }
-            else
-            {
+            } else {
                 launcherArgs = args.ToList();
             }
 
             // Arguments that will be forwarded to the final application are Base64 encoded and then 
             // serialized as JSON list. Using that approach we can simply decode the value and convert the JSON to a list in Java
             // without the need to worry about proper escaping those values while passing it to the new process
-            if (appArgs.Count != 0)
-            {
+            if (appArgs.Count != 0) {
                 MemoryStream stream = new MemoryStream();
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(List<string>));
                 ser.WriteObject(stream, appArgs);
@@ -110,8 +101,7 @@ namespace Bdeploy.Launcher
             }
 
             // Arguments for the launcher are simply added as they have been passed
-            foreach (string appArg in launcherArgs)
-            {
+            foreach (string appArg in launcherArgs) {
                 builder.AppendFormat("\"{0}\" ", appArg);
             }
 
@@ -121,16 +111,13 @@ namespace Bdeploy.Launcher
         /// <summary>
         /// Applies the available updates.
         /// </summary>
-        public bool ApplyUpdates()
-        {
+        public bool ApplyUpdates() {
             FileStream lockStream = null;
-            try
-            {
+            try {
                 // Try to get an exclusive update lock
                 Directory.CreateDirectory(UPDATES);
                 lockStream = GetUpdateLock();
-                if (lockStream == null)
-                {
+                if (lockStream == null) {
                     Log.Information("User canceled installation of updates. Exiting application.");
                     return false;
                 }
@@ -139,18 +126,15 @@ namespace Bdeploy.Launcher
                 Log.Information("Update lock successfully acquired. Starting update. ");
 
                 // Check that we have something to update
-                if (!Directory.Exists(UPDATES_NEXT))
-                {
+                if (!Directory.Exists(UPDATES_NEXT)) {
                     Log.Information("No updates available or updates have already been installed. Restarting application.");
                     return true;
                 }
 
                 // Backup and update the application
                 RetryCancelMode result = RetryCancelMode.RETRY;
-                while (result == RetryCancelMode.RETRY)
-                {
-                    if (BackupAndUpdate())
-                    {
+                while (result == RetryCancelMode.RETRY) {
+                    if (BackupAndUpdate()) {
                         Log.Information("Updates successfully applied. Restarting application.");
                         return true;
                     }
@@ -167,9 +151,7 @@ namespace Bdeploy.Launcher
                 FileHelper.CopyDirectory(BACKUP, LAUNCHER);
                 Log.Information("Application restored. Terminating application.");
                 return false;
-            }
-            finally
-            {
+            } finally {
                 // Release lock
                 lockStream?.Dispose();
                 FileHelper.DeleteFile(UPDATE_LOCK);
@@ -180,12 +162,10 @@ namespace Bdeploy.Launcher
         /// Acquire an exclusive lock to apply updates. 
         /// </summary>
         /// <returns></returns>
-        private FileStream GetUpdateLock()
-        {
+        private FileStream GetUpdateLock() {
             // First directly try to get an update lock
             FileStream lockStream = FileHelper.CreateLockFile(UPDATE_LOCK);
-            if (lockStream != null)
-            {
+            if (lockStream != null) {
                 return lockStream;
             }
 
@@ -199,17 +179,14 @@ namespace Bdeploy.Launcher
         /// <summary>
         /// Creates a backup of the current version and copies the new files back to the working directory.
         /// </summary>
-        private bool BackupAndUpdate()
-        {
-            try
-            {
+        private bool BackupAndUpdate() {
+            try {
                 // Cleanup previously created backups
                 FileHelper.DeleteDir(BACKUP);
                 Directory.CreateDirectory(BACKUP);
 
                 // We first try to check if the JRE is in use before we start moving all files
-                if (File.Exists(JRE) && FileHelper.IsFileLocked(JRE))
-                {
+                if (File.Exists(JRE) && FileHelper.IsFileLocked(JRE)) {
                     Log.Error("JRE executable is locked by another application.");
                     Log.Error("Update cannot be applied.");
                     return false;
@@ -230,9 +207,7 @@ namespace Bdeploy.Launcher
                 // Cleanup update marker
                 FileHelper.DeleteFile(UPDATE_JAVA_LOCK);
                 return true;
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Log.Error(ex, "Failed to apply updates.");
                 return false;
             }
@@ -241,34 +216,27 @@ namespace Bdeploy.Launcher
         /// <summary>
         /// Restarts the launcher application.
         /// </summary>
-        public bool Restart(string[] args)
-        {
+        public bool Restart(string[] args) {
             string executable = Process.GetCurrentProcess().MainModule.FileName;
 
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("\"{0}\" ", clickAndStartFile);
-            foreach (string appArg in args)
-            {
+            foreach (string appArg in args) {
                 builder.AppendFormat("\"{0}\" ", appArg);
             }
 
             string argument = builder.ToString();
             Log.Information("Restarting launcher: {0} {1}", executable, argument);
 
-            try
-            {
+            try {
                 int pid = Utils.RunProcess(executable, argument);
                 Log.Information("Updated launcher running with PID: {0}", pid);
                 return true;
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Log.Error(ex, "Failed to start launcher after update.");
                 Log.Information("Aborting and terminating application.");
                 return false;
             }
         }
-
-
     }
 }
