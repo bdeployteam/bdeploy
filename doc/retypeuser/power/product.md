@@ -196,14 +196,14 @@ runtimeDependencies: <19>
 `processControl` is not supported for `CLIENT` applications.
 !!!
 
-Attribute   | Description
----         | ---
-`supportedStartTypes` | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`).
-`supportsKeepAlive` | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.
-`noOfRetries` | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.
-`gracePeriod` | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.
-`startupProbe` | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.
-`livenessProbe` | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.
+| Attribute             | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedStartTypes` | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`). |
+| `supportsKeepAlive`   | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.                                                                                                                                                                                                                                                                                                                              |
+| `noOfRetries`         | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.                                                                                                                                                                                                           |
+| `gracePeriod`         | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.                                                                                                                                                                                                                                                          |
+| `startupProbe`        | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
+| `livenessProbe`       | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
 
 ### Supported `parameters` attributes
 
@@ -318,16 +318,16 @@ In this case you will want the user to be able to edit the value of `-Dmy.prop` 
 
 ```yaml
 startCommand:
-  launcherPath: "{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}"
+  launcherPath: '{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}'
   parameters:
-    - id: "my.prop"
-      name: "My Property"
-      parameter: "-Dmy.prop"
+    - id: 'my.prop'
+      name: 'My Property'
+      parameter: '-Dmy.prop'
       mandatory: true
-    - id: "my.jar"
-      name: "Application JAR"
-      parameter: "-jar"
-      defaultValue: "application.jar"
+    - id: 'my.jar'
+      name: 'Application JAR'
+      parameter: '-jar'
+      defaultValue: 'application.jar'
       valueAsSeparateArg: true
       mandatory: true
       fixed: true <1>
@@ -364,41 +364,41 @@ A condition expression (isolated) looks like this:
 
 ```yaml
 condition:
-  parameter: "my.param.2"
+  parameter: 'my.param.2'
   must: EQUAL
-  value: "Value 1"
+  value: 'Value 1'
 ```
 
 Or, in its newer form, the very same (but ultimately more powerful) using `expression` would look like this:
 
 ```yaml
 condition:
-  expression: "{{V:my.param.2}}"
+  expression: '{{V:my.param.2}}'
   must: EQUAL
-  value: "Value 1"
+  value: 'Value 1'
 ```
 
 The power comes from the ability to provide an arbitrary amount of [Variable Expansion](/power/variables/#variable-expansions) in the [Link Expressions](/user/instance/#link-expressions).
 
 The condition block understands the following fields:
 
-Name   | Description
----    | ---
-`parameter` | The referenced parameters ID.
-`expression` | A [Link Expression](/user/instance/#link-expressions) which is resolved and matched against the condition.<br/><br/>:warning:**WARNING** `parameter` may not be set if the newer `expression` is used, and vice versa.
-`must` | The type of condition.
-`value` | The value to match against if required by the condition type.
+| Name         | Description                                                                                                                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `parameter`  | The referenced parameters ID.                                                                                                                                                                                          |
+| `expression` | A [Link Expression](/user/instance/#link-expressions) which is resolved and matched against the condition.<br/><br/>:warning:**WARNING** `parameter` may not be set if the newer `expression` is used, and vice versa. |
+| `must`       | The type of condition.                                                                                                                                                                                                 |
+| `value`      | The value to match against if required by the condition type.                                                                                                                                                          |
 
 The `must` field understands the following condition types:
 
-Name   | Description
----    | ---
-`EQUAL` | The referenced parameters value must equal the given condition value.
-`CONTAIN` | The referenced parameters value must contain the given condition value.
-`START_WITH` | The referenced parameters value must start with the given condition value.
-`END_WITH` | The referenced parameters value must end with the given condition value.
-`BE_EMPTY` | The referenced parameters value must be empty. In case of `BOOLEAN` parameters the value must be `false`.<br/><br/>:information_source:**NOTE** Leading and trailing whitespaces are ignored for this check.
-`BE_NON_EMPTY` | The referenced parameters value must be any non-empty value. In case of `BOOLEAN` parameters the value must be `true`.<br/><br/>:information_source:**NOTE** Leading and trailing whitespaces are ignored for this check.
+| Name           | Description                                                                                                                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EQUAL`        | The referenced parameters value must equal the given condition value.                                                                                                                                                     |
+| `CONTAIN`      | The referenced parameters value must contain the given condition value.                                                                                                                                                   |
+| `START_WITH`   | The referenced parameters value must start with the given condition value.                                                                                                                                                |
+| `END_WITH`     | The referenced parameters value must end with the given condition value.                                                                                                                                                  |
+| `BE_EMPTY`     | The referenced parameters value must be empty. In case of `BOOLEAN` parameters the value must be `false`.<br/><br/>:information_source:**NOTE** Leading and trailing whitespaces are ignored for this check.              |
+| `BE_NON_EMPTY` | The referenced parameters value must be any non-empty value. In case of `BOOLEAN` parameters the value must be `true`.<br/><br/>:information_source:**NOTE** Leading and trailing whitespaces are ignored for this check. |
 
 !!!warning Warning
 Be aware that the condition on a parameter has a higher precedence than `mandatory`. A `mandatory` parameter whos condition is not met is still not configurable. As soon as the condition is met, it is automatically added to the configuration using its default value.
@@ -416,20 +416,20 @@ If possible, a parameter with a condition should be defined **after** the parame
 Endpoints definitions are templates which can later on be configured by the user. The only values not editable by the user are `id` and `path`.
 !!!
 
-Attribute   | Description
----         | ---
-`id` | The unique ID of the endpoint. This ID can be used by an authorized third-party application to instruct **BDeploy** to call this endpoint and return the result.
-`enabled` | Any [Link Expression](/user/instance/#link-expressions). If the expression evaluates to a non-empty value which does _not_ equal `false`, the endpoint is considered available/enabled and presented to the user both for configuration and usage. This can be used to tie an endpoint to the configuration of a certain parameter, e.g. the server port configuration which will host the endpoint. 
-`type` | Currently `DEFAULT`, `PROBE_STARTUP` and `PROBE_ALIVE` are supported. Endpoints referenced by _startup_ or _liveness probes_ in the `processControl` section of a server process need to have the according type. If not specified, the `DEFAULT` type is assumed.
-`path` | The path of the endpoint on the target process. **BDeploy** uses this and other parameters (`port`) to construct an URI to the local server.
-`port` | The port this endpoint is hosted on. [Variable Expansion](/power/variables/#variable-expansions) can be used, for instance to reference a parameter of the application (using `{{V:port-param}}` where `port-param` is the ID of a parameter on the `startCommand`).
-`secure` | Whether HTTPS should be used when calling the endpoint
-`trustAll` | Whether to trust any certificate when using HTTPS to call the endpoint. Otherwise a custom `trustStore` must be set if a self-signed certificate is used by the application.
-`trustStore` | Path to a KeyStore in the `JKS` format, containing certificates to trust. [Variable Expansion](/power/variables/#variable-expansions) can be used.
-`trustStorePass` | The passphrase used to load the `trustStore`. [Variable Expansion](/power/variables/#variable-expansions) can be used.
-`authType` | The type of authentication used by **BDeploy** when calling the endpoint. Can be `NONE`, `BASIC` or `DIGEST`.
-`authUser` | The username to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.
-`authPass` | The password to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.
+| Attribute        | Description                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`             | The unique ID of the endpoint. This ID can be used by an authorized third-party application to instruct **BDeploy** to call this endpoint and return the result.                                                                                                                                                                                                                                     |
+| `enabled`        | Any [Link Expression](/user/instance/#link-expressions). If the expression evaluates to a non-empty value which does _not_ equal `false`, the endpoint is considered available/enabled and presented to the user both for configuration and usage. This can be used to tie an endpoint to the configuration of a certain parameter, e.g. the server port configuration which will host the endpoint. |
+| `type`           | Currently `DEFAULT`, `PROBE_STARTUP` and `PROBE_ALIVE` are supported. Endpoints referenced by _startup_ or _liveness probes_ in the `processControl` section of a server process need to have the according type. If not specified, the `DEFAULT` type is assumed.                                                                                                                                   |
+| `path`           | The path of the endpoint on the target process. **BDeploy** uses this and other parameters (`port`) to construct an URI to the local server.                                                                                                                                                                                                                                                         |
+| `port`           | The port this endpoint is hosted on. [Variable Expansion](/power/variables/#variable-expansions) can be used, for instance to reference a parameter of the application (using `{{V:port-param}}` where `port-param` is the ID of a parameter on the `startCommand`).                                                                                                                                 |
+| `secure`         | Whether HTTPS should be used when calling the endpoint                                                                                                                                                                                                                                                                                                                                               |
+| `trustAll`       | Whether to trust any certificate when using HTTPS to call the endpoint. Otherwise a custom `trustStore` must be set if a self-signed certificate is used by the application.                                                                                                                                                                                                                         |
+| `trustStore`     | Path to a KeyStore in the `JKS` format, containing certificates to trust. [Variable Expansion](/power/variables/#variable-expansions) can be used.                                                                                                                                                                                                                                                   |
+| `trustStorePass` | The passphrase used to load the `trustStore`. [Variable Expansion](/power/variables/#variable-expansions) can be used.                                                                                                                                                                                                                                                                               |
+| `authType`       | The type of authentication used by **BDeploy** when calling the endpoint. Can be `NONE`, `BASIC` or `DIGEST`.                                                                                                                                                                                                                                                                                        |
+| `authUser`       | The username to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.                                                                                                                                                                                                                                                                     |
+| `authPass`       | The password to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.                                                                                                                                                                                                                                                                     |
 
 !!!info Note
 Endpoints which are not considered _enabled_ are not required to be configured by the user, but are still reported via public API.
@@ -569,13 +569,13 @@ fixedVariables: <2>
 
 ### Supported `templateVariables` Attributes
 
-Attribute   | Description
----         | ---
-`id` | The unique ID of the template variable. If multiple applications (or instances) define the same variable ID, it is queried from the user only once.
-`name` | The user visible name of the variable, used when querying user input while applying the template.
-`description` | Further detailed description of the template variable, explaining to the user the purpose of the variable.
-`defaultValue` | An optional default value which is pre-filled when querying the user for template variable values.
-`suggestedValues` | A list of values which will be suggested to the user once they begin providing a value for this variable.
+| Attribute         | Description                                                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | The unique ID of the template variable. If multiple applications (or instances) define the same variable ID, it is queried from the user only once. |
+| `name`            | The user visible name of the variable, used when querying user input while applying the template.                                                   |
+| `description`     | Further detailed description of the template variable, explaining to the user the purpose of the variable.                                          |
+| `defaultValue`    | An optional default value which is pre-filled when querying the user for template variable values.                                                  |
+| `suggestedValues` | A list of values which will be suggested to the user once they begin providing a value for this variable.                                           |
 
 !!!info Note
 Defined `templateVariables` can be used in the `name` of the application template, as well as in each `startParameter`s `value` attribute.
@@ -585,20 +585,19 @@ Defined `templateVariables` can be used in the `name` of the application templat
 
 Fixed variables allow overriding template variable input from the user to a _fixed_ value.
 
-Attribute   | Description
----         | ---
-`id` | The unique ID of the template variable. The variable may be declared in either this or any parent template.
-`value` | The target fixed value for the variable to be used in this and any parent template. This value overrides any user input.
+| Attribute | Description                                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `id`      | The unique ID of the template variable. The variable may be declared in either this or any parent template.              |
+| `value`   | The target fixed value for the variable to be used in this and any parent template. This value overrides any user input. |
 
 ### Supported `startParameters` Attributes
 
 The list of `startParameters` provides control over the parameters in the resulting process. This is different from the parameter _definition_ in [`app-info.yaml`](#app-infoyaml) as this list only provides information about presence and value of parameters when applying this template.
 
-Attribute   | Description
----         | ---
-`id` | The unique ID of the parameter. A definition of a parameter with this ID **must** exist in the [`app-info.yaml`](#app-infoyaml) file of the referenced `application`. If the parameter is optional, it will be added to the process when applying the template.
-`value` | The target value of the parameter. If no value is given, the `defaultValue` from the parameter's definition is applied.
-
+| Attribute | Description                                                                                                                                                                                                                                                     |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | The unique ID of the parameter. A definition of a parameter with this ID **must** exist in the [`app-info.yaml`](#app-infoyaml) file of the referenced `application`. If the parameter is optional, it will be added to the process when applying the template. |
+| `value`   | The target value of the parameter. If no value is given, the `defaultValue` from the parameter's definition is applied.                                                                                                                                         |
 
 ## instance-template.yaml
 
@@ -694,41 +693,41 @@ Defined `templateVariables` can be used in each `instanceVariables` (and `instan
 
 ### Supported `instanceVariables` Attributes
 
-Attribute   | Description
----         | ---
-`template` | Allows referencing a collection of template instance variables defined in a single [`instance-variable-template.yaml`](#instance-variable-templateyaml)<br/><br/>:information_source:**NOTE** If this attribute is given, no other attribute may be given, as this item is replaced by the definitions from the instance variable template.
-`id` | The unique ID of the instance variable to be created.
-`value` | The value with which the instance variable should be created. This value can use template variables defined in the containing [`instance-template.yaml`](#instance-templateyaml).
-`description` | A detailed description of the variable presented to the user in the [Instance Variables](/user/instance/#instance-variables) overview.
-`type` | The type of the variable, the same types as if defining a `parameter` can be used, see [Supported `parameters` attributes](#supported-parameters-attributes).
-`customEditor` | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable, also see [Supported `parameters` attributes](#supported-parameters-attributes).
+| Attribute      | Description                                                                                                                                                                                                                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `template`     | Allows referencing a collection of template instance variables defined in a single [`instance-variable-template.yaml`](#instance-variable-templateyaml)<br/><br/>:information_source:**NOTE** If this attribute is given, no other attribute may be given, as this item is replaced by the definitions from the instance variable template. |
+| `id`           | The unique ID of the instance variable to be created.                                                                                                                                                                                                                                                                                       |
+| `value`        | The value with which the instance variable should be created. This value can use template variables defined in the containing [`instance-template.yaml`](#instance-templateyaml).                                                                                                                                                           |
+| `description`  | A detailed description of the variable presented to the user in the [Instance Variables](/user/instance/#instance-variables) overview.                                                                                                                                                                                                      |
+| `type`         | The type of the variable, the same types as if defining a `parameter` can be used, see [Supported `parameters` attributes](#supported-parameters-attributes).                                                                                                                                                                               |
+| `customEditor` | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable, also see [Supported `parameters` attributes](#supported-parameters-attributes).                                                                                                                                      |
 
 ### Supported `instanceVariableDefaults` Attributes
 
-Attribute   | Description
----         | ---
-`id` | The unique ID of a previously defined instance variable (either directly in the same template, or through an applied [`instance-variable-template.yaml`](#instance-variable-templateyaml)).
-`value` | The value to use when applying this instance template.
+| Attribute | Description                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | The unique ID of a previously defined instance variable (either directly in the same template, or through an applied [`instance-variable-template.yaml`](#instance-variable-templateyaml)). |
+| `value`   | The value to use when applying this instance template.                                                                                                                                      |
 
 ### Supported `processControlGroups` Attributes
 
-Attribute   | Description
----         | ---
-`name` | The name of the [Process Control Group]([Process Control Groups](/user/instance/#process-control-groups)) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute.
-`startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups)
-`startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups)
-`stopType` | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups)
+| Attribute   | Description                                                                                                                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`      | The name of the [Process Control Group]([Process Control Groups](/user/instance/#process-control-groups)) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute. |
+| `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups)                                                                                                                                                              |
+| `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups)                                                                                                                                                              |
+| `stopType`  | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups)                                                                                                                                                               |
 
 ### Supported `groups` Attributes
 
 `groups` is a list of _template groups_. This groups together a set of [Application Templates](#application-templateyaml) or inline template definitions. Each group has a set of own attributes, as well as a list of templates:
 
-Attribute   | Description
----         | ---
-`name` | The name of the group. This will be presented to the user, and a user has the possibility to select which groups of the template should be applied to which node in an instance.
-`description` | A description which helps the user in deciding whether to apply a certain group or not.
-`type` | Either `SERVER` or `CLIENT` right now. The target node where the group is applied must match this type.
-`applications` | A list of templates. A template can either be a reference to an [`application-template.yaml`](#application-templateyaml) defined template, or - alternatively - can be defined inline. In this case all attributes of an [`application-template.yaml`](#application-templateyaml) apply to a single item in the `applications` list.
+| Attribute      | Description                                                                                                                                                                                                                                                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`         | The name of the group. This will be presented to the user, and a user has the possibility to select which groups of the template should be applied to which node in an instance.                                                                                                                                                     |
+| `description`  | A description which helps the user in deciding whether to apply a certain group or not.                                                                                                                                                                                                                                              |
+| `type`         | Either `SERVER` or `CLIENT` right now. The target node where the group is applied must match this type.                                                                                                                                                                                                                              |
+| `applications` | A list of templates. A template can either be a reference to an [`application-template.yaml`](#application-templateyaml) defined template, or - alternatively - can be defined inline. In this case all attributes of an [`application-template.yaml`](#application-templateyaml) apply to a single item in the `applications` list. |
 
 ## parameter-template.yaml
 
@@ -819,18 +818,18 @@ instances:
 5. `defaultMappings` can be used to pre-assign **Instance Template** groups to available nodes. If a node with the specified name is not available during application of the **System Template**, no node will be preselected. To specify the **Client Application** node, you can either specify 'Client Applications' or the internal name '\_\_ClientApplications'.
 
 !!!info Note
-When applying a **System Template** from the CLI, all mappings need to be provided through `defaultMappings`, and all **Template Variables** of the **System Template** as well as  downstream **Template Variables** (required by the individual **Instance Templates**) need to either have a default value or be provided using `fixedVariables`, as the CLI is non-interactive when applying **System Templates**
+When applying a **System Template** from the CLI, all mappings need to be provided through `defaultMappings`, and all **Template Variables** of the **System Template** as well as downstream **Template Variables** (required by the individual **Instance Templates**) need to either have a default value or be provided using `fixedVariables`, as the CLI is non-interactive when applying **System Templates**
 !!!
 
 ### Supported `systemVariables` Attributes
 
-Attribute   | Description
----         | ---
-`id` | The unique ID of the system variable to create.
-`value` | The pre-assigned value of the variable.
-`description` | A human readable description explaining the purpose of each variable.
-`type` | Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`.
-`customEditor` | Reserved, currently not supported.
+| Attribute      | Description                                                                                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | The unique ID of the system variable to create.                                                                                                                             |
+| `value`        | The pre-assigned value of the variable.                                                                                                                                     |
+| `description`  | A human readable description explaining the purpose of each variable.                                                                                                       |
+| `type`         | Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. |
+| `customEditor` | Reserved, currently not supported.                                                                                                                                          |
 
 ### Supported `templateVariables` Attributes
 
@@ -846,15 +845,15 @@ Defined `templateVariables` can be used in each `instances` `name`, `description
 
 Each element provides a description of an instance to be created from a specific product and a specific instance template.
 
-Attribute   | Description
----         | ---
-`name` | The name of the instance to create. May use **Template Variables** from the **System Template**.
-`description` | Describes the purpose or meaning of the to-be-created instance.
-`productId` | The **ID** of the product to be used. Note that this is not the **Name**. It corresponds to the `product` field in [`product-info.yaml`](#product-infoyaml).
-`productVersionRegex` | An optional regular expression which narrows down allowable versions of the specified product. Useful in case multiple major versions of a product exist on a server, and only a certain one is supported. Otherwise, the newest product version is selected.
-`templateName` | The name of the **Instance Template** to apply to create this instance. This template must exist in the selected product version.
-`defaultMappings` | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset.
-`fixedVariables` | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.
+| Attribute             | Description                                                                                                                                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | The name of the instance to create. May use **Template Variables** from the **System Template**.                                                                                                                                                              |
+| `description`         | Describes the purpose or meaning of the to-be-created instance.                                                                                                                                                                                               |
+| `productId`           | The **ID** of the product to be used. Note that this is not the **Name**. It corresponds to the `product` field in [`product-info.yaml`](#product-infoyaml).                                                                                                  |
+| `productVersionRegex` | An optional regular expression which narrows down allowable versions of the specified product. Useful in case multiple major versions of a product exist on a server, and only a certain one is supported. Otherwise, the newest product version is selected. |
+| `templateName`        | The name of the **Instance Template** to apply to create this instance. This template must exist in the selected product version.                                                                                                                             |
+| `defaultMappings`     | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset.                                               |
+| `fixedVariables`      | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.                                                                  |
 
 ## product-validation.yaml
 
@@ -968,10 +967,14 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plain use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
 4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files.
 5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.  
-The `repositoryServer` will be queried for additionally specified `runtimeDependencies` at build time. Those dependencies will be downloaded and embedded into the final product.
+   The `repositoryServer` will be queried for additionally specified `runtimeDependencies` at build time. Those dependencies will be downloaded and embedded into the final product.
 6. If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
 7. The `pushProduct` task can push required deltas to one or more configured target servers. The server configuration is the same as for all other `..Server` blocks (see note below). In addition the target `instanceGroup` **must** be specified for pushing.
 8. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
+
+!!!info Note
+All `...Server` blocks can set `useLogin = true` to use local logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` instead of `useLogin` to have full control.
+!!!
 
 Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
 
@@ -979,10 +982,6 @@ Lets start off with the [`app-info.yaml`](#app-infoyaml), which describes the `t
 
 !!!info Note
 This file **must** be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
-!!!
-
-!!!info Note
-All `...Server` blocks can set `useLogin = true` to use local logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` instead of `useLogin` to have full control.
 !!!
 
 ```yaml src/main/dist/app-info.yaml
@@ -1076,8 +1075,8 @@ This file is required and lists the [`product-build.yaml`](#product-buildyaml) f
 
 ```yaml products.yaml
 products:
-  "Product One": "prod-1-build.yaml"
-  "Product Two": "prod-2-build.yaml"
+  'Product One': 'prod-1-build.yaml'
+  'Product Two': 'prod-2-build.yaml'
 ```
 
 The path to the `products.yaml` has to be configured in the **Eclipse TEA** preferences
