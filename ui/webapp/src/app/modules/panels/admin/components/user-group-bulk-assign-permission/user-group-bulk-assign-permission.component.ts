@@ -39,7 +39,7 @@ export class UserGroupBulkAssignPermissionComponent implements OnInit, OnDestroy
       .subscribe(([groups, repositories]) => {
         const groupNames = groups.map((g) => g.instanceGroupConfiguration.name);
         const repositoryNames = repositories.map((r) => r.name);
-        const sortedNames = [...groupNames, ...repositoryNames].sort();
+        const sortedNames = [...groupNames, ...repositoryNames].sort((a, b) => a.localeCompare(b));
 
         this.scopes$.next([null, ...sortedNames]);
         this.labels$.next(['Global', ...sortedNames]);
