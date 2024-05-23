@@ -26,6 +26,7 @@ import io.bdeploy.messaging.transport.smtp.SMTPTransportConnectionHandler;
 import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.ui.api.Minion;
 import jakarta.inject.Inject;
+import jakarta.mail.Address;
 import jakarta.mail.URLName;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.ws.rs.core.MediaType;
@@ -95,7 +96,7 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
         InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
                 : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
 
-        List<InternetAddress> receiverAddresses = new ArrayList<>();
+        List<Address> receiverAddresses = new ArrayList<>();
         if (!StringHelper.isNullOrBlank(mailSenderSettingsDto.receiverAddress)) {
             receiverAddresses.add(MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress));
         }

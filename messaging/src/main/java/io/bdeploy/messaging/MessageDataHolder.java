@@ -13,7 +13,7 @@ import jakarta.mail.Message;
 public class MessageDataHolder {
 
     private final Address sender;
-    private final List<? extends Address> recipients;
+    private final List<Address> recipients;
     private final String subject;
     private final String text;
     private final String textMimeType;
@@ -22,7 +22,7 @@ public class MessageDataHolder {
     /**
      * Creates a new {@link MessageDataHolder} without any {@link MimeFile attachments}.
      */
-    public MessageDataHolder(Address sender, List<? extends Address> recipients, String subject, String text,//
+    public MessageDataHolder(Address sender, List<Address> recipients, String subject, String text,//
             String textMimeType) {
         this(sender, recipients, subject, text, textMimeType, null);
     }
@@ -30,7 +30,7 @@ public class MessageDataHolder {
     /**
      * Creates a new {@link MessageDataHolder} including the given {@link MimeFile attachments}.
      */
-    public MessageDataHolder(Address sender, List<? extends Address> recipients, String subject, String text,//
+    public MessageDataHolder(Address sender, List<Address> recipients, String subject, String text,//
             String textMimeType, List<MimeFile> attachments) {
         this.sender = sender;
         this.recipients = parseList(recipients);
