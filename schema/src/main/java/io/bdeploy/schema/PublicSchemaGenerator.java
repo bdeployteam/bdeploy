@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
@@ -25,6 +26,7 @@ import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
@@ -110,6 +112,14 @@ public class PublicSchemaGenerator {
                 ObjectNode compatUid = on.putObject("uid");
                 compatUid.put("type", "string");
                 compatUid.put("description", "DEPRECATED: Compatibility with 'id' property.");
+            }
+
+            // for compatibility with existing files, we need to properly allow 'lifenessProbe' properties.
+            if(scope.getType().isInstanceOf(ProcessControlDescriptor.class)) {
+                ObjectNode on = (ObjectNode) node.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+
+                JsonNode newProbe = on.get("livenessProbe");
+                on.set("lifenessProbe", newProbe);
             }
         });
 
