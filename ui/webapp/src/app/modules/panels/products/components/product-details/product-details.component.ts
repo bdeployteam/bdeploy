@@ -159,11 +159,49 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       const count = usedIn?.length | 0;
       if (count > 0) {
         this.allowDeletion$.next(false);
-        this.deletionButtonDisabledReason$.next(
-          count === 1
-            ? 'Product is still in use by instance ' + usedIn[0].name
-            : 'Product is still in use by multiple instances',
-        );
+        if (count === 1) {
+          const instanceDto = usedIn[0];
+          this.deletionButtonDisabledReason$.next(
+            'Product is still in use by version ' + instanceDto.tag + ' of instance ' + instanceDto.name,
+          );
+        } else {
+          const mappedDtos = usedIn.reduce((resultArray, dto) => {
+            let key = dto.id;
+            let value = resultArray.find((v) => v && v.instanceId === key);
+            if (value) {
+              value.versions.push(dto);
+            } else {
+              resultArray.push({ instanceId: key, versions: [dto] });
+            }
+            return resultArray;
+          }, new Array<{ instanceId: String; versions: InstanceUsageDto[] }>());
+
+          const instanceCount = mappedDtos.length;
+          if (instanceCount === 1) {
+            const onlyEntry = mappedDtos[0];
+            this.deletionButtonDisabledReason$.next(
+              'Product is still in use by the following versions of instance ' +
+                onlyEntry.versions[0].name +
+                ': ' +
+                onlyEntry.versions.map((dto) => dto.tag).join(', '),
+            );
+          } else {
+            const maxNamedInstances = 3;
+            let instanceList = 'Product is still in use by the following instances: ';
+            for (let i = 0; i < instanceCount; i++) {
+              instanceList += mappedDtos[i].versions[0].name + ', ';
+              if (i >= maxNamedInstances) {
+                break;
+              }
+            }
+            if (instanceCount > maxNamedInstances) {
+              instanceList += 'and ' + (instanceCount - maxNamedInstances) + ' more';
+            } else {
+              instanceList = instanceList.substring(0, instanceList.length - 2);
+            }
+            this.deletionButtonDisabledReason$.next(instanceList);
+          }
+        }
         return;
       }
 
