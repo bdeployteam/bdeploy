@@ -17,7 +17,6 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.Configuration.ValueMapping;
-import io.bdeploy.common.cfg.ExistingDirectoryValidator;
 import io.bdeploy.common.cfg.HostnameValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -57,8 +56,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Validator(NonExistingPathValidator.class)
         String root();
 
-        @Help("Logging root directory")
-        @Validator(ExistingDirectoryValidator.class)
+        @Help("Logging root directory. Will be created if it does not exist.")
         String logData();
 
         @Help("Optional directory where to deploy applications to, defaults to root/deploy")
@@ -142,6 +140,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             String logDataDir = config.logData();
             if (!StringHelper.isNullOrEmpty(logDataDir)) {
                 Path logDataDirPath = Paths.get(logDataDir).toAbsolutePath().normalize();
+                PathHelper.mkdirs(logDataDirPath);
                 mr.modifyState(s -> s.logDataDir = logDataDirPath);
                 result.addField("Logging directory", logDataDirPath);
             }
