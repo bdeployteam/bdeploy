@@ -54,7 +54,7 @@ public class MessageDataHolder {
     /**
      * @return An {@link Collections#unmodifiableList(List) unmodifiable} {@link List} of the recipients of the {@link Message}
      */
-    public List<? extends Address> getRecipients() {
+    public List<Address> getRecipients() {
         return recipients;
     }
 
