@@ -1,5 +1,6 @@
 package io.bdeploy.launcher.cli.ui.browser;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,11 +24,11 @@ class BrowserDialogTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
     private final List<ClientSoftwareConfiguration> apps = new ArrayList<>();
-    private final Path bhiveDir;
+    private final URI bhiveDir;
     private final Auditor auditor;
 
     public BrowserDialogTableModel(Path bhiveDir, Auditor auditor) {
-        this.bhiveDir = bhiveDir;
+        this.bhiveDir = bhiveDir.toUri();
         this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
     }
 
@@ -110,7 +111,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (BrowserDialogTableColumn.fromIndex(columnIndex) == BrowserDialogTableColumn.AUTOSTART) {
-            try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
+            try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                 new MetaManifest<>(apps.get(rowIndex).key, false, Boolean.class).write(hive, (boolean) aValue);
             }
             fireTableCellUpdated(rowIndex, columnIndex);
@@ -137,7 +138,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
             case LVERSION:
                 return app.launcher != null ? app.launcher.getTag() : "";
             case AUTOSTART:
-                try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
+                try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     Boolean storedValue = new MetaManifest<>(app.key, false, Boolean.class).read(hive);
                     if (storedValue != null) {
                         return storedValue.booleanValue();
