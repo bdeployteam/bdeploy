@@ -94,9 +94,9 @@ The **Launcher** (_BDeploy.exe_) can also be launched directly without any argum
 ![Client Application Browser](/images/ManualDoc_ClientBrowserApp.png){width=480}
 :::
 
-The **Customize & Launch** context menu entry allows the user to to modify the command line arguments that is used to start the application. A new dialog is opened that lists the existing command line arguments as currently defined by the **active instance version**.
+The **Customize & Launch** context menu entry allows the user to modify the command line arguments that are used to start the application. A new dialog is opened that lists the existing command line arguments as currently defined by the **active instance version**.
 
-Additional arguments can be added or existing ones can be modified or deleted as desired. This option is especially useful for testing. Arguments can be modified locally without the need to change the global [Instance Configuration](/user/instance/#instance-configuration). The modified arguments are not saved and they need to be redone the next time the application is launched.
+Additional arguments can be added or existing ones can be modified or deleted as desired. This option is especially useful for testing. Arguments can be modified locally without the need to change the global [Instance Configuration](/user/instance/#instance-configuration). The modified arguments are not saved, so they need to be reentered the next time the application is launched.
 
 ## Additional Command Line Arguments
 
