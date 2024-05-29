@@ -103,11 +103,12 @@ branding: <5>
       foreground: "#333333"
 
 processControl: <6>
-  gracePeriod: 3000
   supportedStartTypes:
    - INSTANCE
   supportsKeepAlive: true
   noOfRetries: 5
+  gracePeriod: 3000
+  attachStdin: false
   startupProbe: <7>
      endpoint: "Startup Endpoint"
   livenessProbe: <8>
@@ -193,17 +194,20 @@ runtimeDependencies: <19>
 ### Supported `processControl` attributes
 
 !!!info Note
-`processControl` is not supported for `CLIENT` applications.
+Some `processControl` attributes are only supported for `SERVER` applications, while others are only for `CLIENT` applications.  
+The mock app-info.yaml above is marked as a `CLIENT` application, but it still lists _all_ process control attributes. This would be nonsencial in a real environment - only the applicable attributes should be used.
 !!!
 
-| Attribute             | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `supportedStartTypes` | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`). |
-| `supportsKeepAlive`   | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.                                                                                                                                                                                                                                                                                                                              |
-| `noOfRetries`         | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.                                                                                                                                                                                                           |
-| `gracePeriod`         | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.                                                                                                                                                                                                                                                          |
-| `startupProbe`        | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
-| `livenessProbe`       | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
+| Type   | Attribute             | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SERVER | `supportedStartTypes` | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`). |
+| SERVER | `supportsKeepAlive`   | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.                                                                                                                                                                                                                                                                                                                              |
+| SERVER | `noOfRetries`         | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.                                                                                                                                                                                                           |
+| SERVER | `gracePeriod`         | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.                                                                                                                                                                                                                                                          |
+| SERVER | `attachStdin`         | Specifies if a process expects (and can/wants to handle) input on stdin.                                                                                                                                                                                                                                                                                                                                             |
+| SERVER | `startupProbe`        | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
+| SERVER | `livenessProbe`       | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
+| CLIENT | `configDirs`          | Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.                                                                                                                                                                                                   |
 
 ### Supported `parameters` attributes
 
