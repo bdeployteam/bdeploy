@@ -124,7 +124,8 @@ export class ConfigService {
             headers: suppressUnauthenticatedDelay(new HttpHeaders()),
           });
 
-          const urlParams = new URLSearchParams(window.location.search);
+          const fullHref = window.location.href;
+          const urlParams = new URLSearchParams(fullHref.substring(fullHref.indexOf('?') + 1));
           return combineLatest([of(c), loadAuthSettings, this.loadSession(urlParams.get('otp'))]);
         }),
         map(([config, authSettings, session]) => {
