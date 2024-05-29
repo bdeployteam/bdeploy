@@ -116,6 +116,7 @@ processControl: <6>
      initialDelaySeconds: 5
      periodSeconds: 10
   configDirs: "/dir1,/dir2" <9>
+  supportsAutostart: true
 
 startCommand: <10>
   launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
@@ -208,6 +209,7 @@ The mock app-info.yaml above is marked as a `CLIENT` application, but it still l
 | SERVER | `startupProbe`        | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
 | SERVER | `livenessProbe`       | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
 | CLIENT | `configDirs`          | Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.                                                                                                                                                                                                   |
+| CLIENT | `supportsAutostart`   | "Whether the application is allowed to automatically start upon system bootup.                                                                                                                                                                                                                                                                                                                                       |
 
 ### Supported `parameters` attributes
 
