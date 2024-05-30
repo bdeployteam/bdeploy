@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, concat } from 'rxjs';
-import { concatAll } from 'rxjs/operators';
-import { ProductDto } from 'src/app/models/gen.dtos';
+import { BehaviorSubject } from 'rxjs';
+import { BulkOperationResultDto, ProductDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
@@ -20,7 +19,7 @@ export class ProductBulkService {
 
   public selection$ = new BehaviorSubject<ProductDto[]>([]);
 
-  private apiPath = (group) => `${this.cfg.config.api}/group/${group}/product`;
+  private apiPath = (group) => `${this.cfg.config.api}/group/${group}/product/bulk`;
 
   constructor() {
     // clear selection when the primary route changes
@@ -40,10 +39,7 @@ export class ProductBulkService {
   }
 
   public delete() {
-    return concat(
-      this.selection$.value.map((p) =>
-        this.http.delete(`${this.apiPath(this.groups.current$.value.name)}/${p.key.name}/${p.key.tag}`),
-      ),
-    ).pipe(concatAll());
+    const keys = this.selection$.value.map((p) => p.key);
+    return this.http.post<BulkOperationResultDto>(`${this.apiPath(this.groups.current$.value.name)}/delete`, keys);
   }
 }

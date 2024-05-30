@@ -1,8 +1,10 @@
 import { Component, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ConfirmationService } from 'src/app/modules/core/services/confirmation.service';
 import { ProductBulkService } from '../../services/product-bulk.service';
+import { ProductBulkOperationResultComponent } from '../product-bulk-operation-result/product-bulk-operation-result.component';
 
 @Component({
   selector: 'app-product-bulk',
@@ -10,6 +12,8 @@ import { ProductBulkService } from '../../services/product-bulk.service';
 })
 export class ProductBulkComponent {
   protected bulk = inject(ProductBulkService);
+  private confirm = inject(ConfirmationService);
+
   protected deleting$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -31,7 +35,10 @@ export class ProductBulkComponent {
         this.deleting$.next(true);
         this.bulk
           .delete()
-          .pipe(finalize(() => this.deleting$.next(false)))
+          .pipe(
+            switchMap((r) => this.confirm.prompt(ProductBulkOperationResultComponent, r)),
+            finalize(() => this.deleting$.next(false)),
+          )
           .subscribe();
       });
   }
