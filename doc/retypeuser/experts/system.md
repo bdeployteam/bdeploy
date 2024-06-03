@@ -101,7 +101,7 @@ Using the _Check_ action prior to _Import_ can help verify the connectivity to t
 _LDAP Synchronization Job_ periodically imports users and groups for LDAP connections with selected **Periodically sync users and groups** flag.  
 The job is identical to _Import_ action.  
 By default job starts every midnight, but its schedule can be reconfigured via CLI.  
-To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. 0 0 0 \* \* ? for midnight)  
+To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. 0 0 0 \* \* ? for midnight).  
 To check current schedule and last run timestamp use `ldap --root=... --showSyncInfo`
 
 #### LDAP Certificate Trust
