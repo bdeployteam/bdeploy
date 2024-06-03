@@ -26,6 +26,10 @@ public class ClientPathHelper {
      */
     public static final String LAUNCHER_DIR = "launcher";
 
+    /**
+     * Name of the launch files.
+     */
+    private static final String LAUNCH_FILE_NAME = "launch.bdeploy";
     private static final String LINUX_LAUNCHER = LAUNCHER_DIR;
     private static final String WIN_LAUNCHER = "BDeploy.exe";
 
@@ -99,7 +103,7 @@ public class ClientPathHelper {
      */
     public static Path getOrCreateClickAndStart(Path rootDir, ClickAndStartDescriptor clickAndStart) throws IOException {
         Path appDir = getAppHomeDir(rootDir, clickAndStart);
-        Path launchFile = appDir.resolve("launch.bdeploy");
+        Path launchFile = appDir.resolve(LAUNCH_FILE_NAME);
 
         // Create if not existing
         if (!launchFile.toFile().isFile()) {

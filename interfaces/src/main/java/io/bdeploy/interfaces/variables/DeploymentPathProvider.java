@@ -88,7 +88,6 @@ public class DeploymentPathProvider {
             case INSTANCE_MANIFEST_POOL:
                 return get(SpecialDirectory.ROOT).resolve(dir.dirName);
             case CONFIG:
-                return get(SpecialDirectory.BIN).resolve(dir.dirName);
             case RUNTIME:
                 return get(SpecialDirectory.BIN).resolve(dir.dirName);
             case LOG_DATA:
@@ -97,5 +96,4 @@ public class DeploymentPathProvider {
         }
         throw new IllegalArgumentException("Unhandled special directory: " + dir);
     }
-
 }

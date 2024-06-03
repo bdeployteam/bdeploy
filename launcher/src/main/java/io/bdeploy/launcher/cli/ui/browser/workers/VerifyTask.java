@@ -13,6 +13,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
  * Executes the Verify operation on the given hive and targetPath
@@ -42,7 +43,8 @@ public class VerifyTask extends HiveTask {
 
         Manifest.Key manifest = cac.appConfig.application;
 
-        Path targetPath = rootDir.resolve("apps").resolve("pool").resolve(manifest.directoryFriendlyName());// ClientPathHelper.getAppHomeDir(rootDir, app.clickAndStart);
+        Path targetPath = rootDir.resolve("apps").resolve(SpecialDirectory.MANIFEST_POOL.getDirName())
+                .resolve(manifest.directoryFriendlyName());// ClientPathHelper.getAppHomeDir(rootDir, app.clickAndStart);
 
         VerifyOperationResultDto result = new VerifyOperationResultDto(
                 hive.execute(new VerifyOperation().setTargetPath(targetPath).setManifest(manifest)));

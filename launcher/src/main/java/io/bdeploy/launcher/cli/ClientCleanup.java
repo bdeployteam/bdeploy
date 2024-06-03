@@ -67,6 +67,49 @@ public class ClientCleanup {
         doPrune();
     }
 
+    /** Removes old application versions not required anymore */
+    private void doCleanApps() {
+        // Collect all required software
+        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
+        Set<Key> requiredApps = mf.getRequiredKeys();
+
+        // Collect all available software in the hive
+        Set<Key> availableApps = getAvailableApps();
+        if (availableApps.isEmpty()) {
+            log.info("No applications are installed.");
+            return;
+        }
+
+        // Remove all the software that is still required
+        availableApps.removeAll(requiredApps);
+        if (availableApps.isEmpty()) {
+            log.info("All pooled applications are still in-use.");
+            return;
+        }
+
+        // Cleanup hive and pool
+        log.info("Removing stale pooled applications that are not used any more...");
+        for (Manifest.Key key : availableApps) {
+            log.info("Deleting {}", key);
+
+            // File-Locks could prevent that we can delete the folder
+            // thus we first try to rename and then delete
+            Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
+            if (PathHelper.exists(pooledPath)) {
+                Path tmpPath = pooledPath.getParent().resolve(pooledPath.getFileName() + "_delete");
+                try {
+                    PathHelper.moveAndDelete(pooledPath, tmpPath);
+                } catch (Exception e) {
+                    log.warn("Unable to delete unused pooled application.", e);
+                    return;
+                }
+            }
+
+            // Delete manifest as last operation
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
+        }
+    }
+
     /** Removes all launchers that are not required any more */
     private void doCleanLaunchers() {
         // Collect all required launchers
@@ -114,49 +157,6 @@ public class ClientCleanup {
             hive.execute(new ManifestDeleteOperation().setToDelete(key));
         }
 
-    }
-
-    /** Removes old application versions not required anymore */
-    private void doCleanApps() {
-        // Collect all required software
-        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
-        Set<Key> requiredApps = mf.getRequiredKeys();
-
-        // Collect all available software in the hive
-        Set<Key> availableApps = getAvailableApps();
-        if (availableApps.isEmpty()) {
-            log.info("No applications are installed.");
-            return;
-        }
-
-        // Remove all the software that is still required
-        availableApps.removeAll(requiredApps);
-        if (availableApps.isEmpty()) {
-            log.info("All pooled applications are still in-use.");
-            return;
-        }
-
-        // Cleanup hive and pool
-        log.info("Removing stale pooled applications that are not used any more...");
-        for (Manifest.Key key : availableApps) {
-            log.info("Deleting {}", key);
-
-            // File-Locks could prevent that we can delete the folder
-            // thus we first try to rename and then delete
-            Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
-            if (PathHelper.exists(pooledPath)) {
-                Path tmpPath = pooledPath.getParent().resolve(pooledPath.getFileName() + "_delete");
-                try {
-                    PathHelper.moveAndDelete(pooledPath, tmpPath);
-                } catch (Exception e) {
-                    log.warn("Unable to delete unused pooled application.", e);
-                    return;
-                }
-            }
-
-            // Delete manifest as last operation
-            hive.execute(new ManifestDeleteOperation().setToDelete(key));
-        }
     }
 
     /** Cleans the hive as well as the pool and apps directory */

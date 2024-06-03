@@ -41,6 +41,7 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
 
@@ -185,7 +186,8 @@ class SpecialManifestsTest {
 
             inmf.install();
 
-            Path checkDir = deploymentDir.resolve("pool").resolve(appKey.directoryFriendlyName());
+            Path checkDir = deploymentDir.resolve(SpecialDirectory.MANIFEST_POOL.getDirName())
+                    .resolve(appKey.directoryFriendlyName());
 
             // paths may change in the future, this is a little internal :)
             ContentHelper.checkDirsEqual(app, checkDir);

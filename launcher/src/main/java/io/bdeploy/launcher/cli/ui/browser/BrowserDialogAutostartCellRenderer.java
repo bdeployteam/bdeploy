@@ -2,6 +2,7 @@ package io.bdeploy.launcher.cli.ui.browser;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.net.URI;
 import java.nio.file.Path;
 
 import javax.swing.JTable;
@@ -18,11 +19,11 @@ import io.bdeploy.logging.audit.RollingFileAuditor;
 
 class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UIResource {
 
-    private final Path bhiveDir;
+    private final URI bhiveDir;
     private final Auditor auditor;
 
     public BrowserDialogAutostartCellRenderer(Path bhiveDir, Auditor auditor) {
-        this.bhiveDir = bhiveDir;
+        this.bhiveDir = bhiveDir.toUri();
         this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
     }
 
@@ -35,7 +36,7 @@ class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UIResourc
             ClientApplicationDto metadata = config.metadata;
             if (metadata != null && metadata.supportsAutostart) {
                 Boolean storedValue = null;
-                try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
+                try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     storedValue = new MetaManifest<>(config.key, false, Boolean.class).read(hive);
                 }
                 if (storedValue != null) {

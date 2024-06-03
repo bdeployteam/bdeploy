@@ -17,6 +17,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.UninstallerTool.UninstallerConfig;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
@@ -65,7 +66,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
             log.info("Removing application {}", appId);
             Path appsDir = rootDir.resolve("apps");
-            Path poolDir = appsDir.resolve("pool");
+            Path poolDir = appsDir.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
 
             // Delegate removal to the delegated application
             ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
