@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import javax.swing.JTable;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;
@@ -21,10 +22,12 @@ class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UIResourc
 
     private final URI bhiveDir;
     private final Auditor auditor;
+    private final TableRowSorter<BrowserDialogTableModel> sortModel;
 
-    public BrowserDialogAutostartCellRenderer(Path bhiveDir, Auditor auditor) {
+    public BrowserDialogAutostartCellRenderer(Path bhiveDir, Auditor auditor, TableRowSorter<BrowserDialogTableModel> sortModel) {
         this.bhiveDir = bhiveDir.toUri();
         this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
+        this.sortModel = sortModel;
     }
 
     @Override
@@ -32,7 +35,7 @@ class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UIResourc
         Component component = t.getDefaultRenderer(Boolean.class).getTableCellRendererComponent(t, v, s, f, r, c);
 
         if (!s && t.getModel() instanceof BrowserDialogTableModel bdTableModel) {
-            ClientSoftwareConfiguration config = bdTableModel.get(r);
+            ClientSoftwareConfiguration config = bdTableModel.get(sortModel.convertRowIndexToModel(r));
             ClientApplicationDto metadata = config.metadata;
             if (metadata != null && metadata.supportsAutostart) {
                 Boolean storedValue = null;
