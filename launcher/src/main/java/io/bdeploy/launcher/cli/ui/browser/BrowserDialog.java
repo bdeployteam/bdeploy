@@ -382,33 +382,6 @@ public class BrowserDialog extends BaseDialog {
         doLaunch(app, args);
     }
 
-    /** Notification that the selected app should be updated */
-    private void onUpdateButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        List<String> args = new ArrayList<>();
-        args.add("--updateOnly");
-
-        progressBar.setIndeterminate(true);
-        progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
-
-        AppUpdater task = new AppUpdater(rootDir, app, args);
-        task.addPropertyChangeListener(this::doUpdateProgessBar);
-        task.execute();
-    }
-
-    /** Notification that the selected app should be removed */
-    private void onUninstallButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
-
-        String message = "Are you sure you want to uninstall '" + appName + "'?";
-        int result = JOptionPane.showConfirmDialog(this, message, "Uninstall", JOptionPane.YES_NO_OPTION);
-        if (result != JOptionPane.YES_OPTION) {
-            return;
-        }
-        doUninstall(app);
-    }
-
     /** Notification that the selected apps should be refreshed */
     private void onRefreshButtonClicked(ActionEvent e) {
         List<ClientSoftwareConfiguration> apps = getSelectedApps();
@@ -430,9 +403,17 @@ public class BrowserDialog extends BaseDialog {
         doRefresh(apps);
     }
 
-    /** Notification that the selected rows have changed */
-    private void onSelectionChanged(ListSelectionEvent e) {
-        doUpdateButtonState();
+    /** Notification that the selected app should be removed */
+    private void onUninstallButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
+
+        String message = "Are you sure you want to uninstall '" + appName + "'?";
+        int result = JOptionPane.showConfirmDialog(this, message, "Uninstall", JOptionPane.YES_NO_OPTION);
+        if (result != JOptionPane.YES_OPTION) {
+            return;
+        }
+        doUninstall(app);
     }
 
     /** Executes the prune operation on all local hives */
@@ -475,6 +456,20 @@ public class BrowserDialog extends BaseDialog {
         }
     }
 
+    /** Notification that the selected app should be updated */
+    private void onUpdateButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        List<String> args = new ArrayList<>();
+        args.add("--updateOnly");
+
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
+
+        AppUpdater task = new AppUpdater(rootDir, app, args);
+        task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.execute();
+    }
+
     /** Executes the verify operation on a selected application */
     private void onVerifyButtonClicked(ActionEvent e) {
         try {
@@ -505,6 +500,11 @@ public class BrowserDialog extends BaseDialog {
         }
     }
 
+    /** Notification that the selected rows have changed */
+    private void onSelectionChanged(ListSelectionEvent e) {
+        doUpdateButtonState();
+    }
+
     /** Launches the given application */
     private void doLaunch(ClientSoftwareConfiguration app, List<String> args) {
         progressBar.setIndeterminate(true);
@@ -512,6 +512,20 @@ public class BrowserDialog extends BaseDialog {
 
         AppLauncher task = new AppLauncher(rootDir, app, args);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.execute();
+    }
+
+    /** Refreshes the given applications */
+    private void doRefresh(List<ClientSoftwareConfiguration> apps) {
+        progressBar.setIndeterminate(false);
+        progressBar.setValue(0);
+        progressBar.setMinimum(0);
+        progressBar.setMaximum(apps.size());
+        progressBar.setString("Refreshing applications...");
+
+        AppRefresher task = new AppRefresher(rootDir, auditor, apps);
+        task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
     }
 
@@ -532,20 +546,6 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setString("Reinstalling '" + app.clickAndStart.applicationId + "'");
 
         AppReinstaller task = new AppReinstaller(rootDir, app);
-        task.addPropertyChangeListener(this::doUpdateProgessBar);
-        task.addPropertyChangeListener(this::doRefreshApps);
-        task.execute();
-    }
-
-    /** Refreshes the given applications */
-    private void doRefresh(List<ClientSoftwareConfiguration> apps) {
-        progressBar.setIndeterminate(false);
-        progressBar.setValue(0);
-        progressBar.setMinimum(0);
-        progressBar.setMaximum(apps.size());
-        progressBar.setString("Refreshing applications...");
-
-        AppRefresher task = new AppRefresher(rootDir, auditor, apps);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
