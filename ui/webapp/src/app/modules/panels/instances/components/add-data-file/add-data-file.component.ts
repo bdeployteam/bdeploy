@@ -44,7 +44,6 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
         for (const dir of dd) {
           if (dir.problem) {
             console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
-            continue;
           }
         }
         this.minions$.next(dd.map((d) => d.minion));
