@@ -5,7 +5,7 @@ icon: package-dependencies
 
 # Runtime Dependencies
 
-As you saw before ([`app-info.yaml`](/power/product/#app-infoyaml)), **Applications** can declare dependencies to third-party **Manifests**. These **Manifests** are hosted in **Software Repositories** on the **BDeploy** Server.
+As previously described in [`app-info.yaml`](/power/product/#app-infoyaml), **Applications** can declare dependencies to third-party **Manifests**. These **Manifests** are hosted in **Software Repositories** on the **BDeploy** Server.
 
 To make these **Manifests** available on the server, you need to:
 
@@ -16,7 +16,7 @@ Alternatively, the Web UI provides a mechanism to upload arbitrary software to *
 
 ## Manifest Naming
 
-Third party software **Manifests** can have basically any name. If you want to provide different **Manifests** per target operating system though, you will have to follow a simple naming rule: append the operating system name to the **Manifest** name part, e.g.:
+Third party software **Manifests** can have basically any name. However, if you want to provide different **Manifests** per target operating system, you will have to follow a simple naming rule: append the operating system name to the **Manifest** name part, e.g.:
 
 - `my/external/software/windows:1.0.0`
 - `my/external/software/linux:1.0.0`
@@ -50,7 +50,7 @@ If you already have a package in a BHive format or a package including a product
 ![External Software Upload](/images/Doc_SoftwareRepoFillInfo.png){width=480}
 :::
 
-After all requested information is entered, click **Import** to finally import the files to the **Software Repository**.
+After all requested information is entered, click **Import** to import the files to the **Software Repository**.
 
 :::{align=center}
 ![External Software Import](/images/Doc_SoftwareRepoUploadSuccess.png){width=480}
