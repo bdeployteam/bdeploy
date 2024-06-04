@@ -174,7 +174,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
               resultArray.push({ instanceId: key, versions: [dto] });
             }
             return resultArray;
-          }, new Array<{ instanceId: String; versions: InstanceUsageDto[] }>());
+          }, new Array<{ instanceId: string; versions: InstanceUsageDto[] }>());
 
           const instanceCount = mappedDtos.length;
           if (instanceCount === 1) {
