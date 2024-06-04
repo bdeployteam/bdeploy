@@ -117,7 +117,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
     if (!cp) {
       return '/';
     }
-    return cp[0] === '/' ? cp : `/${cp}`;
+    return cp.startsWith('/') ? cp : `/${cp}`;
   }
 
   protected openUiEndpoint() {
