@@ -155,16 +155,16 @@ public class BrowserDialog extends BaseDialog {
         header.setLayout(new BorderLayout());
 
         launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
-                "Launches the selected application");
+                "Launch the selected application");
 
         refreshButton = createHeaderButton("refresh", "Refresh", this::onRefreshButtonClicked,//
-                "Updates the locally stored information (name, version...) of the selected applications");
+                "Update the locally stored information (name, version...) of the selected applications");
 
         uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
-                "Launches the selected application");
+                "Launch the selected application");
 
         pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
-                "Removes the selected application");
+                "Remove the selected application");
 
         fsckButton = createHeaderButton("fixErrors", "Fix Errors", this::onFsckButtonClicked,//
                 "Fix any errors in the BHive");
@@ -173,7 +173,7 @@ public class BrowserDialog extends BaseDialog {
                 "Check if selected application has missing or modified files");
 
         reinstallButton = createHeaderButton("reinstall", "Reinstall", this::onReinstallButtonClicked,//
-                "Reinstall selected application");
+                "Reinstall the selected application");
 
         // Toolbar on the left side
         JToolBar toolbar = new JToolBar();
