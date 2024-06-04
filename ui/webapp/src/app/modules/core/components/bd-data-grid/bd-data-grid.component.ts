@@ -185,7 +185,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   }
 
   private sortRecords(records: T[]): T[] {
-    if (!this.sortData || !this.sort || !this.sort.active || !this.sort.direction) {
+    if (!this.sortData || !this.sort?.active || !this.sort.direction) {
       return records;
     }
     const col = this._columns.find((c) => c.id === this.sort.active);

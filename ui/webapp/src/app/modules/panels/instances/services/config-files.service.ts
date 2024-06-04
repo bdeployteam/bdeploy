@@ -58,7 +58,7 @@ export class ConfigFilesService {
     // TODO: this one is triggered way too often when saving an instance (after visiting the config files page once).
     combineLatest([this.groups.current$, this.editSvc.current$, this.editSvc.state$]).subscribe(
       ([group, instance, state]) => {
-        if (!group || !instance || !state || !state.config) {
+        if (!group || !instance || !state?.config) {
           return;
         }
         this.loadFiles(group.name, instance, state).subscribe((f) => this.persistent$.next(f));

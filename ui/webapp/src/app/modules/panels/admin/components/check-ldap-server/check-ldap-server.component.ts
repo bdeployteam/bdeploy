@@ -24,7 +24,7 @@ export class CheckLdapServerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(
       ([route, settings]) => {
-        if (!settings || !route?.params || !route.params['id']) {
+        if (!settings || !route?.params?.['id']) {
           this.areas.closePanel();
           return;
         }

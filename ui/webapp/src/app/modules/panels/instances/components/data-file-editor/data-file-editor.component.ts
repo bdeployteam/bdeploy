@@ -35,7 +35,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestr
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       combineLatest([this.filesService.directories$, this.areas.panelRoute$]).subscribe(([d, r]) => {
-        if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
+        if (!r?.params?.['node'] || !r.params['file'] || !d) {
           return;
         }
 

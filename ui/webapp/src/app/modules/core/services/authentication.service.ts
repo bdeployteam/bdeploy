@@ -122,8 +122,7 @@ export class AuthenticationService {
   }
 
   private getTokenPayload(): ApiAccessToken {
-    const payload: any =
-      this.tokenSubject && this.tokenSubject.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
+    const payload: any = this.tokenSubject?.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
     return payload ? JSON.parse(atob(payload)) : null;
   }
 
@@ -206,7 +205,7 @@ export class AuthenticationService {
 
   private isGlobal(permission: Permission): boolean {
     const tokenPayload = this.getTokenPayload();
-    if (tokenPayload && tokenPayload.c) {
+    if (tokenPayload?.c) {
       return !!tokenPayload.c.find((c) => c.scope === null && this.ge(c.permission, permission));
     }
     return false;
@@ -214,7 +213,7 @@ export class AuthenticationService {
 
   private isGlobalExclusiveReadClient(): boolean {
     const tokenPayload = this.getTokenPayload();
-    if (tokenPayload && tokenPayload.c) {
+    if (tokenPayload?.c) {
       // if it has a CLIENT permission
       const clientPerm = tokenPayload.c.find((c) => c.scope === null && c.permission === Permission.CLIENT);
       // and *NO* other global permissions
@@ -281,7 +280,7 @@ export class AuthenticationService {
   }
 
   private isScoped(scope: string, userInfo: UserInfo, permission: Permission): boolean {
-    if (userInfo && userInfo.mergedPermissions) {
+    if (userInfo?.mergedPermissions) {
       return !!userInfo.mergedPermissions.find(
         (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, permission),
       );
@@ -290,7 +289,7 @@ export class AuthenticationService {
   }
 
   public isScopedExclusiveReadClient(scope: string): boolean {
-    if (this.currentUserInfo && this.currentUserInfo.mergedPermissions) {
+    if (this.currentUserInfo?.mergedPermissions) {
       // We have either a global or scoped CLIENT permission,
       const clientPerm = this.currentUserInfo.mergedPermissions.find(
         (sc) => (sc.scope === null || sc.scope === scope) && sc.permission === Permission.CLIENT,

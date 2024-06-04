@@ -51,7 +51,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     );
     this.subscription.add(
       combineLatest([this.minions$, this.areas.primaryRoute$]).subscribe(([minions, route]) => {
-        if (!minions?.length || !route?.params || !route?.params['path']) {
+        if (!minions?.length || !route?.params?.['path']) {
           return;
         }
         const path = decodeDataFilePath(route.params['path']);

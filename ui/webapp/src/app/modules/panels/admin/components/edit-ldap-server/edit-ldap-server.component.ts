@@ -32,7 +32,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription.add(
       combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(([route, settings]) => {
         this.initialServer = settings.auth.ldapSettings.find((a) => a.id === route.params['id']);
-        if (!settings || !route?.params || !route.params['id'] || !this.initialServer) {
+        if (!settings || !route?.params?.['id'] || !this.initialServer) {
           this.areas.closePanel();
           return;
         }

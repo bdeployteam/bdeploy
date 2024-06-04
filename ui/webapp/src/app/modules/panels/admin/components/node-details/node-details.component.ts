@@ -34,7 +34,7 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = combineLatest([this.nodeAdmin.nodes$, this.areas.panelRoute$]).subscribe(([nodes, route]) => {
-      if (!nodes || !route || !route.params.node) {
+      if (!nodes || !route?.params?.node) {
         this.nodeName$.next(null);
         this.nodeState$.next(null);
         return;

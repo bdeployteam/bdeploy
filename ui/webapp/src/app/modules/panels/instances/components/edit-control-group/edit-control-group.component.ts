@@ -50,7 +50,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-        if (!state || !route || !route.params?.node || !route.params?.cgrp) {
+        if (!state || !route?.params?.node || !route.params.cgrp) {
           this.node = null;
           return;
         }

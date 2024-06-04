@@ -35,7 +35,7 @@ export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog
     this.passConfirm = null;
     this.subscription.add(
       combineLatest([this.areas.panelRoute$, this.authAdmin.users$]).subscribe(([route, users]) => {
-        if (!users || !route?.params || !route.params['user']) {
+        if (!users || !route?.params?.['user']) {
           return;
         }
         const user = users.find((u) => u.name === route.params['user']);

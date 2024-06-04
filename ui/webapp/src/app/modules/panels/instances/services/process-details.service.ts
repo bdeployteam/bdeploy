@@ -47,7 +47,7 @@ export class ProcessDetailsService implements OnDestroy {
       // don't subscribe to processToNode$ separately, as it will always trigger twice together with process states.
       const app2node = this.processes.processToNode$.value;
       const process = route?.params['process'];
-      if (!process || !app2node || !app2node[process] || !instance || !nodes) {
+      if (!process || !app2node?.[process] || !instance || !nodes) {
         this.zone.run(() => {
           this.processConfig$.next(null);
           this.processDetail$.next(null);
@@ -66,7 +66,7 @@ export class ProcessDetailsService implements OnDestroy {
       this.zone.run(() => {
         this.processConfig$.next(app);
 
-        if (!states || !states[process]) {
+        if (!states?.[process]) {
           this.processDetail$.next(null);
           return;
         }

@@ -85,7 +85,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) => instances?.find((i) => i.instanceConfiguration.id === app.instanceId)),
-      skipWhile((instance) => !instance || !instance.activeVersion),
+      skipWhile((instance) => !instance?.activeVersion),
     );
     const activeNodeCfgs$ = instance$.pipe(
       switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag)),

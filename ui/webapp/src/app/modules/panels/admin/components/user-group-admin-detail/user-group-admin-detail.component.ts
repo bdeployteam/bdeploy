@@ -60,7 +60,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.authAdmin.userGroups$]).subscribe(
       ([route, groups]) => {
-        if (!groups || !route?.params || !route.params['group']) {
+        if (!groups || !route?.params?.['group']) {
           this.group$.next(null);
           return;
         }

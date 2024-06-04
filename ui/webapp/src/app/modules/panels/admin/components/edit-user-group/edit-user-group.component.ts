@@ -35,7 +35,7 @@ export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableD
     this.passConfirm = null;
     this.subscription.add(
       combineLatest([this.areas.panelRoute$, this.authAdmin.userGroups$]).subscribe(([route, groups]) => {
-        if (!groups || !route?.params || !route.params['group']) {
+        if (!groups || !route?.params?.['group']) {
           return;
         }
         const group = groups.find((g) => g.id === route.params['group']);

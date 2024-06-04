@@ -27,7 +27,7 @@ export class LogFileViewerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.loggingAdmin.directories$]).subscribe(([r, d]) => {
-      if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
+      if (!r?.params?.['node'] || !r.params['file'] || !d) {
         return;
       }
 

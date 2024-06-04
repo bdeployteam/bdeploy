@@ -42,7 +42,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
       this.edit.stateApplications$,
       this.systems.systems$,
     ]).subscribe(([f, r, i, a, s]) => {
-      if (!f || !r || !r.params['file'] || !i || !a || (i.config.config.system && !s?.length)) {
+      if (!f || !r?.params?.['file'] || !i || !a || (i.config.config.system && !s?.length)) {
         this.file$.next(null);
         this.content = null;
         return;

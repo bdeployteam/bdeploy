@@ -43,7 +43,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.authAdmin.users$]).subscribe(([route, users]) => {
-      if (!users || !route?.params || !route.params['user']) {
+      if (!users || !route?.params?.['user']) {
         this.user$.next(null);
         return;
       }

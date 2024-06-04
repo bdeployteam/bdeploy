@@ -18,7 +18,7 @@ export class OverallStatusColumnComponent {
 
   protected getStatus() {
     const s = this.column.data(this.record) as InstanceOverallStatusDto;
-    if (s && s.timestamp) {
+    if (s?.timestamp) {
       if (this.cfg.getCorrectedNow() - s.timestamp > STATUS_TIMEOUT) {
         return null;
       }

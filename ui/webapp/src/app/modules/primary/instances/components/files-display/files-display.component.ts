@@ -175,7 +175,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
 
     this.subscription.add(
       combineLatest([this.areas.primaryRoute$, this.nodes$]).subscribe(([route, nodes]) => {
-        if (!nodes?.length || !route?.params || !route?.params['path']) {
+        if (!nodes?.length || !route?.params?.['path']) {
           this.selectedPath = null;
           this.records$.next(null);
           return;

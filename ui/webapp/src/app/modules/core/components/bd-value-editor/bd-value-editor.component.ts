@@ -165,11 +165,11 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   }
 
   getTransitiveErrorMessage() {
-    if (this.linkEditor && this.linkEditor.isInvalid()) {
+    if (this.linkEditor?.isInvalid()) {
       return this.linkEditor.getErrorMessage();
     }
 
-    if (this.valueEditor && this.valueEditor.isInvalid()) {
+    if (this.valueEditor?.isInvalid()) {
       return this.valueEditor.getErrorMessage();
     }
 
@@ -177,7 +177,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   }
 
   private isInvalid() {
-    return this.ngControl && this.ngControl.invalid;
+    return this.ngControl?.invalid;
   }
 
   protected getErrorMessage() {

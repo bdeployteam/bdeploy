@@ -27,7 +27,7 @@ export class BhiveLogViewerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.hiveLogging.directories$]).subscribe(([r, d]) => {
-      if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
+      if (!r?.params?.['node'] || !r.params['file'] || !d) {
         return;
       }
 

@@ -54,7 +54,7 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
 
   ngOnInit(): void {
     this.subscription = combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-      if (!state || !route || !route.params?.node) {
+      if (!state || !route?.params?.node) {
         this.node = null;
         return;
       }

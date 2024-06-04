@@ -34,7 +34,7 @@ export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = combineLatest([this.cfgFiles.files$, this.areas.panelRoute$, this.edit.state$]).subscribe(
       ([f, r, s]) => {
-        if (!f || !r || !r.params['file'] || !s?.config?.config?.product) {
+        if (!f || !r?.params?.['file'] || !s?.config?.config?.product) {
           this.file$.next(null);
           this.content = null;
           return;

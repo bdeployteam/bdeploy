@@ -449,7 +449,7 @@ export class InstancesService {
     this.current$.next(inst);
 
     // only load nodes in case there is an active version.
-    if (!inst || !inst.activeVersion) {
+    if (!inst?.activeVersion) {
       this.checkActiveReloadState(inst);
 
       // not yet loaded, instance not existant, etc.

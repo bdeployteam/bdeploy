@@ -212,8 +212,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
       this.edit.getApplication(appConfig.application.name).subscribe({
         next: (app) => {
-          if (!app || !app.descriptor) {
-            return; // app not found, product mismatch?
+          if (!app?.descriptor) {
+            return; // app or descriptor not found -> product mismatch?
           }
           if (
             (app.descriptor.type === ApplicationType.SERVER && this.isClientNode(node)) ||

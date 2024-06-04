@@ -98,7 +98,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = combineLatest([this.areas.primaryRoute$, this.areas.panelRoute$]).subscribe(
       ([primaryRoute, panelRoute]) => {
-        if (!primaryRoute || !panelRoute?.params || !panelRoute.params['type']) {
+        if (!primaryRoute || !panelRoute?.params?.['type']) {
           return;
         }
 

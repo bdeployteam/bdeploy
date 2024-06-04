@@ -38,7 +38,7 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
-      if (!route?.params || !route?.params['bhive']) {
+      if (!route?.params?.['bhive']) {
         return;
       }
 

@@ -63,7 +63,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
-      if (!route?.params || !route.params['attribute']) {
+      if (!route?.params?.['attribute']) {
         this.selectedAttributeName = null;
         return;
       }

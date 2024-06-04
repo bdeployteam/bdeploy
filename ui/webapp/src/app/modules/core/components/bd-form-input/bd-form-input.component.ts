@@ -121,7 +121,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   }
 
   public isInvalid() {
-    return this.ngControl && this.ngControl.invalid;
+    return this.ngControl?.invalid;
   }
 
   public getErrorMessage() {

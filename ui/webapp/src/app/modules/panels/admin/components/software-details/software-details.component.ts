@@ -43,7 +43,7 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.software.software$]).subscribe(([r, s]) => {
-      if (!r?.params || !r.params['version'] || !s) return;
+      if (!r?.params?.['version'] || !s) return;
 
       const version = r.params['version'];
       const sw = s.find((x) => x.version === version);

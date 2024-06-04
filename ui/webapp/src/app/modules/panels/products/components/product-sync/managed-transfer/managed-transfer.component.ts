@@ -38,7 +38,7 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
       this.products.products$,
       this.servers.servers$,
     ]).subscribe(([r, p, s]) => {
-      if (!r?.params || !r.params['server'] || !r.params['target'] || !p || !s?.length) {
+      if (!r?.params?.['server'] || !r.params['target'] || !p || !s?.length) {
         return;
       }
 

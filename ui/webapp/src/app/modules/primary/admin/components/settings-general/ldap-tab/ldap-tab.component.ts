@@ -89,7 +89,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
-      if (!route?.params || !route.params['id']) {
+      if (!route?.params?.['id']) {
         this.selectedServerId = null;
         return;
       }

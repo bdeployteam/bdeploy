@@ -38,7 +38,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription.add(
       combineLatest([this.areas.panelRoute$, this.filesService.directories$]).subscribe(([r, d]) => {
-        if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
+        if (!r?.params?.['node'] || !r.params['file'] || !d) {
           return;
         }
 

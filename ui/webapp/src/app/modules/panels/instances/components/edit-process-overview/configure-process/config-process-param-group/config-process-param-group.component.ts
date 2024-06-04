@@ -266,7 +266,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   private checkFormsStatus() {
-    if (!this.formsLoaded && this.forms && this.forms.length) {
+    if (!this.formsLoaded && this.forms?.length) {
       this.forms.forEach((form) => {
         this.subscription.add(form.statusChanges.pipe(debounceTime(100)).subscribe(() => this.emitIsInvalid()));
       });

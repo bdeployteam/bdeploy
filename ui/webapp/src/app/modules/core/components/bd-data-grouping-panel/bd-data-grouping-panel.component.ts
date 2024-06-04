@@ -44,7 +44,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
     if (!this.filter) {
       return this.groupingValues;
     }
-    return this.groupingValues.filter((gv) => gv && gv.toLowerCase().includes(this.filter.toLowerCase()));
+    return this.groupingValues.filter((gv) => gv?.toLowerCase().includes(this.filter.toLowerCase()));
   }
   protected get selectGroupingLabel(): string {
     return this.grouping?.definition?.name ? 'Grouping' : 'Select Grouping';
@@ -105,7 +105,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
   }
 
   protected groupCheckChanged(group: string, change: MatCheckboxChange) {
-    if (!this.grouping || !this.grouping.definition) {
+    if (!this.grouping?.definition) {
       return;
     }
 

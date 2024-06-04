@@ -42,7 +42,7 @@ export class InstanceBulkService {
   }
 
   private logResult(id: string, result: BulkOperationResultDto): void {
-    if (result && result?.results?.length) {
+    if (result?.results?.length) {
       for (const r of result.results) {
         console.log(`${r.target}: ${r.type}: ${r.message}`);
       }

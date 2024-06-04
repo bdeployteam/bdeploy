@@ -61,7 +61,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
-      if (!states || !states[this.node.nodeName]) {
+      if (!states?.[this.node.nodeName]) {
         this.nodeState$.next(null);
         this.nodeStateItems$.next([]);
         return;

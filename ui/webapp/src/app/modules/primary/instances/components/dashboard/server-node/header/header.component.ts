@@ -53,7 +53,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.subscription = combineLatest([this.instances.activeNodeStates$, this.changes$]).subscribe(([states]) => {
-      if (!states || !states[this.node.nodeName]?.config) {
+      if (!states?.[this.node.nodeName]?.config) {
         this.curve = [];
         this.maxValue = 0;
         this.hasVisiblePoint = false;
@@ -87,7 +87,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
 
     this.subscription.add(
       this.instances.activeHistory$.subscribe((history) => {
-        if (!history || !history.events) {
+        if (!history?.events) {
           this.events = [];
           return;
         }

@@ -41,7 +41,7 @@ export class InstanceStateService {
     g: InstanceGroupConfiguration,
     is: InstanceDto[],
   ): Observable<InstanceStateRecord> {
-    return !i || !g || !is || !is.some((instance) => instance.instanceConfiguration.id === i.instanceConfiguration.id) // sometimes instance is removed from instances$ faster than current$ is nulled
+    return !i || !g || !is?.some((instance) => instance.instanceConfiguration.id === i.instanceConfiguration.id) // sometimes instance is removed from instances$ faster than current$ is nulled
       ? of(null)
       : this.http
           .get<InstanceStateRecord>(`${this.apiPath(g.name)}/${i.instanceConfiguration.id}/state`)

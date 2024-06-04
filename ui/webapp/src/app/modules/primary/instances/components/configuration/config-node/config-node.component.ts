@@ -88,7 +88,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.subscription = this.edit.nodes$.subscribe((nodes) => {
-      if (!nodes || !nodes[this.nodeName]) {
+      if (!nodes?.[this.nodeName]) {
         this.node$.next(null);
       } else {
         this.node$.next(nodes[this.nodeName]);

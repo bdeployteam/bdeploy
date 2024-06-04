@@ -34,7 +34,7 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(([route, settings]) => {
-        if (!settings || !route?.params || !route.params['attribute']) {
+        if (!settings || !route?.params?.['attribute']) {
           return;
         }
 

@@ -25,7 +25,7 @@ export class HiveLoggingService {
 
   constructor() {
     this.areas.panelRoute$.subscribe((route) => {
-      if (!route?.params || !route?.params['bhive']) {
+      if (!route?.params?.['bhive']) {
         return;
       }
 
