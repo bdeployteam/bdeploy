@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.op.LockDirectoryOperation;
-import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
+import io.bdeploy.bhive.op.DirectoryLockOperation;
+import io.bdeploy.bhive.op.DirectoryReleaseOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -62,7 +62,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /** Uninstall the given application and removes all not required artifacts */
     private void doUninstall(Path rootDir, BHive hive, String appId) {
         try {
-            hive.execute(new LockDirectoryOperation().setDirectory(rootDir));
+            hive.execute(new DirectoryLockOperation().setDirectory(rootDir));
 
             log.info("Removing application {}", appId);
             Path appsDir = rootDir.resolve("apps");
@@ -87,7 +87,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
             cleanup.run();
         } finally {
-            hive.execute(new ReleaseDirectoryLockOperation().setDirectory(rootDir));
+            hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
         }
     }
 

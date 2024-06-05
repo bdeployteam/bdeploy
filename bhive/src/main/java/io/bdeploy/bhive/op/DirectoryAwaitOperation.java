@@ -8,15 +8,15 @@ import io.bdeploy.common.util.Threads;
 /**
  * Waits until a given directory is unlocked.
  *
- * @see LockDirectoryOperation
- * @see ReleaseDirectoryLockOperation
+ * @see DirectoryLockOperation
+ * @see DirectoryReleaseOperation
  */
-public class AwaitDirectoryLockOperation extends DirectoryLockModificationOperation {
+public class DirectoryAwaitOperation extends DirectoryModificationOperation {
 
     @Override
     public void doCall(Path lockFile) throws Exception {
         for (int i = 0; i < RETRIES; ++i) {
-            if (!PathHelper.exists(lockFile) || !LockDirectoryOperation.isLockFileValid(lockFile, getLockContentValidator())) {
+            if (!PathHelper.exists(lockFile) || !DirectoryLockOperation.isLockFileValid(lockFile, getLockContentValidator())) {
                 return;
             }
             if (!Threads.sleep(SLEEP_MILLIS)) {
