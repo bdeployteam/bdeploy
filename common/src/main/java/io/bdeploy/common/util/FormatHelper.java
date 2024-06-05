@@ -83,7 +83,7 @@ public class FormatHelper {
         if (kBs > 1000) {
             return TRANSFER_FORMAT.format(kBs / 1000.0) + " MB/s";
         }
-        return TRANSFER_FORMAT.format(kBs) + " KB/s";
+        return TRANSFER_FORMAT.format(kBs) + " kB/s";
     }
 
     /**
