@@ -19,7 +19,7 @@ Any of the above will be processed _as late as possible_, i.e. on the target nod
 The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. There are various types, usually denoted by a single character. The following section gives an overview of types, variables, and possible sub-variables.
 
 !!!info Note
-Since 4.6.0, **BDeploy** has a _link expression editor_ built in. All elements in the UI (except the configuration file editor) can be switched from _plain value_ editor to _link expression_ editor, which gives rich content assist for link expressions (which contain one or more variable expansions). The configuration file editor uses rich content assist by default on [ **CTRL** ] + [ **Space** ] if the current word starts with `{{`.
+**BDeploy** has a _link expression editor_ built in. All elements in the UI (except the configuration file editor) can be switched from _plain value_ editor to _link expression_ editor, which gives rich content assist for link expressions (which contain one or more variable expansions). The configuration file editor uses rich content assist by default on [ **CTRL** ] + [ **Space** ] if the current word starts with `{{`.
 !!!
 
 ## M: Manifest Reference
@@ -30,10 +30,10 @@ Used whenever it is required to get the absolute installation path to another ma
 {{M:<Name of Manifest>:<Optional Manifest Tag>}}
 ```
 
-Variable | Description
----      | ---
-{{M:adoptium/jre8}} | Expands to the absolute path where the the manifest named 'adoptium/jre8' is installed on the server. The exact version is specified through a _runtime dependency_ in the [`app-info.yaml`](/power/product/#app-infoyaml).
-{{M:SELF}} | Expands to the absolute path where the manifest is installed on the server which contains the `app-info.yaml` for this application. This substitution shortcut is only supported in `app-info.yaml` files.
+| Variable            | Description                                                                                                                                                                                                                 |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| {{M:adoptium/jre8}} | Expands to the absolute path where the the manifest named 'adoptium/jre8' is installed on the server. The exact version is specified through a _runtime dependency_ in the [`app-info.yaml`](/power/product/#app-infoyaml). |
+| {{M:SELF}}          | Expands to the absolute path where the manifest is installed on the server which contains the `app-info.yaml` for this application. This substitution shortcut is only supported in `app-info.yaml` files.                  |
 
 ## P: Deployment Path
 
@@ -43,12 +43,12 @@ Used to expand to one of the special directories that are defined.
 {{P:<PATH_ID>}}
 ```
 
-| Variable       | Description                                                               |
-| -------------- | ------------------------------------------------------------------------- |
-| {{P:CONFIG}}   | Directory where all configuration files are stored.                       |
-| {{P:BIN}}      | Directory where all binaries are are stored.                              |
-| {{P:RUNTIME}}  | Directory with runtime data (e.d. stdout/stderr capture files) is stored. |
-| {{P:DATA}}     | Directory shared by multiple deployments of the same instance.            |
+| Variable       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| {{P:CONFIG}}   | Directory where all configuration files are stored.                                                                                                                                                                                                                                                                                                                                                                                            |
+| {{P:BIN}}      | Directory where all binaries are are stored.                                                                                                                                                                                                                                                                                                                                                                                                   |
+| {{P:RUNTIME}}  | Directory with runtime data (e.d. stdout/stderr capture files) is stored.                                                                                                                                                                                                                                                                                                                                                                      |
+| {{P:DATA}}     | Directory shared by multiple deployments of the same instance.                                                                                                                                                                                                                                                                                                                                                                                 |
 | {{P:LOG_DATA}} | Configurable directory for log files on the server. The log data directory is shared by all instances, however, each instance has its own subdirectory therein. This expansion references the unique subdirectory applicable for the current instance. Configuration can be done via the [cli](/experts/cli/#initialization-and-local-configuration-management-commands). If not configured, the expansion defaults to be equal to {{P:DATA}}. |
 
 ## V: Parameter Value
@@ -77,13 +77,13 @@ Used to expand to values related to the instance containing the parameter's proc
 {{I:<VAR>}}
 ```
 
-| Variable             | Description                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| {{I:SYSTEM_PURPOSE}} | The purpose of the instance in upper case letters. (PRODUCTIVE, TEST, DEVELOPMENT) |
-| {{I:ID}}             | ID of the instance                                                                 |
-| {{I:NAME}}           | Name of the instance                                                               |
-| {{I:PRODUCT_ID}}     | Name of the 'MANIFEST' keys name of the configured product                         |
-| {{I:PRODUCT_TAG}}    | The tag (i.e. 'version') of the configured product                                 |
+| Variable             | Description                                                                       |
+| -------------------- | --------------------------------------------------------------------------------- |
+| {{I:SYSTEM_PURPOSE}} | The purpose of the instance. Allowed values: `PRODUCTIVE`, `TEST`, `DEVELOPMENT`. |
+| {{I:ID}}             | The ID of the instance.                                                           |
+| {{I:NAME}}           | The name of the instance.                                                         |
+| {{I:PRODUCT_ID}}     | The name of the 'MANIFEST' keys name of the configured product.                   |
+| {{I:PRODUCT_TAG}}    | The tag (i.e. 'version') of the configured product.                               |
 
 ## A: Application Value
 
@@ -93,10 +93,10 @@ Used to expand to values related to the application containing the parameter's.
 {{A:<VAR>}}
 ```
 
-| Variable   | Description             |
-| ---------- | ----------------------- |
-| {{A:ID}}   | ID of the application   |
-| {{A:NAME}} | Name of the application |
+| Variable   | Description                  |
+| ---------- | ---------------------------- |
+| {{A:ID}}   | The ID of the application.   |
+| {{A:NAME}} | The name of the application. |
 
 ## H: Minion Properties
 
@@ -123,11 +123,11 @@ this variable allows the usage of different arguments for different operating sy
 {{OSNAME:<conditional output>}}
 ```
 
-| Variable             | Description                                            |
-| -------------------- | ------------------------------------------------------ |
-| {{LINUX:java}}       | Expands to _java_ on _Linux_                           |
-| {{WINDOWS:java.exe}} | Expands to _java.exe_ on _Windows_                     |
-| java{{WINDOWS:.exe}} | Expands to _java_ on Linux and _java.exe_ on _Windows_ |
+| Variable             | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| {{LINUX:java}}       | Expands to _java_ on _Linux_.                           |
+| {{WINDOWS:java.exe}} | Expands to _java.exe_ on _Windows_.                     |
+| java{{WINDOWS:.exe}} | Expands to _java_ on Linux and _java.exe_ on _Windows_. |
 
 ## Environmental Values
 
@@ -150,7 +150,7 @@ depending on the value of the environmental variable.
 
 ## X: Instance and System Variables
 
-Used to expand to instance and system variables. The same prefix is used for both. Instance Variables take precedence over System Variables in expansions, if an both have a variable with the same ID.
+Used to expand to instance and system variables. The same prefix is used for both. Instance Variables take precedence over System Variables in expansions, if both have a variable with the same ID.
 
 ```
 {{X:<VAR>}}

@@ -5,7 +5,7 @@ icon: container
 
 # Integration of a new product
 
-This chapter is intended for those who want to integrate their own **Product** to be deployed with **BDeploy**. Therefore a couple of YAML files are required. These files describe your product and all its applications together with some additional metadata. These artifacts are required:
+This chapter is intended for those who want to integrate their own **Product** to be deployed with **BDeploy**. Therefor a couple of YAML files are required. These files describe your product and all its applications together with some additional metadata. These artifacts are required:
 
 [app-info.yaml](#app-infoyaml)
 :::
@@ -13,41 +13,39 @@ This chapter is intended for those who want to integrate their own **Product** t
 :::
 [product-info.yaml](#product-infoyaml)
 :::
-&emsp;YAML file with metadata for the whole product.
+&emsp;YAML file with metadata for the whole product
 :::
 [product-version.yaml](#product-versionyaml)
 :::
-&emsp;YAML file required for every **Product Version**.
+&emsp;YAML file required for every **Product Version**
 :::
 [application-template.yaml](#application-templateyaml)
 :::
-&emsp;optional YAML file(s) which can be used to define **Application Templates**
+&emsp;Optional YAML file(s) which can be used to define **Application Templates**
 :::
 [instance-template.yaml](#instance-templateyaml)
 :::
-&emsp;optional YAML file(s) which can be used to define **Instance Templates**
+&emsp;Optional YAML file(s) which can be used to define **Instance Templates**
 :::
 [parameter-template.yaml](#parameter-templateyaml)
 :::
-&emsp;optional YAML file(s) which can be used to provide shared definitions for parameters which are re-usable in [app-info.yaml](#app-infoyaml) files.
+&emsp;Optional YAML file(s) which can be used to provide shared definitions for parameters which are re-usable in [app-info.yaml](#app-infoyaml) files
 :::
 [instance-variable-template.yaml](#instance-variable-templateyaml)
 :::
-&emsp;optional YAML file(s) which can be used to provide shared definitions for instance variables which are re-usable in [instance-template.yaml](#instance-templateyaml) files.
+&emsp;Optional YAML file(s) which can be used to provide shared definitions for instance variables which are re-usable in [instance-template.yaml](#instance-templateyaml) files
 :::
 [system-template.yaml](#system-templateyaml)
 :::
-&emsp;Actually not part of any product itself. Freestanding description that can be used to create multiple instances of multiple products in one go.
+&emsp;Actually not part of any product itself. Freestanding description that can be used to create multiple instances of multiple products in one go
 :::
 [product-validation.yaml](#product-validationyaml)
 :::
-&emsp;A configuration file which references all the YAML files which should be part of a product pre-validation.
+&emsp;A configuration file which references all the YAML files which should be part of a product pre-validation
 :::
 
-This chapter will walk you through these artifacts, what they are for and how to define them.
-
 !!!info Note
-On the BDeploy Releases page you will find some zipped sample products for each release, see https://github.com/bdeployteam/bdeploy/releases
+You can find some zipped sample products on the [BDeploy Releases Page](https://github.com/bdeployteam/bdeploy/releases).
 !!!
 
 :::{align=center}
@@ -58,10 +56,10 @@ This picture illustrates the relation between the various YAML files which are (
 
 ## app-info.yaml
 
-The `app-info.yaml` file is one of the most important parts of **BDeploy**. It describes an **Application**, especially its start command. This **Application** may be _any_ application which contains an _executable_ (whatever kind, script, executable, etc.) and which allows 'installation' by copy to a directory. This is important, as **BDeploy** will 'install' an application by ultimately copying the application to an automatically determined internal directory and launch it from there.
+The `app-info.yaml` file is one of the most important parts of **BDeploy**. It describes an **Application**, especially its start command. This **Application** may be _any_ application which contains an _executable_ (script, executable, etc.) and which allows 'installation' by copy to a directory. This is important, as **BDeploy** will 'install' an application by ultimately copying the application to an automatically determined internal directory and launch it from there.
 
 !!!info Tip
-An **Application** should not modify files in its own installation directory (although it _can_ do it). **BDeploy** tries to aggressively pool applications per version to reduce the footprint on the disc. If this does not work for your application, use the `pooling` configuration to specify different behaviour.
+An **Application** should not modify files in its own installation directory (although it _can_ do it). **BDeploy** tries to aggressively pool applications per version to reduce the footprint on the disc. If this does not work for your application, use the [pooling configuration](/experts/pooling/) to specify different behaviour.
 !!!
 
 !!!warning Warning
@@ -74,7 +72,7 @@ Client applications are always considered for `GLOBAL` pooling by the client lau
 
 Basically, `app-info.yaml` allows you to specify which executable to run, and which parameters could **potentially** be used to configure the **Application**. The `app-info.yaml` does not specify an actual configuration, but describes all possible parameters for an **Application**.
 
-The `app-info.yaml` file should be placed in the root directory of the **Application** it describes.
+The `app-info.yaml` file must be placed in the root directory of the **Application** it describes.
 
 ```yaml app-info.yaml
 name: "My Application" <1>
@@ -174,18 +172,18 @@ runtimeDependencies: <19>
 
 1. A human readable name of the **Application**. Will be displayed in the **Configure Application** pane, and is also used as _default_ name for any process _instantiated_ from this **Application**.
 2. The type of the application, may be `SERVER` or `CLIENT`. `SERVER` applications can be deployed to **Nodes** (including the **master**) and there be started as server processes. `CLIENT` applications in comparison cannot be deployed on a **Node**, but run on a client PC instead.
-3. The supported pooling type for server applications. Supported values are `GLOBAL`, `LOCAL` and `NONE`. `GLOBAL` means that the application is fully poolable and may be installed once (per application version) and used by multiple instance versions of multiple instances. `LOCAL` means that there is limited pooling support, and the application may only be re-used inside a single instance (by multiple instance versions of that instance, e.g. when changing only configuration). `NONE` means that there is no pooling support and the application will be installed freshly per instance version, even if just configuration values changed. This gives some control on how to deploy applications which write data into their installation directory at runtime - which should be avoided of course for better pool-ability. This setting is currently ignored by the client application launcher. Client applications are always globally pooled.
+3. The supported pooling type for server applications. Supported values are `GLOBAL`, `LOCAL` and `NONE`. `GLOBAL` means that the application is fully poolable and may be installed once (per application version) and used by multiple instance versions of multiple instances. `LOCAL` means that there is limited pooling support, and the application may only be re-used inside a single instance (by multiple instance versions of that instance, e.g. when changing only configuration). `NONE` means that there is no pooling support and the application will be installed freshly per instance version, even if just configuration values changed. This gives some control over how to deploy applications which write data into their installation directory at runtime - which should of course be avoided for better pool-ability. This setting is currently ignored by the client application launcher. Client applications are always globally pooled.
 4. List of supported operating systems. This list is solely used to verify during import of the **Product**, that the **Application** actually supports the operating system under which it is listed in the `product-version.yaml`.
 5. Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type **Applications** when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the [Launcher CLI](/experts/cli/#launcher-cli). Paths are interpreted relative to the root folder of the **Application**.
 6. Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type **Applications** are started and kept alive by **BDeploy**. For details, see the list of [processControl](#supported-processcontrol-attributes) attributes.
 7. A _startup probe_ can specify an HTTP Endpoint of type `PROBE_STARTUP` which is queried by **BDeploy** if specified until the endpoint returns a status code >= 200 and < 400. Once this happens, the _startup probe_ is considered to be successful and the **Process** state advances from _starting_ to _running_. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
 8. A _liveness probe_ can specify an HTTP Endpoint of type `PROBE_ALIVE` along with an initial delay in seconds and an interval in which the probe is queried. **BDeploy** starts querying _liveness probes_ only after the application entered _running_ state. This happens either automatically when the process is started (if no _startup probe_ is configured), or once the existing _startup probe_ succeeded. The _liveness probe_ is queried every `periodSeconds` seconds, and the application is considered to be alive if the endpoint returns a status code >= 200 and < 400. If the probe fails, the **Process** status is updated to indicate the problem. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
-9. Allowed Configuration Directories preset - only valid for `CLIENT` applications. These relative sub-directories of the configuration files directory tree will be made available to this application when run on a client PC. This can later also be configured per process using the [Allowable Configuration Directories](/user/instance/#allowable-configuration-directories) configuration.
+9. Allowed configuration directories preset - only valid for `CLIENT` applications. These relative sub-directories of the configuration files directory tree will be made available to this application when run on a client PC. This can later also be configured per process using the [Allowable Configuration Directories](/user/instance/#allowable-configuration-directories) configuration.
 10. The start command of the **Application**. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of [parameter](#supported-parameters-attributes) attributes. To apply e.g. instance-specific values, [Variable Expansion](/power/variables/#variable-expansions) is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
-11. [Variable Expansion](/power/variables/#variable-expansions) can also be used to expand to [Instance Variables](/user/instance/#instance-variables) in default values. These instance variables are required to exist once this application is configured in an instance. They can either be pre-provided using [Instance Templates](/user/instance/#instance-templates) or need to be manually created when required.
-12. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter on the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
+11. [Variable Expansion](/power/variables/#variable-expansions) can also be used to expand to [Instance Variables](/user/instance/#instance-variables) in default values. These instance variables are required to exist once the application is configured in an instance. They can either be pre-provided using [Instance Templates](/user/instance/#instance-templates) or need to be manually created when required.
+12. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter of the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
 13. A product can provide [parameter templates](#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
-14. The optional stop command can be specified to provide a mechanism for clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
+14. The optional stop command can be specified to provide a mechanism for a clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
 15. Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. **BDeploy** can later on call these endpoints when instructed to do so by a third-party application.
 16. The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of **BDeploy** servers.
 17. [Variable Expansion](/power/variables/#variable-expansions) can be used on most of the endpoint properties.
@@ -199,17 +197,17 @@ Some `processControl` attributes are only supported for `SERVER` applications, w
 The mock app-info.yaml above is marked as a `CLIENT` application, but it still lists _all_ process control attributes. This would be nonsencial in a real environment - only the applicable attributes should be used.
 !!!
 
-| Type   | Attribute             | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SERVER | `supportedStartTypes` | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`). |
-| SERVER | `supportsKeepAlive`   | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.                                                                                                                                                                                                                                                                                                                              |
-| SERVER | `noOfRetries`         | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.                                                                                                                                                                                                           |
-| SERVER | `gracePeriod`         | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.                                                                                                                                                                                                                                                          |
-| SERVER | `attachStdin`         | Specifies if a process expects (and can/wants to handle) input on stdin.                                                                                                                                                                                                                                                                                                                                             |
-| SERVER | `startupProbe`        | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
-| SERVER | `livenessProbe`       | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
-| CLIENT | `configDirs`          | Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.                                                                                                                                                                                                   |
-| CLIENT | `supportsAutostart`   | "Whether the application is allowed to automatically start upon system bootup.                                                                                                                                                                                                                                                                                                                                       |
+| Type   | Attribute             | Allowed Values                               | Default Value | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------ | --------------------- | -------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SERVER | `supportedStartTypes` | `MANUAL`, `MANUAL_CONFIRM`, `INSTANCE`       |               | Can be either `MANUAL` (**Application** must be started _explicitly_ through the Web UI or CLI), `MANUAL_CONFIRM` (**Application** must be started _explicitly_ through the Web UI and a confirmation has to be entered by the user), or `INSTANCE` (the **Application** can be started _automatically_ when the **Start Instance** command is issued, either manually or during server startup - implies `MANUAL`). |
+| SERVER | `supportsKeepAlive`   | `true`, `false`                              | false         | Whether this **Application** may be automatically restarted by **BDeploy** if it exits.                                                                                                                                                                                                                                                                                                                              |
+| SERVER | `noOfRetries`         | x ∈ ℕ₀ ∧ x < 2⁶⁴                             | 5             | The number of times **BDeploy** will retry starting the **Application** if it `supportsKeepAlive`. The counter is reset after the **Application** is running for a certain amount of time without exiting.                                                                                                                                                                                                           |
+| SERVER | `gracePeriod`         | x ∈ ℕ₀ ∧ x < 2⁶⁴                             | 30000         | How long to wait (in milliseconds) for the **Application** to stop after issuing the `stopCommand`. After this timeout expired, the process will be killed.                                                                                                                                                                                                                                                          |
+| SERVER | `attachStdin`         | `true`, `false`                              | false         | Specifies if a process expects (and can/wants to handle) input on stdin.                                                                                                                                                                                                                                                                                                                                             |
+| SERVER | `startupProbe`        | String (HTTP endpoint ID)                    |               | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
+| SERVER | `livenessProbe`       | String (HTTP endpoint ID)                    |               | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
+| CLIENT | `configDirs`          | String (comma-separated list of directories) |               | Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.                                                                                                                                                                                                   |
+| CLIENT | `supportsAutostart`   | `true`, `false`                              | false         | "Whether the application is allowed to automatically start upon system bootup.                                                                                                                                                                                                                                                                                                                                       |
 
 ### Supported `parameters` attributes
 
@@ -324,16 +322,16 @@ In this case you will want the user to be able to edit the value of `-Dmy.prop` 
 
 ```yaml
 startCommand:
-  launcherPath: '{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}'
+  launcherPath: "{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}"
   parameters:
-    - id: 'my.prop'
-      name: 'My Property'
-      parameter: '-Dmy.prop'
+    - id: "my.prop"
+      name: "My Property"
+      parameter: "-Dmy.prop"
       mandatory: true
-    - id: 'my.jar'
-      name: 'Application JAR'
-      parameter: '-jar'
-      defaultValue: 'application.jar'
+    - id: "my.jar"
+      name: "Application JAR"
+      parameter: "-jar"
+      defaultValue: "application.jar"
       valueAsSeparateArg: true
       mandatory: true
       fixed: true <1>
@@ -370,21 +368,21 @@ A condition expression (isolated) looks like this:
 
 ```yaml
 condition:
-  parameter: 'my.param.2'
+  parameter: "my.param.2"
   must: EQUAL
-  value: 'Value 1'
+  value: "Value 1"
 ```
 
 Or, in its newer form, the very same (but ultimately more powerful) using `expression` would look like this:
 
 ```yaml
 condition:
-  expression: '{{V:my.param.2}}'
+  expression: "{{V:my.param.2}}"
   must: EQUAL
-  value: 'Value 1'
+  value: "Value 1"
 ```
 
-The power comes from the ability to provide an arbitrary amount of [Variable Expansion](/power/variables/#variable-expansions) in the [Link Expressions](/user/instance/#link-expressions).
+The power comes from the ability to provide an arbitrary amount of [Variable Expansions](/power/variables/#variable-expansions) in the [Link Expressions](/user/instance/#link-expressions).
 
 The condition block understands the following fields:
 
@@ -438,7 +436,7 @@ Endpoints definitions are templates which can later on be configured by the user
 | `authPass`       | The password to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.                                                                                                                                                                                                                                                                     |
 
 !!!info Note
-Endpoints which are not considered _enabled_ are not required to be configured by the user, but are still reported via public API.
+Endpoints which are not considered _enabled_ are not required to be configured by the user, but are still reported via the public API.
 !!!
 
 ## product-info.yaml
@@ -474,7 +472,7 @@ instanceVariableTemplates:
 versionFile: my-versions.yaml <11>
 ```
 
-1. A human readable name of the **Product** for display purposes in the Web UI
+1. A human readable name of the **Product** for display purposes in the Web UI.
 2. A unique ID of the **Product** which is used to base **Instances** of. This should not change, as changing the **Product** ID of an existing **Instance** is not supported.
 3. The vendor of the product. Displayed in the Web UI and used when installing client applications.
 4. The list of **Applications** which are part of the **Product**. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
@@ -492,7 +490,7 @@ versionFile: my-versions.yaml <11>
 There is no actual requirement for the file to be named `product-version.yaml` as it is referenced from the `product-info.yaml` by relative path anyway. This is just the default name.
 !!!
 
-The `product-version.yaml` file associates **Application** IDs used in the `product-info.yaml` with actual locations on the local disc. This is used to find an import each included **Application** when importing the **Product**.
+The `product-version.yaml` file associates **Application** IDs used in the `product-info.yaml` with actual locations on the local disc. This is used to find and import each included **Application** when importing the **Product**.
 
 The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product **Build** . Therefore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually.
 
@@ -720,9 +718,9 @@ Defined `templateVariables` can be used in each `instanceVariables` (and `instan
 | Attribute   | Description                                                                                                                                                                                                                                                   |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`      | The name of the [Process Control Group]([Process Control Groups](/user/instance/#process-control-groups)) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute. |
-| `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups)                                                                                                                                                              |
-| `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups)                                                                                                                                                              |
-| `stopType`  | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups)                                                                                                                                                               |
+| `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                             |
+| `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                             |
+| `stopType`  | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                              |
 
 ### Supported `groups` Attributes
 
@@ -750,7 +748,7 @@ parameters: <2>
 ```
 
 1. The ID can be used to reference the template afterwards from an [`app-info.yaml`](#app-infoyaml).
-2. The `parameters` can contain an arbitrary amount of parameter definitions, which follow exactly the same schema as [Supported `parameters` attributes](#supported-parameters-attributes) in [`app-info.yaml`](#app-infoyaml).
+2. The `parameters` can contain an arbitrary amount of parameter definitions, which follow exactly the same schema as [supported `parameters` attributes](#supported-parameters-attributes) in [`app-info.yaml`](#app-infoyaml).
 
 !!!info Note
 Inlining of templates into applications happens **before** anything else. Parameter templates can also reference other parameters (e.g. `{{V:my-param}}`), even if they are not part of this very template. All applications using this parameter would then either have to have (directly or through another template) this `my-param` parameter, **or** will receive a validation warning and need to change the value.
@@ -775,7 +773,7 @@ instanceVariables: <2>
 ```
 
 1. The ID can be used to reference the template afterwards from an [`instance-template.yaml`](#instance-templateyaml).
-2. An arbitrary amount of instance variable templates. The schema is the same as [Supported `instanceVariables` Attributes](#supported-instancevariables-attributes) in [`instance-template.yaml`](#instance-templateyaml)
+2. An arbitrary amount of instance variable templates. The schema is the same as [supported `instanceVariables` Attributes](#supported-instancevariables-attributes) in [`instance-template.yaml`](#instance-templateyaml)
 
 !!!warning Warning
 To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](#product-infoyaml) so it is included at build time.
@@ -840,7 +838,7 @@ When applying a **System Template** from the CLI, all mappings need to be provid
 ### Supported `templateVariables` Attributes
 
 !!!info Note
-`templateVariables` follows the same scheme as [Supported `templateVariables` Attributes](#supported-templatevariables-attributes) in [`application-template.yaml`](#application-templateyaml) files.
+`templateVariables` follows the same scheme as [supported `templateVariables` attributes](#supported-templatevariables-attributes) in [`application-template.yaml`](#application-templateyaml) files.
 !!!
 
 !!!info Note
@@ -875,7 +873,7 @@ applications:
   other-application: app2/src/main/dist/app-info.yaml
 ```
 
-This file can be passed to the `remote-product-validation` CLI command, as well as to the `BDeployValidationTask` Gradle Task. More tool support will follow.
+This file can be passed to the `remote-product-validation` CLI command, as well as to the `BDeployValidationTask` Gradle task.
 
 # Building a Product
 
@@ -904,7 +902,7 @@ Once you have a `product-info.yaml` with it's `product-version.yaml` and all the
 Given a sample Java application which has been created from the default gradle template using `gradle init`, these are the changes you need to build a **BDeploy** product for this single application. For this demo, the application is named `test`.
 
 !!!info Note
-Add the below code to your _existing_ `build.gradle`
+Add the below code to your _existing_ `build.gradle`.
 !!!
 
 ```groovy build.gradle
@@ -958,10 +956,10 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
   of buildProduct
 
   target.servers {
-      myServer { <7>
-        useLogin = true
-        instanceGroup = project.getProperty('instanceGroup')
-      }
+    myServer { <7>
+      useLogin = true
+      instanceGroup = project.getProperty('instanceGroup')
+    }
   }
 }
 
@@ -970,7 +968,7 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 
 1. Applies the plugin **BDeploy** gradle plugin.
 2. Sets the project version. **Gradle** does not strictly require a version, and uses 'unspecified' as default. **BDeploy** requires _some_ sort of version, and setting it for the whole project is good practice.
-3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plain use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
+3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plainly use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
 4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files.
 5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.  
    The `repositoryServer` will be queried for additionally specified `runtimeDependencies` at build time. Those dependencies will be downloaded and embedded into the final product.
@@ -987,7 +985,7 @@ Next we need the required descriptors for the product and the application. For t
 Lets start off with the [`app-info.yaml`](#app-infoyaml), which describes the `test` application.
 
 !!!info Note
-This file **must** be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
+This file **must** be part of the binary distribution of an application and reside in its root directory. To achieve this, the simplest way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
 !!!
 
 ```yaml src/main/dist/app-info.yaml
@@ -1081,11 +1079,11 @@ This file is required and lists the [`product-build.yaml`](#product-buildyaml) f
 
 ```yaml products.yaml
 products:
-  'Product One': 'prod-1-build.yaml'
-  'Product Two': 'prod-2-build.yaml'
+  "Product One": "prod-1-build.yaml"
+  "Product Two": "prod-2-build.yaml"
 ```
 
-The path to the `products.yaml` has to be configured in the **Eclipse TEA** preferences
+The path to the `products.yaml` has to be configured in the **Eclipse TEA** preferences.
 
 :::{align=center}
 ![TEA Integration Products Preference](/images/TEA_preferences_products.png){width=480}
