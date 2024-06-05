@@ -30,7 +30,8 @@ public class UiResources {
 
                 @Override
                 public void service(Request request, Response response) throws Exception {
-                    String html = JerseyCustomErrorPages.getErrorHtml(503,
+                    String html = JerseyCustomErrorPages.getErrorHtml(
+                            jakarta.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE.getStatusCode(),
                             "<center>This server has encountered <b>internal connection issues</b>. Please check the <code>server.log</code> for more information."
                                     + "<br/>This problem is typically caused by a wrong hostname setting and/or network configuration issues."
                                     + "<br/>Despite the issues, the backend has started, and auto-start instances were processed.</center>");
@@ -90,7 +91,7 @@ public class UiResources {
 
             @Override
             public void service(Request request, Response response) throws Exception {
-                String html = JerseyCustomErrorPages.getErrorHtml(404,
+                String html = JerseyCustomErrorPages.getErrorHtml(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode(),
                         "This server is a <code>NODE</code> and does not have a UI.");
                 response.setContentType(MediaType.TEXT_HTML);
                 response.setContentLength(html.length());

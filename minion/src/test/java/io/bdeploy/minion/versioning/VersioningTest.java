@@ -133,6 +133,6 @@ class VersioningTest {
         assertEquals(VersionMismatchFilter.CODE_VERSION_MISMATCH, wea.getResponse().getStatus());
 
         var wea2 = assertThrows(WebApplicationException.class, unversioned2::textV2);
-        assertEquals(404, wea2.getResponse().getStatus());
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), wea2.getResponse().getStatus());
     }
 }

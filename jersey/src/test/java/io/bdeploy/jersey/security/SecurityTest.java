@@ -29,12 +29,12 @@ class SecurityTest {
 
         Response response = unsecured.request().get();
 
-        assertEquals(200, response.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         assertEquals("unsecured", response.readEntity(String.class));
 
         response = secured.request().get();
 
-        assertEquals(401, response.getStatus());
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
     }
 
     @Test

@@ -13,6 +13,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientResponseContext;
 import jakarta.ws.rs.client.ClientResponseFilter;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
@@ -29,7 +30,7 @@ public class VersionMismatchFilter implements ClientResponseFilter {
 
     @Override
     public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-        if (responseContext.getStatus() == 404) {
+        if (responseContext.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
             // *something* was not found. check versions of server.
             String ourVersion = VersionHelper.getVersion().toString();
             String theirVersion;
