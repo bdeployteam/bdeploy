@@ -2,6 +2,7 @@ package io.bdeploy.common.util;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -48,31 +49,23 @@ public class FormatHelper {
      * @return The string representation.
      */
     public static String formatRemainingTime(long duration) {
-        if (duration == 0) {
-            return "0 seconds";
-        }
-        long allSeconds = duration / 1000;
+        Duration d = Duration.ofMillis(duration);
 
-        long seconds = allSeconds % 60;
-        long allMinutes = allSeconds / 60;
-
-        long minutes = allMinutes % 60;
-        long hours = allMinutes / 60;
-
-        final StringBuilder builder = new StringBuilder();
+        long hours = d.toHours();
         if (hours > 0) {
-            builder.append(hours);
-            builder.append(hours == 1 ? " hour" : " hours");
-            return builder.toString();
+            return hours + (hours == 1 ? " hour" : " hours");
         }
+
+        long minutes = d.toMinutes();
         if (minutes > 0) {
-            builder.append(minutes);
-            builder.append(minutes == 1 ? " min" : " mins");
-            return builder.toString();
+            return minutes + (minutes == 1 ? " min" : " mins");
         }
-        builder.append(seconds);
-        builder.append(seconds == 1 ? " sec" : " secs");
-        return builder.toString();
+
+        long seconds = d.toSeconds();
+        if (seconds > 0) {
+            return seconds + (seconds == 1 ? " sec" : " secs");
+        }
+        return "0 secs";
     }
 
     /**
@@ -124,5 +117,4 @@ public class FormatHelper {
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return SIZE_FORMAT.format(size / Math.pow(1024, digitGroups)) + " " + SIZE_UNITS[digitGroups];
     }
-
 }
