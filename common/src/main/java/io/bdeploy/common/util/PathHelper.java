@@ -31,6 +31,8 @@ import io.bdeploy.common.RetryableScope;
  */
 public class PathHelper {
 
+    private static final int FILEOP_DELAY_MILLIS = 200;
+    private static final int FILEOP_RETRIES = 50;
     private static final ContentInfoUtil CIU = loadCIU();
 
     private static ContentInfoUtil loadCIU() {
@@ -324,7 +326,7 @@ public class PathHelper {
             return;
         }
 
-        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> {
+        RetryableScope.create().withDelay(FILEOP_DELAY_MILLIS).withMaxRetries(FILEOP_RETRIES).run(() -> {
             try (Stream<Path> walk = Files.walk(path)) {
                 walk.map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
             }
@@ -335,7 +337,7 @@ public class PathHelper {
      * @param path the {@link Path} to delete.
      */
     public static void deleteIfExistsRetry(Path path) {
-        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> Files.deleteIfExists(path));
+        RetryableScope.create().withDelay(FILEOP_DELAY_MILLIS).withMaxRetries(FILEOP_RETRIES).run(() -> Files.deleteIfExists(path));
     }
 
     /**
@@ -344,7 +346,7 @@ public class PathHelper {
      * @param options options as as accepted by {@link Files#move(Path, Path, CopyOption...)}
      */
     public static void moveRetry(Path source, Path target, CopyOption... options) {
-        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> Files.move(source, target, options));
+        RetryableScope.create().withDelay(FILEOP_DELAY_MILLIS).withMaxRetries(FILEOP_RETRIES).run(() -> Files.move(source, target, options));
     }
 
 }
