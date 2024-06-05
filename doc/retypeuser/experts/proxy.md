@@ -12,10 +12,10 @@ The application hosting the endpoint to call can be hosted on any node within th
 You will need these informations to be able to call an Endpoint of a remote application through the **BDeploy** public API:
 
 - A **BDeploy** _slim_ token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`. You can obtain this token from the Web UI for the logged in user.
-- The `id` of the instance group hosting the application you want to tunnel to.
-- The `id` of the instance hosting the application you want to tunnel to. You can see this id for instance from the browser's URL when on the instance overview page for the instance in question.
-- The `id` of the applications endpoint as defined in the [app-info.yaml](/power/product/#app-infoyaml).
-- The `id` of the application which hosts the endpoint identified by the endpoint `id` above.
+- The `ID` of the instance group hosting the application you want to tunnel to.
+- The `ID` of the instance hosting the application you want to tunnel to. You can see this ID for instance from the browser's URL when on the instance overview page for the instance in question.
+- The `ID` of the applications endpoint as defined in the [app-info.yaml](/power/product/#app-infoyaml).
+- The `ID` of the application which hosts the endpoint identified by the endpoint `ID` above.
 
 A typical proxy call using the public API would look like this, when using **cURL**:
 
@@ -25,12 +25,12 @@ curl -k -H "Accept: **/**" \
     "https://server/api/public/v1/common/proxy/myEndpoint?BDeploy_group=MyGroup&BDeploy_instance=xxxx-111-xxxx&BDeploy_application=yyyy-111-yyyy" <2> <3> <4> <5> <6>
 ```
 
-1. **<X>** is a bearer token, which can be obtained from the Web UI (User drop-down menu).
-2. **server** is the hostname (and port) of the **BDeploy** master. This may be either a `CENTRAL`, `MANAGED` or `STANDALONE` server, being in charge (directly or indirectly) of the application to tunnel to.
-3. **myEndpoint** is the `id` of the endpoint to call as defined in the [app-info.yaml](/power/product/#app-infoyaml) of the hosting application.
-4. **MyGroup** is the `id` of the instance group which hosts the application to tunnel to.
-5. **xxxx-111-xxxx** is the `id` of the instance which hosts the application to tunnel to.
-6. **yyyy-111-yyyy** is the `id` of the application which hosts an endpoint with the given endpoint `id`.
+1. `<X>` is a bearer token, which can be obtained from the Web UI (User drop-down menu).
+2. `server` is the hostname (and port) of the **BDeploy** master. This may be either a `CENTRAL`, `MANAGED` or `STANDALONE` server, being in charge (directly or indirectly) of the application to tunnel to.
+3. `myEndpoint` is the `ID` of the endpoint to call as defined in the [app-info.yaml](/power/product/#app-infoyaml) of the hosting application.
+4. `MyGroup` is the `ID` of the instance group which hosts the application to tunnel to.
+5. `xxxx-111-xxxx` is the `ID` of the instance which hosts the application to tunnel to.
+6. `yyyy-111-yyyy` is the `ID` of the application which hosts an endpoint with the given endpoint `ID`.
 
 ## Obtaining required IDs
 
@@ -40,15 +40,15 @@ There are two ways to obtain required IDs. You can use a purely manual approach 
 http://my-server/#/instances/dashboard/MyGroup/xxxx-111-xxxx
 ```
 
-From the above URL, you can find the instance group `id` (**MyGroup**) as well as the instance `id` (**xxxx-111-xxxx**). When on the instance dashboard, click the server application you want to tunnel to. The process control panel for that application opens up, and you will see the applications ` Process ID` displayed.
+From the above URL, you can find the `instance group ID` (**MyGroup**) as well as the `instance ID` (**xxxx-111-xxxx**). When on the instance dashboard, click the server application you want to tunnel to. The process control panel for that application opens up, and you will see the applications `process ID` displayed.
 
-Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed on the instance configuration page by clicking on the application you want to tunnel to and then clicking on [ **Configure Endpoints** ]
+Last thing to manually lookup is the `endpoint ID`. Endpoints can be accessed on the instance configuration page by clicking on the application you want to tunnel to and then clicking on [ **Configure Endpoints** ]
 
 :::{align=center}
 ![Application Edit Panel](/images/Doc_InstanceConfig_Endpoints.png){width=480}
 :::
 
-You will be able to read the endpoint `id` and configure properties of the endpoint on this page. The configuration will be used by **BDeploy** when instructed remotely to call that endpoint. **BDeploy** will take care of things like authentication, security, etc. The actual caller will only require access (and permissions) on the master server they are calling into, not to the actual application. Instead, **BDeploy** itself is configured to be authorized to perform the call.
+You will be able to read the `endpoint ID` and configure properties of the endpoint on this page. The configuration will be used by **BDeploy** when instructed remotely to call that endpoint. **BDeploy** will take care of things like authentication, security, etc. The actual caller will only require access (and permissions) on the master server they are calling into, not to the actual application. Instead, **BDeploy** itself is configured to be authorized to perform the call.
 
 :::{align=center}
 ![Application Endpoints Configuration](/images/Doc_InstanceConfig_EndpointsConfig.png){width=480}
@@ -73,9 +73,9 @@ curl -k -H "Accept: application/json" \
     "https://server/api/public/v1/common/endpoints?BDeploy_group=MyGroup&BDeploy_instance=xxxx-111-xxxx" <2> <3>
 ```
 
-1. **<X>** in the following **cURL** calls is the bearer token as obtained from the Web UI.
-2. **MyGroup** is the name of one of the instance groups as obtained by the first API. You can fetch the `id` of each instance from the returned JSON.
-3. **xxxx-111-xxxx** is the instance `id` as obtained by the second API. The returned JSON will include the application `id` hosting the endpoint along with the actual specific configuration of that endpoint (including its `id`).
+1. `<X>` in the following **cURL** calls is the bearer token as obtained from the Web UI.
+2. `MyGroup` is the name of one of the instance groups as obtained by the first API. You can fetch the `ID` of each instance from the returned JSON.
+3. `xxxx-111-xxxx` is the `instance ID` as obtained by the second API. The returned JSON will include the `application ID` hosting the endpoint along with the actual specific configuration of that endpoint (including its `ID`).
 
 ## UI Endpoints
 
@@ -116,5 +116,5 @@ This feature is intended for simple use cases. Advanced use cases may not work a
 !!!
 
 !!!info Note
-Only users which are logged in to **BDeploy** can access UI endpoints via the proxy mechanism!
+Only users which are logged in to **BDeploy** can access UI endpoints via the proxy mechanism.
 !!!
