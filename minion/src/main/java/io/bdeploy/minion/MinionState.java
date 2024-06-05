@@ -114,7 +114,7 @@ public class MinionState {
     /**
      * The timeout of web sessions within which a user needs to be active to have the session be kept alive.
      */
-    public Integer webSessionActiveTimeoutHours = 24 * 1;
+    public Integer webSessionActiveTimeoutHours = 24;
 
     /**
      * Amount of times an object needs to be referenced for it to be moved to a global pool.
