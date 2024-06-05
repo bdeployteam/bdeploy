@@ -65,10 +65,13 @@ abstract class DataTableBase implements DataTable {
         if (data.length() <= limit) {
             return data;
         }
-        if (limit <= 3) {
+
+        String ellipsis = "...";
+        int ellipsisLength = ellipsis.length();
+        if (limit <= ellipsisLength) {
             return data.substring(0, limit);
         }
-        return data.substring(0, limit - 3) + "...";
+        return data.substring(0, limit - ellipsisLength) + ellipsis;
     }
 
     /**
