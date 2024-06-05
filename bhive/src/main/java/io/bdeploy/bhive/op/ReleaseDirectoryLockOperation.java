@@ -1,10 +1,7 @@
 package io.bdeploy.bhive.op;
 
-import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
-
 import java.nio.file.Path;
 
-import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.util.PathHelper;
 
 /**
@@ -13,24 +10,10 @@ import io.bdeploy.common.util.PathHelper;
  * @see LockDirectoryOperation
  * @see AwaitDirectoryLockOperation
  */
-public class ReleaseDirectoryLockOperation extends BHive.Operation<Void> {
-
-    private Path directory;
+public class ReleaseDirectoryLockOperation extends DirectoryLockModificationOperation {
 
     @Override
-    public Void call() throws Exception {
-        assertNotNull(directory, "No directory to unlock.");
-
-        PathHelper.deleteRecursiveRetry(directory.resolve(LockDirectoryOperation.LOCK_FILE));
-        return null;
+    public void doCall(Path lockFile) throws Exception {
+        PathHelper.deleteRecursiveRetry(lockFile);
     }
-
-    /**
-     * Sets the directory that should be unlocked.
-     */
-    public ReleaseDirectoryLockOperation setDirectory(Path directory) {
-        this.directory = directory;
-        return this;
-    }
-
 }

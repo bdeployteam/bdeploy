@@ -1,7 +1,5 @@
 package io.bdeploy.bhive.op;
 
-import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +13,6 @@ import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.Threads;
@@ -27,31 +24,23 @@ import io.bdeploy.common.util.Threads;
  * @see ReleaseDirectoryLockOperation
  * @see AwaitDirectoryLockOperation
  */
-public class LockDirectoryOperation extends BHive.Operation<Void> {
+public class LockDirectoryOperation extends DirectoryLockModificationOperation {
 
     private static final Logger log = LoggerFactory.getLogger(LockDirectoryOperation.class);
 
-    static final String LOCK_FILE = ".lock";
-
-    private Path directory;
-
     @Override
-    public Void call() throws Exception {
-        assertNotNull(directory, "No directory to lock.");
-
-        Path lockFile = directory.resolve(LOCK_FILE);
-
+    public void doCall(Path lockFile) throws Exception {
         String content = "";
         if (getLockContentSupplier() != null) {
             content = getLockContentSupplier().get();
         }
 
         boolean infoWritten = false;
-        for (int i = 0; i < 100_000; ++i) {
+        for (int i = 0; i < RETRIES; ++i) {
             try {
                 Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW, StandardOpenOption.SYNC)
                         .toFile().deleteOnExit();
-                return null;
+                return;
             } catch (IOException e) {
                 // validate to find stale lock files
                 if (!isLockFileValid(lockFile, getLockContentValidator())) {
@@ -63,7 +52,7 @@ public class LockDirectoryOperation extends BHive.Operation<Void> {
                     infoWritten = true;
                 }
                 // delay a little...
-                if (!Threads.sleep(10)) {
+                if (!Threads.sleep(SLEEP_MILLIS)) {
                     break;
                 }
             } catch (Exception e) {
@@ -72,14 +61,6 @@ public class LockDirectoryOperation extends BHive.Operation<Void> {
         }
         throw new IllegalStateException("Retries exceeded or interrupted while waiting to lock " + lockFile
                 + ". Please check manually if another process is still running and delete the lock file manually.");
-    }
-
-    /**
-     * Sets the directory that should be locked.
-     */
-    public LockDirectoryOperation setDirectory(Path directory) {
-        this.directory = directory;
-        return this;
     }
 
     /** Validates whether or not the given lock file is still valid */
@@ -105,5 +86,4 @@ public class LockDirectoryOperation extends BHive.Operation<Void> {
             return true;
         }
     }
-
 }
