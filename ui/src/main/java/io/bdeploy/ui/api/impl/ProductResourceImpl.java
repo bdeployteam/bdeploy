@@ -58,6 +58,7 @@ import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.ProductBulkResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.InstanceUsageDto;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -381,5 +382,10 @@ public class ProductResourceImpl implements ProductResource {
         } catch (IOException e) {
             throw new WebApplicationException("Cannot read configuration file: " + file, e);
         }
+    }
+
+    @Override
+    public ProductBulkResource getBulkResource() {
+        return rc.initResource(new ProductBulkResourceImpl(hive, group));
     }
 }

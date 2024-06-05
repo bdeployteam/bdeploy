@@ -66,4 +66,7 @@ public interface ProductResource {
     @Path("/{name : .+}/{tag}/config/{file: .+}")
     public String loadConfigFile(@PathParam("name") String name, @PathParam("tag") String tag, @PathParam("file") String file);
 
+    @Path("/bulk")
+    public ProductBulkResource getBulkResource();
+
 }
