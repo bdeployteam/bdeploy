@@ -2,6 +2,7 @@ package io.bdeploy.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
@@ -28,5 +29,56 @@ class FormatHelperTest {
         assertEquals("30 hours", result8);
         String result9 = FormatHelper.formatRemainingTime(Duration.ofHours(30).toMillis() + 500);
         assertEquals("30 hours", result9);
+    }
+
+    @Test
+    void formatTransferRateTest() {
+        String resultBothZero = FormatHelper.formatTransferRate(0, 0);
+        assertEquals("N/A", resultBothZero);
+
+        String resultTimeZero1 = FormatHelper.formatTransferRate(-1, 0);
+        assertEquals("N/A", resultTimeZero1);
+        String resultTimeZero2 = FormatHelper.formatTransferRate(1, 0);
+        assertEquals("N/A", resultTimeZero2);
+        String resultTimeZero3 = FormatHelper.formatTransferRate(2, 0);
+        assertEquals("N/A", resultTimeZero3);
+        String resultTimeZero4 = FormatHelper.formatTransferRate(1_000, 0);
+        assertEquals("N/A", resultTimeZero4);
+
+        String resultBytesZero1 = FormatHelper.formatTransferRate(0, -1);
+        assertEquals("N/A", resultBytesZero1);
+        String resultBytesZero2 = FormatHelper.formatTransferRate(0, 1);
+        assertEquals("N/A", resultBytesZero2);
+        String resultBytesZero3 = FormatHelper.formatTransferRate(0, 2);
+        assertEquals("N/A", resultBytesZero3);
+        String resultBytesZero4 = FormatHelper.formatTransferRate(0, 1_000);
+        assertEquals("N/A", resultBytesZero4);
+
+        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance();
+        char decimalSeparator = format.getDecimalFormatSymbols().getDecimalSeparator();
+
+        long oneSecondInMillis = Duration.ofSeconds(1).toMillis();
+
+        String resultOneSecond1 = FormatHelper.formatTransferRate(1, oneSecondInMillis);
+        assertEquals("0" + decimalSeparator + "0 kB/s", resultOneSecond1);
+        String resultOneSecond2 = FormatHelper.formatTransferRate(1_000, oneSecondInMillis);
+        assertEquals("1" + decimalSeparator + "0 kB/s", resultOneSecond2);
+        String resultOneSecond3 = FormatHelper.formatTransferRate(33_521, oneSecondInMillis);
+        assertEquals("33" + decimalSeparator + "5 kB/s", resultOneSecond3);
+        String resultOneSecond4 = FormatHelper.formatTransferRate(100_000, oneSecondInMillis);
+        assertEquals("100" + decimalSeparator + "0 kB/s", resultOneSecond4);
+        String resultOneSecond5 = FormatHelper.formatTransferRate(1_000_000, oneSecondInMillis);
+        assertEquals("1" + decimalSeparator + "0 MB/s", resultOneSecond5);
+        String resultOneSecond6 = FormatHelper.formatTransferRate(10_000_000, oneSecondInMillis);
+        assertEquals("10" + decimalSeparator + "0 MB/s", resultOneSecond6);
+        String resultOneSecond7 = FormatHelper.formatTransferRate(1_000_000_000, oneSecondInMillis);
+        assertEquals("1000" + decimalSeparator + "0 MB/s", resultOneSecond7);
+
+        String result1 = FormatHelper.formatTransferRate(1_000, Duration.ofSeconds(10).toMillis());
+        assertEquals("0" + decimalSeparator + "1 kB/s", result1);
+        String result2 = FormatHelper.formatTransferRate(1_000, Duration.ofSeconds(3).toMillis());
+        assertEquals("0" + decimalSeparator + "3 kB/s", result2);
+        String result3 = FormatHelper.formatTransferRate(565_883, 22_870);
+        assertEquals("24" + decimalSeparator + "7 kB/s", result3);
     }
 }

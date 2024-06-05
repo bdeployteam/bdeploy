@@ -78,12 +78,11 @@ public class FormatHelper {
         if (bytes <= 0 || timeInMs < 1000) {
             return "N/A";
         }
-        double bps = (bytes * 8) / (timeInMs / 1000.0);
-        double kBs = bps / 8000.0;
-        if (kBs > 1000) {
-            return TRANSFER_FORMAT.format(kBs / 1000.0) + " MB/s";
+        double kBps = ((double) bytes) / timeInMs;
+        if (kBps < 1000) {
+            return TRANSFER_FORMAT.format(kBps) + " kB/s";
         }
-        return TRANSFER_FORMAT.format(kBs) + " kB/s";
+        return TRANSFER_FORMAT.format(kBps / 1000.0) + " MB/s";
     }
 
     /**
