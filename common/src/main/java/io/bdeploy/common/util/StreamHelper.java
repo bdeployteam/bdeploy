@@ -8,7 +8,7 @@ import java.io.OutputStream;
 
 public class StreamHelper {
 
-    private static final int BUFFER_SIZE = 8192;
+    public static final int BUFFER_SIZE = 8192;
     private static final int CHECK_BUFFER_SIZE = 4096;
 
     private StreamHelper() {
