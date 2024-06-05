@@ -1,6 +1,5 @@
 package io.bdeploy.launcher.cli.ui.browser;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.net.URI;
 import java.nio.file.Path;
@@ -33,25 +32,28 @@ class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UIResourc
     @Override
     public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
         Component component = t.getDefaultRenderer(Boolean.class).getTableCellRendererComponent(t, v, s, f, r, c);
+        if (s) {
+            return component;
+        }
 
-        if (!s && t.getModel() instanceof BrowserDialogTableModel bdTableModel) {
+        if (t.getModel() instanceof BrowserDialogTableModel bdTableModel) {
             ClientSoftwareConfiguration config = bdTableModel.get(sortModel.convertRowIndexToModel(r));
             ClientApplicationDto metadata = config.metadata;
-            if (metadata != null && metadata.supportsAutostart) {
+            if (metadata == null) {
+                component.setBackground(BrowserDialogTableColorConstants.COULD_NOT_CALCULATE);
+            } else if (metadata.supportsAutostart) {
                 Boolean storedValue = null;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     storedValue = new MetaManifest<>(config.key, false, Boolean.class).read(hive);
                 }
-                if (storedValue != null) {
-                    if (storedValue == metadata.autostart) {
-                        component.setBackground(Color.WHITE);
-                    } else {
-                        component.setBackground(new Color(255, 255, 140));
-                    }
+                if (storedValue != null && storedValue != metadata.autostart) {
+                    component.setBackground(BrowserDialogTableColorConstants.PAY_ATTENTION);
                 }
             } else {
-                component.setBackground(Color.LIGHT_GRAY);
+                component.setBackground(BrowserDialogTableColorConstants.DISABLED);
             }
+        } else {
+            component.setBackground(BrowserDialogTableColorConstants.COULD_NOT_CALCULATE);
         }
 
         return component;

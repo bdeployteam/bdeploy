@@ -1,6 +1,5 @@
 package io.bdeploy.launcher.cli.ui.browser;
 
-import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JTable;
@@ -18,13 +17,22 @@ class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
         if (s) {
             return this;
         }
-        if (v == InstancePurpose.DEVELOPMENT) {
-            setBackground(new Color(51, 170, 0));
-        } else if (v == InstancePurpose.TEST) {
-            setBackground(new Color(51, 170, 255));
-        } else {
-            setBackground(Color.WHITE);
+
+        if (v instanceof InstancePurpose purpose) {
+            switch (purpose) {
+                case DEVELOPMENT:
+                    setBackground(BrowserDialogTableColorConstants.PURPOSE_DEVELOPMENT);
+                    return this;
+                case TEST:
+                    setBackground(BrowserDialogTableColorConstants.PURPOSE_TEST);
+                    return this;
+                case PRODUCTIVE:
+                    setBackground(BrowserDialogTableColorConstants.PURPOSE_PRODUCTIVE);
+                    return this;
+            }
         }
+
+        setBackground(BrowserDialogTableColorConstants.COULD_NOT_CALCULATE);
         return this;
     }
 }
