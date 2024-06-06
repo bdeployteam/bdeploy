@@ -66,7 +66,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
           this.allMetrics.set(group, item);
         }
         this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
-        this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'));
+        this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
         this.doSelect(this.tabIndex);
       });
   }

@@ -155,7 +155,7 @@ export class PortsEditService {
   }
 
   private isPortExpression(value: LinkedValueConfiguration, type: ParameterType) {
-    const num = parseInt(this.getPortValue(value, type));
+    const num = parseInt(this.getPortValue(value, type), 10);
     return isNaN(num);
   }
 }
