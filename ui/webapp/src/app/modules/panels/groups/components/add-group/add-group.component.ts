@@ -35,10 +35,10 @@ export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription = this.areas.registerDirtyable(this, 'panel');
 
     combineLatest([
-      this.groups.groups$.pipe(map((g) => g?.map((x) => x.instanceGroupConfiguration.name))),
-      this.repos.repositories$.pipe(map((r) => r?.map((y) => y.name))),
+      this.groups.groups$.pipe(map((g) => g.map((x) => x.instanceGroupConfiguration.name))),
+      this.repos.repositories$.pipe(map((r) => r.map((y) => y.name))),
     ])
-      .pipe(map(([g, r]) => [...(g && g), ...(r && r)]))
+      .pipe(map(([g, r]) => [...g, ...r]))
       .subscribe((n) => {
         this.usedNames = n;
       });
