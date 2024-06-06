@@ -1,6 +1,7 @@
 <mat-sidenav-container class="admin-shell-container">
   <mat-sidenav mode="side" opened class="admin-shell-nav mat-elevation-z2">
     <mat-nav-list>
+      <div class="menu-group flex-auto">Configuration</div>
       <a mat-list-item [routerLink]="[{ outlets: { admin: ['general'] } }]" routerLinkActive="active-setting"
         ><div class="flex justify-start items-center"><mat-icon class="nav-icon">settings</mat-icon>Settings</div></a
       >
