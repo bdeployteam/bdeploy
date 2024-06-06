@@ -105,13 +105,15 @@ public class FormatHelper {
     }
 
     /**
-     * Formats the given file size in bytes into a human readable format;
+     * Formats the given file size in bytes into a human readable format.
+     *
+     * @param size File size in bytes
      */
     public static String formatFileSize(long size) {
         if (size <= 0) {
             return "0 B";
         }
-        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
-        return SIZE_FORMAT.format(size / Math.pow(1024, digitGroups)) + " " + SIZE_UNITS[digitGroups];
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1000));
+        return SIZE_FORMAT.format(size / Math.pow(1000, digitGroups)) + " " + SIZE_UNITS[digitGroups];
     }
 }
