@@ -10,6 +10,28 @@ import org.junit.jupiter.api.Test;
 class FormatHelperTest {
 
     @Test
+    void formatDurationTest() {
+        String result1 = FormatHelper.formatDuration(-1);
+        assertEquals("59 min 59 sec 999 ms", result1);
+        String result2 = FormatHelper.formatDuration(0);
+        assertEquals("00 min 00 sec 000 ms", result2);
+        String result3 = FormatHelper.formatDuration(1);
+        assertEquals("00 min 00 sec 001 ms", result3);
+        String result4 = FormatHelper.formatDuration(2);
+        assertEquals("00 min 00 sec 002 ms", result4);
+        String result5 = FormatHelper.formatDuration(Duration.ofSeconds(100).toMillis());
+        assertEquals("01 min 40 sec 000 ms", result5);
+        String result6 = FormatHelper.formatDuration(Duration.ofSeconds(100).toMillis() + 333);
+        assertEquals("01 min 40 sec 333 ms", result6);
+        String result7 = FormatHelper.formatDuration(Duration.ofMinutes(3).toMillis());
+        assertEquals("03 min 00 sec 000 ms", result7);
+        String result8 = FormatHelper.formatDuration(Duration.ofHours(30).toMillis());
+        assertEquals("00 min 00 sec 000 ms", result8);
+        String result9 = FormatHelper.formatDuration(Duration.ofHours(30).toMillis() + 500);
+        assertEquals("00 min 00 sec 500 ms", result9);
+    }
+
+    @Test
     void formatRemainingTimeTest() {
         String result1 = FormatHelper.formatRemainingTime(-1);
         assertEquals("0 secs", result1);
