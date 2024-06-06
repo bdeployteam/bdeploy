@@ -37,7 +37,7 @@ As a consequence, a _security token_ is required for all CLI commands that commu
 It is possible to re-generate the internal certificate in case there is a suspected token leak.
 
 !!!warning Caution
-Exchanging the certificate will currently invalidate all issued _security tokens_. The ones issued to authenticated users, as well as the ones used to register **BDeploy** minions with other **BDeploy** servers.
+Exchanging the certificate will invalidate all issued _security tokens_. The ones issued to authenticated users, as well as the ones used to register **BDeploy** minions with other **BDeploy** servers.
 !!!
 
 It is also possible to exchange _just_ the HTTPS certificate. This will keep all issued tokens valid while allowing to secure HTTPS communication with a trusted, proper, official certificate.

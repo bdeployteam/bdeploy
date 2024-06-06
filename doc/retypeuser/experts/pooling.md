@@ -32,10 +32,10 @@ Pooling naturally only makes sense if more than one **BHive** is configured to u
 **BDeploy** can be configured to provide a global default pool directory which is automatically configured on _new_ BHives (e.g. new **Instance Group**, new **Software Repository**), but not on existing BHives. This setup can be performed during init:
 
 ```
-bdeploy init --root=</path/to/root> ... --pooling [--pool=</path/to/somewhere/pool>]
+bdeploy init --root=</path/to/root> ... --pooling [--pool=</path/to/pool>]
 ```
 
-You can also setup the global default after init using:
+You can also setup the global default pool after init using:
 
 ```
 bdeploy pool --root=</path/to/root> --defaultPool=</path/to/pool>
@@ -65,9 +65,9 @@ Pooling works semi-_offline_ in **BDeploy**. Each **BHive** uses its pool as _re
 ![Jobs](/images/Doc_Admin_Jobs.png){width=480}
 :::
 
-## _Unpooling_ or disabling Pools
+## Unpooling or disabling Pools
 
-Pooling can be disabled on **BHives** if pooling is currently enabled. However, this operation requires to _unpool_ required objects from the currently set pool back into the **BHive** local storage. You can do this using:
+Pooling can be disabled for individual **BHives** even while pooling is currently enabled. However, this operation requires to _unpool_ required objects from the currently set pool back into the **BHive** local storage. You can do this using:
 
 ```
 bdeploy bhive pool --hive=</path/to/hive> --unpool

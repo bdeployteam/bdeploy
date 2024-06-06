@@ -7,11 +7,11 @@ icon: table
 
 There are several components in the Web UI which allow maintenance of **BDeploy**. These are not to be used during _normal_ operation by users. They _are_ required during setup and to maintain current software versions of **BDeploy** itself if not done using the [`bdeploy remote-master`](/experts/cli/#bdeploy-cli) CLI.
 
-The administration dialogs are grouped into a Configuration section and a Housekeeping and Maintenance section.
+The administration dialogs are grouped into a _Configuration_, a _Housekeeping_ and a _Maintenance_ section.
 
 ## Settings
 
-In the Settings area some global settings can be made.
+In the _Settings_ area some global settings can be configured.
 
 ### General
 
@@ -57,7 +57,7 @@ On the **LDAP Auth** tab, you can configure a list of LDAP servers which are que
 Technical experts can use the _Check_ action to test a single LDAP server entry: **BDeploy** tries to establish a connection to the configured server. Some logging information, especially Java Exceptions, are shown in a popup window. Similarly, the _Test Auth._ action can be used to trace the entire authentication of a user.
 !!!
 
-**BDeploy** uses simple bind to authenticate users. First, a simple bind is made with the configured _User_. This user must have permissions to list other users that should be able to log into **BDeploy**. This bind is used to query for a user where the `Account User Field` matches the user name to be authenticated. This can be any field like `user`, `sAMAccountName`, or even `mail` if you want users to log on using their E-Mail Address. Once the user to log on is found, it's distinguished name is used to perform another simple bind using the provided password. Once this succeeds the user is authenticated and an according record is created in **BDeploy**. From that point on, permissions can be granted to this user.
+**BDeploy** uses simple bind to authenticate users. First, a simple bind is made with the configured _User_. This user must have permissions to list other users that should be able to log into **BDeploy**. This bind is used to query for a user where the `Account User Field` matches the user name to be authenticated. This can be any field like `user`, `sAMAccountName`, or even `mail` if you want users to log on using their e-mail address. Once the user to log on is found, its distinguished name is used to perform another simple bind using the provided password. Once this succeeds the user is authenticated and an according record is created in **BDeploy**. From that point on, permissions can be granted to the user.
 
 :::{align=center}
 ![BDeploy LDAP Server Configuration](/images/Doc_Admin_Ldap_Server_Config.png){width=480}
@@ -70,15 +70,15 @@ The following properties can be configured for each LDAP Server:
 Property | Description
 ---      | ---
 Server URL | The URL of the LDAP server. Both `ldaps://` (with a proper certificate on the server) and `ldap://` are supported. `ldaps://` should be preferred where possible. Self-signed certificates are currently not configurable inside **BDeploy** (although they can be configure on the operating system).
-Description | Free text to describe the entry
-User | The user which is used to query other users on the LDAP server (aka _bind user_)
+Description | Free text to describe the entry.
+User | The user which is used to query other users on the LDAP server (aka _bind user_).
 Password | The password for the _User_ which is used to query other users on the LDAP server.
 Account and Group Base | Root of the LDAP tree containing all user accounts (with group refs) to query. Typically in the form of `dc=domain,dc=com`.
 Account Pattern | A partial LDAP query expression. Multiple filters can be written one after another. The final LDAP query is built by prepending `(&`, and appending a filter which queries the configures _Account User Field_ for the given user. This means that a pattern `(field1=value1)(field2=value2)` will result in a query like `(&(field1=value1)(field2=value2)(sAMAccountName=<GIVEN USER>))`.
 Account User Field | Specifies the field which must match the login name when querying for the user.
 Account Name Field | The field which should be used as source for the _Full Name_ of the user, which is used as a display name in [User Accounts](/experts/system/#user-accounts) management.
 Account E-Mail Field | The field which should be used as source for the users _E-Mail Address_. This is used for instance to query _Gravatar_ if _Gravatar_ support has been enabled in the [General Settings](/experts/system/#general).
-Group Pattern | A partial LDAP query expression used to fetch groups from LDAP e.g. (objectClass=posixGroup)
+Group Pattern | A partial LDAP query expression used to fetch groups from LDAP e.g. (objectClass=posixGroup).
 Group Name Field | The field which should be used as source for the _name_ of the group, which is used as a display name in [User Groups](/experts/system/#user-groups) management.
 Group Description Field | The field which should be used as source for the _description_ of the group.
 Follow Referrals | Specifies whether the authentication process should follow referrals or not.
@@ -88,7 +88,7 @@ Periodically sync users and groups | A flag that marks the connection to be sele
 
 To ensure a successful operation of the _Import_ feature, it is essential to accurately configure the following fields: _Account and Group Base_, _Account Pattern_, _Account User Field_, _Account Name Field_, _Account E-Mail Field_, _Group Pattern_, _Group Name Field_, and _Group Description_.
 
-Once these configurations are correctly set up, the import process becomes a straightforward task. Simply click on the _Import_ action button, and **BDeploy** will seamlessly handle the rest. Should any errors occur during the import attempt, the system will promptly notify you of the encountered issues.
+Once these configurations are set up correctly, the import process becomes a straightforward task. Simply click on the _Import_ action button, and **BDeploy** will seamlessly handle the rest. Should any errors occur during the import attempt, the system will promptly notify you of the encountered issues.
 
 For added confidence, consider utilizing the _Check_ action before initiating the _Import_ process. This will help ensure a smooth connection to the LDAP Server and preemptively address any potential issues.
 
@@ -98,11 +98,11 @@ Using the _Check_ action prior to _Import_ can help verify the connectivity to t
 
 ##### LDAP Synchronization Job
 
-_LDAP Synchronization Job_ periodically imports users and groups for LDAP connections with selected **Periodically sync users and groups** flag.  
-The job is identical to _Import_ action.  
-By default job starts every midnight, but its schedule can be reconfigured via CLI.  
-To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. 0 0 0 \* \* ? for midnight).  
-To check current schedule and last run timestamp use `ldap --root=... --showSyncInfo`
+The _LDAP Synchronization Job_ periodically imports users and groups for LDAP connections with selected **Periodically sync users and groups** flag.  
+The job is identical to the _Import_ action.  
+By default, job starts every midnight, but its schedule can be reconfigured via the CLI.  
+To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. `0 0 0 \* \* ?` for midnight).  
+To check current schedule and last run timestamp use `ldap --root=... --showSyncInfo`.
 
 #### LDAP Certificate Trust
 
@@ -110,7 +110,7 @@ To check current schedule and last run timestamp use `ldap --root=... --showSync
 This section currently only applies to Linux installations.
 !!!
 
-If the configured LDAP server uses official certificates which are not trusted by the current JVM's default trust store, you can alternatively configure the **BDeploy** service to use the system _cacert_ trust stores, which are typically available at a location like `/etc/pki/ca-trust/extracted/java/cacerts`. This path may be different on different Linux distributions.
+If the configured LDAP server uses official certificates which are not trusted by the current JVM's default trust store, you can alternatively configure the **BDeploy** service to use the system _cacert_ trust stores, which are typically available at a location like `/etc/pki/ca-trust/extracted/java/cacerts`. This path may be different on individual Linux distributions.
 
 To use this trust store, you need to add these parameters to the command line of **BDeploy**:
 
@@ -122,7 +122,7 @@ You can do so by means provided by the Linux distribution, e.g. directly editing
 
 ### Global Attributes
 
-In the _Global Attributes_ tab, globally available attributes for **Instance Groups** can be maintained. Global attributes can be used to maintain additional information for **Instance Groups**, which is then used as an additional grouping or sorting criteria.
+In the _Global Attributes_ tab, globally available attributes for **Instance Groups** can be maintained. Global attributes can be used to configure additional information for **Instance Groups**, which is then used as an additional grouping or sorting criteria.
 
 :::{align=center}
 ![BDeploy Global Attributes](/images/Doc_Admin_Global_Attributes.png){width=480}
@@ -138,7 +138,7 @@ The _Plugins_ tab can be used to manage the plugins known by **BDeploy**. Plugin
 
 ## User Accounts
 
-The **User Accounts** dialog lists all users known in the system, regardless of whether they are local users or LDAP users.
+The **User Accounts** dialog lists all users known to the system, regardless of whether they are local users or LDAP users.
 
 :::{align=center}
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts.png){width=480}
@@ -150,13 +150,13 @@ Use the [ **Create User** ] button to create a local user.
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Add.png){width=480}
 :::
 
-Once a **User** is available, you can click it to open **User Details** panel where detail information is shown on top as well as the list of permissions.
+Once a **User** is available, you can click it to open the **User Details** panel where detailed information about the user, including a list of their permissions, is displayed.
 
 !!!info Note
 To protect against accidental lockout from the system, the currently logged in user cannot be changed, disabled or deleted.
 !!!
 
-The [ **Deactivate Account** ] resp. [ **Activate Account** ] allows to deactivate/activate the selected user.
+The [ **Deactivate Account** ] and [ **Activate Account** ] buttons allow to deactivate/activate the selected user.
 
 :::{align=center}
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Inactive.png){width=480}
@@ -201,7 +201,7 @@ Use the [ **Create User Group** ] button to create a local user group.
 
 Once a **User Group** is available, you can click it to open **User Group Details** panel where detail information is shown on top along with users that belong to the group as well as the list of permissions.
 
-The [ **Deactivate Group** ] resp. [ **Activate Group** ] allows to deactivate/activate the selected user.
+The [ **Deactivate Group** ] and [ **Activate Group** ] buttons allow to deactivate/activate the selected group.
 
 Use [ **Add user to the group** ] input to add user to the group. Enter user's login name and press [ **+** ] icon.
 
@@ -227,7 +227,7 @@ Target | Description
 ---    | ---
 **Instances** with _Auto Uninstallation_ enabled | If the option _Automatic Uninstallation_ is enabled on an **Instance**, **Instance Versions** that are older than the activated and the previously activated **Instance Version** are uninstalled automatically.
 **Instance Groups** with _Automatic Cleanup_ enabled | If the option _Auto Cleanup_ is enabled on an **Instance Group**, old **Product Versions** that are no longer in use by **Instances** of this **Instance Group** are deleted automatically. To avoid that a **Product** vanishes completely, the very latest **Product Version** always remains.
-All Nodes | Delete **Manifests** that are not known by the master
+All Nodes | Delete **Manifests** that are not known by the master.
 All Nodes | Keep two **BDeploy Launcher** versions, delete all older versions.
 All Nodes | Remove unused directories and files in the deployment (including pooled applications), download and temp directory.
 
@@ -260,11 +260,11 @@ It has the power to destroy _everything_ - use with extreme caution.
 
 Clicking a BHive opens the panel with maintenance actions
 
-The details tab allows access to the _Audit Logs_ and the content that is stored in a BHive. It also gives access to the repair and prune operations (see CLI) from the web interface.
+The details tab allows access to the _Audit Logs_ and the content that is stored in a BHive. It also gives access to the repair and prune operations (see [CLI](/experts/cli)) from the web interface.
 
 ## Metrics
 
-This dialog provides a quick way to investigate potential performance issues in the server itself by providing access to the in-memory metrics kept track by the server for all actions and requests performed.
+This dialog provides a quick way to investigate potential performance issues in the server itself by providing access to the in-memory metrics kept by the server for all actions.
 
 The `SERVER` metrics will show various system information about the Java Virtual Machine of the master hosting the Web UI.
 
@@ -274,7 +274,7 @@ The logging page allows to view and download the master servers main audit log, 
 
 ## BDeploy Update
 
-The **BDeploy Update** page from the **Administration** menu offers a mechanism to upload new **BDeploy** software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running **BDeploy** _master_ and attached _nodes_.
+The **BDeploy Update** page from the **Administration** menu offers a mechanism to upload new **BDeploy** software versions and deploy these versions (_upgrade_ and _downgrade_ possible) to the running **BDeploy** _master_ and attached _nodes_.
 
 :::{align=center}
 ![BDeploy System Software](/images/Doc_System_BDeploy_Update.png){width=480}
