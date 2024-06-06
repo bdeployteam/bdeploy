@@ -91,7 +91,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
 
     if (file.size > 1024 * 1024 * 20) {
       this.tempFileContentLoading$.next(false);
-      this.tempFileError = 'Selected File is too large, size limit 20MB';
+      this.tempFileError = 'Selected file is too large, size limit 20MB';
       return;
     }
 
