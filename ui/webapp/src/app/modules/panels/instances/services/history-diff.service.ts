@@ -286,27 +286,30 @@ export class ApplicationConfigurationDiff {
   public os: OperatingSystem;
 
   constructor(
-    base: ApplicationConfiguration,
-    compare: ApplicationConfiguration,
+    leftConfig: ApplicationConfiguration,
+    rightConfig: ApplicationConfiguration,
     public descriptor: ApplicationDescriptor,
   ) {
-    this.id = new Difference(base?.id, compare?.id);
-    this.name = new Difference(base?.name, compare?.name);
+    this.id = new Difference(leftConfig?.id, rightConfig?.id);
+    this.name = new Difference(leftConfig?.name, rightConfig?.name);
     if (descriptor?.type !== ApplicationType.CLIENT) {
-      this.processControl = new ProcessControlDiff(base?.processControl, compare?.processControl);
+      this.processControl = new ProcessControlDiff(leftConfig?.processControl, rightConfig?.processControl);
     }
-    this.start = new CommandDiff(base?.start, compare?.start, descriptor?.startCommand);
-    this.endpoints = new EndpointsDiff(base?.endpoints, compare?.endpoints);
+    this.start = new CommandDiff(leftConfig?.start, rightConfig?.start, descriptor?.startCommand);
+    this.endpoints = new EndpointsDiff(leftConfig?.endpoints, rightConfig?.endpoints);
     this.type = getParentChangeType(
-      base,
-      compare,
+      leftConfig,
+      rightConfig,
       this.name.type,
       this.processControl?.type,
       this.start.type,
       this.endpoints.type,
     );
 
-    this.os = base === null || base === undefined ? getAppOs(compare.application) : getAppOs(base.application);
+    this.os =
+      leftConfig === null || leftConfig === undefined
+        ? getAppOs(rightConfig.application)
+        : getAppOs(leftConfig.application);
   }
 }
 
