@@ -45,9 +45,9 @@ public abstract class TransportConnectionHandler<T extends Transport>//
             new ThreadFactoryBuilder().setNameFormat(getClass().getSimpleName() + "SendThread-%d").build());
 
     /**
-     * Default maximum message size is equal to 50 megabytes (1024 * 1024 * 50 = 52428800)
+     * Default maximum message size is equal to 50 megabytes
      */
-    private int maxMessageSizeInBytes = 52428800;
+    private int maxMessageSizeInBytes = 50_000_000;
 
     /**
      * @throws IllegalArgumentException If the given maximum message size is < 0
