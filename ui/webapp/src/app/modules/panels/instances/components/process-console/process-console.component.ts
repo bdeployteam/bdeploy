@@ -6,7 +6,7 @@ import { ProcessesService } from 'src/app/modules/primary/instances/services/pro
 import { ProcessDetailsService } from '../../services/process-details.service';
 import { ServersService } from './../../../../primary/servers/services/servers.service';
 
-const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
+const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
   selector: 'app-process-console',

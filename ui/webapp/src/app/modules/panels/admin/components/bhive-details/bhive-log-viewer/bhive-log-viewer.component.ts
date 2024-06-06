@@ -5,7 +5,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file-viewer.utils';
 import { HiveLoggingService } from '../../../services/hive-logging.service';
 
-const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
+const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
   selector: 'app-bhive-log-viewer',
