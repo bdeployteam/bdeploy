@@ -1,5 +1,7 @@
 package io.bdeploy.ui.cli;
 
+import static io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter.CODE_VERSION_MISMATCH;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +28,7 @@ import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.cli.RemoteTransferTool.TransferConfig;
 import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
 import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.UriBuilder;
 
 @Help("Transfer products and software from one server to another")
@@ -129,17 +132,37 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
         req.version = config.version();
         req.regex = config.regex();
 
-        InstanceGroupResource igr = ResourceProvider.getResource(source, InstanceGroupResource.class, getLocalContext());
-        SoftwareRepositoryResource srr = ResourceProvider.getResource(source, SoftwareRepositoryResource.class,
+        InstanceGroupResource igr = ResourceProvider.getVersionedResource(source, InstanceGroupResource.class, getLocalContext());
+        SoftwareRepositoryResource srr = ResourceProvider.getVersionedResource(source, SoftwareRepositoryResource.class,
                 getLocalContext());
 
         boolean isInstanceGroup = req.groupOrRepo != null
                 && igr.list().stream().anyMatch(g -> g.instanceGroupConfiguration.name.equals(req.groupOrRepo));
 
-        if (isInstanceGroup) {
-            return igr.getLatestProductVersion(req);
-        } else {
-            return srr.getLatestProductVersion(req);
+        try {
+            if (isInstanceGroup) {
+                return igr.getLatestProductVersion(req);
+            } else {
+                return srr.getLatestProductVersion(req);
+            }
+        } catch (WebApplicationException e) {
+            if (e.getResponse().getStatus() != CODE_VERSION_MISMATCH) {
+                throw e;
+            }
+            if (config.regex()) {
+                helpAndFail(
+                        "Server version is outdated. Please update the server version to 7.1.0 (or newer) to be able to use --regex");
+            }
+            if (config.version() == null) {
+                helpAndFailIfMissing(config.version(),
+                        "Server version is outdated. Please update the server version to 7.1.0 (or newer) or provide --version");
+            }
+            if (config.sourceGroup() == null) {
+                helpAndFailIfMissing(config.sourceGroup(),
+                        "Server version is outdated. Please update the server version to 7.1.0 (or newer) or provide --sourceGroup");
+            }
+            Manifest.Key key = new Manifest.Key(config.key(), config.version());
+            return new ProductKeyWithSourceDto(config.sourceGroup(), key);
         }
     }
 }
