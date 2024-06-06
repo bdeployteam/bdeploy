@@ -78,7 +78,7 @@ public interface SoftwareRepositoryResource {
     public void updateUserGroupPermissions(@Scope @PathParam("repo") String repo, UserGroupPermissionUpdateDto[] permissions);
 
     @POST
-    @Path("/latest-product-version")
+    @Path("/product-version/latest")
     public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req);
 
 }

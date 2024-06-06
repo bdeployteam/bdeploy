@@ -144,6 +144,6 @@ public interface InstanceGroupResource {
             List<CustomDataGrouping> preset);
 
     @POST
-    @Path("/latest-product-version")
+    @Path("/product-version/latest")
     public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req);
 }
