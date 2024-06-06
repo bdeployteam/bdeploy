@@ -60,24 +60,22 @@ export class BdActionsComponent {
 
   protected formatDuration(exec: ActionExecution) {
     const ms = new Date().getTime() - exec.start;
-    const sec = Math.floor(ms / 1000) % 60;
-    const min = Math.floor(ms / 60000) % 60;
-    const hours = Math.floor(ms / 3600000) % 24;
-    const days = Math.floor(ms / 86400000);
+    const sec = Math.floor(ms / 1_000) % 60;
+    const min = Math.floor(ms / 60_000) % 60;
+    const hours = Math.floor(ms / 3_600_000) % 24;
+    const days = Math.floor(ms / 86_400_000);
+
+    if (days === 0 && hours === 0 && min === 0) {
+      return sec + (sec === 1 ? ' second' : ' seconds');
+    }
 
     let s = '';
     if (days > 0) {
-      s = s + days + (days === 1 ? ' day ' : ' days ');
+      s += days + (days === 1 ? ' day ' : ' days ');
     }
-    if (hours > 0 || days > 0) {
-      s = s + hours + (hours === 1 ? ' hour ' : ' hours ');
+    if (days > 0 || hours > 0) {
+      s += hours + (hours === 1 ? ' hour ' : ' hours ');
     }
-    if (min > 0 || hours > 0 || days > 0) {
-      s = s + min + (min === 1 ? ' minute' : ' minutes');
-    }
-    if (days === 0 && hours === 0 && min === 0) {
-      s = s + sec + (sec === 1 ? ' second' : ' seconds');
-    }
-    return s;
+    return s + min + (min === 1 ? ' minute' : ' minutes');
   }
 }
