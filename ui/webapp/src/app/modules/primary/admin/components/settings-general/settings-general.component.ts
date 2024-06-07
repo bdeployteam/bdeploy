@@ -24,7 +24,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
 
   ngOnInit() {
     this.areas.registerDirtyable(this, 'admin');
-    this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'));
+    this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
   }
 
   ngOnDestroy(): void {
@@ -41,7 +41,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
 
   protected tabChanged(tab) {
     this.router.navigate([], { queryParams: { tabIndex: tab.index } });
-    this.tabIndex = parseInt(tab.index);
+    this.tabIndex = parseInt(tab.index, 10);
     if (this.areas.panelVisible$.value) {
       setTimeout(() => this.areas.closePanel());
     }
