@@ -208,8 +208,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
             },
             system?.config,
           );
-          const enabled = !!preview && preview !== 'false' && !preview.match(/{{([^}]+)}}/g);
-          return enabled;
+          return !!preview && preview !== 'false' && !preview.match(/{{([^}]+)}}/g);
         });
 
       if (active?.instanceConfiguration?.id && this.uiEndpoints) {
