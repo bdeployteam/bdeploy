@@ -67,6 +67,9 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
         @Help(value = "The name of the stored login session to login on the default browser")
         String open();
+
+        @Help(value = "The specific URL to open. Must start with /#/ followed by the rest of the path. Ignored if openSession is not specified.")
+        String openUrl();
     }
 
     public LocalLoginTool() {
@@ -101,7 +104,7 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             if (service == null) {
                 return createResultWithErrorMessage("Unknown server: " + serverName);
             }
-            return BrowserHelper.openUrl(service, null)//
+            return BrowserHelper.openUrl(service, config.openUrl())//
                     ? createResultWithSuccessMessage("Successfully opened the web UI")//
                     : createResultWithErrorMessage("Failed to open the web UI");
         } else {
