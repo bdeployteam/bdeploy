@@ -91,12 +91,10 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         const prodTag = snap.queryParamMap.get('productTag');
         if (!!prodKey && !!prodTag) {
           const prod = this.prodList.find((p) => p.id === prodKey);
-          if (prod) {
-            if (prod.versions.find((v) => v === prodTag)) {
-              this.selectedProduct = prod;
-              this.config.product.name = prodKey;
-              this.config.product.tag = prodTag;
-            }
+          if (prod?.versions.find((v) => v === prodTag)) {
+            this.selectedProduct = prod;
+            this.config.product.name = prodKey;
+            this.config.product.tag = prodTag;
           }
         }
 

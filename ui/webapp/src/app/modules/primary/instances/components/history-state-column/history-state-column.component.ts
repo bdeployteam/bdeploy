@@ -65,10 +65,8 @@ export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy
 
     if (this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
       // if the version is older than the last-active tag, we'll uninstall it later on.
-      if (this.states?.lastActiveTag) {
-        if (Number(this.states.lastActiveTag) > Number(this.record.instanceTag)) {
-          return ['local-greyed'];
-        }
+      if (this.states?.lastActiveTag && Number(this.states.lastActiveTag) > Number(this.record.instanceTag)) {
+        return ['local-greyed'];
       }
     }
     return [];
