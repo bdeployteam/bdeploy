@@ -27,5 +27,5 @@ public abstract class DirectoryModificationOperation extends BHive.Operation<Voi
         return this;
     }
 
-    abstract protected void doCall(Path lockFile) throws Exception;
+    protected abstract void doCall(Path lockFile) throws Exception;
 }
