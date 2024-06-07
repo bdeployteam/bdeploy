@@ -207,12 +207,12 @@ export class SystemTemplateComponent implements OnInit {
         templateVariableValues: this.systemVariables,
       };
 
-      this.systems.apply(data).subscribe((r) => {
-        this.result = r;
+      this.systems.apply(data).subscribe((resultDto) => {
+        this.result = resultDto;
         this.resultIsSuccess =
-          r.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) === -1;
+          resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) === -1;
         this.resultHasWarnings =
-          r.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !== -1;
+          resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !== -1;
         this.stepper.next();
       });
     }

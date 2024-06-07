@@ -36,7 +36,7 @@ export class ProductBulkComponent {
         this.bulk
           .delete()
           .pipe(
-            switchMap((r) => this.confirm.prompt(ProductBulkOperationResultComponent, r)),
+            switchMap((resultDto) => this.confirm.prompt(ProductBulkOperationResultComponent, resultDto)),
             finalize(() => this.deleting$.next(false)),
           )
           .subscribe();

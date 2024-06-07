@@ -98,7 +98,7 @@ function addNode(
     return;
   }
 
-  let node: FilePath = parent.children.find((node) => node.path === path);
+  let node: FilePath = parent.children.find((filePath) => filePath.path === path);
   if (!node) {
     node = {
       minion,

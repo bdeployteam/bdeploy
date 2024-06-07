@@ -199,7 +199,7 @@ function processParameter(
   let preview: string;
   let link: string;
   let group: string;
-  let expand: (s: string) => string;
+  let expandMapper: (s: string) => string;
 
   if (thisApp) {
     link = `{{V:${param.id}}}`;
@@ -217,7 +217,7 @@ function processParameter(
         name = paramDesc.name;
         description = paramDesc.longDescription;
         preview = getPreRenderable(param.value, paramDesc.type);
-        expand = (s: string) => doExpand(s, param.value, paramDesc.type);
+        expandMapper = (s: string) => doExpand(s, param.value, paramDesc.type);
         break;
       }
     }
@@ -226,7 +226,7 @@ function processParameter(
     name = param.id;
     description = '';
     preview = getPreRenderable(param.value);
-    expand = (s: string) => doExpand(s, param.value);
+    expandMapper = (s: string) => doExpand(s, param.value);
   }
 
   result.push({
@@ -236,7 +236,7 @@ function processParameter(
     link: link,
     group: group,
     matches: (s: string) => doMatchProcessParameter(s, param.id, app.name, thisApp),
-    expand: expand,
+    expand: expandMapper,
   });
 }
 

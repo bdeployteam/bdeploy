@@ -134,7 +134,7 @@ export class InstancesService {
       update.subscribe(() => {
         // update in case the server has changed (e.g. synchronized update state).
         if (!!servers?.length && !!cur?.managedServer?.hostName) {
-          const s = servers.find((s) => cur.managedServer.hostName === s.hostName);
+          const s = servers.find((managedMasterDto) => cur.managedServer.hostName === managedMasterDto.hostName);
           if (!!s && !isEqual(cur.managedServer, s)) {
             cur.managedServer = s;
             this.current$.next(cur);

@@ -181,7 +181,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
           return;
         }
         const path = decodeDataFilePath(route.params['path']);
-        const node = nodes.find((node) => node.minion === path.minion);
+        const node = nodes.find((filePath) => filePath.minion === path.minion);
         this.tabIndex = nodes.indexOf(node);
         this.selectedPath = findDataFilePath(node, path.path);
         this.bdOnSearch(this.searchTerm);

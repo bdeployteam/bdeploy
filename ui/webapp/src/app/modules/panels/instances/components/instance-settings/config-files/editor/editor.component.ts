@@ -61,7 +61,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
       this.completions = buildCompletions(
         buildCompletionPrefixes(),
         i.config,
-        s?.find((s) => s.key.name === i.config.config.system?.name)?.config,
+        s?.find((systemConfigDto) => systemConfigDto.key.name === i.config.config.system?.name)?.config,
         null,
         a,
       );

@@ -47,8 +47,8 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
         const serverName = dto?.managedServer?.hostName;
         const filtered = s.filter((x) => !x.minion || x.minion === serverName);
 
-        this.systemKeys = filtered.map((s) => s.key);
-        this.systemLabels = filtered.map((s) => `${s.config.name} (${s.config.description})`);
+        this.systemKeys = filtered.map((configDto) => configDto.key);
+        this.systemLabels = filtered.map((configDto) => `${configDto.config.name} (${configDto.config.description})`);
 
         if (i.config.config.system) {
           this.systemSel = this.systemKeys.find((k) => k.name === i.config.config.system.name);

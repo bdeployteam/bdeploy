@@ -87,8 +87,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     this.bulk
       .start()
       .pipe(
-        switchMap((r) => {
-          this.bulkOpResult = r;
+        switchMap((resultDto) => {
+          this.bulkOpResult = resultDto;
           return this.dialog.message({
             header: 'Result',
             template: this.opResult,
@@ -105,8 +105,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     this.bulk
       .restart()
       .pipe(
-        switchMap((r) => {
-          this.bulkOpResult = r;
+        switchMap((resultDto) => {
+          this.bulkOpResult = resultDto;
           return this.dialog.message({
             header: 'Result',
             template: this.opResult,
@@ -123,8 +123,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     this.bulk
       .stop()
       .pipe(
-        switchMap((r) => {
-          this.bulkOpResult = r;
+        switchMap((resultDto) => {
+          this.bulkOpResult = resultDto;
           return this.dialog.message({
             header: 'Result',
             template: this.opResult,
@@ -154,8 +154,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
         this.bulk
           .delete()
           .pipe(
-            switchMap((r) => {
-              this.bulkOpResult = r;
+            switchMap((resultDto) => {
+              this.bulkOpResult = resultDto;
               return this.dialog.message({
                 header: 'Result',
                 template: this.opResult,
@@ -173,8 +173,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     this.bulk
       .install()
       .pipe(
-        switchMap((r) => {
-          this.bulkOpResult = r;
+        switchMap((resultDto) => {
+          this.bulkOpResult = resultDto;
           return this.dialog.message({
             header: 'Result',
             template: this.opResult,
@@ -202,8 +202,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
         this.bulk
           .activate()
           .pipe(
-            switchMap((r) => {
-              this.bulkOpResult = r;
+            switchMap((resultDto) => {
+              this.bulkOpResult = resultDto;
               return this.dialog.message({
                 header: 'Result',
                 template: this.opResult,
@@ -258,8 +258,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
       this.bulk
         .update(this.selectedTarget.key.tag)
         .pipe(
-          switchMap((r) => {
-            this.bulkOpResult = r;
+          switchMap((resultDto) => {
+            this.bulkOpResult = resultDto;
             return this.dialog.message({
               header: 'Result',
               template: this.opResult,

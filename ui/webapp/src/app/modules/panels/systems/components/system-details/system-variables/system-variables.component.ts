@@ -135,13 +135,15 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
     });
 
     this.subscription.add(
-      combineLatest([this.edit.current$, this.instances.instances$]).subscribe(([c, i]) => {
-        if (!c || !i) {
+      combineLatest([this.edit.current$, this.instances.instances$]).subscribe(([systemConfigDto, instanceDto]) => {
+        if (!systemConfigDto || !instanceDto) {
           this.instancesUsing = [];
           return;
         }
 
-        this.instancesUsing = i.filter((i) => i.instanceConfiguration?.system?.name === c.key?.name);
+        this.instancesUsing = instanceDto.filter(
+          (i) => i.instanceConfiguration?.system?.name === systemConfigDto.key?.name,
+        );
       }),
     );
 

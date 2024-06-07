@@ -213,14 +213,14 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
 
       if (active?.instanceConfiguration?.id && this.uiEndpoints) {
         this.uiEndpoints.forEach((e) => {
-          const app = {
+          const clientApp = {
             instanceId: active.instanceConfiguration.id,
             endpoint: {
               id: this.processConfig.id,
               endpoint: e,
             },
           } as ClientApp;
-          this.clients.getDirectUiURI(app).subscribe((url) => {
+          this.clients.getDirectUiURI(clientApp).subscribe((url) => {
             e.directUri = url;
           });
         });

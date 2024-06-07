@@ -64,15 +64,16 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
 
   ngOnInit() {
     this.subscription = combineLatest([this.edit.process$, this.instanceEdit.state$, this.systems.systems$]).subscribe(
-      ([p, i, s]) => {
-        this.process = p;
-        this.instance = i?.config;
+      ([appConfig, editState, systemConfigDto]) => {
+        this.process = appConfig;
+        this.instance = editState?.config;
 
-        if (!i?.config?.config?.system || !s?.length) {
+        if (!editState?.config?.config?.system || !systemConfigDto?.length) {
           this.system = null;
         } else {
-          this.system = s.find(
-            (x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag,
+          this.system = systemConfigDto.find(
+            (x) =>
+              x.key.name === editState.config.config.system.name && x.key.tag === editState.config.config.system.tag,
           )?.config;
         }
 
@@ -84,10 +85,10 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
           this.instanceEdit.stateApplications$.value,
         );
 
-        if (p?.endpoints?.http?.length) {
-          for (let i = 0; i < p.endpoints.http.length; ++i) {
-            this.onChangeAuthType(p.endpoints.http[i].authType, i);
-            this.calculateDisabledStatus(p.endpoints.http[i]);
+        if (appConfig?.endpoints?.http?.length) {
+          for (let i = 0; i < appConfig.endpoints.http.length; ++i) {
+            this.onChangeAuthType(appConfig.endpoints.http[i].authType, i);
+            this.calculateDisabledStatus(appConfig.endpoints.http[i]);
           }
         }
       },

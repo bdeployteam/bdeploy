@@ -45,7 +45,7 @@ export class NodeUpdateComponent implements OnDestroy {
         const currentVersion = convert2String(this.cfg.config.version);
 
         this.nodeName$.next(r.params.node);
-        this.node = n.find((n) => n.name === this.nodeName$.value);
+        this.node = n.find((minionRecord) => minionRecord.name === this.nodeName$.value);
         this.version = s.find(
           (v) => this.hasSystemFor(this.node.status.config.os, v.system) && v.version === currentVersion,
         );

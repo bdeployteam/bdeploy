@@ -50,7 +50,7 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
         of(false),
         null,
         null,
-        this.selected$.pipe(map((p) => p.map((x) => `${x.key.name}:${x.key.tag}`))),
+        this.selected$.pipe(map((productDto) => productDto.map((x) => `${x.key.name}:${x.key.tag}`))),
       );
 
       this.server$.next(server);

@@ -44,7 +44,7 @@ export class SystemDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.instancesUsing$.next(i.filter((i) => i.instanceConfiguration?.system?.name === c.key?.name));
+      this.instancesUsing$.next(i.filter((instance) => instance.instanceConfiguration?.system?.name === c.key?.name));
       this.loading$.next(false);
     });
   }
