@@ -7,7 +7,7 @@ import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file
 import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
-const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
+const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
   selector: 'app-file-viewer',
