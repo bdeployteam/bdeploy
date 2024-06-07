@@ -87,8 +87,7 @@ public class DeploymentPathProvider {
                 return get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName);
             case INSTANCE_MANIFEST_POOL:
                 return get(SpecialDirectory.ROOT).resolve(dir.dirName);
-            case CONFIG:
-            case RUNTIME:
+            case CONFIG, RUNTIME:
                 return get(SpecialDirectory.BIN).resolve(dir.dirName);
             case LOG_DATA:
                 // Note: Default path of logData is equal to DATA for compatibility with older versions
