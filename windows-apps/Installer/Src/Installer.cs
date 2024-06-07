@@ -258,7 +258,7 @@ namespace Bdeploy.Installer {
                 }
 
                 // Associate bdeploy files with the launcher
-                FileAssociation.CreateAssociation(launcherExe, forAllUsers);
+                Utils.LAUNCHER_FILE_ASSOC.CreateBDeployLauncherAssociaton(forAllUsers, launcherExe);
 
                 // Create start menu shortcut for the launcher
                 if (createShortcuts) {

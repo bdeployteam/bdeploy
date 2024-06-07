@@ -110,7 +110,8 @@ public class TextAreaDialog extends BaseDialog {
     public boolean customize(String appName, List<String> command) {
         headerText.setText(appName);
         contentText.setText("<html>The following arguments are passed to the application:");
-        hintText.setText("<html><i>Hint:</i> Arguments can be <b>added</b>, <b>removed</b> or <b>changed</b> as desired.</html>");
+        hintText.setText(
+                "<html><i>Hint:</i> Arguments can be <b>added</b>, <b>removed</b> or <b>changed</b> as desired. Each line is treated as a single argument.</html>");
 
         // Extract the arguments and prepare for displaying
         List<String> args = command.subList(1, command.size());

@@ -36,17 +36,17 @@ namespace Bdeploy.FileAssoc {
 
         private void CreateAssociation_Click(object sender, RoutedEventArgs e) {
             string path = LauncherPath.Text.ToLower();
-            FileAssociation.CreateAssociation(path, false);
+            Utils.LAUNCHER_FILE_ASSOC.CreateBDeployLauncherAssociaton(false, path);
         }
 
         private void DeleteAssociation_Click(object sender, RoutedEventArgs e) {
-            FileAssociation.RemoveAssociation(false);
+            Utils.LAUNCHER_FILE_ASSOC.RemoveAssociation(false);
         }
 
         private void CreateAssociationAsAdmin_Click(object sender, RoutedEventArgs e) {
             if (Utils.IsAdmin()) {
                 string path = LauncherPath.Text.ToLower();
-                FileAssociation.CreateAssociation(path, true);
+                Utils.LAUNCHER_FILE_ASSOC.CreateBDeployLauncherAssociaton(true, path);
             } else {
                 string argument = "/CreateForAllUsers \"" + LauncherPath.Text.ToLower() + "\"";
                 Utils.RunAsAdmin(argument);
@@ -55,11 +55,11 @@ namespace Bdeploy.FileAssoc {
 
         private void DeleteAssociationAsAdmin_Click(object sender, RoutedEventArgs e) {
             // Remove for this user
-            FileAssociation.RemoveAssociation(false);
+            Utils.LAUNCHER_FILE_ASSOC.RemoveAssociation(false);
 
             // Remove for all others
             if (Utils.IsAdmin()) {
-                FileAssociation.RemoveAssociation(true);
+                Utils.LAUNCHER_FILE_ASSOC.RemoveAssociation(true);
             } else {
                 string argument = "/RemoveForAllUsers";
                 Utils.RunAsAdmin(argument);

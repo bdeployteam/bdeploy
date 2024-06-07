@@ -1,5 +1,6 @@
 package io.bdeploy.launcher.cli.ui.browser.workers;
 
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +36,11 @@ public class AppUpdater extends SwingWorker<Integer, Void> {
         command.add(launchFile.toFile().getAbsolutePath());
         command.addAll(args);
         ProcessBuilder b = new ProcessBuilder(command);
-        Process process = b.start();
-
         // We are not interested in the output
-        process.getErrorStream().close();
-        process.getInputStream().close();
-        process.getOutputStream().close();
+        b.redirectOutput(Redirect.DISCARD);
+        b.redirectError(Redirect.DISCARD);
+
+        Process process = b.start();
 
         // Wait for termination
         return process.waitFor();

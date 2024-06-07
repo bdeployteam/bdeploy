@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bdeploy.FileAssoc;
+using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ namespace Bdeploy.Shared {
     public class Utils {
 
         public static readonly int OPERATION_CANCELED = -2;
+        public static readonly FileAssociation LAUNCHER_FILE_ASSOC = new FileAssociation("BDeploy.Launcher.1", ".bdeploy");
 
         /// <summary>
         /// Enriches the given error message with additional details about the system environment

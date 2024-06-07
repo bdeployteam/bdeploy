@@ -21,5 +21,10 @@ file="demo.txt"
 if [[ $(uname) == "Darwin" ]]; then
     open -e "$file"
 else
-    xdg-open "$file"
+    editors=('gnome-text-editor' 'gedit' 'gvim' 'xdg-open')
+    for editor in "${editors[@]}"; do
+        if [[ $(type $editor) ]]; then
+            exec $editor $file
+        fi
+    done
 fi

@@ -72,7 +72,6 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
-import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VariableResolver;
@@ -115,6 +114,9 @@ import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
 import io.bdeploy.launcher.cli.branding.LauncherSplash;
 import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
+import io.bdeploy.launcher.cli.scripts.LocalScriptHelper;
+import io.bdeploy.launcher.cli.scripts.impl.LocalFileAssocScriptHelper;
+import io.bdeploy.launcher.cli.scripts.impl.LocalStartScriptHelper;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 import io.bdeploy.launcher.cli.ui.TextAreaDialog;
 import io.bdeploy.logging.audit.RollingFileAuditor;
@@ -215,6 +217,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Path where the start scripts are stored */
     private Path startScriptsDir;
+
+    /** Path where the file association scripts are stored */
+    private Path fileAssocScriptsDir;
 
     /** The user-directory for the hive */
     private Path userArea;
@@ -361,7 +366,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             if (!readOnlyRootDir) {
                 log.info("Cleaning unused launchers and applications ...");
                 doExecuteLocked(hive, reporter, () -> {
-                    ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir);
+                    ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir,
+                            fileAssocScriptsDir);
                     cleanup.run();
                     return null;
                 });
@@ -567,6 +573,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         appDir = dpp.get(SpecialDirectory.ROOT);
         poolDir = dpp.get(SpecialDirectory.MANIFEST_POOL);
         startScriptsDir = dpp.get(SpecialDirectory.START_SCRIPTS);
+        fileAssocScriptsDir = dpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS);
 
         // Enrich log messages with the application that is about to be launched
         String pid = String.format("PID: %1$5s", ProcessHandle.current().pid());
@@ -820,22 +827,29 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);
 
-        // Handle start script changes
-        String startScriptName = clientAppCfg.appDesc.processControl.startScriptName;
-        if (!StringHelper.isNullOrBlank(startScriptName)) {
-            try {
-                new LocalStartScriptHelper(auditor, rootDir, appDir, startScriptsDir).createStartScript(startScriptName,
-                        clickAndStart, false);
-            } catch (FileAlreadyExistsException e) {
-                log.error(
-                        "Failed to create start script in {} because a different application is already using the same script name: {}",
-                        startScriptsDir, startScriptName);
-            } catch (IOException e) {
-                log.error("Failed to create start script in {}", startScriptsDir, e);
-            }
-        }
+        // Handle script changes
+        OperatingSystem os = OsHelper.getRunningOs();
+        ClientApplicationDto metadata = newConfig.metadata;
+        handleScriptChanges(metadata, new LocalStartScriptHelper(//
+                os, auditor, rootDir, appDir, startScriptsDir), "start", startScriptsDir);
+        handleScriptChanges(metadata, new LocalFileAssocScriptHelper(//
+                os, auditor, rootDir, appDir, fileAssocScriptsDir), "file association", fileAssocScriptsDir);
 
         log.info("Application successfully installed.");
+    }
+
+    private void handleScriptChanges(ClientApplicationDto metadata, LocalScriptHelper scriptHelper, String scriptType,
+            Path scriptDir) {
+        try {
+            scriptHelper.createScript(metadata, clickAndStart, false);
+        } catch (FileAlreadyExistsException e) {
+            log.warn(
+                    "Failed to create " + scriptType
+                            + " script in {} because a different application is already using the same identifier: {}",
+                    scriptDir, scriptHelper.calculateScriptName(metadata));
+        } catch (IOException e) {
+            log.error("Failed to create " + scriptType + " script in {}", scriptDir, e);
+        }
     }
 
     private void downloadAndInstallConfigFiles(ClientApplicationConfiguration clientAppCfg, Path cfgPath) {
@@ -1013,8 +1027,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
+            // we don't set the current directory here anymore on purpose, otherwise command line
+            // arguments referencing files will not work properly in conjunction with start scripts and file associations
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
-                    .redirectOutput(Redirect.INHERIT).directory(appDir.toFile());
+                    .redirectOutput(Redirect.INHERIT);
 
             if (pc.startEnv != null) {
                 b.environment().putAll(pc.startEnv);

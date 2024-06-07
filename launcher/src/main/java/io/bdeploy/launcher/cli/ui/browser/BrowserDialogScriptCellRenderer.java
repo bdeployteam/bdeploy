@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.function.BiFunction;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -13,25 +14,27 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
-import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
+import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
-class BrowserDialogStartScriptCellRenderer extends DefaultTableCellRenderer {
+class BrowserDialogScriptCellRenderer extends DefaultTableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 
     private final URI bhiveDir;
     private final Auditor auditor;
     private final TableRowSorter<BrowserDialogTableModel> sortModel;
+    private final BiFunction<LocalClientApplicationSettings, ClientApplicationDto, ScriptInfo> scriptInfoExtractor;
 
-    public BrowserDialogStartScriptCellRenderer(Path bhiveDir, Auditor auditor,
-            TableRowSorter<BrowserDialogTableModel> sortModel) {
+    public BrowserDialogScriptCellRenderer(Path bhiveDir, Auditor auditor, TableRowSorter<BrowserDialogTableModel> sortModel,
+            BiFunction<LocalClientApplicationSettings, ClientApplicationDto, ScriptInfo> scriptInfoExtractor) {
         this.bhiveDir = bhiveDir.toUri();
         this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
         this.sortModel = sortModel;
+        this.scriptInfoExtractor = scriptInfoExtractor;
     }
 
     @Override
@@ -55,10 +58,10 @@ class BrowserDialogStartScriptCellRenderer extends DefaultTableCellRenderer {
                 if (settings == null) {
                     backgroundColor = BrowserDialogTableColorConstants.COULD_NOT_CALCULATE;
                 } else {
-                    StartScriptInfo startScriptInfo = settings.getStartScriptInfo(metadata.startScriptName);
-                    backgroundColor = startScriptInfo == null//
+                    ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings, metadata);
+                    backgroundColor = scriptInfo == null//
                             ? BrowserDialogTableColorConstants.DISABLED
-                            : config.clickAndStart.equals(startScriptInfo.getDescriptor())//
+                            : config.clickAndStart.equals(scriptInfo.getDescriptor())//
                                     ? BrowserDialogTableColorConstants.ENABLED//
                                     : BrowserDialogTableColorConstants.PAY_ATTENTION;
                 }

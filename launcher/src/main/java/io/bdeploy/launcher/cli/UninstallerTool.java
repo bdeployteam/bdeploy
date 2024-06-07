@@ -1,7 +1,13 @@
 package io.bdeploy.launcher.cli;
 
+import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +21,18 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
-import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
+import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.UninstallerTool.UninstallerConfig;
+import io.bdeploy.launcher.cli.scripts.ScriptUtils;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
 @CliName("uninstaller")
@@ -72,6 +82,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             Path appsDir = rootDir.resolve("apps");
             Path poolDir = appsDir.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
             Path startScriptsDir = appsDir.resolve(SpecialDirectory.START_SCRIPTS.getDirName());
+            Path fileAssocScriptsDir = appsDir.resolve(SpecialDirectory.FILE_ASSOC_SCRIPTS.getDirName());
 
             // Delegate removal to the delegated application
             ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
@@ -83,24 +94,22 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
                 doUninstallApp(rootDir, appId);
             }
 
-            // Remove corresponding script
+            // Remove corresponding scripts
             if (config != null) {
                 ClientApplicationDto metadata = config.metadata;
                 if (metadata != null) {
+                    OperatingSystem os = OsHelper.getRunningOs();
+                    ClickAndStartDescriptor descriptor = config.clickAndStart;
                     String startScriptName = metadata.startScriptName;
-                    if (!StringHelper.isNullOrBlank(startScriptName)) {
-                        LocalClientApplicationSettings settings = new LocalClientApplicationSettingsManifest(hive).read();
-                        if (settings != null) {
-                            StartScriptInfo startScriptInfo = settings.getStartScriptInfo(startScriptName);
-                            if (startScriptInfo != null && config.clickAndStart.equals(startScriptInfo.getDescriptor())) {
-                                Path startScript = startScriptsDir.resolve(startScriptInfo.getFullScriptName());
-                                if (PathHelper.exists(startScript)) {
-                                    PathHelper.deleteRecursiveRetry(startScript);
-                                    log.info("Removed script {}", startScriptName);
-                                }
-                            }
-                        }
-                    }
+                    String fileAssocExtension = metadata.fileAssocExtension;
+
+                    removeScript(hive, descriptor, startScriptName, startScriptsDir, "start",//
+                            settings -> settings.getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, startScriptName)),
+                            null);
+                    removeScript(hive, descriptor, fileAssocExtension, fileAssocScriptsDir, "file association",//
+                            settings -> settings
+                                    .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, fileAssocExtension)),
+                            scriptPath -> uninstallFileAssoc(metadata, rootDir));
                 }
             }
 
@@ -110,10 +119,71 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             }
 
             // Trigger cleanup to remove from hive and from pool
-            ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir);
+            ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir, fileAssocScriptsDir);
             cleanup.run();
         } finally {
             hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
+        }
+    }
+
+    private static void removeScript(BHive hive, ClickAndStartDescriptor descriptor, String scriptName, Path scriptsDir,
+            String scriptType, Function<LocalClientApplicationSettings, ScriptInfo> scriptInfoExtractor,
+            Consumer<Path> uninstallationAddon) {
+        if (StringHelper.isNullOrBlank(scriptName)) {
+            return;
+        }
+        LocalClientApplicationSettings settings = new LocalClientApplicationSettingsManifest(hive).read();
+        if (settings == null) {
+            return;
+        }
+        ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings);
+        if (scriptInfo != null && descriptor.equals(scriptInfo.getDescriptor())) {
+            Path scriptPath = scriptsDir.resolve(scriptInfo.getScriptName());
+            if (PathHelper.exists(scriptPath)) {
+                PathHelper.deleteRecursiveRetry(scriptPath);
+                log.info("Removed " + scriptType + " script {}", scriptName);
+            }
+            if (uninstallationAddon != null) {
+                uninstallationAddon.accept(scriptPath);
+            }
+        }
+    }
+
+    private static void uninstallFileAssoc(ClientApplicationDto metadata, Path launcherDir) {
+        String id = metadata.id;
+        if (id == null) {
+            log.error("Failed to remove file association because no ID was given.");
+            return;
+        }
+        String fileAssocExtension = metadata.fileAssocExtension;
+        if (fileAssocExtension == null) {
+            log.error("Failed to remove file association for {} because no file association extension was given.", id);
+            return;
+        }
+
+        List<String> command = new ArrayList<>();
+        command.add(ClientPathHelper.getNativeFileAssocTool(launcherDir).normalize().toAbsolutePath().toString());
+        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            command.add("/UninstallApplication");
+            command.add(ScriptUtils.getBDeployFileAssocId(id));
+            command.add(ScriptUtils.getFullFileExtension(fileAssocExtension));
+        } else {
+            // Usage: ./file-assoc.sh "Action" "ID" "Extension" "Name of Application" "Exec-Path" "Icon"
+            command.add("remove");
+            command.add(id);
+            command.add(ScriptUtils.getFullFileExtension(fileAssocExtension));
+            command.add(metadata.appName);
+        }
+
+        ProcessBuilder b = new ProcessBuilder(command);
+        // We are not interested in the output
+        b.redirectOutput(Redirect.DISCARD);
+        b.redirectError(Redirect.DISCARD);
+
+        try {
+            b.start();
+        } catch (IOException e) {
+            log.error("Failed to remove file association for {} ({})", fileAssocExtension, id, e);
         }
     }
 

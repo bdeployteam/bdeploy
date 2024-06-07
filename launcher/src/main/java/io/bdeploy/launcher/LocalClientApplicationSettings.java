@@ -8,7 +8,8 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 public class LocalClientApplicationSettings {
 
     private final Map<String, Boolean> startDescriptor2autostartEnabled = new HashMap<>();
-    private final Map<String, StartScriptInfo> startScriptName2startDescriptor = new HashMap<>();
+    private final Map<String, ScriptInfo> startScriptName2startDescriptor = new HashMap<>();
+    private final Map<String, ScriptInfo> fileAssocScriptName2startDescriptor = new HashMap<>();
 
     // Autostart
 
@@ -30,15 +31,15 @@ public class LocalClientApplicationSettings {
         return descriptor.groupId + ';' + descriptor.instanceId + ';' + descriptor.applicationId + ';' + descriptor.host.getUri();
     }
 
-    // Start Script
+    // Scripts
 
     /**
-     * @param scriptName The {@link StartScriptInfo} to add to the internal {@link Map}
+     * @param scriptName The {@link ScriptInfo} to add to the internal {@link Map}
      * @param scriptInfo The {@link ClickAndStartDescriptor}
      * @param override Will use {@link Map#put(Object, Object) put} if <code>true</code>, otherwise
      *            {@link Map#putIfAbsent(Object, Object) putIfAbsent}
      */
-    public void putStartScriptInfo(String scriptName, StartScriptInfo scriptInfo, boolean override) {
+    public void putStartScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
         if (override) {
             startScriptName2startDescriptor.put(scriptName, scriptInfo);
         } else {
@@ -50,26 +51,48 @@ public class LocalClientApplicationSettings {
      * @param scriptName The name of the start script
      * @see Map#get(Object)
      */
-    public StartScriptInfo getStartScriptInfo(String scriptName) {
+    public ScriptInfo getStartScriptInfo(String scriptName) {
         return startScriptName2startDescriptor.get(scriptName);
     }
 
-    public static class StartScriptInfo {
+    /**
+     * @param scriptName The {@link ScriptInfo} to add to the internal {@link Map}
+     * @param scriptInfo The {@link ClickAndStartDescriptor}
+     * @param override Will use {@link Map#put(Object, Object) put} if <code>true</code>, otherwise
+     *            {@link Map#putIfAbsent(Object, Object) putIfAbsent}
+     */
+    public void putFileAssocScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
+        if (override) {
+            fileAssocScriptName2startDescriptor.put(scriptName, scriptInfo);
+        } else {
+            fileAssocScriptName2startDescriptor.putIfAbsent(scriptName, scriptInfo);
+        }
+    }
 
-        private final String fullScriptName;
+    /**
+     * @param scriptName The name of the file association script
+     * @see Map#get(Object)
+     */
+    public ScriptInfo getFileAssocScriptInfo(String scriptName) {
+        return fileAssocScriptName2startDescriptor.get(scriptName);
+    }
+
+    public static class ScriptInfo {
+
+        private final String scriptName;
         private final ClickAndStartDescriptor descriptor;
 
-        public StartScriptInfo() {
+        public ScriptInfo() {
             this(null, null);
         }
 
-        public StartScriptInfo(String fullScriptName, ClickAndStartDescriptor descriptor) {
-            this.fullScriptName = fullScriptName;
+        public ScriptInfo(String scriptName, ClickAndStartDescriptor descriptor) {
+            this.scriptName = scriptName;
             this.descriptor = descriptor;
         }
 
-        public String getFullScriptName() {
-            return fullScriptName;
+        public String getScriptName() {
+            return scriptName;
         }
 
         public ClickAndStartDescriptor getDescriptor() {

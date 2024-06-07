@@ -105,20 +105,22 @@ else
 
     T_UNZ="${T}/launcher-unpack"
     mkdir "${T_UNZ}"
-    cd "${T_UNZ}"
-    echo "Unpacking launcher..."
-    unzip "${T_DL}" > /dev/null
+    (
+        cd "${T_UNZ}"
+        echo "Unpacking launcher..."
+        unzip "${T_DL}" > /dev/null
 
-    echo "Installing launcher..."
-    mv ${T_UNZ}/* ${L_HOME}
+        echo "Installing launcher..."
+        mv ${T_UNZ}/* ${L_HOME}
 
-    # ATTENTION: Linux launcher ZIP misses executable bits at the moment.
-    chmod +x ${L_HOME}/jre/bin/*
-    chmod +x ${L_HOME}/bin/launcher
-    chmod +x ${L_HOME}/bin/file-assoc.sh
-    chmod +x ${L_HOME}/bin/autostart-launcher.sh
+        # ATTENTION: Linux launcher ZIP misses executable bits at the moment.
+        chmod +x ${L_HOME}/jre/bin/*
+        chmod +x ${L_HOME}/bin/launcher
+        chmod +x ${L_HOME}/bin/file-assoc.sh
+        chmod +x ${L_HOME}/bin/autostart-launcher.sh
 
-    rm -f ${T_DL}
+        rm -f ${T_DL}
+    )
 
     if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
         echo "Creating file association and autostart entry..."
@@ -163,16 +165,18 @@ if [[ -z "${SKIP_ICON}" ]]; then
 
         T_CONV="${T}/icon"
         mkdir -p "${T_CONV}"
-        cd "${T_CONV}"
-        convert "${APP_ICON}" "${T_CONV}/${BDEPLOY_APP_UID}.png"
+        (
+            cd "${T_CONV}"
+            convert "${APP_ICON}" "${T_CONV}/${BDEPLOY_APP_UID}.png"
 
-        # produced multiple PNG's per ICO frame.
-        largest=$(identify -format '%w %i\n' "${T_CONV}/${BDEPLOY_APP_UID}*.png" | sort -n | tail -n 1 | awk '{ print $2; }')
-        if [[ ! -f "${largest}" ]]; then
-            echo "Cannot find icon for application."
-        else
-            cp "${largest}" "${APP_ICON_PNG}"
-        fi
+            # produced multiple PNG's per ICO frame.
+            largest=$(identify -format '%w %i\n' "${T_CONV}/${BDEPLOY_APP_UID}*.png" | sort -n | tail -n 1 | awk '{ print $2; }')
+            if [[ ! -f "${largest}" ]]; then
+                echo "Cannot find icon for application."
+            else
+                cp "${largest}" "${APP_ICON_PNG}"
+            fi
+        )
     fi
 fi
 

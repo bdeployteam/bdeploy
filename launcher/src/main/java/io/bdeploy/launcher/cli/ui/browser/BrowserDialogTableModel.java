@@ -155,6 +155,8 @@ class BrowserDialogTableModel extends AbstractTableModel {
                 return metadata != null && metadata.autostart;
             case START_SCRIPT:
                 return metadata != null ? metadata.startScriptName : "";
+            case FILE_ASSOC_EXTENSION:
+                return metadata != null ? metadata.fileAssocExtension : "";
         }
         return null;
     }

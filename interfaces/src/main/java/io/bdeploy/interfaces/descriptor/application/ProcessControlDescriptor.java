@@ -65,7 +65,9 @@ public class ProcessControlDescriptor {
     @JsonPropertyDescription("The name of the script of the application in the PATH environment variable.")
     public String startScriptName;
 
+    @JsonPropertyDescription("The file extension that the file association will be bound to.")
+    public String fileAssocExtension;
+
     @JsonPropertyDescription("Whether the application should be allowed to start when server is offline. Defaults to 'false'.")
     public boolean offlineStartAllowed = false;
-
 }

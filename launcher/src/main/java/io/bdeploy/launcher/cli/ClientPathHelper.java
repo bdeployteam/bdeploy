@@ -46,6 +46,16 @@ public class ClientPathHelper {
      */
     public static final String LINUX_LAUNCHER = "launcher";
 
+    /**
+     * Name of the file association utility on Windows
+     */
+    public static final String WIN_FILE_ASSOC = "FileAssoc.exe";
+
+    /**
+     * Name of the file association utility on Linux
+     */
+    public static final String LINUX_FILE_ASSOC = "file-assoc.sh";
+
     private ClientPathHelper() {
     }
 
@@ -96,6 +106,17 @@ public class ClientPathHelper {
             }
         }
         return hives;
+    }
+
+    /**
+     * Returns the native file association utility.
+     */
+    public static Path getNativeFileAssocTool(Path root) {
+        Path launcherHome = root.resolve(LAUNCHER_DIR);
+        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            return launcherHome.resolve(WIN_FILE_ASSOC);
+        }
+        return launcherHome.resolve("bin").resolve(LINUX_FILE_ASSOC);
     }
 
     /**

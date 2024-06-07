@@ -22,6 +22,7 @@ branding:
 processControl:
   supportsAutostart: true
   startScriptName: "TestScriptName"
+  fileAssocExtension: ".coolbdeployfile"
 
 supportedOperatingSystems:
   - LINUX

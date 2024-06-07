@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.swing.AbstractAction;
 import javax.swing.InputMap;
@@ -52,19 +53,23 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.audit.Auditor;
-import io.bdeploy.common.util.StringHelper;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
-import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
+import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
-import io.bdeploy.launcher.cli.LocalStartScriptHelper;
+import io.bdeploy.launcher.cli.scripts.LocalScriptHelper;
+import io.bdeploy.launcher.cli.scripts.ScriptUtils;
+import io.bdeploy.launcher.cli.scripts.impl.LocalFileAssocScriptHelper;
+import io.bdeploy.launcher.cli.scripts.impl.LocalStartScriptHelper;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
 import io.bdeploy.launcher.cli.ui.WindowHelper;
 import io.bdeploy.launcher.cli.ui.browser.workers.AppLauncher;
@@ -89,6 +94,7 @@ public class BrowserDialog extends BaseDialog {
     private final transient boolean readonlyRoot;
     private final transient Auditor auditor;
 
+    private final OperatingSystem os;
     private final BrowserDialogTableModel model;
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel;
     private final JTable table;
@@ -107,6 +113,7 @@ public class BrowserDialog extends BaseDialog {
     private JMenuItem updateItem;
     private JMenuItem uninstallItem;
     private JMenuItem activateStartScriptItem;
+    private JMenuItem activateFileAssocScriptItem;
 
     private JProgressBar progressBar;
 
@@ -118,6 +125,7 @@ public class BrowserDialog extends BaseDialog {
         this.readonlyRoot = userArea != null;
         this.auditor = userArea != null ? RollingFileAuditor.getFactory().apply(userArea) : null;
 
+        this.os = OsHelper.getRunningOs();
         this.model = new BrowserDialogTableModel(bhiveDir, auditor);
         this.sortModel = new TableRowSorter<>(model);
         this.table = new JTable(model);
@@ -271,7 +279,12 @@ public class BrowserDialog extends BaseDialog {
         columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(bhiveDir, auditor, sortModel));
 
         TableColumn columnS = columnModel.getColumn(BrowserDialogTableColumn.START_SCRIPT.ordinal());
-        columnS.setCellRenderer(new BrowserDialogStartScriptCellRenderer(bhiveDir, auditor, sortModel));
+        columnS.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
+                .getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, metadata.startScriptName))));
+
+        TableColumn columnF = columnModel.getColumn(BrowserDialogTableColumn.FILE_ASSOC_EXTENSION.ordinal());
+        columnF.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
+                .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, metadata.fileAssocExtension))));
 
         // Launch on double click
         table.addMouseListener(new DoubleClickListener());
@@ -318,6 +331,11 @@ public class BrowserDialog extends BaseDialog {
         activateStartScriptItem.setToolTipText("Set this application to be started with its given script name.");
         activateStartScriptItem.addActionListener(this::onActivateStartScriptButtonClicked);
 
+        activateFileAssocScriptItem = new JMenuItem("Activate File Association");
+        activateFileAssocScriptItem.setIcon(WindowHelper.loadIcon("/enable.png", 16, 16));
+        activateFileAssocScriptItem.setToolTipText("Associate files with this application.");
+        activateFileAssocScriptItem.addActionListener(this::onActivateFileAssocScriptButtonClicked);
+
         verifyItem = new JMenuItem(verifyButton.getText());
         verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
         verifyItem.setToolTipText(verifyButton.getToolTipText());
@@ -338,6 +356,7 @@ public class BrowserDialog extends BaseDialog {
         menu.add(uninstallItem);
         menu.add(new JSeparator());
         menu.add(activateStartScriptItem);
+        menu.add(activateFileAssocScriptItem);
         menu.add(new JSeparator());
         menu.add(verifyItem);
         menu.add(reinstallItem);
@@ -522,22 +541,26 @@ public class BrowserDialog extends BaseDialog {
 
     /** Activate the start script of the selected application */
     private void onActivateStartScriptButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        String scriptName = app.metadata.startScriptName;
+        handleScriptChange(dpp -> new LocalStartScriptHelper(os, auditor,//
+                rootDir, dpp.get(SpecialDirectory.ROOT), dpp.get(SpecialDirectory.START_SCRIPTS)), "start");
+    }
 
-        if (!StringHelper.isNullOrBlank(scriptName)) {
-            ClickAndStartDescriptor clickAndStart = app.clickAndStart;
-            DeploymentPathProvider dpp = new DeploymentPathProvider(rootDir.resolve("apps"), null, clickAndStart.applicationId,
-                    "1");
-            try {
-                new LocalStartScriptHelper(auditor, rootDir, dpp.get(SpecialDirectory.ROOT),
-                        dpp.get(SpecialDirectory.START_SCRIPTS)).createStartScript(scriptName, clickAndStart, true);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null, "Failed to change active start script: " + ex.getMessage(), "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+    /** Activate the file association script of the selected application */
+    private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
+        handleScriptChange(dpp -> new LocalFileAssocScriptHelper(os, auditor,//
+                rootDir, dpp.get(SpecialDirectory.ROOT), dpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS)), "file association");
+    }
+
+    private void handleScriptChange(Function<DeploymentPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
+        ClientSoftwareConfiguration config = getSelectedApps().get(0);
+        ClickAndStartDescriptor clickAndStart = config.clickAndStart;
+        DeploymentPathProvider dpp = new DeploymentPathProvider(rootDir.resolve("apps"), null, clickAndStart.applicationId, "1");
+        try {
+            scriptHelperCreator.apply(dpp).createScript(config.metadata, clickAndStart, true);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-
         doRefresh(model.getAll());
     }
 
@@ -650,6 +673,7 @@ public class BrowserDialog extends BaseDialog {
         uninstallButton.setEnabled(!readonlyRoot && singleAppSelected);
 
         boolean activateStartScriptItemEnabled = false;
+        boolean activateFileAssocScriptItemEnabled = false;
         if (singleAppSelected) {
             ClientSoftwareConfiguration singleApp = selectedApps.iterator().next();
             ClientApplicationDto singleAppMetadata = singleApp.metadata;
@@ -659,14 +683,24 @@ public class BrowserDialog extends BaseDialog {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
                 if (settings != null) {
-                    StartScriptInfo startScriptInfo = settings.getStartScriptInfo(singleAppMetadata.startScriptName);
-                    if (startScriptInfo != null && !singleApp.clickAndStart.equals(startScriptInfo.getDescriptor())) {
+                    ClickAndStartDescriptor clickAndStart = singleApp.clickAndStart;
+
+                    ScriptInfo startScriptInfo = settings.getStartScriptInfo(//
+                            ScriptUtils.getStartScriptIdentifier(os, singleAppMetadata.startScriptName));
+                    if (startScriptInfo != null && !clickAndStart.equals(startScriptInfo.getDescriptor())) {
                         activateStartScriptItemEnabled = true;
+                    }
+
+                    ScriptInfo fileAssocScriptInfo = settings.getFileAssocScriptInfo(//
+                            ScriptUtils.getFileAssocIdentifier(os, singleAppMetadata.fileAssocExtension));
+                    if (fileAssocScriptInfo != null && !clickAndStart.equals(fileAssocScriptInfo.getDescriptor())) {
+                        activateFileAssocScriptItemEnabled = true;
                     }
                 }
             }
         }
         activateStartScriptItem.setEnabled(activateStartScriptItemEnabled);
+        activateFileAssocScriptItem.setEnabled(activateFileAssocScriptItemEnabled);
 
         refreshItem.setEnabled(!readonlyRoot);
         refreshButton.setEnabled(!readonlyRoot);

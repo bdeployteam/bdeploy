@@ -41,16 +41,18 @@ public class ClientCleanup {
     private final Path appsDir;
     private final Path poolDir;
     private final Path startScriptsDir;
+    private final Path fileAssocScriptsDir;
 
     /**
      * Creates a new cleanup instance using the given hive
      */
-    public ClientCleanup(BHive hive, Path rootDir, Path appsDir, Path poolDir, Path startScriptsDir) {
+    public ClientCleanup(BHive hive, Path rootDir, Path appsDir, Path poolDir, Path startScriptsDir, Path fileAssocScriptsDir) {
         this.hive = hive;
         this.rootDir = rootDir;
         this.appsDir = appsDir;
         this.poolDir = poolDir;
         this.startScriptsDir = startScriptsDir;
+        this.fileAssocScriptsDir = fileAssocScriptsDir;
     }
 
     /**
@@ -165,6 +167,7 @@ public class ClientCleanup {
     private void doCleanup() {
         deleteDirIfEmpty(poolDir);
         deleteDirIfEmpty(startScriptsDir);
+        deleteDirIfEmpty(fileAssocScriptsDir);
         deleteDirIfEmpty(appsDir);
     }
 

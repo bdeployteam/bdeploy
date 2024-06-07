@@ -35,13 +35,20 @@ public class ClientApplicationDto {
         ProcessControlDescriptor processControlDescr = cfg.appDesc.processControl;
         dto.supportsAutostart = processControlDescr.supportsAutostart;
         dto.startScriptName = processControlDescr.startScriptName;
+        dto.fileAssocExtension = processControlDescr.fileAssocExtension;
 
         ApplicationConfiguration appConfig = cfg.appConfig;
+        dto.id = appConfig.id;
         dto.appName = appConfig.name;
         dto.autostart = appConfig.processControl.autostart;
 
         return dto;
     }
+
+    /**
+     * Globally unique identifier of the application
+     */
+    public String id;
 
     /**
      * The human readable name of the application
@@ -82,4 +89,9 @@ public class ClientApplicationDto {
      * The name of the start script of the client application
      */
     public String startScriptName;
+
+    /**
+     * The file extension that the file association will be bound to
+     */
+    public String fileAssocExtension;
 }

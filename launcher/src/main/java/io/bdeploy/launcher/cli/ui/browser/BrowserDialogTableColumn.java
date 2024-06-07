@@ -16,7 +16,8 @@ enum BrowserDialogTableColumn {
     REMOTE("Remote", String.class),
     LVERSION("Launcher Version", String.class),
     AUTOSTART("Autostart", Boolean.class),
-    START_SCRIPT("Start Script", String.class);
+    START_SCRIPT("Start Script", String.class),
+    FILE_ASSOC_EXTENSION("File Association", String.class);
 
     private final String columnName;
     private final Class<?> columnClass;
