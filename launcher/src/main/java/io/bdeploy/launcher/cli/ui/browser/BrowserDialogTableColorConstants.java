@@ -7,6 +7,9 @@ import java.awt.Color;
  */
 class BrowserDialogTableColorConstants {
 
+    private BrowserDialogTableColorConstants() {
+    }
+
     static final Color DISABLED = Color.LIGHT_GRAY;
     static final Color ENABLED = Color.GREEN;
     static final Color PAY_ATTENTION = new Color(255, 255, 140);
