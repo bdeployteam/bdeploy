@@ -29,9 +29,9 @@ export function mergeOrdererd<T>(a: T[], b: T[], key: (ele) => any): T[] {
       if (!result.find((x) => key(x) === key(item))) {
         // if item is not first item, find position of his left sibling in result array
         if (idx) {
-          const result_idx = result.indexOf(array[idx - 1]);
+          const resultIndex = result.indexOf(array[idx - 1]);
           // add item after left sibling position
-          result.splice(result_idx + 1, 0, item);
+          result.splice(resultIndex + 1, 0, item);
           return;
         }
         result.push(item);
