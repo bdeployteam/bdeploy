@@ -48,7 +48,7 @@ class ProbeTest {
         controller.start("Test");
         listener.await(Duration.ofSeconds(5));
 
-        // wait until the startup probe was performed at least once and returned "nope";
+        // wait until the startup probe was performed at least once and returned "nope"
         while (true) {
             Thread.sleep(100);
 
@@ -61,7 +61,7 @@ class ProbeTest {
 
         assertEquals(ProcessState.RUNNING_NOT_STARTED, controller.getState());
 
-        // update our expectations and let the probe succeed;
+        // update our expectations and let the probe succeed
         listener.expect(ProcessState.RUNNING);
         fakeStart.set(true);
 

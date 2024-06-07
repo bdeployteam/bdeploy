@@ -9,7 +9,7 @@ public final class EmptyVariableResolver implements VariableResolver {
 
     @Override
     public String apply(String t) {
-        return ""; // always resolve to *something* (non-null);
+        return ""; // always resolve to *something* (non-null)
     }
 
 }

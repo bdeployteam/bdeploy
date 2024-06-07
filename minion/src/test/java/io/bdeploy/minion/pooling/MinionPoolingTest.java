@@ -53,7 +53,7 @@ class MinionPoolingTest {
         local.execute(new PushOperation().setHiveName("GroupA").setRemote(remote).addManifest(instance));
         local.execute(new PushOperation().setHiveName("GroupB").setRemote(remote).addManifest(instance));
 
-        // after pushing the BHives should both contain the manifest and objects should be consistent;
+        // after pushing the BHives should both contain the manifest and objects should be consistent
         assertTrue(reg.get("GroupA").execute(new ManifestExistsOperation().setManifest(instance)));
         assertTrue(reg.get("GroupB").execute(new ManifestExistsOperation().setManifest(instance)));
 

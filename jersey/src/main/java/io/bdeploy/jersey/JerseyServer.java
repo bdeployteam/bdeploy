@@ -291,7 +291,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             sslEngine.setEnabledProtocols(new String[] { "TLSv1.2", "TLSv1.3" });
 
             // in case we're running on java 11 (or any non-21 (currently) FWIW), we need to check
-            // each cipher if it is supported;
+            // each cipher if it is supported.
 
             sslEngine.setEnabledCipherSuites(getSupportedCiphers(ctx, cipherSuites));
 
