@@ -166,8 +166,8 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
           );
         } else {
           const mappedDtos = usedIn.reduce((resultArray, dto) => {
-            let key = dto.id;
-            let value = resultArray.find((v) => v && v.instanceId === key);
+            const key = dto.id;
+            const value = resultArray.find((v) => v && v.instanceId === key);
             if (value) {
               value.versions.push(dto);
             } else {
