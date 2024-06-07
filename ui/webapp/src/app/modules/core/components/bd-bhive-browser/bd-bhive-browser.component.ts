@@ -312,7 +312,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
       mTag: s.tag,
       name: s.tag ? `${s.name}:${s.tag}` : s.name,
       type: s.id ? TreeEntryType.TREE : TreeEntryType.MANIFEST,
-      size: undefined,
+      size: null,
     };
     this.doDownload(dto);
   }

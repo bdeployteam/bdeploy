@@ -214,7 +214,7 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   private clearBuffer(): void {
     this.stdinBuffer = '';
     this.stdinBufferCursorPos = 0;
-    this.stdinStartX = undefined;
+    this.stdinStartX = null;
   }
 
   /** Clears the currently *visible* input, but not the buffers. Restores the cursor position as if no user input ever happened */
