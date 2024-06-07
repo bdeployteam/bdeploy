@@ -412,9 +412,7 @@ export class ProcessEditService {
   public meetsConditionOnCurrent(param: ParameterDescriptor): Observable<boolean> {
     return combineLatest([this.application$, this.process$]).pipe(
       skipWhile(([a, c]) => !a || !c),
-      map(([app, cfg]) => {
-        return this.meetsConditionOnGiven(param, app.descriptor.startCommand, cfg);
-      }),
+      map(([app, cfg]) => this.meetsConditionOnGiven(param, app.descriptor.startCommand, cfg)),
       first(),
     );
   }

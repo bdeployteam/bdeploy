@@ -243,9 +243,7 @@ export class InstanceEditService {
 
   /** Creates a standard edit factory, capturing changes by diffing as well as the current update warnings */
   public createStdEdit(): EditFactory {
-    return (desc: string, base: GlobalEditState, state: GlobalEditState) => {
-      return new InstanceEdit(desc, base, state);
-    };
+    return (desc: string, base: GlobalEditState, state: GlobalEditState) => new InstanceEdit(desc, base, state);
   }
 
   /** Creates a special edit factory which reorders applications on the given node */
@@ -256,9 +254,7 @@ export class InstanceEditService {
     source: string,
     target: string,
   ): EditFactory {
-    return (desc: string) => {
-      return new InstanceApplicationMoveEdit(desc, node, previous, current, source, target);
-    };
+    return (desc: string) => new InstanceApplicationMoveEdit(desc, node, previous, current, source, target);
   }
 
   /**

@@ -48,9 +48,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
     };
   };
 
-  protected hasChild = (_: number, _nodeData: DirTreeNode) => {
-    return _nodeData.expandable;
-  };
+  protected hasChild = (_: number, _nodeData: DirTreeNode) => _nodeData.expandable;
 
   ngOnInit(): void {
     this.dirFlattener = new MatTreeFlattener<ConfigDirDto, DirTreeNode>(

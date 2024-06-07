@@ -48,9 +48,7 @@ export class UserGroupBulkService {
     return this.selection$.pipe(
       take(1),
       map((g) => g.map((group) => group.id)),
-      switchMap((ids) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/delete`, ids);
-      }),
+      switchMap((ids) => this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/delete`, ids)),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -61,9 +59,7 @@ export class UserGroupBulkService {
     return this.selection$.pipe(
       take(1),
       map((g) => g.map((group) => group.id)),
-      switchMap((ids) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/inactive/${inactive}`, ids);
-      }),
+      switchMap((ids) => this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/inactive/${inactive}`, ids)),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -75,9 +71,9 @@ export class UserGroupBulkService {
       take(1),
       map((g) => g.map((group) => group.id)),
       map((groupIds) => ({ scopedPermission, groupIds })),
-      switchMap((data: UserGroupBulkAssignPermissionDto) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/assign-permission`, data);
-      }),
+      switchMap((data: UserGroupBulkAssignPermissionDto) =>
+        this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/assign-permission`, data),
+      ),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -89,9 +85,9 @@ export class UserGroupBulkService {
       take(1),
       map((g) => g.map((group) => group.id)),
       map((groupIds) => ({ scope, groupIds })),
-      switchMap((data: UserGroupBulkRemovePermissionDto) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/remove-permission`, data);
-      }),
+      switchMap((data: UserGroupBulkRemovePermissionDto) =>
+        this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/remove-permission`, data),
+      ),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );

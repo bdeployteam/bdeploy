@@ -132,10 +132,6 @@ export class ProcessDetailsService implements OnDestroy {
         }/${detail.status.appId}`,
         NO_LOADING_BAR,
       )
-      .pipe(
-        map((e) => {
-          return [e, e.entries[0]];
-        }),
-      );
+      .pipe(map((e) => [e, e.entries[0]]));
   }
 }

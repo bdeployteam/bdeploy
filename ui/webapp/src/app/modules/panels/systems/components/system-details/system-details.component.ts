@@ -27,9 +27,12 @@ export class SystemDetailsComponent implements OnInit, OnDestroy {
   protected instancesUsing$ = new BehaviorSubject<InstanceDto[]>(null);
   protected instancesUsingColumns = [this.instanceColumns.instanceNameColumn, this.instanceColumns.instanceIdColumn];
 
-  protected getRecordRoute = (row: InstanceDto) => {
-    return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.id];
-  };
+  protected getRecordRoute = (row: InstanceDto) => [
+    '/instances',
+    'dashboard',
+    this.areas.groupContext$.value,
+    row.instanceConfiguration.id,
+  ];
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;

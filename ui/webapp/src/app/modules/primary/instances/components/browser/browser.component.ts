@@ -77,9 +77,12 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDataDisplayComponent) private data: BdDataDisplayComponent<InstanceDto>;
 
-  protected getRecordRoute = (row: InstanceDto) => {
-    return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.id];
-  };
+  protected getRecordRoute = (row: InstanceDto) => [
+    '/instances',
+    'dashboard',
+    this.areas.groupContext$.value,
+    row.instanceConfiguration.id,
+  ];
 
   protected isCardView: boolean;
   protected sort: Sort = { active: 'name', direction: 'asc' };

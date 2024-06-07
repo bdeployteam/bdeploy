@@ -18,9 +18,10 @@ export class ServersBrowserComponent implements OnInit {
 
   grouping: BdDataGroupingDefinition<ManagedMasterDto>[] = [];
 
-  protected getRecordRoute = (row: ManagedMasterDto) => {
-    return ['', { outlets: { panel: ['panels', 'servers', 'details', row.hostName] } }];
-  };
+  protected getRecordRoute = (row: ManagedMasterDto) => [
+    '',
+    { outlets: { panel: ['panels', 'servers', 'details', row.hostName] } },
+  ];
 
   protected isCardView: boolean;
   protected presetKeyValue = 'managedServers';

@@ -50,9 +50,10 @@ export class NodesComponent {
   protected nodesAdmin = inject(NodesAdminService);
 
   protected sort: Sort = { active: 'name', direction: 'asc' };
-  protected getRecordRoute = (row: MinionRecord) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'node-detail', row.name] } }];
-  };
+  protected getRecordRoute = (row: MinionRecord) => [
+    '',
+    { outlets: { panel: ['panels', 'admin', 'node-detail', row.name] } },
+  ];
   protected columns: BdDataColumn<MinionRecord>[] = [
     nodeColName,
     nodeColStatus,

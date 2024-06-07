@@ -48,9 +48,7 @@ export class UserBulkService {
     return this.selection$.pipe(
       take(1),
       map((users) => users.map((user) => user.name)),
-      switchMap((names) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/delete`, names);
-      }),
+      switchMap((names) => this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/delete`, names)),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -61,9 +59,7 @@ export class UserBulkService {
     return this.selection$.pipe(
       take(1),
       map((users) => users.map((user) => user.name)),
-      switchMap((names) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/inactive/${inactive}`, names);
-      }),
+      switchMap((names) => this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/inactive/${inactive}`, names)),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -75,9 +71,9 @@ export class UserBulkService {
       take(1),
       map((users) => users.map((user) => user.name)),
       map((userNames) => ({ scopedPermission, userNames })),
-      switchMap((data: UserBulkAssignPermissionDto) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/assign-permission`, data);
-      }),
+      switchMap((data: UserBulkAssignPermissionDto) =>
+        this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/assign-permission`, data),
+      ),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -89,9 +85,9 @@ export class UserBulkService {
       take(1),
       map((users) => users.map((user) => user.name)),
       map((userNames) => ({ scope, userNames })),
-      switchMap((data: UserBulkRemovePermissionDto) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/remove-permission`, data);
-      }),
+      switchMap((data: UserBulkRemovePermissionDto) =>
+        this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/remove-permission`, data),
+      ),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );
@@ -102,9 +98,9 @@ export class UserBulkService {
     return this.selection$.pipe(
       take(1),
       map((users) => users.map((user) => user.name)),
-      switchMap((names) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/add-to-group/${groupId}`, names);
-      }),
+      switchMap((names) =>
+        this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/add-to-group/${groupId}`, names),
+      ),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false)),
     );

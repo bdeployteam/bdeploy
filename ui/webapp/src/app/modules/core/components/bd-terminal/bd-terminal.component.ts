@@ -56,11 +56,12 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.term.underlying.attachCustomKeyEventHandler((event) => {
-      // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
-      // and default Ctrl-C/X has nothing to copy) and Ctrl-V
-      return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
-    });
+    this.term.underlying.attachCustomKeyEventHandler(
+      (event) =>
+        // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
+        // and default Ctrl-C/X has nothing to copy) and Ctrl-V
+        !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1,
+    );
 
     this.term.underlying.options.fontSize = 12;
 

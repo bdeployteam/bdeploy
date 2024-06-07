@@ -48,9 +48,7 @@ export class BHiveComponent implements OnInit {
   protected columns: BdDataColumn<HiveInfoDto>[] = [colAvatar, colId, colPoolEnabled, colPerm];
   protected sort: Sort = { active: 'id', direction: 'asc' };
 
-  protected getRecordRoute = (row: HiveInfoDto) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'bhive', row.name] } }];
-  };
+  protected getRecordRoute = (row: HiveInfoDto) => ['', { outlets: { panel: ['panels', 'admin', 'bhive', row.name] } }];
 
   ngOnInit() {
     this.load();

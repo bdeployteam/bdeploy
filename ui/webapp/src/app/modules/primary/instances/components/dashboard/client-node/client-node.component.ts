@@ -31,9 +31,10 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
   protected nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
   protected columns = this.appCols.defaultProcessClientColumns;
 
-  protected getRecordRoute = (row: ApplicationConfiguration) => {
-    return ['', { outlets: { panel: ['panels', 'groups', 'client', row.id] } }];
-  };
+  protected getRecordRoute = (row: ApplicationConfiguration) => [
+    '',
+    { outlets: { panel: ['panels', 'groups', 'client', row.id] } },
+  ];
 
   protected isCardView: boolean;
   protected presetKeyValue = 'processList';

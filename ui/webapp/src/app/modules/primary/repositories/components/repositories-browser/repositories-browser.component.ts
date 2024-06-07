@@ -15,9 +15,7 @@ export class RepositoriesBrowserComponent implements OnInit {
   protected repositoriesColumns = inject(RepositoriesColumnsService);
   protected authenticationService = inject(AuthenticationService);
 
-  protected getRecordRoute = (row: SoftwareRepositoryConfiguration) => {
-    return ['/repositories', 'repository', row.name];
-  };
+  protected getRecordRoute = (row: SoftwareRepositoryConfiguration) => ['/repositories', 'repository', row.name];
 
   protected isCardView: boolean;
   protected presetKeyValue = 'softwareRepositories';

@@ -51,9 +51,10 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
 
   protected columns = [...this.appCols.defaultProcessesColumns];
 
-  protected getRecordRoute = (row: ApplicationConfiguration) => {
-    return ['', { outlets: { panel: ['panels', 'instances', 'process', row.id] } }];
-  };
+  protected getRecordRoute = (row: ApplicationConfiguration) => [
+    '',
+    { outlets: { panel: ['panels', 'instances', 'process', row.id] } },
+  ];
 
   protected isCardView: boolean;
   protected presetKeyValue = 'processList';
