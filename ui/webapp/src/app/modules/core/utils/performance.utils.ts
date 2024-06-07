@@ -47,7 +47,7 @@ export const measure = function <T>(name: string) {
 
 function logMeasurements(name: string, entries: PerformanceEntryList) {
   const last = entries[entries.length - 1];
-  const avg = entries.map((p) => p.duration).reduce((p, c) => p + c) / entries.length;
+  const avg = entries.map((entry) => entry.duration).reduce((p, c) => p + c, 0) / entries.length;
   console.group(name);
   try {
     logTiming('Total Duration [ms]', last.duration);
