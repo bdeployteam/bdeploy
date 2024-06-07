@@ -105,7 +105,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
             return false;
         }
         ClientApplicationDto metadata = apps.get(rowIndex).metadata;
-        return metadata == null ? false : metadata.supportsAutostart;
+        return metadata != null && metadata.supportsAutostart;
     }
 
     @Override
@@ -144,7 +144,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
                         return storedValue.booleanValue();
                     }
                 }
-                return metadata != null ? metadata.autostart : false;
+                return metadata != null && metadata.autostart;
         }
         return null;
     }
