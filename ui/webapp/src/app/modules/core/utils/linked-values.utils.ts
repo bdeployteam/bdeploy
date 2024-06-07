@@ -16,7 +16,9 @@ import { getAppOs } from './manifest.utils';
 const ARITH_EXPR = `(\\+|-|)?[0-9]+`;
 
 export function createLinkedValue(val: string): LinkedValueConfiguration {
-  return !!val && val.indexOf('{{') != -1 ? { linkExpression: val, value: null } : { linkExpression: null, value: val };
+  return !!val && val.indexOf('{{') !== -1
+    ? { linkExpression: val, value: null }
+    : { linkExpression: null, value: val };
 }
 
 export function getPreRenderable(config: LinkedValueConfiguration, type?: ParameterType): string {
@@ -82,7 +84,7 @@ function expand(expression: string, expansions: LinkVariable[]): string {
     }
 
     const linkVariableId = match[0];
-    const linkVariable = expansions.find((v) => (v.matches ? v.matches(linkVariableId) : v.link == linkVariableId));
+    const linkVariable = expansions.find((v) => (v.matches ? v.matches(linkVariableId) : v.link === linkVariableId));
     if (!linkVariable) {
       return expression; // the link variable in the expression is not known to us -> we cannot expand it -> we return the expression as it currently is
     }

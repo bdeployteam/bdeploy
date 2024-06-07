@@ -122,7 +122,7 @@ export class ProcessesService {
         // central interval = 15 seconds, so warning every 45 seconds.
         // local interval = 5 seconds, so warning every 20 seconds.
         // (warning after N calls have already been cancelled, so interval * count + 1)
-        if (this.loadCancelCount > 0 && this.loadCancelCount % (this.isCentral ? 2 : 3) == 0) {
+        if (this.loadCancelCount > 0 && this.loadCancelCount % (this.isCentral ? 2 : 3) === 0) {
           if (!this.loadWarnIssued) {
             this.loadWarnIssued = true;
             this.snackbar.open('Process status response seems to be very slow, please be patient.', 'ACKNOWLEDGE');

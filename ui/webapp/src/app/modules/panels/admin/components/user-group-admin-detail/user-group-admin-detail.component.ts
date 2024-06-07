@@ -75,7 +75,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
           this.suggestedUsers = [];
         } else {
           this.users = users.filter((u) => u.groups.indexOf(group.id) >= 0);
-          this.suggestedUsers = users.filter((u) => u.groups.indexOf(group.id) == -1);
+          this.suggestedUsers = users.filter((u) => u.groups.indexOf(group.id) === -1);
         }
       }),
     );
