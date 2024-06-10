@@ -10,6 +10,7 @@ import {
   SimpleChanges,
   inject,
 } from '@angular/core';
+import { editor } from 'monaco-editor';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { MonacoCompletionsService } from '../../services/monaco-completions.service';
 import { ThemeService } from '../../services/theme.service';
@@ -41,6 +42,10 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   @Input() readonly: boolean;
   @Input() completions: ContentCompletion[] = [];
 
+  @Input() markerRegex: string;
+  // might return null, which means nothing will be marked for the given FindMatch
+  @Input() createMarker: (m: editor.FindMatch) => editor.IMarkerData;
+
   @Output() contentChange = new EventEmitter<string>();
 
   protected editorContent = '';
@@ -68,6 +73,9 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     if (changes.completions) {
       this.editorCompletions.setCompletions(this.completions);
     }
+    if (changes.markerRegex || changes.createMarker) {
+      this.setModelMarkers();
+    }
   }
 
   ngOnDestroy(): void {
@@ -77,7 +85,6 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   protected onMonacoInit(monaco) {
     this.monaco = monaco;
     this.globalMonaco = window['monaco'];
-
     // only do this once!
     if (!this.globalMonaco['__providerRegistered']) {
       // register completion provider.
@@ -99,7 +106,18 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   protected onModelChange(event: string) {
+    this.setModelMarkers();
     this.contentChange.emit(event);
+  }
+
+  private setModelMarkers() {
+    if (!this.markerRegex || !this.createMarker || !this.globalMonaco) {
+      return;
+    }
+    const model = this.globalMonaco.editor.getModel(this.globalMonaco.Uri.parse(this.editorPath));
+    const matches = model.findMatches(this.markerRegex, true, true, false, null, true);
+    const markers = matches.map((m) => this.createMarker(m)).filter((m) => !!m);
+    this.globalMonaco.editor.setModelMarkers(model, 'markers', markers);
   }
 
   private onPathChange() {
@@ -115,6 +133,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
       this.globalMonaco.Uri.parse(this.editorPath),
     );
     this.monaco.setModel(model);
+    this.setModelMarkers();
   }
 
   private createCompletionProvider(editorCompletions: MonacoCompletionsService): any {
