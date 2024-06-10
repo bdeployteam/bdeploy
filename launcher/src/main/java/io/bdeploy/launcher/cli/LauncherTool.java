@@ -39,11 +39,11 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
+import io.bdeploy.bhive.op.DirectoryLockOperation;
+import io.bdeploy.bhive.op.DirectoryReleaseOperation;
 import io.bdeploy.bhive.op.ExportOperation;
-import io.bdeploy.bhive.op.LockDirectoryOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
-import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.RemoteBHive;
@@ -587,7 +587,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private <T> T doExecuteLocked(BHive hive, LauncherSplashReporter reporter, Callable<T> runnable) {
         if (!readOnlyRootDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                hive.execute(new LockDirectoryOperation().setDirectory(rootDir)); // this could wait for other launchers.
+                hive.execute(new DirectoryLockOperation().setDirectory(rootDir)); // this could wait for other launchers.
             }
         }
         log.debug("Entered locked execution mode");
@@ -600,7 +600,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } finally {
             log.debug("Leaving locked execution mode");
             if (!readOnlyRootDir) {
-                hive.execute(new ReleaseDirectoryLockOperation().setDirectory(rootDir));
+                hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
             }
         }
     }

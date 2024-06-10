@@ -7,10 +7,10 @@ import io.bdeploy.common.util.PathHelper;
 /**
  * Resolves an existing lock by deleting the lock file.
  *
- * @see LockDirectoryOperation
- * @see AwaitDirectoryLockOperation
+ * @see DirectoryLockOperation
+ * @see DirectoryAwaitOperation
  */
-public class ReleaseDirectoryLockOperation extends DirectoryLockModificationOperation {
+public class DirectoryReleaseOperation extends DirectoryModificationOperation {
 
     @Override
     public void doCall(Path lockFile) throws Exception {

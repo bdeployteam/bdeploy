@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.ObjectDatabase;
-import io.bdeploy.bhive.op.AwaitDirectoryLockOperation;
+import io.bdeploy.bhive.op.DirectoryAwaitOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
@@ -95,7 +95,7 @@ public class BHiveTransactions {
      * @return a {@link Transaction} which will cleanup associated resources when closed.
      */
     public Transaction begin() {
-        hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
+        hive.execute(new DirectoryAwaitOperation().setDirectory(markerRoot));
 
         String txid = UuidHelper.randomId();
         getOrCreate().push(txid);
@@ -116,7 +116,7 @@ public class BHiveTransactions {
         }
 
         return () -> {
-            hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
+            hive.execute(new DirectoryAwaitOperation().setDirectory(markerRoot));
 
             Stack<String> stack = transactions.get();
             if (stack == null || stack.isEmpty()) {

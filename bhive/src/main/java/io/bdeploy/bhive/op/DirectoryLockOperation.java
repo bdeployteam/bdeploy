@@ -18,15 +18,16 @@ import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.Threads;
 
 /**
- * Lock a directory. The operations waits for an already existing lock to disappear before proceeding (max 1000 seconds, ~16
- * minutes). This means only a single lock can exist (intra- and inter-VM).
+ * Locks a directory. The operations waits for an already existing lock to disappear before proceeding (max wait time is
+ * {@value DirectoryModificationOperation#RETRIES} times {@value DirectoryModificationOperation#SLEEP_MILLIS}ms ). This
+ * means only a single lock can exist (intra- and inter-VM).
  *
- * @see ReleaseDirectoryLockOperation
- * @see AwaitDirectoryLockOperation
+ * @see DirectoryAwaitOperation
+ * @see DirectoryReleaseOperation
  */
-public class LockDirectoryOperation extends DirectoryLockModificationOperation {
+public class DirectoryLockOperation extends DirectoryModificationOperation {
 
-    private static final Logger log = LoggerFactory.getLogger(LockDirectoryOperation.class);
+    private static final Logger log = LoggerFactory.getLogger(DirectoryLockOperation.class);
 
     @Override
     public void doCall(Path lockFile) throws Exception {

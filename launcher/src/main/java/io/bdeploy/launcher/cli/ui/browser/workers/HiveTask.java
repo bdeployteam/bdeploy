@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.op.LockDirectoryOperation;
-import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
+import io.bdeploy.bhive.op.DirectoryLockOperation;
+import io.bdeploy.bhive.op.DirectoryReleaseOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.ExceptionHelper;
@@ -45,12 +45,12 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
                     auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hiveDir), getActivityReporter())) {
                 try {
                     setProgress(i++);
-                    hive.execute(new LockDirectoryOperation().setDirectory(rootDir));
+                    hive.execute(new DirectoryLockOperation().setDirectory(rootDir));
                     doExecute(hive);
                 } catch (Exception ex) {
                     builder.append("Failed: " + ExceptionHelper.mapExceptionCausesToReason(ex));
                 } finally {
-                    hive.execute(new ReleaseDirectoryLockOperation().setDirectory(rootDir));
+                    hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
                 }
             }
             builder.append("\n");
