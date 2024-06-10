@@ -216,10 +216,8 @@ export class ConfigFilesService {
       return true;
     }
 
-    if (!f.persistent) {
-      if (!f.modification?.content) {
-        return true; // literally no content, empty file -> text.
-      }
+    if (!f.persistent && !f.modification?.content) {
+      return true; // literally no content, empty file -> text.
     }
 
     return false;

@@ -290,12 +290,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     });
 
     // validate that input parameters are consistent and correct.
-    if (this.dragReorderMode) {
-      if (!!this.sortData || !!this.grouping?.length || this.checkMode) {
-        throw new Error(
-          'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.',
-        );
-      }
+    if (this.dragReorderMode && (!!this.sortData || !!this.grouping?.length || this.checkMode)) {
+      throw new Error(
+        'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.',
+      );
     }
 
     setTimeout(() => this.update());
@@ -318,10 +316,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   private updateColumnsToDisplay() {
     this._visibleColumns = this._columns
       .filter((c) => {
-        if (c.showWhen) {
-          if (!this.media.isMatched(c.showWhen)) {
-            return false;
-          }
+        if (c.showWhen && !this.media.isMatched(c.showWhen)) {
+          return false;
         }
         if (this.grouping && this.grouping.findIndex((g) => g.definition?.associatedColumn === c.id) !== -1) {
           return false;
@@ -335,14 +331,12 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
   bdOnSearch(value: string): void {
     this.search = value;
-    if (!this.checkSelection.isEmpty()) {
-      // Whenever we perform a search/filter we clear all check selection.
-      // This is to avoid having a check selection on a non-visible row.
-      // We *don't* do this if there is a callback which may prevent deselection.
-      if (!this.checkChangeAllowed) {
-        this.checkSelection.clear();
-        this.checkedChange.emit([]);
-      }
+    // Whenever we perform a search/filter we clear all check selection.
+    // This is to avoid having a check selection on a non-visible row.
+    // We *don't* do this if there is a callback which may prevent deselection.
+    if (!this.checkSelection.isEmpty() && !this.checkChangeAllowed) {
+      this.checkSelection.clear();
+      this.checkedChange.emit([]);
     }
     this.update();
   }

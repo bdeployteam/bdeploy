@@ -426,18 +426,16 @@ export class InstancesService {
       }
 
       this.update$.next(group);
-      if (change.details[ObjectChangeDetails.CHANGE_HINT]) {
-        if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER && !!this.active$.value) {
-          // update banner in active version if it changes on the server.
-          this.http
-            .get<InstanceBannerRecord>(
-              `${this.apiPath(this.group)}/${this.active$.value.instanceConfiguration.id}/banner`,
-            )
-            .subscribe((banner) => {
-              this.active$.value.banner = banner;
-              this.active$.next(this.active$.value);
-            });
-        }
+      if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER && !!this.active$.value) {
+        // update banner in active version if it changes on the server.
+        this.http
+          .get<InstanceBannerRecord>(
+            `${this.apiPath(this.group)}/${this.active$.value.instanceConfiguration.id}/banner`,
+          )
+          .subscribe((banner) => {
+            this.active$.value.banner = banner;
+            this.active$.next(this.active$.value);
+          });
       }
     });
   }

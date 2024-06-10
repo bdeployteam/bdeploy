@@ -51,15 +51,13 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
     this.subscription.add(
       this.instances.current$.subscribe((s) => {
         let confirm = of(true);
-        if (this.isDirty()) {
-          if (!!s && !isEqual(this.orig, s.banner)) {
-            // original banner changed *elsewhere*, *and* we have changes, confirm reset
-            confirm = this.dialog.confirm(
-              'Banner Changed',
-              'The banner has been changed in another session. You can update to those changes but will loose local modifications.',
-              'merge_type',
-            );
-          }
+        if (this.isDirty() && !!s && !isEqual(this.orig, s.banner)) {
+          // original banner changed *elsewhere*, *and* we have changes, confirm reset
+          confirm = this.dialog.confirm(
+            'Banner Changed',
+            'The banner has been changed in another session. You can update to those changes but will loose local modifications.',
+            'merge_type',
+          );
         }
 
         confirm.subscribe((r) => {
