@@ -1,4 +1,4 @@
-const { CycloneDxWebpackPlugin } = require('@cyclonedx/webpack-plugin')
+const { CycloneDxWebpackPlugin } = require('@cyclonedx/webpack-plugin');
 
 module.exports = {
   plugins: [
@@ -6,7 +6,7 @@ module.exports = {
       specVersion: '1.6',
       outputLocation: '../../../../build/repots/webapp',
       reproducibleResults: true,
-      validateResults: true
-    })
-  ]
-}
+      validateResults: true,
+    }),
+  ],
+};
