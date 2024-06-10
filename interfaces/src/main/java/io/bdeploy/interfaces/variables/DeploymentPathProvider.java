@@ -21,7 +21,8 @@ public class DeploymentPathProvider {
         DATA("data"),
         LOG_DATA("log_data"),
         MANIFEST_POOL("pool"),
-        INSTANCE_MANIFEST_POOL("pool");
+        INSTANCE_MANIFEST_POOL("pool"),
+        START_SCRIPTS("start_scripts");
 
         private final String dirName;
 
@@ -82,7 +83,7 @@ public class DeploymentPathProvider {
                 return get(SpecialDirectory.ROOT).resolve(dir.dirName);
             case BIN:
                 return get(SpecialDirectory.ROOT).resolve(dir.dirName).resolve(tagId);
-            case MANIFEST_POOL:
+            case MANIFEST_POOL, START_SCRIPTS:
                 // Note: this reaches outside of the given "root" deploymentDir - assumes that the parent is shared by all instances
                 return get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName);
             case INSTANCE_MANIFEST_POOL:

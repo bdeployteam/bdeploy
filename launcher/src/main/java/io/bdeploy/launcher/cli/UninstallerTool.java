@@ -16,8 +16,11 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
+import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.UninstallerTool.UninstallerConfig;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
@@ -67,6 +70,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             log.info("Removing application {}", appId);
             Path appsDir = rootDir.resolve("apps");
             Path poolDir = appsDir.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
+            Path startScriptsDir = appsDir.resolve(SpecialDirectory.START_SCRIPTS.getDirName());
 
             // Delegate removal to the delegated application
             ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
@@ -78,13 +82,29 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
                 doUninstallApp(rootDir, appId);
             }
 
+            // Remove corresponding script
+            ClientApplicationDto metadata = config.metadata;
+            if (metadata != null) {
+                String startScriptName = metadata.startScriptName;
+                if (!StringHelper.isNullOrBlank(startScriptName)) {
+                    StartScriptInfo startScriptInfo = new LocalClientApplicationSettingsManifest(hive).read().getStartScriptInfo(startScriptName);
+                    if (config.clickAndStart.equals(startScriptInfo.getDescriptor())) {
+                        Path startScript = startScriptsDir.resolve(startScriptInfo.getFullScriptName());
+                        if (PathHelper.exists(startScript)) {
+                            PathHelper.deleteRecursiveRetry(startScript);
+                            log.info("Removed script {}", startScriptName);
+                        }
+                    }
+                }
+            }
+
             // Remove the manifest which software is used by this application
             if (cmf.remove(appId)) {
                 log.info("Removed software manifest.");
             }
 
             // Trigger cleanup to remove from hive and from pool
-            ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
+            ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir);
             cleanup.run();
         } finally {
             hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
@@ -117,5 +137,4 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             log.info("Removed application folder {}", appDir);
         }
     }
-
 }

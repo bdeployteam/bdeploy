@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,6 +66,7 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VariableResolver;
@@ -199,6 +201,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Path where the pooled products and artifacts are stored */
     private Path poolDir;
 
+    /** Path where the start scripts are stored */
+    private Path startScriptsDir;
+
     /** The user-directory for the hive */
     private Path userArea;
 
@@ -308,7 +313,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     log.warn("Migrated node detected, cannot continue");
                     return;
                 }
-                doInstall(hive, reporter, splash);
+                doInstall(hive, reporter, splash, auditor);
 
                 // Launch the application
                 if (!config.updateOnly()) {
@@ -325,7 +330,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             if (!readOnlyRootDir) {
                 log.info("Cleaning unused launchers and applications ...");
                 doExecuteLocked(hive, reporter, () -> {
-                    ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
+                    ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir);
                     cleanup.run();
                     return null;
                 });
@@ -530,13 +535,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         dpp = new DeploymentPathProvider(appsDir, null, clickAndStart.applicationId, "1");
         appDir = dpp.get(SpecialDirectory.ROOT);
         poolDir = dpp.get(SpecialDirectory.MANIFEST_POOL);
+        startScriptsDir = dpp.get(SpecialDirectory.START_SCRIPTS);
 
         // Enrich log messages with the application that is about to be launched
         String pid = String.format("PID: %1$5s", ProcessHandle.current().pid());
         MDC.put(MdcLogger.MDC_NAME, pid + " | App: " + clickAndStart.applicationId);
     }
 
-    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash) {
+    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor) {
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
 
@@ -562,7 +568,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if missing
         doExecuteLocked(hive, reporter, () -> {
-            installApplication(hive, splash, reporter, clientAppCfg);
+            installApplication(hive, splash, reporter, clientAppCfg, auditor);
             return null;
         });
     }
@@ -694,7 +700,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Installs the application with all requirements in case it is not already installed
      */
     private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
-            ClientApplicationConfiguration clientAppCfg) {
+            ClientApplicationConfiguration clientAppCfg, Auditor auditor) {
         ApplicationConfiguration appCfg = clientAppCfg.appConfig;
 
         // Check if the application directory is already present
@@ -767,6 +773,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             splash.storeSplashData(branding);
         }
 
+        // Create the click-and-start file
+        try {
+            ClientPathHelper.getOrCreateClickAndStart(rootDir, clickAndStart);
+        } catch (IOException e) {
+            log.error("Initial creation of click-and-start file failed.", e);
+        }
+
         // Protocol the installation
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
@@ -775,7 +788,21 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);
 
-        // Calculate the difference which software is not required anymore
+        // Handle start script changes
+        String startScriptName = clientAppCfg.appDesc.processControl.startScriptName;
+        if (!StringHelper.isNullOrBlank(startScriptName)) {
+            try {
+                new LocalStartScriptHelper(auditor, rootDir, appDir, startScriptsDir).createStartScript(startScriptName, clickAndStart,
+                        false);
+            } catch (FileAlreadyExistsException e) {
+                log.error(
+                        "Failed to create start script in {} because a different application is already using the same script name: {}",
+                        startScriptsDir, startScriptName);
+            } catch (IOException e) {
+                log.error("Failed to create start script in {}", startScriptsDir, e);
+            }
+        }
+
         log.info("Application successfully installed.");
     }
 
