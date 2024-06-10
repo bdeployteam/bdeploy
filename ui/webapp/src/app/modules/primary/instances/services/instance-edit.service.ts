@@ -74,7 +74,6 @@ export class InstanceEdit implements Edit {
 
   constructor(
     public description: string,
-    base: GlobalEditState,
     current: GlobalEditState,
   ) {
     // clone current state so nobody outside can modify what we stored.
@@ -243,7 +242,7 @@ export class InstanceEditService {
 
   /** Creates a standard edit factory, capturing changes by diffing as well as the current update warnings */
   public createStdEdit(): EditFactory {
-    return (desc: string, base: GlobalEditState, state: GlobalEditState) => new InstanceEdit(desc, base, state);
+    return (desc: string, base: GlobalEditState, state: GlobalEditState) => new InstanceEdit(desc, state);
   }
 
   /** Creates a special edit factory which reorders applications on the given node */
