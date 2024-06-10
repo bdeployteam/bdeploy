@@ -382,8 +382,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     };
     this.dialog
       .message({
-        header: 'Edit Custom Parameter',
         template,
+        header: 'Edit Custom Parameter',
         actions: [ACTION_CANCEL, ACTION_OK],
         validation: () => {
           if (this.validateCustomFields.length < 1) {

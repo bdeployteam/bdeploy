@@ -83,10 +83,10 @@ function addNode(
   const path = [parent.path, name].filter((i) => !!i).join('/');
   if (paths.length === 0) {
     const leaf: FilePath = {
-      crumbs: [...parent.crumbs],
       minion,
       name,
       path,
+      crumbs: [...parent.crumbs],
       directory: entry.directory,
       entry: entry.entry,
       children: [],
@@ -101,10 +101,10 @@ function addNode(
   let node: FilePath = parent.children.find((node) => node.path === path);
   if (!node) {
     node = {
-      crumbs: [...parent.crumbs],
       minion,
       name,
       path,
+      crumbs: [...parent.crumbs],
       directory: entry.directory,
       entry: undefined,
       children: [],
