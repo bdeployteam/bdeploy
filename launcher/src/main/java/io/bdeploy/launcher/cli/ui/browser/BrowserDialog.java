@@ -257,7 +257,7 @@ public class BrowserDialog extends BaseDialog {
         columnR.setPreferredWidth(150);
 
         TableColumn columnA = columnModel.getColumn(BrowserDialogTableColumn.AUTOSTART.ordinal());
-        columnA.setPreferredWidth(30);
+        columnA.setPreferredWidth(40);
         columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(bhiveDir, auditor, sortModel));
 
         // Launch on double click
