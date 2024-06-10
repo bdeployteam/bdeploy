@@ -73,12 +73,12 @@ class InstanceProcessControllerParallelTest {
         List<String> order = new ArrayList<>();
         ProcessController pc1 = processList.get("App1");
         ProcessController pc2 = processList.get("App2");
-        pc1.addStatusListener((s) -> {
+        pc1.addStatusListener(s -> {
             if (s.newState == ProcessState.RUNNING) {
                 order.add(pc1.getDescriptor().id);
             }
         });
-        pc2.addStatusListener((s) -> {
+        pc2.addStatusListener(s -> {
             if (s.newState == ProcessState.RUNNING) {
                 order.add(pc2.getDescriptor().id);
 
