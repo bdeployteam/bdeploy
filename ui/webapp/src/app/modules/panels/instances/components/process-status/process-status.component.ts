@@ -458,7 +458,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       const restartProgress = 100 - 100 * (remainingSeconds / totalSeconds);
       const remainingHint = remainingSeconds + ' seconds';
 
-      if (restartProgress != this.restartProgress$.value || remainingHint != this.restartProgressText$.value) {
+      if (restartProgress !== this.restartProgress$.value || remainingHint !== this.restartProgressText$.value) {
         this.zone.run(() => {
           this.restartProgress$.next(restartProgress);
           this.restartProgressText$.next(remainingHint);

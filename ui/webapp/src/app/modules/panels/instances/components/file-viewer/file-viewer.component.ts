@@ -84,7 +84,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
 
     this.subscription.add(
       this.areas.primaryRoute$.subscribe((primRoute) => {
-        this.showEdit = primRoute.url.some((segment) => segment.path == 'data-files');
+        this.showEdit = primRoute.url.some((segment) => segment.path === 'data-files');
       }),
     );
   }
