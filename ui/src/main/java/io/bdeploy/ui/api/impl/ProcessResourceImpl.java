@@ -53,7 +53,7 @@ public class ProcessResourceImpl implements ProcessResource {
 
             var running = instanceStatus.getNodeWhereAppIsRunningOrScheduled(app);
             if (running != null) {
-                // takes precedence;
+                // takes precedence
                 result.processToNode.put(app, running);
             }
         }

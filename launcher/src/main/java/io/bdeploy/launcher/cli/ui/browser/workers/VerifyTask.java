@@ -44,7 +44,7 @@ public class VerifyTask extends HiveTask {
         Manifest.Key manifest = cac.appConfig.application;
 
         Path targetPath = rootDir.resolve("apps").resolve(SpecialDirectory.MANIFEST_POOL.getDirName())
-                .resolve(manifest.directoryFriendlyName());// ClientPathHelper.getAppHomeDir(rootDir, app.clickAndStart);
+                .resolve(manifest.directoryFriendlyName());
 
         VerifyOperationResultDto result = new VerifyOperationResultDto(
                 hive.execute(new VerifyOperation().setTargetPath(targetPath).setManifest(manifest)));

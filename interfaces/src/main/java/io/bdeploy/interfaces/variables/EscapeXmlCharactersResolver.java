@@ -23,11 +23,11 @@ public class EscapeXmlCharactersResolver extends PrefixResolver {
         if (unescaped == null) {
             return null;
         }
-        return unescaped.replace("'", "&apos;") // Replace ' with &apos;
-                .replace("\"", "&quot;") // Replace " with &quot;
-                .replace("&", "&amp;") // Replace & with &amp;
-                .replace("<", "&lt;") // Replace < with &lt;
-                .replace(">", "&gt;"); // Replace > with &gt;
+        return unescaped.replace("'", "&apos;") //
+                .replace("\"", "&quot;") //
+                .replace("&", "&amp;") //
+                .replace("<", "&lt;") //
+                .replace(">", "&gt;"); //
     }
 
 }
