@@ -96,9 +96,10 @@ export class UsersBrowserComponent {
   ];
   protected sort: Sort = { active: 'name', direction: 'asc' };
 
-  protected getRecordRoute = (row: UserInfo) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } }];
-  };
+  protected getRecordRoute = (row: UserInfo) => [
+    '',
+    { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } },
+  ];
 
   protected addUser: Partial<UserInfo>;
   protected addConfirm: string;

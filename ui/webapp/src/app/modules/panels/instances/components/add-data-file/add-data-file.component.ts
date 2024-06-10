@@ -91,11 +91,9 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.directory = this.filesService.directories$.value.find((d) => d.minion === this.fileMinion$.value);
 
     // standard update
-    let update: Observable<any> = this.filesService.updateFile(this.directory, this.fileToSave).pipe(
-      switchMap(() => {
-        return of(true);
-      }),
-    );
+    let update: Observable<any> = this.filesService
+      .updateFile(this.directory, this.fileToSave)
+      .pipe(switchMap(() => of(true)));
 
     // replace update
     if (this.shouldReplace()) {

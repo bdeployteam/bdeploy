@@ -41,9 +41,7 @@ export function searchThroughObject(obj, args) {
     }
 
     if (Array.isArray(val)) {
-      val.forEach((item) => {
-        return searchThroughObject(item, args);
-      });
+      val.forEach((item) => searchThroughObject(item, args));
     }
 
     if (val !== null) {
