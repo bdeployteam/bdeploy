@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,19 +46,19 @@ class MinionUpdateTest {
     TestCliTool cli = new TestCliTool(new MinionServerCli());
 
     @Test
-    void testUpdate(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) throws IOException {
+    void testUpdate(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) {
         doTestUpdate(root, remote, tmp, local);
     }
 
     @Tag("CENTRAL")
     @Test
-    void testUpdateCentral(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) throws IOException {
+    void testUpdateCentral(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) {
         doTestUpdate(root, remote, tmp, local);
     }
 
     @Tag("MANAGED")
     @Test
-    void testUpdateManaged(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) throws IOException {
+    void testUpdateManaged(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) {
         doTestUpdate(root, remote, tmp, local);
     }
 
@@ -91,22 +90,22 @@ class MinionUpdateTest {
     }
 
     @Test
-    void testZippedUpdate(MinionRoot root, RemoteService svc, @TempDir Path tmp, @AuthPack String auth)
-            throws IOException, GeneralSecurityException {
+    void testZippedUpdate(MinionRoot root, RemoteService svc, @TempDir Path tmp, @AuthPack String auth)//
+            throws IOException {
         doTestZippedUpdate(root, svc, tmp, auth);
     }
 
     @Tag("CENTRAL")
     @Test
-    void testZippedUpdateCentral(MinionRoot root, RemoteService svc, @TempDir Path tmp, @AuthPack String auth)
-            throws IOException, GeneralSecurityException {
+    void testZippedUpdateCentral(MinionRoot root, RemoteService svc, @TempDir Path tmp, @AuthPack String auth)//
+            throws IOException {
         doTestZippedUpdate(root, svc, tmp, auth);
     }
 
     @Tag("MANAGED")
     @Test
-    void testZippedUpdateManaged(MinionRoot root, RemoteService svc, @TempDir Path tmp, @AuthPack String auth)
-            throws IOException, GeneralSecurityException {
+    void testZippedUpdateManaged(MinionRoot root, RemoteService svc, @TempDir Path tmp, @AuthPack String auth)//
+            throws IOException {
         doTestZippedUpdate(root, svc, tmp, auth);
     }
 
