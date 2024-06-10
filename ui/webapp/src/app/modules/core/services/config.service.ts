@@ -84,7 +84,7 @@ export class ConfigService {
       this.checkInterval = setInterval(() => this.checkServerVersion(), 60000);
     });
 
-    this.offline$.pipe(distinctUntilChanged()).subscribe(o => {
+    this.offline$.pipe(distinctUntilChanged()).subscribe((o) => {
       this.ngZone.run(() => {
         if(!o) {
           this.closeOverlay();
