@@ -132,8 +132,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           const grouped = {};
-          // eslint-disable-next-line no-unsafe-optional-chaining
-          for (const app of nodeConfig?.nodeConfiguration?.applications) {
+          for (const app of nodeConfig.nodeConfiguration.applications) {
             let group = this.getControlGroup(app);
             if (!group) {
               console.error('no control group found for', app);

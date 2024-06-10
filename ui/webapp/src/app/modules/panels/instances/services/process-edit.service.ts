@@ -318,8 +318,7 @@ export class ProcessEditService {
       }
     }
 
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    for (const node of this.edit.state$.value?.config.nodeDtos) {
+    for (const node of this.edit.state$.value.config.nodeDtos) {
       for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         for (const id of Object.keys(values)) {
           const p = app.start?.parameters?.find((x) => x.id === id);
@@ -338,8 +337,7 @@ export class ProcessEditService {
   }
 
   public getGlobalParameter(id: string): ParameterConfiguration {
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    for (const node of this.edit.state$.value?.config.nodeDtos) {
+    for (const node of this.edit.state$.value.config.nodeDtos) {
       for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         const p = app.start?.parameters?.find((x) => x.id === id);
         if (p) {

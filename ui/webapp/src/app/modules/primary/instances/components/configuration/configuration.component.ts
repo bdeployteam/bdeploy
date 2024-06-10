@@ -190,8 +190,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
       return true;
     }
 
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    for (const node of this.edit.state$.value?.config.nodeDtos) {
+    for (const node of this.edit.state$.value.config.nodeDtos) {
       if (node.nodeConfiguration?.applications?.length) {
         return false;
       }

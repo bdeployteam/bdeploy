@@ -32,8 +32,7 @@ export class EditProcessNameValidatorDirective implements Validator {
     }
 
     const errors = {};
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    for (const n of this.edit.state$.value?.config.nodeDtos) {
+    for (const n of this.edit.state$.value.config.nodeDtos) {
       if (n.nodeName === CLIENT_NODE_NAME) {
         // it is OK for client applications!
         continue;

@@ -173,8 +173,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         isCustom: true,
         isSelectMode: false,
       };
-      // eslint-disable-next-line no-unsafe-optional-chaining
-      for (const pv of process.start?.parameters) {
+      for (const pv of process.start.parameters) {
         if (!app.descriptor?.startCommand?.parameters?.find((d) => d.id === pv.id)) {
           // no descriptor -> custom
           this.custom.pairs.push({

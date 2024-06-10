@@ -90,8 +90,7 @@ export class ConfigPair {
 
     const sortedNodes = base?.nodes?.nodeConfigDtos ? [...base.nodes.nodeConfigDtos] : [];
     if (compare?.nodes?.nodeConfigDtos) {
-      // eslint-disable-next-line no-unsafe-optional-chaining
-      for (const node of compare?.nodes?.nodeConfigDtos) {
+      for (const node of compare.nodes.nodeConfigDtos) {
         if (!sortedNodes.find((n) => n.nodeName === node.nodeName)) {
           sortedNodes.push(node);
         }

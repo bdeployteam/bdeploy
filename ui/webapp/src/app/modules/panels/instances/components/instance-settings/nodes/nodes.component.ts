@@ -85,8 +85,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   protected onCheckedChange(rows: NodeRow[]) {
     // need to propagate changes to the state object.
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    for (const node of [...this.edit.state$.value?.config.nodeDtos]) {
+    for (const node of [...this.edit.state$.value.config.nodeDtos]) {
       if (node.nodeName === CLIENT_NODE_NAME) {
         continue;
       }

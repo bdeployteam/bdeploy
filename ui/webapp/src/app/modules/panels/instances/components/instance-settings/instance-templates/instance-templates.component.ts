@@ -121,10 +121,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     } else {
       return [
         null,
-        // eslint-disable-next-line no-unsafe-optional-chaining
-        ...this.instanceEdit.state$.value?.config?.nodeDtos
-          .map((n) => n.nodeName)
-          .filter((n) => n !== CLIENT_NODE_NAME),
+        ...this.instanceEdit.state$.value.config.nodeDtos.map((n) => n.nodeName).filter((n) => n !== CLIENT_NODE_NAME),
       ];
     }
   }
