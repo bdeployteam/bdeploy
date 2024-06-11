@@ -59,13 +59,15 @@ public class LocalStartScriptHelper {
 
     private String getStartScriptContent(OperatingSystem os) {
         if (os == OperatingSystem.WINDOWS) {
-            return "start /d \"" + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).toAbsolutePath() + "\" "
-                    + ClientPathHelper.WIN_LAUNCHER + " \"" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + "\" %*";
+            return "@echo off\n"//
+                    + "start /d \"" + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).toAbsolutePath() + "\" "
+                    + ClientPathHelper.WIN_LAUNCHER + " \"" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + "\" -- %*";
         }
         return "#!/usr/bin/env bash\n" //
-            + "function strip_colon { echo \"${1::-2}\"; }\n" //
-            + "ARGS=$(echo \"[\" \"$(strip_colon \"$(printf \"\\\"%s\\\", \" \"${@}\";)\")\" \"]\" | base64 -)\n" //
-            + ClientPathHelper.getNativeLauncher(launcherDir) + " launcher --launch=" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + " --appendArgs=${ARGS}";
+                + "function strip_colon { echo \"${1::-2}\"; }\n" //
+                + "ARGS=$(echo \"[\" \"$(strip_colon \"$(printf \"\\\"%s\\\", \" \"${@}\";)\")\" \"]\" | base64 -)\n" //
+                + ClientPathHelper.getNativeLauncher(launcherDir) + " launcher --launch="
+                + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + " --appendArgs=${ARGS}";
     }
 
     private void updateSettings(String name, String fullName, ClickAndStartDescriptor clickAndStart, boolean override) {
