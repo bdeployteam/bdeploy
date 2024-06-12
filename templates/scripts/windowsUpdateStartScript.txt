@@ -66,12 +66,15 @@ mkdir "%APP_UPDATE_BAK%"
 move /y "%APP_HOME%\\jre" "%APP_UPDATE_BAK%\\jre"
 move /y "%APP_HOME%\\lib" "%APP_UPDATE_BAK%\\lib"
 move /y "%APP_HOME%\\version.properties" "%APP_UPDATE_BAK%\\version.properties"
+mkdir "%APP_UPDATE_BAK%\\bin"
+copy /y "%APP_HOME%\\bin\\_bdeploy.bat" "%APP_UPDATE_BAK%\\bin\\_bdeploy.bat"
 
 @rem Copy files from update to current directory
 echo "Copying new files from update directory."
 move /y "%APP_UPDATE_NEXT%\\lib" "%APP_HOME%\\lib"
 move /y "%APP_UPDATE_NEXT%\\jre" "%APP_HOME%\\jre"
 move /y "%APP_UPDATE_NEXT%\\version.properties" "%APP_HOME%\\version.properties"
+move /y "%APP_UPDATE_NEXT%\\bin\\_bdeploy.bat" "%APP_HOME%\\bin\\_bdeploy-new.bat"
 
 @rem Remove update after all files have been copied
 echo "Cleanup update directory."
