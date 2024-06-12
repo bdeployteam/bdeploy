@@ -242,6 +242,21 @@ namespace Bdeploy.Installer {
                     }
                 }
 
+                // Add the laucher to autostart
+                RegistryKey baseKey = forAllUsers ? Registry.LocalMachine : Registry.CurrentUser;
+                RegistryKey autorunKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                autorunKey?.SetValue("BDeploy Launcher Autostart", '"' + launcherExe + "\" /autostart");
+
+                // Create the path directory and insert it into the PATH environment variable
+                Directory.CreateDirectory(pathDir);
+                string pathVariableName = "PATH";
+                EnvironmentVariableTarget scope = forAllUsers ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.User;
+                string currentValue = Environment.GetEnvironmentVariable(pathVariableName, scope);
+                if (!currentValue.Split(';').Contains(pathDir)) {
+                    string newValue = currentValue + ';' + pathDir;
+                    Environment.SetEnvironmentVariable(pathVariableName, newValue, scope);
+                }
+
                 // Associate bdeploy files with the launcher
                 FileAssociation.CreateAssociation(launcherExe, forAllUsers);
 
@@ -336,24 +351,6 @@ namespace Bdeploy.Installer {
 
             // Cleanup. Download not required any more
             FileHelper.DeleteDir(tmpDir);
-
-            // Add the laucher to autostart
-            RegistryKey baseKey = forAllUsers ? Registry.LocalMachine : Registry.CurrentUser;
-            RegistryKey autorunKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            if (autorunKey == null) {
-                return false;
-            }
-            autorunKey.SetValue("BDeploy Launcher Autostart", '"' + launcherExe + "\" /autostart");
-
-            // Create path directory and insert it into the PATH
-            Directory.CreateDirectory(pathDir);
-            string pathVariableName = "PATH";
-            EnvironmentVariableTarget scope = forAllUsers ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.User;
-            string currentValue = Environment.GetEnvironmentVariable(pathVariableName, scope);
-            if (!currentValue.Split(';').Contains(pathDir)) {
-                string newValue = currentValue + ';' + pathDir;
-                Environment.SetEnvironmentVariable(pathVariableName, newValue, scope);
-            }
 
             return true;
         }
