@@ -27,6 +27,11 @@ public class ProxiedRequestWrapper {
         @JsonCreator
         public ProxiedRequestCookie(@JsonProperty("name") String name, @JsonProperty("value") String value,
                 @JsonProperty("version") int version, @JsonProperty("path") String path, @JsonProperty("domain") String domain) {
+            this.name = name;
+            this.value = value;
+            this.version = version;
+            this.path = path;
+            this.domain = domain;
         }
 
     }
