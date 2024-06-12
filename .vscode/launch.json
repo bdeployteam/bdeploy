@@ -1,67 +1,140 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Init (Standalone)",
-            "request": "launch",
-            "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
-            "projectName": "minion",
-            "args": ["-vv", "init", "--root=${workspaceFolder}/../runtime/master", "--hostname=localhost", "--port=7701", "--dist=ignore", "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin", "--pool=${workspaceFolder}/../runtime/master-pool"],
-            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
-        },
-        {
-            "type": "java",
-            "name": "Master (Standalone)",
-            "request": "launch",
-            "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
-            "projectName": "minion",
-            "args": ["-vv", "start", "--root=${workspaceFolder}/../runtime/master", "--allowCors", "--consoleLog"],
-            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
-        },
-        {
-            "type": "java",
-            "name": "Launcher (Browser)",
-            "request": "launch",
-            "mainClass": "io.bdeploy.launcher.cli.LauncherCli",
-            "projectName": "launcher",
-            "args": ["--homeDir=${workspaceFolder}/../runtime/launcher-vsc"],
-            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
-        },
-        {
-            "type": "java",
-            "name": "Launcher (Select .bdeploy)",
-            "request": "launch",
-            "mainClass": "io.bdeploy.launcher.cli.LauncherCli",
-            "projectName": "launcher",
-            "args": ["--homeDir=${workspaceFolder}/../runtime/launcher-vsc", "${input:pickBDeployFile}"],
-            "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Chrome (Standalone)",
-            "url": "http://localhost:4200",
-            "webRoot": "${workspaceFolder}/ui/webapp",
-            "outFiles": ["${workspaceFolder}/ui/webapp/**/*.js", "!**/node_modules/**"],
-            "runtimeArgs": ["--allow-insecure-localhost"]
-          },
-    ],
-    "inputs": [
-        {
-            "id": "pickBDeployFile",
-            "type": "command",
-            "command": "extension.commandvariable.file.openDialog",
-            "args": {
-                "canSelect": "files",
-                "defaultUri": "${workspaceFolder}",
-                "filters": {
-                    "BDeploy": ["bdeploy"]
-                }
-            }
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Init (Standalone)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+      "projectName": "minion",
+      "args": [
+        "-vv",
+        "init",
+        "--root=${workspaceFolder}/../runtime/master",
+        "--hostname=localhost",
+        "--port=7701",
+        "--dist=ignore",
+        "--mode=standalone",
+        "--initUser=admin",
+        "--initPassword=adminadminadmin",
+        "--pool=${workspaceFolder}/../runtime/master-pool"
+      ],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Init (Managed)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+      "projectName": "minion",
+      "args": [
+        "-vv",
+        "init",
+        "--root=${workspaceFolder}/../runtime/managed",
+        "--hostname=localhost",
+        "--port=7706",
+        "--dist=ignore",
+        "--mode=managed",
+        "--initUser=admin",
+        "--initPassword=adminadminadmin"
+      ],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Init (Central)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+      "projectName": "minion",
+      "args": [
+        "-vv",
+        "init",
+        "--root=${workspaceFolder}/../runtime/central",
+        "--hostname=localhost",
+        "--port=7705",
+        "--dist=ignore",
+        "--mode=central",
+        "--initUser=admin",
+        "--initPassword=adminadminadmin"
+      ],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Master (Standalone)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+      "projectName": "minion",
+      "args": ["-vv", "start", "--root=${workspaceFolder}/../runtime/master", "--allowCors", "--consoleLog"],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Master (Managed)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+      "projectName": "minion",
+      "args": ["-vv", "start", "--root=${workspaceFolder}/../runtime/managed", "--allowCors", "--consoleLog"],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Master (Central)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.minion.cli.MinionServerCli",
+      "projectName": "minion",
+      "args": ["-vv", "start", "--root=${workspaceFolder}/../runtime/central", "--allowCors", "--consoleLog"],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Launcher (Browser)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.launcher.cli.LauncherCli",
+      "projectName": "launcher",
+      "args": ["--homeDir=${workspaceFolder}/../runtime/launcher-vsc"],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "java",
+      "name": "Launcher (Select .bdeploy)",
+      "request": "launch",
+      "mainClass": "io.bdeploy.launcher.cli.LauncherCli",
+      "projectName": "launcher",
+      "args": ["--homeDir=${workspaceFolder}/../runtime/launcher-vsc", "${input:pickBDeployFile}"],
+      "vmArgs": ["-XX:+HeapDumpOnOutOfMemoryError", "-Xmx256m"]
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Chrome (Standalone)",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/ui/webapp",
+      "outFiles": ["${workspaceFolder}/ui/webapp/**/*.js", "!**/node_modules/**"],
+      "runtimeArgs": ["--allow-insecure-localhost"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "pickBDeployFile",
+      "type": "command",
+      "command": "extension.commandvariable.file.openDialog",
+      "args": {
+        "canSelect": "files",
+        "defaultUri": "${workspaceFolder}",
+        "filters": {
+          "BDeploy": ["bdeploy"]
         }
-    ]
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Master (Central & Managed)",
+      "configurations": ["Master (Central)", "Master (Managed)"]
+    }
+  ]
 }
