@@ -83,16 +83,19 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             }
 
             // Remove corresponding script
-            ClientApplicationDto metadata = config.metadata;
-            if (metadata != null) {
-                String startScriptName = metadata.startScriptName;
-                if (!StringHelper.isNullOrBlank(startScriptName)) {
-                    StartScriptInfo startScriptInfo = new LocalClientApplicationSettingsManifest(hive).read().getStartScriptInfo(startScriptName);
-                    if (config.clickAndStart.equals(startScriptInfo.getDescriptor())) {
-                        Path startScript = startScriptsDir.resolve(startScriptInfo.getFullScriptName());
-                        if (PathHelper.exists(startScript)) {
-                            PathHelper.deleteRecursiveRetry(startScript);
-                            log.info("Removed script {}", startScriptName);
+            if (config != null) {
+                ClientApplicationDto metadata = config.metadata;
+                if (metadata != null) {
+                    String startScriptName = metadata.startScriptName;
+                    if (!StringHelper.isNullOrBlank(startScriptName)) {
+                        StartScriptInfo startScriptInfo = new LocalClientApplicationSettingsManifest(hive).read()
+                                .getStartScriptInfo(startScriptName);
+                        if (config.clickAndStart.equals(startScriptInfo.getDescriptor())) {
+                            Path startScript = startScriptsDir.resolve(startScriptInfo.getFullScriptName());
+                            if (PathHelper.exists(startScript)) {
+                                PathHelper.deleteRecursiveRetry(startScript);
+                                log.info("Removed script {}", startScriptName);
+                            }
                         }
                     }
                 }
