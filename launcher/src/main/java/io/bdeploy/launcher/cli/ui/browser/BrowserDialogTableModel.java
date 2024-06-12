@@ -12,9 +12,10 @@ import java.util.TreeMap;
 import javax.swing.table.AbstractTableModel;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.launcher.LocalClientApplicationSettings;
+import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.logging.audit.RollingFileAuditor;
@@ -112,7 +113,10 @@ class BrowserDialogTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (BrowserDialogTableColumn.fromIndex(columnIndex) == BrowserDialogTableColumn.AUTOSTART) {
             try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
-                new MetaManifest<>(apps.get(rowIndex).key, false, Boolean.class).write(hive, (boolean) aValue);
+                LocalClientApplicationSettingsManifest manifest = new LocalClientApplicationSettingsManifest(hive);
+                LocalClientApplicationSettings settings = manifest.read();
+                settings.putAutostartEnabled(apps.get(rowIndex).clickAndStart, (boolean) aValue);
+                manifest.write(settings);
             }
             fireTableCellUpdated(rowIndex, columnIndex);
         }
@@ -138,10 +142,14 @@ class BrowserDialogTableModel extends AbstractTableModel {
             case LVERSION:
                 return app.launcher != null ? app.launcher.getTag() : "";
             case AUTOSTART:
+                LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
-                    Boolean storedValue = new MetaManifest<>(app.key, false, Boolean.class).read(hive);
-                    if (storedValue != null) {
-                        return storedValue.booleanValue();
+                    settings = new LocalClientApplicationSettingsManifest(hive).read();
+                }
+                if (settings != null) {
+                    Boolean autostartEnabled = settings.getAutostartEnabled(apps.get(rowIndex).clickAndStart);
+                    if (autostartEnabled != null) {
+                        return autostartEnabled;
                     }
                 }
                 return metadata != null && metadata.autostart;

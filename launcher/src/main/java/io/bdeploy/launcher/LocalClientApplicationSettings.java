@@ -7,7 +7,30 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 public class LocalClientApplicationSettings {
 
+    private final Map<String, Boolean> startDescriptor2autostartEnabled = new HashMap<>();
     private final Map<String, StartScriptInfo> startScriptName2startDescriptor = new HashMap<>();
+
+    // Autostart
+
+    /**
+     * @see Map#put(Object, Object)
+     */
+    public void putAutostartEnabled(ClickAndStartDescriptor descriptor, boolean enabled) {
+        startDescriptor2autostartEnabled.put(stringifyClickAndStartDescriptor(descriptor), enabled);
+    }
+
+    /**
+     * @see Map#get(Object)
+     */
+    public Boolean getAutostartEnabled(ClickAndStartDescriptor descriptor) {
+        return startDescriptor2autostartEnabled.get(stringifyClickAndStartDescriptor(descriptor));
+    }
+
+    private static String stringifyClickAndStartDescriptor(ClickAndStartDescriptor descriptor) {
+        return descriptor.groupId + ';' + descriptor.instanceId + ';' + descriptor.applicationId + ';' + descriptor.host.getUri();
+    }
+
+    // Start Script
 
     /**
      * @param scriptName The {@link StartScriptInfo} to add to the internal {@link Map}

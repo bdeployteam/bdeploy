@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -19,6 +18,8 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.launcher.LocalClientApplicationSettings;
+import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.AutostartTool.AutostartConfig;
 import io.bdeploy.launcher.cli.ui.browser.workers.AppLauncher;
 import io.bdeploy.logging.audit.RollingFileAuditor;
@@ -81,9 +82,12 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
             new ClientSoftwareManifest(hive).list().parallelStream()//
                     .filter(appConfig -> appConfig.clickAndStart != null)//
                     .filter(appConfig -> {
-                        Boolean storedValue = new MetaManifest<>(appConfig.key, false, Boolean.class).read(hive);
-                        if (storedValue != null) {
-                            return storedValue;
+                        LocalClientApplicationSettings settings = new LocalClientApplicationSettingsManifest(hive).read();
+                        if (settings != null) {
+                            Boolean autostartEnabled = settings.getAutostartEnabled(appConfig.clickAndStart);
+                            if (autostartEnabled != null) {
+                                return autostartEnabled;
+                            }
                         }
                         return appConfig.metadata.autostart;
                     })//

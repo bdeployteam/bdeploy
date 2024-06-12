@@ -10,9 +10,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.launcher.LocalClientApplicationSettings;
+import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.logging.audit.RollingFileAuditor;
@@ -42,12 +43,15 @@ class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UIResourc
             if (metadata == null) {
                 component.setBackground(BrowserDialogTableColorConstants.COULD_NOT_CALCULATE);
             } else if (metadata.supportsAutostart) {
-                Boolean storedValue = null;
+                LocalClientApplicationSettings settings = null;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
-                    storedValue = new MetaManifest<>(config.key, false, Boolean.class).read(hive);
+                    settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                if (storedValue != null && storedValue != metadata.autostart) {
-                    component.setBackground(BrowserDialogTableColorConstants.PAY_ATTENTION);
+                if (settings != null) {
+                    Boolean autostartEnabled = settings.getAutostartEnabled(config.clickAndStart);
+                    if (autostartEnabled != null && autostartEnabled != metadata.autostart) {
+                        component.setBackground(BrowserDialogTableColorConstants.PAY_ATTENTION);
+                    }
                 }
             } else {
                 component.setBackground(BrowserDialogTableColorConstants.DISABLED);

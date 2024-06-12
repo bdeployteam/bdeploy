@@ -3,9 +3,6 @@ package io.bdeploy.launcher.cli;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
@@ -22,12 +19,6 @@ public class ClientSoftwareConfiguration {
      * </p>
      */
     public Manifest.Key launcher;
-
-    /**
-     * The key of the {@link ClientSoftwareConfiguration} in the {@link BHive}.
-     */
-    @JsonIgnore
-    public Manifest.Key key;
 
     /**
      * The descriptor that was used to launch the application.
