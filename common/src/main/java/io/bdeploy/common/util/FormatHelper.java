@@ -16,7 +16,6 @@ import java.util.Locale;
  */
 public class FormatHelper {
 
-    private static final SimpleDateFormat DURATION_FORMAT = new SimpleDateFormat("mm 'min' ss 'sec' SSS 'ms'");
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("#,##0.#");
     private static final DecimalFormat TRANSFER_FORMAT = new DecimalFormat("#0.0");
     private static final String[] SIZE_UNITS = new String[] { "B", "kB", "MB", "GB", "TB" };
@@ -30,7 +29,7 @@ public class FormatHelper {
      * Formats the given duration into a human readable format
      */
     public static String formatDuration(long timeInMillis) {
-        return DURATION_FORMAT.format(new Date(timeInMillis));
+        return new SimpleDateFormat("mm 'min' ss 'sec' SSS 'ms'").format(new Date(timeInMillis));
     }
 
     /**
