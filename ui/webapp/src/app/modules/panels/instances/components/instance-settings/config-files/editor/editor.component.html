@@ -17,6 +17,8 @@
         [(content)]="content"
         [path]="file"
         [completions]="completions"
+        [markerRegex]="variableExpansionRegex"
+        [createMarker]="markUnresolvedExpansion"
       ></app-bd-editor>
     </div>
   </app-bd-dialog-content>
