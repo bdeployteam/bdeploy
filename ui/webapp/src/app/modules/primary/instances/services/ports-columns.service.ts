@@ -94,7 +94,7 @@ export class PortsColumnsService {
     }
 
     return {
-      status: undefined,
+      status: null,
       message: null,
     };
   }

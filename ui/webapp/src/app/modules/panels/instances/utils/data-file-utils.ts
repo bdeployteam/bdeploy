@@ -49,11 +49,11 @@ export function constructDataFilePaths(
     name: minion,
     path: '',
     crumbs: [],
-    directory: undefined,
-    entry: undefined,
+    directory: null,
+    entry: null,
     children: [],
-    lastModified: undefined,
-    size: undefined,
+    lastModified: null,
+    size: null,
   };
   root.crumbs.push({ label: minion, onClick: () => selectPath(root) });
   for (const e of entries) {
@@ -106,10 +106,10 @@ function addNode(
       path,
       crumbs: [...parent.crumbs],
       directory: entry.directory,
-      entry: undefined,
+      entry: null,
       children: [],
-      lastModified: undefined, // will be calculated after tree is constructed
-      size: undefined, // will be calculated after tree is constructed
+      lastModified: null, // will be calculated after tree is constructed
+      size: null, // will be calculated after tree is constructed
     };
     node.crumbs.push({ label: name, onClick: () => selectPath(node) });
     parent.children.push(node);
