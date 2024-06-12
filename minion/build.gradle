@@ -38,7 +38,7 @@ dependencies {
 rootProject.addMultiPlatformDistBuild(project)
 
 startScripts {
-    applicationName = 'bdeploy'
+    applicationName = '_bdeploy'
 }
 
 evaluationDependsOn(':launcher')
@@ -76,10 +76,17 @@ distributions {
     win64 {
         distributionBaseName = 'bdeploy-win64'
         addLauncherDist(it)
+        contents {
+            exclude '_bdeploy'
+        }
     }
     linux64 {
         distributionBaseName = 'bdeploy-linux64'
         addLauncherDist(it)
+        contents {
+            exclude '_bdeploy.bat'
+            rename('_bdeploy', 'bdeploy')
+        }
     }
     mac64 {
         distributionBaseName = 'bdeploy-mac64'
