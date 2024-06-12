@@ -69,7 +69,7 @@ export class NavAreasService {
         const adminSnapshot = this.findRouteLeaf(admin)?.snapshot;
 
         // update the states visible to the flyin part of the main nav.
-        this.panelVisible$.next(panelSnapshot ? true : false);
+        this.panelVisible$.next(!!panelSnapshot);
         this.panelMaximized$.next(!!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']);
 
         // we compare the full route from the root of the primary snapshot to determine whether
