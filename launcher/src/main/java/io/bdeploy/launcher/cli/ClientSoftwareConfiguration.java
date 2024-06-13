@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 /**
@@ -30,6 +31,12 @@ public class ClientSoftwareConfiguration {
      * server runs in a version that is too old then this DTO will be null.
      */
     public ClientApplicationDto metadata;
+
+    /**
+     * Snapshot of clientAppCfg from last installation.
+     * Used when server is not reachable to start application offline.
+     */
+    public ClientApplicationConfiguration clientAppCfg;
 
     /**
      * The software that is required by the application.
