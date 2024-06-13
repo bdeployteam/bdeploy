@@ -1,6 +1,8 @@
 package io.bdeploy.common.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.ws.rs.ProcessingException;
 
@@ -42,6 +44,20 @@ public class ExceptionHelper {
     private static boolean isIgnorableExceptionType(Throwable current) {
         // add more if required.
         return current instanceof ProcessingException;
+    }
+
+    public static Throwable getRootCause(final Throwable throwable) {
+        final List<Throwable> list = getThrowableList(throwable);
+        return list.isEmpty() ? null : list.get(list.size() - 1);
+    }
+
+    public static List<Throwable> getThrowableList(Throwable throwable) {
+        final List<Throwable> list = new ArrayList<>();
+        while (throwable != null && !list.contains(throwable)) {
+            list.add(throwable);
+            throwable = throwable.getCause();
+        }
+        return list;
     }
 
 }

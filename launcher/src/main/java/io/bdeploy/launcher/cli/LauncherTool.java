@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -60,6 +63,7 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.ExceptionHelper;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
@@ -279,6 +283,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
         try (BHive hive = new BHive(bhiveDir.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir),
                 reporter)) {
+
             // Provide callback to detect stale locks
             hive.setLockContentSupplier(LOCK_CONTENT);
             hive.setLockContentValidator(LOCK_VALIDATOR);
@@ -294,34 +299,52 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 requiredVersion = requiredLauncher.getKey();
             }
 
-            // Launch the application or delegate launching
             Process process = null;
-            if (shouldDelegate(runningVersion, requiredVersion)) {
-                log.info("Application cannot be started with this launcher: Server is running an older version.");
-                log.info("Delegating to launcher {}", requiredVersion);
-                doExecuteLocked(hive, reporter, () -> {
-                    doInstallLauncherSideBySide(hive, requiredLauncher);
-                    doInstallAppSideBySide(hive, reporter, requiredLauncher);
-                    return null;
-                });
-                process = doDelegateLaunch(requiredVersion, config.launch());
-                log.info("Launcher successfully launched. PID={}", process.pid());
-                log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
-            } else {
-                // the source server could have been migrated/converted to node. in this case, display a message.
-                if (doCheckForMigratedNode()) {
-                    log.warn("Migrated node detected, cannot continue");
-                    return;
-                }
-                doInstall(hive, reporter, splash, auditor);
-
-                // Launch the application
-                if (!config.updateOnly()) {
-                    try (Activity info = reporter.start("Launching...")) {
-                        process = launchApplication(clientAppCfg);
+            try {
+                // Launch the application or delegate launching
+                if (shouldDelegate(runningVersion, requiredVersion)) {
+                    log.info("Application cannot be started with this launcher: Server is running an older version.");
+                    log.info("Delegating to launcher {}", requiredVersion);
+                    doExecuteLocked(hive, reporter, () -> {
+                        doInstallLauncherSideBySide(hive, requiredLauncher);
+                        doInstallAppSideBySide(hive, reporter, requiredLauncher);
+                        return null;
+                    });
+                    process = doDelegateLaunch(requiredVersion, config.launch());
+                    log.info("Launcher successfully launched. PID={}", process.pid());
+                    log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
+                } else {
+                    // the source server could have been migrated/converted to node. in this case, display a message.
+                    if (doCheckForMigratedNode()) {
+                        log.warn("Migrated node detected, cannot continue");
+                        return;
                     }
-                    log.info("Application successfully launched. PID={}", process.pid());
+                    doInstall(hive, reporter, splash, auditor);
+
+                    // Launch the application
+                    if (!config.updateOnly()) {
+                        try (Activity info = reporter.start("Launching...")) {
+                            process = launchApplication(clientAppCfg, true);
+                        }
+                        log.info("Application successfully launched. PID={}", process.pid());
+                    }
                 }
+            } catch (Exception e) {
+                if (!(ExceptionHelper.getRootCause(e) instanceof ConnectException)) {
+                    throw e;
+                }
+
+                clientAppCfg = Optional.of(new ClientSoftwareManifest(hive))
+                        .map(csm -> csm.readNewest(clickAndStart.applicationId, false)).map(csc -> csc.clientAppCfg).orElse(null);
+
+                if (clientAppCfg == null || !clientAppCfg.appDesc.processControl.offlineStartAllowed) {
+                    throw e;
+                }
+
+                try (Activity info = reporter.start("Launching...")) {
+                    process = launchApplication(clientAppCfg, false);
+                }
+                log.info("Application successfully launched without contacting the server. PID={}", process.pid());
             }
 
             reporter.stop();
@@ -785,6 +808,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
         newConfig.clickAndStart = clickAndStart;
         newConfig.metadata = ClientApplicationDto.create(clickAndStart, clientAppCfg);
+        newConfig.clientAppCfg = clientAppCfg;
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);
 
@@ -792,8 +816,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         String startScriptName = clientAppCfg.appDesc.processControl.startScriptName;
         if (!StringHelper.isNullOrBlank(startScriptName)) {
             try {
-                new LocalStartScriptHelper(auditor, rootDir, appDir, startScriptsDir).createStartScript(startScriptName, clickAndStart,
-                        false);
+                new LocalStartScriptHelper(auditor, rootDir, appDir, startScriptsDir).createStartScript(startScriptName,
+                        clickAndStart, false);
             } catch (FileAlreadyExistsException e) {
                 log.error(
                         "Failed to create start script in {} because a different application is already using the same script name: {}",
@@ -903,6 +927,21 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 missing.add("Delete Meta-Manifest: " + clientConfig.launcher);
             }
         }
+
+        if (clientConfig == null || clientConfig.clientAppCfg == null) {
+            if (readOnlyRootDir) {
+                log.warn("Persistent configuration is missing");
+            } else {
+                missing.add("Persistent configuration is missing");
+            }
+        } else if (!Objects.equals(clientConfig.clientAppCfg.activeTag, clientAppCfg.activeTag)) {
+            if (readOnlyRootDir) {
+                log.warn("Persistent configuration is outdated");
+            } else {
+                missing.add("Persistent configuration is outdated");
+            }
+        }
+
         return missing;
     }
 
@@ -935,13 +974,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Launches the client process using the given configuration.
      */
-    private Process launchApplication(ClientApplicationConfiguration clientCfg) {
+    private Process launchApplication(ClientApplicationConfiguration clientCfg, boolean isServerOnline) {
         log.info("Launching application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
 
-        MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
-        MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
-        namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
+        if (isServerOnline) {
+            MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
+            MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
+            namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
+        }
 
         VariableResolver appSpecificResolvers = createResolver(clientCfg);
 
