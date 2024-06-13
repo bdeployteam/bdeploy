@@ -58,6 +58,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
+import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientPathHelper;
@@ -657,9 +658,11 @@ public class BrowserDialog extends BaseDialog {
                 try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                if (settings != null && !singleApp.clickAndStart
-                        .equals(settings.getStartScriptInfo(singleAppMetadata.startScriptName).getDescriptor())) {
-                    activateStartScriptItemEnabled = true;
+                if (settings != null) {
+                    StartScriptInfo startScriptInfo = settings.getStartScriptInfo(singleAppMetadata.startScriptName);
+                    if (startScriptInfo != null && !singleApp.clickAndStart.equals(startScriptInfo.getDescriptor())) {
+                        activateStartScriptItemEnabled = true;
+                    }
                 }
             }
         }
