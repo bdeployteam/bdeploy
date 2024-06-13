@@ -50,7 +50,7 @@ public abstract class TransportConnectionHandler<T extends Transport>//
     private int maxMessageSizeInBytes = 50_000_000;
 
     /**
-     * @throws IllegalArgumentException If the given maximum message size is < 0
+     * @throws IllegalArgumentException If the given maximum message size is less than 0
      */
     @Override
     public void setMaxMessageSize(int maxMessageSizeInBytes) {
