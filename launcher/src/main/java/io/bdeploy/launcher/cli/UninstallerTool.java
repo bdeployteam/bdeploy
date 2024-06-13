@@ -19,6 +19,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.UninstallerTool.UninstallerConfig;
@@ -88,13 +89,15 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
                 if (metadata != null) {
                     String startScriptName = metadata.startScriptName;
                     if (!StringHelper.isNullOrBlank(startScriptName)) {
-                        StartScriptInfo startScriptInfo = new LocalClientApplicationSettingsManifest(hive).read()
-                                .getStartScriptInfo(startScriptName);
-                        if (config.clickAndStart.equals(startScriptInfo.getDescriptor())) {
-                            Path startScript = startScriptsDir.resolve(startScriptInfo.getFullScriptName());
-                            if (PathHelper.exists(startScript)) {
-                                PathHelper.deleteRecursiveRetry(startScript);
-                                log.info("Removed script {}", startScriptName);
+                        LocalClientApplicationSettings settings = new LocalClientApplicationSettingsManifest(hive).read();
+                        if (settings != null) {
+                            StartScriptInfo startScriptInfo = settings.getStartScriptInfo(startScriptName);
+                            if (startScriptInfo != null && config.clickAndStart.equals(startScriptInfo.getDescriptor())) {
+                                Path startScript = startScriptsDir.resolve(startScriptInfo.getFullScriptName());
+                                if (PathHelper.exists(startScript)) {
+                                    PathHelper.deleteRecursiveRetry(startScript);
+                                    log.info("Removed script {}", startScriptName);
+                                }
                             }
                         }
                     }

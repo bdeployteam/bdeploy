@@ -13,6 +13,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
+import io.bdeploy.launcher.LocalClientApplicationSettings.StartScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
@@ -26,7 +27,8 @@ class BrowserDialogStartScriptCellRenderer extends DefaultTableCellRenderer {
     private final Auditor auditor;
     private final TableRowSorter<BrowserDialogTableModel> sortModel;
 
-    public BrowserDialogStartScriptCellRenderer(Path bhiveDir, Auditor auditor, TableRowSorter<BrowserDialogTableModel> sortModel) {
+    public BrowserDialogStartScriptCellRenderer(Path bhiveDir, Auditor auditor,
+            TableRowSorter<BrowserDialogTableModel> sortModel) {
         this.bhiveDir = bhiveDir.toUri();
         this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
         this.sortModel = sortModel;
@@ -50,11 +52,16 @@ class BrowserDialogStartScriptCellRenderer extends DefaultTableCellRenderer {
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                backgroundColor = settings == null//
-                        ? BrowserDialogTableColorConstants.COULD_NOT_CALCULATE//
-                        : config.clickAndStart.equals(settings.getStartScriptInfo(metadata.startScriptName).getDescriptor())//
-                                ? BrowserDialogTableColorConstants.ENABLED//
-                                : BrowserDialogTableColorConstants.PAY_ATTENTION;
+                if (settings == null) {
+                    backgroundColor = BrowserDialogTableColorConstants.COULD_NOT_CALCULATE;
+                } else {
+                    StartScriptInfo startScriptInfo = settings.getStartScriptInfo(metadata.startScriptName);
+                    backgroundColor = startScriptInfo == null//
+                            ? BrowserDialogTableColorConstants.DISABLED
+                            : config.clickAndStart.equals(startScriptInfo.getDescriptor())//
+                                    ? BrowserDialogTableColorConstants.ENABLED//
+                                    : BrowserDialogTableColorConstants.PAY_ATTENTION;
+                }
             }
         } else {
             backgroundColor = BrowserDialogTableColorConstants.COULD_NOT_CALCULATE;
