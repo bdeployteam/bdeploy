@@ -421,10 +421,12 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         syncBulk(sync.keySet());
 
         // TODO: same check as above regarding events.
-        sync.entrySet()
-                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
-                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
-                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            sync.entrySet()
+                    .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                            new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                            Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        }
 
         return result;
     }
@@ -462,10 +464,12 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         syncBulk(sync.keySet());
 
         // TODO: same check as above regarding events.
-        sync.entrySet()
-                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
-                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
-                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            sync.entrySet()
+                    .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                            new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                            Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        }
 
         return result;
     }
