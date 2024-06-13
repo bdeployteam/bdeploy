@@ -628,8 +628,14 @@ public class InstanceResourceImpl implements InstanceResource {
         master.getNamedMaster(group).install(instance.getManifest());
 
         syncInstance(minion, rc, group, instanceId);
-        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            // done on the master directly as well.
+            // TODO: replace with a bridge like ActionBridge
+            // hint: no resource in "ui" package should ever fire these - should be all master.
+            changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+        }
     }
 
     @Override
@@ -659,8 +665,11 @@ public class InstanceResourceImpl implements InstanceResource {
         master.getNamedMaster(group).uninstall(instance.getManifest());
 
         syncInstance(minion, rc, group, instanceId);
-        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+        }
     }
 
     @Override
@@ -672,8 +681,12 @@ public class InstanceResourceImpl implements InstanceResource {
         master.getNamedMaster(group).activate(instance.getManifest());
 
         syncInstance(minion, rc, group, instanceId);
-        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+
+        // TODO: see install - should be a bridge
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+        }
     }
 
     @Override

@@ -116,6 +116,7 @@ import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.MimeFile;
@@ -126,6 +127,10 @@ import io.bdeploy.minion.mail.MinionSignedAttachment;
 import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.api.impl.ChangeEventManager;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeHint;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.ws.rs.WebApplicationException;
@@ -162,6 +167,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Inject
     private MessageSender mailSender;
+
+    @Inject
+    private ChangeEventManager changes;
 
     private final String name;
 
@@ -245,6 +253,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             getState(imf, hive).install(key.getTag());
             imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
+
+            // inform about changes
+            changes.change(ObjectChangeType.INSTANCE, imf.getManifest(), new ObjectScope(this.name, imf.getConfiguration().id),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
 
@@ -407,6 +419,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             getState(imf, hive).activate(key.getTag());
             imf.getHistory(hive).recordAction(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
+
+            // inform about changes
+            changes.change(ObjectChangeType.INSTANCE, imf.getManifest(), new ObjectScope(this.name, imf.getConfiguration().id),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
 
@@ -448,6 +464,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             getState(imf, hive).uninstall(key.getTag());
             imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
+
+            // inform about changes
+            changes.change(ObjectChangeType.INSTANCE, imf.getManifest(), new ObjectScope(this.name, imf.getConfiguration().id),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
 
