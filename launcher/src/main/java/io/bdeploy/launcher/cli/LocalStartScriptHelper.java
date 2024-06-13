@@ -60,8 +60,9 @@ public class LocalStartScriptHelper {
     private String getStartScriptContent(OperatingSystem os) {
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
-                    + "start /d \"" + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).toAbsolutePath() + "\" "
-                    + ClientPathHelper.WIN_LAUNCHER + " \"" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + "\" -- %*";
+                    + '"'
+                    + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve(ClientPathHelper.WIN_LAUNCHER).toAbsolutePath()
+                    + "\" \"" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + "\" -- %*";
         }
         return "#!/usr/bin/env bash\n" //
                 + "function strip_colon { echo \"${1::-2}\"; }\n" //
