@@ -4,6 +4,7 @@
     "vscjava.vscode-java-pack",
     "vscjava.vscode-gradle",
     "pkief.material-icon-theme",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "rioj7.command-variable"
   ]
 }
