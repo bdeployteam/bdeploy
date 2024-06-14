@@ -22,13 +22,13 @@ import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 public class LocalStartScriptHelper {
 
     private final Auditor auditor;
-    private final Path launcherDir;
+    private final Path rootDir;
     private final Path appDir;
     private final Path startScriptsDir;
 
-    public LocalStartScriptHelper(Auditor auditor, Path launcherDir, Path appDir, Path startScriptsDir) {
+    public LocalStartScriptHelper(Auditor auditor, Path rootDir, Path appDir, Path startScriptsDir) {
         this.auditor = auditor;
-        this.launcherDir = launcherDir;
+        this.rootDir = rootDir;
         this.appDir = appDir;
         this.startScriptsDir = startScriptsDir;
     }
@@ -60,19 +60,17 @@ public class LocalStartScriptHelper {
     private String getStartScriptContent(OperatingSystem os) {
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
-                    + '"'
-                    + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve(ClientPathHelper.WIN_LAUNCHER).toAbsolutePath()
-                    + "\" \"" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + "\" -- %*";
+                    + '"' + ClientPathHelper.getScriptLauncher(rootDir).toAbsolutePath() + "\" \"launcher\" \"--launch="
+                    + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + "\" \"--homeDir="
+                    + rootDir.toAbsolutePath() + "\" --noSplash -- %*";
         }
         return "#!/usr/bin/env bash\n" //
-                + "function strip_colon { echo \"${1::-2}\"; }\n" //
-                + "ARGS=$(echo \"[\" \"$(strip_colon \"$(printf \"\\\"%s\\\", \" \"${@}\";)\")\" \"]\" | base64 -)\n" //
-                + ClientPathHelper.getNativeLauncher(launcherDir) + " launcher --launch="
-                + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME) + " --appendArgs=${ARGS}";
+                + ClientPathHelper.getScriptLauncher(rootDir).toAbsolutePath() + " launcher --launch="
+                + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + " --noSplash -- \"$@\"";
     }
 
     private void updateSettings(String name, String fullName, ClickAndStartDescriptor clickAndStart, boolean override) {
-        try (BHive hive = new BHive(launcherDir.resolve("bhive").toUri(), auditor, new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(rootDir.resolve("bhive").toUri(), auditor, new ActivityReporter.Null())) {
             LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(hive);
             LocalClientApplicationSettings settings = settingsManifest.read();
             if (settings == null) {

@@ -27,6 +27,11 @@ public class ClientPathHelper {
     public static final String LAUNCHER_DIR = "launcher";
 
     /**
+     * Name of the launcher.bat file.
+     */
+    public static final String LAUNCHER_BAT = "launcher.bat";
+
+    /**
      * Name of the launch files.
      */
     public static final String LAUNCH_FILE_NAME = "launch.bdeploy";
@@ -39,7 +44,7 @@ public class ClientPathHelper {
     /**
      * Name of the launcher on Linux
      */
-    public static final String LINUX_LAUNCHER = LAUNCHER_DIR;
+    public static final String LINUX_LAUNCHER = "launcher";
 
     private ClientPathHelper() {
     }
@@ -101,6 +106,19 @@ public class ClientPathHelper {
         Path launcherHome = root.resolve(LAUNCHER_DIR);
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             return launcherHome.resolve(WIN_LAUNCHER);
+        }
+        // On Linux and MAC the startup script is in the bin folder
+        return launcherHome.resolve("bin").resolve(LINUX_LAUNCHER);
+    }
+
+    /**
+     * Returns the script launcher which can be used to launch with console being attached.
+     */
+    public static Path getScriptLauncher(Path root) {
+        // On Windows we are searching for a BDeploy.exe executable in the launcher directory
+        Path launcherHome = root.resolve(LAUNCHER_DIR);
+        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            return launcherHome.resolve("bin").resolve(LAUNCHER_BAT);
         }
         // On Linux and MAC the startup script is in the bin folder
         return launcherHome.resolve("bin").resolve(LINUX_LAUNCHER);

@@ -3,6 +3,8 @@
 :: Mini demo client application.
 :: Current working directory is set by the launcher, so the file is in a "good" place.
 
+ECHO BDeploy Client Application.
+
 SET argumentCount=0
 FOR %%x IN (%*) DO SET /A argumentCount+=1
 

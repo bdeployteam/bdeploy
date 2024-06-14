@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.RemainingArguments;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -165,6 +167,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help(value = "Additional command line arguments for the application. The arguments must be a Base64 encoded JSON list.")
         String appendArgs();
 
+        @RemainingArguments
+        String[] remainingArgs();
+
         @Help(value = "Makes the launcher quit immediately after updating and launching the application.", arg = false)
         boolean dontWait() default false;
 
@@ -176,6 +181,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         @Help(value = "Run the launcher in unattended mode where no splash screen and error dialog is shown.", arg = false)
         boolean unattended() default false;
+
+        @Help(value = "Run the launcher without showing a splash screen. Error messages however are still shown.", arg = false)
+        boolean noSplash() default false;
 
         @Help(value = "Write log output to stdout instead of the log file.", arg = false)
         boolean consoleLog() default false;
@@ -235,7 +243,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Show splash and progress of operations
             LauncherSplash splash = new LauncherSplash(appDir);
-            if (!config.unattended()) {
+            if (!config.unattended() && !config.noSplash()) {
                 splash.show();
             }
 
@@ -992,6 +1000,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Append custom arguments if applicable
         command.addAll(decodeAdditionalArguments(config.appendArgs()));
+        if (config.remainingArgs() != null && config.remainingArgs().length > 0) {
+            command.addAll(Arrays.asList(config.remainingArgs()));
+        }
 
         // Let the user modify the command-line before launching
         if (config.customizeArgs()) {
@@ -1142,11 +1153,26 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
-        Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
+        Path launcher = ClientPathHelper.getNativeLauncher(homeDir);
+        Path scriptLauncher = ClientPathHelper.getScriptLauncher(homeDir);
+
+        boolean isNewScriptLauncher = false;
+
+        if (PathHelper.exists(scriptLauncher)) {
+            // we're in post 7.1.0 area and can use the script to keep terminal association.
+            launcher = scriptLauncher;
+            isNewScriptLauncher = true;
+        }
 
         List<String> command = new ArrayList<>();
-        command.add(nativeLauncher.toFile().getAbsolutePath());
-        command.add(appDescriptor);
+        command.add(launcher.normalize().toAbsolutePath().toString());
+        if (isNewScriptLauncher) {
+            command.add("launcher");
+            command.add("--homeDir=" + homeDir.normalize().toAbsolutePath());
+            command.add("--launch=" + appDescriptor);
+        } else {
+            command.add(appDescriptor);
+        }
         if (config.customizeArgs()) {
             command.add("--customizeArgs");
         }
@@ -1154,7 +1180,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             command.add("--updateOnly");
         }
 
-        Collection<String> appArguments = decodeAdditionalArguments(config.appendArgs());
+        if (isNewScriptLauncher && config.noSplash()) {
+            command.add("--noSplash");
+        }
+
+        Collection<String> appArguments = new ArrayList<>();
+        appArguments.addAll(decodeAdditionalArguments(config.appendArgs()));
+        if (config.remainingArgs() != null && config.remainingArgs().length > 0) {
+            appArguments.addAll(Arrays.asList(config.remainingArgs()));
+        }
         if (!appArguments.isEmpty()) {
             command.add("--");
             appArguments.forEach(arg -> command.add("\"" + arg + "\""));

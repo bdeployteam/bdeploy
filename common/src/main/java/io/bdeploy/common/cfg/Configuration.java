@@ -58,6 +58,7 @@ public class Configuration {
 
     private final Map<String, Object> objects = new TreeMap<>();
     private final Map<Method, Object> conversions = new HashMap<>();
+    private final List<String> remaining = new ArrayList<>();
 
     /**
      * Add a set of command line arguments to the mapping. Arguments must currently
@@ -66,8 +67,14 @@ public class Configuration {
      * @param arguments the command line argument as passed to the program.
      */
     public void add(String... arguments) {
+        boolean inRemaining = false;
         for (String arg : arguments) {
-            if (arg.startsWith("--")) {
+            if (inRemaining) {
+                remaining.add(arg);
+            } else if (arg.equals("--")) {
+                inRemaining = true;
+                continue;
+            } else if (arg.startsWith("--")) {
                 String stripped = arg.substring(2);
                 int equalsIndex = stripped.indexOf('=');
                 if (equalsIndex != -1) {
@@ -153,9 +160,19 @@ public class Configuration {
 
     private Object doMap(Object proxy, Method method, Object[] arguments) {
         String key = method.getName();
+        RemainingArguments isRemaining = method.getAnnotation(RemainingArguments.class);
         ConfigurationNameMapping mapping = method.getAnnotation(ConfigurationNameMapping.class);
         if (mapping != null) {
             key = mapping.value();
+        }
+
+        if (isRemaining != null) {
+            // instead of mapping, we simply inject all strings from "remaining"
+            if (!method.getReturnType().isAssignableFrom(String[].class)) {
+                throw new IllegalStateException("Receiver for remaining arguments must be of type String[]");
+            }
+
+            return remaining.toArray(new String[remaining.size()]);
         }
 
         Object value = objects.get(key);
@@ -362,6 +379,10 @@ public class Configuration {
         List<Method> declaredMethods = Arrays.asList(cfg.getDeclaredMethods()).stream()
                 .sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
         for (Method m : declaredMethods) {
+            if (m.getAnnotation(RemainingArguments.class) != null) {
+                continue; // skip in help.
+            }
+
             Help h = m.getAnnotation(Help.class);
             ConfigurationNameMapping mapping = m.getAnnotation(ConfigurationNameMapping.class);
             String name = m.getName();
@@ -405,6 +426,16 @@ public class Configuration {
     public @interface ConfigurationNameMapping {
 
         String value();
+    }
+
+    /**
+     * Marker annotation which denotes an element to receive all remaining arguments. The type of the receiver must be String[]
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface RemainingArguments {
+
     }
 
     public enum ValueMapping {

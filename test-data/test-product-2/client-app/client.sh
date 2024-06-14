@@ -4,6 +4,8 @@
 # Mini demo client application. Opens the system text editor using xdg-open
 ##
 
+echo BDeploy Client Application
+
 # Current working directory is set by the launcher, so the file is in a "good" place.
 cat > demo.txt <<EOF
 BDeploy Launcher is working!
