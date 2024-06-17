@@ -14,14 +14,7 @@ import { createLinkedValue, getRenderPreview } from 'src/app/modules/core/utils/
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ConfigFilesService } from '../../../../services/config-files.service';
-
-// a hack. it is a copy of monaco.MarkerSeverity as it cannot be imported directly for some reason
-enum MarkerSeverity {
-  Hint = 1,
-  Info = 2,
-  Warning = 4,
-  Error = 8,
-}
+import { errorMarker } from '../../../../utils/monaco-editor-utils';
 
 @Component({
   selector: 'app-editor',
@@ -80,7 +73,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
         s?.find((systemConfigDto) => systemConfigDto.key.name === i.config.config.system?.name)?.config,
         null,
         a,
-      );
+      ).filter((c) => !c.value.startsWith('{{DELAYED')); // DELAYED variables should not be used in config files
 
       this.system = s?.find((system) => system.key.name === c?.instanceConfiguration?.system?.name)?.config;
 
@@ -97,18 +90,15 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
 
   protected markUnresolvedExpansion(match: monaco.editor.FindMatch): monaco.editor.IMarkerData {
     const exp = match.matches[0];
+
+    if (exp.startsWith('{{DELAYED:')) {
+      return errorMarker('DELAYED variables are not allowed in config files', match);
+    }
+
     const lv = createLinkedValue(exp);
     const preview = getRenderPreview(lv, null, this.instance, this.system); // null for ApplicationConfiguration
-    return preview.indexOf('{{') === -1
-      ? null
-      : {
-          startLineNumber: match.range.startLineNumber,
-          startColumn: match.range.startColumn,
-          endLineNumber: match.range.endLineNumber,
-          endColumn: match.range.endColumn,
-          message: 'Failed to resolve',
-          severity: MarkerSeverity.Error,
-        };
+
+    return preview.indexOf('{{') === -1 ? null : errorMarker('Failed to resolve', match);
   }
 
   public isDirty(): boolean {

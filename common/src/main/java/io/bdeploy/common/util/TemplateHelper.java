@@ -85,13 +85,36 @@ public class TemplateHelper {
         if (value == null || !value.contains(PATTERN_START)) {
             return value;
         }
-        return doProcess(value, valueResolver, shouldResolve);
+        return doProcess(value, valueResolver, shouldResolve, null);
+    }
+
+    /**
+     * Resolves all variable references in the given String, using the given resolver. The
+     * callback can be used to skip resolving of given variables.
+     *
+     * @param value
+     *            the raw value, potentially containing variable references.
+     * @param valueResolver
+     *            knows how to replace references with the actual content
+     * @param shouldResolve
+     *            callback to ask whether or not to resolve the given variable
+     * @param valueId
+     *            the id that denotes the origin of the value being processed (e.g. config filename, process id).
+     *            Will be mentioned in exception message.
+     *            If valueId is null, value will be passed into exception message instead
+     * @return the resolved string
+     */
+    public static String process(String value, VariableResolver valueResolver, ShouldResolve shouldResolve, String valueId) {
+        if (value == null || !value.contains(PATTERN_START)) {
+            return value;
+        }
+        return doProcess(value, valueResolver, shouldResolve, valueId);
     }
 
     /**
      * Recursively resolves the given input.
      */
-    private static String doProcess(String value, VariableResolver valueResolver, ShouldResolve shouldResolve) {
+    private static String doProcess(String value, VariableResolver valueResolver, ShouldResolve shouldResolve, String valueId) {
         StringBuilder builder = new StringBuilder();
         int currentStart = 0;
 
@@ -103,11 +126,11 @@ public class TemplateHelper {
             if (shouldResolve != null && shouldResolve.apply(nextMatch)) {
                 resolved = valueResolver.apply(nextMatch);
                 if (resolved == null) {
-                    throw new IllegalArgumentException(
-                            "Cannot find replacement for variable " + nextMatch + " while processing " + value);
+                    throw new IllegalArgumentException("Cannot find replacement for variable " + nextMatch + " while processing "
+                            + (valueId == null ? value : valueId));
                 }
                 // Resolve recursive as the replacement can also contains templates
-                resolved = doProcess(resolved, valueResolver, shouldResolve);
+                resolved = doProcess(resolved, valueResolver, shouldResolve, valueId);
             } else {
                 // Keep pattern for the unresolved intact so that we can resolve it later
                 resolved = PATTERN_START + resolved + PATTERN_END;
