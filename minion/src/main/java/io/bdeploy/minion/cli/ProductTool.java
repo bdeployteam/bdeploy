@@ -51,7 +51,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
         @Validator(ExistingPathValidator.class)
         String imp();
 
-        @Help("Name of the target instance group to import the product into")
+        @Help("Name of the target instance group or software repository to import the product into")
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
