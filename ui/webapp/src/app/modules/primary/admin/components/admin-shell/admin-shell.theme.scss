@@ -1,22 +1,22 @@
 @use "@angular/material" as mat;
 
 @mixin settings-shell-theme($theme) {
-  $background: map-get(mat.get-color-config($theme), background);
+  $background: map-get(mat.m2-get-color-config($theme), background);
   $dark: map-get($theme, is-dark);
 
   $groupTextColor: if(
     $dark,
-    mat.get-color-from-palette(mat.$grey-palette, 600),
-    mat.get-color-from-palette(mat.$grey-palette, 400)
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 600),
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 400)
   );
   $groupLineColor: if(
     $dark,
-    mat.get-color-from-palette(mat.$grey-palette, 700),
-    mat.get-color-from-palette(mat.$grey-palette, 300)
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 700),
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 300)
   );
 
   .active-setting {
-    background-color: mat.get-color-from-palette($background, selected-button);
+    background-color: mat.m2-get-color-from-palette($background, selected-button);
   }
 
   .menu-group {

@@ -25,7 +25,7 @@ dependencies {
         'org.bouncycastle:bcprov-jdk18on:1.78.1',
         'org.quartz-scheduler:quartz:2.3.2',
         'net.jsign:jsign-core:6.0',
-        'com.nimbusds:oauth2-oidc-sdk:11.10.1'
+        'com.nimbusds:oauth2-oidc-sdk:11.12'
     )
 
     commonTestDeps(project(":launcher"))
