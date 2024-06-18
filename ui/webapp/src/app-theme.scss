@@ -2,8 +2,8 @@
 
 // TODO: Rework theme according to https://material.angular.io/guide/theming
 
-$mdc-typography-config: mat.define-typography-config(
-  $button: mat.define-typography-level(14px, 14px, 500, normal),
+$mdc-typography-config: mat.m2-define-typography-config(
+  $button: mat.m2-define-typography-level(14px, 14px, 500, normal),
 );
 
 @include mat.all-component-typographies();
@@ -29,21 +29,21 @@ $mdc-typography-config: mat.define-typography-config(
 
   @include settings-shell-theme($theme);
 
-  $default-font-level: mat.define-typography-level(
+  $default-font-level: mat.m2-define-typography-level(
     $font-weight: 400,
     $font-size: 14px,
     $line-height: 1,
     $letter-spacing: normal,
   );
 
-  $button-font-level: mat.define-typography-level(
+  $button-font-level: mat.m2-define-typography-level(
     $font-weight: 500,
     $font-size: 14px,
     $line-height: 1,
     $letter-spacing: normal,
   );
 
-  $typography: mat.define-typography-config(
+  $typography: mat.m2-define-typography-config(
     $body-1: $default-font-level,
     $button: $button-font-level,
   );
@@ -59,7 +59,7 @@ $mdc-typography-config: mat.define-typography-config(
   @include mat.checkbox-density(-3);
 
   $dark: map-get($theme, "is-dark");
-  $color: mat.get-color-config($theme);
+  $color: mat.m2-get-color-config($theme);
   $primary: map-get($color, "primary");
   $accent: map-get($color, "accent");
   $warn: map-get($color, "warn");
@@ -97,49 +97,49 @@ $mdc-typography-config: mat.define-typography-config(
   .mat-card-route-active,
   .mat-row-route-active:hover,
   .mat-card-route-active:hover {
-    background-color: mat.get-color-from-palette($maintb-dark, 900, 0.1);
+    background-color: mat.m2-get-color-from-palette($maintb-dark, 900, 0.1);
   }
 
   a {
     color: if(
       $dark,
-      mat.get-color-from-palette(mat.$blue-palette, 300),
-      mat.get-color-from-palette(mat.$blue-palette, 800)
+      mat.m2-get-color-from-palette(mat.$m2-blue-palette, 300),
+      mat.m2-get-color-from-palette(mat.$m2-blue-palette, 800)
     );
   }
 
   // Define scrollbar style on each element as it is not inherited in some cases.
   * {
-    @include scrollbars(mat.get-color-from-palette($primary), if($dark, #555555, #cccccc));
+    @include scrollbars(mat.m2-get-color-from-palette($primary), if($dark, #555555, #cccccc));
   }
 
   // Pseudo selector to define variables on the main theme class.
   & {
-    --bd-primary: #{mat.get-color-from-palette($primary)};
-    --bd-accent: #{mat.get-color-from-palette($accent)};
-    --bd-warn: #{mat.get-color-from-palette($warn)};
-    --bd-warn-darker: #{mat.get-color-from-palette($warn, 900)};
-    --bd-main-bar: #{mat.get-color-from-palette($maintb)};
+    --bd-primary: #{mat.m2-get-color-from-palette($primary)};
+    --bd-accent: #{mat.m2-get-color-from-palette($accent)};
+    --bd-warn: #{mat.m2-get-color-from-palette($warn)};
+    --bd-warn-darker: #{mat.m2-get-color-from-palette($warn, 900)};
+    --bd-main-bar: #{mat.m2-get-color-from-palette($maintb)};
 
-    --bd-text: #{mat.get-color-from-palette($fg, "text")};
-    --bd-text-secondary: #{mat.get-color-from-palette($fg, "secondary-text")};
-    --bd-text-success: #{mat.get-color-from-palette($success)};
+    --bd-text: #{mat.m2-get-color-from-palette($fg, "text")};
+    --bd-text-secondary: #{mat.m2-get-color-from-palette($fg, "secondary-text")};
+    --bd-text-success: #{mat.m2-get-color-from-palette($success)};
     --bd-text-very-light: #{if($dark, #aeaeae, #747474)};
-    --bd-text-disabled: #{mat.get-color-from-palette($fg, "disabled-text")};
+    --bd-text-disabled: #{mat.m2-get-color-from-palette($fg, "disabled-text")};
     --bd-text-validation: #dc000f;
 
-    --bd-bg-dialog: #{mat.get-color-from-palette($bg, "dialog")};
-    --bd-bg-toolbar: #{mat.get-color-from-palette($bg, "app-bar")};
-    --bd-bg-hover: #{mat.get-color-from-palette($bg, "hover")};
-    --bd-bg-disabled: #{mat.get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
-    --bd-bg-grey: #{mat.get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
+    --bd-bg-dialog: #{mat.m2-get-color-from-palette($bg, "dialog")};
+    --bd-bg-toolbar: #{mat.m2-get-color-from-palette($bg, "app-bar")};
+    --bd-bg-hover: #{mat.m2-get-color-from-palette($bg, "hover")};
+    --bd-bg-disabled: #{mat.m2-get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
+    --bd-bg-grey: #{mat.m2-get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
 
-    --bd-main-bar-darker: #{mat.get-color-from-palette($maintb-dark)};
+    --bd-main-bar-darker: #{mat.m2-get-color-from-palette($maintb-dark)};
 
-    --bd-primary-contrast: #{mat.get-color-from-palette($primary, "default-contrast")};
-    --bd-accent-contrast: #{mat.get-color-from-palette($accent, "default-contrast")};
-    --bd-warn-contrast: #{mat.get-contrast-color-from-palette($warn, 900)};
-    --bd-main-bar-contrast: #{mat.get-color-from-palette($maintb, "default-contrast")};
+    --bd-primary-contrast: #{mat.m2-get-color-from-palette($primary, "default-contrast")};
+    --bd-accent-contrast: #{mat.m2-get-color-from-palette($accent, "default-contrast")};
+    --bd-warn-contrast: #{mat.m2-get-contrast-color-from-palette($warn, 900)};
+    --bd-main-bar-contrast: #{mat.m2-get-color-from-palette($maintb, "default-contrast")};
 
     --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
     --bd-breadcrumb-hover: #{if($dark, #333, #ccc)};
@@ -156,11 +156,11 @@ $mdc-typography-config: mat.define-typography-config(
 }
 
 @mixin theme-chooser($theme) {
-  $color: mat.get-color-config($theme);
+  $color: mat.m2-get-color-config($theme);
   $theme-bg: map-get($color, "background");
-  $theme-primary: mat.get-color-from-palette(map-get($color, "primary"));
-  $theme-accent: mat.get-color-from-palette(map-get($color, "accent"));
-  $theme-main-tb: mat.get-color-from-palette(map-get($color, "main-toolbar"));
+  $theme-primary: mat.m2-get-color-from-palette(map-get($color, "primary"));
+  $theme-accent: mat.m2-get-color-from-palette(map-get($color, "accent"));
+  $theme-main-tb: mat.m2-get-color-from-palette(map-get($color, "main-toolbar"));
 
   .preview-background {
     cursor: pointer;
@@ -213,7 +213,7 @@ $mdc-typography-config: mat.define-typography-config(
 /* Theme definitions - keep in sync with ThemeService.Theme */
 @function add-custom-colors($theme, $toolbar-palette, $toolbar-darker-palette, $success-palette) {
   $colors: map-merge(
-    mat.get-color-config($theme),
+    mat.m2-get-color-config($theme),
     (
       "main-toolbar": $toolbar-palette,
       "main-toolbar-darker": $toolbar-darker-palette,
@@ -231,7 +231,7 @@ $mdc-typography-config: mat.define-typography-config(
 }
 
 @function override-theme-background($theme, $key, $value) {
-  $bg: map-get(mat.get-color-config($theme), background);
+  $bg: map-get(mat.m2-get-color-config($theme), background);
   $bg: map-merge(
     $bg,
     (
@@ -239,7 +239,7 @@ $mdc-typography-config: mat.define-typography-config(
     )
   );
   $colors: map-merge(
-    mat.get-color-config($theme),
+    mat.m2-get-color-config($theme),
     (
       background: $bg,
     )
@@ -253,24 +253,24 @@ $mdc-typography-config: mat.define-typography-config(
 }
 
 /* light theme - default */
-$app-light-primary: mat.define-palette($md-bdblue, 500);
-$app-light-accent: mat.define-palette($md-bdblue, 500);
-$app-light-warning: mat.define-palette($md-bdred, 500);
+$app-light-primary: mat.m2-define-palette($md-bdblue, 500);
+$app-light-accent: mat.m2-define-palette($md-bdblue, 500);
+$app-light-warning: mat.m2-define-palette($md-bdred, 500);
 $app-light-theme: add-custom-colors(
-  mat.define-light-theme(
+  mat.m2-define-light-theme(
     (
       color: (
         primary: $app-light-primary,
         accent: $app-light-accent,
         warn: $app-light-warning,
       ),
-      typography: mat.define-typography-config(),
+      typography: mat.m2-define-typography-config(),
       density: 0,
     )
   ),
   $app-light-primary,
-  mat.define-palette($md-bdblue, 700),
-  mat.define-palette($md-bdgreen, 700)
+  mat.m2-define-palette($md-bdblue, 700),
+  mat.m2-define-palette($md-bdgreen, 700)
 );
 .app-light-theme {
   @include all-themes($app-light-theme);
@@ -283,24 +283,24 @@ $app-light-theme: add-custom-colors(
 @include mat.all-component-themes($app-light-theme);
 
 /* dark theme */
-$app-dark-primary: mat.define-palette($md-bdorange, 500);
-$app-dark-accent: mat.define-palette($md-bdorange, 500);
-$app-dark-warning: mat.define-palette($md-bdred, 500);
+$app-dark-primary: mat.m2-define-palette($md-bdorange, 500);
+$app-dark-accent: mat.m2-define-palette($md-bdorange, 500);
+$app-dark-warning: mat.m2-define-palette($md-bdred, 500);
 $app-dark-theme: add-custom-colors(
-  mat.define-dark-theme(
+  mat.m2-define-dark-theme(
     (
       color: (
         primary: $app-dark-primary,
         accent: $app-dark-accent,
         warn: $app-dark-warning,
       ),
-      typography: mat.define-typography-config(),
+      typography: mat.m2-define-typography-config(),
       density: 0,
     )
   ),
-  mat.define-palette($md-bdgrey, 500),
-  mat.define-palette($md-bdgrey, 700),
-  mat.define-palette($md-bdgreen, 700)
+  mat.m2-define-palette($md-bdgrey, 500),
+  mat.m2-define-palette($md-bdgrey, 700),
+  mat.m2-define-palette($md-bdgreen, 700)
 );
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #2e2e2e);
 .app-dark-theme {

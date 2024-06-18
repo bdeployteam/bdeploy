@@ -56,11 +56,11 @@
 
   /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
   .bd-rect-card {
-    $background: map-get(mat.get-color-config($theme), background);
-    $foreground: map-get(mat.get-color-config($theme), foreground);
+    $background: map-get(mat.m2-get-color-config($theme), background);
+    $foreground: map-get(mat.m2-get-color-config($theme), foreground);
 
-    background: mat.get-color-from-palette($background, card);
-    color: mat.get-color-from-palette($foreground, text);
+    background: mat.m2-get-color-from-palette($background, card);
+    color: mat.m2-get-color-from-palette($foreground, text);
 
     @include mat.overridable-elevation(2);
   }
@@ -174,13 +174,13 @@
 
   $drag-color: if(
     $dark,
-    mat.get-color-from-palette(mat.$grey-palette, 800),
-    mat.get-color-from-palette(mat.$yellow-palette, 200)
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 800),
+    mat.m2-get-color-from-palette(mat.$m2-yellow-palette, 200)
   );
   $border-color: if(
     $dark,
-    mat.get-color-from-palette(mat.$grey-palette, 300),
-    mat.get-color-from-palette(mat.$grey-palette, 700)
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 300),
+    mat.m2-get-color-from-palette(mat.$m2-grey-palette, 700)
   );
   .bd-drag-card {
     background-color: $drag-color !important;

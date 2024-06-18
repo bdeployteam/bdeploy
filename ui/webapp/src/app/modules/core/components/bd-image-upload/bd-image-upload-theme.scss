@@ -3,18 +3,18 @@
 @mixin bd-image-upload-theme($theme) {
   $dark: map-get($theme, "is-dark");
 
-  $palette: map-get(mat.get-color-config($theme), "main-toolbar");
+  $palette: map-get(mat.m2-get-color-config($theme), "main-toolbar");
 
   .bd-image-upload-title-container {
-    background-color: mat.get-color-from-palette($palette);
-    color: mat.get-color-from-palette($palette, default-contrast);
+    background-color: mat.m2-get-color-from-palette($palette);
+    color: mat.m2-get-color-from-palette($palette, default-contrast);
   }
 
   .bd-image-upload-container {
     background-color: if(
       $dark,
-      mat.get-color-from-palette(mat.$grey-palette, 700),
-      mat.get-color-from-palette(mat.$grey-palette, 200)
+      mat.m2-get-color-from-palette(mat.$m2-grey-palette, 700),
+      mat.m2-get-color-from-palette(mat.$m2-grey-palette, 200)
     );
   }
 }

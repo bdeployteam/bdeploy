@@ -3,7 +3,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { CdkScrollableModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -122,8 +122,8 @@ import { LinkExpressionInputValidatorDirective } from './validators/link-express
 import { PasswordVerificationValidator } from './validators/password-verification.directive';
 import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
-import { TrimmedValidator } from './validators/trimmed.directive';
 import { ServerConnectionUrlSyntaxValidator } from './validators/server-connection-url-syntax-validator.directive';
+import { TrimmedValidator } from './validators/trimmed.directive';
 
 function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -217,6 +217,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdBHiveBrowserComponent,
   ],
   providers: [
+    provideHttpClient(withInterceptorsFromDi()),
     httpInterceptorProviders,
     /* make sure that ConfigService and HistoryService are initialize always on startup */
     {
@@ -263,7 +264,6 @@ function loadAppConfig(cfgService: ConfigService) {
     MatDialogModule,
 
     // angular base infrastructure used throughout the application.
-    HttpClientModule,
     FormsModule,
     RouterModule,
     LayoutModule,
@@ -275,7 +275,6 @@ function loadAppConfig(cfgService: ConfigService) {
   ],
   exports: [
     // core infrastructure usable by any other module.
-    HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
     LayoutModule,

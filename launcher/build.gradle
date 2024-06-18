@@ -17,8 +17,8 @@ dependencies {
         project(":dcu"),
         project(":interfaces"),
         
-        'com.twelvemonkeys.imageio:imageio-core:3.10.1',
-        'com.twelvemonkeys.imageio:imageio-bmp:3.10.1',
+        'com.twelvemonkeys.imageio:imageio-core:3.11.0',
+        'com.twelvemonkeys.imageio:imageio-bmp:3.11.0',
         'net.java.dev.jna:jna:5.14.0',
         'net.java.dev.jna:jna-platform:5.14.0'
     )
