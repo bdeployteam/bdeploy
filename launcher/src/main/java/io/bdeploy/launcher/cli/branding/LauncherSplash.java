@@ -41,6 +41,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
     private final Path appDir;
     private Frame splash;
     private SplashGraphics splashComp;
+    private boolean isDefaultSplash = false;
 
     public LauncherSplash(Path appDir) {
         this.appDir = appDir;
@@ -65,9 +66,10 @@ public class LauncherSplash implements LauncherSplashDisplay {
         if (splashImage != null) {
             splashComp.setImage(splashImage);
         } else {
-            splashImage = loadResource("/splash.bmp");
+            splashImage = loadResource("/splash.png");
             if (splashImage != null) {
                 splashComp.setImage(splashImage);
+                isDefaultSplash = true;
             }
             splashComp.setText(new Rectangle(15, 220, 450, 20));
             splashComp.setProgress(new Rectangle(15, 245, 450, 12));
@@ -204,13 +206,21 @@ public class LauncherSplash implements LauncherSplashDisplay {
             Color textColor = Color.decode(splashCfg.textRect.foreground);
             splashComp.setTextColor(textColor);
         } else {
-            splashComp.setTextColor(Color.BLACK);
+            if (isDefaultSplash) {
+                splashComp.setTextColor(Color.WHITE);
+            } else {
+                splashComp.setTextColor(Color.BLACK);
+            }
         }
         if (splashCfg.progressRect != null && splashCfg.progressRect.foreground != null) {
             Color progressColor = Color.decode(splashCfg.progressRect.foreground);
             splashComp.setProgressColor(progressColor);
         } else {
-            splashComp.setProgressColor(Color.BLACK);
+            if (isDefaultSplash) {
+                splashComp.setProgressColor(Color.WHITE);
+            } else {
+                splashComp.setProgressColor(Color.BLACK);
+            }
         }
 
         // text and progress
