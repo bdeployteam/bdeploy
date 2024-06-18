@@ -43,3 +43,8 @@ You can find more information here:
 * [Homepage](https://bdeploy.io)
 * [Documentation](https://bdeploy.io/user/index.html)
 * [Downloads](https://github.com/bdeployteam/bdeploy/releases)
+
+The BDeploy project is sponsored by, developed by and copyright by:
+
+![SSI Schaefer Software Development GmbH](https://bdeploy.io/user/images/ssi-logo.png)
+
