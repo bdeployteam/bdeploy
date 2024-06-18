@@ -38,7 +38,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
   private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
     id: 'app',
-    name: 'Application',
+    name: 'Application / File',
     data: (r) => this.getApplicationName(r.appId),
     width: '150px',
     classes: (r) => (!r.appId ? ['bd-hint-text'] : []),

@@ -578,7 +578,7 @@ export class InstanceEditService {
     this.validating$.next(true);
     const upd: InstanceUpdateDto = {
       config: this.state$.value?.config,
-      files: null,
+      files: this.state$.value?.files,
       validation: null,
     };
     this.http

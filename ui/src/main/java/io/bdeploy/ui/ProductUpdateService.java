@@ -1,5 +1,6 @@
 package io.bdeploy.ui;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.codec.binary.Base64;
 import org.jvnet.hk2.annotations.Service;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -20,6 +22,8 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
@@ -348,6 +352,22 @@ public class ProductUpdateService {
             SystemConfiguration system) {
         List<ApplicationValidationDto> result = new ArrayList<>();
 
+        if (instance.files != null && !instance.config.nodeDtos.isEmpty()) {
+            InstanceNodeConfigurationDto nodeConfig = instance.config.nodeDtos.getFirst();
+            VariableResolver resolver = createResolver(nodeConfig, null);
+            for (FileStatusDto file : instance.files) {
+                if (file.type == FileStatusType.DELETE) {
+                    continue;
+                }
+                try {
+                    String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
+                    TemplateHelper.process(content, resolver, str -> true, file.file);
+                } catch (Exception e) {
+                    result.add(new ApplicationValidationDto(file.file, null, e.getMessage()));
+                }
+            }
+        }
+
         // there is nothing in the base config which requires excessive validation right now. mandatory fields are
         // validated in the client(s) individually.
 
@@ -392,17 +412,19 @@ public class ProductUpdateService {
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
         res.add(new ConditionalExpressionResolver(res));
         res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
-        res.add(new ApplicationVariableResolver(process));
-        res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
-        ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
-        res.add(new ManifestSelfResolver(process.application, dummy));
+        if (process != null) {
+            res.add(new ApplicationVariableResolver(process));
+            res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
+            ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
+            res.add(new ManifestSelfResolver(process.application, dummy));
+            res.add(dummy);
+            res.add(new DelayedVariableResolver(res));
+        }
         res.add(new DeploymentPathValidationDummyResolver());
-        res.add(dummy);
         res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
         res.add(new OsVariableResolver());
         res.add(new LocalHostnameResolver(false));
         res.add(new EnvironmentVariableDummyResolver());
-        res.add(new DelayedVariableResolver(res));
         res.add(new EscapeJsonCharactersResolver(res));
         res.add(new EscapeXmlCharactersResolver(res));
         res.add(new EscapeYamlCharactersResolver(res));
