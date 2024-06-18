@@ -1174,8 +1174,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         boolean isNewScriptLauncher = false;
 
-        if (PathHelper.exists(scriptLauncher)) {
-            // we're in post 7.1.0 area and can use the script to keep terminal association.
+        if (PathHelper.exists(scriptLauncher) && OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            // we're in post 7.1.0 area and can use the script to keep terminal association. on linux it has been that way always.
             launcher = scriptLauncher;
             isNewScriptLauncher = true;
         }
@@ -1184,8 +1184,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         command.add(launcher.normalize().toAbsolutePath().toString());
         if (isNewScriptLauncher) {
             command.add("launcher");
-            command.add("--homeDir=" + homeDir.normalize().toAbsolutePath());
             command.add("--launch=" + appDescriptor);
+            command.add("--homeDir=" + homeDir.normalize().toAbsolutePath());
         } else {
             command.add(appDescriptor);
         }
