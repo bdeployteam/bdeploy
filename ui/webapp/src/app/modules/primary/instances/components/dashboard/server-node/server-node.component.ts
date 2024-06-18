@@ -39,7 +39,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
 
   protected nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
   protected nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
-  protected synchronized$ = new BehaviorSubject<boolean>(false);
+  protected synchronizationCollapse$ = new BehaviorSubject<boolean>(false);
   protected collapsed$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
@@ -87,22 +87,21 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
             }
           : null,
       });
-      items.push({
-        name: state.offline ? 'Offline' : 'Online',
-        type: state.offline ? 'warning' : 'ok',
-      });
-      items.push(this.processesItem);
-      items.push(this.portsItem);
 
-      const isSynchronized = state.nodeSynchronizationStatus === NodeSynchronizationStatus.SYNCHRONIZED;
-      items.push({
-        name: state.nodeSynchronizationStatus
-          .split('_')
-          .map((word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase())
-          .join(' '),
-        type: isSynchronized ? 'ok' : 'warning',
-      });
-      this.synchronized$.next(isSynchronized);
+      items.push(this.getNodeStateItem(state));
+
+      const syncStatus = state.nodeSynchronizationStatus;
+      if (syncStatus === NodeSynchronizationStatus.SYNCHRONIZED || syncStatus === NodeSynchronizationStatus.UNKNOWN) {
+        items.push(this.processesItem);
+        items.push(this.portsItem);
+      }
+
+      const syncCollapse = [
+        NodeSynchronizationStatus.NOT_SYNCHRONIZED,
+        NodeSynchronizationStatus.SYNCHRONIZING,
+        NodeSynchronizationStatus.SYNCHRONIZATION_FAILED,
+      ].some((s) => s === syncStatus);
+      this.synchronizationCollapse$.next(syncCollapse);
 
       this.nodeStateItems$.next(items);
     });
@@ -115,14 +114,42 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(
-      combineLatest([this.collapsedWhen$, this.synchronized$]).subscribe(([c, s]) => {
-        this.collapsed$.next(c || !s);
+      combineLatest([this.collapsedWhen$, this.synchronizationCollapse$]).subscribe(([c, s]) => {
+        this.collapsed$.next(c || s);
       }),
     );
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+  }
+
+  private getNodeStateItem(state: MinionStatusDto): StateItem {
+    const syncStatus = state.nodeSynchronizationStatus;
+    const isUnknownOffline = syncStatus === NodeSynchronizationStatus.UNKNOWN && state.offline;
+    const isUnknownOnline = syncStatus === NodeSynchronizationStatus.UNKNOWN && !state.offline;
+
+    if (syncStatus === NodeSynchronizationStatus.NOT_SYNCHRONIZED || isUnknownOffline) {
+      return {
+        name: 'Offline',
+        type: 'warning',
+      };
+    }
+
+    if (syncStatus === NodeSynchronizationStatus.SYNCHRONIZED || isUnknownOnline) {
+      return {
+        name: 'Online',
+        type: 'ok',
+      };
+    }
+
+    return {
+      name: syncStatus
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase())
+        .join(' '),
+      type: 'warning',
+    };
   }
 
   private updateAllProcesses(states: { [key: string]: ProcessStatusDto }) {

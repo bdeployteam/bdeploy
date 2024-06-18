@@ -40,7 +40,7 @@ public class MinionStatusDto {
     /**
      * Whether or not the node is up to date with master in terms of installed and activated versions for every instance
      */
-    public NodeSynchronizationStatus nodeSynchronizationStatus = NodeSynchronizationStatus.NOT_SYNCHRONIZED;
+    public NodeSynchronizationStatus nodeSynchronizationStatus = NodeSynchronizationStatus.UNKNOWN;
 
     /**
      * Creates a new node status indicating that this node is offline.
@@ -55,6 +55,7 @@ public class MinionStatusDto {
         status.config = config;
         status.offline = true;
         status.infoText = infoText;
+        status.nodeSynchronizationStatus = NodeSynchronizationStatus.NOT_SYNCHRONIZED;
         return status;
     }
 
