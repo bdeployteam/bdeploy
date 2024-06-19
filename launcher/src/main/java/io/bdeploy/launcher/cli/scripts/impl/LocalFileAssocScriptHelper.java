@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.cli.ClientApplicationDto;

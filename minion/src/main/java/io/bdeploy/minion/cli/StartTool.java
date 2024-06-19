@@ -94,6 +94,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         String root();
 
         @Help("Specify the directory where any incoming updates should be placed in.")
+        @EnvironmentFallback("BDEPLOY_INTERNAL_UPDATEDIR")
         String updateDir();
 
         @Help(value = "Publish the web application, defaults to true.", arg = false)

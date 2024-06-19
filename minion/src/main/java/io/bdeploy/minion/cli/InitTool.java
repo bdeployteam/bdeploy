@@ -80,6 +80,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         String nodeIdentFile();
 
         @Help("Internal update directory.")
+        @EnvironmentFallback("BDEPLOY_INTERNAL_UPDATEDIR")
         String updateDir();
 
         @Help("Port that the master will run on.")

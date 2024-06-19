@@ -27,7 +27,9 @@ if NOT "%ERRORLEVEL%" == "0" (
 
 @rem Execute ${applicationName} (--updateDir BDEPLOY EXTENSION)
 @rem echo "Starting minion with embedded JVM."
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %> -classpath %CLASSPATH% ${mainClassName} "--updateDir=%APP_HOME%\\update" %CMD_LINE_ARGS% 
+set "BDEPLOY_INTERNAL_UPDATEDIR=%APP_HOME%\\update"
+set "BDEPLOY_INTERNAL_HOMEDIR=%APP_HOME%"
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %> -classpath %CLASSPATH% ${mainClassName} %CMD_LINE_ARGS%
 
 @rem update requested (exit code == 42)
 IF NOT "%ERRORLEVEL%"=="42" (

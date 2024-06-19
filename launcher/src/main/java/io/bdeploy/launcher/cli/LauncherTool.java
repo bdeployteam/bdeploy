@@ -58,6 +58,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.RemainingArguments;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -161,9 +162,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         String launch();
 
         @Help("Directory where the launcher stores the hive as well as all applications.")
+        @EnvironmentFallback("BDEPLOY_INTERNAL_HOMEDIR")
         String homeDir();
 
         @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
+        @EnvironmentFallback("BDEPLOY_INTERNAL_UPDATEDIR")
         String updateDir();
 
         @Help(value = "Additional command line arguments for the application. The arguments must be a Base64 encoded JSON list.")
@@ -1185,7 +1188,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (isNewScriptLauncher) {
             command.add("launcher");
             command.add("--launch=" + appDescriptor);
-            command.add("--homeDir=" + homeDir.normalize().toAbsolutePath());
         } else {
             command.add(appDescriptor);
         }

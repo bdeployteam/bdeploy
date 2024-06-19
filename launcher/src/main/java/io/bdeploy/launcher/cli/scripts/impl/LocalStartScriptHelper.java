@@ -27,8 +27,7 @@ public class LocalStartScriptHelper extends LocalScriptHelper {
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
                     + '"' + ClientPathHelper.getScriptLauncher(launcherDir).toAbsolutePath() + "\" \"launcher\" \"--launch="
-                    + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + "\" \"--homeDir="
-                    + launcherDir.toAbsolutePath() + "\" --noSplash -- %*";
+                    + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + "\" --noSplash -- %*";
         }
         return "#!/usr/bin/env bash\n" //
                 + ClientPathHelper.getScriptLauncher(launcherDir).toAbsolutePath() + " launcher \"--launch="
