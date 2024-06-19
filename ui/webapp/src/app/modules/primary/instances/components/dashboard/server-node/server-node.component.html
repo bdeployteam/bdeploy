@@ -21,7 +21,7 @@
       [narrowWhen$]="narrowWhen$"
       [lastRefreshAt$]="processes.processStatesLoadTime$"
       [refreshingWhen$]="processes.loading$"
-      (manualRefresh)="processes.reload()"
+      (manualRefresh)="onManualRefresh()"
     ></app-node-state-panel>
     <ng-container *ngIf="!(collapsed$ | async)">
       <mat-divider></mat-divider>

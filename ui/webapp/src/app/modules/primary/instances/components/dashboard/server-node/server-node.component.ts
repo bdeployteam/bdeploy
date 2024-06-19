@@ -96,14 +96,14 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         items.push(this.portsItem);
       }
 
+      this.nodeStateItems$.next(items);
+
       const syncCollapse = [
         NodeSynchronizationStatus.NOT_SYNCHRONIZED,
         NodeSynchronizationStatus.SYNCHRONIZING,
         NodeSynchronizationStatus.SYNCHRONIZATION_FAILED,
       ].some((s) => s === syncStatus);
       this.synchronizationCollapse$.next(syncCollapse);
-
-      this.nodeStateItems$.next(items);
     });
 
     this.subscription.add(
@@ -150,6 +150,11 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         .join(' '),
       type: 'warning',
     };
+  }
+
+  protected onManualRefresh() {
+    this.processes.reload();
+    this.instances.reloadActiveStates(this.instances.active$.value);
   }
 
   private updateAllProcesses(states: { [key: string]: ProcessStatusDto }) {
