@@ -432,32 +432,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             // 1. update the node configuration. this also forces contact with the node to be established.
             editNode(name, minion);
 
-            // 3. find all instances in which the node participates.
-            Map<String, NodeGroupState> toReinstall = getInstancesToReinstall(name);
-
-            // 4. trigger re-install of all software.
-            for (var entry : toReinstall.entrySet()) {
-                String group = entry.getKey();
-                NodeGroupState ngs = entry.getValue();
-
-                BHive hive = registry.get(group);
-
-                for (var instanceEntry : ngs.instances.entrySet()) {
-                    String instanceId = instanceEntry.getKey();
-                    NodeInstanceState nis = instanceEntry.getValue();
-
-                    MasterNamedResource mnr = getNamedMaster(group);
-
-                    for (var instanceTag : nis.installed) {
-                        InstanceManifest iim = InstanceManifest.load(hive, instanceId, instanceTag);
-
-                        mnr.install(iim.getManifest());
-                        if (instanceTag.equals(nis.active)) {
-                            mnr.activate(iim.getManifest());
-                        }
-                    }
-                }
-            }
+            // And now we're done, as the node synchronizer will take care of the rest asynchronously.
         }
     }
 
