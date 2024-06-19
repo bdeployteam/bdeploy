@@ -207,7 +207,10 @@ The mock app-info.yaml above is marked as a `CLIENT` application, but it still l
 | SERVER | `startupProbe`        | String (HTTP endpoint ID)                    |               | Specifies a probe which can indicate to **BDeploy** that the application has completed startup.                                                                                                                                                                                                                                                                                                                      |
 | SERVER | `livenessProbe`       | String (HTTP endpoint ID)                    |               | Specifies a probe which can indicate to **BDeploy** whether the application is _alive_. _Alive_ means whether the application is currently performing as it should. **BDeploy** does not take immediate action on its own if a liveness probe fails. It will only report the failure to the user.                                                                                                                    |
 | CLIENT | `configDirs`          | String (comma-separated list of directories) |               | Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.                                                                                                                                                                                                   |
-| CLIENT | `supportsAutostart`   | `true`, `false`                              | false         | "Whether the application is allowed to automatically start upon system bootup.                                                                                                                                                                                                                                                                                                                                       |
+| CLIENT | `supportsAutostart`   | `true`, `false`                              | false         | Whether the application is allowed to automatically start upon system bootup (on the client PC).                                                                                                                                                                                                                                                                                                                     |
+| CLIENT | `startScriptName`     | String                                       |               | A console-friendly name for a script. This script will be placed in the client PCs PATH (user environment) and can be used to launch the application from the client command line. The application will be started through the **BDeploy** launcher and will perform updates as usual.                                                                                                                               |
+| CLIENT | `offlineStartAllowed` | `true`, `false`                              | false         | Whether the application is allowed to continue starting in case the server can not be contacted to check for updates.                                                                                                                                                                                                                                                                                                |
+| CLIENT | `fileAssocExtension`  | String (e.g. .myext)                         |               | A file extension which should be associated with the client application on the client PC. The client application will still be launched through the **BDeploy** launcher, and applies updates as usual.                                                                                                                                                                                                              |
 
 ### Supported `parameters` attributes
 
@@ -322,16 +325,16 @@ In this case you will want the user to be able to edit the value of `-Dmy.prop` 
 
 ```yaml
 startCommand:
-  launcherPath: "{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}"
+  launcherPath: '{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}'
   parameters:
-    - id: "my.prop"
-      name: "My Property"
-      parameter: "-Dmy.prop"
+    - id: 'my.prop'
+      name: 'My Property'
+      parameter: '-Dmy.prop'
       mandatory: true
-    - id: "my.jar"
-      name: "Application JAR"
-      parameter: "-jar"
-      defaultValue: "application.jar"
+    - id: 'my.jar'
+      name: 'Application JAR'
+      parameter: '-jar'
+      defaultValue: 'application.jar'
       valueAsSeparateArg: true
       mandatory: true
       fixed: true <1>
@@ -368,18 +371,18 @@ A condition expression (isolated) looks like this:
 
 ```yaml
 condition:
-  parameter: "my.param.2"
+  parameter: 'my.param.2'
   must: EQUAL
-  value: "Value 1"
+  value: 'Value 1'
 ```
 
 Or, in its newer form, the very same (but ultimately more powerful) using `expression` would look like this:
 
 ```yaml
 condition:
-  expression: "{{V:my.param.2}}"
+  expression: '{{V:my.param.2}}'
   must: EQUAL
-  value: "Value 1"
+  value: 'Value 1'
 ```
 
 The power comes from the ability to provide an arbitrary amount of [Variable Expansions](/power/variables/#variable-expansions) in the [Link Expressions](/user/instance/#link-expressions).
@@ -977,7 +980,7 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 8. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
 
 !!!info Note
-All `...Server` blocks can set `useLogin = true` to use local logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` instead of `useLogin` to have full control.
+All `...Server` blocks can set `useLogin = true` to use local logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` instead of `useLogin` to have full control. Where `useLogin` is valid, `loginStorage` can also be used to set a different directory where **BDeploy** logins are stored and can be read from.
 !!!
 
 Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
@@ -1079,8 +1082,8 @@ This file is required and lists the [`product-build.yaml`](#product-buildyaml) f
 
 ```yaml products.yaml
 products:
-  "Product One": "prod-1-build.yaml"
-  "Product Two": "prod-2-build.yaml"
+  'Product One': 'prod-1-build.yaml'
+  'Product Two': 'prod-2-build.yaml'
 ```
 
 The path to the `products.yaml` has to be configured in the **Eclipse TEA** preferences.
