@@ -16,7 +16,7 @@ icon: arrow-both
 
 Any of the above will be processed _as late as possible_, i.e. on the target node, right before writing the final content to the target directories.
 
-The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. There are various types, usually denoted by a single character. The following section gives an overview of types, variables, and possible sub-variables.
+The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. There are various types, usually denoted by a single character. The following section gives an overview of types, variables, and possible sub-variables. Additionally, limited arithmetic expressions (only `+` and `-`) can be added as last component, e.g. `{{X:myvar:+3}}`. Arithmetic expressions may not be available depending on the data type used at the specific location (e.g. not available if the variable in question is of type `STRING`).
 
 !!!info Note
 **BDeploy** has a _link expression editor_ built in. All elements in the UI (except the configuration file editor) can be switched from _plain value_ editor to _link expression_ editor, which gives rich content assist for link expressions (which contain one or more variable expansions). The configuration file editor uses rich content assist by default on [ **CTRL** ] + [ **Space** ] if the current word starts with `{{`.
