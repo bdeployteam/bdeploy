@@ -445,13 +445,6 @@ public class BrowserDialog extends BaseDialog {
     /** Notification that the selected app should be removed */
     private void onUninstallButtonClicked(ActionEvent e) {
         ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
-
-        String message = "Are you sure you want to uninstall '" + appName + "'?";
-        int result = JOptionPane.showConfirmDialog(this, message, "Uninstall", JOptionPane.YES_NO_OPTION);
-        if (result != JOptionPane.YES_OPTION) {
-            return;
-        }
         doUninstall(app);
     }
 

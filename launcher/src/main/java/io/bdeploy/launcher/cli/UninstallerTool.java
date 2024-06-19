@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.swing.JOptionPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,9 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         @Help("Directory where the launcher stores the hive as well as all applications. ")
         String homeDir();
 
+        @Help(value = "Don't ask for confirmation before uninstalling application", arg = false)
+        boolean yes() default false;
+
     }
 
     public UninstallerTool() {
@@ -63,6 +68,9 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         if (config.app() == null) {
             throw new IllegalStateException("Missing --app argument");
         }
+        if (!config.yes() && !confirmDelete()) {
+            return createResultWithErrorMessage("Aborted, no confirmation");
+        }
 
         Path rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         Path bhiveDir = rootDir.resolve("bhive");
@@ -71,6 +79,13 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             doUninstall(rootDir, hive, config.app());
         }
         return createSuccess();
+    }
+
+    private boolean confirmDelete() {
+        int result = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete this application? This CANNOT be undone.", "Uninstall",
+                JOptionPane.YES_NO_OPTION);
+        return result == JOptionPane.YES_OPTION;
     }
 
     /** Uninstall the given application and removes all not required artifacts */
