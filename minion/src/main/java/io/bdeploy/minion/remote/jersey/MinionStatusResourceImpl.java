@@ -29,6 +29,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.minion.MinionMonitoringDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.NodeSynchronizationStatus;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
@@ -68,6 +69,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
         s.startup = startTime;
         s.config = root.getSelfConfig();
         s.monitoring = rollingMonitoring;
+        s.nodeSynchronizationStatus = NodeSynchronizationStatus.UNKNOWN; // minion does not know if it is synchronized with master
         return s;
     }
 
