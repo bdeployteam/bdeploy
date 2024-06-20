@@ -352,21 +352,22 @@ public class ProductUpdateService {
             SystemConfiguration system) {
         List<ApplicationValidationDto> result = new ArrayList<>();
 
-        if (instance.files != null && !instance.config.nodeDtos.isEmpty()) {
-            InstanceNodeConfigurationDto nodeConfig = instance.config.nodeDtos.getFirst();
-            VariableResolver resolver = createResolver(nodeConfig, null);
-            for (FileStatusDto file : instance.files) {
-                if (file.type == FileStatusType.DELETE) {
-                    continue;
-                }
-                try {
-                    String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
-                    TemplateHelper.process(content, resolver, str -> true, file.file);
-                } catch (Exception e) {
-                    result.add(new ApplicationValidationDto(file.file, null, e.getMessage()));
-                }
-            }
-        }
+        // TODO: CT_BDEPLOY-56 - skip validation on server side for 7.1.0.
+        // if (instance.files != null && !instance.config.nodeDtos.isEmpty()) {
+        //     InstanceNodeConfigurationDto nodeConfig = instance.config.nodeDtos.getFirst();
+        //     VariableResolver resolver = createResolver(nodeConfig, null);
+        //     for (FileStatusDto file : instance.files) {
+        //         if (file.type == FileStatusType.DELETE) {
+        //             continue;
+        //         }
+        //         try {
+        //             String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
+        //             TemplateHelper.process(content, resolver, str -> true, file.file);
+        //         } catch (Exception e) {
+        //             result.add(new ApplicationValidationDto(file.file, null, e.getMessage()));
+        //         }
+        //     }
+        // }
 
         // there is nothing in the base config which requires excessive validation right now. mandatory fields are
         // validated in the client(s) individually.
