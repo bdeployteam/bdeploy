@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.audit.Auditor;
-import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
@@ -47,7 +46,7 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
 
         List<String> command = new ArrayList<>();
         command.add(ClientPathHelper.getNativeFileAssocTool(launcherDir).normalize().toAbsolutePath().toString());
-        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+        if (os == OperatingSystem.WINDOWS) {
             command.add("/InstallApplication");
             command.add(ScriptUtils.getBDeployFileAssocId(id));
             command.add(ScriptUtils.getFullFileExtension(fileAssocExtension));
@@ -63,6 +62,7 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
             command.add(fullScriptPath.normalize().toAbsolutePath().toString());
             // TODO: last argument is a 128x128 png image used as icon. if not given uses the bdeploy launcher icon (good enough for now).
         }
+
         ProcessBuilder b = new ProcessBuilder(command);
         // We are not interested in the output
         b.redirectOutput(Redirect.DISCARD);
