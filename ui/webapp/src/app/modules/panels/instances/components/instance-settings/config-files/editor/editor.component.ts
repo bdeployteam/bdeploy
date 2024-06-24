@@ -35,6 +35,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   private system: SystemConfiguration;
 
   protected completions: ContentCompletion[];
+  protected recursivePrefixes = ['JSON', 'XML', 'YAML'];
   protected variableExpansionRegex = '\\{\\{.*?\\}\\}';
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;

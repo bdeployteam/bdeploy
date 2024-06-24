@@ -1,6 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, ElementRef, Input, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { getRecursivePrefix } from '../../utils/completion.utils';
 
 export class ContentCompletion {
   value: string;
@@ -47,19 +48,24 @@ export class BdContentAssistMenuComponent {
 
     this.tooManyMatches = false;
     this.isPrefix = false;
-    if (this.prefixes?.length) {
-      const prefixes = this.prefixes.filter((p) => word.startsWith(p.value));
+
+    const recursivePrefix = getRecursivePrefix(word, '{{');
+    const prefixes = this.prefixes.map((p) => ({ ...p, value: p.value.replace('{{', recursivePrefix) }));
+    const values = this.values.map((v) => ({ ...v, value: v.value.replace('{{', recursivePrefix) }));
+
+    if (prefixes?.length) {
+      const suitablePrefixes = prefixes.filter((p) => word.startsWith(p.value));
 
       // in case we have exactly one prefix, we can continue with values. otherwise select a prefix first.
-      if (prefixes.length !== 1) {
+      if (suitablePrefixes.length !== 1) {
         this.isPrefix = true;
         // other way round, select potential prefixes.
-        this.matches = this.prefixes.filter((p) => p.value.startsWith(word));
+        this.matches = prefixes.filter((p) => p.value.startsWith(word));
       }
     }
 
     if (!this.isPrefix) {
-      this.matches = this.values.filter((v) => v.value.startsWith(word));
+      this.matches = values.filter((v) => v.value.startsWith(word));
     }
 
     if (!this.matches?.length) {

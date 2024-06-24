@@ -13,6 +13,21 @@ import {
   gatherVariableExpansions,
 } from './linked-values.utils';
 
+const RECURSIVE_PREFIXES = ['DELAYED', 'JSON', 'XML', 'YAML'];
+
+export function getRecursivePrefix(
+  word: string,
+  acc: string,
+  recursivePrefixes: string[] = RECURSIVE_PREFIXES,
+): string {
+  for (var prefix of recursivePrefixes) {
+    if (word.startsWith(acc + prefix + ':')) {
+      return getRecursivePrefix(word, acc + prefix + ':');
+    }
+  }
+  return acc;
+}
+
 export function buildCompletionPrefixes(): ContentCompletion[] {
   return [
     {

@@ -41,6 +41,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() readonly: boolean;
   @Input() completions: ContentCompletion[] = [];
+  @Input() recursivePrefixes: string[] = [];
 
   @Input() markerRegex: string;
   // might return null, which means nothing will be marked for the given FindMatch
@@ -71,7 +72,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.completions) {
-      this.editorCompletions.setCompletions(this.completions);
+      this.editorCompletions.setCompletions(this.completions, this.recursivePrefixes);
     }
     if (changes.markerRegex || changes.createMarker) {
       this.setModelMarkers();
@@ -193,13 +194,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
         };
 
         return {
-          suggestions: editorCompletions.getCompletions()?.map((c) => ({
-            label: c.value,
-            insertText: c.value,
-            detail: c.description,
-            kind: kindByIcon(c.icon),
-            range: range,
-          })),
+          suggestions: editorCompletions.getCompletions(word, range).map((c) => ({ ...c, kind: kindByIcon(c.icon) })),
         };
       },
     };
