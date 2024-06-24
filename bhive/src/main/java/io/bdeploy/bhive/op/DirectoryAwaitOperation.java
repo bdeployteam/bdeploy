@@ -14,7 +14,7 @@ import io.bdeploy.common.util.Threads;
 public class DirectoryAwaitOperation extends DirectoryModificationOperation {
 
     @Override
-    public void doCall(Path lockFile) throws Exception {
+    public void doCall(Path lockFile) {
         for (int i = 0; i < RETRIES; ++i) {
             if (!PathHelper.exists(lockFile) || !DirectoryLockOperation.isLockFileValid(lockFile, getLockContentValidator())) {
                 return;
