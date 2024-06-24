@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -37,13 +36,11 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
-import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -383,47 +380,6 @@ public class MasterRootResourceImpl implements MasterRootResource {
         try (var handle = af.run(Actions.EDIT_NODE, null, null, name)) {
             nodes.editNode(name, minion);
         }
-    }
-
-    private Map<String, NodeGroupState> getInstancesToReinstall(String node) {
-        Map<String, NodeGroupState> result = new TreeMap<>();
-
-        CommonRootResource groups = rc.initResource(new CommonRootResourceImpl());
-
-        groups.getInstanceGroups().forEach(g -> {
-            NodeGroupState ngs = new NodeGroupState();
-
-            // find all instances in the group
-            BHive hive = registry.get(g.name);
-            SortedSet<Key> ims = InstanceManifest.scan(hive, true);
-
-            ims.forEach(e -> {
-                InstanceManifest im = InstanceManifest.of(hive, e);
-                InstanceConfiguration i = im.getConfiguration();
-
-                // find all installed/active versions
-                InstanceStateRecord states = im.getState(hive).read();
-                NodeInstanceState ns = new NodeInstanceState();
-                ns.active = states.activeTag;
-
-                for (String installed : states.installedTags) {
-                    // if it does, we add it to the list we want to re-install.
-                    if (im.getInstanceNodeManifests().containsKey(node)) {
-                        ns.installed.add(installed);
-                    }
-                }
-
-                if (!ns.installed.isEmpty()) {
-                    ngs.instances.put(i.id, ns);
-                }
-            });
-
-            if (!ngs.instances.isEmpty()) {
-                result.put(g.name, ngs);
-            }
-        });
-
-        return result;
     }
 
     @Override
