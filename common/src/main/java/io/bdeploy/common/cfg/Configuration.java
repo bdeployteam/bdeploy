@@ -73,7 +73,6 @@ public class Configuration {
                 remaining.add(arg);
             } else if (arg.equals("--")) {
                 inRemaining = true;
-                continue;
             } else if (arg.startsWith("--")) {
                 String stripped = arg.substring(2);
                 int equalsIndex = stripped.indexOf('=');
