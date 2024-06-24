@@ -34,10 +34,18 @@ public class LocalClientApplicationSettings {
     // Scripts
 
     /**
-     * @param scriptName The {@link ScriptInfo} to add to the internal {@link Map}
-     * @param scriptInfo The {@link ClickAndStartDescriptor}
-     * @param override Will use {@link Map#put(Object, Object) put} if <code>true</code>, otherwise
-     *            {@link Map#putIfAbsent(Object, Object) putIfAbsent}
+     * @param scriptName The name of the start script to remove
+     * @see Map#remove(Object)
+     */
+    public void removeStartScriptInfo(String scriptName) {
+        startScriptName2startDescriptor.remove(scriptName);
+    }
+
+    /**
+     * @param scriptName The name of the start script
+     * @param scriptInfo The {@link ScriptInfo} to add to the internal {@link Map}
+     * @param override Will use {@link Map#put(Object, Object)} if <code>true</code>, otherwise
+     *            {@link Map#putIfAbsent(Object, Object)}
      */
     public void putStartScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
         if (override) {
@@ -56,10 +64,18 @@ public class LocalClientApplicationSettings {
     }
 
     /**
-     * @param scriptName The {@link ScriptInfo} to add to the internal {@link Map}
-     * @param scriptInfo The {@link ClickAndStartDescriptor}
-     * @param override Will use {@link Map#put(Object, Object) put} if <code>true</code>, otherwise
-     *            {@link Map#putIfAbsent(Object, Object) putIfAbsent}
+     * @param scriptName The name of the file association script script to remove
+     * @see Map#remove(Object)
+     */
+    public void removeFileAssocScriptInfo(String scriptName) {
+        startScriptName2startDescriptor.remove(scriptName);
+    }
+
+    /**
+     * @param scriptName The name of the file association script
+     * @param scriptInfo The {@link ScriptInfo} to add to the internal {@link Map}
+     * @param override Will use {@link Map#put(Object, Object)} if <code>true</code>, otherwise
+     *            {@link Map#putIfAbsent(Object, Object)}
      */
     public void putFileAssocScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
         if (override) {
