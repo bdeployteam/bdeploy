@@ -846,12 +846,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             scriptHelper.createScript(metadata, clickAndStart, false);
         } catch (FileAlreadyExistsException e) {
-            log.warn(
-                    "Failed to create " + scriptType
-                            + " script in {} because a different application is already using the same identifier: {}",
-                    scriptDir, scriptHelper.calculateScriptName(metadata));
+            log.warn("Failed to create  {} script in {} because a different application is already using the same identifier: {}",
+                    scriptType, scriptDir, scriptHelper.calculateScriptName(metadata));
         } catch (IOException e) {
-            log.error("Failed to create " + scriptType + " script in {}", scriptDir, e);
+            log.error("Failed to create {} script in {}", scriptType, scriptDir, e);
         }
     }
 

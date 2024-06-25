@@ -164,7 +164,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             Path scriptPath = scriptsDir.resolve(scriptInfo.getScriptName());
             if (PathHelper.exists(scriptPath)) {
                 PathHelper.deleteRecursiveRetry(scriptPath);
-                log.info("Removed " + scriptType + " script {}", scriptName);
+                log.info("Removed {} script {}", scriptType, scriptName);
             }
             settingsUpdater.accept(settings);
             manifest.write(settings);
