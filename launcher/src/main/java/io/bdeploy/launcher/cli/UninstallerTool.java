@@ -115,15 +115,20 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
                 if (metadata != null) {
                     OperatingSystem os = OsHelper.getRunningOs();
                     ClickAndStartDescriptor descriptor = config.clickAndStart;
+
                     String startScriptName = metadata.startScriptName;
                     String fileAssocExtension = metadata.fileAssocExtension;
 
+                    String startScriptIdentifier = ScriptUtils.getStartScriptIdentifier(os, startScriptName);
+                    String fileAssocIdentifier = ScriptUtils.getFileAssocIdentifier(os, fileAssocExtension);
+
                     removeScript(hive, descriptor, startScriptName, startScriptsDir, "start",//
-                            settings -> settings.getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, startScriptName)),
+                            settings -> settings.getStartScriptInfo(startScriptIdentifier),//
+                            settings -> settings.removeStartScriptInfo(startScriptIdentifier),//
                             null);
                     removeScript(hive, descriptor, fileAssocExtension, fileAssocScriptsDir, "file association",//
-                            settings -> settings
-                                    .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, fileAssocExtension)),
+                            settings -> settings.getFileAssocScriptInfo(fileAssocIdentifier),//
+                            settings -> settings.removeFileAssocScriptInfo(fileAssocIdentifier),//
                             scriptPath -> uninstallFileAssoc(metadata, rootDir));
                 }
             }
@@ -143,14 +148,17 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     private static void removeScript(BHive hive, ClickAndStartDescriptor descriptor, String scriptName, Path scriptsDir,
             String scriptType, Function<LocalClientApplicationSettings, ScriptInfo> scriptInfoExtractor,
-            Consumer<Path> uninstallationAddon) {
+            Consumer<LocalClientApplicationSettings> settingsUpdater, Consumer<Path> uninstallationAddon) {
         if (StringHelper.isNullOrBlank(scriptName)) {
             return;
         }
-        LocalClientApplicationSettings settings = new LocalClientApplicationSettingsManifest(hive).read();
+
+        LocalClientApplicationSettingsManifest manifest = new LocalClientApplicationSettingsManifest(hive);
+        LocalClientApplicationSettings settings = manifest.read();
         if (settings == null) {
             return;
         }
+
         ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings);
         if (scriptInfo != null && descriptor.equals(scriptInfo.getDescriptor())) {
             Path scriptPath = scriptsDir.resolve(scriptInfo.getScriptName());
@@ -158,6 +166,8 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
                 PathHelper.deleteRecursiveRetry(scriptPath);
                 log.info("Removed " + scriptType + " script {}", scriptName);
             }
+            settingsUpdater.accept(settings);
+            manifest.write(settings);
             if (uninstallationAddon != null) {
                 uninstallationAddon.accept(scriptPath);
             }
