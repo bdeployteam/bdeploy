@@ -24,14 +24,14 @@ public class LocalStartScriptHelper extends LocalScriptHelper {
 
     @Override
     protected String getScriptContent() {
+        Path scriptLauncher = ClientPathHelper.getScriptLauncher(launcherDir).toAbsolutePath();
+        Path launchFile = appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath();
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
-                    + '"' + ClientPathHelper.getScriptLauncher(launcherDir).toAbsolutePath() + "\" \"launcher\" \"--launch="
-                    + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + "\" --noSplash -- %*";
+                    + '"' + scriptLauncher + "\" \"launcher\" \"--launch=" + launchFile + "\" --noSplash -- %*";
         }
-        return "#!/usr/bin/env bash\n" //
-                + ClientPathHelper.getScriptLauncher(launcherDir).toAbsolutePath() + " launcher \"--launch="
-                + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + "\" --noSplash -- \"$@\"";
+        return "#!/usr/bin/env bash\n"//
+                + scriptLauncher + " launcher \"--launch=" + launchFile + "\" --noSplash -- \"$@\"";
     }
 
     @Override

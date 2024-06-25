@@ -82,15 +82,15 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
 
     @Override
     protected String getScriptContent() {
+        Path launchFile = appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath();
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
                     + "start /d \"" + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).toAbsolutePath() + "\" "
-                    + ClientPathHelper.WIN_LAUNCHER + " \"" + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath()
-                    + "\" -- %*";
+                    + ClientPathHelper.WIN_LAUNCHER + " \"" + launchFile + "\" -- %*";
         }
-        return "#!/usr/bin/env bash\n" //
-                + ClientPathHelper.getNativeLauncher(launcherDir).toAbsolutePath() + " launcher \"--launch="
-                + appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath() + "\" -- \"$@\"";
+        return "#!/usr/bin/env bash\n"//
+                + ClientPathHelper.getNativeLauncher(launcherDir).toAbsolutePath() + " launcher \"--launch=" + launchFile
+                + "\" -- \"$@\"";
     }
 
     @Override
