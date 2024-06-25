@@ -92,14 +92,14 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected markUnresolvedExpansion(match: monaco.editor.FindMatch): monaco.editor.IMarkerData {
     const exp = match.matches[0];
 
-    if (exp.startsWith('{{DELAYED:')) {
+    if (exp.includes('DELAYED:')) {
       return errorMarker('DELAYED variables are not allowed in config files', match);
     }
 
     const lv = createLinkedValue(exp);
     const preview = getRenderPreview(lv, null, this.instance, this.system); // null for ApplicationConfiguration
 
-    return preview.indexOf('{{') === -1 ? null : errorMarker('Failed to resolve', match);
+    return !preview.includes('{{') ? null : errorMarker('Failed to resolve', match);
   }
 
   public isDirty(): boolean {
