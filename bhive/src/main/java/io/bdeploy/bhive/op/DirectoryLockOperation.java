@@ -30,7 +30,7 @@ public class DirectoryLockOperation extends DirectoryModificationOperation {
     private static final Logger log = LoggerFactory.getLogger(DirectoryLockOperation.class);
 
     @Override
-    public void doCall(Path lockFile) throws Exception {
+    public void doCall(Path lockFile) {
         String content = "";
         if (getLockContentSupplier() != null) {
             content = getLockContentSupplier().get();

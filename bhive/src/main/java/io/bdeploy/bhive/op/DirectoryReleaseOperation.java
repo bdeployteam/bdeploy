@@ -13,7 +13,7 @@ import io.bdeploy.common.util.PathHelper;
 public class DirectoryReleaseOperation extends DirectoryModificationOperation {
 
     @Override
-    public void doCall(Path lockFile) throws Exception {
+    public void doCall(Path lockFile) {
         PathHelper.deleteRecursiveRetry(lockFile);
     }
 }
