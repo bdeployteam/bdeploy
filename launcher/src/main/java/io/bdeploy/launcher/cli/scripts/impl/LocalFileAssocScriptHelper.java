@@ -15,6 +15,7 @@ import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientPathHelper;
+import io.bdeploy.launcher.cli.scripts.LaunchMode;
 import io.bdeploy.launcher.cli.scripts.LocalScriptHelper;
 import io.bdeploy.launcher.cli.scripts.ScriptUtils;
 
@@ -82,13 +83,16 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
 
     @Override
     protected String getScriptContent() {
+        String envVar = LaunchMode.LAUNCH_MODE_ENV_VAR_NAME + "=" + LaunchMode.ASSOCIATION;
         Path launchFile = appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath();
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
+                    + "set " + envVar + "\n"//
                     + "start /d \"" + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).toAbsolutePath() + "\" "
                     + ClientPathHelper.WIN_LAUNCHER + " \"" + launchFile + "\" -- %*";
         }
         return "#!/usr/bin/env bash\n"//
+                + "export " + envVar + "\n"//
                 + ClientPathHelper.getNativeLauncher(launcherDir).toAbsolutePath() + " launcher \"--launch=" + launchFile
                 + "\" -- \"$@\"";
     }
