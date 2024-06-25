@@ -100,9 +100,12 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /**
    * The columns to display
    */
-  protected _columns: BdDataColumn<T>[];
-  protected _visibleColumns: string[];
+  protected _columns: BdDataColumn<T>[] = [];
+  protected _visibleColumns: string[] = [];
   @Input() set columns(val: BdDataColumn<T>[]) {
+    if (!val) {
+      return;
+    }
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
       (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH,

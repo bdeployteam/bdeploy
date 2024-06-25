@@ -116,6 +116,9 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
       return;
     }
     const model = this.globalMonaco.editor.getModel(this.globalMonaco.Uri.parse(this.editorPath));
+    if (!model) {
+      return;
+    }
     const matches = model.findMatches(this.markerRegex, true, true, false, null, true);
     const markers = matches.map((m) => this.createMarker(m)).filter((m) => !!m);
     this.globalMonaco.editor.setModelMarkers(model, 'markers', markers);
