@@ -569,7 +569,7 @@ export class InstanceEditService {
     }
 
     // if the current product is not available, there is no way (currently) we can validate that...
-    if (!this.current$.value.hasProduct) {
+    if (!this.hasCurrentInstanceProduct()) {
       this.validating$.next(false);
       return;
     }
@@ -623,6 +623,12 @@ export class InstanceEditService {
 
         this.conceal(`Update Product Version to ${target.key.tag}`);
       });
+  }
+
+  private hasCurrentInstanceProduct(): boolean {
+    const products = this.products.products$.value;
+    const product = this.instances.current$.value?.instanceConfiguration?.product;
+    return !!products?.find((p) => p.key.name === product?.name && p.key.tag === product?.tag);
   }
 
   public getLastControlGroup(node: InstanceNodeConfiguration): ProcessControlGroupConfiguration {

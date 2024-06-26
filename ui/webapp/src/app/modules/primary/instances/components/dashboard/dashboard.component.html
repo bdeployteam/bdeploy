@@ -70,19 +70,19 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container>
-      <ng-container *ngIf="!!currentInstance?.hasProduct">
+      <ng-container *ngIf="hasProduct">
         <div
-          *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)"
+          *ngIf="currentInstance.instance.tag !== currentInstance.activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)"
           class="bd-rect-card flex flex-col mb-2.5"
         >
           <div class="bd-default-padding flex gap-1">
             <div class="flex-auto flex flex-col">
-              <div *ngIf="!!currentInstance?.activeVersion?.tag">
+              <div *ngIf="!!currentInstance.activeVersion?.tag">
                 This instance has a newer configuration version available to be activated ({{
-                currentInstance?.instance.tag }}). You can
+                currentInstance.instance.tag }}). You can
                 <strong>install and activate</strong> this version now.
               </div>
-              <div *ngIf="!currentInstance?.activeVersion?.tag">
+              <div *ngIf="!currentInstance.activeVersion?.tag">
                 This instance has no active version. You can install and activate the current version now.
               </div>
               <div class="bd-description-text">
@@ -97,9 +97,9 @@
                 color="primary"
                 text="Install"
                 icon="layers"
-                (click)="doInstall(currentInstance?.instance.tag)"
+                (click)="doInstall(currentInstance.instance.tag)"
                 [collapsed]="isInstalled"
-                [disabled]="(mappedInstall$ | async) || isInstalled || !(auth.isCurrentScopeWrite$ | async)"
+                [disabled]="(mappedInstall$ | async) || isInstalled || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
                 [loadingWhen$]="mappedInstall$"
                 tooltip="below"
               ></app-bd-button>
@@ -107,7 +107,7 @@
                 color="primary"
                 text="Activate"
                 icon="star"
-                (click)="doActivate(currentInstance?.instance.tag)"
+                (click)="doActivate(currentInstance.instance.tag)"
                 [collapsed]="!isInstalled"
                 [disabled]="(mappedActivate$ | async) || !isInstalled || !(auth.isCurrentScopeWrite$ | async)"
                 [loadingWhen$]="mappedActivate$"

@@ -370,8 +370,6 @@ public class InstanceResourceImpl implements InstanceResource {
         Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
                 k -> vss.getTagComparator(group, im.getConfiguration().product));
 
-        boolean hasProduct = pmScan.contains(config.product);
-
         Key activeVersion = null;
         Key activeProduct = null;
         try {
@@ -426,9 +424,8 @@ public class InstanceResourceImpl implements InstanceResource {
             readTree(configRoot, rootTv);
         }
 
-        return InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable,
-                newerVersionAvailableInRepository, managedMaster, attributes, banner, im.getManifest(), activeVersion,
-                overallState, configRoot);
+        return InstanceDto.create(imKey, config, activeProduct, newerVersionAvailable, newerVersionAvailableInRepository,
+                managedMaster, attributes, banner, im.getManifest(), activeVersion, overallState, configRoot);
     }
 
     @Override

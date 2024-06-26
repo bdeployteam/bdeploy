@@ -570,7 +570,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
         attached.minions = new MinionConfiguration(config);
 
-        // 10. Check if managed server has newer products that central
+        // 10. Check if managed server has newer products than central
         MinionProductUpdatesDto productUpdatesDto = new MinionProductUpdatesDto();
         productUpdatesDto.newerVersionAvailable = new HashMap<>();
         SortedSet<Key> productsOnCentral = ProductManifest.scan(hive);

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { isEqual } from 'lodash-es';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { finalize, map, skipWhile, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import { catchError, finalize, map, skipWhile, switchMap } from 'rxjs/operators';
 import { Actions, HistoryEntryDto, HistoryEntryType, InstanceStateRecord, ManifestKey } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
@@ -11,6 +11,7 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { HistoryService } from 'src/app/modules/primary/instances/services/history.service';
 import { InstanceStateService } from 'src/app/modules/primary/instances/services/instance-state.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
 import { histKey, histKeyDecode } from '../../utils/history-key.utils';
@@ -25,6 +26,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   private details = inject(HistoryDetailsService);
   private actions = inject(ActionsService);
   private groups = inject(GroupsService);
+  private products = inject(ProductsService);
   protected instances = inject(InstancesService);
   protected states = inject(InstanceStateService);
   protected servers = inject(ServersService);
@@ -38,7 +40,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   private activating$ = new BehaviorSubject<boolean>(false);
   private deleting$ = new BehaviorSubject<boolean>(false);
 
-  private tag$ = this.entry$.pipe(map((e) => e.instanceTag));
+  private tag$ = this.entry$.pipe(map((e) => e?.instanceTag));
 
   protected mappedInstall$ = this.actions.action([Actions.INSTALL], this.installing$, null, null, this.tag$);
   protected mappedUninstall$ = this.actions.action([Actions.UNINSTALL], this.uninstalling$, null, null, this.tag$);
@@ -54,7 +56,8 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   protected isCreate: boolean;
   protected isInstalled: boolean;
   protected isActive: boolean;
-  protected product: ManifestKey;
+  protected hasProduct: boolean;
+  protected product$ = new BehaviorSubject<ManifestKey>(null);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -82,8 +85,14 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
         .pipe(
           skipWhile((entry) => !entry),
           switchMap((entry) => this.details.getVersionDetails(entry.instanceTag)),
+          catchError(() => of(null)),
         )
-        .subscribe((cache) => (this.product = cache.config.product)),
+        .subscribe((cache) => this.product$.next(cache?.config?.product)),
+    );
+    this.subscription.add(
+      combineLatest([this.product$, this.products.products$]).subscribe(([product, products]) => {
+        this.hasProduct = !!products?.find((p) => p.key.name === product?.name && p.key.tag === product?.tag);
+      }),
     );
   }
 
@@ -140,9 +149,10 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
 
   protected goToProductPage() {
     const group = this.groups.current$.value.name;
+    const product = this.product$.value;
     this.areas.navigateBoth(
       ['products', 'browser', group],
-      ['panels', 'products', 'details', this.product.name, this.product.tag],
+      ['panels', 'products', 'details', product.name, product.tag],
     );
   }
 }
