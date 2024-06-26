@@ -33,10 +33,10 @@ for %%i in ("%APP_HOME%\\..") do set "BDEPLOY_INTERNAL_HOMEDIR=%%~fi"
 
 @rem update requested (exit code == 42)
 IF NOT "%ERRORLEVEL%"=="42" (
-    IF NOT "%ERRORLEVEL%"=="0" (
-        goto :fail
+    IF "%ERRORLEVEL%"=="0" (
+        goto :end
     )
-    goto :end
+    goto :fail
 )
 echo "Minion signalled restart request."
 
