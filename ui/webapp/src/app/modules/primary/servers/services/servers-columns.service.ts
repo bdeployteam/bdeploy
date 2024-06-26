@@ -27,7 +27,7 @@ export class ServersColumnsService {
     id: 'nodeCount',
     name: 'Nodes',
     data: (r) => Object.keys(r.minions.minions).length,
-    icon: (r) => 'dock',
+    icon: () => 'dock',
     hint: BdDataColumnTypeHint.DETAILS,
   };
 

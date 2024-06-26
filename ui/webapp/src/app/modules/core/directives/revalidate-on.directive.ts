@@ -17,7 +17,7 @@ export class RevalidateOnDirective implements OnInit, OnDestroy {
       return; // error...
     }
 
-    this.sub = this.appRevalidateOn.subscribe((s) => {
+    this.sub = this.appRevalidateOn.subscribe(() => {
       // need to do this outside the update loop.
       setTimeout(() => {
         this.host.control.updateValueAndValidity();

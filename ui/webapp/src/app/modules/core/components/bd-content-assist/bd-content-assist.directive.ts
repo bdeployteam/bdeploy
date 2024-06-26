@@ -1,14 +1,6 @@
 import { Directive, ElementRef, HostListener, Input, OnInit, inject } from '@angular/core';
 import { BdContentAssistMenuComponent } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 
-enum Keys {
-  TAB = 9,
-  ENTER = 13,
-  ESC = 27,
-  UP = 38,
-  DOWN = 40,
-}
-
 class WordInfo {
   word: string;
   begin: number;
