@@ -9,7 +9,18 @@ SET argumentCount=0
 FOR %%x IN (%*) DO SET /A argumentCount+=1
 
 IF %argumentCount%==1 (
-	notepad %1
+	SET "argIsNumericCheck="&FOR /f "delims=-0123456789" %%i IN ("%1") DO SET argIsNumericCheck=%%i
+	IF DEFINED argIsNumericCheck (
+		:: The single argument is not numeric
+		:: -> Interpret it as a path to a text file and open it with notepad
+		ECHO The argument "%1" is not numeric.
+		notepad %1
+	) ELSE (
+		:: The single argument is numeric
+		:: -> Exit with the given argument as exit code
+		ECHO The argument "%1" is numeric.
+		exit /b %1%
+	)
 ) ELSE (
 	(
 		ECHO BDeploy Launcher is working!
