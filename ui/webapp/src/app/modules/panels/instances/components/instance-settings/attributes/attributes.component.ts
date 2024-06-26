@@ -79,7 +79,7 @@ export class AttributesComponent implements OnInit {
     });
   }
 
-  protected showAddDialog(template: TemplateRef<any>) {
+  protected showAddDialog(template: TemplateRef<unknown>) {
     this.dialog
       .message({
         header: 'Add/Edit Attribute Value',

@@ -22,7 +22,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   protected class$ = new BehaviorSubject<string>('local-unknown');
 
   private id$ = new BehaviorSubject<string>(null);
-  private change$ = new BehaviorSubject<any>(null);
+  private change$ = new BehaviorSubject<unknown>(null);
   private subscription: Subscription;
 
   protected mappedAction$ = this.actions.action(

@@ -86,7 +86,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-  @ViewChild('msgTemplate') private tplMessages: TemplateRef<any>;
+  @ViewChild('msgTemplate') private tplMessages: TemplateRef<unknown>;
   @ViewChild('stepper', { static: false }) private myStepper: MatStepper;
 
   private product: ProductDto;

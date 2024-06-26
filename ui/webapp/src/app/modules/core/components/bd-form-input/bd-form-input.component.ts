@@ -37,7 +37,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   @Input() suggested: string[];
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
   @Input() passwordLock = false;
-  @Input() prefix: TemplateRef<any>;
+  @Input() prefix: TemplateRef<unknown>;
   @Input() assistValues: ContentCompletion[];
   @Input() assistPrefixes: ContentCompletion[];
   @Input() errorFallback: string;
@@ -45,7 +45,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   @Input() passwordShowable = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-native
-  @Output() focus = new EventEmitter<any>();
+  @Output() focus = new EventEmitter<unknown>();
 
   @ViewChild(MatAutocompleteTrigger) private trigger: MatAutocompleteTrigger;
 
@@ -64,11 +64,11 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
     }
   }
 
-  private internalValue: any = '';
+  private internalValue: unknown = '';
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
-  private onChangedCb: (_: any) => void = () => {
+  private onChangedCb: (_: unknown) => void = () => {
     /* intentionally empty */
   };
 
@@ -93,7 +93,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
     setTimeout(() => this.trigger.closePanel(), 200);
   }
 
-  writeValue(v: any): void {
+  writeValue(v: unknown): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
       this.updateFilter();

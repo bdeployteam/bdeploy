@@ -184,7 +184,7 @@ export class ServersService {
       .pipe(measure('Load remote products'));
   }
 
-  public transferProducts(transfer: ProductTransferDto): Observable<any> {
+  public transferProducts(transfer: ProductTransferDto): Observable<unknown> {
     return this.http
       .post(`${this.apiPath}/transfer-products/${this.group}`, transfer)
       .pipe(measure('Initiate Product Transfer'));

@@ -30,7 +30,7 @@ export interface BdDialogMessage<T> {
   message?: string;
 
   /** Template for the message used *instead* of the message. */
-  template?: TemplateRef<any>;
+  template?: TemplateRef<unknown>;
 
   /** Icon shown in the message, defaults to 'info' */
   icon?: string;
@@ -102,7 +102,7 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
 export class BdDialogMessageComponent implements OnInit, OnDestroy {
   private popupService = inject(PopupService);
 
-  public message$ = new BehaviorSubject<BdDialogMessage<any>>(null);
+  public message$ = new BehaviorSubject<BdDialogMessage<unknown>>(null);
   public result$ = new Subject<any>();
   public confirmed$ = new BehaviorSubject<boolean>(true);
 
@@ -164,7 +164,7 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
     this.complete(x[0].result);
   }
 
-  public complete(result: any) {
+  public complete(result: unknown) {
     this.message$.next(null);
     this.result$.next(result);
     this._userConfirmation = '';

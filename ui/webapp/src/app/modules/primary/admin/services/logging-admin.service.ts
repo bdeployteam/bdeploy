@@ -74,7 +74,7 @@ export class LoggingAdminService {
     return this.http.get(`${this.apiPath()}/config`, { responseType: 'text' });
   }
 
-  public setLogConfig(encoded: string): Observable<any> {
+  public setLogConfig(encoded: string): Observable<unknown> {
     return this.http.post(`${this.apiPath()}/config`, encoded);
   }
 }

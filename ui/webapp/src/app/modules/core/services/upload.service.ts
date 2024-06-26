@@ -76,7 +76,7 @@ export class ImportStatus {
   stateObservable: Observable<ImportState>;
 
   /** The error message if failed */
-  detail: any;
+  detail: unknown;
 }
 
 @Injectable({

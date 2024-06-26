@@ -47,7 +47,7 @@ export class UserGroupPermissionsComponent {
     width: '40px',
   };
 
-  private readonly actRemoveLocal: BdDialogMessageAction<any> = {
+  private readonly actRemoveLocal: BdDialogMessageAction<unknown> = {
     name: 'Remove',
     result: 'REMOVE',
     confirm: false,
@@ -83,7 +83,7 @@ export class UserGroupPermissionsComponent {
   protected availablePermissionsForGroup: Permission[];
 
   @Input() dialog: BdDialogComponent;
-  @ViewChild('modDialog') private modDialog: TemplateRef<any>;
+  @ViewChild('modDialog') private modDialog: TemplateRef<unknown>;
 
   private getLocalPermissionLevel(group: UserGroupInfo): Permission {
     return group.permissions.find((p) => p.scope === this.repos.current$.value.name)?.permission;
@@ -93,7 +93,7 @@ export class UserGroupPermissionsComponent {
     return group.permissions.find((p) => !p.scope)?.permission;
   }
 
-  private doModify(tpl: TemplateRef<any>, group: UserGroupInfo) {
+  private doModify(tpl: TemplateRef<unknown>, group: UserGroupInfo) {
     this.modGroup = group;
     this.availablePermissionsForGroup = this.getAvailablePermissionsForGroup(this.modGroup);
     this.modPerm = this.getLocalPermissionLevel(group);

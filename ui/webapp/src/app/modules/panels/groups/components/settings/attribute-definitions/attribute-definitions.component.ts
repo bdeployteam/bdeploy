@@ -50,7 +50,7 @@ export class AttributeDefinitionsComponent {
   protected newDesc: string;
   protected newUsedIds: string[];
 
-  protected showAddDialog(group: InstanceGroupConfiguration, templ: TemplateRef<any>) {
+  protected showAddDialog(group: InstanceGroupConfiguration, templ: TemplateRef<unknown>) {
     this.newUsedIds = group.instanceAttributes.map((r) => r.name);
     this.dialog
       .message({

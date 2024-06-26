@@ -100,12 +100,12 @@ export class ProductDetailsService implements OnDestroy {
     return this.plugins$;
   }
 
-  public delete(): Observable<any> {
+  public delete(): Observable<unknown> {
     return this.http.delete(this.apiPath());
   }
 
-  public download(): Observable<any> {
-    return new Observable<any>((s) => {
+  public download(): Observable<unknown> {
+    return new Observable<unknown>((s) => {
       this.http.get(`${this.apiPath()}/zip`, { responseType: 'text' }).subscribe((token) => {
         this.downloads.download(this.downloads.createDownloadUrl(token));
         s.next(token);

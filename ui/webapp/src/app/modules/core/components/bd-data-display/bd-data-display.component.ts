@@ -100,7 +100,7 @@ export class BdDataDisplayComponent<T> {
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
-  @Input() recordRoute: (r: T) => any[];
+  @Input() recordRoute: (r: T) => unknown[];
 
   /**
    * Key used for persisting the view
@@ -120,7 +120,7 @@ export class BdDataDisplayComponent<T> {
   @ViewChild('table', { static: false }) tableComp: BdDataTableComponent<T>;
   @ViewChild('grid', { static: false }) gridComp: BdDataGridComponent<T>;
   @ContentChild('dataDisplayExtraCardDetails')
-  dataDisplayExtraCardDetails: TemplateRef<any>;
+  dataDisplayExtraCardDetails: TemplateRef<unknown>;
 
   public update(): void {
     this.tableComp?.update();

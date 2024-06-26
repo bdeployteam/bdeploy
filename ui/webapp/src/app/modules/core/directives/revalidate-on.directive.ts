@@ -6,7 +6,7 @@ import { Observable, Subscription } from 'rxjs';
   selector: '[appRevalidateOn]',
 })
 export class RevalidateOnDirective implements OnInit, OnDestroy {
-  @Input() appRevalidateOn: Observable<any>;
+  @Input() appRevalidateOn: Observable<unknown>;
   private host = inject(NgControl);
   private cd = inject(ChangeDetectorRef);
 

@@ -71,7 +71,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   protected clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(null);
   protected clipBoardError$ = new BehaviorSubject<string>(null);
 
-  @ViewChild('varTemplate') template: TemplateRef<any>;
+  @ViewChild('varTemplate') template: TemplateRef<unknown>;
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   private subscription: Subscription;
@@ -262,7 +262,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         // we have an empty object in any accepted case, null if cancelled.
         return;
       }
-      const allCreations: Observable<any>[] = [];
+      const allCreations: Observable<unknown>[] = [];
       if (this.isClientNode(row.node)) {
         // multiple applications for the same ID for multiple OS'.
         for (const app of row.app.applications) {

@@ -131,7 +131,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
     return this.isDirty() && !this.isFromInvalid;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return of(true).pipe(
       tap(() => {
         this.instanceEdit.conceal('Change endpoint configuration');

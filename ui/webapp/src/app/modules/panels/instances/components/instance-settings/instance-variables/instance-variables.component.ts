@@ -107,7 +107,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) tb: BdDialogToolbarComponent;
 
-  @ViewChild('editTemplate') editTemplate: TemplateRef<any>;
+  @ViewChild('editTemplate') editTemplate: TemplateRef<unknown>;
 
   @ViewChild('addForm', { static: false }) addForm: NgForm;
   @ViewChild('editForm', { static: false }) editForm: NgForm;
@@ -171,7 +171,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Change Instance Variables');
@@ -265,7 +265,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
     );
   }
 
-  protected onAdd(templ: TemplateRef<any>) {
+  protected onAdd(templ: TemplateRef<unknown>) {
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
       id: '',

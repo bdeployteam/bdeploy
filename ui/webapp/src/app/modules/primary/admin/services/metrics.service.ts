@@ -11,8 +11,8 @@ export class MetricsService {
   private http = inject(HttpClient);
   private config = inject(ConfigService);
 
-  public getAllMetrics(): Observable<any> {
-    return this.http.get<any>(this.config.config.api + '/metrics');
+  public getAllMetrics(): Observable<unknown> {
+    return this.http.get<unknown>(this.config.config.api + '/metrics');
   }
 
   public getServerMetrics(): Observable<JerseyServerMonitoringDto> {

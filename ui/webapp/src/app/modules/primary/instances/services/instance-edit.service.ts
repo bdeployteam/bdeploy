@@ -158,7 +158,7 @@ export class InstanceEditService {
   public baseApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
   public stateApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
 
-  public validationDebounce$ = new BehaviorSubject<any>(null);
+  public validationDebounce$ = new BehaviorSubject<unknown>(null);
   public validating$ = new BehaviorSubject<boolean>(false);
   public issues$ = new BehaviorSubject<ApplicationValidationDto[]>(null);
   private issuesSubject$ = new Subject<ApplicationValidationDto[]>();
@@ -675,7 +675,7 @@ export class InstanceEditService {
     return !this.incompatible$.value;
   }
 
-  private hasChanges(object: any, original: any) {
+  private hasChanges(object: unknown, original: unknown) {
     if (!object || !original) {
       return false;
     }

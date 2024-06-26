@@ -22,7 +22,7 @@ export class UserBulkAddToGroupComponent {
 
   protected bulkOpResult: BulkOperationResultDto;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<any>;
+  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
 
   protected get suggestions(): string[] {
     return this.authAdmin.userGroups$.value?.map((g) => g.name);

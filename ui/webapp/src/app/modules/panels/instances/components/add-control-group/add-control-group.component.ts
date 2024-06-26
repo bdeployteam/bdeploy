@@ -84,7 +84,7 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.node.controlGroups.push(this.newGroup);
 
     return of(true).pipe(

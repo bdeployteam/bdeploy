@@ -24,7 +24,7 @@ export class UserBulkManipulationComponent {
 
   protected bulkOpResult: BulkOperationResultDto;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<any>;
+  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
 
   protected onDelete() {
     this.dialog

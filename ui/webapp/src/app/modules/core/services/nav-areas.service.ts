@@ -146,7 +146,12 @@ export class NavAreasService {
     }
   }
 
-  public navigateBoth(primary: any[], panel: any[], primaryExtra?: NavigationExtras, panelExtra?: NavigationExtras) {
+  public navigateBoth(
+    primary: unknown[],
+    panel: unknown[],
+    primaryExtra?: NavigationExtras,
+    panelExtra?: NavigationExtras,
+  ) {
     this.router.navigate(primary, primaryExtra).then((nav) => {
       if (nav) {
         // need to perform a panel navigation separately to avoid closing the panel and to separate query params.

@@ -90,7 +90,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
     return !this.form?.invalid;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.adding$.next(true);
     return this.nodesAdmin.addNode(this.data).pipe(
       finalize(() => {

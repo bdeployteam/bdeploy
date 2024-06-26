@@ -164,7 +164,7 @@ export class InstancesService {
     });
   }
 
-  public delete(instance: string): Observable<any> {
+  public delete(instance: string): Observable<unknown> {
     return this.http.delete(`${this.apiPath(this.group)}/${instance}/delete`).pipe(
       tap(() => {
         this.current$.next(null);
@@ -238,7 +238,7 @@ export class InstancesService {
     );
   }
 
-  public updateBanner(banner: InstanceBannerRecord): Observable<any> {
+  public updateBanner(banner: InstanceBannerRecord): Observable<unknown> {
     return this.http
       .post(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.id}/banner`, banner)
       .pipe(measure('Update Instance Banner'));

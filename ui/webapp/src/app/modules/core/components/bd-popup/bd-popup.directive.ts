@@ -121,7 +121,7 @@ export class BdPopupDirective implements OnDestroy {
   private popupService = inject(PopupService);
   private _render = inject(Renderer2);
 
-  @Input() appBdPopup: TemplateRef<any>;
+  @Input() appBdPopup: TemplateRef<unknown>;
   @Input() appBdPopupTrigger: 'click' | 'hover' = 'click';
   @Input() appBdPopupDelay = 0;
 

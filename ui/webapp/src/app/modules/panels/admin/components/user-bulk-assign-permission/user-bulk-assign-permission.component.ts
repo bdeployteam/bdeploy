@@ -29,7 +29,7 @@ export class UserBulkAssignPermissionComponent implements OnInit, OnDestroy {
 
   protected bulkOpResult: BulkOperationResultDto;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<any>;
+  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
 
   private subscription: Subscription;
 

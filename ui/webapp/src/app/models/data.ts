@@ -48,7 +48,7 @@ export interface BdDataColumn<T> {
   tooltip?: (record: T) => string;
 
   /** Provides a alternative rendering component for the cell, which has an Input named 'record', and an optional Input named 'column' */
-  component?: Type<any>;
+  component?: Type<unknown>;
 
   /** The description of the column, usually displayed as a tooltip somewhere */
   description?: string;

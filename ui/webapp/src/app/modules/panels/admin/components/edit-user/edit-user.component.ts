@@ -75,7 +75,7 @@ export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog
     });
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return this.authAdmin.updateUser(this.tempUser).pipe(
       switchMap(() => {
         if (this.tempUser.password?.length) {

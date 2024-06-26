@@ -76,7 +76,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     return !this.form?.invalid;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     if (this.replace) {
       return this.nodesAdmin

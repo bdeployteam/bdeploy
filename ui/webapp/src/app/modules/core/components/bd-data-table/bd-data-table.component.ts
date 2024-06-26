@@ -40,9 +40,9 @@ import { BdSearchable, SearchService } from '../../services/search.service';
 
 /** Represents the hirarchical presentation of the records after grouping/sorting/searching is applied. */
 interface Node<T> {
-  nodeId: any;
+  nodeId: unknown;
   item: T;
-  groupOrFirstColumn: any;
+  groupOrFirstColumn: unknown;
   children: Node<T>[];
   checkForbidden: boolean;
 }
@@ -177,7 +177,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
-  @Input() recordRoute: (r: T) => any[];
+  @Input() recordRoute: (r: T) => unknown[];
 
   /**
    * A list of connected drag-drop-enabled tables. Dragging is possible between those lists if given.
@@ -221,7 +221,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   private search: string;
 
   /** Emitted when a redraw is requested. */
-  private redrawRequest$ = new Subject<any>();
+  private redrawRequest$ = new Subject<unknown>();
 
   /** The treeControl provides the hierarchy and flattened nodes rendered by the table */
   treeControl = new FlatTreeControl<FlatNode<T>>(

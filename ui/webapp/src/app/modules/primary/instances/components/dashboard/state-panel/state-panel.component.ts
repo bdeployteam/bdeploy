@@ -27,7 +27,7 @@ export class NodeStatePanelComponent implements OnChanges {
   @Input() lastRefreshAt$: BehaviorSubject<number>;
   @Input() refreshingWhen$: BehaviorSubject<boolean>;
 
-  @Output() manualRefresh = new EventEmitter<any>();
+  @Output() manualRefresh = new EventEmitter<unknown>();
 
   protected itemsToDisplay: StateItemToDisplay[];
 

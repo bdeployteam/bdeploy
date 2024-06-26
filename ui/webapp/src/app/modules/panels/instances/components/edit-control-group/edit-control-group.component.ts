@@ -93,7 +93,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     const index = this.node.controlGroups.indexOf(this.origGroup);
     this.node.controlGroups[index] = this.group;
 

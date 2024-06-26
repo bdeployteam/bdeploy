@@ -48,7 +48,7 @@ export class InstanceStateService {
           .pipe(measure('Load Instance Version States'));
   }
 
-  public install(version: string): Observable<any> {
+  public install(version: string): Observable<unknown> {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
@@ -58,7 +58,7 @@ export class InstanceStateService {
       .pipe(measure(`Install ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }
 
-  public uninstall(version: string): Observable<any> {
+  public uninstall(version: string): Observable<unknown> {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
@@ -68,7 +68,7 @@ export class InstanceStateService {
       .pipe(measure(`Uninstall ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }
 
-  public activate(version: string): Observable<any> {
+  public activate(version: string): Observable<unknown> {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${

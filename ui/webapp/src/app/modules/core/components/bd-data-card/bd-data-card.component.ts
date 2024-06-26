@@ -34,7 +34,7 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
-  @Input() recordRoute: (r: T) => any[];
+  @Input() recordRoute: (r: T) => unknown[];
 
   /**
    * A flag that denotes whether a card was selected in bulk mode
@@ -57,7 +57,7 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
 
   avatar: string;
 
-  @ContentChild('extraCardDetails') extraCardDetails: TemplateRef<any>;
+  @ContentChild('extraCardDetails') extraCardDetails: TemplateRef<unknown>;
 
   ngOnInit(): void {
     this.calculateColumnPlacing();

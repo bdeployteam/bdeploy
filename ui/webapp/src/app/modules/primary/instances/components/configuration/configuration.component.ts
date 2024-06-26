@@ -177,7 +177,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     });
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return this.edit.save();
   }
 

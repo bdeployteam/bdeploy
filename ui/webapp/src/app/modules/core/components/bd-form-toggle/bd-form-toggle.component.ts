@@ -25,7 +25,7 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() name: string;
   @Input() disabled: boolean;
   @Input() appearance: 'slide' | 'checkbox' = 'checkbox';
-  @Input() prefix: TemplateRef<any>;
+  @Input() prefix: TemplateRef<unknown>;
 
   @ViewChild(MatCheckbox, { static: false })
   private checkbox: MatCheckbox;
@@ -42,12 +42,12 @@ export class BdFormToggleComponent implements ControlValueAccessor {
     }
   }
 
-  private internalValue: any = '';
+  private internalValue: unknown = '';
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
-  private onChangedCb: (_: any) => void = () => {
+  private onChangedCb: (_: unknown) => void = () => {
     /* intentionally empty */
   };
 
@@ -57,7 +57,7 @@ export class BdFormToggleComponent implements ControlValueAccessor {
     }
   }
 
-  writeValue(v: any): void {
+  writeValue(v: unknown): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
     }

@@ -47,7 +47,7 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return of(true).pipe(
       tap(() => {
         this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);

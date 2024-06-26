@@ -172,19 +172,19 @@ export class ProcessesService {
     }
   }
 
-  public start(pids: string[]): Observable<any> {
+  public start(pids: string[]): Observable<unknown> {
     return this.http
       .post(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/start`, pids)
       .pipe(finalize(() => this.reload()));
   }
 
-  public stop(pids: string[]): Observable<any> {
+  public stop(pids: string[]): Observable<unknown> {
     return this.http
       .post(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/stop`, pids)
       .pipe(finalize(() => this.reload()));
   }
 
-  public restart(pids: string[]): Observable<any> {
+  public restart(pids: string[]): Observable<unknown> {
     return this.http
       .post(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/restart`, pids)
       .pipe(finalize(() => this.reload()));
@@ -197,26 +197,26 @@ export class ProcessesService {
     );
   }
 
-  public reinstall(pid: string): Observable<any> {
+  public reinstall(pid: string): Observable<unknown> {
     return this.http.post<boolean>(
       `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/reinstall/${pid}`,
       null,
     );
   }
 
-  public startInstance(): Observable<any> {
+  public startInstance(): Observable<unknown> {
     return this.http
       .get(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/startAll`)
       .pipe(finalize(() => this.reload()));
   }
 
-  public stopInstance(): Observable<any> {
+  public stopInstance(): Observable<unknown> {
     return this.http
       .get(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/stopAll`)
       .pipe(finalize(() => this.reload()));
   }
 
-  public restartInstance(): Observable<any> {
+  public restartInstance(): Observable<unknown> {
     return this.http
       .get(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/restartAll`)
       .pipe(finalize(() => this.reload()));

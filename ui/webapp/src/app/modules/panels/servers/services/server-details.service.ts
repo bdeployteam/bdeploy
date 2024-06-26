@@ -128,7 +128,7 @@ export class ServerDetailsService implements OnDestroy {
     });
   }
 
-  private waitForUpdate(server: ManagedMasterDto): Observable<any> {
+  private waitForUpdate(server: ManagedMasterDto): Observable<unknown> {
     return this.http
       .get<Version>(`${this.apiPath}/minion-ping/${this.areas.groupContext$.value}/${server.hostName}`, {
         headers: suppressGlobalErrorHandling(new HttpHeaders()),
@@ -143,7 +143,7 @@ export class ServerDetailsService implements OnDestroy {
       );
   }
 
-  private complete<T>(val: T, obs: Subscriber<T>, err?: any) {
+  private complete<T>(val: T, obs: Subscriber<T>, err?: unknown) {
     if (err) {
       obs.error(err);
     } else {

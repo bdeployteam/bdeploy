@@ -176,8 +176,8 @@ export class GroupsService {
     return this.http.delete<Response>(`${this.apiPath}/${group}/image`);
   }
 
-  public updatePreset(group: string, preset: CustomDataGrouping[], multiple: boolean): Observable<any> {
-    return this.http.put<any>(`${this.apiPath}/${group}/presets?multiple=${multiple}`, preset);
+  public updatePreset(group: string, preset: CustomDataGrouping[], multiple: boolean): Observable<unknown> {
+    return this.http.put<unknown>(`${this.apiPath}/${group}/presets?multiple=${multiple}`, preset);
   }
 
   private reload() {

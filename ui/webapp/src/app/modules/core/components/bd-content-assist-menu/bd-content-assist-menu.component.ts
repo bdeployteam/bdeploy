@@ -29,7 +29,7 @@ export class BdContentAssistMenuComponent {
   protected isPrefix = true;
   protected tooManyMatches = false;
 
-  @ViewChild('menu') private menu: TemplateRef<any>;
+  @ViewChild('menu') private menu: TemplateRef<unknown>;
   @ViewChild('itemContainer', { static: false, read: ElementRef })
   private containerElement: ElementRef;
   private overlayRef: OverlayRef;

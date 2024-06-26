@@ -8,7 +8,7 @@ import { DiffType, Difference } from '../../services/history-diff.service';
 })
 export class HistoryDiffFieldComponent implements OnInit {
   @Input() diff: Difference;
-  @Input() popup: TemplateRef<any>;
+  @Input() popup: TemplateRef<unknown>;
 
   @Input() maxWidthPx: number;
   @Input() maskValue = false;

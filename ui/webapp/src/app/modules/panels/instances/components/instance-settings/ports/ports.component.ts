@@ -94,7 +94,7 @@ export class PortsComponent implements OnInit {
     this.dl.downloadBlob('ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv', blob);
   }
 
-  protected shiftSelectedPorts(tpl: TemplateRef<any>) {
+  protected shiftSelectedPorts(tpl: TemplateRef<unknown>) {
     this.amount = null;
     this.dialog
       .message({

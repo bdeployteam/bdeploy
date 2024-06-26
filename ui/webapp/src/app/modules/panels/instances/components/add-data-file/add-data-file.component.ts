@@ -81,7 +81,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     return this.currentPath$.value + this.tempFilePath;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     this.fileToSave = {
       file: this.filePath,
@@ -91,7 +91,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.directory = this.filesService.directories$.value.find((d) => d.minion === this.fileMinion$.value);
 
     // standard update
-    let update: Observable<any> = this.filesService
+    let update: Observable<unknown> = this.filesService
       .updateFile(this.directory, this.fileToSave)
       .pipe(switchMap(() => of(true)));
 
@@ -118,7 +118,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     );
   }
 
-  public doReplace(): Observable<any> {
+  public doReplace(): Observable<unknown> {
     return this.filesService.updateFile(this.directory, this.fileToSave);
   }
 

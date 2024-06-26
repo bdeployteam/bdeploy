@@ -68,7 +68,7 @@ export class ConfigFilesActionsComponent implements OnInit {
     return true;
   }
 
-  protected onRename(tpl: TemplateRef<any>): void {
+  protected onRename(tpl: TemplateRef<unknown>): void {
     const oldName = this.path;
     const isBin = !this.isText;
     this.newName = oldName;
@@ -107,7 +107,7 @@ export class ConfigFilesActionsComponent implements OnInit {
       });
   }
 
-  protected doReplaceFile(tpl: TemplateRef<any>): void {
+  protected doReplaceFile(tpl: TemplateRef<unknown>): void {
     this.tempFileContent = '';
 
     this.parent.dialog

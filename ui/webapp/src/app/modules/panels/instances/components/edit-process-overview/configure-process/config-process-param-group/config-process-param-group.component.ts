@@ -369,7 +369,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     );
   }
 
-  protected onEditCustomParameter(param: ParameterPair, template: TemplateRef<any>) {
+  protected onEditCustomParameter(param: ParameterPair, template: TemplateRef<unknown>) {
     // may not be (and is not) called for linkExpression (different editor).
     const parameters = this.edit.process$.value.start.parameters;
     const paramIndex = parameters.findIndex((p) => p.id === param.value.id);
@@ -402,7 +402,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       });
   }
 
-  protected onAddCustomParameter(template: TemplateRef<any>) {
+  protected onAddCustomParameter(template: TemplateRef<unknown>) {
     this.customTemp = {
       predecessor: null,
       id: null,

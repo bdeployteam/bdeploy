@@ -18,7 +18,7 @@ export class RepositoryComponent implements OnInit {
   protected auth = inject(AuthenticationService);
 
   protected grouping: BdDataGroupingDefinition<any>[] = [{ name: 'Type', group: (r) => r.type }];
-  protected defaultGrouping: BdDataGrouping<any>[] = [{ definition: this.grouping[0], selected: [] }];
+  protected defaultGrouping: BdDataGrouping<unknown>[] = [{ definition: this.grouping[0], selected: [] }];
 
   protected getRecordRoute = (row: any) => {
     return [

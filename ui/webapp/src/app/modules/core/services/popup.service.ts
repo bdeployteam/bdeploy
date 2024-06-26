@@ -4,10 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class PopupService {
-  private clickPopup: any;
-  private contentAssist: any;
+  private clickPopup: unknown;
+  private contentAssist: unknown;
 
-  public setClickPopup(value: any): void {
+  public setClickPopup(value: unknown): void {
     this.clickPopup = value;
   }
 
@@ -15,7 +15,7 @@ export class PopupService {
     return !!this.clickPopup;
   }
 
-  public setContentAssist(value: any): void {
+  public setContentAssist(value: unknown): void {
     this.contentAssist = value;
   }
 

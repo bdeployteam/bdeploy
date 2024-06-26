@@ -87,7 +87,7 @@ export class ProcessNativesComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  private flattenProcesses(processes: any[], detail: ProcessHandleDto) {
+  private flattenProcesses(processes: unknown[], detail: ProcessHandleDto) {
     processes.push(detail);
     detail.children.forEach((child) => this.flattenProcesses(processes, child));
   }

@@ -23,7 +23,7 @@ export class NodeFilterPipe implements PipeTransform {
   pure: false,
 })
 export class CustomNodeFilterPipe implements PipeTransform {
-  transform(item: any, args: any): any {
+  transform(item: unknown, args: any): unknown {
     if (item) {
       if (args.length === 0) {
         return item;

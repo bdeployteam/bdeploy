@@ -42,7 +42,7 @@ export class SystemEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     return isDirty(this.system, this.orig);
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     return this.edit.update(this.system).pipe(finalize(() => this.saving$.next(false)));
   }

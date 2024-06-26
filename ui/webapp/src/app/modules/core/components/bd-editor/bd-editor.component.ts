@@ -140,7 +140,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.setModelMarkers();
   }
 
-  private createCompletionProvider(editorCompletions: MonacoCompletionsService): any {
+  private createCompletionProvider(editorCompletions: MonacoCompletionsService): unknown {
     // ATTENTION: the provider may NOT use ANYTHING from this component, as it will live globally, longer than this component.
     // Thus we're using a global service which will hold the currently valid completions. This also implies that ther cannot be
     // more than one set of completions at a time - thus IF there would be more than one editor, they'd share those.

@@ -13,11 +13,11 @@ export class RepositoryDetailsService {
 
   private apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
 
-  public delete(repository: SoftwareRepositoryConfiguration): Observable<any> {
+  public delete(repository: SoftwareRepositoryConfiguration): Observable<unknown> {
     return this.http.delete(`${this.apiPath(repository.name)}`);
   }
 
-  public update(repository: SoftwareRepositoryConfiguration): Observable<any> {
+  public update(repository: SoftwareRepositoryConfiguration): Observable<unknown> {
     return this.http.post(this.apiPath(repository.name), repository);
   }
 }

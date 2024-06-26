@@ -55,8 +55,8 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('productChooser') private prodChooser: TemplateRef<any>;
-  @ViewChild('opResult') private opResult: TemplateRef<any>;
+  @ViewChild('productChooser') private prodChooser: TemplateRef<unknown>;
+  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
 
   ngOnInit(): void {
     this.subscription = this.bulk.selection$.subscribe((selections) => {

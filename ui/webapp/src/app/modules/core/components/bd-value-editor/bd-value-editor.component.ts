@@ -67,7 +67,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   @Input() completions: ContentCompletion[];
   @Input() completionPrefixes: ContentCompletion[];
 
-  @Input() actions: TemplateRef<any>;
+  @Input() actions: TemplateRef<unknown>;
 
   @Output() customEditorLoaded = new EventEmitter<CustomEditor>();
 
@@ -99,7 +99,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
-  private onChangedCb: (_: any) => void = () => {
+  private onChangedCb: (_: unknown) => void = () => {
     /* intentionally empty */
   };
 
@@ -230,7 +230,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     this.fireChange(this.internalValue);
   }
 
-  protected doChangeValue(event: any) {
+  protected doChangeValue(event: unknown) {
     let reset = false;
     const val = `${event}`; // convert to string in case of number, etc.
 

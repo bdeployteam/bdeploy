@@ -82,12 +82,12 @@ export class SoftwareDetailsService implements OnDestroy {
     return this.plugins$;
   }
 
-  public delete(): Observable<any> {
+  public delete(): Observable<unknown> {
     return this.http.delete(this.getApiPath4Type());
   }
 
-  public download(): Observable<any> {
-    return new Observable<any>((s) => {
+  public download(): Observable<unknown> {
+    return new Observable<unknown>((s) => {
       this.http
         .get(`${this.getApiPath4Type()}/zip`, {
           responseType: 'text',

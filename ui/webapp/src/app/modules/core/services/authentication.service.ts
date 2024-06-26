@@ -78,7 +78,7 @@ export class AuthenticationService {
     });
   }
 
-  public authenticate(username: string, password: string, auth?: SpecialAuthenticators): Observable<any> {
+  public authenticate(username: string, password: string, auth?: SpecialAuthenticators): Observable<unknown> {
     return this.http
       .post(this.cfg.config.api + '/auth/session', { user: username, password: password } as CredentialsApi, {
         responseType: 'text',
@@ -172,7 +172,7 @@ export class AuthenticationService {
     return of(null);
   }
 
-  public logout(): Observable<any> {
+  public logout(): Observable<unknown> {
     this.tokenSubject.next(null);
 
     return combineLatest([
@@ -327,12 +327,12 @@ export class AuthenticationService {
     return this.http.get<UserProfileInfo>(this.cfg.config.api + '/auth/user-profile');
   }
 
-  public updateUserInfo(info: UserInfo): Observable<any> {
+  public updateUserInfo(info: UserInfo): Observable<unknown> {
     this.userInfoSubject$.next(info);
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }
 
-  public changePassword(dto: UserChangePasswordDto): Observable<any> {
+  public changePassword(dto: UserChangePasswordDto): Observable<unknown> {
     return this.http.post(this.cfg.config.api + '/auth/change-password', dto, {
       responseType: 'text',
       headers: suppressGlobalErrorHandling(new HttpHeaders()),

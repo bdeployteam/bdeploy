@@ -35,7 +35,7 @@ export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
     return this.config !== this.origConfig;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return this.loggingAdmin.setLogConfig(Base64.encode(this.config));
   }
 

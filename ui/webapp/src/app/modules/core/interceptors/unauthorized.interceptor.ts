@@ -11,7 +11,7 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
   private auth = inject(AuthenticationService);
   private router = inject(Router);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler) {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler) {
     return next.handle(req).pipe(
       catchError((err) => {
         if (err.status === 401 && !req.headers.has(NO_ERROR_HANDLING_HDR)) {

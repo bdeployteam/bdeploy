@@ -99,7 +99,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
-  @Input() recordRoute: (r: T) => any[];
+  @Input() recordRoute: (r: T) => unknown[];
 
   /**
    * Fires when the user changes the checked elements
@@ -118,7 +118,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   private subscription: Subscription;
 
   @ContentChild('dataGridExtraCardDetails')
-  dataGridExtraCardDetails: TemplateRef<any>;
+  dataGridExtraCardDetails: TemplateRef<unknown>;
 
   ngOnInit(): void {
     if (this.searchable) {

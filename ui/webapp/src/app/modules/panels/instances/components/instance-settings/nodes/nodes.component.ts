@@ -127,7 +127,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return of(true).pipe(tap(() => this.edit.conceal('Select Instance Nodes')));
   }
 }

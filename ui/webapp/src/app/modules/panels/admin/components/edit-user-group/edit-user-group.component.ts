@@ -75,7 +75,7 @@ export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableD
     });
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return this.authAdmin.updateUserGroup(this.tempGroup);
   }
 

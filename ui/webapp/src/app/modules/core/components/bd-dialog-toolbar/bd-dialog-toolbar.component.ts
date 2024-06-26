@@ -28,7 +28,7 @@ export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() header: string;
   @Input() panel = false;
-  @Input() route: any[];
+  @Input() route: unknown[];
   @Input() relative = true;
   @Input() actionText = 'Back to Overview';
   @Input() actionIcon = 'arrow_back';

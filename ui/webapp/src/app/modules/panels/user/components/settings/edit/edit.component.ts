@@ -75,7 +75,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.loading$.next(true);
     this.orig = cloneDeep(this.user);
     return this.auth.updateUserInfo(this.user).pipe(finalize(() => this.loading$.next(false)));

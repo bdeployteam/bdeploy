@@ -8,7 +8,7 @@ import { AuthenticationService } from '../services/authentication.service';
 export class DelayForAuthInterceptor implements HttpInterceptor {
   private auth = inject(AuthenticationService);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler) {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler) {
     // only continue with requests if we have a user already.
     return this.auth.getTokenSubject().pipe(
       skipWhile(

@@ -1,7 +1,7 @@
 import { cloneDeep, isEqual } from 'lodash-es';
 
 /** A dirty check for two objects. Empty strings are mapped to null before comparing to clear out anything a form may have done. */
-export function isDirty(a: any, b: any) {
+export function isDirty(a: unknown, b: unknown) {
   if (!a || !b) {
     return false;
   }

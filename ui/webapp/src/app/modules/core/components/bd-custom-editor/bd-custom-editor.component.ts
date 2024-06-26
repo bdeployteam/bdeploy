@@ -41,7 +41,7 @@ export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewI
   @Output() valueConfirmed: EventEmitter<string> = new EventEmitter<string>();
   @Output() pluginLoaded: EventEmitter<CustomEditor> = new EventEmitter<CustomEditor>();
 
-  @ViewChildren('editorPanel') editorPanels: QueryList<ElementRef<any>>;
+  @ViewChildren('editorPanel') editorPanels: QueryList<ElementRef<unknown>>;
 
   protected plugin: PluginInfoDto;
   protected error: HttpErrorResponse;

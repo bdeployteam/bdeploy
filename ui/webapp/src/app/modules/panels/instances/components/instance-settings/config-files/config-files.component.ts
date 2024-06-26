@@ -64,7 +64,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected doAddFile(tpl: TemplateRef<any>): void {
+  protected doAddFile(tpl: TemplateRef<unknown>): void {
     this.tempFilePath = '';
     this.tempFileContent = '';
 

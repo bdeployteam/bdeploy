@@ -22,7 +22,7 @@ export class MainNavButtonComponent {
   @Input() collapsed: boolean;
   @Input() disabled: boolean;
   @Input() visible = true;
-  @Input() route: any[];
+  @Input() route: unknown[];
   @Input() panel = false;
 
   @ViewChild(RouterLinkActive, { static: false }) protected rla: RouterLinkActive;

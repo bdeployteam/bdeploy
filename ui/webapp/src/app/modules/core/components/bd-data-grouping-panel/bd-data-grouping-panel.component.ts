@@ -25,7 +25,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
   /** The records currently available for grouping */
   @Input() records: T[];
   /** Binds the emitter for the popup-open event, so this panel can refresh values */
-  @Input() popupEmitter: EventEmitter<any>;
+  @Input() popupEmitter: EventEmitter<unknown>;
   /** The panel's index, this is used to show a hint to the user. */
   @Input() index: number;
   /** The actual grouping bound to the controls */

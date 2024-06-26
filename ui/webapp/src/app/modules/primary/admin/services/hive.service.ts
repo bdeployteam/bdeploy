@@ -95,7 +95,7 @@ export class HiveService {
     });
   }
 
-  public enablePool(hive: string): Observable<any> {
+  public enablePool(hive: string): Observable<unknown> {
     const params = new HttpParams().set('hive', hive);
     return this.http.get(`${this.apiPath()}/pool/enable`, { params }).pipe(finalize(() => this.loadHives()));
   }

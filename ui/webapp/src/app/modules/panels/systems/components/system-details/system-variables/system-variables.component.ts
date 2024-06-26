@@ -118,7 +118,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   @ViewChild('addForm', { static: false }) addForm: NgForm;
   @ViewChild('editForm', { static: false }) editForm: NgForm;
 
-  @ViewChild('editTemplate') editTemplate: TemplateRef<any>;
+  @ViewChild('editTemplate') editTemplate: TemplateRef<unknown>;
 
   ngOnInit() {
     this.subscription = this.edit.current$.subscribe((c) => {
@@ -175,7 +175,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
     return isDirty(this.system, this.orig);
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
 
     const save = this.edit.update(this.system).pipe(finalize(() => this.saving$.next(false)));
@@ -292,7 +292,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
     );
   }
 
-  protected onAdd(templ: TemplateRef<any>) {
+  protected onAdd(templ: TemplateRef<unknown>) {
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
       id: '',

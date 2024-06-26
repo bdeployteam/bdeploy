@@ -47,7 +47,7 @@ export class SystemsService {
       .pipe(measure(`Create system ${system.config.name}`));
   }
 
-  public delete(id: string): Observable<any> {
+  public delete(id: string): Observable<unknown> {
     return this.http
       .delete(`${this.apiPath(this.groups.current$.value?.name)}/${id}`)
       .pipe(measure(`Delete system ${id}`));

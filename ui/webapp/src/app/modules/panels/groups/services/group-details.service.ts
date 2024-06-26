@@ -14,11 +14,11 @@ export class GroupDetailsService {
   private hiveApiPath = `${this.cfg.config.api}/hive`;
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
 
-  public delete(group: InstanceGroupConfiguration): Observable<any> {
+  public delete(group: InstanceGroupConfiguration): Observable<unknown> {
     return this.http.delete(`${this.apiPath(group.name)}`);
   }
 
-  public update(group: InstanceGroupConfiguration): Observable<any> {
+  public update(group: InstanceGroupConfiguration): Observable<unknown> {
     return this.http.post(this.apiPath(group.name), group);
   }
 

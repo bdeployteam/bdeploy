@@ -19,7 +19,7 @@ export class ConfirmationService {
     return dialogRef.afterClosed();
   }
 
-  public prompt<T>(component: ComponentType<T>, data: any): Observable<boolean> {
+  public prompt<T>(component: ComponentType<T>, data: unknown): Observable<boolean> {
     const dialogRef = this.dialog.open(component, {
       disableClose: true,
       panelClass: 'bd-dialog-container',

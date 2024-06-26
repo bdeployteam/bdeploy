@@ -88,7 +88,7 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
     state.config.config.system = value;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Change Instance Configuration');

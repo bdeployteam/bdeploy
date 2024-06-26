@@ -62,7 +62,7 @@ export class UserPermissionsComponent {
     width: '40px',
   };
 
-  private readonly actRemoveLocal: BdDialogMessageAction<any> = {
+  private readonly actRemoveLocal: BdDialogMessageAction<unknown> = {
     name: 'Remove',
     result: 'REMOVE',
     confirm: false,
@@ -109,7 +109,7 @@ export class UserPermissionsComponent {
   protected availablePermissions: Permission[];
 
   @Input() private dialog: BdDialogComponent;
-  @ViewChild('modDialog') private modDialog: TemplateRef<any>;
+  @ViewChild('modDialog') private modDialog: TemplateRef<unknown>;
 
   private getInheritedPermissionTooltip(user: UserInfo): string {
     const scope = this.repos.current$.value.name;
@@ -132,7 +132,7 @@ export class UserPermissionsComponent {
     return user.permissions.find((c) => !c.scope)?.permission;
   }
 
-  private doModify(tpl: TemplateRef<any>, user: UserInfo) {
+  private doModify(tpl: TemplateRef<unknown>, user: UserInfo) {
     this.modUser = user;
     this.modPerm = this.getLocalPermissionLevel(user);
     this.dialog

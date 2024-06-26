@@ -17,7 +17,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
   private route = inject(ActivatedRoute);
   protected settings = inject(SettingsService);
 
-  protected addPlugin$ = new Subject<any>();
+  protected addPlugin$ = new Subject<unknown>();
   protected tabIndex: number;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
@@ -35,7 +35,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
     return this.settings.isDirty();
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     return this.settings.save();
   }
 

@@ -29,7 +29,7 @@ export class RepositoriesService {
   private router = inject(Router);
 
   private apiPath = `${this.cfg.config.api}/softwarerepository`;
-  private update$ = new BehaviorSubject<any>(null);
+  private update$ = new BehaviorSubject<unknown>(null);
 
   public loading$ = new BehaviorSubject<boolean>(true);
 

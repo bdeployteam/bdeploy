@@ -25,7 +25,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
-  @Input() route: any[] = ['.'];
+  @Input() route: unknown[] = ['.'];
   @Input() relative = false;
   @Input() toggle = true;
   @Input() collapsed = true;
@@ -39,7 +39,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
 
   private subscription: Subscription;
 
-  protected generatedRoute$ = new BehaviorSubject<any[]>([]);
+  protected generatedRoute$ = new BehaviorSubject<unknown[]>([]);
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((snap) => {

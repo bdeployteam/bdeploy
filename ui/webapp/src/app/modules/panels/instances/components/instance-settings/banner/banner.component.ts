@@ -92,7 +92,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     this.orig = null; // make sure we're no longer dirty.
     return this.instances.updateBanner(this.banner).pipe(finalize(() => this.saving$.next(false)));

@@ -34,7 +34,7 @@ export class FilesBulkService {
     return this.selection.flatMap((dfp) => toFileList(dfp));
   }
 
-  public deleteFiles(minion: string, files: FileListEntry[]): Observable<any> {
+  public deleteFiles(minion: string, files: FileListEntry[]): Observable<unknown> {
     return this.http
       .post(
         `${this.apiPath(

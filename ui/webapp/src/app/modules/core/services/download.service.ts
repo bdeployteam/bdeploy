@@ -24,7 +24,7 @@ export class DownloadService {
    * @param name the file name the browser should save the file as
    * @param data any object which can be JSON stringify'ed
    */
-  public downloadJson(name: string, data: any) {
+  public downloadJson(name: string, data: unknown) {
     const mediatype = 'application/json';
     const blob = new Blob([JSON.stringify(data)], { type: mediatype });
 

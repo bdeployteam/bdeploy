@@ -128,7 +128,7 @@ export class ClientsService {
   }
 
   /** Downloads the Click & Start file for the given client application */
-  public downloadClickAndStart(app: string, name: string, instance: string): Observable<any> {
+  public downloadClickAndStart(app: string, name: string, instance: string): Observable<unknown> {
     return new Observable((s) => {
       this.http
         .get(`${this.apiInstancePath(this.groups.current$.value.name)}/${instance}/${app}/clickAndStart`)
@@ -147,7 +147,7 @@ export class ClientsService {
   }
 
   /** Download the Installer application for the given client application */
-  public downloadInstaller(app: string, instance: string): Observable<any> {
+  public downloadInstaller(app: string, instance: string): Observable<unknown> {
     return new Observable((s) => {
       this.http
         .get(`${this.apiInstancePath(this.groups.current$.value.name)}/${instance}/${app}/installer/zip`, {
@@ -168,7 +168,7 @@ export class ClientsService {
   }
 
   /** Download the unbranded launcher installer which will just install the launcher without concrete application */
-  public downloadLauncherInstaller(os: OperatingSystem): Observable<any> {
+  public downloadLauncherInstaller(os: OperatingSystem): Observable<unknown> {
     return new Observable((s) => {
       this.http
         .get(`${this.apiSwupPath}/createLauncherInstaller`, {

@@ -60,21 +60,21 @@ export class NodesAdminService {
       .pipe(measure(`Update node ${nodeName}`));
   }
 
-  public addNode(dto: NodeAttachDto): Observable<any> {
+  public addNode(dto: NodeAttachDto): Observable<unknown> {
     return this.http.put(`${this.apiPath()}/nodes`, dto).pipe(measure(`Add node ${dto.name}`));
   }
 
-  public editNode(nodeName: string, remote: RemoteService): Observable<any> {
+  public editNode(nodeName: string, remote: RemoteService): Observable<unknown> {
     return this.http.post(`${this.apiPath()}/nodes/${nodeName}`, remote).pipe(measure(`Edit node ${nodeName}`));
   }
 
-  public replaceNode(nodeName: string, remote: RemoteService): Observable<any> {
+  public replaceNode(nodeName: string, remote: RemoteService): Observable<unknown> {
     return this.http
       .post(`${this.apiPath()}/nodes/${nodeName}/replace`, remote)
       .pipe(measure(`Replace node ${nodeName}`));
   }
 
-  public removeNode(nodeName: string): Observable<any> {
+  public removeNode(nodeName: string): Observable<unknown> {
     return this.http.delete(`${this.apiPath()}/nodes/${nodeName}`).pipe(measure(`Remove node ${nodeName}`));
   }
 

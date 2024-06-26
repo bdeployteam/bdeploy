@@ -15,5 +15,5 @@ export class BdNotificationCardComponent {
   @Input() dismissable = true;
   @Input() background: 'toolbar' | 'dialog' = 'toolbar';
   @Input() collapsed = false;
-  @Output() dismiss = new EventEmitter<any>();
+  @Output() dismiss = new EventEmitter<unknown>();
 }

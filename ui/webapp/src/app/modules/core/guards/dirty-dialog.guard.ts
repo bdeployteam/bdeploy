@@ -60,7 +60,7 @@ export interface DirtyableDialog {
    * Optional method which can be provided. In this case, resolving an observable returned by doSave
    * to the boolean value 'true' will make the guard call this method in addition.
    */
-  doReplace?(): Observable<any>;
+  doReplace?(): Observable<unknown>;
 }
 
 @Injectable({

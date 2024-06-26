@@ -21,7 +21,7 @@ export const sortNodesMasterFirst = (a, b) => {
  *
  * See https://stackoverflow.com/questions/53720910/merge-arrays-and-keep-ordering
  */
-export function mergeOrdererd<T>(a: T[], b: T[], key: (ele) => any): T[] {
+export function mergeOrdererd<T>(a: T[], b: T[], key: (ele) => unknown): T[] {
   const result = [];
   [a, b].forEach((array) => {
     array.forEach((item, idx) => {

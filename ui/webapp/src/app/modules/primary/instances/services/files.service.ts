@@ -38,7 +38,7 @@ export class FilesService {
 
   public directories$ = new BehaviorSubject<RemoteDirectory[]>(null);
 
-  public updateFile(rd: RemoteDirectory, file: FileStatusDto): Observable<any> {
+  public updateFile(rd: RemoteDirectory, file: FileStatusDto): Observable<unknown> {
     return this.http
       .post(
         `${this.apiPath(

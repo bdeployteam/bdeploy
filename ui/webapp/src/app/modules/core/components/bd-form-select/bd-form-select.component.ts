@@ -14,14 +14,14 @@ export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMa
 
   @Input() label: string;
   @Input() name: string;
-  @Input() values: any[] = [];
+  @Input() values: unknown[] = [];
   @Input() labels: string[];
   @Input() required: any;
   @Input() disabled: any;
   @Input() allowNone = false;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
-  @Input() component: Type<any>;
-  @Input() prefix: TemplateRef<any>;
+  @Input() component: Type<unknown>;
+  @Input() prefix: TemplateRef<unknown>;
 
   public get value() {
     return this.internalValue;
@@ -38,7 +38,7 @@ export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMa
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
-  private onChangedCb: (_: any) => void = () => {
+  private onChangedCb: (_: unknown) => void = () => {
     /* intentionally empty */
   };
 
@@ -48,7 +48,7 @@ export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMa
     }
   }
 
-  writeValue(v: any): void {
+  writeValue(v: unknown): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
     }

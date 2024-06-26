@@ -27,7 +27,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   protected url: SafeUrl;
   protected directUri: string;
   protected frameLoaded = false;
-  protected returnPanel: any[] = null;
+  protected returnPanel: unknown[] = null;
 
   private rawUrl: string;
   private subscription: Subscription;

@@ -29,7 +29,7 @@ export enum DiffType {
 }
 
 /** Returns the DiffType for an object, comparing the two given instances in depth */
-function getChangeType(base: any, compare: any): DiffType {
+function getChangeType(base: unknown, compare: unknown): DiffType {
   const noBase = base === null || base === undefined;
   const noCompare = compare === null || compare === undefined;
 
@@ -45,7 +45,7 @@ function getChangeType(base: any, compare: any): DiffType {
 }
 
 /** Given two complex objects and the DiffTypes of all the contained child objects, calculate a "outer" DiffType for the complex object */
-function getParentChangeType(base: any, compare: any, ...types: DiffType[]): DiffType {
+function getParentChangeType(base: unknown, compare: unknown, ...types: DiffType[]): DiffType {
   const noBase = base === null || base === undefined;
   const noCompare = compare === null || compare === undefined;
   if (noBase && !noCompare) {
@@ -69,7 +69,7 @@ export class Difference {
   constructor(
     private base: string | number | boolean,
     private compare: string | number | boolean,
-    valueOverride?: any,
+    valueOverride?: unknown,
   ) {
     this.value = valueOverride || (base ?? compare);
     this.type = getChangeType(base, compare);

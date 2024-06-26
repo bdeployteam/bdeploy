@@ -104,7 +104,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
       .subscribe(() => this.reset());
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     if (this.imageChanged) {
       return this.details

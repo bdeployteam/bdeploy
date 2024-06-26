@@ -16,7 +16,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
   private router = inject(Router);
   private areas = inject(NavAreasService);
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     let displayPath = '';
     let msg = '';
     return next.handle(request).pipe(
