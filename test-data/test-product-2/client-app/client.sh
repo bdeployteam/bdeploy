@@ -9,9 +9,8 @@ echo BDeploy Client Application
 # Current working directory is set by the launcher, so the file is in a "good" place.
 cat > demo.txt <<EOF
 BDeploy Launcher is working!
-
 This file has been written by the demo client application on your system and opened with your current text editor.
-The command line argument were: "$@"
+The command line arguments were: "$@"
 EOF
 
 file="demo.txt"
