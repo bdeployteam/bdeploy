@@ -281,7 +281,9 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
             console.error(`Invalid system variables format.`);
           }
           this.clipboardVars = systemVariables;
-        } catch {}
+        } catch {
+          // Intentionally empty
+        }
       },
       (e) => {
         console.error('Unable to read from clipboard', e);

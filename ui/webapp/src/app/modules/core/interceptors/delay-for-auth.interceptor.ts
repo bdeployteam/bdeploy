@@ -18,7 +18,7 @@ export class DelayForAuthInterceptor implements HttpInterceptor {
           req.url.includes('/api/'), // or we're loading resources and not trying to talk to the api.
       ),
       take(1),
-      switchMap((u) => next.handle(req)),
+      switchMap(() => next.handle(req)),
     );
   }
 }

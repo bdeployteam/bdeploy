@@ -20,7 +20,7 @@ export function getRecursivePrefix(
   acc: string,
   recursivePrefixes: string[] = RECURSIVE_PREFIXES,
 ): string {
-  for (var prefix of recursivePrefixes) {
+  for (const prefix of recursivePrefixes) {
     if (word.startsWith(acc + prefix + ':')) {
       return getRecursivePrefix(word, acc + prefix + ':');
     }
