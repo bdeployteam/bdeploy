@@ -43,7 +43,6 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   }
 
   private internalValue: unknown = '';
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
