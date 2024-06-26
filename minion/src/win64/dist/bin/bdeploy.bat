@@ -6,4 +6,4 @@ if exist "%SCRIPT_HOME%_bdeploy-new.bat" (
     move /y "%SCRIPT_HOME%_bdeploy-new.bat" "%SCRIPT_HOME%_bdeploy.bat"
 )
 
-call "%SCRIPT_HOME%_bdeploy.bat" %*
+"%SCRIPT_HOME%_bdeploy.bat" %*
