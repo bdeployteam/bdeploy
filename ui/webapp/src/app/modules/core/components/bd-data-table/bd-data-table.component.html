@@ -61,7 +61,7 @@
     <!-- static ellipsis footer in case more data is available -->
     <tr
       mat-footer-row
-      *matFooterRowDef="[_visibleColumns[0]]"
+      *matFooterRowDef="_visibleColumns.length ? [_visibleColumns[0]] : []"
       [style.display]="hasMoreData ? 'table-row' : 'none'"
     ></tr>
 

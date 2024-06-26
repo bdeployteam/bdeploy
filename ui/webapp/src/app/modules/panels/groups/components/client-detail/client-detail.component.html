@@ -1,7 +1,7 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [panel]="true">
     <mat-icon class="ml-2.5" *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
-    <ng-container *ngIf="areas.instanceContext$.value === app$.value.instanceId">
+    <ng-container *ngIf="app$.value && areas.instanceContext$.value === app$.value.instanceId">
       <div class="flex-auto"></div>
       <mat-divider [vertical]="true"></mat-divider>
       <app-bd-button
