@@ -1,6 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -22,6 +22,7 @@ import {
   getNodeOfApplication,
   getProcessControlGroupOfApplication,
 } from 'src/app/modules/panels/instances/utils/instance-utils';
+import { ProductsService } from '../../../products/services/products.service';
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceStateService } from '../../services/instance-state.service';
 import { InstancesService } from '../../services/instances.service';
@@ -40,6 +41,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private cardViewService = inject(CardViewService);
   private processesColumns = inject(ProcessesColumnsService);
   private actions = inject(ActionsService);
+  private products = inject(ProductsService);
   protected instances = inject(InstancesService);
   protected areas = inject(NavAreasService);
   protected servers = inject(ServersService);
@@ -88,6 +90,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected currentInstance: InstanceDto;
   protected activeInstance: InstanceDto;
   protected isInstalled: boolean;
+  protected hasProduct: boolean;
 
   protected isCentral = false;
 
@@ -139,6 +142,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.instances.active$.subscribe((activeInstance) => {
         this.activeInstance = activeInstance;
+      }),
+    );
+    this.subscription.add(
+      combineLatest([this.instances.current$, this.products.products$]).subscribe(([currentInstance, products]) => {
+        const product = currentInstance?.instanceConfiguration?.product;
+        this.hasProduct = !!products?.find((p) => p.key.name === product?.name && p.key.tag === product?.tag);
       }),
     );
 

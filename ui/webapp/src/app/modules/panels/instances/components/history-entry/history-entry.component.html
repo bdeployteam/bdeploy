@@ -44,7 +44,8 @@
           [collapsed]="false"
           [toggle]="false"
           icon="visibility"
-          text="View Product"
+          [text]="hasProduct ? 'View Product' : 'Product N/A'"
+          [disabled]="!hasProduct"
           (click)="goToProductPage()"
         ></app-bd-button>
         <app-bd-panel-button
@@ -109,7 +110,7 @@
             text="Install"
             icon="layers"
             color="primary"
-            [disabled]="(mappedInstall$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)"
+            [disabled]="(mappedInstall$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
             (click)="doInstall()"
             [loadingWhen$]="mappedInstall$"
           ></app-bd-button>
