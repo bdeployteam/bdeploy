@@ -27,7 +27,6 @@ export class VariableServerValidatorDirective implements Validator {
       return null; // "required" must be validated elsewhere.
     }
 
-    // eslint-disable-next-line no-unsafe-optional-chaining
     for (const k of Object.keys(server.minions.minions)) {
       const n = server.minions.minions[k];
       if (n.master) {

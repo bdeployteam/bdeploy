@@ -374,11 +374,7 @@ export class SystemTemplateComponent implements OnInit {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
-      return [
-        null,
-        // eslint-disable-next-line no-unsafe-optional-chaining
-        ...this.nodeNames.filter((n) => n !== CLIENT_NODE_NAME),
-      ];
+      return [null, ...this.nodeNames.filter((n) => n !== CLIENT_NODE_NAME)];
     }
   }
 
