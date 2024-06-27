@@ -267,7 +267,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         Path dataDir = new DeploymentPathProvider(root.getDeploymentDir(), null, instanceId, null).get(SpecialDirectory.DATA);
 
         for (FileStatusDto update : updates) {
-            Path actual = dataDir.resolve(update.file);
+            Path actual = dataDir.resolve(update.file.replace("\\", "/"));
             if (!actual.normalize().startsWith(dataDir)) {
                 throw new WebApplicationException("Trying to escape " + dataDir, Status.BAD_REQUEST);
             }
