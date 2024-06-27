@@ -405,6 +405,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 doExit(UpdateHelper.CODE_RESTART);
             }
             log.info("Application terminated with exit code {}.", exitCode);
+            doExit(exitCode);
         }
     }
 
