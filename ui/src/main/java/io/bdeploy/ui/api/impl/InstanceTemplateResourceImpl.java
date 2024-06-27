@@ -67,6 +67,7 @@ import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.api.InstanceTemplateResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.ProductDto;
@@ -104,7 +105,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
     @Override
     public InstanceTemplateReferenceResultDto createFromTemplate(InstanceTemplateReferenceDescriptor instance,
-            InstancePurpose purpose, String server) {
+            InstancePurpose purpose, String server, String system) {
         RemoteService remote = mp.getNamedMasterOrSelf(hive, server);
 
         // 0. normalize input
@@ -164,10 +165,21 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                             Status.EXPECTATION_FAILED));
         }
 
+        // 4. figure out target system if given.
+        Optional<Manifest.Key> systemKey = Optional.empty();
+        if (system != null) {
+            SystemResource sr = rc.initResource(new SystemResourceImpl(group, hive));
+            systemKey = sr.list().stream().filter(s -> s.config.id.equals(system)).map(s -> s.key).findAny();
+            if (systemKey.isEmpty()) {
+                throw new WebApplicationException("Cannot find specified system: " + system, Status.EXPECTATION_FAILED);
+            }
+        }
+
         TrackingTemplateOverrideResolver ttor = new TrackingTemplateOverrideResolver(instance.fixedVariables);
 
-        // 4. finally create the instance on the target.
-        var result = createInstanceFromTemplateRequest(remote, null, instance, product.key, groupToNode, ttor, purpose);
+        // 5. finally create the instance on the target.
+        var result = createInstanceFromTemplateRequest(remote, systemKey.orElse(null), instance, product.key, groupToNode, ttor,
+                purpose);
 
         if (result.status != InstanceTemplateReferenceStatus.ERROR) {
             // sync in case of central and success... :)

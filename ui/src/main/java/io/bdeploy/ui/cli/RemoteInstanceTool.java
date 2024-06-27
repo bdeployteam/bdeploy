@@ -297,7 +297,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                     InstanceTemplateReferenceDescriptor.class);
 
             InstanceTemplateReferenceResultDto result = ir.getTemplateResource().createFromTemplate(desc, config.purpose(),
-                    config.server());
+                    config.server(), config.system());
 
             if (result.status != InstanceTemplateReferenceStatus.ERROR) {
                 return createSuccess().setMessage(result.status + ": " + result.message);

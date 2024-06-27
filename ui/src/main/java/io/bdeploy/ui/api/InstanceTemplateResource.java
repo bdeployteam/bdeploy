@@ -23,6 +23,7 @@ public interface InstanceTemplateResource {
     @POST
     @Path("/apply")
     public InstanceTemplateReferenceResultDto createFromTemplate(InstanceTemplateReferenceDescriptor instance,
-            @QueryParam("purpose") InstancePurpose purpose, @QueryParam("server") String server);
+            @QueryParam("purpose") InstancePurpose purpose, @QueryParam("server") String server,
+            @QueryParam("system") String system);
 
 }
