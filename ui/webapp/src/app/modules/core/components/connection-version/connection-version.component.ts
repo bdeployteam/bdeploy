@@ -21,7 +21,7 @@ export class ConnectionVersionComponent {
   protected oldVersion: string;
   protected mode: MinionMode;
 
-  constructor(@Inject(VERSION_DATA) private data: VersionMismatch) {
+  constructor(@Inject(VERSION_DATA) data: VersionMismatch) {
     this.newVersion = convert2String(data.newVersion);
     this.oldVersion = convert2String(data.oldVersion);
     this.mode = data.mode;
