@@ -592,17 +592,6 @@ public class MasterRootResourceImpl implements MasterRootResource {
         return rc.initResource(new MasterNamedResourceImpl(root, h, name));
     }
 
-    private static final class NodeGroupState {
-
-        public Map<String, NodeInstanceState> instances = new TreeMap<>();
-    }
-
-    private static final class NodeInstanceState {
-
-        public List<String> installed = new ArrayList<>();
-        public String active;
-    }
-
     private static final class MinionMigrationState {
 
         public String newName;
@@ -612,5 +601,4 @@ public class MasterRootResourceImpl implements MasterRootResource {
         public Map<String, Map<String, List<Manifest.Key>>> toFetch = new TreeMap<>();
         public Map<String, List<InstanceDto>> allInstances = new TreeMap<>();
     }
-
 }
