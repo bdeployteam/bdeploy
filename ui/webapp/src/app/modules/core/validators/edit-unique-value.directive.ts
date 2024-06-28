@@ -1,10 +1,9 @@
-import { Directive, Input, inject } from '@angular/core';
+import { Directive, Input } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
-import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 const ID = 'edit-unique-value';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
@@ -20,8 +19,6 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
   ],
 })
 export class EditUniqueValueValidatorDirective implements Validator {
-  private edit = inject(InstanceEditService);
-
   @Input() disallowedValues: string[];
   @Input() disallowedMessage = 'ID is not unique';
 

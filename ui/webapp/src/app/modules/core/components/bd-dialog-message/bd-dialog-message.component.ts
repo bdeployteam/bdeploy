@@ -1,8 +1,7 @@
-import { Component, HostListener, OnDestroy, OnInit, TemplateRef, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
-import { PopupService } from '../../services/popup.service';
 
 export interface BdDialogMessageAction<T> {
   /** The name of the action is usually rendered as button text */
@@ -100,8 +99,6 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
   animations: [delayedFadeIn],
 })
 export class BdDialogMessageComponent implements OnInit, OnDestroy {
-  private popupService = inject(PopupService);
-
   public message$ = new BehaviorSubject<BdDialogMessage<unknown>>(null);
   public result$ = new Subject<any>();
   public confirmed$ = new BehaviorSubject<boolean>(true);
