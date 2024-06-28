@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { AbstractControl, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceConfiguration, InstancePurpose, ManagedMasterDto, ManifestKey } from 'src/app/models/gen.dtos';
@@ -28,7 +27,6 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   private readonly groups = inject(GroupsService);
   private readonly instances = inject(InstancesService);
   private readonly areas = inject(NavAreasService);
-  private router = inject(Router);
   protected products = inject(ProductsService);
   protected servers = inject(ServersService);
   protected cfg = inject(ConfigService);
