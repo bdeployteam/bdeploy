@@ -20,7 +20,7 @@ import { BdButtonColorMode } from '../bd-button/bd-button.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
 
   @Input() icon: string;
   @Input() svgIcon: string;
@@ -34,7 +34,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() tooltip: TooltipPosition;
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
 
-  @ViewChild(RouterLink) private rl: RouterLink;
+  @ViewChild(RouterLink) private readonly rl: RouterLink;
   @ViewChild(RouterLinkActive) public rla: RouterLinkActive;
 
   private subscription: Subscription;

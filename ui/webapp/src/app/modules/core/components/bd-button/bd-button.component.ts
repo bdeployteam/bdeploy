@@ -21,7 +21,7 @@ export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inh
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdButtonComponent implements AfterViewInit {
-  private _elementRef = inject(ElementRef);
+  private readonly _elementRef = inject(ElementRef);
 
   @Input() icon: string;
   @Input() svgIcon: string;

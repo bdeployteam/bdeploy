@@ -25,9 +25,9 @@ interface ProductRow {
   templateUrl: './add-instance.component.html',
 })
 export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
-  private areas = inject(NavAreasService);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
+  private readonly areas = inject(NavAreasService);
   private router = inject(Router);
   protected products = inject(ProductsService);
   protected servers = inject(ServersService);

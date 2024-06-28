@@ -12,14 +12,14 @@ import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logg
   templateUrl: './log-config-editor.component.html',
 })
 export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
-  private loggingAdmin = inject(LoggingAdminService);
+  private readonly loggingAdmin = inject(LoggingAdminService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected config: string;
   public origConfig: string;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   ngOnInit(): void {
     this.loggingAdmin

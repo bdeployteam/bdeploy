@@ -11,7 +11,7 @@ import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
   templateUrl: './bd-data-display.component.html',
 })
 export class BdDataDisplayComponent<T> {
-  private cardViewService = inject(CardViewService);
+  private readonly cardViewService = inject(CardViewService);
 
   /**
    * The current display mode, which will either use bd-data-table (false) or bd-data-grid (true) to visualize data.

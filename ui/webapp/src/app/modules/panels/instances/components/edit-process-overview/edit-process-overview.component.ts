@@ -11,8 +11,8 @@ import { ProcessEditService } from '../../services/process-edit.service';
   templateUrl: './edit-process-overview.component.html',
 })
 export class EditProcessOverviewComponent {
-  private areas = inject(NavAreasService);
-  private snackbar = inject(MatSnackBar);
+  private readonly areas = inject(NavAreasService);
+  private readonly snackbar = inject(MatSnackBar);
   protected edit = inject(ProcessEditService);
   protected instanceEdit = inject(InstanceEditService);
   protected servers = inject(ServersService);

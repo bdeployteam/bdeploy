@@ -16,8 +16,8 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private settings = inject(SettingsService);
-  private areas = inject(NavAreasService);
+  private readonly settings = inject(SettingsService);
+  private readonly areas = inject(NavAreasService);
 
   protected tempAttribute: CustomAttributeDescriptor;
   protected origAttribute: CustomAttributeDescriptor;

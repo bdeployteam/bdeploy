@@ -7,9 +7,9 @@ import { AuthenticationService } from '../services/authentication.service';
   providedIn: 'root',
 })
 export class AdminGuard {
-  private authService = inject(AuthenticationService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
+  private readonly authService = inject(AuthenticationService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     if (this.authService.isGlobalAdmin()) {

@@ -13,11 +13,11 @@ import { ProcessEditService } from '../../../services/process-edit.service';
   templateUrl: './configure-process.component.html',
 })
 export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private instanceEdit = inject(InstanceEditService);
-  private areas = inject(NavAreasService);
+  private readonly instanceEdit = inject(InstanceEditService);
+  private readonly areas = inject(NavAreasService);
   protected edit = inject(ProcessEditService);
 
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   protected hasPendingChanges: boolean;

@@ -8,7 +8,7 @@ export const URL_VALIDATION = 'errorMsg';
   providers: [{ provide: NG_VALIDATORS, useExisting: ServerConnectionUrlSyntaxValidator, multi: true }],
 })
 export class ServerConnectionUrlSyntaxValidator implements Validator {
-  private regex = new RegExp(/^(\S+:\/\/\S+:\d+($|\/\S+))?$/);
+  private readonly regex = new RegExp(/^(\S+:\/\/\S+:\d+($|\/\S+))?$/);
 
   public validate(control: AbstractControl): ValidationErrors {
     const value = control.value;

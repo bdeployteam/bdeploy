@@ -8,7 +8,7 @@ import { BdConfirmationComponent } from '../components/bd-confirmation/bd-confir
   providedIn: 'root',
 })
 export class ConfirmationService {
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   public confirm(header: string, message: string): Observable<boolean> {
     const dialogRef = this.dialog.open(BdConfirmationComponent, {

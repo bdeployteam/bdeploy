@@ -9,8 +9,8 @@ import { BdBHiveBrowserComponent } from '../bd-bhive-browser.component';
   templateUrl: './bd-manifest-delete-action.component.html',
 })
 export class BdManifestDeleteActionComponent {
-  private hives = inject(HiveService);
-  private parent = inject(forwardRef(() => BdBHiveBrowserComponent));
+  private readonly hives = inject(HiveService);
+  private readonly parent = inject(forwardRef(() => BdBHiveBrowserComponent));
   protected auth = inject(AuthenticationService);
 
   @Input() record: HiveEntryDto;

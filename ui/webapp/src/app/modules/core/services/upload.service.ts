@@ -83,7 +83,7 @@ export class ImportStatus {
   providedIn: 'root',
 })
 export class UploadService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   /**
    * Uploads the given files to the given URL and returns an observable result to track the upload status. For

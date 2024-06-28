@@ -12,7 +12,7 @@ import { UserBulkService } from '../../services/user-bulk.service';
   templateUrl: './user-bulk-manipulation.component.html',
 })
 export class UserBulkManipulationComponent {
-  private auth = inject(AuthenticationService);
+  private readonly auth = inject(AuthenticationService);
   protected actions = inject(ActionsService);
   protected bulk = inject(UserBulkService);
 
@@ -23,8 +23,8 @@ export class UserBulkManipulationComponent {
   );
 
   protected bulkOpResult: BulkOperationResultDto;
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild('opResult') private readonly opResult: TemplateRef<unknown>;
 
   protected onDelete() {
     this.dialog

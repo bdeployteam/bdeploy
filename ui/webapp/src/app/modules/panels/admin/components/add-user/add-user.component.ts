@@ -13,8 +13,8 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddUserComponent implements OnInit, OnDestroy {
-  private authAdmin = inject(AuthAdminService);
-  private areas = inject(NavAreasService);
+  private readonly authAdmin = inject(AuthAdminService);
+  private readonly areas = inject(NavAreasService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected addUser: Partial<UserInfo>;

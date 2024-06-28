@@ -15,8 +15,8 @@ import { GroupDetailsService } from '../../services/group-details.service';
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
-  private actions = inject(ActionsService);
-  private router = inject(Router);
+  private readonly actions = inject(ActionsService);
+  private readonly router = inject(Router);
   protected auth = inject(AuthenticationService);
   protected groups = inject(GroupsService);
   protected details = inject(GroupDetailsService);
@@ -24,8 +24,8 @@ export class SettingsComponent {
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  private deleting$ = new BehaviorSubject<boolean>(false);
-  private repairing$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly repairing$ = new BehaviorSubject<boolean>(false);
 
   protected mappedDelete$ = this.actions.action([Actions.DELETE_GROUP], this.deleting$);
   protected mappedRepair$ = this.actions.action([Actions.FSCK_BHIVE, Actions.PRUNE_BHIVE], this.repairing$);

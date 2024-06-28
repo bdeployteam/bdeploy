@@ -8,8 +8,8 @@ import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/
   providedIn: 'root',
 })
 export class SoftwareVersionBulkService {
-  private areas = inject(NavAreasService);
-  private software = inject(SoftwareUpdateService);
+  private readonly areas = inject(NavAreasService);
+  private readonly software = inject(SoftwareUpdateService);
 
   public selection$ = new BehaviorSubject<SoftwareVersion[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);

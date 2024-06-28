@@ -84,10 +84,10 @@ const MAX_ROWS_PER_GROUP = 500;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
-  private searchService = inject(SearchService);
-  private media = inject(BreakpointObserver);
-  private sanitizer = inject(DomSanitizer);
-  private cd = inject(ChangeDetectorRef);
+  private readonly searchService = inject(SearchService);
+  private readonly media = inject(BreakpointObserver);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly cd = inject(ChangeDetectorRef);
 
   /**
    * Aria caption for the table, mainly for screen readers.
@@ -206,7 +206,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
   /** The sort associated with the column headers */
   @ViewChild(MatSort)
-  private sortHeader: MatSort;
+  private readonly sortHeader: MatSort;
 
   /** The current sort dicdated by the sortHeader */
   @Input() sort: Sort;
@@ -221,7 +221,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   private search: string;
 
   /** Emitted when a redraw is requested. */
-  private redrawRequest$ = new Subject<unknown>();
+  private readonly redrawRequest$ = new Subject<unknown>();
 
   /** The treeControl provides the hierarchy and flattened nodes rendered by the table */
   treeControl = new FlatTreeControl<FlatNode<T>>(
@@ -230,8 +230,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   );
 
   /** The transformer bound to 'this', so we can use this in the transformer function */
-  private boundTransformer: (node: Node<T>, level: number) => FlatNode<T> = this.transformer.bind(this);
-  private treeFlattener = new MatTreeFlattener(
+  private readonly boundTransformer: (node: Node<T>, level: number) => FlatNode<T> = this.transformer.bind(this);
+  private readonly treeFlattener = new MatTreeFlattener(
     this.boundTransformer,
     (n) => n.level,
     (n) => n.expandable,

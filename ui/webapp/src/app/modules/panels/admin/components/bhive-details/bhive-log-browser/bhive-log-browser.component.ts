@@ -12,7 +12,7 @@ import { HiveLoggingService } from '../../../services/hive-logging.service';
   templateUrl: './bhive-log-browser.component.html',
 })
 export class BhiveLogBrowserComponent implements OnInit {
-  private cols = inject(LogColumnsService);
+  private readonly cols = inject(LogColumnsService);
   protected authService = inject(AuthenticationService);
   protected hiveLogging = inject(HiveLoggingService);
 

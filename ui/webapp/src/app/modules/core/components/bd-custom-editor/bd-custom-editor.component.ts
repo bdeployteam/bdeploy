@@ -29,8 +29,8 @@ import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewInit {
-  private plugins = inject(PluginService);
-  private cd = inject(ChangeDetectorRef);
+  private readonly plugins = inject(PluginService);
+  private readonly cd = inject(ChangeDetectorRef);
 
   @Input() customEditor: string;
   @Input() value: LinkedValueConfiguration;

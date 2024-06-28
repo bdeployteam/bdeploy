@@ -15,11 +15,11 @@ import { decodeDataFilePath } from '../../utils/data-file-utils';
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
   public filesService = inject(FilesService);
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
 
   protected minions$ = new BehaviorSubject<string[]>([]);
 
-  private currentPath$ = new BehaviorSubject('');
+  private readonly currentPath$ = new BehaviorSubject('');
   protected fileMinion$ = new BehaviorSubject<string>(null);
   protected tempFilePath: string;
   protected tempFileError: string;

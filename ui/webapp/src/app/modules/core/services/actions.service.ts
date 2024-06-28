@@ -22,15 +22,15 @@ import { EMPTY_SCOPE, ObjectChangesService } from './object-changes.service';
   providedIn: 'root',
 })
 export class ActionsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private areas = inject(NavAreasService);
-  private changes = inject(ObjectChangesService);
-  private auth = inject(AuthenticationService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly areas = inject(NavAreasService);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly auth = inject(AuthenticationService);
 
   public actions$ = new BehaviorSubject<ActionBroadcastDto[]>(null);
 
-  private apiPath = `${this.cfg.config.api}/actions`;
+  private readonly apiPath = `${this.cfg.config.api}/actions`;
   private changesSubscription: Subscription;
 
   constructor() {

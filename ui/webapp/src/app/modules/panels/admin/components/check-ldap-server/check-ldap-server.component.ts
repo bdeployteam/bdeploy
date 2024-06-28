@@ -12,9 +12,9 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckLdapServerComponent implements OnInit, OnDestroy {
-  private settings = inject(SettingsService);
-  private auth = inject(AuthAdminService);
-  private areas = inject(NavAreasService);
+  private readonly settings = inject(SettingsService);
+  private readonly auth = inject(AuthAdminService);
+  private readonly areas = inject(NavAreasService);
 
   protected tempServer: Partial<LDAPSettingsDto>;
 

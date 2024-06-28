@@ -15,10 +15,10 @@ import { UserBulkService } from '../../services/user-bulk.service';
 })
 export class UserBulkAssignPermissionComponent implements OnInit, OnDestroy {
   protected bulk = inject(UserBulkService);
-  private groups = inject(GroupsService);
-  private repositories = inject(RepositoriesService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly groups = inject(GroupsService);
+  private readonly repositories = inject(RepositoriesService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected scopes$ = new BehaviorSubject<string[]>([null]);
   protected labels$ = new BehaviorSubject<string[]>(['Global']);
@@ -28,8 +28,8 @@ export class UserBulkAssignPermissionComponent implements OnInit, OnDestroy {
   protected allPerms: Permission[] = Object.keys(Permission).map((k) => Permission[k]);
 
   protected bulkOpResult: BulkOperationResultDto;
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild('opResult') private readonly opResult: TemplateRef<unknown>;
 
   private subscription: Subscription;
 

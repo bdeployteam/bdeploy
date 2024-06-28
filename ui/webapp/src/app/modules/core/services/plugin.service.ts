@@ -10,8 +10,8 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class PluginService {
-  private http = inject(HttpClient);
-  private config = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly config = inject(ConfigService);
 
   public getEditorPlugin(group: string, product: ManifestKey, editorType: string): Observable<PluginInfoDto> {
     return this.http.post<PluginInfoDto>(

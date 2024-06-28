@@ -27,16 +27,16 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   @Input() server: ManagedMasterDto;
   @Input() collapsed = true;
 
-  private serverDetailsService = inject(ServerDetailsService);
-  private servers = inject(ServersService);
-  private auth = inject(AuthenticationService);
-  private instancesService = inject(InstancesService);
-  private ngZone = inject(NgZone);
-  private cd = inject(ChangeDetectorRef);
-  private actions = inject(ActionsService);
+  private readonly serverDetailsService = inject(ServerDetailsService);
+  private readonly servers = inject(ServersService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly instancesService = inject(InstancesService);
+  private readonly ngZone = inject(NgZone);
+  private readonly cd = inject(ChangeDetectorRef);
+  private readonly actions = inject(ActionsService);
 
-  private synchronizing$ = new BehaviorSubject<boolean>(false);
-  private hostName$ = new BehaviorSubject<string>(null);
+  private readonly synchronizing$ = new BehaviorSubject<boolean>(false);
+  private readonly hostName$ = new BehaviorSubject<string>(null);
   protected mappedSync$ = this.actions.action(
     [Actions.SYNCHRONIZING],
     this.synchronizing$,

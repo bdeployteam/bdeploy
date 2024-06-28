@@ -39,12 +39,12 @@ const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
   styleUrls: ['./add-node.component.css'],
 })
 export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private actions = inject(ActionsService);
-  private snackbar = inject(MatSnackBar);
+  private readonly areas = inject(NavAreasService);
+  private readonly actions = inject(ActionsService);
+  private readonly snackbar = inject(MatSnackBar);
   protected nodesAdmin = inject(NodesAdminService);
 
-  private adding$ = new BehaviorSubject<boolean>(false);
+  private readonly adding$ = new BehaviorSubject<boolean>(false);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected nodeNames$ = this.nodesAdmin.nodes$.pipe(
@@ -64,8 +64,8 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected data = cloneDeep(DEF_NODE);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-  @ViewChild(NgForm) private form: NgForm;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
+  @ViewChild(NgForm) private readonly form: NgForm;
 
   private subscription: Subscription;
 

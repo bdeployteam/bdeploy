@@ -15,7 +15,7 @@ import { fromEvent } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdMicroIconButtonComponent implements AfterViewInit {
-  private _elementRef = inject(ElementRef);
+  private readonly _elementRef = inject(ElementRef);
 
   @Input() disabled = false;
 

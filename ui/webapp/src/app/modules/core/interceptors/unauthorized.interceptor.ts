@@ -8,8 +8,8 @@ import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable()
 export class UnauthorizedInterceptor implements HttpInterceptor {
-  private auth = inject(AuthenticationService);
-  private router = inject(Router);
+  private readonly auth = inject(AuthenticationService);
+  private readonly router = inject(Router);
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler) {
     return next.handle(req).pipe(

@@ -56,10 +56,10 @@ const colDesc: BdDataColumn<ConfigVariable> = {
   templateUrl: './instance-variables.component.html',
 })
 export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
-  private systems = inject(SystemsService);
-  private areas = inject(NavAreasService);
-  private plugins = inject(PluginService);
-  private snackbar = inject(MatSnackBar);
+  private readonly systems = inject(SystemsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly plugins = inject(PluginService);
+  private readonly snackbar = inject(MatSnackBar);
   protected edit = inject(InstanceEditService);
   protected groups = inject(GroupsService);
 

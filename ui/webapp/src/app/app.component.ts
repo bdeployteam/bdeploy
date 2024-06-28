@@ -16,8 +16,8 @@ export class AppComponent implements OnInit {
   loadCount = 0;
 
   constructor(
-    private router: Router,
-    private areas: NavAreasService,
+    private readonly router: Router,
+    private readonly areas: NavAreasService,
     @Inject(DOCUMENT) document: Document,
   ) {
     console.log('----------------------------------------');

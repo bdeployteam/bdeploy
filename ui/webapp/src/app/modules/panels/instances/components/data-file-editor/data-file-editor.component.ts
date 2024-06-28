@@ -16,8 +16,8 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 })
 export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected filesService = inject(FilesService);
-  private instances = inject(InstancesService);
-  private areas = inject(NavAreasService);
+  private readonly instances = inject(InstancesService);
+  private readonly areas = inject(NavAreasService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
@@ -27,7 +27,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestr
   protected originalContent = '';
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 

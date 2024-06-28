@@ -28,7 +28,7 @@ const colNodeName: BdDataColumn<NodeRow> = {
   templateUrl: './nodes.component.html',
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected edit = inject(InstanceEditService);
   protected servers = inject(ServersService);
 
@@ -38,7 +38,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   protected hasPendingChanges: boolean;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 

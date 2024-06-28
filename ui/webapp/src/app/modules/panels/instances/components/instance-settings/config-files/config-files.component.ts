@@ -40,7 +40,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
   protected bulkSelection$ = new BehaviorSubject<ConfigFile[]>([]);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
+  @ViewChild('tempFileInput', { static: false }) private readonly tempFileInput: BdFormInputComponent;
 
   private subscription: Subscription;
 

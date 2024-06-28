@@ -75,7 +75,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   @ViewChild('valueEditor', { static: false })
   valueEditor: BdFormInputComponent;
 
-  private modelChanged = new Subject<LinkedValueConfiguration>();
+  private readonly modelChanged = new Subject<LinkedValueConfiguration>();
 
   protected passwordLock = true;
   protected linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);

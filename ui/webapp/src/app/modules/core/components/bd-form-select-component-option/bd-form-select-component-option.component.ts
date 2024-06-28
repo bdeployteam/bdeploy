@@ -5,7 +5,7 @@ import { Component, ComponentRef, Input, OnDestroy, OnInit, Type, ViewContainerR
   templateUrl: './bd-form-select-component-option.component.html',
 })
 export class BdFormSelectComponentOptionComponent<T, X> implements OnInit, OnDestroy {
-  private vc = inject(ViewContainerRef);
+  private readonly vc = inject(ViewContainerRef);
 
   @Input() option: T;
   @Input() componentType: Type<X>;

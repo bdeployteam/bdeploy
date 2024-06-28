@@ -17,8 +17,8 @@ export class UserGroupBulkManipulationComponent {
   protected loading$ = new BehaviorSubject<boolean>(false);
 
   protected bulkOpResult: BulkOperationResultDto;
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild('opResult') private readonly opResult: TemplateRef<unknown>;
 
   protected onDelete() {
     this.dialog

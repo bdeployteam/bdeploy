@@ -48,11 +48,11 @@ const colAppName: BdDataColumn<AppRow> = {
   encapsulation: ViewEncapsulation.None,
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
-  private edit = inject(ProcessEditService);
+  private readonly edit = inject(ProcessEditService);
   protected instanceEdit = inject(InstanceEditService);
   protected servers = inject(ServersService);
 
-  private colAdd: BdDataColumn<AppRow> = {
+  private readonly colAdd: BdDataColumn<AppRow> = {
     id: 'add',
     name: 'Add',
     data: (r) => `Add ${r.template ? 'template ' + r.template.name : r.app.appDisplayName} to selected node.`,

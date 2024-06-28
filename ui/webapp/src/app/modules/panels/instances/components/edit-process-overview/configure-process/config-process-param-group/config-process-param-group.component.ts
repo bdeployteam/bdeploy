@@ -70,9 +70,9 @@ interface ParameterGroup {
   encapsulation: ViewEncapsulation.None,
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
-  private bop = inject(BreakpointObserver);
-  private systems = inject(SystemsService);
-  private searchService = inject(SearchService);
+  private readonly bop = inject(BreakpointObserver);
+  private readonly systems = inject(SystemsService);
+  private readonly searchService = inject(SearchService);
   protected edit = inject(ProcessEditService);
   protected instances = inject(InstanceEditService);
   protected groups = inject(GroupsService);
@@ -96,7 +96,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   preview: HistoryProcessConfigComponent;
   @ViewChildren('groupForm') public forms: QueryList<NgForm>;
   @ViewChildren('validateCustom', { read: NgControl })
-  private validateCustomFields: QueryList<NgControl>;
+  private readonly validateCustomFields: QueryList<NgControl>;
   @Output() checkIsInvalid = new EventEmitter<boolean>();
 
   private custom: ParameterGroup;
@@ -107,7 +107,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     value: string;
   };
 
-  private updatePreview$ = new BehaviorSubject<boolean>(false);
+  private readonly updatePreview$ = new BehaviorSubject<boolean>(false);
   protected expandPreview = true;
   private subscription: Subscription;
   private formsLoaded = false;

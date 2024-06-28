@@ -26,8 +26,8 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavFlyinComponent implements OnInit {
-  private areas = inject(NavAreasService);
-  private media = inject(BreakpointObserver);
+  private readonly areas = inject(NavAreasService);
+  private readonly media = inject(BreakpointObserver);
 
   protected panelContent = '';
 

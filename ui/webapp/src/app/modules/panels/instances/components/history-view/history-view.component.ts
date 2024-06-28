@@ -14,9 +14,9 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   styleUrls: ['./history-view.component.css'],
 })
 export class HistoryViewComponent implements OnInit, OnDestroy, BdSearchable {
-  private areas = inject(NavAreasService);
-  private details = inject(HistoryDetailsService);
-  private searchService = inject(SearchService);
+  private readonly areas = inject(NavAreasService);
+  private readonly details = inject(HistoryDetailsService);
+  private readonly searchService = inject(SearchService);
   protected instances = inject(InstancesService);
 
   protected base$ = new BehaviorSubject<string>(null);

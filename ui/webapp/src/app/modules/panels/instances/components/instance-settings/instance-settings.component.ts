@@ -15,17 +15,17 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
   templateUrl: './instance-settings.component.html',
 })
 export class InstanceSettingsComponent {
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
-  private router = inject(Router);
-  private actions = inject(ActionsService);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
+  private readonly router = inject(Router);
+  private readonly actions = inject(ActionsService);
   protected auth = inject(AuthenticationService);
   protected edit = inject(InstanceEditService);
 
-  private deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
   protected mappedDelete$ = this.actions.action([Actions.DELETE_INSTANCE], this.deleting$);
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   protected doDelete() {
     const inst = this.instances.current$.value;

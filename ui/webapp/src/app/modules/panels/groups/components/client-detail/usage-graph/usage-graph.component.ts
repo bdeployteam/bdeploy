@@ -9,7 +9,7 @@ const PERC_PER_DAY = 100 / 29;
   styleUrls: ['./usage-graph.component.css'],
 })
 export class ClientUsageGraphComponent implements OnChanges {
-  private clients = inject(ClientsUsageService);
+  private readonly clients = inject(ClientsUsageService);
 
   @Input() instanceId: string;
   @Input() appId: string;

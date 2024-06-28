@@ -18,7 +18,7 @@ THEME_DESC[Theme.DARK] = 'Dark Theme';
 export class ThemeService {
   activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject(Theme.DEFAULT);
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor(@Inject(DOCUMENT) private readonly document: Document) {
     const themeName = localStorage.getItem('theme');
     if (!themeName || (themeName !== Theme.DARK && themeName !== Theme.DEFAULT)) {
       localStorage.setItem('theme', Theme.DEFAULT);

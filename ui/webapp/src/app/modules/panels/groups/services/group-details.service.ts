@@ -8,11 +8,11 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
   providedIn: 'root',
 })
 export class GroupDetailsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
-  private hiveApiPath = `${this.cfg.config.api}/hive`;
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
+  private readonly hiveApiPath = `${this.cfg.config.api}/hive`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
 
   public delete(group: InstanceGroupConfiguration): Observable<unknown> {
     return this.http.delete(`${this.apiPath(group.name)}`);

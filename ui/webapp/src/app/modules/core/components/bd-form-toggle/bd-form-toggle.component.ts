@@ -28,8 +28,8 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() prefix: TemplateRef<unknown>;
 
   @ViewChild(MatCheckbox, { static: false })
-  private checkbox: MatCheckbox;
-  @ViewChild(MatSlideToggle, { static: false }) private slide: MatSlideToggle;
+  private readonly checkbox: MatCheckbox;
+  @ViewChild(MatSlideToggle, { static: false }) private readonly slide: MatSlideToggle;
 
   protected get value() {
     return this.internalValue;

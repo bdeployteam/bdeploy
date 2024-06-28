@@ -67,8 +67,8 @@ export interface DirtyableDialog {
   providedIn: 'root',
 })
 export class DirtyDialogGuard {
-  private areas = inject(NavAreasService);
-  private router = inject(Router);
+  private readonly areas = inject(NavAreasService);
+  private readonly router = inject(Router);
 
   canDeactivate(component: DirtyableDialog): Observable<boolean> {
     const ignore = this.router.getCurrentNavigation()?.extras?.state?.ignoreDirtyGuard;

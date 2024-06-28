@@ -16,15 +16,15 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   providedIn: 'root',
 })
 export class UserBulkService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private auth = inject(AuthAdminService);
-  private areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthAdminService);
+  private readonly areas = inject(NavAreasService);
 
   public selection$ = new BehaviorSubject<UserInfo[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
-  private bulkApiPath = () => `${this.cfg.config.api}/auth/admin/user-bulk`;
+  private readonly bulkApiPath = () => `${this.cfg.config.api}/auth/admin/user-bulk`;
 
   constructor() {
     // clear selection when the primary route changes

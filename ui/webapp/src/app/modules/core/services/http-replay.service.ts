@@ -10,7 +10,7 @@ interface ReplayCache {
   providedIn: 'root',
 })
 export class HttpReplayService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private cache: ReplayCache = {};
 

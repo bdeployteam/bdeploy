@@ -6,8 +6,8 @@ import { AuthenticationService } from '../services/authentication.service';
   providedIn: 'root',
 })
 export class AuthGuard {
-  private authService = inject(AuthenticationService);
-  private router = inject(Router);
+  private readonly authService = inject(AuthenticationService);
+  private readonly router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     // try some current-state check to determine whether we need to redirect.

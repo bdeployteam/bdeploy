@@ -22,10 +22,10 @@ export class DirTreeNode {
 })
 export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterViewInit {
   protected edit = inject(ProcessEditService);
-  private instances = inject(InstancesService);
+  private readonly instances = inject(InstancesService);
 
   @ViewChild('form') public form: NgForm;
-  @ViewChild('dirSelector', { static: false }) private dirSelector: BdPopupDirective;
+  @ViewChild('dirSelector', { static: false }) private readonly dirSelector: BdPopupDirective;
   @Output() checkIsInvalid = new EventEmitter<boolean>();
 
   protected app: ApplicationDto;
@@ -40,7 +40,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
 
   private subscription: Subscription;
 
-  private dirTransformer = (node: ConfigDirDto, level: number): DirTreeNode => {
+  private readonly dirTransformer = (node: ConfigDirDto, level: number): DirTreeNode => {
     return {
       name: node.name,
       level: level,

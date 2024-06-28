@@ -14,23 +14,23 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
   templateUrl: './node-details.component.html',
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
-  private nodeAdmin = inject(NodesAdminService);
-  private cfg = inject(ConfigService);
-  private areas = inject(NavAreasService);
+  private readonly nodeAdmin = inject(NodesAdminService);
+  private readonly cfg = inject(ConfigService);
+  private readonly areas = inject(NavAreasService);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
   protected nodeVersion: string;
   protected isCurrent: boolean;
 
-  private deleting$ = new BehaviorSubject<boolean>(false);
-  private actions = inject(ActionsService);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly actions = inject(ActionsService);
   private subscription: Subscription;
 
   protected mappedDelete$ = this.actions.action([Actions.REMOVE_NODE], this.deleting$, null, null, this.nodeName$);
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   ngOnInit() {
     this.subscription = combineLatest([this.nodeAdmin.nodes$, this.areas.panelRoute$]).subscribe(([nodes, route]) => {

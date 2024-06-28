@@ -17,7 +17,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
   public products = inject(ProductsService);
   public edit = inject(InstanceEditService);
   public areas = inject(NavAreasService);
-  private groups = inject(GroupsService);
+  private readonly groups = inject(GroupsService);
 
   private readonly productVersionColumn: BdDataColumn<ProductDto> = {
     id: 'version',

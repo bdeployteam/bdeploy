@@ -20,14 +20,14 @@ import { NavAreasService } from './nav-areas.service';
   providedIn: 'root',
 })
 export class AuthenticationService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private areas = inject(NavAreasService);
-  private injector = inject(Injector);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly areas = inject(NavAreasService);
+  private readonly injector = inject(Injector);
 
-  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(null);
+  private readonly tokenSubject: BehaviorSubject<string> = new BehaviorSubject(null);
 
-  private userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject(1);
+  private readonly userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject(1);
   private currentUserInfo: UserInfo = null; // possibly uninitialized value
   get firstUserInfo$(): Observable<UserInfo> {
     return this.userInfoSubject$.pipe(first());

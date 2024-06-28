@@ -7,8 +7,8 @@ import { ThemeService } from '../../services/theme.service';
   templateUrl: './bd-editor-diff.component.html',
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
-  private themeService = inject(ThemeService);
-  private cd = inject(ChangeDetectorRef);
+  private readonly themeService = inject(ThemeService);
+  private readonly cd = inject(ChangeDetectorRef);
 
   private globalMonaco;
   private monaco;

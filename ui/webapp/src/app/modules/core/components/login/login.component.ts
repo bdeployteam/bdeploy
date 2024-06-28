@@ -15,10 +15,10 @@ import { ConfigService } from '../../services/config.service';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private auth0 = inject(AuthService);
-  private snackbar = inject(MatSnackBar);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth0 = inject(AuthService);
+  private readonly snackbar = inject(MatSnackBar);
   protected auth = inject(AuthenticationService);
   protected cfg = inject(ConfigService);
 

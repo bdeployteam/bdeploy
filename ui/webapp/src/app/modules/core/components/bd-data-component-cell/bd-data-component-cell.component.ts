@@ -6,7 +6,7 @@ import { BdDataColumn } from 'src/app/models/data';
   templateUrl: './bd-data-component-cell.component.html',
 })
 export class BdDataComponentCellComponent<T, X> implements OnInit, OnDestroy {
-  private vc = inject(ViewContainerRef);
+  private readonly vc = inject(ViewContainerRef);
 
   @Input() record: T;
   @Input() column: BdDataColumn<T>;
