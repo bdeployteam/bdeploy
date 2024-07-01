@@ -2,7 +2,6 @@ package io.bdeploy.bhive.remote.jersey;
 
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,17 +42,14 @@ public class BHiveLocatorImpl implements BHiveLocator {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
         try {
-            // need to check this here to avoid accepting a large upload if the filesystem doesn't have enough space.
-            // this essentially locks down all remote communication with a BHive until there is enough free space.
-            Path path = Paths.get(hive.getUri());
+            // Need to check this here to avoid accepting a large upload if the filesystem doesn't have enough space.
+            // This essentially locks down all remote communication with a BHive until there is enough free space.
+            Path path = Path.of(hive.getUri());
             if (!fsss.hasFreeSpace(path)) {
                 throw new WebApplicationException("Not enough free space in " + path, Status.SERVICE_UNAVAILABLE);
             }
         } catch (IllegalArgumentException | FileSystemNotFoundException | SecurityException e) {
-            log.warn("Cannot check free space on {}", hive.getUri());
-            if (log.isDebugEnabled()) {
-                log.debug("Error:", e);
-            }
+            log.warn("Cannot check free space on {}", hive.getUri(), e);
         }
         return rc.initResource(new BHiveResourceImpl(hive));
     }

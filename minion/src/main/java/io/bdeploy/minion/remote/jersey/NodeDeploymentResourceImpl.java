@@ -75,10 +75,11 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
     @Override
     public void install(Key key) {
-        BHive hive = root.getHive();
         if (!fsss.hasFreeSpace(root.getDeploymentDir())) {
             throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(), Status.SERVICE_UNAVAILABLE);
         }
+
+        BHive hive = root.getHive();
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
         inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
