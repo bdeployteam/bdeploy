@@ -29,8 +29,8 @@ enum PresetType {
   encapsulation: ViewEncapsulation.None,
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
-  private snackBar = inject(MatSnackBar);
-  private confirmationService = inject(ConfirmationService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly confirmationService = inject(ConfirmationService);
   protected auth = inject(AuthenticationService);
 
   /** whether mutiple groupings are supported */

@@ -16,8 +16,8 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
-  private settings = inject(SettingsService);
-  private areas = inject(NavAreasService);
+  private readonly settings = inject(SettingsService);
+  private readonly areas = inject(NavAreasService);
 
   protected tempServer: Partial<LDAPSettingsDto>;
   protected initialServer: Partial<LDAPSettingsDto>;

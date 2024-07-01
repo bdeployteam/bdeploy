@@ -30,14 +30,14 @@ const DATE_FORMAT = 'yyyy-MM-dd';
   providedIn: 'root',
 })
 export class ClientsUsageService {
-  private http = inject(HttpClient);
-  private cfg = inject(ConfigService);
-  private groups = inject(GroupsService);
+  private readonly http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly groups = inject(GroupsService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public clientUsage$ = new BehaviorSubject<ClientUsagePerApp[]>(null);
 
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
   public load(id: string): Observable<ClientUsagePerApp[]> {
     this.loading$.next(true);

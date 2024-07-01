@@ -22,9 +22,9 @@ import { errorMarker } from '../../../../utils/monaco-editor-utils';
 })
 export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected cfgFiles = inject(ConfigFilesService);
-  private areas = inject(NavAreasService);
-  private edit = inject(InstanceEditService);
-  private systems = inject(SystemsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly edit = inject(InstanceEditService);
+  private readonly systems = inject(SystemsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected file$ = new BehaviorSubject<string>(null);
@@ -39,7 +39,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected variableExpansionRegex = '\\{\\{.*?\\}\\}';
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 

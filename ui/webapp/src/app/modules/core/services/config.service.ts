@@ -31,13 +31,13 @@ export interface AppConfig {
   providedIn: 'root',
 })
 export class ConfigService {
-  private themes = inject(ThemeService); /* dummy: required to bootstrap theming early! */
-  private http = inject(HttpClient);
-  private overlay = inject(Overlay);
-  private auth0 = inject(AuthClientConfig);
-  private ngZone = inject(NgZone);
-  private icons = inject(MatIconRegistry);
-  private sanitizer = inject(DomSanitizer);
+  private readonly themes = inject(ThemeService); /* dummy: required to bootstrap theming early! */
+  private readonly http = inject(HttpClient);
+  private readonly overlay = inject(Overlay);
+  private readonly auth0 = inject(AuthClientConfig);
+  private readonly ngZone = inject(NgZone);
+  private readonly icons = inject(MatIconRegistry);
+  private readonly sanitizer = inject(DomSanitizer);
 
   public config: AppConfig;
   public webAuthCfg: WebAuthSettingsDto;

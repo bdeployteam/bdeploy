@@ -12,16 +12,16 @@ import { DownloadService } from '../../../core/services/download.service';
   providedIn: 'root',
 })
 export class HiveLoggingService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private downloadService = inject(DownloadService);
-  private areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly downloadService = inject(DownloadService);
+  private readonly areas = inject(NavAreasService);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public directories$ = new BehaviorSubject<RemoteDirectory[]>(null);
   public bhive$ = new BehaviorSubject<string>(null);
 
-  private apiPath = (h: string) => `${this.cfg.config.api}/hive/${h}/logging`;
+  private readonly apiPath = (h: string) => `${this.cfg.config.api}/hive/${h}/logging`;
 
   constructor() {
     this.areas.panelRoute$.subscribe((route) => {

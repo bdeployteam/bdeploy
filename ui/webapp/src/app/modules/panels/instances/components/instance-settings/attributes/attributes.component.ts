@@ -23,24 +23,24 @@ interface AttributeRow {
   templateUrl: './attributes.component.html',
 })
 export class AttributesComponent implements OnInit {
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
   protected servers = inject(ServersService);
 
-  private attrNameCol: BdDataColumn<AttributeRow> = {
+  private readonly attrNameCol: BdDataColumn<AttributeRow> = {
     id: 'attribute',
     name: 'Attribute',
     data: (r) => r.name,
     isId: true,
   };
 
-  private attrValCol: BdDataColumn<AttributeRow> = {
+  private readonly attrValCol: BdDataColumn<AttributeRow> = {
     id: 'value',
     name: 'Value',
     data: (r) => r.value,
   };
 
-  private attrRemoveCol: BdDataColumn<AttributeRow> = {
+  private readonly attrRemoveCol: BdDataColumn<AttributeRow> = {
     id: 'remove',
     name: 'Rem.',
     data: (r) => `Remove value for ${r.name}`,

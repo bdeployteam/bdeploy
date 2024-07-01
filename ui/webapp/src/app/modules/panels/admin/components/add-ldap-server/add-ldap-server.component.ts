@@ -15,8 +15,8 @@ import { randomString } from 'src/app/modules/core/utils/object.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private settings = inject(SettingsService);
-  private areas = inject(NavAreasService);
+  private readonly settings = inject(SettingsService);
+  private readonly areas = inject(NavAreasService);
 
   protected tempServer: Partial<LDAPSettingsDto>;
   protected saving$ = new BehaviorSubject<boolean>(false);

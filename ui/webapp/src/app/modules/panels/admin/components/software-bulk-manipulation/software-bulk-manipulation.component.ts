@@ -13,10 +13,10 @@ import { SoftwareVersionBulkService } from '../../services/software-version-bulk
   templateUrl: './software-bulk-manipulation.component.html',
 })
 export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
-  private actions = inject(ActionsService);
-  private bulk = inject(SoftwareVersionBulkService);
-  private software = inject(SoftwareUpdateService);
-  private deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly actions = inject(ActionsService);
+  private readonly bulk = inject(SoftwareVersionBulkService);
+  private readonly software = inject(SoftwareUpdateService);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
 
   protected mappedDelete$ = this.actions.action(
     [Actions.DELETE_UPDATES],
@@ -26,8 +26,8 @@ export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
     this.bulk.selection$.pipe(map((b) => b.map((x) => x.version))),
   );
   protected selections: SoftwareVersion[];
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 

@@ -9,7 +9,7 @@ import { ApplicationConfigurationDiff, DiffType, HistoryDiffService } from '../.
   styleUrls: ['./history-process-config.component.css'],
 })
 export class HistoryProcessConfigComponent implements OnInit {
-  private diffService = inject(HistoryDiffService);
+  private readonly diffService = inject(HistoryDiffService);
 
   @Input() baseConfig: ApplicationConfiguration;
   @Input() compareConfig: ApplicationConfiguration;

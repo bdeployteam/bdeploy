@@ -15,10 +15,10 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   styleUrls: ['./user-group-admin-detail.component.css'],
 })
 export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private authAdmin = inject(AuthAdminService);
-  private usersColumnsService = inject(UsersColumnsService);
-  private permissionColumnsService = inject(PermissionColumnsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly authAdmin = inject(AuthAdminService);
+  private readonly usersColumnsService = inject(UsersColumnsService);
+  private readonly permissionColumnsService = inject(PermissionColumnsService);
 
   private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
     id: 'deletePermission',

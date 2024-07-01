@@ -16,8 +16,8 @@ export interface CanComponentDeactivate {
   providedIn: 'root',
 })
 export class CanDeactivateGuard {
-  private location = inject(Location);
-  private router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
   canDeactivate(
     component: CanComponentDeactivate,

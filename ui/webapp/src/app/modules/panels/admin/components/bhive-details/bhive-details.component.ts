@@ -13,17 +13,17 @@ import { HiveService } from 'src/app/modules/primary/admin/services/hive.service
   templateUrl: './bhive-details.component.html',
 })
 export class BhiveDetailsComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private hives = inject(HiveService);
+  private readonly areas = inject(NavAreasService);
+  private readonly hives = inject(HiveService);
 
   protected bhive$ = new BehaviorSubject<string>(null);
   protected details$ = new BehaviorSubject<HiveInfoDto>(null);
 
-  private repairing$ = new BehaviorSubject<boolean>(false);
-  private enablingPool$ = new BehaviorSubject<boolean>(false);
-  private disablingPool$ = new BehaviorSubject<boolean>(false);
+  private readonly repairing$ = new BehaviorSubject<boolean>(false);
+  private readonly enablingPool$ = new BehaviorSubject<boolean>(false);
+  private readonly disablingPool$ = new BehaviorSubject<boolean>(false);
 
-  private actions = inject(ActionsService);
+  private readonly actions = inject(ActionsService);
   protected mappedRepair$ = this.actions.action(
     [Actions.FSCK_BHIVE, Actions.PRUNE_BHIVE],
     this.repairing$,
@@ -32,7 +32,7 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
   protected mappedEnablePool$ = this.actions.action([Actions.ENABLE_POOL], this.enablingPool$, this.bhive$);
   protected mappedDisablePool$ = this.actions.action([Actions.DISABLE_POOL], this.disablingPool$, this.bhive$);
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   private subscription: Subscription;
 

@@ -12,9 +12,9 @@ import { NavAreasService } from './nav-areas.service';
   providedIn: 'root',
 })
 export class SettingsService {
-  private config = inject(ConfigService);
-  private http = inject(HttpClient);
-  private areas = inject(NavAreasService);
+  private readonly config = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly areas = inject(NavAreasService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public settings$ = new BehaviorSubject<SettingsConfiguration>(null);

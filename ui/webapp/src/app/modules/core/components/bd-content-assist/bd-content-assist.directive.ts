@@ -13,7 +13,7 @@ class WordInfo {
   exportAs: 'appBdContentAssist',
 })
 export class BdContentAssistDirective implements OnInit {
-  private elementRef = inject(ElementRef);
+  private readonly elementRef = inject(ElementRef);
 
   @Input() appBdContentAssist: BdContentAssistMenuComponent;
 

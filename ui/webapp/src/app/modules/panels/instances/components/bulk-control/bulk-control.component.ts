@@ -14,19 +14,19 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './bulk-control.component.html',
 })
 export class BulkControlComponent implements OnInit {
-  private processes = inject(ProcessesService);
-  private actions = inject(ActionsService);
+  private readonly processes = inject(ProcessesService);
+  private readonly actions = inject(ActionsService);
   protected instances = inject(InstancesService);
   protected servers = inject(ServersService);
   protected bulk = inject(ProcessesBulkService);
 
-  private starting$ = new BehaviorSubject<boolean>(false);
-  private stopping$ = new BehaviorSubject<boolean>(false);
-  private restarting$ = new BehaviorSubject<boolean>(false);
+  private readonly starting$ = new BehaviorSubject<boolean>(false);
+  private readonly stopping$ = new BehaviorSubject<boolean>(false);
+  private readonly restarting$ = new BehaviorSubject<boolean>(false);
 
-  private startingMulti$ = new BehaviorSubject<boolean>(false);
-  private stoppingMulti$ = new BehaviorSubject<boolean>(false);
-  private restartingMulti$ = new BehaviorSubject<boolean>(false);
+  private readonly startingMulti$ = new BehaviorSubject<boolean>(false);
+  private readonly stoppingMulti$ = new BehaviorSubject<boolean>(false);
+  private readonly restartingMulti$ = new BehaviorSubject<boolean>(false);
 
   protected bulkContainsConfirmed = false;
   protected bulkSelection$ = new BehaviorSubject<string[]>(null);

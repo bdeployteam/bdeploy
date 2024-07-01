@@ -12,17 +12,17 @@ import { UserBulkService } from '../../services/user-bulk.service';
   templateUrl: './user-bulk-add-to-group.component.html',
 })
 export class UserBulkAddToGroupComponent {
-  private authAdmin = inject(AuthAdminService);
+  private readonly authAdmin = inject(AuthAdminService);
   protected bulk = inject(UserBulkService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected userInput: string;
 
   protected bulkOpResult: BulkOperationResultDto;
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('opResult') private opResult: TemplateRef<unknown>;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild('opResult') private readonly opResult: TemplateRef<unknown>;
 
   protected get suggestions(): string[] {
     return this.authAdmin.userGroups$.value?.map((g) => g.name);

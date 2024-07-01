@@ -15,8 +15,8 @@ export class ContentCompletion {
   styleUrls: ['./bd-content-assist-menu.component.css'],
 })
 export class BdContentAssistMenuComponent {
-  private overlay = inject(Overlay);
-  private viewContainerRef = inject(ViewContainerRef);
+  private readonly overlay = inject(Overlay);
+  private readonly viewContainerRef = inject(ViewContainerRef);
 
   @Input() attachTo: HTMLElement;
   @Input() values: ContentCompletion[];
@@ -29,9 +29,9 @@ export class BdContentAssistMenuComponent {
   protected isPrefix = true;
   protected tooManyMatches = false;
 
-  @ViewChild('menu') private menu: TemplateRef<unknown>;
+  @ViewChild('menu') private readonly menu: TemplateRef<unknown>;
   @ViewChild('itemContainer', { static: false, read: ElementRef })
-  private containerElement: ElementRef;
+  private readonly containerElement: ElementRef;
   private overlayRef: OverlayRef;
 
   public show(word: string) {

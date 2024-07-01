@@ -10,7 +10,7 @@ import { ActionsService } from '../../services/actions.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdActionsComponent {
-  private instances = inject(InstancesService);
+  private readonly instances = inject(InstancesService);
   protected actions = inject(ActionsService);
 
   // to update duration values every second.

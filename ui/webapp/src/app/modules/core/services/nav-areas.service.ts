@@ -9,8 +9,8 @@ export type DirtyableKey = 'primary' | 'panel' | 'admin';
   providedIn: 'root',
 })
 export class NavAreasService {
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   public panelVisible$ = new BehaviorSubject<boolean>(false);
   public panelMaximized$ = new BehaviorSubject<boolean>(false);

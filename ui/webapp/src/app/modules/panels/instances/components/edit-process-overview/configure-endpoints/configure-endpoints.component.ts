@@ -34,12 +34,12 @@ interface HttpEndpointDisabledStatus {
 export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnDestroy, AfterViewInit {
   protected edit = inject(ProcessEditService);
   protected instanceEdit = inject(InstanceEditService);
-  private systems = inject(SystemsService);
-  private areas = inject(NavAreasService);
+  private readonly systems = inject(SystemsService);
+  private readonly areas = inject(NavAreasService);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-  @ViewChildren('epForm') private forms: QueryList<NgForm>;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
+  @ViewChildren('epForm') private readonly forms: QueryList<NgForm>;
 
   protected hasPendingChanges: boolean;
   protected isFromInvalid: boolean;

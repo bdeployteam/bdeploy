@@ -30,13 +30,13 @@ type BHivePathSegment = PathIdName;
   templateUrl: './bd-bhive-browser.component.html',
 })
 export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private search = inject(SearchService);
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
+  private readonly areas = inject(NavAreasService);
+  private readonly search = inject(SearchService);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
   protected hives = inject(HiveService);
   protected repositories = inject(RepositoriesService);
-  private downloads = inject(DownloadService);
+  private readonly downloads = inject(DownloadService);
 
   private readonly colAvatar: BdDataColumn<HiveEntryDto> = {
     id: 'avatar',

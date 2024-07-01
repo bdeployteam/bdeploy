@@ -25,7 +25,7 @@ export class BdFileUploadRawComponent implements OnInit {
 
   @Output() dismiss = new EventEmitter<File>();
 
-  private uploads = inject(UploadService);
+  private readonly uploads = inject(UploadService);
 
   protected uploadStatus: UploadStatus;
   protected importStatus: ImportStatus;

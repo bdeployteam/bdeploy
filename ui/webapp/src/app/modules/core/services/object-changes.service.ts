@@ -25,17 +25,17 @@ interface RemoteRegistration {
   providedIn: 'root',
 })
 export class ObjectChangesService {
-  private cfg = inject(ConfigService);
-  private auth = inject(AuthenticationService);
+  private readonly cfg = inject(ConfigService);
+  private readonly auth = inject(AuthenticationService);
 
   public errorCount$ = new BehaviorSubject<number>(0);
 
-  private _change$ = new Subject<ObjectChangeDto>();
-  private _error$ = new Subject<ErrorEvent>();
-  private _open$ = new BehaviorSubject<boolean>(false);
+  private readonly _change$ = new Subject<ObjectChangeDto>();
+  private readonly _error$ = new Subject<ErrorEvent>();
+  private readonly _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
   private _lastError = 0;
-  private ws = this.createWebSocket();
+  private readonly ws = this.createWebSocket();
 
   constructor() {
     combineLatest([

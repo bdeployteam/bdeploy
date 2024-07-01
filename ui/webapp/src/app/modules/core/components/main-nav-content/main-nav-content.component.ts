@@ -57,7 +57,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavContentComponent implements OnInit {
-  private media = inject(BreakpointObserver);
+  private readonly media = inject(BreakpointObserver);
   protected areas = inject(NavAreasService);
 
   @HostBinding('@marginForPanel') get marginAnimation() {

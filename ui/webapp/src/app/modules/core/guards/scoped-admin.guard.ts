@@ -11,10 +11,10 @@ import { findParam } from './scoped-read.guard';
   providedIn: 'root',
 })
 export class ScopedAdminGuard {
-  private authService = inject(AuthenticationService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
-  private areas = inject(NavAreasService);
+  private readonly authService = inject(AuthenticationService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly areas = inject(NavAreasService);
 
   canActivate(route: ActivatedRouteSnapshot): boolean | Observable<boolean> {
     const group = findParam('group', route) || this.areas._tempNavGroupContext$.value || this.areas.groupContext$.value;

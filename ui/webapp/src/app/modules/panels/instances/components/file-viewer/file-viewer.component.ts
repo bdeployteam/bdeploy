@@ -14,12 +14,12 @@ const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
   templateUrl: './file-viewer.component.html',
 })
 export class FileViewerComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private filesService = inject(FilesService);
-  private auth = inject(AuthenticationService);
-  private ngZone = inject(NgZone);
+  private readonly areas = inject(NavAreasService);
+  private readonly filesService = inject(FilesService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly ngZone = inject(NgZone);
   private offset = 0;
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
   private followInterval;
 
   protected instances = inject(InstancesService);

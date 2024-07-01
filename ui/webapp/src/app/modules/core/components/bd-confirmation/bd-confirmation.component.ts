@@ -7,7 +7,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdConfirmationComponent {
-  private dialogRef = inject(MatDialogRef<BdConfirmationComponent>);
+  private readonly dialogRef = inject(MatDialogRef<BdConfirmationComponent>);
   protected data: { header: string; message: string } = inject(MAT_DIALOG_DATA);
 
   confirm(answer: boolean) {

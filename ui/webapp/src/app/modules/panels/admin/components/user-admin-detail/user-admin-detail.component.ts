@@ -15,10 +15,10 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   styleUrls: ['./user-admin-detail.component.css'],
 })
 export class UserAdminDetailComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private authAdmin = inject(AuthAdminService);
-  private auth = inject(AuthenticationService);
-  private permissionColumnsService = inject(PermissionColumnsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly authAdmin = inject(AuthAdminService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly permissionColumnsService = inject(PermissionColumnsService);
 
   private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
     id: 'delete',
@@ -37,7 +37,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   ];
   protected isCurrentUser: boolean;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   private subscription: Subscription;
 

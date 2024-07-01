@@ -9,7 +9,7 @@ import { AuthAdminService } from '../../../../primary/admin/services/auth-admin.
   styleUrls: ['./auth-test.component.css'],
 })
 export class AuthTestComponent {
-  private auth = inject(AuthAdminService);
+  private readonly auth = inject(AuthAdminService);
 
   protected testUser = '';
   protected testPass = '';

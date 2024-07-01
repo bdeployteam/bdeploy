@@ -12,8 +12,8 @@ import { SettingsService } from '../../services/settings.service';
   styleUrls: ['./main-nav-top.component.css'],
 })
 export class MainNavTopComponent implements OnInit {
-  private media = inject(BreakpointObserver);
-  private authService = inject(AuthenticationService);
+  private readonly media = inject(BreakpointObserver);
+  private readonly authService = inject(AuthenticationService);
   protected cfgService = inject(ConfigService);
   protected search = inject(SearchService);
   protected settings = inject(SettingsService);

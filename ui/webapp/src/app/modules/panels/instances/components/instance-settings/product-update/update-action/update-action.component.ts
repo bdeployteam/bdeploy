@@ -8,8 +8,8 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
   templateUrl: './update-action.component.html',
 })
 export class UpdateActionComponent implements OnInit {
-  private products = inject(ProductsService);
-  private edit = inject(InstanceEditService);
+  private readonly products = inject(ProductsService);
+  private readonly edit = inject(InstanceEditService);
 
   @Input() record: ProductDto;
 

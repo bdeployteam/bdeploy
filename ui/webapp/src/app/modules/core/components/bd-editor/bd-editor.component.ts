@@ -21,9 +21,9 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
   templateUrl: './bd-editor.component.html',
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
-  private themeService = inject(ThemeService);
-  private editorCompletions = inject(MonacoCompletionsService);
-  private cd = inject(ChangeDetectorRef);
+  private readonly themeService = inject(ThemeService);
+  private readonly editorCompletions = inject(MonacoCompletionsService);
+  private readonly cd = inject(ChangeDetectorRef);
 
   private globalMonaco;
   private monaco;

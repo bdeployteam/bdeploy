@@ -60,8 +60,8 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
   styleUrls: ['./instance-templates.component.css'],
 })
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
-  private products = inject(ProductsService);
-  private edit = inject(ProcessEditService);
+  private readonly products = inject(ProductsService);
+  private readonly edit = inject(ProcessEditService);
   protected servers = inject(ServersService);
   protected instanceEdit = inject(InstanceEditService);
 
@@ -84,10 +84,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected groupNodes: { [key: string]: string[] };
   protected groupLabels: { [key: string]: string[] };
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-  @ViewChild('msgTemplate') private tplMessages: TemplateRef<unknown>;
-  @ViewChild('stepper', { static: false }) private myStepper: MatStepper;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
+  @ViewChild('msgTemplate') private readonly tplMessages: TemplateRef<unknown>;
+  @ViewChild('stepper', { static: false }) private readonly myStepper: MatStepper;
 
   private product: ProductDto;
   private subscription: Subscription;

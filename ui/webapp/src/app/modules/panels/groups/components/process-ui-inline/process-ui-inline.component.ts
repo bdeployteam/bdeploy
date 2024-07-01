@@ -15,13 +15,13 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   styleUrls: ['./process-ui-inline.component.css'],
 })
 export class ProcessUiInlineComponent implements OnInit, OnDestroy {
-  private clients = inject(ClientsService);
-  private cfg = inject(ConfigService);
-  private nav = inject(NavAreasService);
-  private groups = inject(GroupsService);
-  private sanitizer = inject(DomSanitizer);
-  private instances = inject(InstancesService);
-  private systems = inject(SystemsService);
+  private readonly clients = inject(ClientsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly nav = inject(NavAreasService);
+  private readonly groups = inject(GroupsService);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly instances = inject(InstancesService);
+  private readonly systems = inject(SystemsService);
 
   protected app: ClientApp;
   protected url: SafeUrl;
@@ -32,7 +32,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   private rawUrl: string;
   private subscription: Subscription;
 
-  @ViewChild('iframe', { static: false }) private iframe: ElementRef;
+  @ViewChild('iframe', { static: false }) private readonly iframe: ElementRef;
 
   ngOnInit(): void {
     this.subscription = combineLatest([this.nav.panelRoute$, this.groups.current$, this.clients.apps$])

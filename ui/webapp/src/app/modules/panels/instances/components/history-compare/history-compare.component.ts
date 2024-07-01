@@ -15,10 +15,10 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   styleUrls: ['./history-compare.component.css'],
 })
 export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable {
-  private areas = inject(NavAreasService);
-  private bop = inject(BreakpointObserver);
-  private details = inject(HistoryDetailsService);
-  private searchService = inject(SearchService);
+  private readonly areas = inject(NavAreasService);
+  private readonly bop = inject(BreakpointObserver);
+  private readonly details = inject(HistoryDetailsService);
+  private readonly searchService = inject(SearchService);
   protected instances = inject(InstancesService);
 
   protected narrow$ = new BehaviorSubject<boolean>(false);
@@ -32,8 +32,8 @@ export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable 
   protected searchTerm = '';
   protected showOnlyDifferences = true;
 
-  private baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
-  private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
+  private readonly baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
+  private readonly compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private subscription: Subscription;
 
   ngOnInit() {

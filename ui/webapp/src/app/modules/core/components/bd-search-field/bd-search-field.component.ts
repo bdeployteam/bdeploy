@@ -25,7 +25,7 @@ export class BdSearchFieldComponent implements OnInit, OnDestroy {
 
   @ViewChild('searchField') searchField: ElementRef;
 
-  private searchChanged = new Subject<string>();
+  private readonly searchChanged = new Subject<string>();
   private subscription: Subscription;
 
   ngOnInit(): void {

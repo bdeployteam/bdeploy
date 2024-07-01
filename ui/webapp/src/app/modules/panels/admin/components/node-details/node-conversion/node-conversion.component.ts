@@ -10,7 +10,7 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
   styleUrls: ['./node-conversion.component.css'],
 })
 export class NodeConversionComponent implements OnInit {
-  private cfg = inject(ConfigService);
+  private readonly cfg = inject(ConfigService);
   protected nodesAdmin = inject(NodesAdminService);
 
   protected data: NodeAttachDto;

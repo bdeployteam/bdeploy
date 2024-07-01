@@ -19,7 +19,7 @@ import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
   styleUrls: ['./bd-data-card.component.css'],
 })
 export class BdDataCardComponent<T> implements OnInit, OnChanges {
-  private sanitizer = inject(DomSanitizer);
+  private readonly sanitizer = inject(DomSanitizer);
 
   /**
    * The columns to display

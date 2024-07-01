@@ -24,13 +24,13 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   protected products = inject(ProductsService);
   protected actions = inject(ActionsService);
 
-  private starting$ = new BehaviorSubject<boolean>(false);
-  private restarting$ = new BehaviorSubject<boolean>(false);
-  private stopping$ = new BehaviorSubject<boolean>(false);
-  private deleting$ = new BehaviorSubject<boolean>(false);
-  private installing$ = new BehaviorSubject<boolean>(false);
-  private activating$ = new BehaviorSubject<boolean>(false);
-  private updating$ = new BehaviorSubject<boolean>(false);
+  private readonly starting$ = new BehaviorSubject<boolean>(false);
+  private readonly restarting$ = new BehaviorSubject<boolean>(false);
+  private readonly stopping$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly installing$ = new BehaviorSubject<boolean>(false);
+  private readonly activating$ = new BehaviorSubject<boolean>(false);
+  private readonly updating$ = new BehaviorSubject<boolean>(false);
 
   protected isAllSameProduct: boolean;
   protected selectableProducts: ProductDto[];
@@ -38,7 +38,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   protected selectedTarget: ProductDto;
   protected bulkOpResult: BulkOperationResultDto;
 
-  private ids$ = this.bulk.selection$.pipe(map((i) => i.map((x) => x.instanceConfiguration.id)));
+  private readonly ids$ = this.bulk.selection$.pipe(map((i) => i.map((x) => x.instanceConfiguration.id)));
 
   protected mappedStart$ = this.actions.action([Actions.START_INSTANCE], this.starting$, null, this.ids$);
   protected mappedRestart$ = this.actions.action(

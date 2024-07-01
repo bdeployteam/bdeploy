@@ -17,9 +17,9 @@ import { ConfigFilesComponent } from '../config-files.component';
   templateUrl: './config-files-actions.component.html',
 })
 export class ConfigFilesActionsComponent implements OnInit {
-  private cfgFiles = inject(ConfigFilesService);
-  private edit = inject(InstanceEditService);
-  private parent = inject(forwardRef(() => ConfigFilesComponent));
+  private readonly cfgFiles = inject(ConfigFilesService);
+  private readonly edit = inject(InstanceEditService);
+  private readonly parent = inject(forwardRef(() => ConfigFilesComponent));
 
   @Input() record: ConfigFile;
 
@@ -36,7 +36,7 @@ export class ConfigFilesActionsComponent implements OnInit {
   protected tempFileContent = '';
   private tempFileIsBin = false;
 
-  @ViewChild('renameInput', { static: false }) private renameInput: BdFormInputComponent;
+  @ViewChild('renameInput', { static: false }) private readonly renameInput: BdFormInputComponent;
 
   ngOnInit(): void {
     this.edit.state$.subscribe(() => {

@@ -32,13 +32,13 @@ const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
   styleUrls: ['./bd-terminal.component.css'],
 })
 export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
-  private searchService = inject(SearchService);
+  private readonly searchService = inject(SearchService);
 
   @Input() content$: Observable<string>;
   @Input() allowInput = false;
   @Output() userInput = new EventEmitter<string>();
 
-  @ViewChild('term') private term: NgTerminal;
+  @ViewChild('term') private readonly term: NgTerminal;
 
   private stdinResize: IDisposable;
   private stdinSubscription: Subscription;
@@ -47,7 +47,7 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   private stdinBufferCursorPos = 0;
   private stdinStartX: number;
 
-  private searchAddon = new SearchAddon();
+  private readonly searchAddon = new SearchAddon();
   private webglAddon = new WebglAddon();
   private searchSubscription: Subscription;
 

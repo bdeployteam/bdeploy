@@ -17,7 +17,7 @@ import { GroupUsersService } from '../../../services/group-users.service';
   templateUrl: './user-group-permissions.component.html',
 })
 export class UserGroupPermissionsComponent {
-  private groupCols = inject(UserGroupsColumnsService);
+  private readonly groupCols = inject(UserGroupsColumnsService);
   protected groups = inject(GroupsService);
   protected users = inject(GroupUsersService);
 
@@ -54,7 +54,7 @@ export class UserGroupPermissionsComponent {
     disabled: () => !this.getLocalPermissionLevel(this.modGroup),
   };
 
-  private groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
+  private readonly groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
 
   protected columns: BdDataColumn<UserGroupInfo>[] = [
     ...this.groupCols.defaultColumns,
@@ -83,7 +83,7 @@ export class UserGroupPermissionsComponent {
   protected availablePermissionsForGroup: Permission[];
 
   @Input() dialog: BdDialogComponent;
-  @ViewChild('modDialog') private modDialog: TemplateRef<unknown>;
+  @ViewChild('modDialog') private readonly modDialog: TemplateRef<unknown>;
 
   private getLocalPermissionLevel(group: UserGroupInfo): Permission {
     return group.permissions.find((p) => p.scope === this.groups.current$.value.name)?.permission;

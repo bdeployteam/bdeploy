@@ -9,7 +9,7 @@ import { DiffType, HistoryDiffService, VariablesDiff } from '../../services/hist
   styleUrls: ['./history-variables-config.component.css'],
 })
 export class HistoryVariablesConfigComponent implements OnInit {
-  private diffService = inject(HistoryDiffService);
+  private readonly diffService = inject(HistoryDiffService);
 
   @Input() baseConfig: InstanceConfiguration;
   @Input() compareConfig: InstanceConfiguration;

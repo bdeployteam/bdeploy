@@ -15,9 +15,9 @@ interface LinkableScope {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdCurrentScopeComponent {
-  private groups = inject(GroupsService);
-  private instance = inject(InstancesService);
-  private repositories = inject(RepositoriesService);
+  private readonly groups = inject(GroupsService);
+  private readonly instance = inject(InstancesService);
+  private readonly repositories = inject(RepositoriesService);
 
   protected currentScope$ = combineLatest([
     this.groups.current$,

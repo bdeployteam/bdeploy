@@ -20,7 +20,7 @@ export class BdFileDropComponent {
   /** Fired when a valid file is added */
   @Output() fileAdded = new EventEmitter<File>();
 
-  @ViewChild('file', { static: true }) private fileRef: ElementRef;
+  @ViewChild('file', { static: true }) private readonly fileRef: ElementRef;
 
   protected active = false;
   protected validationError$ = new BehaviorSubject<boolean>(false);

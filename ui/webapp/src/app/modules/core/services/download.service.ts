@@ -16,7 +16,7 @@ declare let downloadLocation: {
   providedIn: 'root',
 })
 export class DownloadService {
-  private cfg = inject(ConfigService);
+  private readonly cfg = inject(ConfigService);
 
   /**
    * Sends the given object as JSON string as download with the given file name

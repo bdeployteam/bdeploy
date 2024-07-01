@@ -77,7 +77,7 @@ export class UserPermissionsComponent {
     this.colModPerm,
   ];
 
-  private groupNames = ['CLIENT', 'READ', 'WRITE', 'ADMIN'];
+  private readonly groupNames = ['CLIENT', 'READ', 'WRITE', 'ADMIN'];
 
   protected grouping$: Observable<BdDataGrouping<UserInfo>[]> = combineLatest([
     this.groups.current$,
@@ -109,7 +109,7 @@ export class UserPermissionsComponent {
   protected availablePermissionsForUser: Permission[];
 
   @Input() dialog: BdDialogComponent;
-  @ViewChild('modDialog') private modDialog: TemplateRef<unknown>;
+  @ViewChild('modDialog') private readonly modDialog: TemplateRef<unknown>;
 
   private getInheritedPermissionTooltip(user: UserInfo): string {
     const scope = this.groups.current$.value.name;

@@ -12,9 +12,9 @@ const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
   templateUrl: './bhive-log-viewer.component.html',
 })
 export class BhiveLogViewerComponent implements OnInit, OnDestroy {
-  private hiveLogging = inject(HiveLoggingService);
-  private areas = inject(NavAreasService);
-  private ngZone = inject(NgZone);
+  private readonly hiveLogging = inject(HiveLoggingService);
+  private readonly areas = inject(NavAreasService);
+  private readonly ngZone = inject(NgZone);
 
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
   protected file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);

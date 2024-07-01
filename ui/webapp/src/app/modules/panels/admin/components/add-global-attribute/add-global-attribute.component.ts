@@ -14,8 +14,8 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private settings = inject(SettingsService);
-  private areas = inject(NavAreasService);
+  private readonly settings = inject(SettingsService);
+  private readonly areas = inject(NavAreasService);
 
   protected tempAttribute: CustomAttributeDescriptor;
   protected tempUsedIds: string[];

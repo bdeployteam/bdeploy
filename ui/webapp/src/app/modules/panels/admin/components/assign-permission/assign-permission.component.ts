@@ -13,10 +13,10 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssignPermissionComponent implements OnInit, OnDestroy {
-  private authAdmin = inject(AuthAdminService);
-  private areas = inject(NavAreasService);
-  private groups = inject(GroupsService);
-  private repositories = inject(RepositoriesService);
+  private readonly authAdmin = inject(AuthAdminService);
+  private readonly areas = inject(NavAreasService);
+  private readonly groups = inject(GroupsService);
+  private readonly repositories = inject(RepositoriesService);
 
   protected scopes$ = new BehaviorSubject<string[]>([null]);
   protected labels$ = new BehaviorSubject<string[]>(['Global']);

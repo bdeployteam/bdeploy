@@ -15,11 +15,11 @@ import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/
   templateUrl: './node-update.component.html',
 })
 export class NodeUpdateComponent implements OnDestroy {
-  private cfg = inject(ConfigService);
-  private software = inject(SoftwareUpdateService);
-  private nodesAdmin = inject(NodesAdminService);
-  private actions = inject(ActionsService);
-  private updating$ = new BehaviorSubject<boolean>(false);
+  private readonly cfg = inject(ConfigService);
+  private readonly software = inject(SoftwareUpdateService);
+  private readonly nodesAdmin = inject(NodesAdminService);
+  private readonly actions = inject(ActionsService);
+  private readonly updating$ = new BehaviorSubject<boolean>(false);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected loading$ = combineLatest([this.software.loading$, this.nodesAdmin.loading$]).pipe(map(([a, b]) => a || b));
@@ -29,9 +29,9 @@ export class NodeUpdateComponent implements OnDestroy {
   protected version: SoftwareVersion;
   protected isCurrent = false;
 
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
 
   constructor(areas: NavAreasService) {
     this.subscription = combineLatest([areas.panelRoute$, this.nodesAdmin.nodes$, this.software.software$]).subscribe(

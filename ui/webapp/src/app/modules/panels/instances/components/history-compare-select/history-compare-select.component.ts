@@ -11,11 +11,11 @@ import { HistoryDetailsService } from '../../services/history-details.service';
   templateUrl: './history-compare-select.component.html',
 })
 export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private instances = inject(InstancesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly instances = inject(InstancesService);
   protected details = inject(HistoryDetailsService);
 
-  private versionColumn: BdDataColumn<InstanceVersionDto> = {
+  private readonly versionColumn: BdDataColumn<InstanceVersionDto> = {
     id: 'version',
     name: 'Instance Version',
     data: (r) => this.getVersionText(r),
@@ -23,7 +23,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
     classes: (r) => this.getVersionClass(r),
   };
 
-  private productVersionColumn: BdDataColumn<InstanceVersionDto> = {
+  private readonly productVersionColumn: BdDataColumn<InstanceVersionDto> = {
     id: 'prodVersion',
     name: 'Product Version',
     data: (r) => r.product.tag,

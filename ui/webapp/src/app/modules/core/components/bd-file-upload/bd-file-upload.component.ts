@@ -19,7 +19,7 @@ export class BdFileUploadComponent implements OnInit {
   @Output() success = new EventEmitter<unknown>();
   @Output() dismiss = new EventEmitter<File>();
 
-  private uploads = inject(UploadService);
+  private readonly uploads = inject(UploadService);
 
   protected status: UploadStatus;
   protected finished$ = new BehaviorSubject<boolean>(false);

@@ -14,10 +14,10 @@ import { ThemeService } from '../../services/theme.service';
   styleUrls: ['./main-nav.component.css'],
 })
 export class MainNavComponent implements OnInit {
-  private authService = inject(AuthenticationService);
-  private changes = inject(ObjectChangesService);
-  private config = inject(ConfigService);
-  private snackbar = inject(MatSnackBar);
+  private readonly authService = inject(AuthenticationService);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly config = inject(ConfigService);
+  private readonly snackbar = inject(MatSnackBar);
   protected themeService = inject(ThemeService);
   protected actions = inject(ActionsService);
 

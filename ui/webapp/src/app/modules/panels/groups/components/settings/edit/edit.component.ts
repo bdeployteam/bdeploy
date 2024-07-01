@@ -19,9 +19,9 @@ import { GroupDetailsService } from '../../../services/group-details.service';
   templateUrl: './edit.component.html',
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
-  private http = inject(HttpClient);
-  private sanitizer = inject(DomSanitizer);
-  private areas = inject(NavAreasService);
+  private readonly http = inject(HttpClient);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly areas = inject(NavAreasService);
   protected groups = inject(GroupsService);
   protected details = inject(GroupDetailsService);
 
@@ -35,7 +35,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   ngOnInit(): void {

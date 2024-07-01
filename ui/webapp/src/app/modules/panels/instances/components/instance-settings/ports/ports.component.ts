@@ -42,9 +42,9 @@ const colPort: BdDataColumn<PortParam> = {
   templateUrl: './ports.component.html',
 })
 export class PortsComponent implements OnInit {
-  private dl = inject(DownloadService);
-  private systems = inject(SystemsService);
-  private instances = inject(InstancesService);
+  private readonly dl = inject(DownloadService);
+  private readonly systems = inject(SystemsService);
+  private readonly instances = inject(InstancesService);
   protected edit = inject(InstanceEditService);
   protected portEdit = inject(PortsEditService);
 
@@ -53,7 +53,7 @@ export class PortsComponent implements OnInit {
   protected ports: PortParam[] = [];
   protected amount: number;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit(): void {
     this.portEdit.ports$.subscribe((ports) => {

@@ -16,8 +16,8 @@ import { ConfigFilesService } from '../../../../services/config-files.service';
 })
 export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected cfgFiles = inject(ConfigFilesService);
-  private edit = inject(InstanceEditService);
-  private areas = inject(NavAreasService);
+  private readonly edit = inject(InstanceEditService);
+  private readonly areas = inject(NavAreasService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected file$ = new BehaviorSubject<string>(null);
@@ -26,8 +26,8 @@ export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected contentTemplate = '';
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-  @ViewChild(BdEditorDiffComponent) private editor: BdEditorDiffComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
+  @ViewChild(BdEditorDiffComponent) private readonly editor: BdEditorDiffComponent;
 
   private subscription: Subscription;
 

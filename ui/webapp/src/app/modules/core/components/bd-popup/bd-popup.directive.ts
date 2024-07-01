@@ -115,11 +115,11 @@ const RIGHT_BELOW: ConnectedPosition = {
   exportAs: 'appBdPopup',
 })
 export class BdPopupDirective implements OnDestroy {
-  private host = inject(ElementRef);
-  private overlay = inject(Overlay);
-  private viewContainerRef = inject(ViewContainerRef);
-  private popupService = inject(PopupService);
-  private _render = inject(Renderer2);
+  private readonly host = inject(ElementRef);
+  private readonly overlay = inject(Overlay);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly popupService = inject(PopupService);
+  private readonly _render = inject(Renderer2);
 
   @Input() appBdPopup: TemplateRef<unknown>;
   @Input() appBdPopupTrigger: 'click' | 'hover' = 'click';

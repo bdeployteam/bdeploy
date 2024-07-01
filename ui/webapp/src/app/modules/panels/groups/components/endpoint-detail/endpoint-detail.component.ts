@@ -26,13 +26,13 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   templateUrl: './endpoint-detail.component.html',
 })
 export class EndpointDetailComponent implements OnInit, OnDestroy {
-  private route = inject(ActivatedRoute);
-  private instances = inject(InstancesService);
-  private systems = inject(SystemsService);
-  private cfg = inject(ConfigService);
-  private areas = inject(NavAreasService);
-  private clients = inject(ClientsService);
-  private groups = inject(GroupsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly instances = inject(InstancesService);
+  private readonly systems = inject(SystemsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly areas = inject(NavAreasService);
+  private readonly clients = inject(ClientsService);
+  private readonly groups = inject(GroupsService);
 
   protected app$ = new BehaviorSubject<ClientApp>(null);
   protected header: string;

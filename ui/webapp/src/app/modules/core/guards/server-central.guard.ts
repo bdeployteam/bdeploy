@@ -8,9 +8,9 @@ import { ConfigService } from '../services/config.service';
   providedIn: 'root',
 })
 export class ServerCentralGuard {
-  private config = inject(ConfigService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
+  private readonly config = inject(ConfigService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     if (this.config.config.mode !== MinionMode.CENTRAL) {

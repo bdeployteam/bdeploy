@@ -7,9 +7,9 @@ import { NavAreasService } from '../services/nav-areas.service';
   providedIn: 'root',
 })
 export class NotFoundGuard {
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
-  private areas = inject(NavAreasService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly areas = inject(NavAreasService);
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     this.snackbar.open(

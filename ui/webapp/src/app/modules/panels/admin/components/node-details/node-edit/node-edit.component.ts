@@ -19,12 +19,12 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
   styleUrls: ['./node-edit.component.css'],
 })
 export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private areas = inject(NavAreasService);
-  private actions = inject(ActionsService);
-  private snackbar = inject(MatSnackBar);
+  private readonly areas = inject(NavAreasService);
+  private readonly actions = inject(ActionsService);
+  private readonly snackbar = inject(MatSnackBar);
   protected nodesAdmin = inject(NodesAdminService);
 
-  private saving$ = new BehaviorSubject<boolean>(false);
+  private readonly saving$ = new BehaviorSubject<boolean>(false);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected mappedSave$ = this.actions.action(
@@ -40,8 +40,8 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   protected replace = false;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-  @ViewChild(NgForm) private form: NgForm;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
+  @ViewChild(NgForm) private readonly form: NgForm;
 
   private subscription: Subscription;
 

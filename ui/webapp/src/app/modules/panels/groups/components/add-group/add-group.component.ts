@@ -14,9 +14,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   templateUrl: './add-group.component.html',
 })
 export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private groups = inject(GroupsService);
-  private repos = inject(RepositoriesService);
-  private areas = inject(NavAreasService);
+  private readonly groups = inject(GroupsService);
+  private readonly repos = inject(RepositoriesService);
+  private readonly areas = inject(NavAreasService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected group: Partial<InstanceGroupConfiguration> = {

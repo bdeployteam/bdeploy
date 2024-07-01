@@ -17,14 +17,14 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   templateUrl: './edit-config.component.html',
 })
 export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected cfg = inject(ConfigService);
   protected edit = inject(InstanceEditService);
   protected servers = inject(ServersService);
   protected systems = inject(SystemsService);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;

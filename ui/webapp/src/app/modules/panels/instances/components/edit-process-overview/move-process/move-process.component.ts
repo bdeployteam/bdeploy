@@ -30,7 +30,7 @@ const colNodeName: BdDataColumn<NodeRow> = {
 export class MoveProcessComponent implements OnInit, OnDestroy {
   public instanceEdit = inject(InstanceEditService);
   public edit = inject(ProcessEditService);
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
 
   protected records: NodeRow[] = [];
   protected columns: BdDataColumn<NodeRow>[] = [colNodeName];

@@ -11,12 +11,12 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
   templateUrl: './node-maintenance.component.html',
 })
 export class NodeMaintenanceComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected nodesAdmin = inject(NodesAdminService);
 
-  private repairing$ = new BehaviorSubject<boolean>(false);
+  private readonly repairing$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
-  private actions = inject(ActionsService);
+  private readonly actions = inject(ActionsService);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected state: MinionStatusDto;
@@ -28,7 +28,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
     this.nodeName$,
   );
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.nodesAdmin.nodes$]).subscribe(([route, nodes]) => {

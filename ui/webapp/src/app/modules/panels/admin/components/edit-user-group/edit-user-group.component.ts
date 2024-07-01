@@ -16,8 +16,8 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableDialog, OnDestroy {
-  private authAdmin = inject(AuthAdminService);
-  private areas = inject(NavAreasService);
+  private readonly authAdmin = inject(AuthAdminService);
+  private readonly areas = inject(NavAreasService);
 
   protected passConfirm: string;
   protected tempGroup: UserGroupInfo;

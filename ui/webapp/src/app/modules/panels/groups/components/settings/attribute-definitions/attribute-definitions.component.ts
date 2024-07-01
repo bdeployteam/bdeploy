@@ -19,20 +19,20 @@ export class AttributeDefinitionsComponent {
   protected groups = inject(GroupsService);
   protected details = inject(GroupDetailsService);
 
-  private defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',
     name: 'ID',
     data: (r) => r.name,
     isId: true,
   };
 
-  private defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'desc',
     name: 'Description',
     data: (r) => r.description,
   };
 
-  private defDelCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDelCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove definition ${r.name}`,

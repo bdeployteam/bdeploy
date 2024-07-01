@@ -30,7 +30,7 @@ import { BdSearchable, SearchService } from '../../services/search.service';
   templateUrl: './bd-data-grid.component.html',
 })
 export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
-  private searchService = inject(SearchService);
+  private readonly searchService = inject(SearchService);
   protected areas = inject(NavAreasService);
 
   /**

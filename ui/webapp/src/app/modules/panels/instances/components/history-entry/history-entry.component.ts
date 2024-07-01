@@ -21,12 +21,12 @@ import { histKey, histKeyDecode } from '../../utils/history-key.utils';
   templateUrl: './history-entry.component.html',
 })
 export class HistoryEntryComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private history = inject(HistoryService);
-  private details = inject(HistoryDetailsService);
-  private actions = inject(ActionsService);
-  private groups = inject(GroupsService);
-  private products = inject(ProductsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly history = inject(HistoryService);
+  private readonly details = inject(HistoryDetailsService);
+  private readonly actions = inject(ActionsService);
+  private readonly groups = inject(GroupsService);
+  private readonly products = inject(ProductsService);
   protected instances = inject(InstancesService);
   protected states = inject(InstanceStateService);
   protected servers = inject(ServersService);
@@ -35,12 +35,12 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   protected entry$ = new BehaviorSubject<HistoryEntryDto>(null);
   protected state$ = new BehaviorSubject<InstanceStateRecord>(null);
 
-  private installing$ = new BehaviorSubject<boolean>(false);
-  private uninstalling$ = new BehaviorSubject<boolean>(false);
-  private activating$ = new BehaviorSubject<boolean>(false);
-  private deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly installing$ = new BehaviorSubject<boolean>(false);
+  private readonly uninstalling$ = new BehaviorSubject<boolean>(false);
+  private readonly activating$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
 
-  private tag$ = this.entry$.pipe(map((e) => e?.instanceTag));
+  private readonly tag$ = this.entry$.pipe(map((e) => e?.instanceTag));
 
   protected mappedInstall$ = this.actions.action([Actions.INSTALL], this.installing$, null, null, this.tag$);
   protected mappedUninstall$ = this.actions.action([Actions.UNINSTALL], this.uninstalling$, null, null, this.tag$);
@@ -59,7 +59,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   protected hasProduct: boolean;
   protected product$ = new BehaviorSubject<ManifestKey>(null);
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   private subscription: Subscription;
 

@@ -9,7 +9,7 @@ import { DiffType, HistoryDiffService, InstanceConfigurationDiff } from '../../s
   styleUrls: ['./history-header-config.component.css'],
 })
 export class HistoryHeaderConfigComponent implements OnInit {
-  private diffService = inject(HistoryDiffService);
+  private readonly diffService = inject(HistoryDiffService);
 
   @Input() baseConfig: InstanceConfiguration;
   @Input() compareConfig: InstanceConfiguration;

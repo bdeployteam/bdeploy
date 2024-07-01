@@ -15,13 +15,13 @@ import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/
   templateUrl: './software-details.component.html',
 })
 export class SoftwareDetailsComponent implements OnInit, OnDestroy {
-  private software = inject(SoftwareUpdateService);
-  private actions = inject(ActionsService);
-  private areas = inject(NavAreasService);
+  private readonly software = inject(SoftwareUpdateService);
+  private readonly actions = inject(ActionsService);
+  private readonly areas = inject(NavAreasService);
   protected cfg = inject(ConfigService);
 
-  private deleting$ = new BehaviorSubject<boolean>(false);
-  private installing$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly installing$ = new BehaviorSubject<boolean>(false);
 
   protected software$ = new BehaviorSubject<SoftwareVersion>(null);
   protected mappedDelete$ = this.actions.action(
@@ -36,8 +36,8 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
   protected systemOs$ = new BehaviorSubject<OperatingSystem[]>(null);
   protected launcherOs$ = new BehaviorSubject<OperatingSystem[]>(null);
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 

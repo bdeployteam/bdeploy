@@ -11,10 +11,10 @@ import { NavAreasService } from '../services/nav-areas.service';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
-  private config = inject(ConfigService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
-  private areas = inject(NavAreasService);
+  private readonly config = inject(ConfigService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly areas = inject(NavAreasService);
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     let displayPath = '';

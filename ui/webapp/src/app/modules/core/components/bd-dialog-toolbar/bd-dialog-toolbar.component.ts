@@ -20,9 +20,9 @@ import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.compo
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
-  private title = inject(Title);
+  private readonly title = inject(Title);
   protected areas = inject(NavAreasService);
-  private bop = inject(BreakpointObserver);
+  private readonly bop = inject(BreakpointObserver);
 
   protected narrow$ = new BehaviorSubject<boolean>(true);
 

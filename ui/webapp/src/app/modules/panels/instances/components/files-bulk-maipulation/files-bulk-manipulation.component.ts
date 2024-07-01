@@ -10,16 +10,16 @@ import { FilePath, FilesService } from 'src/app/modules/primary/instances/servic
   templateUrl: './files-bulk-manipulation.component.html',
 })
 export class FilesBulkManipulationComponent implements OnDestroy {
-  private areas = inject(NavAreasService);
-  private filesService = inject(FilesService);
-  private subscription: Subscription;
+  private readonly areas = inject(NavAreasService);
+  private readonly filesService = inject(FilesService);
+  private readonly subscription: Subscription;
 
   protected filesBulkService = inject(FilesBulkService);
   protected deleting$ = new BehaviorSubject<boolean>(false);
   protected selections: FilePath[];
   protected showDelete = false;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   constructor() {
     this.subscription = this.areas.primaryRoute$.subscribe((s) => (this.showDelete = s.data['isDataFiles']));

@@ -20,10 +20,10 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
   providedIn: 'root',
 })
 export class GroupUsersService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private groups = inject(GroupsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly groups = inject(GroupsService);
 
   public loadingUsers$ = new BehaviorSubject<boolean>(false);
   public loadingUserGroups$ = new BehaviorSubject<boolean>(false);
@@ -35,7 +35,7 @@ export class GroupUsersService {
   public userGroups$ = new BehaviorSubject<UserGroupInfo[]>([]);
 
   private group: InstanceGroupConfiguration;
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
 
   constructor() {
     this.groups.current$.subscribe((g) => {

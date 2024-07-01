@@ -17,8 +17,8 @@ import { ColorDef, ColorSelectGroupComponent } from './color-select-group/color-
   templateUrl: './banner.component.html',
 })
 export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
-  private auth = inject(AuthenticationService);
-  private areas = inject(NavAreasService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly areas = inject(NavAreasService);
   protected servers = inject(ServersService);
   protected instances = inject(InstancesService);
 
@@ -37,9 +37,9 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
   protected disableApply = true;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild(ColorSelectGroupComponent)
-  private colorSelect: ColorSelectGroupComponent;
+  private readonly colorSelect: ColorSelectGroupComponent;
 
   private subscription: Subscription;
 
