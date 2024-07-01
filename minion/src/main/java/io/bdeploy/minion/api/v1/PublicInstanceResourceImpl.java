@@ -91,9 +91,8 @@ public class PublicInstanceResourceImpl implements PublicInstanceResource {
         // this one is not explicitly implemented. the reason is that the proxy resource /must/ simply be a resource
         // implementation that forwards every request with every supported method. by /not/ implementing it in the public
         // API, we will be able to accept additional methods supported in future releases of BDeploy without adaption.
-        throw new WebApplicationException(Response.temporaryRedirect(UriBuilder
-                .fromUri(ui.getRequestUri().toString().replace("/public/v1/common/proxy", "/master/common/proxy")).build())
-                .build());
+        String uriString = ui.getRequestUri().toString().replace("/public/v1/common/proxy", "/master/common/proxy");
+        Response response = Response.temporaryRedirect(UriBuilder.fromUri(uriString).build()).build();
+        throw new WebApplicationException(response);
     }
-
 }
