@@ -540,7 +540,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         log.info("Checking for launcher updates...");
         return doExecuteLocked(hive, reporter, () -> {
+            long start = System.currentTimeMillis();
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter);
+            log.info("Took {}ms to calculate the latest launcher version.", System.currentTimeMillis() - start);
             doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
             return requiredLauncher;
         });
