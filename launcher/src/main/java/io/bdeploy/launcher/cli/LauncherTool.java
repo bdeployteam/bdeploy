@@ -136,13 +136,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Validator will check whether the writing PID of the lock file is still there. */
     private static final Predicate<String> LOCK_VALIDATOR = pid -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
 
-    /** name of the file containing the ID of the exported configuration version */
+    /** Name of the file containing the ID of the exported configuration version */
     private static final String CONFIG_DIR_CHECK_FILE = ".cfgv";
 
     /**
-     * Environment variable that is set in case that one launcher delegates launching to another (older) one.
-     * When this is set, the delegated launcher will not perform any update handling. Sample: User want to launch an application
-     * that requires an older launcher. In that case the following processes are involved:
+     * Environment variable that is set in case that one launcher delegates launching to another (older) one. When this is set,
+     * the delegated launcher will not perform any update handling. Sample: User want to launch an application that requires an
+     * older launcher. In that case the following processes are involved:
      *
      * <pre>
      *      Native Launcher ---> Java Launcher ---> Native Launcher 2 ---> Java Launcher 2 ---> Application
@@ -285,9 +285,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return null;
     }
 
-    /**
-     * Launch application after installing updates
-     */
+    /** Launches an application after installing updates. */
     private void doLaunch(Auditor auditor, LauncherSplash splash) {
         log.info("Launcher version '{}' started.", VersionHelper.getVersionAsString());
         log.info("Root directory: {}", rootDir);
@@ -426,11 +424,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Cleans up any past transactions which have been aborted for whatever reason.
      * <p>
-     * A transaction is stale if the process which created the transaction is no longer alive, but the marker database
-     * backing the transaction still exists. This would (worst case) allow damaged objects to exist in the object
-     * database without any means to clean them up.
-     *
-     * @param hive
+     * A transaction is stale if the process which created the transaction is no longer alive, but the marker database backing the
+     * transaction still exists. This would (worst case) allow damaged objects to exist in the object database without any means
+     * to clean them up.
      */
     private void cleanStaleTransactions(BHive hive) {
         // only possible if not read-only root.
@@ -455,7 +451,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Returns whether launching should be delegated to another (older) launcher */
+    /** Returns whether launching should be delegated to another (older) launcher. */
     private boolean shouldDelegate(Version running, Version required) {
         // If the local or the required version is undefined we launch with whatever we have
         if (VersionHelper.isUndefined(running) || VersionHelper.isUndefined(required)) {
@@ -465,13 +461,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return !VersionHelper.equals(running, required);
     }
 
-    /** Terminates the VM with the given exit code */
+    /** Terminates the VM with the given exit code. */
     @SuppressFBWarnings("DM_EXIT")
     private static void doExit(Integer exitCode) {
         System.exit(exitCode);
     }
 
-    /** Updates the launcher if there is a new version available */
+    /** Updates the launcher if there is a new version available. */
     private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter) {
         if (VersionHelper.isRunningUndefined()) {
             log.warn("Skipping self update. The local running version is not defined.");
@@ -485,7 +481,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         });
     }
 
-    /** Waits until the given process terminates */
+    /** Waits until the given process terminates. */
     private int doMonitorProcess(Process process) {
         try {
             return process.waitFor();
@@ -496,7 +492,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Validate that homeDir is specified the same way as it was the first time */
+    /** Validate that homeDir is specified the same way as it was the first time. */
     private void validateBDeployHome() {
         Path bdeployHomePath = rootDir.resolve("bdeploy.home");
         if (bdeployHomePath.toFile().exists()) {
@@ -506,7 +502,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Validate content of bdeploy.home file is the same as current value of homeDir */
+    /** Validate content of bdeploy.home file is the same as current value of homeDir. */
     private void validateBDeployHome(Path bdeployHomePath) {
         try {
             Path storedPath = Path.of(Files.readString(bdeployHomePath, StandardCharsets.UTF_8));
@@ -519,7 +515,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Save homeDir value into bdeploy.home file */
+    /** Save homeDir value into bdeploy.home file. */
     private void saveBDeployHome(Path bdeployHomePath) {
         try {
             Files.write(bdeployHomePath, config.homeDir().getBytes(StandardCharsets.UTF_8));
@@ -528,7 +524,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Initializes all parameters based on the given configuration */
+    /** Initializes all parameters based on the given configuration. */
     private void doInit(LauncherConfig config) {
         if (config.launch() == null) {
             throw new IllegalStateException("Missing --launch argument");
@@ -629,8 +625,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Locks the root in order to perform the given operation. The lock is not taken if the current user does
-     * not have the permissions to modify the root directory. In that case the operation is directly executed.
+     * Locks the root in order to perform the given operation. The lock is not taken if the current user does not have the
+     * permissions to modify the root directory. In that case the operation is directly executed.
      */
     private <T> T doExecuteLocked(BHive hive, LauncherSplashReporter reporter, Callable<T> runnable) {
         if (!readOnlyRootDir) {
@@ -653,7 +649,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Checks for updates and installs them if required */
+    /** Checks for updates and installs them if required. */
     private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter, Map.Entry<Version, Key> requiredLauncher) {
         Version latestVersion = requiredLauncher.getKey();
         if (latestVersion.compareTo(runningVersion) <= 0) {
@@ -701,9 +697,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /**
-     * Waits for some time until another launcher has finished installing updates for the launcher.
-     */
+    /** Waits for some time until another launcher has finished installing updates. */
     private void waitForLauncherUpdates(Path updateMarker) throws IOException {
         // No one is installing updates.
         if (!Files.isRegularFile(updateMarker)) {
@@ -738,9 +732,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         doExit(UpdateHelper.CODE_RESTART);
     }
 
-    /**
-     * Installs the application with all requirements in case it is not already installed
-     */
+    /** Installs the application with all requirements if necessary. */
     private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
             ClientApplicationConfiguration clientAppCfg, Auditor auditor) {
         ApplicationConfiguration appCfg = clientAppCfg.appConfig;
@@ -892,9 +884,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Checks if the application and ALL the required dependencies are already installed. The check is done
-     * by verifying that the target directories are existing. No deep verification is done. The returned list
-     * indicates which artifacts are missing.
+     * Checks if the application and ALL the required dependencies are already installed. The check is done by verifying that the
+     * target directories are existing. No deep verification is done. The returned list indicates which artifacts are missing.
      */
     private Collection<String> getMissingArtifacts(BHive hive, ClientApplicationConfiguration clientAppCfg) {
         // Application directory must be there
@@ -995,9 +986,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return false;
     }
 
-    /**
-     * Launches the client process using the given configuration.
-     */
+    /** Launches the client process using the given configuration. */
     private Process launchApplication(ClientApplicationConfiguration clientCfg, boolean isServerOnline) {
         log.info("Launching application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
@@ -1083,9 +1072,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return appSpecificResolvers;
     }
 
-    /**
-     * Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed
-     */
+    /** Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed. */
     private void doInstallLauncherSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
@@ -1109,9 +1096,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Launcher successfully installed.");
     }
 
-    /**
-     * Copies software that the application is using from our hive to the side-by-side hive.
-     */
+    /** Copies software that the application is using from our hive to the side-by-side hive. */
     private void doInstallAppSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
         // Check if the stored configuration references the required launcher
         // If so then we can continue. There is nothing that we need to do
@@ -1166,9 +1151,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /**
-     * Delegates launching of the application to the given version of the launcher.
-     */
+    /** Delegates launching of the application to the given version of the launcher. */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         Path launcher = ClientPathHelper.getNativeLauncher(homeDir);
@@ -1231,7 +1214,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Returns the latest available launcher version */
+    /** Returns the latest available launcher version. */
     private Map.Entry<Version, Key> getLatestLauncherVersion(ActivityReporter reporter) {
         // Fetch all versions and filter out the one that corresponds to the server version
         OperatingSystem runningOs = OsHelper.getRunningOs();
@@ -1271,9 +1254,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return versions.firstEntry();
     }
 
-    /**
-     * Decodes the additional arguments that are passed to the application.
-     */
+    /** Decodes the additional arguments that are passed to the application. */
     @SuppressWarnings("unchecked")
     private Collection<String> decodeAdditionalArguments(String appendArgs) {
         if (appendArgs == null || appendArgs.isBlank()) {
@@ -1283,9 +1264,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return StorageHelper.fromRawBytes(decodedBytes, List.class);
     }
 
-    /**
-     * Returns the server version or null in case that the version cannot be determined
-     */
+    /** Returns the server version or null in case that the version cannot be determined. */
     public static Version getServerVersion(ClickAndStartDescriptor descriptor) {
         try {
             CommonRootResource resource = ResourceProvider.getVersionedResource(descriptor.host, CommonRootResource.class, null);
