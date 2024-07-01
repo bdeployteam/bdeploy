@@ -266,7 +266,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             log.info("Launching has been canceled by the user.");
             doExit(-1);
         } catch (SoftwareUpdateException ex) {
-            log.error("Software update cannot be installed.", ex);
+            log.error("Software update could not be installed.", ex);
             if (config.unattended()) {
                 helpAndFail(ex.getMessage());
             }
@@ -328,9 +328,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     log.info("Launcher successfully launched. PID={}", process.pid());
                     log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
                 } else {
-                    // the source server could have been migrated/converted to node. in this case, display a message.
+                    // The source server could have been migrated/converted to node. in this case, display a message.
                     if (doCheckForMigratedNode()) {
-                        log.warn("Migrated node detected, cannot continue");
+                        log.warn("Migrated node detected, cannot continue.");
                         return;
                     }
                     doInstall(hive, reporter, splash, auditor);
@@ -365,7 +365,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             splash.dismiss();
 
             if (!readOnlyRootDir) {
-                log.info("Cleaning unused launchers and applications ...");
+                log.info("Cleaning unused launchers and applications...");
                 doExecuteLocked(hive, reporter, () -> {
                     ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir,
                             fileAssocScriptsDir);
@@ -386,16 +386,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.warn("No process handle found after launching.");
             }
 
-            // The delegated launcher launcher has already evaluated the exit
-            // code and translated the application specific exit code
-            // We just need to terminate with the given code
+            // The delegated launcher launcher has already evaluated the exit code and translated the application specific exit code.
+            // We just need to terminate with the given code.
             if (clientAppCfg == null) {
                 log.info("Delegated launcher terminated with exit code {}.", exitCode);
                 doExit(exitCode);
             }
 
-            // Application request an update. We will terminate the launcher
-            // so that potential launcher updates are also applied
+            // Application request an update. We will terminate the launcher so that potential launcher updates are also applied.
             ApplicationDescriptor appDesc = clientAppCfg.appDesc;
             ApplicationExitCodeDescriptor exitCodes = appDesc.exitCodes;
             if (exitCodes != null && exitCodes.update != null && exitCodes.update == exitCode) {
@@ -429,15 +427,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * to clean them up.
      */
     private void cleanStaleTransactions(BHive hive) {
-        // only possible if not read-only root.
+        // Only possible if not read-only root.
         if (!readOnlyRootDir) {
             // Check for stale transactions in the hive.
             log.debug("Checking for stale transactions.");
             long stale = hive.getTransactions().cleanStaleTransactions();
             if (stale > 0) {
                 // Stale transactions might leave damaged objects around, force a prune to get rid of them.
-                // There is no need to perform a full check of all existing manifests though, a stale transaction
-                // can not cause them to break.
+                // There is no need to perform a full check of all existing manifests though, a stale transaction cannot cause them to break.
                 log.warn("{} stale transactions found, forcing prune of hive", stale);
 
                 SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
@@ -453,11 +450,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Returns whether launching should be delegated to another (older) launcher. */
     private boolean shouldDelegate(Version running, Version required) {
-        // If the local or the required version is undefined we launch with whatever we have
+        // If the local or the required version is undefined we launch with whatever we have.
         if (VersionHelper.isUndefined(running) || VersionHelper.isUndefined(required)) {
             return false;
         }
-        // Delegate when they do not match
+        // Delegate when they do not match.
         return !VersionHelper.equals(running, required);
     }
 
@@ -538,21 +535,21 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
 
-        // setup logging into files.
+        // Setup logging into files.
         if (!config.consoleLog()) {
-            // always log into logs directory.
+            // Always log into logs directory.
             LauncherLoggingContextDataProvider.setLogDir(rootDir.resolve("logs").toAbsolutePath().normalize().toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("launcher");
         }
 
-        // Check for inconsistent file and folder permissions
+        // Check for inconsistent file and folder permissions.
         Path versionsFile = rootDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve("version.properties");
         readOnlyRootDir = PathHelper.isReadOnly(rootDir, versionsFile);
 
-        // Check that the launcher was not moved
+        // Check that the launcher was not moved.
         validateBDeployHome();
 
-        // Try to get a user-area if the root is readonly
+        // Try to get a user-area if the root is readonly.
         if (readOnlyRootDir) {
             userArea = ClientPathHelper.getUserArea();
             if (userArea == null || PathHelper.isReadOnly(userArea)) {
@@ -590,7 +587,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             clientAppCfg = namedMaster.getClientConfiguration(clickAndStart.instanceId, clickAndStart.applicationId);
         }
 
-        // Update splash with the fetched branding information
+        // Update splash with the fetched branding information.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding == null) {
             log.info("Client configuration does not contain any branding information.");
@@ -604,7 +601,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             splash.updateSplashData(branding.splash);
         }
 
-        // Install the application into the pool if missing
+        // Install the application into the pool if necessary.
         doExecuteLocked(hive, reporter, () -> {
             installApplication(hive, splash, reporter, clientAppCfg, auditor);
             return null;
@@ -616,7 +613,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             hostname = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (Exception e) {
-            // continue
+            // Ignore Exception
         }
         if (hostname == null || hostname.equalsIgnoreCase("localhost")) {
             hostname = NativeHostnameResolver.getHostname();
@@ -631,7 +628,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private <T> T doExecuteLocked(BHive hive, LauncherSplashReporter reporter, Callable<T> runnable) {
         if (!readOnlyRootDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                hive.execute(new DirectoryLockOperation().setDirectory(rootDir)); // this could wait for other launchers.
+                hive.execute(new DirectoryLockOperation().setDirectory(rootDir)); // This could wait for other launchers.
             }
         }
         log.debug("Entered locked execution mode");
@@ -665,8 +662,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     "Installed=" + runningVersion.toString() + " Available=" + latestVersion.toString());
         }
 
-        // In case that another launcher has launched us then we do not perform any updates
-        // We just exit with the update code so that the outer launcher can do all required tasks
+        // In case that another launcher has launched us then we do not perform any updates.
+        // We just exit with the update code so that the outer launcher can do all required tasks.
         if (System.getenv(BDEPLOY_DELEGATE) != null) {
             log.info("Update of launcher required. Delegating to parent to do this...");
             doExit(UpdateHelper.CODE_RESTART);
@@ -678,18 +675,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             waitForLauncherUpdates(updateMarker);
 
             try (Transaction t = hive.getTransactions().begin()) {
-                // found a newer version to install.
+                // Found a newer version to install.
                 hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
             }
 
-            // write to target directory
+            // Write to target directory.
             Path next = UpdateHelper.prepareUpdateDirectory(updateDir);
             hive.execute(new ExportOperation().setManifest(launcher).setTarget(next));
 
-            // create a marker for others which will gain the lock after we exit for restart.
+            // Create a marker for others which will gain the lock after we exit for restart.
             Files.createFile(updateMarker);
 
-            // Signal that a new update is available
+            // Signal that a new update is available.
             log.info("Restarting...");
             doExit(UpdateHelper.CODE_RESTART);
         } catch (IOException e) {
@@ -784,18 +781,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
 
-        // Application specific data will be stored in a separate directory
+        // Application specific data will be stored in a separate directory.
         PathHelper.mkdirs(appDir);
 
         // Download and install the current configuration tree if required.
         Path cfgPath = dpp.get(SpecialDirectory.CONFIG);
-        PathHelper.deleteRecursiveRetry(cfgPath); // get rid of *any* existing config
+        PathHelper.deleteRecursiveRetry(cfgPath); // Get rid of *all* existing configurations
 
         if (clientAppCfg.configTree != null) {
             downloadAndInstallConfigFiles(clientAppCfg, cfgPath);
         }
 
-        // Store branding information on file-system
+        // Store branding information on file-system.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding != null) {
             if (clientAppCfg.clientImageIcon != null) {
@@ -807,14 +804,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             splash.storeSplashData(branding);
         }
 
-        // Create the click-and-start file
+        // Create the click-and-start file.
         try {
             ClientPathHelper.getOrCreateClickAndStart(rootDir, clickAndStart);
         } catch (IOException e) {
             log.error("Initial creation of click-and-start file failed.", e);
         }
 
-        // Protocol the installation
+        // Protocol the installation.
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
         newConfig.clickAndStart = clickAndStart;
@@ -823,7 +820,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);
 
-        // Handle script changes
+        // Handle script changes.
         OperatingSystem os = OsHelper.getRunningOs();
         ClientApplicationDto metadata = newConfig.metadata;
         handleScriptChanges(metadata, new LocalStartScriptHelper(//
@@ -847,7 +844,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     private void downloadAndInstallConfigFiles(ClientApplicationConfiguration clientAppCfg, Path cfgPath) {
-        // contact server, download files and write into config directory.
+        // Contact server, download files and write into configuration directory.
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
 
@@ -859,27 +856,27 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     + zipDl.getStatusInfo().getReasonPhrase());
         }
 
-        // write the download into a temporary file so we can unzip it.
+        // Write the download into a temporary file so we can unzip it.
         try (InputStream input = zipDl.readEntity(InputStream.class); OutputStream output = Files.newOutputStream(cfgZip)) {
             StreamHelper.copy(input, output);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "Cannot read ZIP response from config files request for " + clickAndStart.applicationId);
+                    "Cannot read ZIP response from configuration files request for " + clickAndStart.applicationId);
         }
 
-        // unzip the downloaded ZIP containing the configuration files.
+        // Un-zip the downloaded ZIP containing the configuration files.
         ZipHelper.unzip(cfgZip, cfgPath);
 
         TemplateHelper.processFileTemplates(cfgPath, createResolver(clientAppCfg));
 
         try {
-            // record the proper ID in the config check file.
+            // Record the proper ID in the configuration check file.
             Files.write(cfgPath.resolve(CONFIG_DIR_CHECK_FILE), Collections.singletonList(clientAppCfg.configTree.getId()));
         } catch (Exception e) {
-            log.warn("Cannot write config check file", e);
+            log.warn("Cannot write configuration check file", e);
         }
 
-        // remove the temporary download file.
+        // Remove the temporary download file.
         PathHelper.deleteRecursiveRetry(cfgZip);
     }
 
@@ -888,8 +885,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * target directories are existing. No deep verification is done. The returned list indicates which artifacts are missing.
      */
     private Collection<String> getMissingArtifacts(BHive hive, ClientApplicationConfiguration clientAppCfg) {
-        // Application directory must be there
-        // NOTE: Directory is create before by the native installer
+        // Application directory must exist
+        // NOTE: Directory is created before by the native installer
         Collection<String> missing = new ArrayList<>();
         if (!PathHelper.exists(appDir)) {
             missing.add("Directory: " + clientAppCfg.appConfig.id);
@@ -906,7 +903,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
 
-        // configuration files need to be installed in the correct version
+        // Configuration files need to be installed in the correct version
         Path cfgPath = dpp.get(SpecialDirectory.CONFIG);
 
         if (clientAppCfg.configTree != null) {
@@ -916,7 +913,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 missing.add("Configuration Files Version: " + clientAppCfg.configTree);
             }
         } else {
-            // in case we HAD a config directory, we might need to get rid of it.
+            // In case we HAD a configuration directory, we might need to get rid of it.
             boolean hasOldConfig = checkForExistingConfigFiles(cfgPath);
 
             if (hasOldConfig) {
@@ -924,14 +921,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
 
-        // Meta-Manifest about the installation must be there
-        // and must refer to what the application actually requires
+        // Meta-Manifest about the installation must exist and must refer to what the application actually requires.
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.id, false);
         if (clientConfig == null) {
             missing.add("Meta-Manifest:" + clientAppCfg.appConfig.id);
         } else {
-            // Check that all required apps are listed
+            // Check that all required applications are listed
             applications.removeAll(clientConfig.requiredSoftware);
             if (!applications.isEmpty()) {
                 missing.add("Meta-Manifest-Entry: " + applications);
@@ -1018,8 +1014,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
-            // we don't set the current directory here anymore on purpose, otherwise command line
-            // arguments referencing files will not work properly in conjunction with start scripts and file associations
+            // We intentionally don't set the current directory here, otherwise command line arguments referencing files
+            // would not work properly in conjunction with start scripts and file associations
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
                     .redirectOutput(Redirect.INHERIT);
 
@@ -1098,8 +1094,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Copies software that the application is using from our hive to the side-by-side hive. */
     private void doInstallAppSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
-        // Check if the stored configuration references the required launcher
-        // If so then we can continue. There is nothing that we need to do
+        // Check if the stored configuration references the required launcher.
+        // If so, then we can continue. There is nothing that we need to do.
         Version version = requiredLauncher.getKey();
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration cscfg = manifest.readNewest(clickAndStart.applicationId, true);
@@ -1145,8 +1141,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Copied missing files from this hive. {}", stats.toLogString());
             }
         } catch (Exception ex) {
-            // We just log the error and continue
-            // The other launcher will download the required software
+            // We just log the error and continue. The other launcher will download the required software.
             log.warn("Failed to copy required software.", ex);
         }
     }
@@ -1160,7 +1155,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         boolean isNewScriptLauncher = false;
 
         if (PathHelper.exists(scriptLauncher) && OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            // we're in post 7.1.0 area and can use the script to keep terminal association. on linux it has been that way always.
+            // We're in post 7.1.0 area and can use the script to keep terminal association. On Linux it has always been that way.
             launcher = scriptLauncher;
             isNewScriptLauncher = true;
         }
@@ -1200,13 +1195,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
             b.directory(homeDir.resolve(ClientPathHelper.LAUNCHER_DIR).toFile());
 
-            // Set the home directory for the launcher. Required for older launchers
-            // Newer launchers do not use the variable any more
+            // Set the home directory for the launcher. Required for older launchers. Newer launchers do not use the variable anymore.
             Map<String, String> env = b.environment();
             env.put("BDEPLOY_HOME", homeDir.toFile().getAbsolutePath());
 
-            // Notify the launcher that he runs in a special mode.
-            // In that mode he will forward all exit codes without special handling.
+            // Notify the launcher that it runs in a special mode. In this mode it will forward all exit codes without special handling.
             env.put(BDEPLOY_DELEGATE, "TRUE");
             return b.start();
         } catch (IOException e) {
@@ -1233,9 +1226,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     continue;
                 }
 
-                // Filter out all versions that do not match the current server version
-                // We do this only in case that the server provides a valid version. Older
-                // servers do not have this API and thus cannot tell us their version
+                // Filter out all versions that do not match the current server version. We do this only in case that the
+                // server provides a valid version. Older servers do not have this API and thus cannot tell us their version.
                 Version version = VersionHelper.tryParse(smk.getTag());
                 if (!serverIsUndefined && !VersionHelper.equals(serverVersion, version)) {
                     continue;
