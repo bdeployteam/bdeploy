@@ -33,8 +33,7 @@ public class ClientSoftwareConfiguration {
     public ClientApplicationDto metadata;
 
     /**
-     * Snapshot of clientAppCfg from last installation.
-     * Used when server is not reachable to start application offline.
+     * Snapshot of clientAppCfg from last installation. Allows the application to start offline when the server is not reachable.
      */
     public ClientApplicationConfiguration clientAppCfg;
 

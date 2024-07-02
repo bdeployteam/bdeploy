@@ -23,6 +23,7 @@ processControl:
   supportsAutostart: true
   startScriptName: "TestScriptName"
   fileAssocExtension: ".coolbdeployfile"
+  offlineStartAllowed: true
 
 supportedOperatingSystems:
   - LINUX

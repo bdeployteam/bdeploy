@@ -393,29 +393,53 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             // Clean stale transactions once the content supplier and validator are available.
             cleanStaleTransactions(hive);
 
-            // Check for and install launcher updates
-            // We always try to use the launcher matching the server version
-            Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter);
-            Version requiredVersion = VersionHelper.UNDEFINED;
-            if (requiredLauncher != null) {
-                requiredVersion = requiredLauncher.getKey();
+            // Retrieve the client application configuration.
+            boolean offlineMode;
+            try (Activity info = reporter.start("Loading meta-data...")) {
+                log.info("Fetching configuration from server...");
+                clientAppCfg = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null)
+                        .getNamedMaster(clickAndStart.groupId)
+                        .getClientConfiguration(clickAndStart.instanceId, clickAndStart.applicationId);
+                log.info("Successfully retrieved configuration from server.");
+                offlineMode = false;
+            } catch (Exception e) {
+                if (!(ExceptionHelper.getRootCause(e) instanceof ConnectException)) {
+                    throw e;
+                }
+                clientAppCfg = Optional.of(new ClientSoftwareManifest(hive))
+                        .map(csm -> csm.readNewest(clickAndStart.applicationId, false)).map(csc -> csc.clientAppCfg).orElse(null);
+                if (clientAppCfg == null || !clientAppCfg.appDesc.processControl.offlineStartAllowed) {
+                    throw e;
+                }
+                log.info("Connection to server failed. Launching will continue in offline mode.");
+                offlineMode = true;
             }
 
+            if (offlineMode) {
+                log.info("Continuing launch in offline mode...");
+            } else {
+                log.info("Continuing launch in online mode...");
+            }
+
+            // Check for and install launcher updates if necessary.
+            Entry<Version, Key> requiredLauncher = offlineMode ? null : doSelfUpdate(hive, reporter);
+            Version requiredVersion = requiredLauncher == null ? VersionHelper.UNDEFINED : requiredLauncher.getKey();
+
             Process process = null;
-            try {
-                // Launch the application or delegate launching
-                if (shouldDelegate(runningVersion, requiredVersion)) {
-                    log.info("Application cannot be started with this launcher: Server is running an older version.");
-                    log.info("Delegating to launcher {}", requiredVersion);
-                    doExecuteLocked(hive, reporter, () -> {
-                        doInstallLauncherSideBySide(hive, requiredLauncher);
-                        doInstallAppSideBySide(hive, reporter, requiredLauncher);
-                        return null;
-                    });
-                    process = doDelegateLaunch(requiredVersion, config.launch());
-                    log.info("Launcher successfully launched. PID={}", process.pid());
-                    log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
-                } else {
+            // Launch the application or delegate launching
+            if (shouldDelegate(runningVersion, requiredVersion)) {
+                log.info("Application cannot be started with this launcher: Server is running an older version.");
+                log.info("Delegating to launcher {}", requiredVersion);
+                doExecuteLocked(hive, reporter, () -> {
+                    doInstallLauncherSideBySide(hive, requiredLauncher);
+                    doInstallAppSideBySide(hive, reporter, requiredLauncher);
+                    return null;
+                });
+                process = doDelegateLaunch(requiredVersion, config.launch());
+                log.info("Launcher successfully launched. PID={}", process.pid());
+                log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
+            } else {
+                if (!offlineMode) {
                     // The source server could have been migrated/converted to node. in this case, display a message.
                     MinionStatusResource msr = ResourceProvider.getVersionedResource(clickAndStart.host,
                             MinionStatusResource.class, null);
@@ -424,33 +448,16 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                         MessageDialogs.showServerIsNode();
                         return;
                     }
-
                     doInstall(hive, reporter, splash, auditor);
+                }
 
-                    // Launch the application
-                    if (!config.updateOnly()) {
-                        try (Activity info = reporter.start("Launching...")) {
-                            process = launchApplication(clientAppCfg, true);
-                        }
-                        log.info("Application successfully launched. PID={}", process.pid());
+                // Launch the application
+                if (!config.updateOnly()) {
+                    try (Activity info = reporter.start("Launching...")) {
+                        process = launchApplication(clientAppCfg, offlineMode);
                     }
+                    log.info("Application successfully launched. PID={}", process.pid());
                 }
-            } catch (Exception e) {
-                if (!(ExceptionHelper.getRootCause(e) instanceof ConnectException)) {
-                    throw e;
-                }
-
-                clientAppCfg = Optional.of(new ClientSoftwareManifest(hive))
-                        .map(csm -> csm.readNewest(clickAndStart.applicationId, false)).map(csc -> csc.clientAppCfg).orElse(null);
-
-                if (clientAppCfg == null || !clientAppCfg.appDesc.processControl.offlineStartAllowed) {
-                    throw e;
-                }
-
-                try (Activity info = reporter.start("Launching...")) {
-                    process = launchApplication(clientAppCfg, false);
-                }
-                log.info("Application successfully launched without contacting the server. PID={}", process.pid());
             }
 
             reporter.stop();
@@ -821,15 +828,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor) {
-        MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
-        MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
-
-        // Fetch more information from the remote server.
-        try (Activity info = reporter.start("Loading meta-data...")) {
-            log.info("Fetching configuration from server...");
-            clientAppCfg = namedMaster.getClientConfiguration(clickAndStart.instanceId, clickAndStart.applicationId);
-        }
-
         // Update splash with the fetched branding information.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding == null) {
@@ -1000,30 +998,31 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         if (clientConfig == null) {
             missing.add("Meta-Manifest:" + clientAppCfg.appConfig.id);
-        } else {
-            // Check that all required applications are listed
-            applications.removeAll(clientConfig.requiredSoftware);
-            if (!applications.isEmpty()) {
-                missing.add("Meta-Manifest-Entry: " + applications);
-            }
-
-            // Remove reference to the launcher
-            if (clientConfig.launcher != null) {
-                missing.add("Delete Meta-Manifest: " + clientConfig.launcher);
-            }
+            return missing;
         }
 
-        if (clientConfig == null || clientConfig.clientAppCfg == null) {
+        // Check that all required applications are listed
+        applications.removeAll(clientConfig.requiredSoftware);
+        if (!applications.isEmpty()) {
+            missing.add("Meta-Manifest-Entry: " + applications);
+        }
+
+        // Remove reference to the launcher
+        if (clientConfig.launcher != null) {
+            missing.add("Delete Meta-Manifest: " + clientConfig.launcher);
+        }
+
+        if (clientConfig.clientAppCfg == null) {
             if (readOnlyRootDir) {
-                log.warn("Persistent configuration is missing");
+                log.warn("Persistent configuration is missing.");
             } else {
-                missing.add("Persistent configuration is missing");
+                missing.add("Persistent configuration is missing.");
             }
         } else if (!Objects.equals(clientConfig.clientAppCfg.activeTag, clientAppCfg.activeTag)) {
             if (readOnlyRootDir) {
-                log.warn("Persistent configuration is outdated");
+                log.warn("Persistent configuration is outdated.");
             } else {
-                missing.add("Persistent configuration is outdated");
+                missing.add("Persistent configuration is outdated.");
             }
         }
 
@@ -1101,11 +1100,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Launches the client process using the given configuration. */
-    private Process launchApplication(ClientApplicationConfiguration clientCfg, boolean isServerOnline) {
+    private Process launchApplication(ClientApplicationConfiguration clientCfg, boolean offlineMode) {
         log.info("Launching application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
 
-        if (isServerOnline) {
+        if (!offlineMode) {
             MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
             MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
             namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
