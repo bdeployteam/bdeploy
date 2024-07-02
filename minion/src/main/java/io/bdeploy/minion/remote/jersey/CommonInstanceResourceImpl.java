@@ -76,7 +76,6 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
     @Override
     public SortedMap<String, EndpointsConfiguration> getAllEndpoints(String instanceId) {
-        SortedMap<String, EndpointsConfiguration> result = new TreeMap<>();
         String activeTag = getInstanceState(instanceId).activeTag;
         if (activeTag == null) {
             throw new WebApplicationException("Endpoints are available only once there is an active version for " + instanceId,
@@ -85,6 +84,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
         InstanceManifest im = InstanceManifest.load(hive, instanceId, activeTag);
 
+        SortedMap<String, EndpointsConfiguration> result = new TreeMap<>();
         for (Manifest.Key imnk : im.getInstanceNodeManifests().values()) {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, imnk);
             inm.getConfiguration().applications.stream().forEach(a -> result.put(a.id, a.endpoints));

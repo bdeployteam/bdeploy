@@ -106,7 +106,6 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
     @Override
     public List<RemoteDirectoryEntry> getLogEntries(String hive) {
         Path logDir = root.getLogDir();
-        Path rootDir = root.getRootDir();
         List<RemoteDirectoryEntry> entries = new ArrayList<>();
 
         if (hive != null) {
@@ -122,6 +121,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
             }
         }
 
+        Path rootDir = root.getRootDir();
         try (Stream<Path> paths = Files.walk(logDir)) {
             paths.filter(Files::isRegularFile).forEach(f -> {
                 File file = f.toFile();

@@ -178,9 +178,6 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
             return perm;
         }
 
-        // check on a method which returns the actual permission.
-        String scopeValue = getScopedValue(uriInfo, perm.scope(), perm.scopeOptional());
-
         MethodHandler handler = resourceMethod.getInvocable().getHandler();
         Method dynamicPermMethod;
         try {
@@ -201,6 +198,8 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
             return perm;
         }
 
+        // Check on a method which returns the actual permission.
+        String scopeValue = getScopedValue(uriInfo, perm.scope(), perm.scopeOptional());
         try {
             Permission dynPerm = (Permission) dynamicPermMethod.invoke(instance, scopeValue);
             if (dynPerm == null) {

@@ -105,12 +105,11 @@ public class ProductUpdateService {
             VariableResolver resolver) {
         var current = currentApplications == null ? null
                 : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
-        var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName())).findFirst();
-
         if (current != null && current.isEmpty()) {
             throw new IllegalStateException("Cannot find current application: " + app.application);
         }
 
+        var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName())).findFirst();
         if (target.isEmpty()) {
             // cannot update, application no longer exists. perform "dummy" update, so validation detects this.
             app.application = new Manifest.Key(app.application.getName(), "NOT_PRESENT");

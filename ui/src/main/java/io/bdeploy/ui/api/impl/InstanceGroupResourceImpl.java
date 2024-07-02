@@ -446,8 +446,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Override
     public InstanceResource getInstanceResource(String group) {
-        BHive groupHive = getGroupHive(group);
-
         // check if the current instance group mode matches the server mode, else don't continue.
         boolean isManagedGroup = read(group).managed;
         boolean requiresManagedGroup = minion.getMode() != MinionMode.STANDALONE;
@@ -457,7 +455,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             throw new WebApplicationException("Instance group mode does not match server mode.", Status.SERVICE_UNAVAILABLE);
         }
 
-        return rc.initResource(new InstanceResourceImpl(group, groupHive));
+        return rc.initResource(new InstanceResourceImpl(group, getGroupHive(group)));
     }
 
     @Override

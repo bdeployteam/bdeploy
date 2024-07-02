@@ -32,7 +32,6 @@ public class VersionMismatchFilter implements ClientResponseFilter {
     public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
         if (responseContext.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
             // *something* was not found. check versions of server.
-            String ourVersion = VersionHelper.getVersion().toString();
             String theirVersion;
             try {
                 theirVersion = factory.getProxyClient(PublicRootResource.class).getVersion();
@@ -44,15 +43,14 @@ public class VersionMismatchFilter implements ClientResponseFilter {
                 return; // nothing we can do here.
             }
 
+            String ourVersion = VersionHelper.getVersion().toString();
             if (ourVersion.equals(theirVersion)) {
                 return; // version is the same, it's a "normal" 404.
             }
-
             throw new WebApplicationException("Cannot perform communication with " + requestContext.getUri().getHost()
                     + " (port: " + requestContext.getUri().getPort() + ", path: " + requestContext.getUri().getPath()
                     + "). The endpoint is not supported due to a version mismatch (target version: " + theirVersion
                     + ", our version: " + ourVersion + "). Please update BDeploy.", CODE_VERSION_MISMATCH);
         }
     }
-
 }

@@ -142,15 +142,13 @@ class DataTableText extends DataTableBase {
     }
 
     private void adjustColumnsWidth() {
-        List<DataTableColumn> columns = getColumns();
         List<List<DataTableCell>> rows = getRows();
-        Map<Integer, Integer> colIdxToMaxCellLength = new HashMap<>();
-
         if (rows.isEmpty()) {
             return;
         }
 
         // calculate column width
+        Map<Integer, Integer> colIdxToMaxCellLength = new HashMap<>();
         for (List<DataTableCell> row : rows) {
             int colIdx = 0;
             for (DataTableCell cell : row) {
@@ -164,6 +162,7 @@ class DataTableText extends DataTableBase {
         }
 
         // adjust column width
+        List<DataTableColumn> columns = getColumns();
         for (int i = 0; i < columns.size(); i++) {
             DataTableColumn column = columns.get(i);
             column.setMaxCellLength(colIdxToMaxCellLength.get(i));

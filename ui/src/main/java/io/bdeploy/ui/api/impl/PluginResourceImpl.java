@@ -157,13 +157,14 @@ public class PluginResourceImpl implements PluginResource {
 
     @Override
     public Set<String> getEditorTypes(String group, Key product) {
-        Set<String> result = new TreeSet<>();
-
         // check plugins from the product.
         BHive hive = reg.get(group);
         if (hive == null) {
             throw new WebApplicationException("Instance Group not found: " + group, Status.NOT_FOUND);
         }
+
+        Set<String> result = new TreeSet<>();
+
         ProductManifest pm = ProductManifest.of(hive, product);
         for (ObjectId plugin : pm.getPlugins()) {
             boolean wasLoaded = manager.isLoaded(plugin);

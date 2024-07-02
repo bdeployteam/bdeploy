@@ -1018,7 +1018,6 @@ public class ProcessController {
     /** Executes the configured stop command and waits for the termination */
     private void doInvokeStopCommand() {
         try {
-            List<String> stopCommand = processConfig.stop;
             if (processConfig.stop == null || processConfig.stop.isEmpty()) {
                 logger.log(l -> l.debug("No stop command configured."));
                 return;
@@ -1026,7 +1025,7 @@ public class ProcessController {
             logger.log(l -> l.info("Invoking configured stop command."));
             logger.log(l -> l.debug("Stop command: {}.", processConfig.stop));
 
-            Process stopProcess = launch(stopCommand, processConfig.stopEnv);
+            Process stopProcess = launch(processConfig.stop, processConfig.stopEnv);
             NoThrowAutoCloseable stopLogger = null;
 
             // either we can (and must) attach to an existing one, or we need a new one in case the process was recovered.

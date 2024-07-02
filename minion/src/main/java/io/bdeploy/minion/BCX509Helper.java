@@ -119,8 +119,6 @@ public class BCX509Helper {
         // backup before doing it...
         Files.copy(ks, ks.getParent().resolve(ks.getFileName().toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
 
-        KeyStore keyStore = SecurityHelper.getInstance().loadPrivateKeyStore(ks, pass);
-
         List<Certificate> chain = new ArrayList<>();
         KeyPair kp = null;
 
@@ -147,6 +145,7 @@ public class BCX509Helper {
         }
 
         // replace the existing one...
+        KeyStore keyStore = SecurityHelper.getInstance().loadPrivateKeyStore(ks, pass);
         keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), pass, chain.toArray(Certificate[]::new));
 
         try (OutputStream os = Files.newOutputStream(ks)) {

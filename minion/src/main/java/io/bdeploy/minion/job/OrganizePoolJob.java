@@ -82,11 +82,12 @@ public class OrganizePoolJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         log.info("Pool re-organization job started");
+
         MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
-        BHiveRegistry registry = (BHiveRegistry) context.getMergedJobDataMap().get(REGISTRY);
         if (mr == null) {
             throw new IllegalStateException("No minion root set");
         }
+        BHiveRegistry registry = (BHiveRegistry) context.getMergedJobDataMap().get(REGISTRY);
         if (registry == null) {
             throw new IllegalStateException("No BHive registry set");
         }

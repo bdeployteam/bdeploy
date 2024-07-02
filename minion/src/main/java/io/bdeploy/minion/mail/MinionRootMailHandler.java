@@ -85,8 +85,6 @@ public class MinionRootMailHandler {
 
         String[] data = AttachmentUtils.getAttachmentDataFromName(Path.of(name));
         String hiveName = data[0];
-        String instanceId = data[1];
-        String serverName = data[2];
 
         BHive target = registry.get(hiveName);
 
@@ -94,6 +92,7 @@ public class MinionRootMailHandler {
             throw new IllegalStateException("Instance Group " + hiveName + " is unknown");
         }
 
+        String serverName = data[2];
         ManagedMasters managedMasters = new ManagedMasters(target);
         ManagedMastersConfiguration cfg = managedMasters.read();
         ManagedMasterDto managedMaster = cfg.getManagedMaster(serverName);
@@ -110,6 +109,7 @@ public class MinionRootMailHandler {
         String signedInstanceId = signedData[1];
         String signedServerName = signedData[2];
 
+        String instanceId = data[1];
         if (!hiveName.equals(signedHiveName) || !instanceId.equals(signedInstanceId) || !serverName.equals(signedServerName)) {
             // the name carries information, so we must make sure nobody tinkered with it.
             throw new IllegalArgumentException(

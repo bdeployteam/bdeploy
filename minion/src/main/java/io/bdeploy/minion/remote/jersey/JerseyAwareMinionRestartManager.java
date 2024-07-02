@@ -43,13 +43,15 @@ public class JerseyAwareMinionRestartManager implements MinionRestartManager {
     }
 
     private static void rollOverFiles(Path filePath, int count) {
-        Path source = filePath.getParent().resolve(filePath.getFileName().toString() + (count > 0 ? ("." + count) : ""));
-        Path target = filePath.getParent().resolve(filePath.getFileName().toString() + "." + (count + 1));
+        Path parent = filePath.getParent();
+        String fileName = filePath.getFileName().toString();
 
+        Path source = parent.resolve(fileName + (count > 0 ? ("." + count) : ""));
         if (!Files.exists(source)) {
             return;
         }
 
+        Path target = parent.resolve(fileName + "." + (count + 1));
         try {
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {

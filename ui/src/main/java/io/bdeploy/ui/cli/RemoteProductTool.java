@@ -119,19 +119,15 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
     }
 
     private RenderableResult showDetails(RemoteService remote, ProductConfig config) {
-        DataResult result = createEmptyResult();
-
-        ProductResource pr = getProductRsrc(remote, config);
-
         Manifest.Key key = Manifest.Key.parse(config.details());
-
+        ProductResource pr = getProductRsrc(remote, config);
         Optional<ProductDto> dto = pr.list(key.getName()).stream().filter(p -> p.key.getTag().equals(key.getTag())).findFirst();
-
         if (dto.isEmpty()) {
             throw new IllegalStateException("Cannot find product: " + config.details());
         }
 
         ProductDto prod = dto.get();
+        DataResult result = createEmptyResult();
         result.addField("Key", prod.key.toString());
         result.addField("ID", prod.product);
         result.addField("Name", prod.name);
@@ -144,8 +140,8 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         result.addField("Dependencies",
                 String.join("\n", prod.references.stream().map(r -> r.getName() + ":" + r.getTag()).toList()));
 
-        // applications?
-        // plugins?
+        // TODO applications?
+        // TODO plugins?
 
         return result;
     }
@@ -232,8 +228,6 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         }
 
         ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
-        Manifest.Key pkey = Manifest.Key.parse(config.product());
-
         ManagedMasterDto msrv = null;
         for (var srv : msr.getManagedServers(config.instanceGroup())) {
             if (srv.hostName.equals(config.transferToManaged())) {
@@ -248,6 +242,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getProductResource(config.instanceGroup());
 
+        Manifest.Key pkey = Manifest.Key.parse(config.product());
         List<ProductDto> products = pr.list(null);
         Optional<ProductDto> dto = products.stream()
                 .filter(p -> Objects.equals(p.key.getName(), pkey.getName()) && Objects.equals(p.key.getTag(), pkey.getTag()))

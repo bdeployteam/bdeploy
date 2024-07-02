@@ -44,13 +44,13 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
     private static final Logger log = LoggerFactory.getLogger(ExecuteUnreadMessagesReceiver.class);
     private static final Comparator<Message> OLDEST_MESSAGE_FIRST_COMPARATOR = (msg1, msg2) -> {
         Date date1;
-        Date date2;
         try {
             date1 = msg1.getSentDate();
         } catch (MessagingException e) {
             log.error("Could not determine received date message " + msg1.getMessageNumber() + ". Comparator will return 0.", e);
             return 0;
         }
+        Date date2;
         try {
             date2 = msg2.getSentDate();
         } catch (MessagingException e) {

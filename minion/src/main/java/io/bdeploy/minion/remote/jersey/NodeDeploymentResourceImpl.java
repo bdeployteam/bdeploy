@@ -165,15 +165,12 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     @Override
     public void remove(Key key) {
         BHive hive = root.getHive();
-
         if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(key)))) {
             return;
         }
 
-        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
-
         // check currently active deployment
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController controller = processController.getOrCreate(hive, inm);
         InstanceNodeStatusDto status = controller.getStatus();
@@ -185,7 +182,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         getState(inm, hive).uninstall(key.getTag());
 
         // cleanup the deployment directory.
-        inc.uninstall();
+        new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts).uninstall();
 
         // Remove the InstanceNodeManifest
         hive.execute(new ManifestDeleteOperation().setToDelete(key));

@@ -144,7 +144,6 @@ public class SoftwareResourceImpl implements SoftwareResource {
     public List<Manifest.Key> upload(FormDataMultiPart fdmp) {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
-        List<Manifest.Key> imported = new ArrayList<>();
 
         // Download the hive to a temporary location
         try {
@@ -154,6 +153,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         }
 
         // Read all product manifests
+        List<Manifest.Key> imported = new ArrayList<>();
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
         try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
             Set<Key> manifestKeys = zipHive.execute(new ManifestListOperation());

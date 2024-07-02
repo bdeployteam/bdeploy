@@ -241,7 +241,6 @@ public class MasterRootResourceImpl implements MasterRootResource {
     private MinionMigrationState checkAndPrepareNodesForMigration(String name, RemoteService minion) {
         BackendInfoResource bir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
         BackendInfoDto info = bir.getVersion();
-        MinionMigrationState result = new MinionMigrationState();
 
         if (!(info.mode == MinionMode.MANAGED || info.mode == MinionMode.STANDALONE)) {
             throw new WebApplicationException("Requested conversion is not possible, minion has wrong mode: " + info.mode,
@@ -349,10 +348,10 @@ public class MasterRootResourceImpl implements MasterRootResource {
         status.infoText = "Converting...";
         allNodes.put(name, status);
 
+        MinionMigrationState result = new MinionMigrationState();
         result.newName = name;
         result.originalName = oldMasterName;
         result.allNodes = allNodes;
-
         return result;
     }
 

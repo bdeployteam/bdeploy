@@ -602,7 +602,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             log.info("No launcher updates are available.");
             return;
         }
-        Key launcher = requiredLauncher.getValue();
         log.info("Launcher updates found. Updating from {} to {}", runningVersion, latestVersion);
 
         // Check if we have write permissions to install the update
@@ -619,6 +618,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             return;
         }
 
+        Key launcher = requiredLauncher.getValue();
         Path updateMarker = updateDir.resolve(".updating");
         try (Activity updating = reporter.start("Updating Launcher")) {
             waitForLauncherUpdates(updateMarker);
@@ -755,7 +755,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
 
-        Key launcher = requiredLauncher.getValue();
         if (PathHelper.exists(nativeLauncher)) {
             log.info("Launcher is already installed.");
             return;
@@ -764,7 +763,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (PathHelper.isReadOnly(homeDir)) {
             throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
         }
+
         // Fetch and write to target directory
+        Key launcher = requiredLauncher.getValue();
         try (Transaction t = hive.getTransactions().begin()) {
             hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
         }
@@ -777,7 +778,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private void doInstallAppSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
         // Check if the stored configuration references the required launcher.
         // If so, then we can continue. There is nothing that we need to do.
-        Version version = requiredLauncher.getKey();
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration cscfg = manifest.readNewest(clickAndStart.applicationId, true);
         Key launcher = requiredLauncher.getValue();
@@ -786,6 +786,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             return;
         }
 
+        Version version = requiredLauncher.getKey();
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         if (PathHelper.isReadOnly(homeDir)) {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
@@ -855,7 +856,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         ApplicationConfiguration appCfg = clientAppCfg.appConfig;
 
         // Check if the application directory is already present
-        String appName = appCfg.name;
         Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
         if (missing.isEmpty()) {
             log.info("Application is already installed. Nothing to install/update.");
@@ -864,6 +864,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Application needs to be installed/updated: {}", missing);
 
         // Throw an exception if we do not have write permissions in the directory
+        String appName = appCfg.name;
         if (readOnlyRootDir) {
             throw new SoftwareUpdateException(appName, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
         }
@@ -1055,15 +1056,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
 
-        Path cfgZip = appDir.resolve(clientAppCfg.configTree.getId() + ".zip");
         Response zipDl = namedMaster.getConfigZipSteam(clickAndStart.instanceId, clickAndStart.applicationId);
-
         if (zipDl.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             throw new IllegalStateException("Config File download failed: " + zipDl.getStatusInfo().getStatusCode() + ": "
                     + zipDl.getStatusInfo().getReasonPhrase());
         }
 
         // Write the download into a temporary file so we can unzip it.
+        Path cfgZip = appDir.resolve(clientAppCfg.configTree.getId() + ".zip");
         try (InputStream input = zipDl.readEntity(InputStream.class); OutputStream output = Files.newOutputStream(cfgZip)) {
             StreamHelper.copy(input, output);
         } catch (Exception e) {

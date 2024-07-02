@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
@@ -158,7 +157,6 @@ public class WindowsExecutableUtils {
             throw new IllegalStateException("Certificate is self-signed, the signature is not universally valid.");
         }
 
-        PublicKey key = certificate.getPublicKey();
         Signature signature = null;
         try {
             SignerInfo signerInfo = signerInformation.toASN1Structure();
@@ -169,7 +167,7 @@ public class WindowsExecutableUtils {
             throw new IllegalStateException(e);
         }
         try {
-            signature.initVerify(key);
+            signature.initVerify(certificate.getPublicKey());
         } catch (InvalidKeyException e) {
             throw new IllegalStateException(e);
         }
@@ -201,7 +199,6 @@ public class WindowsExecutableUtils {
             throw new IllegalStateException(e);
         }
         md.update(signerInformation.getSignature());
-        byte[] authAttrHash = md.digest();
 
         byte[] messageDigestInCounterSignature;
         Attribute attributeOfCounterSignature = (Attribute) counterSignerInformation.getSignedAttributes().toHashtable()
@@ -215,7 +212,7 @@ public class WindowsExecutableUtils {
         }
 
         // Compare both and throw exception if not equal
-        if (!Arrays.equals(messageDigestInCounterSignature, authAttrHash)) {
+        if (!Arrays.equals(messageDigestInCounterSignature, md.digest())) {
             throw new IllegalStateException(
                     "The digest of encrypted hash in the signerInformation does not match with digest found in counter signature");
         }
@@ -233,10 +230,7 @@ public class WindowsExecutableUtils {
             throw new IllegalStateException("No message digest was found in authenticated attributes");
         }
 
-        // Get the spc blob
-        byte[] spcBlob = getSpcBlob(contentInfo1.getContent().toASN1Primitive());
-
-        // Now calculate the digest of the spcblob
+        // Calculate the digest of the spc blob
         MessageDigest md;
         try {
             md = MessageDigest.getInstance(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm().toString());
@@ -244,6 +238,8 @@ public class WindowsExecutableUtils {
             throw new IllegalStateException(e);
         }
 
+        // Get the spc blob
+        byte[] spcBlob = getSpcBlob(contentInfo1.getContent().toASN1Primitive());
         md.update(spcBlob);
         byte[] spcDigest = md.digest();
 
@@ -257,7 +253,6 @@ public class WindowsExecutableUtils {
 
     private static SignerInformation getAndCheckAlgorithms(CMSSignedData signedData, DigestAlgorithm signedDataAlgorithm,
             DigestAlgorithm spcDigestAlgorithm) {
-        SignerInformation signerInformation;
         if (signedData.getDigestAlgorithmIDs().size() != 1) {
             throw new IllegalStateException("Signed Data must contain exactly one DigestAlgorithm");
         }
@@ -272,7 +267,7 @@ public class WindowsExecutableUtils {
             throw new IllegalStateException("Signed Data must contain exactly one SignerInfo");
         }
 
-        signerInformation = signedData.getSignerInfos().iterator().next();
+        SignerInformation signerInformation = signedData.getSignerInfos().iterator().next();
         if (!(signerInformation.getDigestAlgorithmID().getAlgorithm().getId()).equals(signedDataAlgorithm.oid.getId())) {
             throw new IllegalStateException("Signed Data algorithm doesn't match with SignerInformation algorithm");
         }

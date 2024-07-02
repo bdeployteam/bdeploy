@@ -100,11 +100,9 @@ public class UpdateHelper {
      * @throws IOException
      */
     public static List<Manifest.Key> importUpdate(Path updateZipFileOrDir, Path tmpDir, BHive hive) throws IOException {
-        List<Manifest.Key> result = new ArrayList<>();
-        Manifest.Key key;
-
         PathHelper.mkdirs(tmpDir);
 
+        Manifest.Key key;
         Path updContent = null;
         if (Files.isDirectory(updateZipFileOrDir)) {
             Path vprops = updateZipFileOrDir.resolve("version.properties");
@@ -145,8 +143,8 @@ public class UpdateHelper {
 
         RuntimeAssert.assertTrue(Files.isDirectory(updContent), "Cannot find update content directory: " + updContent);
 
+        List<Manifest.Key> result = new ArrayList<>();
         doImportUpdates(tmpDir, hive, result, key, updContent);
-
         return result;
     }
 

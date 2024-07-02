@@ -236,7 +236,6 @@ public class ProductManifestBuilder {
         // 4. prepare product meta-data and builder to be filled.
         String baseName = prod.product + '/';
         Manifest.Key prodKey = new Manifest.Key(baseName + "product", versions.version);
-        ProductManifestBuilder builder = new ProductManifestBuilder(prod);
 
         // 4a. check if product is already present
         if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(prodKey)))) {
@@ -244,6 +243,7 @@ public class ProductManifestBuilder {
         }
 
         // 5. find and import all applications to import.
+        ProductManifestBuilder builder = new ProductManifestBuilder(prod);
         Path impBasePath = descriptorPath.getParent();
         importApplications(hive, fetcher, versions, toImport, baseName, builder, impBasePath, parallel);
 

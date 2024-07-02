@@ -36,10 +36,8 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
 
     @Override
     public synchronized SortedSet<Manifest.Key> fetch(BHive hive, SortedSet<String> deps, OperatingSystem os) {
-        String group = this.instanceGroup;
-        SortedSet<String> remaining = new TreeSet<>();
-
         // 1. check which dependency is available locally already
+        SortedSet<String> remaining = new TreeSet<>();
         SortedSet<Manifest.Key> passOne = new TreeSet<>();
         for (String dep : deps) {
             Key resolved = LocalDependencyFetcher.resolveSingleLocal(hive, dep, os);
@@ -55,6 +53,7 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
         }
 
         // 2. try to fetch from the own instance group - likely all dependencies are present
+        String group = this.instanceGroup;
         if (group != null) {
             try (Activity resolving = reporter
                     .start("Resolving " + remaining.size() + " dependencies from instance group " + group)) {
@@ -87,12 +86,10 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
         SortedSet<Manifest.Key> toFetch = new TreeSet<>();
         SortedSet<String> unresolved = new TreeSet<>();
         for (String dep : deps) {
-            boolean found = false;
             if (!dep.contains(":")) {
                 throw new IllegalStateException("Dependency must have a tag ('name:tag'): " + dep);
             }
-            found = findOnRemote(os, group, toFetch, dep);
-            if (!found) {
+            if (!findOnRemote(os, group, toFetch, dep)) {
                 unresolved.add(dep);
             }
         }

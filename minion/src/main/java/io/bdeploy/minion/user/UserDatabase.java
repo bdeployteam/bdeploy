@@ -492,20 +492,21 @@ public class UserDatabase implements AuthService {
         if (info != null) {
             return info;
         }
+
         Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
         if (!current.isPresent()) {
             return null;
         }
 
-        Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
-        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
-
         // check the manifest for manipulation to prevent from manually making somebody admin, etc.
+        Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
         Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
         if (!result.isEmpty()) {
             log.error("User corruption detected for {}", name);
             return null;
         }
+
+        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
             info = StorageHelper.fromStream(is, UserInfo.class);
             userCache.put(name, info);

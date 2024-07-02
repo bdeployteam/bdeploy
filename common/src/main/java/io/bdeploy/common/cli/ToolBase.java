@@ -164,7 +164,6 @@ public abstract class ToolBase {
             reporterOutput = opArg == null ? System.out : new PrintStream(new File(opArg), StandardCharsets.UTF_8.name());
             streamReporter = new ActivityReporter.Stream(reporterOutput);
             streamReporter.setVerboseSummary(vv);
-            ActivityReporter reporter = vv ? streamReporter : new ActivityReporter.Null();
 
             if (args.length <= toolArgNum || tools.get(args[toolArgNum]) == null) {
                 int logo = 0;
@@ -214,6 +213,7 @@ public abstract class ToolBase {
                 }
             }
 
+            ActivityReporter reporter = vv ? streamReporter : new ActivityReporter.Null();
             CliTool instance = getTool(Arrays.copyOfRange(args, toolArgNum, args.length));
             Class<? extends CliTool> clazz = instance.getClass();
             ToolDefaultVerbose defVerbose = clazz.getAnnotation(ToolDefaultVerbose.class);

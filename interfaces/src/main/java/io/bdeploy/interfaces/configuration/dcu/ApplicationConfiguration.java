@@ -74,9 +74,7 @@ public class ApplicationConfiguration {
      * artifacts are existing and fixed.
      */
     public ProcessConfiguration renderDescriptor(VariableResolver valueResolver) {
-        SkipDelayed skipDelayCallback = new SkipDelayed();
         ProcessConfiguration processConfig = new ProcessConfiguration();
-
         processConfig.id = id;
         processConfig.name = name;
         processConfig.processControl = processControl;
@@ -92,14 +90,17 @@ public class ApplicationConfiguration {
         if (path == null) {
             throw new IllegalStateException("Unable to determine application installation path. Reference=" + appManifestPath);
         }
-        Path manifestInstallPath = Paths.get(path);
 
         if (start.executable == null) {
             throw new IllegalStateException("No executable set for application '" + name + "' (" + id + ")");
         }
 
+        SkipDelayed skipDelayCallback = new SkipDelayed();
+        Path manifestInstallPath = Paths.get(path);
+
         String startCmd = TemplateHelper.process(start.executable, valueResolver, skipDelayCallback);
         processConfig.start.add(manifestInstallPath.resolve(startCmd).toString());
+
         start.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.COMMAND)
                 .map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
                 .forEach(processConfig.start::addAll);
@@ -126,5 +127,4 @@ public class ApplicationConfiguration {
     private boolean hasStopCommand() {
         return stop != null && stop.executable != null && !stop.executable.isEmpty();
     }
-
 }

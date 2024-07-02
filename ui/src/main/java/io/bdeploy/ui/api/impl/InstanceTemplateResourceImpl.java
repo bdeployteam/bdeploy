@@ -193,7 +193,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     InstanceTemplateReferenceResultDto createInstanceFromTemplateRequest(RemoteService remote, Manifest.Key systemKey,
             InstanceTemplateReferenceDescriptor inst, Manifest.Key productKey, Map<String, String> groupToNode,
             TrackingTemplateOverrideResolver ttor, InstancePurpose purpose) {
-
         String expandedName = TemplateHelper.process(inst.name, ttor, ttor::canResolve);
         ProductManifest pmf = ProductManifest.of(hive, productKey);
 
@@ -207,11 +206,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         var nodeStates = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
 
-        // create update from the current product's config template tree, this is the starting point.
-        // we cannot simply set the tree ID, since the product on the target may not be available (yet).
-        List<FileStatusDto> cfgFiles = InstanceResourceImpl.getUpdatesFromTree(hive, "", new ArrayList<>(),
-                pmf.getConfigTemplateTreeId());
-
         InstanceConfiguration cfg = new InstanceConfiguration();
         cfg.id = UuidHelper.randomId();
         cfg.name = expandedName;
@@ -221,11 +215,9 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.system = systemKey;
         // cfg.configTree = pmf.getConfigTemplateTreeId(); // not allowed.
         cfg.purpose = purpose;
-
-        List<ApplicationManifest> apps = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
-
         cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), ttor);
 
+        List<ApplicationManifest> apps = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
         List<InstanceNodeConfigurationDto> nodes;
         try {
             nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), groupToNode, apps, ttor, nodeStates, (n, o) -> a -> {
@@ -244,6 +236,10 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                     "Failed to apply template: " + e.toString());
         }
 
+        // Create update from the current product's config template tree, this is the starting point.
+        // We cannot simply set the tree ID, since the product on the target may not be available (yet).
+        List<FileStatusDto> cfgFiles = InstanceResourceImpl.getUpdatesFromTree(hive, "", new ArrayList<>(),
+                pmf.getConfigTemplateTreeId());
         InstanceUpdateDto iud = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, nodes), cfgFiles);
 
         try {

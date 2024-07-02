@@ -110,7 +110,6 @@ public class BHive implements AutoCloseable, BHiveExecution {
             this.zipFs = null;
         }
 
-        Path objRoot = relRoot.resolve("objects");
         try {
             objTmp = zipFs == null ? relRoot.resolve("tmp") : Files.createTempDirectory("objdb-");
             markerTmp = zipFs == null ? relRoot.resolve("markers") : objTmp.resolve("markers");
@@ -120,6 +119,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
             throw new IllegalStateException("Cannot create temporary directory for zipped BHive", e);
         }
 
+        Path objRoot = relRoot.resolve("objects");
         this.auditor = auditor == null ? new NullAuditor() : auditor;
         this.transactions = new BHiveTransactions(this, markerTmp, reporter);
         if (zipFs != null) {

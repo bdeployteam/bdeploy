@@ -260,17 +260,13 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public ManagedMasterDto getServerForInstance(String instanceGroup, String instanceId, String instanceTag) {
         BHive hive = getInstanceGroupHive(instanceGroup);
-
-        ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
         InstanceManifest im = InstanceManifest.load(hive, instanceId, instanceTag);
-
         String selected = new ControllingMaster(hive, im.getManifest()).read().getName();
         if (selected == null) {
             return null;
         }
 
-        ManagedMasterDto dto = masters.getManagedMaster(selected);
-
+        ManagedMasterDto dto = new ManagedMasters(hive).read().getManagedMaster(selected);
         if (dto == null) {
             throw new WebApplicationException("Recorded managed server for instance " + instanceId
                     + " no longer available on instance group: " + instanceGroup, Status.NOT_FOUND);
@@ -703,7 +699,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         try (ActionHandle h = af.run(Actions.MANAGED_UPDATE_INSTALL, groupName, null, serverName)) {
             // Only retain server packages in the list of packages to install
             Collection<Key> keys = updates.packagesToInstall;
-            Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
 
             BHive hive = getInstanceGroupHive(groupName);
 
@@ -719,6 +714,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             // Trigger the update on the master node
             RemoteService svc = getConfiguredRemote(groupName, serverName);
+            Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
             UpdateHelper.update(svc, server, true, context);
 
             // update the information in the hive.

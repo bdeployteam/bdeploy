@@ -41,17 +41,15 @@ public class FileSystemSpaceService {
      *         storageMinFree property.
      */
     public boolean hasFreeSpace(Path path) {
-        long freeSpace = getFreeSpace(path);
-
         // minFreeBytes is not bound in case of tests, etc.
         if (minFreeBytes.get() == null) {
             return true; // cannot check.
         }
 
+        long freeSpace = getFreeSpace(path);
         if (freeSpace < 0) {
             return true; // safety fallback - we continue even though dangerous.. 
         }
         return freeSpace > minFreeBytes.get();
     }
-
 }

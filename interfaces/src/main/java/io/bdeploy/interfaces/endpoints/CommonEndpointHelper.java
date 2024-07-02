@@ -128,8 +128,6 @@ public class CommonEndpointHelper {
      * @return the processed endpoint or null in case the endpoint cannot be enabled.
      */
     public static HttpEndpoint processEndpoint(VariableResolver resolver, HttpEndpoint rawEndpoint) {
-        HttpEndpoint processed = new HttpEndpoint();
-
         UnaryOperator<String> p = s -> TemplateHelper.process(s, resolver);
 
         // check if the endpoint is enabled, otherwise return null.
@@ -144,6 +142,7 @@ public class CommonEndpointHelper {
             return null;
         }
 
+        HttpEndpoint processed = new HttpEndpoint();
         processed.id = rawEndpoint.id;
         processed.path = rawEndpoint.path;
         processed.contextPath = rawEndpoint.contextPath;

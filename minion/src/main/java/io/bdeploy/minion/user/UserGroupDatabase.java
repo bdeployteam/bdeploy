@@ -100,20 +100,21 @@ public class UserGroupDatabase implements AuthGroupService {
         if (info != null) {
             return info;
         }
+
         Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + id));
         if (!current.isPresent()) {
             return null;
         }
 
-        Manifest.Key key = new Manifest.Key(NAMESPACE + id, String.valueOf(current.get()));
-        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
-
         // check the manifest for manipulation to prevent from manually making somebody admin, etc.
+        Manifest.Key key = new Manifest.Key(NAMESPACE + id, String.valueOf(current.get()));
         Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
         if (!result.isEmpty()) {
             log.error("User group corruption detected for {}", id);
             return null;
         }
+
+        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
             info = StorageHelper.fromStream(is, UserGroupInfo.class);
             userGroupCache.put(id, info);
@@ -122,7 +123,6 @@ public class UserGroupDatabase implements AuthGroupService {
             log.error("Failed to persist user group: {}", id, ex);
             return null;
         }
-
     }
 
     @Override

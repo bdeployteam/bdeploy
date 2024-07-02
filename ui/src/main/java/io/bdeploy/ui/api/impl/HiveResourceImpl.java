@@ -131,12 +131,11 @@ public class HiveResourceImpl implements HiveResource {
     @Override
     public List<HiveEntryDto> list(String hiveParam, String id) {
         log.debug("listManifest(\"{}\",\"{}\")", hiveParam, id);
-        BHive hive = registry.get(hiveParam);
         ObjectId treeId = ObjectId.parse(id);
         if (treeId == null) {
             throw new WebApplicationException("Invalid object ID " + id);
         }
-        return list(hive, treeId);
+        return list(registry.get(hiveParam), treeId);
     }
 
     @Override
