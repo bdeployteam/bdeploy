@@ -417,10 +417,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
                 } else {
                     // The source server could have been migrated/converted to node. in this case, display a message.
-                    if (doCheckForMigratedNode()) {
-                        log.warn("Migrated node detected, cannot continue.");
+                    MinionStatusResource msr = ResourceProvider.getVersionedResource(clickAndStart.host,
+                            MinionStatusResource.class, null);
+                    if (!msr.getStatus().config.master) {
+                        log.info("Launch aborted because minion is not a master: {}", clickAndStart.host.getUri());
+                        MessageDialogs.showServerIsNode();
                         return;
                     }
+
                     doInstall(hive, reporter, splash, auditor);
 
                     // Launch the application
@@ -469,7 +473,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             int exitCode = -1;
             if (process != null) {
-                exitCode = doMonitorProcess(process);
+                try {
+                    exitCode = process.waitFor();
+                } catch (InterruptedException e) {
+                    log.warn("Waiting for application exit interrupted.");
+                    Thread.currentThread().interrupt();
+                    exitCode = -1;
+                }
             } else {
                 log.warn("No process handle found after launching.");
             }
@@ -522,17 +532,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Waits until the given process terminates. */
-    private int doMonitorProcess(Process process) {
-        try {
-            return process.waitFor();
-        } catch (InterruptedException e) {
-            log.warn("Waiting for application exit interrupted.");
-            Thread.currentThread().interrupt();
-            return -1;
-        }
-    }
-
     /** Updates the launcher if there is a new version available. */
     private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter) {
         if (VersionHelper.isRunningUndefined()) {
@@ -541,7 +540,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         log.info("Checking for launcher updates...");
         return doExecuteLocked(hive, reporter, () -> {
+            long start = System.currentTimeMillis();
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter);
+            log.info("Took {}ms to calculate the latest launcher version.", System.currentTimeMillis() - start);
             doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
             return requiredLauncher;
         });
@@ -575,6 +576,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 versions.put(version, launcher);
             }
         }
+
         // Last version is the newest one
         if (versions.size() > 0) {
             return versions.lastEntry();
@@ -818,20 +820,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    private boolean doCheckForMigratedNode() {
-        MinionStatusResource msr = ResourceProvider.getVersionedResource(clickAndStart.host, MinionStatusResource.class, null);
-
-        if (!msr.getStatus().config.master) {
-            log.info("Minion is not a master: {}", clickAndStart.host.getUri());
-
-            MessageDialogs.showServerIsNode();
-
-            return true;
-        }
-
-        return false;
-    }
-
     private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor) {
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
@@ -999,7 +987,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         } else {
             // In case we HAD a configuration directory, we might need to get rid of it.
-            boolean hasOldConfig = checkForExistingConfigFiles(cfgPath);
+            boolean hasOldConfig = PathHelper.exists(cfgPath.resolve(CONFIG_DIR_CHECK_FILE));
 
             if (hasOldConfig) {
                 missing.add("Configuration Files must be removed.");
@@ -1009,6 +997,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Meta-Manifest about the installation must exist and must refer to what the application actually requires.
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.id, false);
+
         if (clientConfig == null) {
             missing.add("Meta-Manifest:" + clientAppCfg.appConfig.id);
         } else {
@@ -1060,11 +1049,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
         return false;
-    }
-
-    private boolean checkForExistingConfigFiles(Path cfgPath) {
-        Path checkFile = cfgPath.resolve(CONFIG_DIR_CHECK_FILE);
-        return PathHelper.exists(checkFile);
     }
 
     private void downloadAndInstallConfigFiles(ClientApplicationConfiguration clientAppCfg, Path cfgPath) {
@@ -1253,8 +1237,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Returns the server version or null in case that the version cannot be determined. */
     public static Version getServerVersion(ClickAndStartDescriptor descriptor) {
         try {
-            CommonRootResource resource = ResourceProvider.getVersionedResource(descriptor.host, CommonRootResource.class, null);
-            return resource.getVersion();
+            return ResourceProvider.getVersionedResource(descriptor.host, CommonRootResource.class, null).getVersion();
         } catch (Exception ex) {
             if (log.isDebugEnabled()) {
                 log.debug("Cannot determine server version.", ex);
