@@ -11,15 +11,15 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
   providedIn: 'root',
 })
 export class ProductBulkService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private products = inject(ProductsService);
-  private areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly products = inject(ProductsService);
+  private readonly areas = inject(NavAreasService);
 
   public selection$ = new BehaviorSubject<ProductDto[]>([]);
 
-  private apiPath = (group) => `${this.cfg.config.api}/group/${group}/product/bulk`;
+  private readonly apiPath = (group) => `${this.cfg.config.api}/group/${group}/product/bulk`;
 
   constructor() {
     // clear selection when the primary route changes

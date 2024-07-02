@@ -15,9 +15,9 @@ import { InstancesService } from '../../services/instances.service';
   templateUrl: './history.component.html',
 })
 export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
-  private cfg = inject(ConfigService);
-  private servers = inject(ServersService);
-  private search = inject(SearchService);
+  private readonly cfg = inject(ConfigService);
+  private readonly servers = inject(ServersService);
+  private readonly search = inject(SearchService);
   protected instances = inject(InstancesService);
   protected columns = inject(HistoryColumnsService);
   protected history = inject(HistoryService);

@@ -36,12 +36,12 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   providedIn: 'root',
 })
 export class ProcessEditService {
-  private edit = inject(InstanceEditService);
-  private products = inject(ProductsService);
-  private areas = inject(NavAreasService);
-  private groups = inject(GroupsService);
-  private systems = inject(SystemsService);
-  private snackbar = inject(MatSnackBar);
+  private readonly edit = inject(InstanceEditService);
+  private readonly products = inject(ProductsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly groups = inject(GroupsService);
+  private readonly systems = inject(SystemsService);
+  private readonly snackbar = inject(MatSnackBar);
 
   public node$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
   public product$ = new BehaviorSubject<ProductDto>(null);
@@ -49,7 +49,7 @@ export class ProcessEditService {
   public process$ = new BehaviorSubject<ApplicationConfiguration>(null);
   public application$ = new BehaviorSubject<ApplicationDto>(null);
 
-  private preliminary: ApplicationConfiguration[] = [];
+  private readonly preliminary: ApplicationConfiguration[] = [];
 
   constructor() {
     combineLatest([

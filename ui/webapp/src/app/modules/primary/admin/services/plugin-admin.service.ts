@@ -11,14 +11,14 @@ import { measure } from '../../../core/utils/performance.utils';
   providedIn: 'root',
 })
 export class PluginAdminService {
-  private http = inject(HttpClient);
-  private cfg = inject(ConfigService);
-  private changes = inject(ObjectChangesService);
+  private readonly http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly changes = inject(ObjectChangesService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public plugins$ = new BehaviorSubject<PluginInfoDto[]>([]);
 
-  private apiPath = () => `${this.cfg.config.api}/plugin-admin`;
+  private readonly apiPath = () => `${this.cfg.config.api}/plugin-admin`;
   public globalUploadUrl$ = new BehaviorSubject<string>(`${this.apiPath()}/upload-global`);
 
   constructor() {

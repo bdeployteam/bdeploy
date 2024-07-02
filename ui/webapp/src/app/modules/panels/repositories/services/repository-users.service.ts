@@ -20,10 +20,10 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   providedIn: 'root',
 })
 export class RepositoryUsersService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private repos = inject(RepositoriesService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly repos = inject(RepositoriesService);
 
   public loadingUsers$ = new BehaviorSubject<boolean>(false);
   public loadingUserGroups$ = new BehaviorSubject<boolean>(false);
@@ -35,7 +35,7 @@ export class RepositoryUsersService {
   public userGroups$ = new BehaviorSubject<UserGroupInfo[]>([]);
 
   private repo: SoftwareRepositoryConfiguration;
-  private apiPath = (g) => `${this.cfg.config.api}/softwarerepository/${g}`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/softwarerepository/${g}`;
 
   constructor() {
     this.repos.current$.subscribe((r) => {

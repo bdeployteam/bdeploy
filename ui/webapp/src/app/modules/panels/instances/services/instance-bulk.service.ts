@@ -13,16 +13,16 @@ import { BulkOperationResultDto } from './../../../../models/gen.dtos';
   providedIn: 'root',
 })
 export class InstanceBulkService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private instance = inject(InstancesService);
-  private areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly instance = inject(InstancesService);
+  private readonly areas = inject(NavAreasService);
 
   public selection$ = new BehaviorSubject<InstanceDto[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
-  private bulkApiPath = (group) => `${this.cfg.config.api}/group/${group}/instance/bulk`;
+  private readonly bulkApiPath = (group) => `${this.cfg.config.api}/group/${group}/instance/bulk`;
 
   constructor() {
     // clear selection when the primary route changes

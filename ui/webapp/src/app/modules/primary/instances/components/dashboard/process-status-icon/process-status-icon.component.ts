@@ -10,8 +10,8 @@ import { ProcessesService } from '../../../services/processes.service';
   styleUrls: ['./process-status-icon.component.css'],
 })
 export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
-  private processes = inject(ProcessesService);
-  private actions = inject(ActionsService);
+  private readonly processes = inject(ProcessesService);
+  private readonly actions = inject(ActionsService);
 
   @Input() record: ApplicationConfiguration;
   @HostBinding('attr.data-cy') dataCy: string;
@@ -21,8 +21,8 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   protected hint$ = new BehaviorSubject<string>('Unknown');
   protected class$ = new BehaviorSubject<string>('local-unknown');
 
-  private id$ = new BehaviorSubject<string>(null);
-  private change$ = new BehaviorSubject<unknown>(null);
+  private readonly id$ = new BehaviorSubject<string>(null);
+  private readonly change$ = new BehaviorSubject<unknown>(null);
   private subscription: Subscription;
 
   protected mappedAction$ = this.actions.action(

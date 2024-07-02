@@ -12,14 +12,14 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   providedIn: 'root',
 })
 export class SystemsEditService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private nav = inject(NavAreasService);
-  private systems = inject(SystemsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly nav = inject(NavAreasService);
+  private readonly systems = inject(SystemsService);
 
   public current$ = new BehaviorSubject<SystemConfigurationDto>(null);
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
 
   constructor() {
     combineLatest([this.systems.systems$, this.nav.panelRoute$]).subscribe(([systems, panelRoute]) => {

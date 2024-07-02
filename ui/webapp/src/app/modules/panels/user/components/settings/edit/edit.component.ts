@@ -17,8 +17,8 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
   templateUrl: './edit.component.html',
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
-  private auth = inject(AuthenticationService);
-  private areas = inject(NavAreasService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly areas = inject(NavAreasService);
   protected settings = inject(SettingsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
@@ -28,10 +28,10 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
   protected disableSave: boolean;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
   private subscription: Subscription;
-  private mailChanged = new Subject<string>();
+  private readonly mailChanged = new Subject<string>();
 
   ngOnInit(): void {
     this.subscription = this.mailChanged.pipe(debounceTime(500)).subscribe((v) => this.mail$.next(v));

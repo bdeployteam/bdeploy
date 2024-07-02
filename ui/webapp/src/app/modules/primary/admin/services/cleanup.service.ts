@@ -11,19 +11,19 @@ import { ConfigService } from '../../../core/services/config.service';
   providedIn: 'root',
 })
 export class CleanupService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private ngZone = inject(NgZone);
-  private actions = inject(ActionsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly ngZone = inject(NgZone);
+  private readonly actions = inject(ActionsService);
 
-  private internalPerforming$ = new BehaviorSubject<boolean>(false);
+  private readonly internalPerforming$ = new BehaviorSubject<boolean>(false);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public countdown$ = new BehaviorSubject<number>(-1);
   public cleanup$ = new BehaviorSubject<CleanupGroup[]>(null);
   public performing$ = this.actions.action([Actions.CLEANUP_PERFORM], this.internalPerforming$);
 
-  private apiPath = () => `${this.cfg.config.api}/cleanUi`;
+  private readonly apiPath = () => `${this.cfg.config.api}/cleanUi`;
   private cdHandle;
 
   public calculateCleanup() {

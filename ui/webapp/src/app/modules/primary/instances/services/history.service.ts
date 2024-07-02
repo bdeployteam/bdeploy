@@ -8,7 +8,7 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class HistoryService {
-  private instances = inject(InstancesService);
+  private readonly instances = inject(InstancesService);
 
   public history$ = new BehaviorSubject<HistoryEntryDto[]>(null);
   public loading$ = new BehaviorSubject<boolean>(true);

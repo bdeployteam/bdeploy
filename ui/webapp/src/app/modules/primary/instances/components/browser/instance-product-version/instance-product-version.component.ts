@@ -9,7 +9,7 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
   styleUrls: ['./instance-product-version.component.css'],
 })
 export class InstanceProductVersionComponent {
-  private products = inject(ProductsService);
+  private readonly products = inject(ProductsService);
 
   @Input() record: InstanceDto;
 

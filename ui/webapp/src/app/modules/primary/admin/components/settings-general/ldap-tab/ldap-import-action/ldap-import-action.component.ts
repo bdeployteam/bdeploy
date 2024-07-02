@@ -11,8 +11,8 @@ import { ActionsService } from 'src/app/modules/core/services/actions.service';
 export class LdapImportActionComponent implements OnInit {
   @Input() record: LDAPSettingsDto;
 
-  private actions = inject(ActionsService);
-  private id$ = new BehaviorSubject<string>(null);
+  private readonly actions = inject(ActionsService);
+  private readonly id$ = new BehaviorSubject<string>(null);
 
   protected mappedImport$ = this.actions.action([Actions.LDAP_SYNC], of(false), null, null, this.id$);
 

@@ -131,7 +131,7 @@ export class SystemTemplateComponent implements OnInit {
     return `Loaded '${this.template.template.name}', will create ${this.template.template.instances?.length} instances.`;
   };
 
-  @ViewChild(MatStepper) private stepper: MatStepper;
+  @ViewChild(MatStepper) private readonly stepper: MatStepper;
 
   ngOnInit() {
     this.systemNames$ = this.systems.systems$.pipe(map((s) => s.map((x) => x.config.name)));

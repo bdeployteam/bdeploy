@@ -10,8 +10,8 @@ import { ProcessesService } from '../../../services/processes.service';
   styleUrls: ['./process-outdated.component.css'],
 })
 export class ProcessOutdatedComponent implements OnInit {
-  private processes = inject(ProcessesService);
-  private instances = inject(InstancesService);
+  private readonly processes = inject(ProcessesService);
+  private readonly instances = inject(InstancesService);
 
   @Input() record: ApplicationConfiguration;
 

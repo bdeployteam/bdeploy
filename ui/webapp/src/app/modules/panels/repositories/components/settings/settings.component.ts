@@ -13,7 +13,7 @@ import { RepositoryDetailsService } from '../../services/repository-details.serv
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
-  private router = inject(Router);
+  private readonly router = inject(Router);
   protected auth = inject(AuthenticationService);
   protected repositories = inject(RepositoriesService);
   protected details = inject(RepositoryDetailsService);

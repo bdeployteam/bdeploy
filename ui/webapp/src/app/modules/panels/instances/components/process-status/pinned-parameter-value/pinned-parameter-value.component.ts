@@ -10,7 +10,7 @@ import { PinnedParameter } from '../process-status.component';
   styleUrls: ['./pinned-parameter-value.component.css'],
 })
 export class PinnedParameterValueComponent implements OnInit, OnChanges {
-  private ports = inject(PortsService);
+  private readonly ports = inject(PortsService);
 
   @Input() record: PinnedParameter;
 

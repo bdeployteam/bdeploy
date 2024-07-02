@@ -107,7 +107,7 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
   providers: [ProductDetailsService],
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
-  private actions = inject(ActionsService);
+  private readonly actions = inject(ActionsService);
   protected products = inject(ProductsService);
   protected singleProduct = inject(ProductDetailsService);
   protected areas = inject(NavAreasService);
@@ -126,9 +126,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
 
   protected allowDeletion$ = new BehaviorSubject<boolean>(false);
   protected deletionButtonDisabledReason$ = new BehaviorSubject<string>('');
-  private deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
 
-  private p$ = this.singleProduct.product$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
+  private readonly p$ = this.singleProduct.product$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
 
   // this one *is* allowed multiple times! so no server action mapping.
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);

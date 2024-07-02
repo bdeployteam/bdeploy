@@ -30,11 +30,11 @@ export interface FilePath {
   providedIn: 'root',
 })
 export class FilesService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
-  private apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
+  private readonly apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
 
   public directories$ = new BehaviorSubject<RemoteDirectory[]>(null);
 

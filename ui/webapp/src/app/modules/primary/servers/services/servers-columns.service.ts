@@ -8,7 +8,7 @@ import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-c
   providedIn: 'root',
 })
 export class ServersColumnsService {
-  private serverNameColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverNameColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.hostName,
@@ -16,14 +16,14 @@ export class ServersColumnsService {
     hint: BdDataColumnTypeHint.TITLE,
   };
 
-  private serverDescColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverDescColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'description',
     name: 'Description',
     data: (r) => r.description,
     hint: BdDataColumnTypeHint.DESCRIPTION,
   };
 
-  private serverNodesColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverNodesColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'nodeCount',
     name: 'Nodes',
     data: (r) => Object.keys(r.minions.minions).length,
@@ -31,7 +31,7 @@ export class ServersColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
   };
 
-  private serverSyncTimeColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverSyncTimeColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'syncTime',
     name: 'Last Sync.',
     data: (r) => r.lastSync,
@@ -41,7 +41,7 @@ export class ServersColumnsService {
     component: BdDataDateCellComponent,
   };
 
-  private serverSyncColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverSyncColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,

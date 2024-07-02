@@ -14,7 +14,7 @@ import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-acti
 export class PluginsTabComponent {
   protected plugins = inject(PluginAdminService);
 
-  private colId: BdDataColumn<PluginInfoDto> = {
+  private readonly colId: BdDataColumn<PluginInfoDto> = {
     id: 'id',
     name: 'ID',
     data: (r) => r.id.id,
@@ -22,20 +22,20 @@ export class PluginsTabComponent {
     showWhen: '(min-width: 1000px)',
   };
 
-  private colName: BdDataColumn<PluginInfoDto> = {
+  private readonly colName: BdDataColumn<PluginInfoDto> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
   };
 
-  private colVersion: BdDataColumn<PluginInfoDto> = {
+  private readonly colVersion: BdDataColumn<PluginInfoDto> = {
     id: 'version',
     name: 'Version',
     data: (r) => r.version,
     width: '100px',
   };
 
-  private colLoaded: BdDataColumn<PluginInfoDto> = {
+  private readonly colLoaded: BdDataColumn<PluginInfoDto> = {
     id: 'loaded',
     name: 'Loaded',
     data: (r) => (r.loaded ? 'check_box' : 'check_box_outline_blank'),
@@ -43,7 +43,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  private colGlobal: BdDataColumn<PluginInfoDto> = {
+  private readonly colGlobal: BdDataColumn<PluginInfoDto> = {
     id: 'global',
     name: 'Global',
     data: (r) => (r.global ? 'public' : null),
@@ -51,7 +51,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  private colLoadUnload: BdDataColumn<PluginInfoDto> = {
+  private readonly colLoadUnload: BdDataColumn<PluginInfoDto> = {
     id: 'loadUnload',
     name: 'Ctrl',
     data: (r) => r,
@@ -59,7 +59,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  private colDelete: BdDataColumn<PluginInfoDto> = {
+  private readonly colDelete: BdDataColumn<PluginInfoDto> = {
     id: 'delete',
     name: 'Del.',
     data: (r) => r,

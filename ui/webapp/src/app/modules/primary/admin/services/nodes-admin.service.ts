@@ -22,15 +22,15 @@ export interface MinionRecord {
   providedIn: 'root',
 })
 export class NodesAdminService {
-  private changes = inject(ObjectChangesService);
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public nodes$ = new BehaviorSubject<MinionRecord[]>(null);
 
-  private update$ = new BehaviorSubject<void>(null);
-  private apiPath = () => `${this.cfg.config.api}/node-admin`;
+  private readonly update$ = new BehaviorSubject<void>(null);
+  private readonly apiPath = () => `${this.cfg.config.api}/node-admin`;
 
   constructor() {
     this.changes.subscribe(ObjectChangeType.NODES, EMPTY_SCOPE, () => {

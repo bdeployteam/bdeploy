@@ -8,10 +8,10 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
   providedIn: 'root',
 })
 export class JobService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
-  private apiPath = `${this.cfg.config.api}/job`;
+  private readonly apiPath = `${this.cfg.config.api}/job`;
 
   load(): Observable<JobDto[]> {
     return this.http.get<JobDto[]>(`${this.apiPath}/list`);

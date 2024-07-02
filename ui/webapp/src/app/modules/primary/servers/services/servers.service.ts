@@ -26,10 +26,10 @@ export enum AttachType {
   providedIn: 'root',
 })
 export class ServersService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private groups = inject(GroupsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly groups = inject(GroupsService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public servers$ = new BehaviorSubject<ManagedMasterDto[]>([]);
@@ -37,12 +37,12 @@ export class ServersService {
   public isCurrentInstanceSynchronized$ = new BehaviorSubject<boolean>(true);
   public isServerDetailsSynchronized$ = new BehaviorSubject<boolean>(true);
 
-  private apiPath = `${this.cfg.config.api}/managed-servers`;
+  private readonly apiPath = `${this.cfg.config.api}/managed-servers`;
   private group: string;
   private subscription: Subscription;
   private isCentral = false;
 
-  private update$ = new BehaviorSubject<string>(null);
+  private readonly update$ = new BehaviorSubject<string>(null);
 
   constructor() {
     this.groups.current$.subscribe((g) => this.update$.next(g?.name));

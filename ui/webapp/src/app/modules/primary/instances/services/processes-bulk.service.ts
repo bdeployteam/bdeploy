@@ -7,7 +7,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
   providedIn: 'root',
 })
 export class ProcessesBulkService {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
 
   public selection$ = new BehaviorSubject<{
     [key: string]: ApplicationConfiguration[];

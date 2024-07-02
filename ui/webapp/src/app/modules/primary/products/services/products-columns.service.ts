@@ -7,7 +7,7 @@ import { ProductVersionDetailsCellComponent } from 'src/app/modules/panels/insta
   providedIn: 'root',
 })
 export class ProductsColumnsService {
-  private productNameColumn: BdDataColumn<ProductDto> = {
+  private readonly productNameColumn: BdDataColumn<ProductDto> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -27,14 +27,14 @@ export class ProductsColumnsService {
     sortCard: true,
   };
 
-  private productVendorColumn: BdDataColumn<ProductDto> = {
+  private readonly productVendorColumn: BdDataColumn<ProductDto> = {
     id: 'vendor',
     name: 'Vendor',
     hint: BdDataColumnTypeHint.FOOTER,
     data: (r) => r.vendor,
   };
 
-  private productLogoCardColumn: BdDataColumn<ProductDto> = {
+  private readonly productLogoCardColumn: BdDataColumn<ProductDto> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,

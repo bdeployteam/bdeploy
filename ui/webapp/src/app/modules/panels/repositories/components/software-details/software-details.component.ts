@@ -95,9 +95,9 @@ export class SoftwareDetailsComponent implements OnInit {
   protected pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
   protected softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
-  private p$ = this.detailsService.softwarePackage$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
+  private readonly p$ = this.detailsService.softwarePackage$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
 
-  private deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);
 
   protected mappedDelete$ = this.actions.action([Actions.DELETE_SOFTWARE], this.deleting$, null, null, this.p$);

@@ -31,17 +31,17 @@ const INIT_GROUPS = [];
   providedIn: 'root',
 })
 export class GroupsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private areas = inject(NavAreasService);
-  private settings = inject(SettingsService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
-  private auth = inject(AuthenticationService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly settings = inject(SettingsService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthenticationService);
 
-  private apiPath = `${this.cfg.config.api}/group`;
-  private update$ = new BehaviorSubject<ObjectChangeDto>(null);
+  private readonly apiPath = `${this.cfg.config.api}/group`;
+  private readonly update$ = new BehaviorSubject<ObjectChangeDto>(null);
 
   public loading$ = new BehaviorSubject<boolean>(true);
 

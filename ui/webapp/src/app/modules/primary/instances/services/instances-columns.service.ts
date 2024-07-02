@@ -15,9 +15,9 @@ import { InstancePurposeShortComponent } from '../components/browser/instance-pu
   providedIn: 'root',
 })
 export class InstancesColumnsService {
-  private cfg = inject(ConfigService);
-  private products = inject(ProductsService);
-  private systems = inject(SystemsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly products = inject(ProductsService);
+  private readonly systems = inject(SystemsService);
 
   public instanceTypeColumn: BdDataColumn<InstanceDto> = {
     id: 'type',

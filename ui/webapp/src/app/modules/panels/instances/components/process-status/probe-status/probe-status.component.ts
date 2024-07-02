@@ -9,7 +9,7 @@ import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
   styleUrls: ['./probe-status.component.css'],
 })
 export class ProbeStatusComponent implements OnInit, OnChanges, OnDestroy {
-  private bop = inject(BreakpointObserver);
+  private readonly bop = inject(BreakpointObserver);
 
   @Input() probe: ProcessProbeResultDto;
 

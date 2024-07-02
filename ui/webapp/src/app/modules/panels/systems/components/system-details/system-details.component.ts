@@ -15,11 +15,11 @@ import { SystemsEditService } from '../../services/systems-edit.service';
   templateUrl: './system-details.component.html',
 })
 export class SystemDetailsComponent implements OnInit, OnDestroy {
-  private systems = inject(SystemsService);
-  private areas = inject(NavAreasService);
-  private instances = inject(InstancesService);
-  private servers = inject(ServersService);
-  private instanceColumns = inject(InstancesColumnsService);
+  private readonly systems = inject(SystemsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly instances = inject(InstancesService);
+  private readonly servers = inject(ServersService);
+  private readonly instanceColumns = inject(InstancesColumnsService);
   protected edit = inject(SystemsEditService);
   protected auth = inject(AuthenticationService);
 
@@ -35,7 +35,7 @@ export class SystemDetailsComponent implements OnInit, OnDestroy {
   ];
   private subscription: Subscription;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit() {
     this.subscription = combineLatest([this.edit.current$, this.instances.instances$]).subscribe(([c, i]) => {

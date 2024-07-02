@@ -11,14 +11,14 @@ import { DownloadService } from '../../../core/services/download.service';
   providedIn: 'root',
 })
 export class LoggingAdminService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private downloadService = inject(DownloadService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly downloadService = inject(DownloadService);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public directories$ = new BehaviorSubject<RemoteDirectory[]>([]);
 
-  private apiPath = () => `${this.cfg.config.api}/logging-admin`;
+  private readonly apiPath = () => `${this.cfg.config.api}/logging-admin`;
 
   public reload() {
     this.loading$.next(true);

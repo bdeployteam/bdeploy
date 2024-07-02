@@ -27,7 +27,7 @@ interface MarkedEvent {
   styleUrls: ['./header.component.css'],
 })
 export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
-  private instances = inject(InstancesService);
+  private readonly instances = inject(InstancesService);
   protected servers = inject(ServersService);
 
   @Input() node: InstanceNodeConfigurationDto;
@@ -47,7 +47,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   protected hasVisiblePoint = false;
   protected formatter: (number) => string;
 
-  private changes$ = new BehaviorSubject<boolean>(false);
+  private readonly changes$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 

@@ -11,7 +11,7 @@ import { ServersService } from '../../services/servers.service';
   templateUrl: './servers-browser.component.html',
 })
 export class ServersBrowserComponent implements OnInit {
-  private cardViewService = inject(CardViewService);
+  private readonly cardViewService = inject(CardViewService);
   protected groups = inject(GroupsService);
   protected servers = inject(ServersService);
   protected columns = inject(ServersColumnsService);

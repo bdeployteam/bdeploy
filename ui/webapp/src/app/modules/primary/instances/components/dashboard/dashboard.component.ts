@@ -35,20 +35,20 @@ import { CONTROL_GROUP_COL_ID } from './server-node/process-list/process-list.co
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  private media = inject(BreakpointObserver);
-  private cfg = inject(ConfigService);
-  private states = inject(InstanceStateService);
-  private cardViewService = inject(CardViewService);
-  private processesColumns = inject(ProcessesColumnsService);
-  private actions = inject(ActionsService);
-  private products = inject(ProductsService);
+  private readonly media = inject(BreakpointObserver);
+  private readonly cfg = inject(ConfigService);
+  private readonly states = inject(InstanceStateService);
+  private readonly cardViewService = inject(CardViewService);
+  private readonly processesColumns = inject(ProcessesColumnsService);
+  private readonly actions = inject(ActionsService);
+  private readonly products = inject(ProductsService);
   protected instances = inject(InstancesService);
   protected areas = inject(NavAreasService);
   protected servers = inject(ServersService);
   protected auth = inject(AuthenticationService);
 
-  private installing$ = new BehaviorSubject<boolean>(false);
-  private activating$ = new BehaviorSubject<boolean>(false);
+  private readonly installing$ = new BehaviorSubject<boolean>(false);
+  private readonly activating$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
   private isCardView: boolean;
 

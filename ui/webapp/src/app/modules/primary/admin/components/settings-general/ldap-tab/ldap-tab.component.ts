@@ -18,23 +18,23 @@ import { LdapImportActionComponent } from './ldap-import-action/ldap-import-acti
   templateUrl: './ldap-tab.component.html',
 })
 export class LdapTabComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected settings = inject(SettingsService);
 
-  private colServer: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colServer: BdDataColumn<LDAPSettingsDto> = {
     id: 'server',
     name: 'Server',
     data: (r) => r.server,
     isId: true,
   };
 
-  private colDescription: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colDescription: BdDataColumn<LDAPSettingsDto> = {
     id: 'description',
     name: 'Description',
     data: (r) => r.description,
   };
 
-  private colCheck: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colCheck: BdDataColumn<LDAPSettingsDto> = {
     id: 'check',
     name: 'Check',
     data: (r) => `Check connection to ${r.server}`,
@@ -43,7 +43,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  private colImport: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colImport: BdDataColumn<LDAPSettingsDto> = {
     id: 'import',
     name: 'Import',
     data: (r) => `Import accounts from ${r.server}`,
@@ -52,7 +52,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  private colEdit: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colEdit: BdDataColumn<LDAPSettingsDto> = {
     id: 'edit',
     name: 'Edit',
     data: (r) => `Edit server ${r.server}`,
@@ -61,7 +61,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     width: '40px',
   };
 
-  private colDelete: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colDelete: BdDataColumn<LDAPSettingsDto> = {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove server ${r.server}`,
@@ -85,7 +85,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<LDAPSettingsDto>;
+  @ViewChild(BdDataTableComponent) private readonly table: BdDataTableComponent<LDAPSettingsDto>;
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {

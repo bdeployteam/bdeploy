@@ -15,7 +15,7 @@ import { ProductsService } from '../../services/products.service';
   templateUrl: './products-browser.component.html',
 })
 export class ProductsBrowserComponent implements OnInit {
-  private cardViewService = inject(CardViewService);
+  private readonly cardViewService = inject(CardViewService);
   protected cfg = inject(ConfigService);
   protected products = inject(ProductsService);
   protected productColumns = inject(ProductsColumnsService);

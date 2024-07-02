@@ -19,18 +19,18 @@ import { AuthAdminService } from '../../services/auth-admin.service';
   styleUrls: ['./users-browser.component.css'],
 })
 export class UsersBrowserComponent {
-  private userColumns = inject(UsersColumnsService);
+  private readonly userColumns = inject(UsersColumnsService);
   protected authAdmin = inject(AuthAdminService);
   protected settings = inject(SettingsService);
   protected bulk = inject(UserBulkService);
 
-  private colInGroups: BdDataColumn<UserInfo> = {
+  private readonly colInGroups: BdDataColumn<UserInfo> = {
     id: 'inGroups',
     name: 'In Groups',
     data: (r) => this.getInGroups(r),
   };
 
-  private colPermLevel: BdDataColumn<UserInfo> = {
+  private readonly colPermLevel: BdDataColumn<UserInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
     data: (r) => getGlobalPermission(r.permissions),
@@ -38,7 +38,7 @@ export class UsersBrowserComponent {
     width: '100px',
   };
 
-  private colInheritedPermLevel: BdDataColumn<UserInfo> = {
+  private readonly colInheritedPermLevel: BdDataColumn<UserInfo> = {
     id: 'inheritedPermLevel',
     name: 'Inherited Global Permission',
     data: (r) => this.getInheritedGlobalPermission(r),
@@ -46,7 +46,7 @@ export class UsersBrowserComponent {
     width: '100px',
   };
 
-  private colInact: BdDataColumn<UserInfo> = {
+  private readonly colInact: BdDataColumn<UserInfo> = {
     id: 'inactive',
     name: 'Inact.',
     data: (r) => (r.inactive ? 'check_box' : 'check_box_outline_blank'),
@@ -54,14 +54,14 @@ export class UsersBrowserComponent {
     width: '40px',
   };
 
-  private colAuthBy: BdDataColumn<UserInfo> = {
+  private readonly colAuthBy: BdDataColumn<UserInfo> = {
     id: 'authBy',
     name: 'Authenticated By',
     data: (r) => this.getAuthenticatedBy(r),
     showWhen: '(min-width: 1500px)',
   };
 
-  private colLastLogin: BdDataColumn<UserInfo> = {
+  private readonly colLastLogin: BdDataColumn<UserInfo> = {
     id: 'lastLogin',
     name: 'Last active login',
     data: (r) => r.lastActiveLogin,

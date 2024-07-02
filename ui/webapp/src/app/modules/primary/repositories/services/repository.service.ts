@@ -23,20 +23,20 @@ export type SwPkgCompound = ProdDtoWithType | SwDtoWithType;
   providedIn: 'root',
 })
 export class RepositoryService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private repositories = inject(RepositoriesService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly repositories = inject(RepositoriesService);
 
   private repository: string;
   private subscription: Subscription;
 
-  private productsApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/product`;
-  private softwareRepositoryApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/content`;
+  private readonly productsApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/product`;
+  private readonly softwareRepositoryApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/content`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
   public importUrl$ = new BehaviorSubject<string>(null);
 
-  private update$ = new BehaviorSubject<string>(null);
+  private readonly update$ = new BehaviorSubject<string>(null);
 
   public products$ = new BehaviorSubject<ProductDto[]>([]);
   public productsLoading$ = new BehaviorSubject<boolean>(true);

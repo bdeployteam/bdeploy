@@ -10,7 +10,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 })
 export class InstanceManagedServerComponent {
   protected auth = inject(AuthenticationService);
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
 
   @Input() record: InstanceDto;
 

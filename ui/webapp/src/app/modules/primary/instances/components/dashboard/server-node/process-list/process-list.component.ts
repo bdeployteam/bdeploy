@@ -27,14 +27,14 @@ export const CONTROL_GROUP_COL_ID = 'ctrlGroup';
   templateUrl: './process-list.component.html',
 })
 export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestroy {
-  private appCols = inject(ProcessesColumnsService);
-  private cardViewService = inject(CardViewService);
-  private ports = inject(PortsService);
-  private instances = inject(InstancesService);
-  private systems = inject(SystemsService);
+  private readonly appCols = inject(ProcessesColumnsService);
+  private readonly cardViewService = inject(CardViewService);
+  private readonly ports = inject(PortsService);
+  private readonly instances = inject(InstancesService);
+  private readonly systems = inject(SystemsService);
   protected bulk = inject(ProcessesBulkService);
 
-  private processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
+  private readonly processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
     id: CONTROL_GROUP_COL_ID,
     name: 'Control Group',
     data: (r) => this.getControlGroup(r),
@@ -47,7 +47,7 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
   @Input() gridWhen$: BehaviorSubject<boolean>;
   @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
 
-  @ViewChild(BdDataDisplayComponent) private data: BdDataDisplayComponent<ApplicationConfiguration>;
+  @ViewChild(BdDataDisplayComponent) private readonly data: BdDataDisplayComponent<ApplicationConfiguration>;
 
   protected columns = [...this.appCols.defaultProcessesColumns];
 

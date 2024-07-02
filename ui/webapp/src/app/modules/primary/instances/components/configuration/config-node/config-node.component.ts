@@ -34,12 +34,12 @@ import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-nam
   styleUrls: ['./config-node.component.css'],
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
-  private edit = inject(InstanceEditService);
+  private readonly edit = inject(InstanceEditService);
   protected columns = inject(ProcessesColumnsService);
 
   @HostBinding('attr.data-cy') @Input() nodeName: string;
 
-  private processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+  private readonly processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -47,7 +47,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     classes: (r) => this.getStateClass(r),
   };
 
-  private processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+  private readonly processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',
     name: 'Name and OS',
     hint: BdDataColumnTypeHint.TITLE,
@@ -71,7 +71,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   protected cols: BdDataColumn<ApplicationConfiguration>[] = [];
 
-  @ViewChildren(BdDataTableComponent) private data: QueryList<BdDataTableComponent<ApplicationConfiguration>>;
+  @ViewChildren(BdDataTableComponent) private readonly data: QueryList<BdDataTableComponent<ApplicationConfiguration>>;
 
   private subscription: Subscription;
 

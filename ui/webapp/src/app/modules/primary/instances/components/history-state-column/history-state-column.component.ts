@@ -9,7 +9,7 @@ import { InstanceStateService } from '../../services/instance-state.service';
   styleUrls: ['./history-state-column.component.css'],
 })
 export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy {
-  private state = inject(InstanceStateService);
+  private readonly state = inject(InstanceStateService);
 
   @Input() record: HistoryEntryDto;
 

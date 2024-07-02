@@ -10,13 +10,13 @@ import { ConfigService } from '../../../core/services/config.service';
   providedIn: 'root',
 })
 export class HiveService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public hives$ = new BehaviorSubject<HiveInfoDto[]>([]);
 
-  private apiPath = () => `${this.cfg.config.api}/hive`;
+  private readonly apiPath = () => `${this.cfg.config.api}/hive`;
 
   public loadHives() {
     this.loading$.next(true);

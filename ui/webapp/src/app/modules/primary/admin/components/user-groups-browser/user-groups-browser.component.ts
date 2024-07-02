@@ -16,19 +16,19 @@ import { AuthAdminService } from '../../services/auth-admin.service';
   styleUrls: ['./user-groups-browser.component.css'],
 })
 export class UserGroupsBrowserComponent {
-  private groupCols = inject(UserGroupsColumnsService);
+  private readonly groupCols = inject(UserGroupsColumnsService);
   protected authAdmin = inject(AuthAdminService);
   protected settings = inject(SettingsService);
   protected bulk = inject(UserGroupBulkService);
 
-  private colPermLevel: BdDataColumn<UserGroupInfo> = {
+  private readonly colPermLevel: BdDataColumn<UserGroupInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
     data: (r) => getGlobalPermission(r.permissions),
     component: BdDataPermissionLevelCellComponent,
   };
 
-  private colInact: BdDataColumn<UserGroupInfo> = {
+  private readonly colInact: BdDataColumn<UserGroupInfo> = {
     id: 'inactive',
     name: 'Inact.',
     data: (r) => (r.inactive ? 'check_box' : 'check_box_outline_blank'),

@@ -67,8 +67,8 @@ export class Difference {
   public type: DiffType;
 
   constructor(
-    private base: string | number | boolean,
-    private compare: string | number | boolean,
+    private readonly base: string | number | boolean,
+    private readonly compare: string | number | boolean,
     valueOverride?: unknown,
   ) {
     this.value = valueOverride || (base ?? compare);

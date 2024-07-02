@@ -21,7 +21,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
   ],
 })
 export class SystemOnServerValidatorDirective implements Validator {
-  private systems = inject(SystemsService);
+  private readonly systems = inject(SystemsService);
 
   @Input('appSystemOnServerValidator') serverName: string;
 

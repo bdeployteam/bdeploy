@@ -60,7 +60,7 @@ export class ManualJobsComponent implements OnInit, OnDestroy {
     width: '50px',
   };
 
-  private jobService = inject(JobService);
+  private readonly jobService = inject(JobService);
   protected columns: BdDataColumn<JobDto>[] = [
     colName,
     colGroup,

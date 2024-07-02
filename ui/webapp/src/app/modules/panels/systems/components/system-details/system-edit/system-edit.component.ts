@@ -14,15 +14,15 @@ import { SystemsEditService } from '../../../services/systems-edit.service';
   templateUrl: './system-edit.component.html',
 })
 export class SystemEditComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private edit = inject(SystemsEditService);
-  private areas = inject(NavAreasService);
+  private readonly edit = inject(SystemsEditService);
+  private readonly areas = inject(NavAreasService);
 
   protected system: SystemConfigurationDto;
   protected orig: SystemConfigurationDto;
   protected saving$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 

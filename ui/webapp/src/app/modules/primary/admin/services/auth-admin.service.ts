@@ -18,11 +18,11 @@ import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
   providedIn: 'root',
 })
 export class AuthAdminService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
 
-  private apiPath = () => `${this.cfg.config.api}/auth/admin`;
+  private readonly apiPath = () => `${this.cfg.config.api}/auth/admin`;
 
   public loadingUsers$ = new BehaviorSubject<boolean>(true);
   public loadingUserGroups$ = new BehaviorSubject<boolean>(true);

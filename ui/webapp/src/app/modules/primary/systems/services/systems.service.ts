@@ -16,15 +16,15 @@ import { GroupsService } from '../../groups/services/groups.service';
   providedIn: 'root',
 })
 export class SystemsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private groups = inject(GroupsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly groups = inject(GroupsService);
 
   public systems$ = new BehaviorSubject<SystemConfigurationDto[]>([]);
   public loading$ = new BehaviorSubject<boolean>(true);
 
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
   private subscription: Subscription;
 
   constructor() {

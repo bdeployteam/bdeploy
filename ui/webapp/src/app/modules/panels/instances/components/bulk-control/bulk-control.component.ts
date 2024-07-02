@@ -57,7 +57,7 @@ export class BulkControlComponent implements OnInit {
     this.bulkSelection$,
   );
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit(): void {
     this.bulk.selection$.subscribe((s) => {

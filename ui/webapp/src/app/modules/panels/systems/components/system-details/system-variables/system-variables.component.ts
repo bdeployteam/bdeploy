@@ -63,10 +63,10 @@ const colDesc: BdDataColumn<ConfigVariable> = {
   templateUrl: './system-variables.component.html',
 })
 export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
-  private edit = inject(SystemsEditService);
-  private instances = inject(InstancesService);
-  private areas = inject(NavAreasService);
-  private snackbar = inject(MatSnackBar);
+  private readonly edit = inject(SystemsEditService);
+  private readonly instances = inject(InstancesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly snackbar = inject(MatSnackBar);
   protected auth = inject(AuthenticationService);
 
   private readonly colEdit: BdDataColumn<ConfigVariable> = {

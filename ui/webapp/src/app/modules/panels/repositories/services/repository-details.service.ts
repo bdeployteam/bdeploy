@@ -8,10 +8,10 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
   providedIn: 'root',
 })
 export class RepositoryDetailsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
-  private apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
+  private readonly apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
 
   public delete(repository: SoftwareRepositoryConfiguration): Observable<unknown> {
     return this.http.delete(`${this.apiPath(repository.name)}`);

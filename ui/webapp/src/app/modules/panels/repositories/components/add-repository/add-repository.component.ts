@@ -13,9 +13,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   templateUrl: './add-repository.component.html',
 })
 export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private repositories = inject(RepositoriesService);
-  private groups = inject(GroupsService);
-  private areas = inject(NavAreasService);
+  private readonly repositories = inject(RepositoriesService);
+  private readonly groups = inject(GroupsService);
+  private readonly areas = inject(NavAreasService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected repository: Partial<SoftwareRepositoryConfiguration> = {};

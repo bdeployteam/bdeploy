@@ -9,7 +9,7 @@ import { ProcessDetailsService } from '../../services/process-details.service';
   templateUrl: './process-ports.component.html',
 })
 export class ProcessPortsComponent implements OnInit, OnDestroy {
-  private ports = inject(PortsService);
+  private readonly ports = inject(PortsService);
   protected details = inject(ProcessDetailsService);
   protected columns = inject(PortsColumnsService);
 

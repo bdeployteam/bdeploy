@@ -15,10 +15,10 @@ import { StateItem } from '../state-panel/state-panel.component';
   styleUrls: ['./client-node.component.css'],
 })
 export class ClientNodeComponent implements OnInit, OnDestroy {
-  private appCols = inject(ProcessesColumnsService);
-  private areas = inject(NavAreasService);
-  private auth = inject(AuthenticationService);
-  private cardViewService = inject(CardViewService);
+  private readonly appCols = inject(ProcessesColumnsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly cardViewService = inject(CardViewService);
   protected instances = inject(InstancesService);
 
   @Input() node: InstanceNodeConfigurationDto;

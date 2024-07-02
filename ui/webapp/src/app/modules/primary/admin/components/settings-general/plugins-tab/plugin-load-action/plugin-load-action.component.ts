@@ -7,7 +7,7 @@ import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugi
   templateUrl: './plugin-load-action.component.html',
 })
 export class PluginLoadActionComponent {
-  private plugins = inject(PluginAdminService);
+  private readonly plugins = inject(PluginAdminService);
 
   @Input() record: PluginInfoDto;
 

@@ -20,13 +20,13 @@ export interface SoftwareVersion {
   providedIn: 'root',
 })
 export class SoftwareUpdateService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public software$ = new BehaviorSubject<SoftwareVersion[]>(null);
 
-  private apiPath = () => `${this.cfg.config.api}/swup`;
+  private readonly apiPath = () => `${this.cfg.config.api}/swup`;
   public uploadUrl$ = new BehaviorSubject<string>(this.apiPath());
 
   public load() {

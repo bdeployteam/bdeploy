@@ -13,9 +13,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './managed-transfer.component.html',
 })
 export class ManagedTransferComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
-  private servers = inject(ServersService);
-  private products = inject(ProductsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly servers = inject(ServersService);
+  private readonly products = inject(ProductsService);
   protected productColumns = inject(ProductsColumnsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
@@ -24,10 +24,10 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
   protected typeText$ = new BehaviorSubject<string>(null);
   protected selected$ = new BehaviorSubject<ProductDto[]>([]);
 
-  private actions = inject(ActionsService);
+  private readonly actions = inject(ActionsService);
   protected mappedTransfer$;
 
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   private transfer: ProductTransferDto;
   private subscription: Subscription;

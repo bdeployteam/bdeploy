@@ -17,12 +17,12 @@ import { RepositoryService } from 'src/app/modules/primary/repositories/services
   templateUrl: './product-transfer-repo.component.html',
 })
 export class ProductTransferRepoComponent implements OnInit {
-  private repositories = inject(RepositoriesService);
-  private repository = inject(RepositoryService);
-  private products = inject(ProductsService);
-  private prodCols = inject(ProductsColumnsService);
-  private areas = inject(NavAreasService);
-  private actions = inject(ActionsService);
+  private readonly repositories = inject(RepositoriesService);
+  private readonly repository = inject(RepositoryService);
+  private readonly products = inject(ProductsService);
+  private readonly prodCols = inject(ProductsColumnsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly actions = inject(ActionsService);
 
   protected prodVersionColumns: BdDataColumn<ProductDto>[] = [this.prodCols.productVersionColumn];
 

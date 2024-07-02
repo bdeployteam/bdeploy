@@ -9,7 +9,7 @@ import { ConfigFile, ConfigFilesService } from './config-files.service';
   providedIn: 'root',
 })
 export class ConfigFilesColumnsService {
-  private cfgFiles = inject(ConfigFilesService);
+  private readonly cfgFiles = inject(ConfigFilesService);
 
   private readonly colStatus: BdDataColumn<ConfigFile> = {
     id: 'status',

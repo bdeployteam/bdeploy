@@ -13,17 +13,17 @@ import { InstanceConfigCache } from '../utils/instance-utils';
   providedIn: 'root',
 })
 export class HistoryDetailsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public versions$ = new BehaviorSubject<InstanceVersionDto[]>(null);
 
   private cache: InstanceConfigCache[] = [];
 
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
   constructor() {
     combineLatest([this.instances.current$, this.groups.current$]).subscribe(([instance, group]) => {

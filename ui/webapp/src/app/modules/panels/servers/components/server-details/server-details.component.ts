@@ -54,18 +54,18 @@ const detailOsCol: BdDataColumn<MinionRow> = {
   providers: [ServerDetailsService],
 })
 export class ServerDetailsComponent implements OnInit {
-  private actions = inject(ActionsService);
+  private readonly actions = inject(ActionsService);
   protected servers = inject(ServersService);
   protected serverDetails = inject(ServerDetailsService);
   protected auth = inject(AuthenticationService);
   protected areas = inject(NavAreasService);
 
-  private deleting$ = new BehaviorSubject<boolean>(false);
+  private readonly deleting$ = new BehaviorSubject<boolean>(false);
 
-  private transfering$ = new BehaviorSubject<boolean>(false);
-  private installing$ = new BehaviorSubject<boolean>(false);
+  private readonly transfering$ = new BehaviorSubject<boolean>(false);
+  private readonly installing$ = new BehaviorSubject<boolean>(false);
 
-  private s$ = this.serverDetails.server$.pipe(map((s) => (!s ? '__DUMMY__' : s.hostName)));
+  private readonly s$ = this.serverDetails.server$.pipe(map((s) => (!s ? '__DUMMY__' : s.hostName)));
 
   protected mappedTransfer$ = this.actions.action(
     [Actions.MANAGED_UPDATE_TRANSFER],

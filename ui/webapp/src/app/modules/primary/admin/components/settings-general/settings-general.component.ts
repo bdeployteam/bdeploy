@@ -12,9 +12,9 @@ import { SettingsService } from '../../../../core/services/settings.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private areas = inject(NavAreasService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly areas = inject(NavAreasService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected settings = inject(SettingsService);
 
   protected addPlugin$ = new Subject<unknown>();

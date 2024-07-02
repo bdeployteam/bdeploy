@@ -48,7 +48,7 @@ export class UpdateBrowserComponent implements OnInit {
     ];
   };
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit() {
     this.software.load();

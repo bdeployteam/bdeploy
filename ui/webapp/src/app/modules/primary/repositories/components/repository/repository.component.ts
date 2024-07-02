@@ -11,7 +11,7 @@ import { RepositoryService } from '../../services/repository.service';
   templateUrl: './repository.component.html',
 })
 export class RepositoryComponent implements OnInit {
-  private cardViewService = inject(CardViewService);
+  private readonly cardViewService = inject(CardViewService);
   protected repositories = inject(RepositoriesService);
   protected repository = inject(RepositoryService);
   protected repositoryColumns = inject(RepositoryColumnsService);

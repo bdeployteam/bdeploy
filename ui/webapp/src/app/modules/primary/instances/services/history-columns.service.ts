@@ -67,7 +67,7 @@ const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
   providedIn: 'root',
 })
 export class HistoryColumnsService {
-  private instances = inject(InstancesService);
+  private readonly instances = inject(InstancesService);
 
   public historyStateColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'state',

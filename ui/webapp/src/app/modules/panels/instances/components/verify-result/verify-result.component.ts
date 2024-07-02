@@ -8,7 +8,7 @@ import { VerifyOperationResultDto } from 'src/app/models/gen.dtos';
   templateUrl: './verify-result.component.html',
 })
 export class VerifyResultComponent implements OnInit {
-  private dialogRef = inject(MatDialogRef<VerifyResultComponent>);
+  private readonly dialogRef = inject(MatDialogRef<VerifyResultComponent>);
   protected data: VerifyOperationResultDto = inject(MAT_DIALOG_DATA);
   protected isCorrupted: boolean;
 

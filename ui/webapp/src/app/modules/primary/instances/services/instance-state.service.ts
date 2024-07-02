@@ -12,13 +12,13 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class InstanceStateService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
 
   public state$: Observable<InstanceStateRecord>;
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
   constructor() {
     this.state$ = combineLatest([

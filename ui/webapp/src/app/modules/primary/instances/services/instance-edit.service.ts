@@ -70,7 +70,7 @@ export type EditFactory = (description: string, base: GlobalEditState, state: Gl
  * and return it if required.
  */
 export class InstanceEdit implements Edit {
-  private state: GlobalEditState;
+  private readonly state: GlobalEditState;
 
   constructor(
     public description: string,
@@ -95,11 +95,11 @@ export class InstanceEdit implements Edit {
 export class InstanceApplicationMoveEdit implements Edit {
   constructor(
     public description: string,
-    private nodeName: string,
-    private previousIndex: number,
-    private currentIndex: number,
-    private source: string,
-    private target: string,
+    private readonly nodeName: string,
+    private readonly previousIndex: number,
+    private readonly currentIndex: number,
+    private readonly source: string,
+    private readonly target: string,
   ) {}
 
   public apply(current: GlobalEditState): GlobalEditState {
@@ -131,14 +131,14 @@ export class InstanceApplicationMoveEdit implements Edit {
   providedIn: 'root',
 })
 export class InstanceEditService {
-  private http = inject(HttpClient);
-  private cfg = inject(ConfigService);
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
-  private products = inject(ProductsService);
-  private areas = inject(NavAreasService);
-  private ngZone = inject(NgZone);
-  private changes = inject(ObjectChangesService);
+  private readonly http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
+  private readonly products = inject(ProductsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly ngZone = inject(NgZone);
+  private readonly changes = inject(ObjectChangesService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public saving$ = new BehaviorSubject<boolean>(false);
@@ -161,13 +161,13 @@ export class InstanceEditService {
   public validationDebounce$ = new BehaviorSubject<unknown>(null);
   public validating$ = new BehaviorSubject<boolean>(false);
   public issues$ = new BehaviorSubject<ApplicationValidationDto[]>(null);
-  private issuesSubject$ = new Subject<ApplicationValidationDto[]>();
+  private readonly issuesSubject$ = new Subject<ApplicationValidationDto[]>();
 
   public current$ = new BehaviorSubject<InstanceDto>(null);
   public hasSaveableChanges$ = new BehaviorSubject<boolean>(false);
   public hasCurrentProduct$ = new BehaviorSubject<boolean>(false);
 
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
   private updateSaveableChangesHandle;
   private changeSubscription: Subscription;
 

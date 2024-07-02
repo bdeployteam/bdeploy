@@ -15,7 +15,7 @@ import { GroupsService } from '../../services/groups.service';
   templateUrl: './groups-browser.component.html',
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
-  private cardViewService = inject(CardViewService);
+  private readonly cardViewService = inject(CardViewService);
   protected groups = inject(GroupsService);
   protected groupColumns = inject(GroupsColumnsService);
   protected config = inject(ConfigService);
@@ -33,7 +33,7 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   protected presetKeyValue = 'instanceGroups';
   protected sort: Sort = { active: 'name', direction: 'asc' };
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   protected getRecordRoute = (r: InstanceGroupConfigurationDto) => {
     const row = r.instanceGroupConfiguration;

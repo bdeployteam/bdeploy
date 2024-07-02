@@ -21,13 +21,13 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class ProcessesService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private servers = inject(ServersService);
-  private instances = inject(InstancesService);
-  private snackbar = inject(MatSnackBar);
-  private zone = inject(NgZone);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly servers = inject(ServersService);
+  private readonly instances = inject(InstancesService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly zone = inject(NgZone);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public processStates$ = new BehaviorSubject<{ [key: string]: ProcessStatusDto }>(null);
@@ -67,7 +67,8 @@ export class ProcessesService {
     return states[port];
   }
 
-  private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}/processes`;
+  private readonly apiPath = (group, instance) =>
+    `${this.cfg.config.api}/group/${group}/instance/${instance}/processes`;
   private isCentral = false;
 
   constructor() {

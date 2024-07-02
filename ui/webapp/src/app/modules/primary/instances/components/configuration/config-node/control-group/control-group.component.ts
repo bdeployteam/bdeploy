@@ -13,8 +13,8 @@ import { InstanceEditService } from '../../../../services/instance-edit.service'
   encapsulation: ViewEncapsulation.None,
 })
 export class ControlGroupComponent implements OnInit, OnDestroy {
-  private edit = inject(InstanceEditService);
-  private bop = inject(BreakpointObserver);
+  private readonly edit = inject(InstanceEditService);
+  private readonly bop = inject(BreakpointObserver);
 
   @Input() set group(val: ProcessControlGroupConfiguration) {
     this.group$.next(val);

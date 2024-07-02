@@ -10,7 +10,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
   templateUrl: './password.component.html',
 })
 export class PasswordComponent {
-  private auth = inject(AuthenticationService);
+  private readonly auth = inject(AuthenticationService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected passOrig = '';
@@ -18,7 +18,7 @@ export class PasswordComponent {
   protected passVerify = '';
   protected remoteError: string = null;
 
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   protected onSave(): void {
     this.loading$.next(true);

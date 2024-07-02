@@ -26,10 +26,10 @@ import { InstanceEditService } from '../../services/instance-edit.service';
   styleUrls: ['./configuration.component.css'],
 })
 export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private media = inject(BreakpointObserver);
-  private products = inject(ProductsService);
-  private router = inject(Router);
-  private groups = inject(GroupsService);
+  private readonly media = inject(BreakpointObserver);
+  private readonly products = inject(ProductsService);
+  private readonly router = inject(Router);
+  private readonly groups = inject(GroupsService);
   protected cfg = inject(ConfigService);
   protected areas = inject(NavAreasService);
   protected servers = inject(ServersService);

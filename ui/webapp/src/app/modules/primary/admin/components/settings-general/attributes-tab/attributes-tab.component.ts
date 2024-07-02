@@ -12,23 +12,23 @@ import { AttributeEditActionComponent } from './attribute-edit-action/attribute-
   templateUrl: './attributes-tab.component.html',
 })
 export class AttributesTabComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected settings = inject(SettingsService);
 
-  private defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',
     name: 'ID',
     data: (r) => r.name,
     isId: true,
   };
 
-  private defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'desc',
     name: 'Description',
     data: (r) => r.description,
   };
 
-  private defEditCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defEditCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'edit',
     name: 'Edit',
     data: (r) => `Edit definition ${r.name}`,
@@ -37,7 +37,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     width: '40px',
   };
 
-  private defDelCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDelCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove definition ${r.name}`,
@@ -59,7 +59,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<CustomAttributeDescriptor>;
+  @ViewChild(BdDataTableComponent) private readonly table: BdDataTableComponent<CustomAttributeDescriptor>;
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {

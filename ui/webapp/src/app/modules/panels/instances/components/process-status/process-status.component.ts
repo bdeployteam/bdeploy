@@ -68,13 +68,13 @@ interface ProcessUiEndpoint extends HttpEndpoint {
   encapsulation: ViewEncapsulation.None,
 })
 export class ProcessStatusComponent implements OnInit, OnDestroy {
-  private cfg = inject(ConfigService);
-  private route = inject(ActivatedRoute);
-  private systems = inject(SystemsService);
-  private zone = inject(NgZone);
-  private actions = inject(ActionsService);
-  private router = inject(Router);
-  private clients = inject(ClientsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly systems = inject(SystemsService);
+  private readonly zone = inject(NgZone);
+  private readonly actions = inject(ActionsService);
+  private readonly router = inject(Router);
+  private readonly clients = inject(ClientsService);
 
   protected auth = inject(AuthenticationService);
   protected groups = inject(GroupsService);
@@ -90,9 +90,9 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected restartProgressText$ = new BehaviorSubject<string>(null);
   protected outdated$ = new BehaviorSubject<boolean>(false);
 
-  private starting$ = new BehaviorSubject<boolean>(false);
-  private stopping$ = new BehaviorSubject<boolean>(false);
-  private restarting$ = new BehaviorSubject<boolean>(false);
+  private readonly starting$ = new BehaviorSubject<boolean>(false);
+  private readonly stopping$ = new BehaviorSubject<boolean>(false);
+  private readonly restarting$ = new BehaviorSubject<boolean>(false);
   protected verifying$ = new BehaviorSubject<boolean>(false);
 
   protected isCrashedWaiting: boolean;
@@ -128,7 +128,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   );
 
   // legacy warning. isRunning, etc. is available through trigger outdated$
-  private disabledBase = combineLatest([this.auth.isCurrentScopeWrite$, this.performing$, this.outdated$]);
+  private readonly disabledBase = combineLatest([this.auth.isCurrentScopeWrite$, this.performing$, this.outdated$]);
   protected startDisabled$ = this.disabledBase.pipe(
     map(([perm, perform, outdated]) => !perm || perform || outdated || this.isRunning || this.isStopping),
   );
@@ -149,7 +149,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit(): void {
     this.subscription = combineLatest([

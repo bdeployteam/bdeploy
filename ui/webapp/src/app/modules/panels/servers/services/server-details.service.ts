@@ -18,20 +18,20 @@ export const ATTACH_MIME_TYPE = 'text/plain';
   providedIn: 'root',
 })
 export class ServerDetailsService implements OnDestroy {
-  private route = inject(ActivatedRoute);
-  private servers = inject(ServersService);
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private areas = inject(NavAreasService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly servers = inject(ServersService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly areas = inject(NavAreasService);
 
-  private apiPath = `${this.cfg.config.api}/managed-servers`;
-  private serverName$ = new BehaviorSubject<string>(null);
+  private readonly apiPath = `${this.cfg.config.api}/managed-servers`;
+  private readonly serverName$ = new BehaviorSubject<string>(null);
 
   public loading$ = new BehaviorSubject<boolean>(false);
   public server$ = new BehaviorSubject<ManagedMasterDto>(null);
   public instances$ = new BehaviorSubject<InstanceConfiguration[]>([]);
 
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
   private serverSubscription: Subscription;
 
   constructor() {

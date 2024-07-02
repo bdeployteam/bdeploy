@@ -20,7 +20,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
   ],
 })
 export class CfgFileNameValidatorDirective implements Validator {
-  private cfgFiles = inject(ConfigFilesService);
+  private readonly cfgFiles = inject(ConfigFilesService);
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const name = control.value as string;

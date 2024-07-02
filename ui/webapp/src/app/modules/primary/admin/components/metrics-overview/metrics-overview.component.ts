@@ -16,9 +16,9 @@ export interface SeriesElement {
   styleUrls: ['./metrics-overview.component.css'],
 })
 export class MetricsOverviewComponent implements OnInit, OnDestroy {
-  private metrics = inject(MetricsService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly metrics = inject(MetricsService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   private allMetrics: Map<MetricGroup, MetricBundle>;
 

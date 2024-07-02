@@ -38,16 +38,16 @@ import { ServersService } from '../../servers/services/servers.service';
   providedIn: 'root',
 })
 export class InstancesService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private areas = inject(NavAreasService);
-  private serversService = inject(ServersService);
-  private downloads = inject(DownloadService);
-  private httpReplayService = inject(HttpReplayService);
-  private products = inject(ProductsService);
-  private groups = inject(GroupsService);
-  private ngZone = inject(NgZone);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly serversService = inject(ServersService);
+  private readonly downloads = inject(DownloadService);
+  private readonly httpReplayService = inject(HttpReplayService);
+  private readonly products = inject(ProductsService);
+  private readonly groups = inject(GroupsService);
+  private readonly ngZone = inject(NgZone);
 
   public listLoading$ = new BehaviorSubject<boolean>(true);
   public activeLoading$ = new BehaviorSubject<boolean>(false);
@@ -77,10 +77,10 @@ export class InstancesService {
 
   private group: string;
   private subscription: Subscription;
-  private update$ = new BehaviorSubject<string>(null);
+  private readonly update$ = new BehaviorSubject<string>(null);
   public importURL$ = new BehaviorSubject<string>(null);
 
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
   constructor() {
     // clear out stuff whenever the group is re-set.

@@ -12,7 +12,7 @@ import { LoggingAdminService } from '../../services/logging-admin.service';
   templateUrl: './log-files-browser.component.html',
 })
 export class LogFilesBrowserComponent implements OnInit {
-  private cols = inject(LogColumnsService);
+  private readonly cols = inject(LogColumnsService);
   protected authService = inject(AuthenticationService);
   protected loggingAdmin = inject(LoggingAdminService);
 

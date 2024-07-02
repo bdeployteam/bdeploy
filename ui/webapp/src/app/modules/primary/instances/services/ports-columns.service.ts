@@ -35,9 +35,9 @@ const portStateCol: BdDataColumn<NodeApplicationPort> = {
   providedIn: 'root',
 })
 export class PortsColumnsService {
-  private processes = inject(ProcessesService);
+  private readonly processes = inject(ProcessesService);
 
-  private portRatingCol: BdDataColumn<NodeApplicationPort> = {
+  private readonly portRatingCol: BdDataColumn<NodeApplicationPort> = {
     id: 'rating',
     name: 'Rating',
     data: (r) => this.getRating(r),

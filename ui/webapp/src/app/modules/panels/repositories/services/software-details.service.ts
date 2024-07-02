@@ -19,29 +19,29 @@ import { LabelRecord } from '../../products/services/product-details.service';
  */
 @Injectable()
 export class SoftwareDetailsService implements OnDestroy {
-  private route = inject(ActivatedRoute);
-  private repository = inject(RepositoryService);
-  private areas = inject(NavAreasService);
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private downloads = inject(DownloadService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly repository = inject(RepositoryService);
+  private readonly areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly downloads = inject(DownloadService);
 
   public manifestKey$ = new BehaviorSubject<string>(null);
   public manifestTag$ = new BehaviorSubject<string>(null);
   public softwarePackage$ = new BehaviorSubject<SwPkgCompound>(null);
   public labels$ = new BehaviorSubject<LabelRecord[]>(null);
 
-  private plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);
+  private readonly plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);
   public pluginsLoading$ = new BehaviorSubject<boolean>(false);
 
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
   private softwareSubscription: Subscription;
 
-  private productApiPath = () =>
+  private readonly productApiPath = () =>
     `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/product/${this.manifestKey$.value}/${this.manifestTag$.value}`;
-  private softwareApiPath = () =>
+  private readonly softwareApiPath = () =>
     `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/content/${this.manifestKey$.value}/${this.manifestTag$.value}`;
-  private pluginApiPath = () =>
+  private readonly pluginApiPath = () =>
     `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.repositoryContext$.value}`;
 
   constructor() {

@@ -6,33 +6,33 @@ import { ProdDtoWithType, SwPkgCompound } from './repository.service';
   providedIn: 'root',
 })
 export class RepositoryColumnsService {
-  private nameColumn: BdDataColumn<SwPkgCompound> = {
+  private readonly nameColumn: BdDataColumn<SwPkgCompound> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.key.name,
     isId: true,
   };
 
-  private productNameColumn: BdDataColumn<ProdDtoWithType> = {
+  private readonly productNameColumn: BdDataColumn<ProdDtoWithType> = {
     id: 'productName',
     name: 'Product Name',
     data: (r) => r.name,
   };
 
-  private versionColumn: BdDataColumn<SwPkgCompound> = {
+  private readonly versionColumn: BdDataColumn<SwPkgCompound> = {
     id: 'version',
     name: 'Version',
     data: (r) => r.key.tag,
     isId: true,
   };
 
-  private productVendorColumn: BdDataColumn<ProdDtoWithType> = {
+  private readonly productVendorColumn: BdDataColumn<ProdDtoWithType> = {
     id: 'vendor',
     name: 'Vendor',
     data: (r) => r.vendor,
   };
 
-  private cardTitle: BdDataColumn<ProdDtoWithType> = {
+  private readonly cardTitle: BdDataColumn<ProdDtoWithType> = {
     id: 'cardTitle',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -40,7 +40,7 @@ export class RepositoryColumnsService {
     data: (r) => (r.type === 'Product' ? r.name : r.key.name),
   };
 
-  private cardDescription: BdDataColumn<ProdDtoWithType> = {
+  private readonly cardDescription: BdDataColumn<ProdDtoWithType> = {
     id: 'cardDescription',
     name: 'Description',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -48,7 +48,7 @@ export class RepositoryColumnsService {
     data: (r) => (r.type === 'Product' ? r.key.name + ' ' : '') + r.key.tag,
   };
 
-  private cardLogo: BdDataColumn<ProdDtoWithType> = {
+  private readonly cardLogo: BdDataColumn<ProdDtoWithType> = {
     id: 'cardLogo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -56,7 +56,7 @@ export class RepositoryColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  private cardVendor: BdDataColumn<ProdDtoWithType> = {
+  private readonly cardVendor: BdDataColumn<ProdDtoWithType> = {
     id: 'cardvendor',
     name: 'Vendor',
     hint: BdDataColumnTypeHint.FOOTER,

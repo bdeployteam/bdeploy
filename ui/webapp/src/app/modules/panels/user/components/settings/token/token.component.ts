@@ -11,8 +11,8 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
   styleUrls: ['./token.component.css'],
 })
 export class TokenComponent implements OnInit {
-  private authService = inject(AuthenticationService);
-  private snackbarService = inject(MatSnackBar);
+  private readonly authService = inject(AuthenticationService);
+  private readonly snackbarService = inject(MatSnackBar);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected user$ = new BehaviorSubject<UserInfo>(null);

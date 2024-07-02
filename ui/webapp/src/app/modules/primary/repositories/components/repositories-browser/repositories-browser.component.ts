@@ -10,7 +10,7 @@ import { RepositoriesService } from '../../services/repositories.service';
   templateUrl: './repositories-browser.component.html',
 })
 export class RepositoriesBrowserComponent implements OnInit {
-  private cardViewService = inject(CardViewService);
+  private readonly cardViewService = inject(CardViewService);
   protected repositories = inject(RepositoriesService);
   protected repositoriesColumns = inject(RepositoriesColumnsService);
   protected authenticationService = inject(AuthenticationService);

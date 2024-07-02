@@ -23,30 +23,30 @@ export interface LabelRecord {
  */
 @Injectable()
 export class ProductDetailsService implements OnDestroy {
-  private products = inject(ProductsService);
-  private route = inject(ActivatedRoute);
-  private areas = inject(NavAreasService);
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private downloads = inject(DownloadService);
+  private readonly products = inject(ProductsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly downloads = inject(DownloadService);
 
   public productKey$ = new BehaviorSubject<string>(null);
   public productTag$ = new BehaviorSubject<string>(null);
   public product$ = new BehaviorSubject<ProductDto>(null);
   public labels$ = new BehaviorSubject<LabelRecord[]>(null);
 
-  private usedIn$ = new BehaviorSubject<InstanceUsageDto[]>(null);
+  private readonly usedIn$ = new BehaviorSubject<InstanceUsageDto[]>(null);
   public usedInLoading$ = new BehaviorSubject<boolean>(false);
 
-  private plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);
+  private readonly plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);
   public pluginsLoading$ = new BehaviorSubject<boolean>(false);
 
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
   private prodSubscription: Subscription;
 
-  private apiPath = () =>
+  private readonly apiPath = () =>
     `${this.cfg.config.api}/group/${this.areas.groupContext$.value}/product/${this.productKey$.value}/${this.productTag$.value}`;
-  private pluginApiPath = () =>
+  private readonly pluginApiPath = () =>
     `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.groupContext$.value}`;
 
   constructor() {

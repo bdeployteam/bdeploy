@@ -45,7 +45,7 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
   protected records: InstanceEditRow[] = [];
   protected columns: BdDataColumn<InstanceEditRow>[] = [descColumn, currentColumn, redoColumn];
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   private subscription: Subscription;
 

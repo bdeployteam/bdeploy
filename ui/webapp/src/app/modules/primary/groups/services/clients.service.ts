@@ -29,24 +29,24 @@ export interface ClientApp {
   providedIn: 'root',
 })
 export class ClientsService {
-  private http = inject(HttpClient);
-  private cfg = inject(ConfigService);
-  private groups = inject(GroupsService);
-  private downloads = inject(DownloadService);
-  private changes = inject(ObjectChangesService);
-  private instances = inject(InstancesService);
+  private readonly http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly groups = inject(GroupsService);
+  private readonly downloads = inject(DownloadService);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly instances = inject(InstancesService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public launcher$ = new BehaviorSubject<LauncherDto>(null);
   public apps$ = new BehaviorSubject<ClientApp[]>(null);
 
-  private update$ = new BehaviorSubject<string>(null);
+  private readonly update$ = new BehaviorSubject<string>(null);
   private loadCall: Subscription;
 
   private subscription: Subscription;
-  private apiSwupPath = `${this.cfg.config.api}/swup`;
-  private apiGroupPath = (g) => `${this.cfg.config.api}/group/${g}`;
-  private apiInstancePath = (g) => `${this.apiGroupPath(g)}/instance`;
+  private readonly apiSwupPath = `${this.cfg.config.api}/swup`;
+  private readonly apiGroupPath = (g) => `${this.cfg.config.api}/group/${g}`;
+  private readonly apiInstancePath = (g) => `${this.apiGroupPath(g)}/instance`;
 
   constructor() {
     this.groups.current$.subscribe((g) => this.updateChangeSubscription(g?.name));

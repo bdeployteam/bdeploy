@@ -12,11 +12,11 @@ import { ProductBulkOperationResultComponent } from '../product-bulk-operation-r
 })
 export class ProductBulkComponent {
   protected bulk = inject(ProductBulkService);
-  private confirm = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmationService);
 
   protected deleting$ = new BehaviorSubject<boolean>(false);
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   protected onDelete() {
     this.dialog

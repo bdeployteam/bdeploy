@@ -14,9 +14,9 @@ import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
   styleUrls: ['./link-central.component.css'],
 })
 export class LinkCentralComponent implements OnInit, OnDestroy {
-  private servers = inject(ServersService);
-  private changes = inject(ObjectChangesService);
-  private areas = inject(NavAreasService);
+  private readonly servers = inject(ServersService);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly areas = inject(NavAreasService);
   protected downloads = inject(DownloadService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);

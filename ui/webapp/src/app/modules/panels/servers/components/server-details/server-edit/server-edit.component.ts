@@ -18,8 +18,8 @@ import { ServerDetailsService } from '../../../services/server-details.service';
   providers: [ServerDetailsService],
 })
 export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
-  private servers = inject(ServersService);
-  private areas = inject(NavAreasService);
+  private readonly servers = inject(ServersService);
+  private readonly areas = inject(NavAreasService);
   protected details = inject(ServerDetailsService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
@@ -32,7 +32,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
   protected disableSave: boolean;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
   private subscription: Subscription;
 

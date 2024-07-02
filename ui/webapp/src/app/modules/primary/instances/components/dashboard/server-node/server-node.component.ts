@@ -23,10 +23,10 @@ import { StateItem, StateType } from '../state-panel/state-panel.component';
   styleUrls: ['./server-node.component.css'],
 })
 export class ServerNodeComponent implements OnInit, OnDestroy {
-  private instances = inject(InstancesService);
-  private ports = inject(PortsService);
-  private auth = inject(AuthenticationService);
-  private areas = inject(NavAreasService);
+  private readonly instances = inject(InstancesService);
+  private readonly ports = inject(PortsService);
+  private readonly auth = inject(AuthenticationService);
+  private readonly areas = inject(NavAreasService);
   protected processes = inject(ProcessesService);
 
   @Input() node: InstanceNodeConfigurationDto;
@@ -43,9 +43,9 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   protected collapsed$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
-  private portsState = new BehaviorSubject<StateType>('unknown');
-  private portsTooltip = new BehaviorSubject<string>('State of all server ports');
-  private portsItem: StateItem = {
+  private readonly portsState = new BehaviorSubject<StateType>('unknown');
+  private readonly portsTooltip = new BehaviorSubject<string>('State of all server ports');
+  private readonly portsItem: StateItem = {
     name: 'Server Ports',
     type: this.portsState,
     tooltip: this.portsTooltip,

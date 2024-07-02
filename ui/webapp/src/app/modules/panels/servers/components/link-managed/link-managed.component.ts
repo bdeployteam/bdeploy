@@ -14,10 +14,10 @@ import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
   styleUrls: ['./link-managed.component.css'],
 })
 export class LinkManagedComponent {
-  private servers = inject(ServersService);
-  private areas = inject(NavAreasService);
-  private downloads = inject(DownloadService);
-  private snackbar = inject(MatSnackBar);
+  private readonly servers = inject(ServersService);
+  private readonly areas = inject(NavAreasService);
+  private readonly downloads = inject(DownloadService);
+  private readonly snackbar = inject(MatSnackBar);
 
   protected payload: ManagedMasterDto;
   protected ident: string;

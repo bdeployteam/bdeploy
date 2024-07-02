@@ -15,7 +15,7 @@ import { RepositoryDetailsService } from '../../../services/repository-details.s
   templateUrl: './edit.component.html',
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected repositories = inject(RepositoriesService);
   protected details = inject(RepositoryDetailsService);
 
@@ -26,7 +26,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 
   ngOnInit(): void {
     this.subscription = this.areas.registerDirtyable(this, 'panel');

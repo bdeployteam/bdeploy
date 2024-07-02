@@ -11,8 +11,8 @@ import { SystemsService } from '../../services/systems.service';
   templateUrl: './system-browser.component.html',
 })
 export class SystemBrowserComponent implements OnInit {
-  private columns = inject(SystemsColumnsService);
-  private config = inject(ConfigService);
+  private readonly columns = inject(SystemsColumnsService);
+  private readonly config = inject(ConfigService);
   protected systems = inject(SystemsService);
   protected groups = inject(GroupsService);
   protected authService = inject(AuthenticationService);

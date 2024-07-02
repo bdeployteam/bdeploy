@@ -15,13 +15,13 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class FilesBulkService {
-  private areas = inject(NavAreasService);
-  private cfg = inject(ConfigService);
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
-  private downloads = inject(DownloadService);
-  private http = inject(HttpClient);
-  private apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
+  private readonly areas = inject(NavAreasService);
+  private readonly cfg = inject(ConfigService);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
+  private readonly downloads = inject(DownloadService);
+  private readonly http = inject(HttpClient);
+  private readonly apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
 
   public selection: FilePath[] = [];
 

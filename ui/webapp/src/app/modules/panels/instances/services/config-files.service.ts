@@ -20,18 +20,18 @@ export type ConfigFileStatusType = 'new' | 'modified' | 'local' | 'sync' | 'unsy
   providedIn: 'root',
 })
 export class ConfigFilesService {
-  private http = inject(HttpClient);
-  private cfg = inject(ConfigService);
-  private groups = inject(GroupsService);
-  private editSvc = inject(InstanceEditService);
+  private readonly http = inject(HttpClient);
+  private readonly cfg = inject(ConfigService);
+  private readonly groups = inject(GroupsService);
+  private readonly editSvc = inject(InstanceEditService);
 
-  private persistent$ = new BehaviorSubject<ConfigFileDto[]>(null);
+  private readonly persistent$ = new BehaviorSubject<ConfigFileDto[]>(null);
   private binCache: { [key: string]: boolean } = {};
   private moveCache: { [key: string]: boolean } = {};
 
   public files$ = new BehaviorSubject<ConfigFile[]>(null);
 
-  private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}/cfgFiles`;
+  private readonly apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}/cfgFiles`;
 
   constructor() {
     combineLatest([this.persistent$, this.editSvc.state$]).subscribe(([pers, state]) => {

@@ -21,15 +21,15 @@ const INIT_REPOSITORIES = [];
   providedIn: 'root',
 })
 export class RepositoriesService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private areas = inject(NavAreasService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
-  private apiPath = `${this.cfg.config.api}/softwarerepository`;
-  private update$ = new BehaviorSubject<unknown>(null);
+  private readonly apiPath = `${this.cfg.config.api}/softwarerepository`;
+  private readonly update$ = new BehaviorSubject<unknown>(null);
 
   public loading$ = new BehaviorSubject<boolean>(true);
 

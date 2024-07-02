@@ -77,18 +77,18 @@ const colAvatar: BdDataColumn<FilePath> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
-  private instances = inject(InstancesService);
-  private filesService = inject(FilesService);
-  private areas = inject(NavAreasService);
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
-  private searchService = inject(SearchService);
+  private readonly instances = inject(InstancesService);
+  private readonly filesService = inject(FilesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly searchService = inject(SearchService);
 
   private searchTerm = '';
   private subscription: Subscription;
 
-  private searchColumns: BdDataColumn<FilePath>[] = [colAvatar, colPath, colItems, colModTime, colSize];
-  private defaultColumns: BdDataColumn<FilePath>[];
+  private readonly searchColumns: BdDataColumn<FilePath>[] = [colAvatar, colPath, colItems, colModTime, colSize];
+  private readonly defaultColumns: BdDataColumn<FilePath>[];
 
   private readonly colDownload: BdDataColumn<FilePath> = {
     id: 'download',

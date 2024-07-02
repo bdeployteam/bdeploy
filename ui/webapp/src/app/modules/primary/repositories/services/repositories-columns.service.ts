@@ -6,7 +6,7 @@ import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
   providedIn: 'root',
 })
 export class RepositoriesColumnsService {
-  private repositoryTypeColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryTypeColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -14,7 +14,7 @@ export class RepositoriesColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  private repositoryNameColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryNameColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'name',
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -23,7 +23,7 @@ export class RepositoriesColumnsService {
     width: '200px',
   };
 
-  private repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -32,7 +32,7 @@ export class RepositoriesColumnsService {
     showWhen: '(min-width: 1000px)',
   };
 
-  private repositoryLogoCardColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryLogoCardColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,

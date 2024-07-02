@@ -88,7 +88,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   protected previewName$ = new BehaviorSubject<string>(null);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild('previewTemplate') private previewTemplate: TemplateRef<unknown>;
+  @ViewChild('previewTemplate') private readonly previewTemplate: TemplateRef<unknown>;
 
   private subscription: Subscription;
   private lastQuery: string;

@@ -20,22 +20,22 @@ import { ProcessesService } from 'src/app/modules/primary/instances/services/pro
   providedIn: 'root',
 })
 export class ProcessDetailsService implements OnDestroy {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private groups = inject(GroupsService);
-  private instances = inject(InstancesService);
-  private processes = inject(ProcessesService);
-  private areas = inject(NavAreasService);
-  private zone = inject(NgZone);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly groups = inject(GroupsService);
+  private readonly instances = inject(InstancesService);
+  private readonly processes = inject(ProcessesService);
+  private readonly areas = inject(NavAreasService);
+  private readonly zone = inject(NgZone);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public processDetail$ = new BehaviorSubject<ProcessDetailDto>(null);
   public processConfig$ = new BehaviorSubject<ApplicationConfiguration>(null);
 
-  private subscription: Subscription;
+  private readonly subscription: Subscription;
   private detailsCall: Subscription;
 
-  private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
+  private readonly apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
 
   constructor() {
     this.subscription = combineLatest([

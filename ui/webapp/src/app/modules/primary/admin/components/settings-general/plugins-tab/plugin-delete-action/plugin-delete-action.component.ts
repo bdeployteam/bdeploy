@@ -8,8 +8,8 @@ import { SettingsGeneralComponent } from '../../settings-general.component';
   templateUrl: './plugin-delete-action.component.html',
 })
 export class PluginDeleteActionComponent {
-  private parent = inject(forwardRef(() => SettingsGeneralComponent));
-  private plugins = inject(PluginAdminService);
+  private readonly parent = inject(forwardRef(() => SettingsGeneralComponent));
+  private readonly plugins = inject(PluginAdminService);
 
   @Input() record: PluginInfoDto;
 

@@ -59,8 +59,8 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
 export class ClientApplicationsComponent implements OnInit {
   protected groups = inject(GroupsService);
   protected clients = inject(ClientsService);
-  private dd = inject(DeviceDetectorService);
-  private cardViewService = inject(CardViewService);
+  private readonly dd = inject(DeviceDetectorService);
+  private readonly cardViewService = inject(CardViewService);
 
   protected currentOs: OperatingSystem;
   protected columns: BdDataColumn<ClientApp>[] = [

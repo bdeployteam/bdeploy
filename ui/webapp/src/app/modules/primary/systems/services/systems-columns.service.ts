@@ -10,8 +10,8 @@ import { ServersService } from '../../servers/services/servers.service';
   providedIn: 'root',
 })
 export class SystemsColumnsService {
-  private cfg = inject(ConfigService);
-  private serversSvc = inject(ServersService);
+  private readonly cfg = inject(ConfigService);
+  private readonly serversSvc = inject(ServersService);
 
   public systemIdColumn: BdDataColumn<SystemConfigurationDto> = {
     id: 'system',

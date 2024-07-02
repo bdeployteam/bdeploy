@@ -10,8 +10,8 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
   templateUrl: './node-details.component.html',
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
-  private instances = inject(InstancesService);
-  private route = inject(ActivatedRoute);
+  private readonly instances = inject(InstancesService);
+  private readonly route = inject(ActivatedRoute);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected nodeState$ = new BehaviorSubject<MinionStatusDto>(null);

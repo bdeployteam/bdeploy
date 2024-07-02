@@ -11,7 +11,7 @@ const STATUS_TIMEOUT = 1000 * 60 * 15;
   styleUrls: ['./overall-status-column.component.css'],
 })
 export class OverallStatusColumnComponent {
-  private cfg = inject(ConfigService);
+  private readonly cfg = inject(ConfigService);
 
   @Input() record: InstanceDto;
   @Input() column: BdDataColumn<InstanceDto>;

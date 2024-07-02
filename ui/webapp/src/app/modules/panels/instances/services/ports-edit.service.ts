@@ -22,7 +22,7 @@ export interface PortParam {
   providedIn: 'root',
 })
 export class PortsEditService {
-  private procEdit = inject(ProcessEditService);
+  private readonly procEdit = inject(ProcessEditService);
   protected edit = inject(InstanceEditService);
 
   public ports$ = new BehaviorSubject<PortParam[]>(null);

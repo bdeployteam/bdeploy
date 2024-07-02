@@ -23,8 +23,8 @@ import { OverallStatusColumnComponent } from './overall-status-column/overall-st
   templateUrl: './browser.component.html',
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
-  private config = inject(ConfigService);
-  private cardViewService = inject(CardViewService);
+  private readonly config = inject(ConfigService);
+  private readonly cardViewService = inject(CardViewService);
   protected instances = inject(InstancesService);
   protected instanceColumns = inject(InstancesColumnsService);
   protected products = inject(ProductsService);
@@ -65,7 +65,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  private colOverallStatus: BdDataColumn<InstanceDto> = {
+  private readonly colOverallStatus: BdDataColumn<InstanceDto> = {
     id: 'status',
     name: 'Status',
     description: 'Status',
@@ -74,8 +74,8 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     width: '110px', // required width in case timestamp is shown along with the icon.
   };
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild(BdDataDisplayComponent) private data: BdDataDisplayComponent<InstanceDto>;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
+  @ViewChild(BdDataDisplayComponent) private readonly data: BdDataDisplayComponent<InstanceDto>;
 
   protected getRecordRoute = (row: InstanceDto) => [
     '/instances',

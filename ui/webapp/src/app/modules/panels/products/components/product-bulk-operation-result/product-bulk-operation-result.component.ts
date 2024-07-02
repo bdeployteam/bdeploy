@@ -7,7 +7,7 @@ import { BulkOperationResultDto } from 'src/app/models/gen.dtos';
   templateUrl: './product-bulk-operation-result.component.html',
 })
 export class ProductBulkOperationResultComponent {
-  private dialogRef = inject(MatDialogRef<BulkOperationResultDto>);
+  private readonly dialogRef = inject(MatDialogRef<BulkOperationResultDto>);
   protected bulkOpResult: BulkOperationResultDto = inject(MAT_DIALOG_DATA);
 
   close() {

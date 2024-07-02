@@ -7,9 +7,9 @@ import { GroupsService } from './groups.service';
   providedIn: 'root',
 })
 export class GroupsColumnsService {
-  private groups = inject(GroupsService);
+  private readonly groups = inject(GroupsService);
 
-  private groupTypeColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupTypeColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -17,7 +17,7 @@ export class GroupsColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  private groupNameColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupNameColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'name',
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -28,7 +28,7 @@ export class GroupsColumnsService {
     sortCard: true,
   };
 
-  private groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'title',
     name: 'Title',
     hint: BdDataColumnTypeHint.TITLE,
@@ -36,7 +36,7 @@ export class GroupsColumnsService {
     sortCard: true,
   };
 
-  private groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -44,7 +44,7 @@ export class GroupsColumnsService {
     showWhen: '(min-width: 1000px)',
   };
 
-  private groupLogoTableColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupLogoTableColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -54,7 +54,7 @@ export class GroupsColumnsService {
     width: '150px',
   };
 
-  private groupLogoCardColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupLogoCardColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,

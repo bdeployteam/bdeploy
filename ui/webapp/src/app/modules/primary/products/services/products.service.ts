@@ -12,19 +12,19 @@ import { GroupsService } from '../../groups/services/groups.service';
   providedIn: 'root',
 })
 export class ProductsService {
-  private cfg = inject(ConfigService);
-  private http = inject(HttpClient);
-  private changes = inject(ObjectChangesService);
-  private groups = inject(GroupsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly changes = inject(ObjectChangesService);
+  private readonly groups = inject(GroupsService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public products$ = new BehaviorSubject<ProductDto[]>(null);
 
   private group: string;
   private subscription: Subscription;
-  private delayLoad$ = new Subject<string>();
+  private readonly delayLoad$ = new Subject<string>();
 
-  private apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
 
   constructor() {

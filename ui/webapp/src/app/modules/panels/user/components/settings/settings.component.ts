@@ -23,8 +23,8 @@ const colUserGroupName: BdDataColumn<UserGroupPermission> = {
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent implements OnInit {
-  private router = inject(Router);
-  private permissionColumnsService = inject(PermissionColumnsService);
+  private readonly router = inject(Router);
+  private readonly permissionColumnsService = inject(PermissionColumnsService);
   protected authService = inject(AuthenticationService);
   protected settings = inject(SettingsService);
 

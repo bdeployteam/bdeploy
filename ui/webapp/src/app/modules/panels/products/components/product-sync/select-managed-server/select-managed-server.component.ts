@@ -9,7 +9,7 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './select-managed-server.component.html',
 })
 export class SelectManagedServerComponent {
-  private areas = inject(NavAreasService);
+  private readonly areas = inject(NavAreasService);
   protected servers = inject(ServersService);
   protected columns = inject(ServersColumnsService);
 

@@ -51,7 +51,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   protected users: UserInfo[] = [];
   protected suggestedUsers: UserInfo[] = [];
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   private subscription: Subscription;
 

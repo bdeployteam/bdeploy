@@ -15,10 +15,10 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   templateUrl: './add-system.component.html',
 })
 export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
-  private areas = inject(NavAreasService);
-  private systems = inject(SystemsService);
-  private cfg = inject(ConfigService);
-  private groups = inject(GroupsService);
+  private readonly areas = inject(NavAreasService);
+  private readonly systems = inject(SystemsService);
+  private readonly cfg = inject(ConfigService);
+  private readonly groups = inject(GroupsService);
   protected servers = inject(ServersService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);

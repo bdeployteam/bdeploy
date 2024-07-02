@@ -8,8 +8,8 @@ import { ConfigService } from '../../../core/services/config.service';
   providedIn: 'root',
 })
 export class MetricsService {
-  private http = inject(HttpClient);
-  private config = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly config = inject(ConfigService);
 
   public getAllMetrics(): Observable<unknown> {
     return this.http.get<unknown>(this.config.config.api + '/metrics');
