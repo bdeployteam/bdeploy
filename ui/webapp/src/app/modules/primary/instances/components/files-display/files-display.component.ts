@@ -124,7 +124,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   protected columns: BdDataColumn<FilePath>[];
   protected isDataFiles: boolean;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   constructor() {
     this.isDataFiles = this.activatedRoute.snapshot.data['isDataFiles'];

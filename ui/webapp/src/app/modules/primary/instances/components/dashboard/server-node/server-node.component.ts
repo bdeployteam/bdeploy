@@ -51,9 +51,9 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     tooltip: this.portsTooltip,
   };
 
-  private processesState = new BehaviorSubject<StateType>('unknown');
-  private processesTooltip = new BehaviorSubject<string>('State of all server processes');
-  private processesItem: StateItem = {
+  private readonly processesState = new BehaviorSubject<StateType>('unknown');
+  private readonly processesTooltip = new BehaviorSubject<string>('State of all server processes');
+  private readonly processesItem: StateItem = {
     name: 'Instance Processes',
     type: this.processesState,
     tooltip: this.processesTooltip,

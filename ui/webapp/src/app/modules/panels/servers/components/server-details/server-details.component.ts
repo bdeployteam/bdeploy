@@ -81,7 +81,7 @@ export class ServerDetailsComponent implements OnInit {
     null,
     this.s$,
   );
-  private mappedDelete$ = this.actions.action([Actions.REMOVE_MANAGED], this.deleting$, null, null, this.s$);
+  private readonly mappedDelete$ = this.actions.action([Actions.REMOVE_MANAGED], this.deleting$, null, null, this.s$);
 
   protected loading$ = combineLatest([this.mappedDelete$, this.servers.loading$, this.serverDetails.loading$]).pipe(
     map(([a, b, c]) => a || b || c),
@@ -92,7 +92,7 @@ export class ServerDetailsComponent implements OnInit {
   protected minions: MinionRow[];
   protected server: ManagedMasterDto;
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit(): void {
     this.serverDetails.server$.subscribe((server) => {
