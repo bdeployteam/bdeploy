@@ -19,7 +19,7 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly auth = inject(AuthenticationService);
   private readonly areas = inject(NavAreasService);
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected mail$ = new BehaviorSubject<string>(null);

@@ -58,7 +58,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
 })
 export class MainNavContentComponent implements OnInit {
   private readonly media = inject(BreakpointObserver);
-  protected areas = inject(NavAreasService);
+  protected readonly areas = inject(NavAreasService);
 
   @HostBinding('@marginForPanel') get marginAnimation() {
     if (this.media.isMatched('(max-width: 960px)') && this.areas.panelVisible$.value) {

@@ -32,10 +32,10 @@ interface HttpEndpointDisabledStatus {
   templateUrl: './configure-endpoints.component.html',
 })
 export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnDestroy, AfterViewInit {
-  protected edit = inject(ProcessEditService);
-  protected instanceEdit = inject(InstanceEditService);
   private readonly systems = inject(SystemsService);
   private readonly areas = inject(NavAreasService);
+  protected readonly edit = inject(ProcessEditService);
+  protected readonly instanceEdit = inject(InstanceEditService);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;

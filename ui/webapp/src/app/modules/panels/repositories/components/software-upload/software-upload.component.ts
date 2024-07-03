@@ -6,7 +6,7 @@ import { RepositoryService } from 'src/app/modules/primary/repositories/services
   templateUrl: './software-upload.component.html',
 })
 export class SoftwareUploadComponent {
-  protected repositoryService = inject(RepositoryService);
+  protected readonly repositoryService = inject(RepositoryService);
 
   protected files: File[] = [];
 

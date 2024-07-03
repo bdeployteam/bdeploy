@@ -28,7 +28,7 @@ interface MarkedEvent {
 })
 export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   private readonly instances = inject(InstancesService);
-  protected servers = inject(ServersService);
+  protected readonly servers = inject(ServersService);
 
   @Input() node: InstanceNodeConfigurationDto;
   @Input() show: 'load' | 'cpu';

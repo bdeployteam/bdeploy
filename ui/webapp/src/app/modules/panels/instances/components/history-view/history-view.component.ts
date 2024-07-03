@@ -17,7 +17,7 @@ export class HistoryViewComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly areas = inject(NavAreasService);
   private readonly details = inject(HistoryDetailsService);
   private readonly searchService = inject(SearchService);
-  protected instances = inject(InstancesService);
+  protected readonly instances = inject(InstancesService);
 
   protected base$ = new BehaviorSubject<string>(null);
   protected config$ = new BehaviorSubject<InstanceConfigCache>(null);

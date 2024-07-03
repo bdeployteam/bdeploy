@@ -20,7 +20,7 @@ import { ServerDetailsService } from '../../../services/server-details.service';
 export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly servers = inject(ServersService);
   private readonly areas = inject(NavAreasService);
-  protected details = inject(ServerDetailsService);
+  protected readonly details = inject(ServerDetailsService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected loading$ = combineLatest([this.saving$, this.servers.loading$, this.details.loading$]).pipe(

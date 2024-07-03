@@ -15,9 +15,9 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
   templateUrl: './data-file-editor.component.html',
 })
 export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestroy {
-  protected filesService = inject(FilesService);
   private readonly instances = inject(InstancesService);
   private readonly areas = inject(NavAreasService);
+  protected readonly filesService = inject(FilesService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);

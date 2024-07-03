@@ -16,9 +16,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 export class BulkControlComponent implements OnInit {
   private readonly processes = inject(ProcessesService);
   private readonly actions = inject(ActionsService);
-  protected instances = inject(InstancesService);
-  protected servers = inject(ServersService);
-  protected bulk = inject(ProcessesBulkService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly servers = inject(ServersService);
+  protected readonly bulk = inject(ProcessesBulkService);
 
   private readonly starting$ = new BehaviorSubject<boolean>(false);
   private readonly stopping$ = new BehaviorSubject<boolean>(false);

@@ -6,5 +6,5 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './oidc-tab.component.html',
 })
 export class OidcTabComponent {
-  public settings = inject(SettingsService);
+  public readonly settings = inject(SettingsService);
 }

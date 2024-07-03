@@ -10,8 +10,8 @@ import { ProcessDetailsService } from '../../services/process-details.service';
 })
 export class ProcessPortsComponent implements OnInit, OnDestroy {
   private readonly ports = inject(PortsService);
-  protected details = inject(ProcessDetailsService);
-  protected columns = inject(PortsColumnsService);
+  protected readonly details = inject(ProcessDetailsService);
+  protected readonly columns = inject(PortsColumnsService);
 
   protected ports$ = new BehaviorSubject<NodeApplicationPort[]>(null);
 

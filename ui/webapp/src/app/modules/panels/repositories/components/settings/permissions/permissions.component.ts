@@ -7,6 +7,6 @@ import { RepositoryUsersService } from '../../../services/repository-users.servi
   templateUrl: './permissions.component.html',
 })
 export class PermissionsComponent {
-  protected repos = inject(RepositoriesService);
-  protected users = inject(RepositoryUsersService);
+  protected readonly repos = inject(RepositoriesService);
+  protected readonly users = inject(RepositoryUsersService);
 }

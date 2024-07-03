@@ -21,8 +21,8 @@ import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.compo
 })
 export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
   private readonly title = inject(Title);
-  protected areas = inject(NavAreasService);
   private readonly bop = inject(BreakpointObserver);
+  protected readonly areas = inject(NavAreasService);
 
   protected narrow$ = new BehaviorSubject<boolean>(true);
 

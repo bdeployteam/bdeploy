@@ -75,15 +75,14 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);
   private readonly router = inject(Router);
   private readonly clients = inject(ClientsService);
-
-  protected auth = inject(AuthenticationService);
-  protected groups = inject(GroupsService);
-  protected details = inject(ProcessDetailsService);
-  protected processes = inject(ProcessesService);
-  protected instances = inject(InstancesService);
-  protected servers = inject(ServersService);
-  protected areas = inject(NavAreasService);
-  protected confirmationService = inject(ConfirmationService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly details = inject(ProcessDetailsService);
+  protected readonly processes = inject(ProcessesService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly servers = inject(ServersService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly confirmationService = inject(ConfirmationService);
 
   protected uptime$ = new BehaviorSubject<string>(null);
   protected restartProgress$ = new BehaviorSubject<number>(0);

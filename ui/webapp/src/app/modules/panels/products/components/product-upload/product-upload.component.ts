@@ -6,7 +6,7 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
   templateUrl: './product-upload.component.html',
 })
 export class ProductUploadComponent {
-  protected products = inject(ProductsService);
+  protected readonly products = inject(ProductsService);
 
   protected files: File[] = [];
 

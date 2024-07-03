@@ -7,5 +7,5 @@ import { ThemeService } from 'src/app/modules/core/services/theme.service';
   styleUrls: ['./themes.component.css'],
 })
 export class ThemesComponent {
-  public themeService = inject(ThemeService);
+  public readonly themeService = inject(ThemeService);
 }

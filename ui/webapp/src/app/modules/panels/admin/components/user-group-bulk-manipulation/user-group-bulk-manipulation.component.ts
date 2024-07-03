@@ -11,8 +11,8 @@ import { UserGroupBulkService } from '../../services/user-group-bulk.service';
   templateUrl: './user-group-bulk-manipulation.component.html',
 })
 export class UserGroupBulkManipulationComponent {
-  protected actions = inject(ActionsService);
-  protected bulk = inject(UserGroupBulkService);
+  protected readonly actions = inject(ActionsService);
+  protected readonly bulk = inject(UserGroupBulkService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
 

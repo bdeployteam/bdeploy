@@ -60,7 +60,7 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
   templateUrl: './process-natives.component.html',
 })
 export class ProcessNativesComponent implements OnInit, OnDestroy {
-  protected details = inject(ProcessDetailsService);
+  protected readonly details = inject(ProcessDetailsService);
 
   protected readonly columns: BdDataColumn<ProcessHandleDto>[] = [
     nativePidColumn,

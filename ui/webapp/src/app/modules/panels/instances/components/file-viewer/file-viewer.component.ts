@@ -18,11 +18,12 @@ export class FileViewerComponent implements OnInit, OnDestroy {
   private readonly filesService = inject(FilesService);
   private readonly auth = inject(AuthenticationService);
   private readonly ngZone = inject(NgZone);
+  protected readonly instances = inject(InstancesService);
+
   private offset = 0;
   private readonly subscription: Subscription;
   private followInterval;
 
-  protected instances = inject(InstancesService);
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
   protected file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
   protected content$ = new Subject<string>();

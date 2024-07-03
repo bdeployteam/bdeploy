@@ -35,7 +35,7 @@ import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-nam
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly edit = inject(InstanceEditService);
-  protected columns = inject(ProcessesColumnsService);
+  protected readonly columns = inject(ProcessesColumnsService);
 
   @HostBinding('attr.data-cy') @Input() nodeName: string;
 

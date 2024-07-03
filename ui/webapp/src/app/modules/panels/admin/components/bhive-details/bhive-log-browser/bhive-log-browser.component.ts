@@ -13,8 +13,8 @@ import { HiveLoggingService } from '../../../services/hive-logging.service';
 })
 export class BhiveLogBrowserComponent implements OnInit {
   private readonly cols = inject(LogColumnsService);
-  protected authService = inject(AuthenticationService);
-  protected hiveLogging = inject(HiveLoggingService);
+  protected readonly authService = inject(AuthenticationService);
+  protected readonly hiveLogging = inject(HiveLoggingService);
 
   private readonly colDownload: BdDataColumn<RemoteDirectoryEntry> = {
     id: 'download',

@@ -14,10 +14,10 @@ import { UpdateActionComponent } from './update-action/update-action.component';
   templateUrl: './product-update.component.html',
 })
 export class ProductUpdateComponent implements OnInit, OnDestroy {
-  public products = inject(ProductsService);
-  public edit = inject(InstanceEditService);
-  public areas = inject(NavAreasService);
   private readonly groups = inject(GroupsService);
+  public readonly products = inject(ProductsService);
+  public readonly edit = inject(InstanceEditService);
+  public readonly areas = inject(NavAreasService);
 
   private readonly productVersionColumn: BdDataColumn<ProductDto> = {
     id: 'version',

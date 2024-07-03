@@ -60,8 +60,8 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   private readonly areas = inject(NavAreasService);
   private readonly plugins = inject(PluginService);
   private readonly snackbar = inject(MatSnackBar);
-  protected edit = inject(InstanceEditService);
-  protected groups = inject(GroupsService);
+  protected readonly edit = inject(InstanceEditService);
+  protected readonly groups = inject(GroupsService);
 
   private readonly colEdit: BdDataColumn<ConfigVariable> = {
     id: 'edit',

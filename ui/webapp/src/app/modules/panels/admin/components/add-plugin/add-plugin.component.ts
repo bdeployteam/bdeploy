@@ -8,7 +8,7 @@ import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugi
   templateUrl: './add-plugin.component.html',
 })
 export class AddPluginComponent {
-  protected plugins = inject(PluginAdminService);
+  protected readonly plugins = inject(PluginAdminService);
 
   protected files: File[] = [];
 

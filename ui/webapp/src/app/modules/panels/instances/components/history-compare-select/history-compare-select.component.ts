@@ -13,7 +13,7 @@ import { HistoryDetailsService } from '../../services/history-details.service';
 export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
   private readonly instances = inject(InstancesService);
-  protected details = inject(HistoryDetailsService);
+  protected readonly details = inject(HistoryDetailsService);
 
   private readonly versionColumn: BdDataColumn<InstanceVersionDto> = {
     id: 'version',

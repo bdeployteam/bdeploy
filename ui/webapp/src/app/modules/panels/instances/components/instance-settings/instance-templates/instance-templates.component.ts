@@ -62,8 +62,8 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private readonly products = inject(ProductsService);
   private readonly edit = inject(ProcessEditService);
-  protected servers = inject(ServersService);
-  protected instanceEdit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
+  protected readonly instanceEdit = inject(InstanceEditService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
 

@@ -7,6 +7,6 @@ import { GroupUsersService } from '../../../services/group-users.service';
   templateUrl: './permissions.component.html',
 })
 export class PermissionsComponent {
-  protected groups = inject(GroupsService);
-  protected users = inject(GroupUsersService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly users = inject(GroupUsersService);
 }

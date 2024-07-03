@@ -37,10 +37,11 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavMenuComponent {
-  protected cfgService = inject(ConfigService);
-  protected authService = inject(AuthenticationService);
-  protected areas = inject(NavAreasService);
-  protected actions = inject(ActionsService);
+  protected readonly cfgService = inject(ConfigService);
+  protected readonly authService = inject(AuthenticationService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly actions = inject(ActionsService);
+
   protected masterNode = encodeDataFilePath({ minion: 'master', path: '' });
 
   @HostBinding('@menuOpenClose') get animationState() {

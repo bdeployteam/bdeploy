@@ -14,8 +14,8 @@ import { decodeDataFilePath } from '../../utils/data-file-utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
-  public filesService = inject(FilesService);
   private readonly areas = inject(NavAreasService);
+  public readonly filesService = inject(FilesService);
 
   protected minions$ = new BehaviorSubject<string[]>([]);
 

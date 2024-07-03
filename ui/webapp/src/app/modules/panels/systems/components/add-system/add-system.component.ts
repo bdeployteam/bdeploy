@@ -19,7 +19,7 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly systems = inject(SystemsService);
   private readonly cfg = inject(ConfigService);
   private readonly groups = inject(GroupsService);
-  protected servers = inject(ServersService);
+  protected readonly servers = inject(ServersService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected saving$ = new BehaviorSubject<boolean>(false);

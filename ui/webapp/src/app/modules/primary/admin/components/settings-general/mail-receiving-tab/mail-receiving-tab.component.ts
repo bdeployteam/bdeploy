@@ -8,7 +8,8 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './mail-receiving-tab.component.html',
 })
 export class MailReceivingTabComponent {
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
+
   protected connectionTestStatusMsg$ = new BehaviorSubject<string>(null);
 
   protected onPasswordChange(e) {

@@ -27,10 +27,10 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   private readonly groups = inject(GroupsService);
   private readonly instances = inject(InstancesService);
   private readonly areas = inject(NavAreasService);
-  protected products = inject(ProductsService);
-  protected servers = inject(ServersService);
-  protected cfg = inject(ConfigService);
-  protected systems = inject(SystemsService);
+  protected readonly products = inject(ProductsService);
+  protected readonly servers = inject(ServersService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly systems = inject(SystemsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected config: Partial<InstanceConfiguration> = {

@@ -81,10 +81,10 @@ const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   encapsulation: ViewEncapsulation.None,
 })
 export class SystemTemplateComponent implements OnInit {
-  protected cfg = inject(ConfigService);
-  protected groups = inject(GroupsService);
-  protected systems = inject(SystemsService);
-  protected servers = inject(ServersService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly systems = inject(SystemsService);
+  protected readonly servers = inject(ServersService);
 
   protected file: File;
   protected template: SystemTemplateDto;

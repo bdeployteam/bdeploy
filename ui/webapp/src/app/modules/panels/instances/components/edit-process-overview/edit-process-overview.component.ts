@@ -13,9 +13,9 @@ import { ProcessEditService } from '../../services/process-edit.service';
 export class EditProcessOverviewComponent {
   private readonly areas = inject(NavAreasService);
   private readonly snackbar = inject(MatSnackBar);
-  protected edit = inject(ProcessEditService);
-  protected instanceEdit = inject(InstanceEditService);
-  protected servers = inject(ServersService);
+  protected readonly edit = inject(ProcessEditService);
+  protected readonly instanceEdit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
 
   protected clientNodeName = CLIENT_NODE_NAME;
 

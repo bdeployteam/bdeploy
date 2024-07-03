@@ -32,7 +32,7 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
   private readonly ports = inject(PortsService);
   private readonly instances = inject(InstancesService);
   private readonly systems = inject(SystemsService);
-  protected bulk = inject(ProcessesBulkService);
+  protected readonly bulk = inject(ProcessesBulkService);
 
   private readonly processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
     id: CONTROL_GROUP_COL_ID,

@@ -27,7 +27,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   private readonly ports = inject(PortsService);
   private readonly auth = inject(AuthenticationService);
   private readonly areas = inject(NavAreasService);
-  protected processes = inject(ProcessesService);
+  protected readonly processes = inject(ProcessesService);
 
   @Input() node: InstanceNodeConfigurationDto;
 

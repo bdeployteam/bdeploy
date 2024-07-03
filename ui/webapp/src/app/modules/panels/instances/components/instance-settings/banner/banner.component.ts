@@ -19,8 +19,8 @@ import { ColorDef, ColorSelectGroupComponent } from './color-select-group/color-
 export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly auth = inject(AuthenticationService);
   private readonly areas = inject(NavAreasService);
-  protected servers = inject(ServersService);
-  protected instances = inject(InstancesService);
+  protected readonly servers = inject(ServersService);
+  protected readonly instances = inject(InstancesService);
 
   private readonly DEFAULT_BANNER = {
     text: 'Banner information goes here.',

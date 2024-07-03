@@ -11,9 +11,9 @@ import { RepositoriesService } from '../../services/repositories.service';
 })
 export class RepositoriesBrowserComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);
-  protected repositories = inject(RepositoriesService);
-  protected repositoriesColumns = inject(RepositoriesColumnsService);
-  protected authenticationService = inject(AuthenticationService);
+  protected readonly repositories = inject(RepositoriesService);
+  protected readonly repositoriesColumns = inject(RepositoriesColumnsService);
+  protected readonly authenticationService = inject(AuthenticationService);
 
   protected getRecordRoute = (row: SoftwareRepositoryConfiguration) => ['/repositories', 'repository', row.name];
 

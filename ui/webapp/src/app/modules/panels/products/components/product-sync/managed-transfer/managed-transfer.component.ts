@@ -16,7 +16,8 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
   private readonly servers = inject(ServersService);
   private readonly products = inject(ProductsService);
-  protected productColumns = inject(ProductsColumnsService);
+  private readonly actions = inject(ActionsService);
+  protected readonly productColumns = inject(ProductsColumnsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected records$ = new BehaviorSubject<ProductDto[]>(null);
@@ -24,7 +25,6 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
   protected typeText$ = new BehaviorSubject<string>(null);
   protected selected$ = new BehaviorSubject<ProductDto[]>([]);
 
-  private readonly actions = inject(ActionsService);
   protected mappedTransfer$;
 
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;

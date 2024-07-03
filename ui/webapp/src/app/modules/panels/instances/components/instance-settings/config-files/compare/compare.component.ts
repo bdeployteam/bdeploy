@@ -15,9 +15,9 @@ import { ConfigFilesService } from '../../../../services/config-files.service';
   templateUrl: './compare.component.html',
 })
 export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
-  protected cfgFiles = inject(ConfigFilesService);
   private readonly edit = inject(InstanceEditService);
   private readonly areas = inject(NavAreasService);
+  protected readonly cfgFiles = inject(ConfigFilesService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected file$ = new BehaviorSubject<string>(null);

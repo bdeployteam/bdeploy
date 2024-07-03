@@ -12,11 +12,11 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
 })
 export class NodeMaintenanceComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
-  protected nodesAdmin = inject(NodesAdminService);
+  private readonly actions = inject(ActionsService);
+  protected readonly nodesAdmin = inject(NodesAdminService);
 
   private readonly repairing$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
-  private readonly actions = inject(ActionsService);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected state: MinionStatusDto;

@@ -108,10 +108,10 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);
-  protected products = inject(ProductsService);
-  protected singleProduct = inject(ProductDetailsService);
-  protected areas = inject(NavAreasService);
-  protected auth = inject(AuthenticationService);
+  protected readonly products = inject(ProductsService);
+  protected readonly singleProduct = inject(ProductDetailsService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly auth = inject(AuthenticationService);
 
   protected readonly instanceColumns: BdDataColumn<InstanceUsageDto>[] = //
     [instanceNameColumn, instanceTagColumn];

@@ -9,7 +9,7 @@ import { ApplicationPair, ConfigPair, NodePair } from '../../../utils/diff-utils
   templateUrl: './local-diff.component.html',
 })
 export class LocalDiffComponent implements OnInit, OnDestroy {
-  protected edit = inject(InstanceEditService);
+  protected readonly edit = inject(InstanceEditService);
 
   protected configPair$ = new BehaviorSubject<ConfigPair>(null);
   protected clientNodeName = CLIENT_NODE_NAME;

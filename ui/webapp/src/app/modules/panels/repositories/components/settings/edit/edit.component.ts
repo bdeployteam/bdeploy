@@ -16,8 +16,8 @@ import { RepositoryDetailsService } from '../../../services/repository-details.s
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
-  protected repositories = inject(RepositoriesService);
-  protected details = inject(RepositoryDetailsService);
+  protected readonly repositories = inject(RepositoriesService);
+  protected readonly details = inject(RepositoryDetailsService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected repository: SoftwareRepositoryConfiguration;

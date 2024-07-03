@@ -16,9 +16,9 @@ const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 export class ProcessConsoleComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthenticationService);
   private readonly ngZone = inject(NgZone);
-  protected instances = inject(InstancesService);
-  protected details = inject(ProcessDetailsService);
-  protected servers = inject(ServersService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly details = inject(ProcessDetailsService);
+  protected readonly servers = inject(ServersService);
 
   protected content$ = new BehaviorSubject<string>('');
   protected available$ = new BehaviorSubject<boolean>(false);

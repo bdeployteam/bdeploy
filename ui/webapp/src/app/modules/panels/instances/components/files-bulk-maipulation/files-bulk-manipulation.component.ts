@@ -12,9 +12,9 @@ import { FilePath, FilesService } from 'src/app/modules/primary/instances/servic
 export class FilesBulkManipulationComponent implements OnDestroy {
   private readonly areas = inject(NavAreasService);
   private readonly filesService = inject(FilesService);
-  private readonly subscription: Subscription;
+  protected readonly filesBulkService = inject(FilesBulkService);
 
-  protected filesBulkService = inject(FilesBulkService);
+  private readonly subscription: Subscription;
   protected deleting$ = new BehaviorSubject<boolean>(false);
   protected selections: FilePath[];
   protected showDelete = false;

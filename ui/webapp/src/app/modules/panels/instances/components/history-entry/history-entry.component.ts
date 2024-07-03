@@ -27,10 +27,10 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);
   private readonly groups = inject(GroupsService);
   private readonly products = inject(ProductsService);
-  protected instances = inject(InstancesService);
-  protected states = inject(InstanceStateService);
-  protected servers = inject(ServersService);
-  protected auth = inject(AuthenticationService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly states = inject(InstanceStateService);
+  protected readonly servers = inject(ServersService);
+  protected readonly auth = inject(AuthenticationService);
 
   protected entry$ = new BehaviorSubject<HistoryEntryDto>(null);
   protected state$ = new BehaviorSubject<InstanceStateRecord>(null);

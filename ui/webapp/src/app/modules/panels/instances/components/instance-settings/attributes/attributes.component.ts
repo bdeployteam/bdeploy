@@ -25,7 +25,7 @@ interface AttributeRow {
 export class AttributesComponent implements OnInit {
   private readonly groups = inject(GroupsService);
   private readonly instances = inject(InstancesService);
-  protected servers = inject(ServersService);
+  protected readonly servers = inject(ServersService);
 
   private readonly attrNameCol: BdDataColumn<AttributeRow> = {
     id: 'attribute',

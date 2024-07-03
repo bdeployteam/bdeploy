@@ -18,9 +18,9 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
   private readonly cfg = inject(ConfigService);
   private readonly servers = inject(ServersService);
   private readonly search = inject(SearchService);
-  protected instances = inject(InstancesService);
-  protected columns = inject(HistoryColumnsService);
-  protected history = inject(HistoryService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly columns = inject(HistoryColumnsService);
+  protected readonly history = inject(HistoryService);
 
   protected showCreate$ = new BehaviorSubject<boolean>(true);
   protected showDeploy$ = new BehaviorSubject<boolean>(false);

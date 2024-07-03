@@ -29,8 +29,8 @@ const colNodeName: BdDataColumn<NodeRow> = {
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
-  protected edit = inject(InstanceEditService);
-  protected servers = inject(ServersService);
+  protected readonly edit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
 
   protected records: NodeRow[] = [];
   protected readonly columns: BdDataColumn<NodeRow>[] = [colNodeName];

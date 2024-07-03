@@ -49,8 +49,8 @@ const colAppName: BdDataColumn<AppRow> = {
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
   private readonly edit = inject(ProcessEditService);
-  protected instanceEdit = inject(InstanceEditService);
-  protected servers = inject(ServersService);
+  protected readonly instanceEdit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
 
   private readonly colAdd: BdDataColumn<AppRow> = {
     id: 'add',

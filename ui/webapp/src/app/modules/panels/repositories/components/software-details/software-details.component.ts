@@ -83,11 +83,11 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
   providers: [SoftwareDetailsService],
 })
 export class SoftwareDetailsComponent implements OnInit {
-  protected repository = inject(RepositoryService);
-  protected detailsService = inject(SoftwareDetailsService);
-  protected areas = inject(NavAreasService);
-  protected auth = inject(AuthenticationService);
-  protected actions = inject(ActionsService);
+  protected readonly repository = inject(RepositoryService);
+  protected readonly detailsService = inject(SoftwareDetailsService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly actions = inject(ActionsService);
 
   protected readonly labelColumns: BdDataColumn<LabelRecord>[] = //
     [labelKeyColumn, labelValueColumn];

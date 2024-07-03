@@ -13,8 +13,8 @@ import { UserBulkService } from '../../services/user-bulk.service';
 })
 export class UserBulkManipulationComponent {
   private readonly auth = inject(AuthenticationService);
-  protected actions = inject(ActionsService);
-  protected bulk = inject(UserBulkService);
+  protected readonly actions = inject(ActionsService);
+  protected readonly bulk = inject(UserBulkService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
 

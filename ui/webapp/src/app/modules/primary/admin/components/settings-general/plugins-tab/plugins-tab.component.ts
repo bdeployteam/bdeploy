@@ -12,7 +12,7 @@ import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-acti
   templateUrl: './plugins-tab.component.html',
 })
 export class PluginsTabComponent {
-  protected plugins = inject(PluginAdminService);
+  protected readonly plugins = inject(PluginAdminService);
 
   private readonly colId: BdDataColumn<PluginInfoDto> = {
     id: 'id',

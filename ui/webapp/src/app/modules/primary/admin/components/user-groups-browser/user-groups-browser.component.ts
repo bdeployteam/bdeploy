@@ -17,9 +17,9 @@ import { AuthAdminService } from '../../services/auth-admin.service';
 })
 export class UserGroupsBrowserComponent {
   private readonly groupCols = inject(UserGroupsColumnsService);
-  protected authAdmin = inject(AuthAdminService);
-  protected settings = inject(SettingsService);
-  protected bulk = inject(UserGroupBulkService);
+  protected readonly authAdmin = inject(AuthAdminService);
+  protected readonly settings = inject(SettingsService);
+  protected readonly bulk = inject(UserGroupBulkService);
 
   private readonly colPermLevel: BdDataColumn<UserGroupInfo> = {
     id: 'permLevel',

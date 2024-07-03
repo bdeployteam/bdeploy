@@ -73,9 +73,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   private readonly bop = inject(BreakpointObserver);
   private readonly systems = inject(SystemsService);
   private readonly searchService = inject(SearchService);
-  protected edit = inject(ProcessEditService);
-  protected instances = inject(InstanceEditService);
-  protected groups = inject(GroupsService);
+  protected readonly edit = inject(ProcessEditService);
+  protected readonly instances = inject(InstanceEditService);
+  protected readonly groups = inject(GroupsService);
 
   protected groups$ = new BehaviorSubject<ParameterGroup[]>(null);
   protected narrow$ = new BehaviorSubject<boolean>(false);

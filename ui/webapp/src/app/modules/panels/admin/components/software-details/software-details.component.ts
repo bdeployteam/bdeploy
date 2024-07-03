@@ -18,7 +18,7 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
   private readonly software = inject(SoftwareUpdateService);
   private readonly actions = inject(ActionsService);
   private readonly areas = inject(NavAreasService);
-  protected cfg = inject(ConfigService);
+  protected readonly cfg = inject(ConfigService);
 
   private readonly deleting$ = new BehaviorSubject<boolean>(false);
   private readonly installing$ = new BehaviorSubject<boolean>(false);

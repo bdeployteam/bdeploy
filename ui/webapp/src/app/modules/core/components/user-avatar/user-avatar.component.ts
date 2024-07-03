@@ -12,7 +12,7 @@ export interface StyleDef {
   templateUrl: './user-avatar.component.html',
 })
 export class UserAvatarComponent implements OnInit {
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
 
   @Input()
   @HostBinding('style.width.px')

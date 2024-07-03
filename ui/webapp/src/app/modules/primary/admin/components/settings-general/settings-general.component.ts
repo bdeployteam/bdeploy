@@ -15,7 +15,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
   private readonly areas = inject(NavAreasService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
 
   protected addPlugin$ = new Subject<unknown>();
   protected tabIndex: number;

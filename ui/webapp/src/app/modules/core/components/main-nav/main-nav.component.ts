@@ -18,8 +18,8 @@ export class MainNavComponent implements OnInit {
   private readonly changes = inject(ObjectChangesService);
   private readonly config = inject(ConfigService);
   private readonly snackbar = inject(MatSnackBar);
-  protected themeService = inject(ThemeService);
-  protected actions = inject(ActionsService);
+  protected readonly themeService = inject(ThemeService);
+  protected readonly actions = inject(ActionsService);
 
   isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map((s) => s !== null));
 

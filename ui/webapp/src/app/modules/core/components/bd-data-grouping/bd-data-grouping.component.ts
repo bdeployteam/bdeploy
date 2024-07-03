@@ -31,7 +31,7 @@ enum PresetType {
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   private readonly snackBar = inject(MatSnackBar);
   private readonly confirmationService = inject(ConfirmationService);
-  protected auth = inject(AuthenticationService);
+  protected readonly auth = inject(AuthenticationService);
 
   /** whether mutiple groupings are supported */
   @Input() multiple = true;

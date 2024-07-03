@@ -11,7 +11,7 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 })
 export class NodeConversionComponent implements OnInit {
   private readonly cfg = inject(ConfigService);
-  protected nodesAdmin = inject(NodesAdminService);
+  protected readonly nodesAdmin = inject(NodesAdminService);
 
   protected data: NodeAttachDto;
 

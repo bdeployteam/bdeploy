@@ -8,7 +8,8 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './mail-sending-tab.component.html',
 })
 export class MailSendingTabComponent {
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
+
   protected connectionTestStatusMsg$ = new BehaviorSubject<string>(null);
   protected mailSendingTestStatusMsg$ = new BehaviorSubject<string>(null);
 

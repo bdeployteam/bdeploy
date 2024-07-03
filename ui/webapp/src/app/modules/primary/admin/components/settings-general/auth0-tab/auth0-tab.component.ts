@@ -6,5 +6,5 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './auth0-tab.component.html',
 })
 export class Auth0TabComponent {
-  public settings = inject(SettingsService);
+  public readonly settings = inject(SettingsService);
 }

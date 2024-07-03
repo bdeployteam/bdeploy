@@ -42,7 +42,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
   private readonly actions = inject(ActionsService);
   private readonly snackbar = inject(MatSnackBar);
-  protected nodesAdmin = inject(NodesAdminService);
+  protected readonly nodesAdmin = inject(NodesAdminService);
 
   private readonly adding$ = new BehaviorSubject<boolean>(false);
 

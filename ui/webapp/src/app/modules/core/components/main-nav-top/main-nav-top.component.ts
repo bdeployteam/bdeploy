@@ -14,9 +14,9 @@ import { SettingsService } from '../../services/settings.service';
 export class MainNavTopComponent implements OnInit {
   private readonly media = inject(BreakpointObserver);
   private readonly authService = inject(AuthenticationService);
-  protected cfgService = inject(ConfigService);
-  protected search = inject(SearchService);
-  protected settings = inject(SettingsService);
+  protected readonly cfgService = inject(ConfigService);
+  protected readonly search = inject(SearchService);
+  protected readonly settings = inject(SettingsService);
 
   protected logoSize = 64;
   protected user: UserInfo;

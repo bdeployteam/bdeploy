@@ -23,9 +23,9 @@ import { RepositoryUsersService } from '../../../services/repository-users.servi
   templateUrl: './user-permissions.component.html',
 })
 export class UserPermissionsComponent {
-  public repos = inject(RepositoriesService);
-  public users = inject(RepositoryUsersService);
-  public userCols = inject(UsersColumnsService);
+  public readonly repos = inject(RepositoriesService);
+  public readonly users = inject(RepositoryUsersService);
+  public readonly userCols = inject(UsersColumnsService);
 
   private readonly colInheritedPerm: BdDataColumn<UserInfo> = {
     id: 'inherited',

@@ -17,7 +17,7 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
   private readonly servers = inject(ServersService);
   private readonly changes = inject(ObjectChangesService);
   private readonly areas = inject(NavAreasService);
-  protected downloads = inject(DownloadService);
+  protected readonly downloads = inject(DownloadService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected payload: ManagedMasterDto;

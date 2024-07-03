@@ -19,7 +19,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormToggleComponent implements ControlValueAccessor {
-  protected ngControl = inject(NgControl, { self: true, optional: true });
+  protected readonly ngControl = inject(NgControl, { self: true, optional: true });
 
   @Input() label: string;
   @Input() name: string;

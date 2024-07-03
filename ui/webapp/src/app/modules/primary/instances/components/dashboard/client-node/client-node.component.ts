@@ -19,7 +19,7 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
   private readonly auth = inject(AuthenticationService);
   private readonly cardViewService = inject(CardViewService);
-  protected instances = inject(InstancesService);
+  protected readonly instances = inject(InstancesService);
 
   @Input() node: InstanceNodeConfigurationDto;
 

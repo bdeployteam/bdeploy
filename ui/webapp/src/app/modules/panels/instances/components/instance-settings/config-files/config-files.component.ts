@@ -17,8 +17,8 @@ import { ConfigFile, ConfigFilesService } from '../../../services/config-files.s
   templateUrl: './config-files.component.html',
 })
 export class ConfigFilesComponent implements OnInit, OnDestroy {
-  protected cfgFiles = inject(ConfigFilesService);
-  protected cfgFileColumns = inject(ConfigFilesColumnsService);
+  protected readonly cfgFiles = inject(ConfigFilesService);
+  protected readonly cfgFileColumns = inject(ConfigFilesColumnsService);
 
   protected records$ = new BehaviorSubject<ConfigFile[]>(null);
   protected readonly columns: BdDataColumn<ConfigFile>[] = this.cfgFileColumns.defaultColumns;

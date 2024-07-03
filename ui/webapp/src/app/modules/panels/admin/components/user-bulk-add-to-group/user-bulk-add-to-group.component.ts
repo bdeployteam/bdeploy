@@ -13,9 +13,9 @@ import { UserBulkService } from '../../services/user-bulk.service';
 })
 export class UserBulkAddToGroupComponent {
   private readonly authAdmin = inject(AuthAdminService);
-  protected bulk = inject(UserBulkService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  protected readonly bulk = inject(UserBulkService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected userInput: string;

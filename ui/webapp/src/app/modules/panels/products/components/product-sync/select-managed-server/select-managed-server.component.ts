@@ -10,8 +10,8 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 })
 export class SelectManagedServerComponent {
   private readonly areas = inject(NavAreasService);
-  protected servers = inject(ServersService);
-  protected columns = inject(ServersColumnsService);
+  protected readonly servers = inject(ServersService);
+  protected readonly columns = inject(ServersColumnsService);
 
   protected getRecordRoute = (row: ManagedMasterDto) => {
     // calculate relative route, as this component is used from two different routes.

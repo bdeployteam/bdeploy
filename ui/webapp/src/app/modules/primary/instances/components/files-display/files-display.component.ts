@@ -83,6 +83,10 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly searchService = inject(SearchService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly servers = inject(ServersService);
+  protected readonly authService = inject(AuthenticationService);
+  protected readonly filesBulkService = inject(FilesBulkService);
 
   private searchTerm = '';
   private subscription: Subscription;
@@ -108,10 +112,6 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
     actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
 
-  protected cfg = inject(ConfigService);
-  protected servers = inject(ServersService);
-  protected authService = inject(AuthenticationService);
-  protected filesBulkService = inject(FilesBulkService);
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected records$ = new BehaviorSubject<FilePath[]>(null);
   protected noactive$ = new BehaviorSubject<boolean>(true);

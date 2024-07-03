@@ -12,9 +12,9 @@ import { ServersService } from '../../services/servers.service';
 })
 export class ServersBrowserComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);
-  protected groups = inject(GroupsService);
-  protected servers = inject(ServersService);
-  protected columns = inject(ServersColumnsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly servers = inject(ServersService);
+  protected readonly columns = inject(ServersColumnsService);
 
   grouping: BdDataGroupingDefinition<ManagedMasterDto>[] = [];
 

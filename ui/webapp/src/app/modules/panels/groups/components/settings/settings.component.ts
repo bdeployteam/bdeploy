@@ -17,10 +17,10 @@ import { GroupDetailsService } from '../../services/group-details.service';
 export class SettingsComponent {
   private readonly actions = inject(ActionsService);
   private readonly router = inject(Router);
-  protected auth = inject(AuthenticationService);
-  protected groups = inject(GroupsService);
-  protected details = inject(GroupDetailsService);
-  protected instances = inject(InstancesService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly details = inject(GroupDetailsService);
+  protected readonly instances = inject(InstancesService);
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 

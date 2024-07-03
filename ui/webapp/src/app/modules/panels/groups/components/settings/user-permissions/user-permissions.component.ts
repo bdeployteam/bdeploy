@@ -23,9 +23,9 @@ import { UsersColumnsService } from '../../../../../core/services/users-columns.
   templateUrl: './user-permissions.component.html',
 })
 export class UserPermissionsComponent {
-  protected groups = inject(GroupsService);
-  protected users = inject(GroupUsersService);
-  protected userCols = inject(UsersColumnsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly users = inject(GroupUsersService);
+  protected readonly userCols = inject(UsersColumnsService);
 
   private readonly colInheritedPerm: BdDataColumn<UserInfo> = {
     id: 'inherited',

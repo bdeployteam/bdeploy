@@ -19,8 +19,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly auth0 = inject(AuthService);
   private readonly snackbar = inject(MatSnackBar);
-  protected auth = inject(AuthenticationService);
-  protected cfg = inject(ConfigService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly cfg = inject(ConfigService);
 
   private tokenSubscription: Subscription;
 

@@ -34,9 +34,9 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private readonly search = inject(SearchService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
-  protected hives = inject(HiveService);
-  protected repositories = inject(RepositoriesService);
   private readonly downloads = inject(DownloadService);
+  protected readonly hives = inject(HiveService);
+  protected readonly repositories = inject(RepositoriesService);
 
   private readonly colAvatar: BdDataColumn<HiveEntryDto> = {
     id: 'avatar',

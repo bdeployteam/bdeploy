@@ -42,10 +42,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly processesColumns = inject(ProcessesColumnsService);
   private readonly actions = inject(ActionsService);
   private readonly products = inject(ProductsService);
-  protected instances = inject(InstancesService);
-  protected areas = inject(NavAreasService);
-  protected servers = inject(ServersService);
-  protected auth = inject(AuthenticationService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly servers = inject(ServersService);
+  protected readonly auth = inject(AuthenticationService);
 
   private readonly installing$ = new BehaviorSubject<boolean>(false);
   private readonly activating$ = new BehaviorSubject<boolean>(false);

@@ -13,9 +13,9 @@ import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/servic
   styleUrls: ['./client-detail.component.css'],
 })
 export class ClientDetailComponent implements OnInit, OnDestroy {
-  protected areas = inject(NavAreasService);
-  protected clients = inject(ClientsService);
-  protected auth = inject(AuthenticationService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly clients = inject(ClientsService);
+  protected readonly auth = inject(AuthenticationService);
 
   protected readonly CLIENT_NODE = CLIENT_NODE_NAME;
 

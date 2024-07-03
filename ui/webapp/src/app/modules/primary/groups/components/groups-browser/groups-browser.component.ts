@@ -16,10 +16,10 @@ import { GroupsService } from '../../services/groups.service';
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
   private readonly cardViewService = inject(CardViewService);
-  protected groups = inject(GroupsService);
-  protected groupColumns = inject(GroupsColumnsService);
-  protected config = inject(ConfigService);
-  protected authService = inject(AuthenticationService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly groupColumns = inject(GroupsColumnsService);
+  protected readonly config = inject(ConfigService);
+  protected readonly authService = inject(AuthenticationService);
 
   protected grouping: BdDataGroupingDefinition<InstanceGroupConfigurationDto>[] = [];
 

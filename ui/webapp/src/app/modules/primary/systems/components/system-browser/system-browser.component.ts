@@ -13,9 +13,9 @@ import { SystemsService } from '../../services/systems.service';
 export class SystemBrowserComponent implements OnInit {
   private readonly columns = inject(SystemsColumnsService);
   private readonly config = inject(ConfigService);
-  protected systems = inject(SystemsService);
-  protected groups = inject(GroupsService);
-  protected authService = inject(AuthenticationService);
+  protected readonly systems = inject(SystemsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly authService = inject(AuthenticationService);
 
   protected sysCols = [
     this.columns.systemNameColumn,

@@ -9,8 +9,8 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
   styleUrls: ['./instance-managed-server.component.css'],
 })
 export class InstanceManagedServerComponent {
-  protected auth = inject(AuthenticationService);
   private readonly areas = inject(NavAreasService);
+  protected readonly auth = inject(AuthenticationService);
 
   @Input() record: InstanceDto;
 

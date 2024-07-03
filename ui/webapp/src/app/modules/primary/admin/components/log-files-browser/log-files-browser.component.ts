@@ -13,8 +13,8 @@ import { LoggingAdminService } from '../../services/logging-admin.service';
 })
 export class LogFilesBrowserComponent implements OnInit {
   private readonly cols = inject(LogColumnsService);
-  protected authService = inject(AuthenticationService);
-  protected loggingAdmin = inject(LoggingAdminService);
+  protected readonly authService = inject(AuthenticationService);
+  protected readonly loggingAdmin = inject(LoggingAdminService);
 
   private readonly colDownload: BdDataColumn<RemoteDirectoryEntry> = {
     id: 'download',

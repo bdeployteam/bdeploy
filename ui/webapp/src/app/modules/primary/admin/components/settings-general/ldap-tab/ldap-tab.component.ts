@@ -19,7 +19,7 @@ import { LdapImportActionComponent } from './ldap-import-action/ldap-import-acti
 })
 export class LdapTabComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
 
   private readonly colServer: BdDataColumn<LDAPSettingsDto> = {
     id: 'server',

@@ -33,8 +33,8 @@ const colLauncher: BdDataColumn<SoftwareVersion> = {
   templateUrl: './update-browser.component.html',
 })
 export class UpdateBrowserComponent implements OnInit {
-  protected software = inject(SoftwareUpdateService);
-  protected bulk = inject(SoftwareVersionBulkService);
+  protected readonly software = inject(SoftwareUpdateService);
+  protected readonly bulk = inject(SoftwareVersionBulkService);
 
   protected readonly columns: BdDataColumn<SoftwareVersion>[] = [colTag, colSystem, colLauncher];
   protected getRecordRoute = (r: SoftwareVersion) => {

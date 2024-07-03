@@ -13,7 +13,7 @@ import { AttributeEditActionComponent } from './attribute-edit-action/attribute-
 })
 export class AttributesTabComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
-  protected settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
 
   private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',

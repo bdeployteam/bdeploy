@@ -31,7 +31,7 @@ import { BdSearchable, SearchService } from '../../services/search.service';
 })
 export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
   private readonly searchService = inject(SearchService);
-  protected areas = inject(NavAreasService);
+  protected readonly areas = inject(NavAreasService);
 
   /**
    * The columns to display

@@ -37,7 +37,7 @@ import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdValueEditorComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
-  protected ngControl = inject(NgControl, { self: true, optional: true });
+  protected readonly ngControl = inject(NgControl, { self: true, optional: true });
 
   @Input() label: string;
   @Input() name: string;

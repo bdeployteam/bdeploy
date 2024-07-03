@@ -47,7 +47,7 @@ const nodeColOs: BdDataColumn<MinionRecord> = {
   templateUrl: './nodes.component.html',
 })
 export class NodesComponent {
-  protected nodesAdmin = inject(NodesAdminService);
+  protected readonly nodesAdmin = inject(NodesAdminService);
 
   protected sort: Sort = { active: 'name', direction: 'asc' };
   protected getRecordRoute = (row: MinionRecord) => [

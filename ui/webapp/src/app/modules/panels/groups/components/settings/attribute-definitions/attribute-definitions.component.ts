@@ -16,8 +16,8 @@ import { GroupDetailsService } from '../../../services/group-details.service';
   templateUrl: './attribute-definitions.component.html',
 })
 export class AttributeDefinitionsComponent {
-  protected groups = inject(GroupsService);
-  protected details = inject(GroupDetailsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly details = inject(GroupDetailsService);
 
   private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',

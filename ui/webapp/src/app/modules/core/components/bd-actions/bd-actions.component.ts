@@ -11,7 +11,7 @@ import { ActionsService } from '../../services/actions.service';
 })
 export class BdActionsComponent {
   private readonly instances = inject(InstancesService);
-  protected actions = inject(ActionsService);
+  protected readonly actions = inject(ActionsService);
 
   // to update duration values every second.
   content$ = timer(0, 1000).pipe(switchMap(() => this.actions.actions$.pipe(take(1))));

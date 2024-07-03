@@ -19,7 +19,7 @@ export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable 
   private readonly bop = inject(BreakpointObserver);
   private readonly details = inject(HistoryDetailsService);
   private readonly searchService = inject(SearchService);
-  protected instances = inject(InstancesService);
+  protected readonly instances = inject(InstancesService);
 
   protected narrow$ = new BehaviorSubject<boolean>(false);
 

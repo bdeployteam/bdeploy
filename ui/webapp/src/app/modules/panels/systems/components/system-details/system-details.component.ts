@@ -20,8 +20,8 @@ export class SystemDetailsComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);
   private readonly servers = inject(ServersService);
   private readonly instanceColumns = inject(InstancesColumnsService);
-  protected edit = inject(SystemsEditService);
-  protected auth = inject(AuthenticationService);
+  protected readonly edit = inject(SystemsEditService);
+  protected readonly auth = inject(AuthenticationService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected instancesUsing$ = new BehaviorSubject<InstanceDto[]>(null);

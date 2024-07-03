@@ -30,11 +30,11 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   private readonly products = inject(ProductsService);
   private readonly router = inject(Router);
   private readonly groups = inject(GroupsService);
-  protected cfg = inject(ConfigService);
-  protected areas = inject(NavAreasService);
-  protected servers = inject(ServersService);
-  protected edit = inject(InstanceEditService);
-  protected auth = inject(AuthenticationService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly servers = inject(ServersService);
+  protected readonly edit = inject(InstanceEditService);
+  protected readonly auth = inject(AuthenticationService);
 
   private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
     id: 'app',

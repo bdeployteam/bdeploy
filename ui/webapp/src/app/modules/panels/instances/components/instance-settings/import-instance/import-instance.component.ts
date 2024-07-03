@@ -13,7 +13,7 @@ interface ImportFile {
   templateUrl: './import-instance.component.html',
 })
 export class ImportInstanceComponent {
-  protected instances = inject(InstancesService);
+  protected readonly instances = inject(InstancesService);
 
   protected files: ImportFile[] = [];
 

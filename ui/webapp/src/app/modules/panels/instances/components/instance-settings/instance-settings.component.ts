@@ -19,8 +19,8 @@ export class InstanceSettingsComponent {
   private readonly instances = inject(InstancesService);
   private readonly router = inject(Router);
   private readonly actions = inject(ActionsService);
-  protected auth = inject(AuthenticationService);
-  protected edit = inject(InstanceEditService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly edit = inject(InstanceEditService);
 
   private readonly deleting$ = new BehaviorSubject<boolean>(false);
   protected mappedDelete$ = this.actions.action([Actions.DELETE_INSTANCE], this.deleting$);

@@ -67,7 +67,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   private readonly instances = inject(InstancesService);
   private readonly areas = inject(NavAreasService);
   private readonly snackbar = inject(MatSnackBar);
-  protected auth = inject(AuthenticationService);
+  protected readonly auth = inject(AuthenticationService);
 
   private readonly colEdit: BdDataColumn<ConfigVariable> = {
     id: 'edit',

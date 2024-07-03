@@ -21,10 +21,10 @@ import { errorMarker } from '../../../../utils/monaco-editor-utils';
   templateUrl: './editor.component.html',
 })
 export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
-  protected cfgFiles = inject(ConfigFilesService);
   private readonly areas = inject(NavAreasService);
   private readonly edit = inject(InstanceEditService);
   private readonly systems = inject(SystemsService);
+  protected readonly cfgFiles = inject(ConfigFilesService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected file$ = new BehaviorSubject<string>(null);

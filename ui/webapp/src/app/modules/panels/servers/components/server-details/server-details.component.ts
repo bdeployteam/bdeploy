@@ -55,10 +55,10 @@ const detailOsCol: BdDataColumn<MinionRow> = {
 })
 export class ServerDetailsComponent implements OnInit {
   private readonly actions = inject(ActionsService);
-  protected servers = inject(ServersService);
-  protected serverDetails = inject(ServerDetailsService);
-  protected auth = inject(AuthenticationService);
-  protected areas = inject(NavAreasService);
+  protected readonly servers = inject(ServersService);
+  protected readonly serverDetails = inject(ServerDetailsService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly areas = inject(NavAreasService);
 
   private readonly deleting$ = new BehaviorSubject<boolean>(false);
 

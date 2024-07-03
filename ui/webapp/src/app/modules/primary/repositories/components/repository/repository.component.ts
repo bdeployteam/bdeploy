@@ -12,10 +12,10 @@ import { RepositoryService } from '../../services/repository.service';
 })
 export class RepositoryComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);
-  protected repositories = inject(RepositoriesService);
-  protected repository = inject(RepositoryService);
-  protected repositoryColumns = inject(RepositoryColumnsService);
-  protected auth = inject(AuthenticationService);
+  protected readonly repositories = inject(RepositoriesService);
+  protected readonly repository = inject(RepositoryService);
+  protected readonly repositoryColumns = inject(RepositoryColumnsService);
+  protected readonly auth = inject(AuthenticationService);
 
   protected grouping: BdDataGroupingDefinition<any>[] = [{ name: 'Type', group: (r) => r.type }];
   protected defaultGrouping: BdDataGrouping<unknown>[] = [{ definition: this.grouping[0], selected: [] }];

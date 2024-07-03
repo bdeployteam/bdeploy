@@ -10,7 +10,7 @@ import { bdValidationMessage } from '../../validators/messages';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMatcher {
-  protected ngControl = inject(NgControl, { self: true, optional: true });
+  protected readonly ngControl = inject(NgControl, { self: true, optional: true });
 
   @Input() label: string;
   @Input() name: string;

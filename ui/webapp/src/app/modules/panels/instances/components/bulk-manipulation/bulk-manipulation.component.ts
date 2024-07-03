@@ -19,10 +19,10 @@ import { ACTION_APPLY } from './../../../../core/components/bd-dialog-message/bd
   templateUrl: './bulk-manipulation.component.html',
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
-  protected bulk = inject(InstanceBulkService);
-  protected instance = inject(InstancesService);
-  protected products = inject(ProductsService);
-  protected actions = inject(ActionsService);
+  protected readonly bulk = inject(InstanceBulkService);
+  protected readonly instance = inject(InstancesService);
+  protected readonly products = inject(ProductsService);
+  protected readonly actions = inject(ActionsService);
 
   private readonly starting$ = new BehaviorSubject<boolean>(false);
   private readonly restarting$ = new BehaviorSubject<boolean>(false);

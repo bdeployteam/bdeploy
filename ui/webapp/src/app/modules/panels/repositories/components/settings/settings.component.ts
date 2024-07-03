@@ -14,9 +14,9 @@ import { RepositoryDetailsService } from '../../services/repository-details.serv
 })
 export class SettingsComponent {
   private readonly router = inject(Router);
-  protected auth = inject(AuthenticationService);
-  protected repositories = inject(RepositoriesService);
-  protected details = inject(RepositoryDetailsService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly repositories = inject(RepositoriesService);
+  protected readonly details = inject(RepositoryDetailsService);
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 

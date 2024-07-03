@@ -20,9 +20,9 @@ import { AuthAdminService } from '../../services/auth-admin.service';
 })
 export class UsersBrowserComponent {
   private readonly userColumns = inject(UsersColumnsService);
-  protected authAdmin = inject(AuthAdminService);
-  protected settings = inject(SettingsService);
-  protected bulk = inject(UserBulkService);
+  protected readonly authAdmin = inject(AuthAdminService);
+  protected readonly settings = inject(SettingsService);
+  protected readonly bulk = inject(UserBulkService);
 
   private readonly colInGroups: BdDataColumn<UserInfo> = {
     id: 'inGroups',

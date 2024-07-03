@@ -40,7 +40,7 @@ const redoColumn: BdDataColumn<InstanceEditRow> = {
   templateUrl: './local-changes.component.html',
 })
 export class LocalChangesComponent implements OnInit, OnDestroy {
-  protected edit = inject(InstanceEditService);
+  protected readonly edit = inject(InstanceEditService);
 
   protected records: InstanceEditRow[] = [];
   protected readonly columns: BdDataColumn<InstanceEditRow>[] = [descColumn, currentColumn, redoColumn];

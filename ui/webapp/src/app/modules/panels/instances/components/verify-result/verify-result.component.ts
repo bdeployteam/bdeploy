@@ -9,7 +9,7 @@ import { VerifyOperationResultDto } from 'src/app/models/gen.dtos';
 })
 export class VerifyResultComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<VerifyResultComponent>);
-  protected data: VerifyOperationResultDto = inject(MAT_DIALOG_DATA);
+  protected readonly data: VerifyOperationResultDto = inject(MAT_DIALOG_DATA);
   protected isCorrupted: boolean;
 
   protected verifyResult$ = new Subject<string>();

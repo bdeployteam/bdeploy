@@ -22,7 +22,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
   private readonly actions = inject(ActionsService);
   private readonly snackbar = inject(MatSnackBar);
-  protected nodesAdmin = inject(NodesAdminService);
+  protected readonly nodesAdmin = inject(NodesAdminService);
 
   private readonly saving$ = new BehaviorSubject<boolean>(false);
 

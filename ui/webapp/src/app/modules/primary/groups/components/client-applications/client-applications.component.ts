@@ -57,10 +57,10 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
   templateUrl: './client-applications.component.html',
 })
 export class ClientApplicationsComponent implements OnInit {
-  protected groups = inject(GroupsService);
-  protected clients = inject(ClientsService);
   private readonly dd = inject(DeviceDetectorService);
   private readonly cardViewService = inject(CardViewService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly clients = inject(ClientsService);
 
   protected currentOs: OperatingSystem;
   protected readonly columns: BdDataColumn<ClientApp>[] = [

@@ -28,9 +28,9 @@ const colNodeName: BdDataColumn<NodeRow> = {
   templateUrl: './move-process.component.html',
 })
 export class MoveProcessComponent implements OnInit, OnDestroy {
-  public instanceEdit = inject(InstanceEditService);
-  public edit = inject(ProcessEditService);
   private readonly areas = inject(NavAreasService);
+  public readonly instanceEdit = inject(InstanceEditService);
+  public readonly edit = inject(ProcessEditService);
 
   protected records: NodeRow[] = [];
   protected readonly columns: BdDataColumn<NodeRow>[] = [colNodeName];

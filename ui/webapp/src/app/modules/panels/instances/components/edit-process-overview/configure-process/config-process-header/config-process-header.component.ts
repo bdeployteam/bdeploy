@@ -21,8 +21,8 @@ export class DirTreeNode {
   styleUrls: ['./config-process-header.component.css'],
 })
 export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterViewInit {
-  protected edit = inject(ProcessEditService);
   private readonly instances = inject(InstancesService);
+  protected readonly edit = inject(ProcessEditService);
 
   @ViewChild('form') public form: NgForm;
   @ViewChild('dirSelector', { static: false }) private readonly dirSelector: BdPopupDirective;

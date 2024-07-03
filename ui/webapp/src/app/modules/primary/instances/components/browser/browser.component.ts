@@ -25,14 +25,14 @@ import { OverallStatusColumnComponent } from './overall-status-column/overall-st
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   private readonly config = inject(ConfigService);
   private readonly cardViewService = inject(CardViewService);
-  protected instances = inject(InstancesService);
-  protected instanceColumns = inject(InstancesColumnsService);
-  protected products = inject(ProductsService);
-  protected groups = inject(GroupsService);
-  protected areas = inject(NavAreasService);
-  protected authService = inject(AuthenticationService);
-  protected bulk = inject(InstanceBulkService);
-  protected servers = inject(ServersService);
+  protected readonly instances = inject(InstancesService);
+  protected readonly instanceColumns = inject(InstancesColumnsService);
+  protected readonly products = inject(ProductsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly areas = inject(NavAreasService);
+  protected readonly authService = inject(AuthenticationService);
+  protected readonly bulk = inject(InstanceBulkService);
+  protected readonly servers = inject(ServersService);
 
   protected initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
     {

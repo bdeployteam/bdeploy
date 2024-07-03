@@ -43,7 +43,7 @@ const colPerm: BdDataColumn<HiveInfoDto> = {
   templateUrl: './bhive.component.html',
 })
 export class BHiveComponent implements OnInit {
-  protected hives = inject(HiveService);
+  protected readonly hives = inject(HiveService);
 
   protected readonly columns: BdDataColumn<HiveInfoDto>[] = [colAvatar, colId, colPoolEnabled, colPerm];
   protected sort: Sort = { active: 'id', direction: 'asc' };

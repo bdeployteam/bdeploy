@@ -28,7 +28,7 @@ const colDesc: BdDataColumn<CleanupAction> = {
   encapsulation: ViewEncapsulation.None,
 })
 export class MasterCleanupComponent {
-  protected cleanup = inject(CleanupService);
+  protected readonly cleanup = inject(CleanupService);
 
   protected readonly columns: BdDataColumn<CleanupAction>[] = [colType, colWhat, colDesc];
 }

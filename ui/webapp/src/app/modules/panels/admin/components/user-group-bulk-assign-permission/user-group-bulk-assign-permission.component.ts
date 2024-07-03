@@ -14,11 +14,11 @@ import { UserGroupBulkService } from '../../services/user-group-bulk.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserGroupBulkAssignPermissionComponent implements OnInit, OnDestroy {
-  protected bulk = inject(UserGroupBulkService);
   private readonly groups = inject(GroupsService);
   private readonly repositories = inject(RepositoriesService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  protected readonly bulk = inject(UserGroupBulkService);
 
   protected scopes$ = new BehaviorSubject<string[]>([null]);
   protected labels$ = new BehaviorSubject<string[]>(['Global']);

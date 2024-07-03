@@ -23,7 +23,7 @@ export interface PortParam {
 })
 export class PortsEditService {
   private readonly procEdit = inject(ProcessEditService);
-  protected edit = inject(InstanceEditService);
+  protected readonly edit = inject(InstanceEditService);
 
   public ports$ = new BehaviorSubject<PortParam[]>(null);
 

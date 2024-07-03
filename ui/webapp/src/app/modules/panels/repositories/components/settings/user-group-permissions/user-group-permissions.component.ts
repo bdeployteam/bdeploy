@@ -18,8 +18,8 @@ import { RepositoryUsersService } from '../../../services/repository-users.servi
 })
 export class UserGroupPermissionsComponent {
   private readonly groupCols = inject(UserGroupsColumnsService);
-  protected repos = inject(RepositoriesService);
-  protected users = inject(RepositoryUsersService);
+  protected readonly repos = inject(RepositoriesService);
+  protected readonly users = inject(RepositoryUsersService);
 
   private readonly colGlobalPerm: BdDataColumn<UserGroupInfo> = {
     id: 'global',

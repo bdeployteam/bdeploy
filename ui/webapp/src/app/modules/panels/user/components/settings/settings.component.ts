@@ -25,8 +25,8 @@ const colUserGroupName: BdDataColumn<UserGroupPermission> = {
 export class SettingsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly permissionColumnsService = inject(PermissionColumnsService);
-  protected authService = inject(AuthenticationService);
-  protected settings = inject(SettingsService);
+  protected readonly authService = inject(AuthenticationService);
+  protected readonly settings = inject(SettingsService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected user: UserInfo;

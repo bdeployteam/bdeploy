@@ -6,7 +6,7 @@ import { SoftwareUpdateService } from 'src/app/modules/primary/admin/services/so
   templateUrl: './software-upload.component.html',
 })
 export class SoftwareUploadComponent {
-  protected software = inject(SoftwareUpdateService);
+  protected readonly software = inject(SoftwareUpdateService);
 
   protected files: File[] = [];
 

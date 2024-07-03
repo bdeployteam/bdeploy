@@ -18,10 +18,10 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
 })
 export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly areas = inject(NavAreasService);
-  protected cfg = inject(ConfigService);
-  protected edit = inject(InstanceEditService);
-  protected servers = inject(ServersService);
-  protected systems = inject(SystemsService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly edit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
+  protected readonly systems = inject(SystemsService);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;

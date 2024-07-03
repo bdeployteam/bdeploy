@@ -16,12 +16,12 @@ import { ProductsService } from '../../services/products.service';
 })
 export class ProductsBrowserComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);
-  protected cfg = inject(ConfigService);
-  protected products = inject(ProductsService);
-  protected productColumns = inject(ProductsColumnsService);
-  protected groups = inject(GroupsService);
-  protected auth = inject(AuthenticationService);
-  protected bulk = inject(ProductBulkService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly products = inject(ProductsService);
+  protected readonly productColumns = inject(ProductsColumnsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly auth = inject(AuthenticationService);
+  protected readonly bulk = inject(ProductBulkService);
 
   protected grouping: BdDataGroupingDefinition<ProductDto>[] = [{ name: 'Product ID', group: (r) => r.product }];
   protected defaultGrouping: BdDataGrouping<ProductDto>[] = [{ definition: this.grouping[0], selected: [] }];

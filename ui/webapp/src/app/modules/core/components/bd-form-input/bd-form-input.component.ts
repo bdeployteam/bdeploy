@@ -25,8 +25,8 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMatcher {
-  protected ngControl = inject(NgControl, { self: true, optional: true });
-  protected elementRef = inject(ElementRef);
+  protected readonly ngControl = inject(NgControl, { self: true, optional: true });
+  protected readonly elementRef = inject(ElementRef);
 
   @Input() label: string;
   @Input() name: string;

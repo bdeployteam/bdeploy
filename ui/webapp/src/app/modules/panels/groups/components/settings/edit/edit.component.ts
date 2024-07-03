@@ -22,8 +22,8 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
   private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly areas = inject(NavAreasService);
-  protected groups = inject(GroupsService);
-  protected details = inject(GroupDetailsService);
+  protected readonly groups = inject(GroupsService);
+  protected readonly details = inject(GroupDetailsService);
 
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected group: InstanceGroupConfiguration;

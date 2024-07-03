@@ -30,9 +30,9 @@ const GROUP_TEMPLATE = {
 })
 export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly areas = inject(NavAreasService);
-  protected cfg = inject(ConfigService);
-  protected edit = inject(InstanceEditService);
-  protected servers = inject(ServersService);
+  protected readonly cfg = inject(ConfigService);
+  protected readonly edit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;

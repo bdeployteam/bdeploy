@@ -11,8 +11,8 @@ import { ProductBulkOperationResultComponent } from '../product-bulk-operation-r
   templateUrl: './product-bulk.component.html',
 })
 export class ProductBulkComponent {
-  protected bulk = inject(ProductBulkService);
   private readonly confirm = inject(ConfirmationService);
+  protected readonly bulk = inject(ProductBulkService);
 
   protected deleting$ = new BehaviorSubject<boolean>(false);
 

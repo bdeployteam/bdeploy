@@ -7,5 +7,5 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
   styleUrls: ['./admin-shell.component.css'],
 })
 export class AdminShellComponent {
-  public cfg = inject(ConfigService);
+  public readonly cfg = inject(ConfigService);
 }
