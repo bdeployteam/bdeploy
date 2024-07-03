@@ -36,7 +36,7 @@ export class UpdateBrowserComponent implements OnInit {
   protected software = inject(SoftwareUpdateService);
   protected bulk = inject(SoftwareVersionBulkService);
 
-  protected columns: BdDataColumn<SoftwareVersion>[] = [colTag, colSystem, colLauncher];
+  protected readonly columns: BdDataColumn<SoftwareVersion>[] = [colTag, colSystem, colLauncher];
   protected getRecordRoute = (r: SoftwareVersion) => {
     return [
       '',

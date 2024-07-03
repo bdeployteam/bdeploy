@@ -52,7 +52,7 @@ export class AttributesComponent implements OnInit {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   protected loading$ = new BehaviorSubject<boolean>(false);
-  protected columns: BdDataColumn<AttributeRow>[] = [this.attrNameCol, this.attrValCol, this.attrRemoveCol];
+  protected readonly columns: BdDataColumn<AttributeRow>[] = [this.attrNameCol, this.attrValCol, this.attrRemoveCol];
   protected records: AttributeRow[] = [];
   protected defs: CustomAttributeDescriptor[];
 

@@ -30,5 +30,5 @@ const colDesc: BdDataColumn<CleanupAction> = {
 export class MasterCleanupComponent {
   protected cleanup = inject(CleanupService);
 
-  protected columns: BdDataColumn<CleanupAction>[] = [colType, colWhat, colDesc];
+  protected readonly columns: BdDataColumn<CleanupAction>[] = [colType, colWhat, colDesc];
 }

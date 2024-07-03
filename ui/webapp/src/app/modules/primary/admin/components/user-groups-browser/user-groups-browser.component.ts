@@ -36,7 +36,7 @@ export class UserGroupsBrowserComponent {
     width: '40px',
   };
 
-  protected columns: BdDataColumn<UserGroupInfo>[] = [
+  protected readonly columns: BdDataColumn<UserGroupInfo>[] = [
     ...this.groupCols.defaultColumns,
     this.colInact,
     this.colPermLevel,

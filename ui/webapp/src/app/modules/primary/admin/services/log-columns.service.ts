@@ -40,5 +40,5 @@ const colMod: BdDataColumn<RemoteDirectoryEntry> = {
   providedIn: 'root',
 })
 export class LogColumnsService {
-  public defaultColumns: BdDataColumn<RemoteDirectoryEntry>[] = [colAvatar, colPath, colSize, colMod];
+  public readonly defaultColumns: BdDataColumn<RemoteDirectoryEntry>[] = [colAvatar, colPath, colSize, colMod];
 }

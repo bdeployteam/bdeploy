@@ -105,7 +105,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected nodeCfg: InstanceNodeConfigurationDto;
   protected startType: 'Instance' | 'Manual' | 'Confirmed Manual';
   protected pinnedParameters: PinnedParameter[] = [];
-  protected pinnedColumns: BdDataColumn<PinnedParameter>[] = [colPinnedName, colPinnedValue];
+  protected readonly pinnedColumns: BdDataColumn<PinnedParameter>[] = [colPinnedName, colPinnedValue];
   protected uiEndpoints: ProcessUiEndpoint[] = [];
 
   // we only show a loading spinner if loading takes longer than 200ms.

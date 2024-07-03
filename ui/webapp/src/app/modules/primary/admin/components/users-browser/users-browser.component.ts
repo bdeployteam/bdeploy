@@ -73,7 +73,7 @@ export class UsersBrowserComponent {
   protected loading$ = combineLatest([this.settings.loading$, this.authAdmin.loadingUsers$]).pipe(
     map(([s, a]) => s || a),
   );
-  protected columns: BdDataColumn<UserInfo>[] = [
+  protected readonly columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
     this.colPermLevel,
     this.colInGroups,

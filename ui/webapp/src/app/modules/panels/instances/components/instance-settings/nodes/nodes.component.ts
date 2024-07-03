@@ -33,7 +33,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   protected servers = inject(ServersService);
 
   protected records: NodeRow[] = [];
-  protected columns: BdDataColumn<NodeRow>[] = [colNodeName];
+  protected readonly columns: BdDataColumn<NodeRow>[] = [colNodeName];
   protected checked: NodeRow[] = [];
   protected hasPendingChanges: boolean;
 

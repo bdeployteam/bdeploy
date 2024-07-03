@@ -40,7 +40,7 @@ export class RepositoriesColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  public defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [
+  public readonly defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [
     this.repositoryTypeColumn,
     this.repositoryNameColumn,
     this.repositoryDescriptionColumn,

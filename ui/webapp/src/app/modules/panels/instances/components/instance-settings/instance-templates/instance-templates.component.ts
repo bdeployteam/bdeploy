@@ -74,7 +74,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected variables: { [key: string]: string }; // key is var name, value is value.
   protected groups: { [key: string]: string }; // key is group name, value is target node name.
   protected messages: TemplateMessage[];
-  protected msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
+  protected readonly msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
   protected isAnyGroupSelected = false;
   protected hasAllVariables = false;
   protected firstStepCompleted = false;

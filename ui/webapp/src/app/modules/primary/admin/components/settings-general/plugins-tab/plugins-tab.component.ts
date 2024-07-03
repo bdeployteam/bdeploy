@@ -67,7 +67,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  protected columns: BdDataColumn<PluginInfoDto>[] = [
+  protected readonly columns: BdDataColumn<PluginInfoDto>[] = [
     this.colId,
     this.colName,
     this.colVersion,

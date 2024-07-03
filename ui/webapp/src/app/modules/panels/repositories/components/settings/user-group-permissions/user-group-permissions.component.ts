@@ -56,7 +56,7 @@ export class UserGroupPermissionsComponent {
 
   private readonly groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
 
-  protected columns: BdDataColumn<UserGroupInfo>[] = [
+  protected readonly columns: BdDataColumn<UserGroupInfo>[] = [
     ...this.groupCols.defaultColumns,
     this.colGlobalPerm,
     this.colLocalPerm,

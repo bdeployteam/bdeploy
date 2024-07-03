@@ -97,7 +97,13 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   protected system: SystemConfigurationDto;
   protected saving$ = new BehaviorSubject<boolean>(false);
   protected records: ConfigVariable[] = [];
-  protected columns: BdDataColumn<ConfigVariable>[] = [colName, colValue, colDesc, this.colEdit, this.colDelete];
+  protected readonly columns: BdDataColumn<ConfigVariable>[] = [
+    colName,
+    colValue,
+    colDesc,
+    this.colEdit,
+    this.colDelete,
+  ];
   protected checked: ConfigVariable[];
   protected clipboardVars: ConfigVariable[];
 

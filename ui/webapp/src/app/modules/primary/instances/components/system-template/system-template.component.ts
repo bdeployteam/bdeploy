@@ -106,7 +106,7 @@ export class SystemTemplateComponent implements OnInit {
   protected isAllVariablesSet = false;
   protected isAnyInstanceApplied = false;
   protected result: SystemTemplateResultDto;
-  protected resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] = [
+  protected readonly resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] = [
     colInstResIcon,
     colInstanceName,
     colInstanceMsg,

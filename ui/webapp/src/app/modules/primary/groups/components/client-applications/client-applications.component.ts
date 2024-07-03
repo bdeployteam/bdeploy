@@ -63,7 +63,7 @@ export class ClientApplicationsComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);
 
   protected currentOs: OperatingSystem;
-  protected columns: BdDataColumn<ClientApp>[] = [
+  protected readonly columns: BdDataColumn<ClientApp>[] = [
     clientNameColumn,
     clientIdColumn,
     clientInstanceColumn,

@@ -25,7 +25,7 @@ export class LogFilesBrowserComponent implements OnInit {
     icon: () => 'cloud_download',
   };
 
-  protected columns: BdDataColumn<RemoteDirectoryEntry>[] = [...this.cols.defaultColumns, this.colDownload];
+  protected readonly columns: BdDataColumn<RemoteDirectoryEntry>[] = [...this.cols.defaultColumns, this.colDownload];
   protected records$ = new BehaviorSubject<RemoteDirectoryEntry[]>([]);
   protected sort: Sort = { active: 'modified', direction: 'desc' };
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);

@@ -16,7 +16,7 @@ export class ProductsColumnsService {
     sortCard: true,
   };
 
-  public productVersionColumn: BdDataColumn<ProductDto> = {
+  public readonly productVersionColumn: BdDataColumn<ProductDto> = {
     id: 'version',
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -42,14 +42,14 @@ export class ProductsColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  public defaultProductsColumns: BdDataColumn<ProductDto>[] = [
+  public readonly defaultProductsColumns: BdDataColumn<ProductDto>[] = [
     this.productNameColumn,
     this.productVersionColumn,
     this.productVendorColumn,
     this.productLogoCardColumn,
   ];
 
-  public defaultReducedProductsColumns: BdDataColumn<ProductDto>[] = [
+  public readonly defaultReducedProductsColumns: BdDataColumn<ProductDto>[] = [
     this.productNameColumn,
     this.productVersionColumn,
   ];

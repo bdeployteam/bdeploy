@@ -89,10 +89,14 @@ export class SoftwareDetailsComponent implements OnInit {
   protected auth = inject(AuthenticationService);
   protected actions = inject(ActionsService);
 
-  protected labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
-  protected appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = [appTemplateNameColumn];
-  protected instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = [instTemplateNameColumn];
-  protected pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
+  protected readonly labelColumns: BdDataColumn<LabelRecord>[] = //
+    [labelKeyColumn, labelValueColumn];
+  protected readonly appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = //
+    [appTemplateNameColumn];
+  protected readonly instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = //
+    [instTemplateNameColumn];
+  protected readonly pluginColumns: BdDataColumn<PluginInfoDto>[] = //
+    [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
   protected softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
   private readonly p$ = this.detailsService.softwarePackage$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));

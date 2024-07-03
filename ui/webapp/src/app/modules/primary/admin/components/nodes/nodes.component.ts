@@ -54,7 +54,7 @@ export class NodesComponent {
     '',
     { outlets: { panel: ['panels', 'admin', 'node-detail', row.name] } },
   ];
-  protected columns: BdDataColumn<MinionRecord>[] = [
+  protected readonly columns: BdDataColumn<MinionRecord>[] = [
     nodeColName,
     nodeColStatus,
     nodeColInfo,

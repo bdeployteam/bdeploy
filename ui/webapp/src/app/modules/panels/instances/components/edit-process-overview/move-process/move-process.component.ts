@@ -33,7 +33,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
 
   protected records: NodeRow[] = [];
-  protected columns: BdDataColumn<NodeRow>[] = [colNodeName];
+  protected readonly columns: BdDataColumn<NodeRow>[] = [colNodeName];
 
   private currentNode: InstanceNodeConfigurationDto;
   private subscription: Subscription;

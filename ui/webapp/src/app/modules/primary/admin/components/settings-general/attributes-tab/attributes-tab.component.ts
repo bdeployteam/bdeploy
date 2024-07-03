@@ -47,7 +47,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.selectedAttributeName === r.name,
   };
 
-  protected attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [
+  protected readonly attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [
     this.defIdCol,
     this.defDescCol,
     this.defEditCol,

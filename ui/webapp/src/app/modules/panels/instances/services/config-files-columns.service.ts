@@ -42,7 +42,7 @@ export class ConfigFilesColumnsService {
     width: '230px',
   };
 
-  public defaultColumns: BdDataColumn<ConfigFile>[] = [
+  public readonly defaultColumns: BdDataColumn<ConfigFile>[] = [
     this.colFileName,
     this.colStatus,
     this.colProductState,

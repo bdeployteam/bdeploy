@@ -69,7 +69,7 @@ export class UserPermissionsComponent {
     disabled: () => !this.getLocalPermissionLevel(this.modUser),
   };
 
-  protected columns: BdDataColumn<UserInfo>[] = [
+  protected readonly columns: BdDataColumn<UserInfo>[] = [
     ...this.userCols.defaultUsersColumns,
     this.colInheritedPerm,
     this.colGlobalPerm,

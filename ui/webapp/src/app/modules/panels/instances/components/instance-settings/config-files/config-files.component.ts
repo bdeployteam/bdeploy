@@ -21,7 +21,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
   protected cfgFileColumns = inject(ConfigFilesColumnsService);
 
   protected records$ = new BehaviorSubject<ConfigFile[]>(null);
-  protected columns: BdDataColumn<ConfigFile>[] = this.cfgFileColumns.defaultColumns;
+  protected readonly columns: BdDataColumn<ConfigFile>[] = this.cfgFileColumns.defaultColumns;
 
   protected groupingDefinition: BdDataGroupingDefinition<ConfigFile> = {
     name: 'Configuration File Availability',

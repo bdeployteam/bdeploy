@@ -48,7 +48,7 @@ export class PortsComponent implements OnInit {
   protected edit = inject(InstanceEditService);
   protected portEdit = inject(PortsEditService);
 
-  protected columns: BdDataColumn<PortParam>[] = [colName, colType, colPort];
+  protected readonly columns: BdDataColumn<PortParam>[] = [colName, colType, colPort];
   protected checked: PortParam[];
   protected ports: PortParam[] = [];
   protected amount: number;

@@ -58,7 +58,7 @@ export class BdExpressionPickerComponent implements OnChanges {
   protected pathRecords: LinkVariable[];
   protected specialRecords: LinkVariable[];
 
-  protected varColumns: BdDataColumn<LinkVariable>[] = [colVarName, colVarValue, colVarDesc];
+  protected readonly varColumns: BdDataColumn<LinkVariable>[] = [colVarName, colVarValue, colVarDesc];
   /* temlpate */ paramGrouping: BdDataGrouping<LinkVariable>[] = [
     {
       definition: { group: (r) => r.group, name: 'Application' },

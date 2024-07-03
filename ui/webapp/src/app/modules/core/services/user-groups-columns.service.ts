@@ -19,5 +19,5 @@ const colDescription: BdDataColumn<UserGroupInfo> = {
   providedIn: 'root',
 })
 export class UserGroupsColumnsService {
-  public defaultColumns: BdDataColumn<UserGroupInfo>[] = [colName, colDescription];
+  public readonly defaultColumns: BdDataColumn<UserGroupInfo>[] = [colName, colDescription];
 }

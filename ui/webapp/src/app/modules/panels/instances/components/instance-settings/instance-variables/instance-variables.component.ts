@@ -86,7 +86,13 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   };
 
   protected records: ConfigVariable[] = [];
-  protected columns: BdDataColumn<ConfigVariable>[] = [colName, colValue, colDesc, this.colEdit, this.colDelete];
+  protected readonly columns: BdDataColumn<ConfigVariable>[] = [
+    colName,
+    colValue,
+    colDesc,
+    this.colEdit,
+    this.colDelete,
+  ];
   protected checked: ConfigVariable[];
   protected clipboardVars: ConfigVariable[];
 

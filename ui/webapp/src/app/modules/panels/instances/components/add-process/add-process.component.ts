@@ -63,7 +63,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected records$ = new BehaviorSubject<AppRow[]>([]);
-  protected columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
+  protected readonly columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
 
   protected selectedTemplate: FlattenedApplicationTemplateConfiguration;
   protected response: { [key: string]: string };

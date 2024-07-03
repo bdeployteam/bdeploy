@@ -113,13 +113,18 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   protected areas = inject(NavAreasService);
   protected auth = inject(AuthenticationService);
 
-  protected instanceColumns: BdDataColumn<InstanceUsageDto>[] = [instanceNameColumn, instanceTagColumn];
-  protected labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
-  protected appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = [appTemplateNameColumn];
-  protected instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = [instTemplateNameColumn];
-  protected pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
+  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto>[] = //
+    [instanceNameColumn, instanceTagColumn];
+  protected readonly labelColumns: BdDataColumn<LabelRecord>[] = //
+    [labelKeyColumn, labelValueColumn];
+  protected readonly appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = //
+    [appTemplateNameColumn];
+  protected readonly instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = //
+    [instTemplateNameColumn];
+  protected readonly pluginColumns: BdDataColumn<PluginInfoDto>[] = //
+    [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
 
-  protected refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
+  protected readonly refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
   protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
   private subscription: Subscription;

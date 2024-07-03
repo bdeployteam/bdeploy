@@ -67,7 +67,7 @@ export class GroupsColumnsService {
       ),
   };
 
-  public defaultGroupColumns: BdDataColumn<InstanceGroupConfigurationDto>[] = [
+  public readonly defaultGroupColumns: BdDataColumn<InstanceGroupConfigurationDto>[] = [
     this.groupTypeColumn,
     this.groupNameColumn,
     this.groupTitleColumn,

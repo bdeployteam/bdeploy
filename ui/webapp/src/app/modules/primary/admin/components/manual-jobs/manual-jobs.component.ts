@@ -61,7 +61,7 @@ export class ManualJobsComponent implements OnInit, OnDestroy {
   };
 
   private readonly jobService = inject(JobService);
-  protected columns: BdDataColumn<JobDto>[] = [
+  protected readonly columns: BdDataColumn<JobDto>[] = [
     colName,
     colGroup,
     colIsRunning,

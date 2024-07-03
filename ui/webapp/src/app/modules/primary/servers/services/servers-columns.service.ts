@@ -50,7 +50,7 @@ export class ServersColumnsService {
     width: '50px',
   };
 
-  public defaultServerColumns: BdDataColumn<ManagedMasterDto>[] = [
+  public readonly defaultServerColumns: BdDataColumn<ManagedMasterDto>[] = [
     this.serverNameColumn,
     this.serverDescColumn,
     this.serverNodesColumn,
@@ -58,5 +58,8 @@ export class ServersColumnsService {
     this.serverSyncColumn,
   ];
 
-  public defaultReducedServerColumns: BdDataColumn<ManagedMasterDto>[] = [this.serverNameColumn, this.serverDescColumn];
+  public readonly defaultReducedServerColumns: BdDataColumn<ManagedMasterDto>[] = [
+    this.serverNameColumn,
+    this.serverDescColumn,
+  ];
 }

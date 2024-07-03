@@ -45,13 +45,16 @@ export class PortsColumnsService {
     width: '40px',
   };
 
-  public defaultPortsColumns: BdDataColumn<NodeApplicationPort>[] = [
+  public readonly defaultPortsColumns: BdDataColumn<NodeApplicationPort>[] = [
     portNameCol,
     portNumCol,
     portStateCol,
     this.portRatingCol,
   ];
-  public defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [portAppCol, ...this.defaultPortsColumns];
+  public readonly defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [
+    portAppCol,
+    ...this.defaultPortsColumns,
+  ];
 
   private getRating(r: NodeApplicationPort) {
     const currentStates = this.processes.processStates$.value;

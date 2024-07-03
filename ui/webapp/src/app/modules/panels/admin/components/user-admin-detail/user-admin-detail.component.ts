@@ -31,7 +31,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected user$ = new BehaviorSubject<UserInfo>(null);
-  protected permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];

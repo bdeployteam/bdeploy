@@ -45,7 +45,7 @@ const colPerm: BdDataColumn<HiveInfoDto> = {
 export class BHiveComponent implements OnInit {
   protected hives = inject(HiveService);
 
-  protected columns: BdDataColumn<HiveInfoDto>[] = [colAvatar, colId, colPoolEnabled, colPerm];
+  protected readonly columns: BdDataColumn<HiveInfoDto>[] = [colAvatar, colId, colPoolEnabled, colPerm];
   protected sort: Sort = { active: 'id', direction: 'asc' };
 
   protected getRecordRoute = (row: HiveInfoDto) => ['', { outlets: { panel: ['panels', 'admin', 'bhive', row.name] } }];

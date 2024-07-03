@@ -66,13 +66,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     width: '40px',
   };
 
-  protected issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [
+  protected readonly issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [
     this.issueColApp,
     this.issueColParam,
     this.issueColMsg,
     this.issueColDismiss,
   ];
-  protected validationColumns: BdDataColumn<ApplicationValidationDto>[] = [
+  protected readonly validationColumns: BdDataColumn<ApplicationValidationDto>[] = [
     this.issueColApp,
     this.issueColParam,
     this.issueColMsg,

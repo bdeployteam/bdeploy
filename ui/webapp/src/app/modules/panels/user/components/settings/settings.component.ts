@@ -31,8 +31,10 @@ export class SettingsComponent implements OnInit {
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected user: UserInfo;
   protected userGroupPermissions: UserGroupPermission[];
-  protected permColumns: BdDataColumn<ScopedPermission>[] = [...this.permissionColumnsService.defaultPermissionColumns];
-  protected userGroupPermColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
+    ...this.permissionColumnsService.defaultPermissionColumns,
+  ];
+  protected readonly userGroupPermColumns: BdDataColumn<ScopedPermission>[] = [
     colUserGroupName,
     ...this.permissionColumnsService.defaultPermissionColumns,
   ];

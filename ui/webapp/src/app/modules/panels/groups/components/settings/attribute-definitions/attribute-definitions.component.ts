@@ -44,7 +44,11 @@ export class AttributeDefinitionsComponent {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   protected loading$ = new BehaviorSubject<boolean>(false);
-  protected columns: BdDataColumn<CustomAttributeDescriptor>[] = [this.defIdCol, this.defDescCol, this.defDelCol];
+  protected readonly columns: BdDataColumn<CustomAttributeDescriptor>[] = [
+    this.defIdCol,
+    this.defDescCol,
+    this.defDelCol,
+  ];
 
   protected newId: string;
   protected newDesc: string;

@@ -69,7 +69,7 @@ const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
 export class HistoryColumnsService {
   private readonly instances = inject(InstancesService);
 
-  public historyStateColumn: BdDataColumn<HistoryEntryDto> = {
+  public readonly historyStateColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'state',
     name: 'State',
     data: (r) => r.instanceTag,
@@ -77,14 +77,14 @@ export class HistoryColumnsService {
     component: HistoryStateColumnComponent,
   };
 
-  public historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
+  public readonly historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'version',
     name: 'Version',
     data: (r) => this.getVersionText(r),
     width: '100px',
   };
 
-  public defaultHistoryColumns: BdDataColumn<HistoryEntryDto>[] = [
+  public readonly defaultHistoryColumns: BdDataColumn<HistoryEntryDto>[] = [
     historyTimestampColumn,
     historyUserColumn,
     historyTypeColumn,

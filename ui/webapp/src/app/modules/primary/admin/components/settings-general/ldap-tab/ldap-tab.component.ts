@@ -71,7 +71,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  protected columns: BdDataColumn<LDAPSettingsDto>[] = [
+  protected readonly columns: BdDataColumn<LDAPSettingsDto>[] = [
     this.colServer,
     this.colDescription,
     this.colCheck,

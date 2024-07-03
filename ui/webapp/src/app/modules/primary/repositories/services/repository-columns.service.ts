@@ -64,7 +64,7 @@ export class RepositoryColumnsService {
     data: () => '-',
   };
 
-  public defaultRepositoryColumns: BdDataColumn<SwPkgCompound>[] = [
+  public readonly defaultRepositoryColumns: BdDataColumn<SwPkgCompound>[] = [
     this.nameColumn,
     this.productNameColumn,
     this.versionColumn,

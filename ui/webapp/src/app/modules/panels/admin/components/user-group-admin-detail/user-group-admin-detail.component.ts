@@ -40,11 +40,11 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected group$ = new BehaviorSubject<UserGroupInfo>(null);
-  protected permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];
-  protected userColumns: BdDataColumn<UserInfo>[] = [
+  protected readonly userColumns: BdDataColumn<UserInfo>[] = [
     ...this.usersColumnsService.userGroupAdminDetailsColumns,
     this.colDeleteUser,
   ];

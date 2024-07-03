@@ -54,7 +54,7 @@ export class ProcessesColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  public applicationNameColumn: BdDataColumn<ApplicationConfiguration> = {
+  public readonly applicationNameColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'appName',
     name: 'Application Type',
     data: (r) =>
@@ -79,7 +79,7 @@ export class ProcessesColumnsService {
     width: '70px',
   };
 
-  public startTypeColumn: BdDataColumn<ApplicationConfiguration> = {
+  public readonly startTypeColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'startType',
     name: 'Start Type',
     display: BdDataColumnDisplay.TABLE,
@@ -106,7 +106,7 @@ export class ProcessesColumnsService {
     width: '40px',
   };
 
-  public defaultProcessesColumns: BdDataColumn<ApplicationConfiguration>[] = [
+  public readonly defaultProcessesColumns: BdDataColumn<ApplicationConfiguration>[] = [
     this.processNameColumn,
     this.processIdColumn,
     this.processAvatarColumn,
@@ -117,14 +117,14 @@ export class ProcessesColumnsService {
     this.processActualityColumn,
   ];
 
-  public defaultProcessClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
+  public readonly defaultProcessClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
     this.processNameAndOsColumn,
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
   ];
 
-  public defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
+  public readonly defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,

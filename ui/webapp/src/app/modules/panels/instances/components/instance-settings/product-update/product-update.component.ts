@@ -38,7 +38,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
   };
 
   protected records$ = new BehaviorSubject<ProductDto[]>(null);
-  protected columns: BdDataColumn<ProductDto>[] = [this.productVersionColumn, this.productUpdateAction];
+  protected readonly columns: BdDataColumn<ProductDto>[] = [this.productVersionColumn, this.productUpdateAction];
 
   private subscription: Subscription;
 
