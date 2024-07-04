@@ -58,8 +58,8 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
@@ -539,22 +539,22 @@ public class BrowserDialog extends BaseDialog {
 
     /** Activate the start script of the selected application */
     private void onActivateStartScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(dpp -> new LocalStartScriptHelper(os, auditor,//
-                rootDir, dpp.get(SpecialDirectory.ROOT), dpp.get(SpecialDirectory.START_SCRIPTS)), "start");
+        handleScriptChange(lpp -> new LocalStartScriptHelper(os, auditor,//
+                rootDir, lpp.get(SpecialDirectory.APP), lpp.get(SpecialDirectory.START_SCRIPTS)), "start");
     }
 
     /** Activate the file association script of the selected application */
     private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(dpp -> new LocalFileAssocScriptHelper(os, auditor,//
-                rootDir, dpp.get(SpecialDirectory.ROOT), dpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS)), "file association");
+        handleScriptChange(lpp -> new LocalFileAssocScriptHelper(os, auditor,//
+                rootDir, lpp.get(SpecialDirectory.APP), lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS)), "file association");
     }
 
-    private void handleScriptChange(Function<DeploymentPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
+    private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
         ClientSoftwareConfiguration config = getSelectedApps().get(0);
         ClickAndStartDescriptor clickAndStart = config.clickAndStart;
-        DeploymentPathProvider dpp = new DeploymentPathProvider(rootDir.resolve("apps"), null, clickAndStart.applicationId, "1");
+        LauncherPathProvider lpp = new LauncherPathProvider(rootDir).setInstance(clickAndStart.applicationId);
         try {
-            scriptHelperCreator.apply(dpp).createScript(config.metadata, clickAndStart, true);
+            scriptHelperCreator.apply(lpp).createScript(config.metadata, clickAndStart, true);
         } catch (IOException ex) {
             showErrorMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage());
         }

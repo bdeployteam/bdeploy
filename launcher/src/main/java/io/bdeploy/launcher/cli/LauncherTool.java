@@ -99,8 +99,6 @@ import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
@@ -114,6 +112,8 @@ import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
 import io.bdeploy.launcher.cli.branding.LauncherSplash;
 import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
@@ -229,8 +229,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** The user-directory for the hive */
     private Path userArea;
 
-    /** The {@link DeploymentPathProvider} for this {@link LauncherTool} */
-    private DeploymentPathProvider dpp;
+    /** The {@link LauncherPathProvider} for this {@link LauncherTool} */
+    private LauncherPathProvider lpp;
 
     /** The launch descriptor */
     private ClickAndStartDescriptor clickAndStart;
@@ -300,16 +300,17 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Check where to put local data.
         rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
+        lpp = new LauncherPathProvider(rootDir);
 
         // Setup logging into files.
         if (!config.consoleLog()) {
             // Always log into logs directory.
-            LauncherLoggingContextDataProvider.setLogDir(rootDir.resolve("logs").toAbsolutePath().normalize().toString());
+            LauncherLoggingContextDataProvider.setLogDir(lpp.get(SpecialDirectory.LOGS).toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("launcher");
         }
 
         // Check for inconsistent file and folder permissions.
-        Path versionsFile = rootDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve("version.properties");
+        Path versionsFile = lpp.get(SpecialDirectory.LAUNCHER).resolve("version.properties");
         readOnlyRootDir = PathHelper.isReadOnly(rootDir, versionsFile);
 
         // Check that the launcher was not moved.
@@ -327,13 +328,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to read " + config.launch(), e);
         }
 
-        bhiveDir = rootDir.resolve("bhive");
-        appsDir = rootDir.resolve("apps");
-        dpp = new DeploymentPathProvider(appsDir, null, clickAndStart.applicationId, "1");
-        appDir = dpp.get(SpecialDirectory.ROOT);
-        poolDir = dpp.get(SpecialDirectory.MANIFEST_POOL);
-        startScriptsDir = dpp.get(SpecialDirectory.START_SCRIPTS);
-        fileAssocScriptsDir = dpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS);
+        lpp.setInstance(clickAndStart.applicationId);
+        appsDir = lpp.get(SpecialDirectory.APPS);
+        bhiveDir = lpp.get(SpecialDirectory.BHIVE);
+        appDir = lpp.get(SpecialDirectory.APP);
+        poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);
+        startScriptsDir = lpp.get(SpecialDirectory.START_SCRIPTS);
+        fileAssocScriptsDir = lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS);
 
         // Enrich log messages with the application that is about to be launched
         String pid = String.format("PID: %1$5s", ProcessHandle.current().pid());
@@ -725,7 +726,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             ProcessBuilder b = new ProcessBuilder(command);
             b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
-            b.directory(homeDir.resolve(ClientPathHelper.LAUNCHER_DIR).toFile());
+            b.directory(lpp.get(SpecialDirectory.LAUNCHER).toFile());
 
             // Set the home directory for the launcher. Required for older launchers. Newer launchers do not use the variable anymore.
             Map<String, String> env = b.environment();
@@ -769,7 +770,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try (Transaction t = hive.getTransactions().begin()) {
             hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
         }
-        Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
+        Path launcherHome = lpp.get(SpecialDirectory.LAUNCHER);
         hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
         log.info("Launcher successfully installed.");
     }
@@ -906,7 +907,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         PathHelper.mkdirs(appDir);
 
         // Download and install the current configuration tree if required.
-        Path cfgPath = dpp.get(SpecialDirectory.CONFIG);
+        Path cfgPath = lpp.get(LauncherPathProvider.SpecialDirectory.CONFIG);
         PathHelper.deleteRecursiveRetry(cfgPath); // Get rid of *all* existing configurations
 
         if (clientAppCfg.configTree != null) {
@@ -976,7 +977,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // Configuration files need to be installed in the correct version
-        Path cfgPath = dpp.get(SpecialDirectory.CONFIG);
+        Path cfgPath = lpp.get(LauncherPathProvider.SpecialDirectory.CONFIG);
 
         if (clientAppCfg.configTree != null) {
             boolean isCurrent = checkForCurrentConfigFiles(clientAppCfg.configTree, cfgPath);
@@ -1191,8 +1192,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         resolvers.add(new ConditionalExpressionResolver(resolvers));
         resolvers.add(new ApplicationVariableResolver(clientCfg.appConfig));
         resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers
-                .add(new InstanceVariableResolver(clientCfg.instanceConfig, dpp.get(SpecialDirectory.ROOT), clientCfg.activeTag));
+        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, lpp.get(SpecialDirectory.APP), clientCfg.activeTag));
         resolvers.add(new OsVariableResolver());
         resolvers.add(new EnvironmentVariableResolver());
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
@@ -1201,7 +1201,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         resolvers.add(new EscapeYamlCharactersResolver(resolvers));
 
         // Enable resolving of path variables
-        resolvers.add(new DeploymentPathResolver(dpp));
+        resolvers.add(new DeploymentPathResolver(lpp.toDeploymentPathProvider()));
 
         // Enable resolving of manifest variables
         Map<Key, Path> pooledSoftware = new HashMap<>();
