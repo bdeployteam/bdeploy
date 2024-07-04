@@ -46,15 +46,14 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     public @interface UninstallerConfig {
 
-        @Help("The unique identifier of the application to uninstall.")
-        String app();
-
         @Help("Directory where the launcher stores the hive as well as all applications. ")
         String homeDir();
 
+        @Help("The unique identifier of the application to uninstall.")
+        String app();
+
         @Help(value = "Don't ask for confirmation before uninstalling application", arg = false)
         boolean yes() default false;
-
     }
 
     /** The {@link LauncherPathProvider} for this {@link UninstallerTool} */
@@ -73,17 +72,19 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     @Override
     protected RenderableResult run(UninstallerConfig config) {
-        if (config.homeDir() == null) {
+        String homeDirString = config.homeDir();
+        if (homeDirString == null) {
             throw new IllegalStateException("Missing --homeDir argument");
         }
-        if (config.app() == null) {
+        String instanceId = config.app();
+        if (instanceId == null) {
             throw new IllegalStateException("Missing --app argument");
         }
         if (!config.yes() && !confirmDelete()) {
             return createResultWithErrorMessage("Aborted, no confirmation");
         }
 
-        lpp = new LauncherPathProvider(Paths.get(config.homeDir())).setInstance(config.app());
+        lpp = new LauncherPathProvider(Paths.get(homeDirString)).setInstance(config.app());
         homeDir = lpp.get(SpecialDirectory.HOME);
         bhiveDir = lpp.get(SpecialDirectory.BHIVE);
         appsDir = lpp.get(SpecialDirectory.APPS);
@@ -94,7 +95,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
         try (BHive hive = new BHive(bhiveDir.toUri(), RollingFileAuditor.getFactory().apply(bhiveDir),
                 new ActivityReporter.Null())) {
-            doUninstall(hive, config.app());
+            doUninstall(hive, instanceId);
         }
         return createSuccess();
     }

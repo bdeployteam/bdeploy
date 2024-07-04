@@ -203,7 +203,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private LauncherConfig config;
 
     /** The home-directory for the hive */
-    private Path rootDir;
+    private Path homeDir;
 
     /** The path where to store updates */
     private Path updateDir;
@@ -238,8 +238,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Configuration about the launched application */
     private ClientApplicationConfiguration clientAppCfg;
 
-    /** Indicates whether or not the root is read-only */
-    private boolean readOnlyRootDir;
+    /** Indicates whether or not the home directory is read-only */
+    private boolean readOnlyHomeDir;
 
     public LauncherTool() {
         super(LauncherConfig.class);
@@ -298,9 +298,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         this.config = config;
 
         // Check where to put local data.
-        rootDir = Paths.get(config.homeDir()).toAbsolutePath();
+        homeDir = Paths.get(config.homeDir()).toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
-        lpp = new LauncherPathProvider(rootDir);
+        lpp = new LauncherPathProvider(homeDir);
 
         // Setup logging into files.
         if (!config.consoleLog()) {
@@ -311,13 +311,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Check for inconsistent file and folder permissions.
         Path versionsFile = lpp.get(SpecialDirectory.LAUNCHER).resolve("version.properties");
-        readOnlyRootDir = PathHelper.isReadOnly(rootDir, versionsFile);
+        readOnlyHomeDir = PathHelper.isReadOnly(homeDir, versionsFile);
 
         // Check that the launcher was not moved.
         validateBDeployHome();
 
-        // Try to get a user-area if the root is readonly.
-        if (readOnlyRootDir) {
+        // Try to get an user-area if the home is readonly
+        if (readOnlyHomeDir) {
             userArea = ClientPathHelper.getUserAreaOrThrow();
         }
 
@@ -343,10 +343,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Validate that homeDir is specified the same way as it was the first time. */
     private void validateBDeployHome() {
-        Path bdeployHomePath = rootDir.resolve("bdeploy.home");
+        Path bdeployHomePath = homeDir.resolve("bdeploy.home");
         if (bdeployHomePath.toFile().exists()) {
             validateBDeployHome(bdeployHomePath);
-        } else if (!readOnlyRootDir) {
+        } else if (!readOnlyHomeDir) {
             saveBDeployHome(bdeployHomePath);
         }
     }
@@ -355,9 +355,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private void validateBDeployHome(Path bdeployHomePath) {
         try {
             Path storedPath = Path.of(Files.readString(bdeployHomePath, StandardCharsets.UTF_8));
-            if (!rootDir.equals(storedPath)) {
+            if (!homeDir.equals(storedPath)) {
                 throw new IllegalStateException(
-                        "BDeploy home directory has changed. Expected: " + storedPath + " Got: " + rootDir);
+                        "BDeploy home directory has changed. Expected: " + storedPath + " Got: " + homeDir);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read from " + bdeployHomePath.toAbsolutePath());
@@ -376,10 +376,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Launches an application after installing updates. */
     private void doLaunch(Auditor auditor, LauncherSplash splash) {
         log.info("Launcher version '{}' started.", VersionHelper.getVersionAsString());
-        log.info("Root directory: {}", rootDir);
-        if (readOnlyRootDir) {
+        log.info("Home directory: {}", homeDir);
+        if (readOnlyHomeDir) {
             log.info("User directory: {}", userArea);
-            log.info("Root directory is readonly. No new applications or updates can be installed.");
+            log.info("Home directory is readonly. No new applications or updates can be installed.");
         }
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
@@ -438,7 +438,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 });
                 process = doDelegateLaunch(requiredVersion, config.launch());
                 log.info("Launcher successfully launched. PID={}", process.pid());
-                log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
+                log.info("Check logs in {} for more details.", ClientPathHelper.getHome(homeDir, requiredVersion));
             } else {
                 if (!offlineMode) {
                     // The source server could have been migrated/converted to node. in this case, display a message.
@@ -464,10 +464,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             reporter.stop();
             splash.dismiss();
 
-            if (!readOnlyRootDir) {
+            if (!readOnlyHomeDir) {
                 log.info("Cleaning unused launchers and applications...");
                 doExecuteLocked(hive, reporter, () -> {
-                    ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir,
+                    ClientCleanup cleanup = new ClientCleanup(hive, homeDir, appsDir, poolDir, startScriptsDir,
                             fileAssocScriptsDir);
                     cleanup.run();
                     return null;
@@ -519,8 +519,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * to clean them up.
      */
     private void cleanStaleTransactions(BHive hive) {
-        // Only possible if not read-only root.
-        if (!readOnlyRootDir) {
+        // Only possible if the home directory is not read-only.
+        if (!readOnlyHomeDir) {
             // Check for stale transactions in the hive.
             log.debug("Checking for stale transactions.");
             long stale = hive.getTransactions().cleanStaleTransactions();
@@ -606,7 +606,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Launcher updates found. Updating from {} to {}", runningVersion, latestVersion);
 
         // Check if we have write permissions to install the update
-        if (readOnlyRootDir) {
+        if (readOnlyHomeDir) {
             throw new SoftwareUpdateException("launcher",
                     "Installed=" + runningVersion.toString() + " Available=" + latestVersion.toString());
         }
@@ -681,20 +681,20 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Delegates launching of the application to the given version of the launcher. */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
-        Path homeDir = ClientPathHelper.getHome(rootDir, version);
-        Path launcher = ClientPathHelper.getNativeLauncher(homeDir);
-        Path scriptLauncher = ClientPathHelper.getScriptLauncher(homeDir);
+        Path versionedHomeDir = ClientPathHelper.getHome(homeDir, version);
+        Path versionedLauncher = ClientPathHelper.getNativeLauncher(versionedHomeDir);
+        Path versionedScriptLauncher = ClientPathHelper.getScriptLauncher(versionedHomeDir);
 
         boolean isNewScriptLauncher = false;
 
-        if (PathHelper.exists(scriptLauncher) && OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+        if (PathHelper.exists(versionedScriptLauncher) && OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             // We're in post 7.1.0 area and can use the script to keep terminal association. On Linux it has always been that way.
-            launcher = scriptLauncher;
+            versionedLauncher = versionedScriptLauncher;
             isNewScriptLauncher = true;
         }
 
         List<String> command = new ArrayList<>();
-        command.add(launcher.toString());
+        command.add(versionedLauncher.toString());
         if (isNewScriptLauncher) {
             command.add("launcher");
             command.add("--launch=" + appDescriptor);
@@ -730,7 +730,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Set the home directory for the launcher. Required for older launchers. Newer launchers do not use the variable anymore.
             Map<String, String> env = b.environment();
-            env.put("BDEPLOY_HOME", homeDir.toFile().getAbsolutePath());
+            env.put("BDEPLOY_HOME", versionedHomeDir.toFile().getAbsolutePath());
 
             // Notify the launcher that it runs in a special mode. In this mode it will forward all exit codes without special handling.
             env.put(BDEPLOY_DELEGATE, "TRUE");
@@ -753,15 +753,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed. */
     private void doInstallLauncherSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
-        Path homeDir = ClientPathHelper.getHome(rootDir, version);
-        Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
+        Path versionedHomeDir = ClientPathHelper.getHome(homeDir, version);
+        Path versionedNativeLauncher = ClientPathHelper.getNativeLauncher(versionedHomeDir);
 
-        if (PathHelper.exists(nativeLauncher)) {
+        if (PathHelper.exists(versionedNativeLauncher)) {
             log.info("Launcher is already installed.");
             return;
         }
         log.info("Installing required launcher ...");
-        if (PathHelper.isReadOnly(homeDir)) {
+        if (PathHelper.isReadOnly(versionedHomeDir)) {
             throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
         }
 
@@ -788,8 +788,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         Version version = requiredLauncher.getKey();
-        Path homeDir = ClientPathHelper.getHome(rootDir, version);
-        if (PathHelper.isReadOnly(homeDir)) {
+        Path versionedHomeDir = ClientPathHelper.getHome(homeDir, version);
+        if (PathHelper.isReadOnly(versionedHomeDir)) {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }
 
@@ -810,8 +810,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Copy the required software from our hive to the target hive
         log.info("Copy required software ...");
-        Path hiveDir = homeDir.resolve("bhive");
-        try (BHive otherHive = new BHive(hiveDir.toUri(), RollingFileAuditor.getFactory().apply(hiveDir), reporter)) {
+        Path versionedHiveDir = versionedHomeDir.resolve("bhive");
+        try (BHive otherHive = new BHive(versionedHiveDir.toUri(), RollingFileAuditor.getFactory().apply(versionedHiveDir),
+                reporter)) {
             otherHive.setLockContentSupplier(LOCK_CONTENT);
             otherHive.setLockContentValidator(LOCK_VALIDATOR);
 
@@ -866,7 +867,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Throw an exception if we do not have write permissions in the directory
         String appName = appCfg.name;
-        if (readOnlyRootDir) {
+        if (readOnlyHomeDir) {
             throw new SoftwareUpdateException(appName, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
         }
 
@@ -928,7 +929,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Create the click-and-start file.
         try {
-            ClientPathHelper.getOrCreateClickAndStart(rootDir, clickAndStart);
+            ClientPathHelper.getOrCreateClickAndStart(homeDir, clickAndStart);
         } catch (IOException e) {
             log.error("Initial creation of click-and-start file failed.", e);
         }
@@ -1015,13 +1016,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         if (clientConfig.clientAppCfg == null) {
-            if (readOnlyRootDir) {
+            if (readOnlyHomeDir) {
                 log.warn("Persistent configuration is missing.");
             } else {
                 missing.add("Persistent configuration is missing.");
             }
         } else if (!Objects.equals(clientConfig.clientAppCfg.activeTag, clientAppCfg.activeTag)) {
-            if (readOnlyRootDir) {
+            if (readOnlyHomeDir) {
                 log.warn("Persistent configuration is outdated.");
             } else {
                 missing.add("Persistent configuration is outdated.");
@@ -1161,13 +1162,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Locks the root in order to perform the given operation. The lock is not taken if the current user does not have the
-     * permissions to modify the root directory. In that case the operation is directly executed.
+     * Locks the home directory in order to perform the given operation. The lock is not created if the current user does not have
+     * the permissions to modify the home directory. If that happens, the operation is executed immediately.
      */
     private <T> T doExecuteLocked(BHive hive, LauncherSplashReporter reporter, Callable<T> runnable) {
-        if (!readOnlyRootDir) {
+        if (!readOnlyHomeDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                hive.execute(new DirectoryLockOperation().setDirectory(rootDir)); // This could wait for other launchers.
+                hive.execute(new DirectoryLockOperation().setDirectory(homeDir)); // This could wait for other launchers.
             }
         }
         log.debug("Entered locked execution mode");
@@ -1179,8 +1180,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to execute locked operation", ex);
         } finally {
             log.debug("Leaving locked execution mode");
-            if (!readOnlyRootDir) {
-                hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
+            if (!readOnlyHomeDir) {
+                hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
             }
         }
     }

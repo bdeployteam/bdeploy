@@ -16,10 +16,6 @@ import io.bdeploy.launcher.cli.ui.browser.BrowserDialog;
 @Help("A tool which shows all locally installed applications")
 public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
 
-    public BrowserTool() {
-        super(BrowserConfig.class);
-    }
-
     public @interface BrowserConfig {
 
         @Help("Directory where the launcher stores the hive as well as all applications.")
@@ -27,7 +23,10 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
 
         @Help(value = "Write log output to stdout instead of the log file.", arg = false)
         boolean consoleLog() default false;
+    }
 
+    public BrowserTool() {
+        super(BrowserConfig.class);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
         Path logsDir = lpp.get(SpecialDirectory.LOGS);
 
         if (!config.consoleLog()) {
-            // always log into logs directory.
+            // Always log into logs directory
             LauncherLoggingContextDataProvider.setLogDir(logsDir.toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("browser");
         }

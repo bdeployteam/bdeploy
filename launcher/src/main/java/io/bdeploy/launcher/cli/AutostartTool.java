@@ -30,10 +30,6 @@ import io.bdeploy.logging.audit.RollingFileAuditor;
 @Help("A tool which starts all applications which are configured for autostart")
 public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
-    public AutostartTool() {
-        super(AutostartConfig.class);
-    }
-
     public @interface AutostartConfig {
 
         @Help("Directory where the launcher stores the hive as well as all applications.")
@@ -41,7 +37,10 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
         @Help(value = "Write log output to stdout instead of the log file.", arg = false)
         boolean consoleLog() default false;
+    }
 
+    public AutostartTool() {
+        super(AutostartConfig.class);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
         Path bhiveDir = lpp.get(SpecialDirectory.BHIVE);
 
         if (!config.consoleLog()) {
-            // always log into logs directory.
+            // Always log into logs directory
             LauncherLoggingContextDataProvider.setLogDir(logsDir.toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("autostart");
         }
