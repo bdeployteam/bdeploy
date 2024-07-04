@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import java.awt.Component;
 
@@ -7,7 +7,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 
-class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
+public class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,18 +21,18 @@ class BrowserDialogPurposeCellRenderer extends DefaultTableCellRenderer {
         if (v instanceof InstancePurpose purpose) {
             switch (purpose) {
                 case DEVELOPMENT:
-                    setBackground(BrowserDialogTableColorConstants.PURPOSE_DEVELOPMENT);
+                    setBackground(BrowserDialogTableCellColorConstants.PURPOSE_DEVELOPMENT);
                     return this;
                 case TEST:
-                    setBackground(BrowserDialogTableColorConstants.PURPOSE_TEST);
+                    setBackground(BrowserDialogTableCellColorConstants.PURPOSE_TEST);
                     return this;
                 case PRODUCTIVE:
-                    setBackground(BrowserDialogTableColorConstants.PURPOSE_PRODUCTIVE);
+                    setBackground(BrowserDialogTableCellColorConstants.PURPOSE_PRODUCTIVE);
                     return this;
             }
         }
 
-        setBackground(BrowserDialogTableColorConstants.COULD_NOT_CALCULATE);
+        setBackground(BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE);
         return this;
     }
 }

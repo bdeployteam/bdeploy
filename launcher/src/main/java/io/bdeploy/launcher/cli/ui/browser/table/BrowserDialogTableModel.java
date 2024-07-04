@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -20,7 +20,7 @@ import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
-class BrowserDialogTableModel extends AbstractTableModel {
+public class BrowserDialogTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = 1L;
 

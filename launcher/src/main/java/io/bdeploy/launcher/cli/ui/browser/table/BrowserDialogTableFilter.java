@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import javax.swing.RowFilter;
 
@@ -6,7 +6,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
-class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel, Integer> {
+public class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel, Integer> {
 
     private final String filterText;
 

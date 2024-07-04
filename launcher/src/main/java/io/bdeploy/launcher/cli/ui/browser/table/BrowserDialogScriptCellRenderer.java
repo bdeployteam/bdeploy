@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -20,7 +20,7 @@ import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
-class BrowserDialogScriptCellRenderer extends DefaultTableCellRenderer {
+public class BrowserDialogScriptCellRenderer extends DefaultTableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 
@@ -49,25 +49,25 @@ class BrowserDialogScriptCellRenderer extends DefaultTableCellRenderer {
             ClientSoftwareConfiguration config = bdTableModel.get(sortModel.convertRowIndexToModel(r));
             ClientApplicationDto metadata = config.metadata;
             if (metadata == null) {
-                backgroundColor = BrowserDialogTableColorConstants.COULD_NOT_CALCULATE;
+                backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
             } else {
                 LocalClientApplicationSettings settings = null;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
                 if (settings == null) {
-                    backgroundColor = BrowserDialogTableColorConstants.COULD_NOT_CALCULATE;
+                    backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
                 } else {
                     ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings, metadata);
                     backgroundColor = scriptInfo == null//
-                            ? BrowserDialogTableColorConstants.DISABLED
+                            ? BrowserDialogTableCellColorConstants.DISABLED
                             : config.clickAndStart.equals(scriptInfo.getDescriptor())//
-                                    ? BrowserDialogTableColorConstants.ENABLED//
-                                    : BrowserDialogTableColorConstants.PAY_ATTENTION;
+                                    ? BrowserDialogTableCellColorConstants.ENABLED//
+                                    : BrowserDialogTableCellColorConstants.PAY_ATTENTION;
                 }
             }
         } else {
-            backgroundColor = BrowserDialogTableColorConstants.COULD_NOT_CALCULATE;
+            backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
         }
 
         setBackground(backgroundColor);
