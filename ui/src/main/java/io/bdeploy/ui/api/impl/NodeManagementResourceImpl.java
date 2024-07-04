@@ -49,10 +49,7 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
 
     @Override
     public void addNode(NodeAttachDto data) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
-
+        throwIfCentral();
         if (data.sourceMode == MinionMode.NODE) {
             ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).addNode(data.name, data.remote);
         } else {
@@ -62,25 +59,19 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
 
     @Override
     public void editNode(String name, RemoteService node) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
+        throwIfCentral();
         ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).editNode(name, node);
     }
 
     @Override
     public void removeNode(String name) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
+        throwIfCentral();
         ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).removeNode(name);
     }
 
     @Override
     public void updateNode(String name, List<Key> keys) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
+        throwIfCentral();
 
         MasterRootResource root = ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context);
 
@@ -109,5 +100,11 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
         result.pruned = FormatHelper.formatFileSize(
                 ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).pruneNode(name));
         return result;
+    }
+
+    private void throwIfCentral() {
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            throw new WebApplicationException("Operation not available in mode CENTRAL");
+        }
     }
 }

@@ -259,14 +259,17 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
             URI launcherLocation = launcherUri.build(new Object[] { os.name().toLowerCase() }, false);
 
             String fileName = null;
-            if (os == OperatingSystem.WINDOWS) {
-                fileName = "BDeploy Click & Start - Installer.exe";
-                createWindowsInstaller(installerPath, launcherKey, launcherLocation);
-            } else if (os == OperatingSystem.LINUX || os == OperatingSystem.MACOS) {
-                fileName = "BDeploy-Click-and-Start-Installer.run";
-                createLinuxInstaller(installerPath, launcherKey, launcherLocation);
-            } else {
-                throw new WebApplicationException("MAC OS Installer not yet supported");
+            switch (os) {
+                case WINDOWS:
+                    fileName = "BDeploy Click & Start - Installer.exe";
+                    createWindowsInstaller(installerPath, launcherKey, launcherLocation);
+                    break;
+                case LINUX, MACOS:
+                    fileName = "BDeploy-Click-and-Start-Installer.run";
+                    createLinuxInstaller(installerPath, launcherKey, launcherLocation);
+                    break;
+                default:
+                    throw new WebApplicationException(os.name() + " installer not yet supported.");
             }
 
             // Register the file for downloading

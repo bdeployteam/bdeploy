@@ -195,11 +195,9 @@ public class TestFactory {
         ic.configTree = pmf.getConfigTemplateTreeId();
 
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
-        Manifest.Key imKey = new InstanceManifest.Builder().setInstanceConfiguration(ic)
-                .addInstanceNodeManifest(Minion.DEFAULT_NAME, inmKey)
+        // This is the "root" - all instance artifacts are now reachable from here.
+        return new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(Minion.DEFAULT_NAME, inmKey)
                 .addInstanceNodeManifest(InstanceManifest.CLIENT_NODE_NAME, cinmKey).insert(local);
-
-        return imKey; // this is the "root" - all instance artifacts are now reachable from here.
     }
 
     /**

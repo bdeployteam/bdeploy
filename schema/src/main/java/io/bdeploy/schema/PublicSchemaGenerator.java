@@ -79,11 +79,13 @@ public class PublicSchemaGenerator {
         });
 
         // need to do this fully custom, to make variable id/uid & template "primary keys" required.
+        String id = "id";
+        String template = "template";
         cfgBuilder.forTypesInGeneral().withTypeAttributeOverride((node, scope, context) -> {
             if (scope.getType().isInstanceOf(ParameterDescriptor.class)) {
                 var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
-                exlusiveField(arr, context, "id", "template");
-                exlusiveField(arr, context, "template", "id");
+                exlusiveField(arr, context, id, template);
+                exlusiveField(arr, context, template, id);
 
                 // Compat with old files...
                 exlusiveField(arr, context, "uid", "__dummy");
@@ -91,8 +93,8 @@ public class PublicSchemaGenerator {
 
             if (scope.getType().isInstanceOf(TemplateableVariableConfiguration.class)) {
                 var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
-                exlusiveField(arr, context, "id", "template");
-                exlusiveField(arr, context, "template", "id");
+                exlusiveField(arr, context, id, template);
+                exlusiveField(arr, context, template, id);
             }
 
             // we have 1, 2 places where Map is used instead of concrete objects to allow partials with config different from the original. This allows that.
@@ -115,7 +117,7 @@ public class PublicSchemaGenerator {
             }
 
             // for compatibility with existing files, we need to properly allow 'lifenessProbe' properties.
-            if(scope.getType().isInstanceOf(ProcessControlDescriptor.class)) {
+            if (scope.getType().isInstanceOf(ProcessControlDescriptor.class)) {
                 ObjectNode on = (ObjectNode) node.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
 
                 JsonNode newProbe = on.get("livenessProbe");

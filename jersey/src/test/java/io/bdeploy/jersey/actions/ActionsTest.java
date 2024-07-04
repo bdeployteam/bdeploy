@@ -29,7 +29,7 @@ class ActionsTest {
 
             @Override
             public void sendBestMatching(List<ObjectChangeDto> changes) {
-
+                // Not needed for testing
             }
 
             @Override
@@ -70,5 +70,4 @@ class ActionsTest {
         assertEquals(0, svc.getRunningActions(null, null).size());
         assertEquals(Boolean.TRUE, removed.get().get(1, TimeUnit.SECONDS));
     }
-
 }

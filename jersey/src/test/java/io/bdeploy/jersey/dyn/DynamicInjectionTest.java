@@ -56,8 +56,8 @@ class DynamicInjectionTest {
 
         @Override
         public void dispose(ValueDto instance) {
+            // Not needed
         }
-
     }
 
     @Test
@@ -67,5 +67,4 @@ class DynamicInjectionTest {
 
         assertEquals("value", locator.getNamed("test").getValue().str);
     }
-
 }

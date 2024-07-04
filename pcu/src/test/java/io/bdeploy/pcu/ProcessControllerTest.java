@@ -21,7 +21,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 
 class ProcessControllerTest {
 
-    private final static Duration TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration TIMEOUT = Duration.ofSeconds(60);
 
     @Test
     void testStartStop(@TempDir Path tmp) throws Exception {

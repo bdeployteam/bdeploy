@@ -195,7 +195,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             ApplicationTemplateDescriptor a) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
-        String tplNiceName = (a.name == null ? ("<anonymous> (" + a.application + ")") : a.name);
+        String tplNiceName = a.name == null ? createNiceAnonymousName(a.application) : a.name;
 
         // figure out which variables are requested in the template.
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
@@ -236,7 +236,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                         && !controlGroupsInTemplate.contains(app.preferredProcessControlGroup)) {
                     result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
                             "Preferred process control group '" + app.preferredProcessControlGroup + "' for application "
-                                    + (app.name == null ? ("<anonymous> (" + app.application + ")") : app.name)
+                                    + (app.name == null ? createNiceAnonymousName(app.application) : app.name)
                                     + " is not available in the instance template " + tpl.name));
                 }
 
@@ -251,7 +251,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             ProductValidationConfigDescriptor descriptor) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
-        String tplNiceName = (tpl.name == null ? ("<anonymous> (" + tpl.application + ")") : tpl.name);
+        String tplNiceName = tpl.name == null ? createNiceAnonymousName(tpl.application) : tpl.name;
 
         if (!descriptor.applications.containsKey(tpl.application)) {
             result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
@@ -259,6 +259,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
 
         return result;
+    }
+
+    private static String createNiceAnonymousName(String s) {
+        return "<anonymous> (" + s + ")";
     }
 
     private void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,

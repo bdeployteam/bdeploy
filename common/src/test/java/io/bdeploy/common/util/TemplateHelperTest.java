@@ -12,7 +12,7 @@ class TemplateHelperTest {
 
     private static final String R = "RESOLVED";
 
-    private static Map<String, String> VARS = new TreeMap<>();
+    private static final Map<String, String> VARS = new TreeMap<>();
     static {
         VARS.put("a", "RESOLVED");
         VARS.put("b", "{{a}}");
@@ -20,8 +20,9 @@ class TemplateHelperTest {
         VARS.put("d", "{{c}}");
     }
 
-    private static VariableResolver RESOLVER = VARS::get;
-    private static ShouldResolve DELAY_RESOLVING_B = s -> {
+    private static final VariableResolver RESOLVER = VARS::get;
+
+    private static final ShouldResolve DELAY_RESOLVING_B = s -> {
         return !s.startsWith("b");
     };
 
@@ -57,5 +58,4 @@ class TemplateHelperTest {
     void notMatchingPattern() {
         assertEquals("|a|", TemplateHelper.process("|a|", RESOLVER));
     }
-
 }

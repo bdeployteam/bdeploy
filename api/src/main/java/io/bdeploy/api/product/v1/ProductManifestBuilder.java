@@ -52,6 +52,8 @@ public class ProductManifestBuilder {
     public static final String APP_TEMPLATES_ENTRY = "appTemplates";
     public static final String PARAM_TEMPLATES_ENTRY = "paramTemplates";
     public static final String VARIABLE_TEMPLATES_ENTRY = "variableTemplates";
+    public static final String JAR_FILE_EXTENSION = ".jar";
+    public static final String YAML_FILE_EXTENSION = ".yaml";
 
     private final Map<String, Manifest.Key> applications = new TreeMap<>();
     private final Map<String, String> labels = new TreeMap<>();
@@ -137,7 +139,7 @@ public class ProductManifestBuilder {
 
             TreeView tv = hive.execute(new ScanOperation().setTree(pluginId));
             tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(".jar")) {
+                if (b.getName().toLowerCase().endsWith(JAR_FILE_EXTENSION)) {
                     try (JarInputStream jis = new JarInputStream(
                             hive.execute(new ObjectLoadOperation().setObject(b.getElementId())))) {
                         java.util.jar.Manifest pluginMf = jis.getManifest();
@@ -164,7 +166,7 @@ public class ProductManifestBuilder {
         Tree.Builder templTree = new Tree.Builder();
         for (Path p : instanceTemplates) {
             ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
-            templTree.add(new Tree.Key(id.toString() + ".yaml", EntryType.BLOB), id);
+            templTree.add(new Tree.Key(id.toString() + YAML_FILE_EXTENSION, EntryType.BLOB), id);
         }
         tree.add(new Tree.Key(TEMPLATES_ENTRY, EntryType.TREE),
                 hive.execute(new InsertArtificialTreeOperation().setTree(templTree)));
@@ -173,7 +175,7 @@ public class ProductManifestBuilder {
         Tree.Builder appTemplTree = new Tree.Builder();
         for (Path p : appTemplates) {
             ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
-            appTemplTree.add(new Tree.Key(id.toString() + ".yaml", EntryType.BLOB), id);
+            appTemplTree.add(new Tree.Key(id.toString() + YAML_FILE_EXTENSION, EntryType.BLOB), id);
         }
         tree.add(new Tree.Key(APP_TEMPLATES_ENTRY, EntryType.TREE),
                 hive.execute(new InsertArtificialTreeOperation().setTree(appTemplTree)));
@@ -182,7 +184,7 @@ public class ProductManifestBuilder {
         Tree.Builder paramTemplTree = new Tree.Builder();
         for (Path p : paramTemplates) {
             ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
-            paramTemplTree.add(new Tree.Key(id.toString() + ".yaml", EntryType.BLOB), id);
+            paramTemplTree.add(new Tree.Key(id.toString() + YAML_FILE_EXTENSION, EntryType.BLOB), id);
         }
         tree.add(new Tree.Key(PARAM_TEMPLATES_ENTRY, EntryType.TREE),
                 hive.execute(new InsertArtificialTreeOperation().setTree(paramTemplTree)));
@@ -191,7 +193,7 @@ public class ProductManifestBuilder {
         Tree.Builder varTemplTree = new Tree.Builder();
         for (Path p : varTemplates) {
             ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
-            varTemplTree.add(new Tree.Key(id.toString() + ".yaml", EntryType.BLOB), id);
+            varTemplTree.add(new Tree.Key(id.toString() + YAML_FILE_EXTENSION, EntryType.BLOB), id);
         }
         tree.add(new Tree.Key(VARIABLE_TEMPLATES_ENTRY, EntryType.TREE),
                 hive.execute(new InsertArtificialTreeOperation().setTree(varTemplTree)));

@@ -34,6 +34,7 @@ class IMAPStoreConnectionHandlerTests {
     @Test
     void testClosingClosedHandler() {
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler()) {
+            // Do nothing - just test the closing
         }
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler()) {
             messageReceiver.disconnect();
@@ -42,6 +43,7 @@ class IMAPStoreConnectionHandlerTests {
             messageReceiver.close();
         }
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_WRITE)) {
+            // Do nothing - just test the closing
         }
         try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningMode.READ_WRITE)) {
             messageReceiver.disconnect();
