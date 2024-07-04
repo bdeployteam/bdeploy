@@ -63,6 +63,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.RemainingArguments;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
+import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
@@ -1245,9 +1246,20 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Terminates the VM with the given exit code. */
+    /**
+     * Terminates the VM with the given exit code.
+     * Careful: in tests will not exit but throw in case of non-zero and <b>continue</b> in case of zero exit code.
+     */
     @SuppressFBWarnings("DM_EXIT")
     private static void doExit(Integer exitCode) {
+        // if we are in test mode, System.exit will exit the JVM running the test, so we don't do that.
+        if (ToolBase.isTestMode()) {
+            if (exitCode != 0) {
+                throw new IllegalStateException("Non-zero exit in test mode: " + exitCode);
+            }
+            return; // in test - keep going.
+        }
+
         System.exit(exitCode);
     }
 }
