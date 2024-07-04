@@ -4,6 +4,8 @@ import java.nio.file.Path;
 
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
@@ -14,8 +16,8 @@ import io.bdeploy.launcher.cli.scripts.ScriptUtils;
 
 public class LocalStartScriptHelper extends LocalScriptHelper {
 
-    public LocalStartScriptHelper(OperatingSystem os, Auditor auditor, Path launcherDir, Path appDir, Path scriptDir) {
-        super(os, auditor, launcherDir, appDir, scriptDir);
+    public LocalStartScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
+        super(os, auditor, lpp, scriptDir);
     }
 
     @Override
@@ -26,8 +28,8 @@ public class LocalStartScriptHelper extends LocalScriptHelper {
     @Override
     protected String getScriptContent() {
         String envVar = LaunchMode.LAUNCH_MODE_ENV_VAR_NAME + "=" + LaunchMode.PATH;
-        Path scriptLauncher = ClientPathHelper.getScriptLauncher(launcherDir).toAbsolutePath();
-        Path launchFile = appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath();
+        Path scriptLauncher = ClientPathHelper.getScriptLauncher(lpp.get(SpecialDirectory.HOME));
+        Path launchFile = lpp.get(SpecialDirectory.APP).resolve(ClientPathHelper.LAUNCH_FILE_NAME);
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
                     + "set " + envVar + "\n"//

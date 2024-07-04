@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
@@ -23,8 +25,8 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
 
     private static final Logger log = LoggerFactory.getLogger(LocalFileAssocScriptHelper.class);
 
-    public LocalFileAssocScriptHelper(OperatingSystem os, Auditor auditor, Path launcherDir, Path appDir, Path scriptDir) {
-        super(os, auditor, launcherDir, appDir, scriptDir);
+    public LocalFileAssocScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
+        super(os, auditor, lpp, scriptDir);
     }
 
     @Override
@@ -46,13 +48,13 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
         }
 
         List<String> command = new ArrayList<>();
-        command.add(ClientPathHelper.getNativeFileAssocTool(launcherDir).normalize().toAbsolutePath().toString());
+        command.add(ClientPathHelper.getNativeFileAssocTool(lpp.get(SpecialDirectory.HOME)).toString());
         if (os == OperatingSystem.WINDOWS) {
             command.add("/InstallApplication");
             command.add(ScriptUtils.getBDeployFileAssocId(id));
             command.add(ScriptUtils.getFullFileExtension(fileAssocExtension));
             command.add(fullScriptPath.normalize().toAbsolutePath().toString());
-            command.add(appDir.resolve("icon.ico").toFile().getAbsolutePath());
+            command.add(lpp.get(SpecialDirectory.APP).resolve("icon.ico").toFile().getAbsolutePath());
             command.add(appName);
         } else {
             // Usage: ./file-assoc.sh "Action" "ID" "Extension" "Name of Application" "Exec-Path" "Icon"
@@ -84,16 +86,16 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
     @Override
     protected String getScriptContent() {
         String envVar = LaunchMode.LAUNCH_MODE_ENV_VAR_NAME + "=" + LaunchMode.ASSOCIATION;
-        Path launchFile = appDir.resolve(ClientPathHelper.LAUNCH_FILE_NAME).toAbsolutePath();
+        Path launchFile = lpp.get(SpecialDirectory.APP).resolve(ClientPathHelper.LAUNCH_FILE_NAME);
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//
                     + "set " + envVar + "\n"//
-                    + "start /d \"" + launcherDir.resolve(ClientPathHelper.LAUNCHER_DIR).toAbsolutePath() + "\" "
-                    + ClientPathHelper.WIN_LAUNCHER + " \"" + launchFile + "\" -- %*";
+                    + "start /d \"" + lpp.get(SpecialDirectory.LAUNCHER) + "\" " + ClientPathHelper.WIN_LAUNCHER + " \""
+                    + launchFile + "\" -- %*";
         }
         return "#!/usr/bin/env bash\n"//
                 + "export " + envVar + "\n"//
-                + ClientPathHelper.getNativeLauncher(launcherDir).toAbsolutePath() + " launcher \"--launch=" + launchFile
+                + ClientPathHelper.getNativeLauncher(lpp.get(SpecialDirectory.HOME)) + " launcher \"--launch=" + launchFile
                 + "\" -- \"$@\"";
     }
 

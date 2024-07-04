@@ -946,9 +946,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         OperatingSystem os = OsHelper.getRunningOs();
         ClientApplicationDto metadata = newConfig.metadata;
         handleScriptChanges(metadata, new LocalStartScriptHelper(//
-                os, auditor, rootDir, appDir, startScriptsDir), "start", startScriptsDir);
+                os, auditor, lpp, SpecialDirectory.START_SCRIPTS), "start", startScriptsDir);
         handleScriptChanges(metadata, new LocalFileAssocScriptHelper(//
-                os, auditor, rootDir, appDir, fileAssocScriptsDir), "file association", fileAssocScriptsDir);
+                os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS), "file association", fileAssocScriptsDir);
 
         log.info("Application successfully installed.");
     }

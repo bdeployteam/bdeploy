@@ -15,6 +15,8 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
@@ -23,17 +25,15 @@ import io.bdeploy.launcher.cli.ClientApplicationDto;
 public abstract class LocalScriptHelper {
 
     protected final OperatingSystem os;
+    protected final LauncherPathProvider lpp;
     private final Auditor auditor;
-    protected final Path launcherDir;
-    protected final Path appDir;
     private final Path scriptDir;
 
-    protected LocalScriptHelper(OperatingSystem os, Auditor auditor, Path launcherDir, Path appDir, Path scriptDir) {
+    protected LocalScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
         this.os = os;
+        this.lpp = lpp;
         this.auditor = auditor;
-        this.launcherDir = launcherDir;
-        this.appDir = appDir;
-        this.scriptDir = scriptDir;
+        this.scriptDir = lpp.get(scriptDir);
     }
 
     /**
@@ -59,7 +59,7 @@ public abstract class LocalScriptHelper {
         Files.writeString(fullScriptPath, scriptContent, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
         setExecutable(fullScriptPath);
 
-        try (BHive hive = new BHive(launcherDir.resolve("bhive").toUri(), auditor, new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(lpp.get(SpecialDirectory.BHIVE).toUri(), auditor, new ActivityReporter.Null())) {
             LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(hive);
             LocalClientApplicationSettings settings = settingsManifest.read();
             updateSettings(settings, scriptName, new ScriptInfo(scriptName, clickAndStart), override);
