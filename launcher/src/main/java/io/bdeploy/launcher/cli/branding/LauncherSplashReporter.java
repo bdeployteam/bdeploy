@@ -117,5 +117,4 @@ public class LauncherSplashReporter implements ActivityReporter {
     public void stop() {
         updater.shutdownNow();
     }
-
 }

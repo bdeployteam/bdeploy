@@ -76,5 +76,4 @@ public class BaseDialog extends JFrame {
             lock.notifyAll();
         }
     }
-
 }

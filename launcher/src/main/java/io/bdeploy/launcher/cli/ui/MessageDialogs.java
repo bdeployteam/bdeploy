@@ -186,5 +186,4 @@ public class MessageDialogs {
             return ex.getMessage();
         }
     }
-
 }

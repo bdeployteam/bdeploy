@@ -131,5 +131,4 @@ public class TextAreaDialog extends BaseDialog {
         command.addAll(Splitter.on("\n").trimResults().splitToList(text));
         return true;
     }
-
 }

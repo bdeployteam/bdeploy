@@ -9,5 +9,4 @@ public interface LauncherSplashDisplay {
     public void setProgressMax(int max);
 
     public void repaint();
-
 }

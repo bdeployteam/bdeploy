@@ -57,5 +57,4 @@ public class WindowHelper {
         BufferedImage image = loadImage(iconName);
         return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
     }
-
 }

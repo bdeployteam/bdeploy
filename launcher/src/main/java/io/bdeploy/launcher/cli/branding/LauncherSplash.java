@@ -309,5 +309,4 @@ public class LauncherSplash implements LauncherSplashDisplay {
             splashComp.repaintTextAndProgress();
         }
     }
-
 }

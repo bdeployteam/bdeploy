@@ -209,5 +209,4 @@ public class MessageDialog extends BaseDialog {
         CardLayout layout = (CardLayout) content.getLayout();
         layout.next(content);
     }
-
 }
