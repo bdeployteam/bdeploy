@@ -111,33 +111,35 @@ public class ClientPathHelper {
     /**
      * Returns the native file association utility.
      */
-    public static Path getNativeFileAssocTool(Path root) {
-        Path launcherHome = root.resolve(LAUNCHER_DIR);
-        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            return launcherHome.resolve(WIN_FILE_ASSOC);
-        }
-        return launcherHome.resolve("bin").resolve(LINUX_FILE_ASSOC);
+    public static Path getNativeFileAssocTool(Path home) {
+        Path launcherDir = home.resolve(LAUNCHER_DIR);
+        Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
+                ? launcherDir.resolve(WIN_FILE_ASSOC)
+                : launcherDir.resolve("bin").resolve(LINUX_FILE_ASSOC);
+        return result.normalize().toAbsolutePath();
     }
 
     /**
      * Returns the native launcher used to start the application.
      */
-    public static Path getNativeLauncher(Path root) {
-        // On Windows we are searching for a BDeploy.exe executable in the launcher directory
-        Path launcherHome = root.resolve(LAUNCHER_DIR);
-        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            return launcherHome.resolve(WIN_LAUNCHER);
-        }
-        // On Linux and MAC the startup script is in the bin folder
-        return launcherHome.resolve("bin").resolve(LINUX_LAUNCHER);
+    public static Path getNativeLauncher(Path home) {
+        Path launcherDir = home.resolve(LAUNCHER_DIR);
+        Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
+                ? launcherDir.resolve(WIN_LAUNCHER)
+                : launcherDir.resolve("bin").resolve(LINUX_LAUNCHER);
+        return result.normalize().toAbsolutePath();
     }
 
     /**
      * Returns the script launcher which can be used to launch with console being attached.
      */
-    public static Path getScriptLauncher(Path root) {
-        return root.resolve(LAUNCHER_DIR).resolve("bin")
-                .resolve(OsHelper.getRunningOs() == OperatingSystem.WINDOWS ? LAUNCHER_BAT : LINUX_LAUNCHER);
+    public static Path getScriptLauncher(Path home) {
+        Path launcherDir = home.resolve(LAUNCHER_DIR);
+        Path launcherBinDir = launcherDir.resolve("bin");
+        Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
+                ? launcherBinDir.resolve(LAUNCHER_BAT)
+                : launcherBinDir.resolve(LINUX_LAUNCHER);
+        return result.normalize().toAbsolutePath();
     }
 
     /**

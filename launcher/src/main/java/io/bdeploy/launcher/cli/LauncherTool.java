@@ -694,7 +694,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         List<String> command = new ArrayList<>();
-        command.add(launcher.normalize().toAbsolutePath().toString());
+        command.add(launcher.toString());
         if (isNewScriptLauncher) {
             command.add("launcher");
             command.add("--launch=" + appDescriptor);
