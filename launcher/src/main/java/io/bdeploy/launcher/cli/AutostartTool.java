@@ -56,9 +56,6 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
         }
 
         Path hivePath = rootDir.resolve("bhive");
-        if (!hivePath.toFile().isDirectory()) {
-            return createResultWithErrorMessage("Home directory does not contain a BHive.");
-        }
 
         Path auditorPath;
         if (PathHelper.isReadOnly(rootDir)) {
