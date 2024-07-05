@@ -681,9 +681,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Delegates launching of the application to the given version of the launcher. */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
-        Path versionedHomeDir = ClientPathHelper.getHome(homeDir, version);
-        Path versionedLauncher = ClientPathHelper.getNativeLauncher(versionedHomeDir);
-        Path versionedScriptLauncher = ClientPathHelper.getScriptLauncher(versionedHomeDir);
+        LauncherPathProvider versionedLpp = new LauncherPathProvider(ClientPathHelper.getHome(homeDir, version));
+        Path versionedLauncher = ClientPathHelper.getNativeLauncher(versionedLpp);
+        Path versionedScriptLauncher = ClientPathHelper.getScriptLauncher(versionedLpp);
 
         boolean isNewScriptLauncher = false;
 
@@ -730,7 +730,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Set the home directory for the launcher. Required for older launchers. Newer launchers do not use the variable anymore.
             Map<String, String> env = b.environment();
-            env.put("BDEPLOY_HOME", versionedHomeDir.toFile().getAbsolutePath());
+            env.put("BDEPLOY_HOME", versionedLpp.get(SpecialDirectory.HOME).toFile().getAbsolutePath());
 
             // Notify the launcher that it runs in a special mode. In this mode it will forward all exit codes without special handling.
             env.put(BDEPLOY_DELEGATE, "TRUE");
@@ -753,15 +753,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed. */
     private void doInstallLauncherSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
-        Path versionedHomeDir = ClientPathHelper.getHome(homeDir, version);
-        Path versionedNativeLauncher = ClientPathHelper.getNativeLauncher(versionedHomeDir);
+        LauncherPathProvider versionedLpp = new LauncherPathProvider(ClientPathHelper.getHome(homeDir, version));
+        Path versionedNativeLauncher = ClientPathHelper.getNativeLauncher(versionedLpp);
 
         if (PathHelper.exists(versionedNativeLauncher)) {
             log.info("Launcher is already installed.");
             return;
         }
         log.info("Installing required launcher ...");
-        if (PathHelper.isReadOnly(versionedHomeDir)) {
+        if (PathHelper.isReadOnly(versionedLpp.get(SpecialDirectory.HOME))) {
             throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
         }
 

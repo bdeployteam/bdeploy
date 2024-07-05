@@ -28,7 +28,7 @@ public class LocalStartScriptHelper extends LocalScriptHelper {
     @Override
     protected String getScriptContent() {
         String envVar = LaunchMode.LAUNCH_MODE_ENV_VAR_NAME + "=" + LaunchMode.PATH;
-        Path scriptLauncher = ClientPathHelper.getScriptLauncher(lpp.get(SpecialDirectory.HOME));
+        Path scriptLauncher = ClientPathHelper.getScriptLauncher(lpp);
         Path launchFile = lpp.get(SpecialDirectory.APP).resolve(ClientPathHelper.LAUNCH_FILE_NAME);
         if (os == OperatingSystem.WINDOWS) {
             return "@echo off\n"//

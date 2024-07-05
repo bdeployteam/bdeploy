@@ -8,6 +8,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
+import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
@@ -29,7 +30,7 @@ public class AppUpdater extends SwingWorker<Integer, Void> {
     @Override
     protected Integer doInBackground() throws Exception {
         Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
-        Path launcher = ClientPathHelper.getNativeLauncher(rootDir);
+        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
 
         List<String> command = new ArrayList<>();
         command.add(launcher.toFile().getAbsolutePath());

@@ -199,7 +199,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         }
 
         List<String> command = new ArrayList<>();
-        command.add(ClientPathHelper.getNativeFileAssocTool(launcherDir).toString());
+        command.add(ClientPathHelper.getNativeFileAssocTool(new LauncherPathProvider(launcherDir)).toString());
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             command.add("/UninstallApplication");
             command.add(ScriptUtils.getBDeployFileAssocId(id));

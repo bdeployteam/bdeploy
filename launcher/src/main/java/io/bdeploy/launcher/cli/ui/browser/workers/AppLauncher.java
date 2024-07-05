@@ -11,6 +11,7 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
@@ -34,7 +35,7 @@ public class AppLauncher extends SwingWorker<Object, Void> {
     @Override
     protected Object doInBackground() throws Exception {
         Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
-        Path launcher = ClientPathHelper.getNativeLauncher(rootDir);
+        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
 
         List<String> command = new ArrayList<>();
         command.add(launcher.toFile().getAbsolutePath());

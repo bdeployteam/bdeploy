@@ -14,6 +14,8 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 
 /**
  * Helper class providing access to common folders.
@@ -114,8 +116,8 @@ public class ClientPathHelper {
     /**
      * Returns the native file association utility.
      */
-    public static Path getNativeFileAssocTool(Path home) {
-        Path launcherDir = home.resolve(LAUNCHER_DIR);
+    public static Path getNativeFileAssocTool(LauncherPathProvider lpp) {
+        Path launcherDir = lpp.get(SpecialDirectory.LAUNCHER);
         Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
                 ? launcherDir.resolve(WIN_FILE_ASSOC)
                 : launcherDir.resolve("bin").resolve(LINUX_FILE_ASSOC);
@@ -125,8 +127,8 @@ public class ClientPathHelper {
     /**
      * Returns the native launcher used to start the application.
      */
-    public static Path getNativeLauncher(Path home) {
-        Path launcherDir = home.resolve(LAUNCHER_DIR);
+    public static Path getNativeLauncher(LauncherPathProvider lpp) {
+        Path launcherDir = lpp.get(SpecialDirectory.LAUNCHER);
         Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
                 ? launcherDir.resolve(WIN_LAUNCHER)
                 : launcherDir.resolve("bin").resolve(LINUX_LAUNCHER);
@@ -136,8 +138,8 @@ public class ClientPathHelper {
     /**
      * Returns the script launcher which can be used to launch with console being attached.
      */
-    public static Path getScriptLauncher(Path home) {
-        Path launcherDir = home.resolve(LAUNCHER_DIR);
+    public static Path getScriptLauncher(LauncherPathProvider lpp) {
+        Path launcherDir = lpp.get(SpecialDirectory.LAUNCHER);
         Path launcherBinDir = launcherDir.resolve("bin");
         Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
                 ? launcherBinDir.resolve(LAUNCHER_BAT)

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ProcessHelper;
@@ -71,7 +72,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
         List<String> command = new ArrayList<>();
         // On Windows the BDeploy executable expects the click and start file
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            Path launcher = ClientPathHelper.getNativeLauncher(rootDir);
+            Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
             Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
             command.add(launcher.toFile().getAbsolutePath());
             command.add("/Uninstall");
@@ -89,7 +90,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
         }
 
         // Startup the native launcher and pass the uninstall arguments
-        Path launcher = ClientPathHelper.getNativeLauncher(rootDir);
+        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
         command.add(launcher.toFile().getAbsolutePath());
         command.add("uninstaller");
         command.add("--app=" + app.clickAndStart.applicationId);

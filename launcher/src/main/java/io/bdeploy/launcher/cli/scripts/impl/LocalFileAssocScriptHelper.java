@@ -48,7 +48,7 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
         }
 
         List<String> command = new ArrayList<>();
-        command.add(ClientPathHelper.getNativeFileAssocTool(lpp.get(SpecialDirectory.HOME)).toString());
+        command.add(ClientPathHelper.getNativeFileAssocTool(lpp).toString());
         if (os == OperatingSystem.WINDOWS) {
             command.add("/InstallApplication");
             command.add(ScriptUtils.getBDeployFileAssocId(id));
@@ -95,8 +95,7 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
         }
         return "#!/usr/bin/env bash\n"//
                 + "export " + envVar + "\n"//
-                + ClientPathHelper.getNativeLauncher(lpp.get(SpecialDirectory.HOME)) + " launcher \"--launch=" + launchFile
-                + "\" -- \"$@\"";
+                + ClientPathHelper.getNativeLauncher(lpp) + " launcher \"--launch=" + launchFile + "\" -- \"$@\"";
     }
 
     @Override

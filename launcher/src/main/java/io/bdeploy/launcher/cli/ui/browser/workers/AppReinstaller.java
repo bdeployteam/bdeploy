@@ -16,6 +16,7 @@ import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfigurati
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
@@ -100,7 +101,7 @@ public class AppReinstaller extends SwingWorker<Void, Object> {
     private List<String> getInstallCommand() throws IOException {
         List<String> command = new ArrayList<>();
         Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
-        Path launcher = ClientPathHelper.getNativeLauncher(rootDir);
+        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
         command.add(launcher.toFile().getAbsolutePath());
         command.add(launchFile.toFile().getAbsolutePath());
         command.add("--updateOnly");
