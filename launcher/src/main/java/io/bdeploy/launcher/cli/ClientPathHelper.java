@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -62,20 +61,24 @@ public class ClientPathHelper {
     /**
      * Returns the are where the user is permitted to write files required for the application to run.
      */
-    public static Path getUserArea() {
+    public static Path getUserAreaOrThrow() {
         // Check if a specific directory should be used
-        Path userArea = PathHelper.ofNullableStrig(System.getenv("BDEPLOY_USER_AREA"));
-        if (userArea != null) {
-            return userArea.toAbsolutePath();
+        String userAreaEnv = System.getenv("BDEPLOY_USER_AREA");
+        Path userArea;
+        if (userAreaEnv != null) {
+            userArea = Path.of(userAreaEnv);
+        } else if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            // On Windows we default to the local application data folder
+            userArea = Path.of(System.getenv("LOCALAPPDATA"), "BDeploy");
+        } else {
+            throw new IllegalStateException("No user area was found.");
         }
 
-        // On Windows we default to the local application data folder
-        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            return Paths.get(System.getenv("LOCALAPPDATA"), "BDeploy");
+        if (PathHelper.isReadOnly(userArea)) {
+            throw new IllegalStateException("The user area '" + userArea + "' cannot be modified.");
         }
 
-        // No user area
-        return null;
+        return userArea.normalize().toAbsolutePath();
     }
 
     /**

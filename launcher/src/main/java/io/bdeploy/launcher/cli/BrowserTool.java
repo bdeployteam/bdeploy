@@ -42,17 +42,7 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
         }
 
         // Try to get a user-area if the root is readonly
-        Path userArea = null;
-        if (PathHelper.isReadOnly(rootDir)) {
-            userArea = ClientPathHelper.getUserArea();
-            if (userArea == null) {
-                throw new IllegalStateException(
-                        "The launcher installation directory is read-only and no user area has been set up.");
-            }
-            if (PathHelper.isReadOnly(userArea)) {
-                throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
-            }
-        }
+        Path userArea = PathHelper.isReadOnly(rootDir) ? ClientPathHelper.getUserAreaOrThrow() : null;
 
         BrowserDialog dialog = new BrowserDialog(rootDir, userArea);
         dialog.setVisible(true);

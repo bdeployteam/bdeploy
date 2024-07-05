@@ -57,20 +57,7 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
         Path hivePath = rootDir.resolve("bhive");
 
-        Path auditorPath;
-        if (PathHelper.isReadOnly(rootDir)) {
-            Path userArea = ClientPathHelper.getUserArea();
-            if (userArea == null) {
-                throw new IllegalStateException(
-                        "The launcher installation directory is read-only and no user area has been set up.");
-            }
-            if (PathHelper.isReadOnly(userArea)) {
-                throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
-            }
-            auditorPath = userArea;
-        } else {
-            auditorPath = hivePath;
-        }
+        Path auditorPath = PathHelper.isReadOnly(rootDir) ? ClientPathHelper.getUserAreaOrThrow() : hivePath;
         Auditor auditor = RollingFileAuditor.getFactory().apply(auditorPath);
 
         List<String> emptyArgs = List.of();

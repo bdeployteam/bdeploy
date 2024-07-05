@@ -316,10 +316,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Try to get a user-area if the root is readonly.
         if (readOnlyRootDir) {
-            userArea = ClientPathHelper.getUserArea();
-            if (userArea == null || PathHelper.isReadOnly(userArea)) {
-                throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
-            }
+            userArea = ClientPathHelper.getUserAreaOrThrow();
         }
 
         Path descriptorFile = Paths.get(config.launch());
