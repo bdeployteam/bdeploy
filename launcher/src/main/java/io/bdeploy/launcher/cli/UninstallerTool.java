@@ -60,8 +60,6 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     private LauncherPathProvider lpp;
     private Path homeDir;
     private Path bhiveDir;
-    private Path appsDir;
-    private Path poolDir;
     private Path startScriptsDir;
     private Path fileAssocScriptsDir;
     private Path appDir;
@@ -87,8 +85,6 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         lpp = new LauncherPathProvider(Paths.get(homeDirString)).setInstance(config.app());
         homeDir = lpp.get(SpecialDirectory.HOME);
         bhiveDir = lpp.get(SpecialDirectory.BHIVE);
-        appsDir = lpp.get(SpecialDirectory.APPS);
-        poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);
         startScriptsDir = lpp.get(SpecialDirectory.START_SCRIPTS);
         fileAssocScriptsDir = lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS);
         appDir = lpp.get(SpecialDirectory.APP);
@@ -154,8 +150,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             }
 
             // Trigger cleanup to remove from hive and from pool
-            ClientCleanup cleanup = new ClientCleanup(hive, homeDir, appsDir, poolDir, startScriptsDir, fileAssocScriptsDir);
-            cleanup.run();
+            new ClientCleanup(hive, lpp).run();
         } finally {
             hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
         }

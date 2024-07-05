@@ -214,9 +214,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Path where the launched app is stored */
     private Path appDir;
 
-    /** Path where all apps are stored. Each app is located in a folder with its unique ID */
-    private Path appsDir;
-
     /** Path where the pooled products and artifacts are stored */
     private Path poolDir;
 
@@ -329,7 +326,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         lpp.setInstance(clickAndStart.applicationId);
-        appsDir = lpp.get(SpecialDirectory.APPS);
         bhiveDir = lpp.get(SpecialDirectory.BHIVE);
         appDir = lpp.get(SpecialDirectory.APP);
         poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);
@@ -467,9 +463,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             if (!readOnlyHomeDir) {
                 log.info("Cleaning unused launchers and applications...");
                 doExecuteLocked(hive, reporter, () -> {
-                    ClientCleanup cleanup = new ClientCleanup(hive, homeDir, appsDir, poolDir, startScriptsDir,
-                            fileAssocScriptsDir);
-                    cleanup.run();
+                    new ClientCleanup(hive, lpp).run();
                     return null;
                 });
             }

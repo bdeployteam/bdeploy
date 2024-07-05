@@ -82,9 +82,9 @@ public class ClientPathHelper {
      * Returns the home directory for the given version. Each version will get its own directory where the launcher, the hive as
      * well as all apps are stored. Nothing is shared between different versions to prevent side-effects
      */
-    public static Path getHome(Path root, Version version) {
+    public static Path getHome(Path homeDir, Version version) {
         String name = "bdeploy-" + version.toString();
-        return root.resolve(name);
+        return homeDir.resolve(name);
     }
 
     /**

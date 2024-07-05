@@ -26,6 +26,8 @@ import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 
 /**
  * Cleans software from the hive which is not used any more. The {@linkplain ClientSoftwareManifest} is used in
@@ -37,22 +39,14 @@ public class ClientCleanup {
     private static final Logger log = LoggerFactory.getLogger(ClientCleanup.class);
 
     private final BHive hive;
-    private final Path rootDir;
-    private final Path appsDir;
-    private final Path poolDir;
-    private final Path startScriptsDir;
-    private final Path fileAssocScriptsDir;
+    private final LauncherPathProvider lpp;
 
     /**
      * Creates a new cleanup instance using the given hive
      */
-    public ClientCleanup(BHive hive, Path rootDir, Path appsDir, Path poolDir, Path startScriptsDir, Path fileAssocScriptsDir) {
+    public ClientCleanup(BHive hive, LauncherPathProvider lpp) {
         this.hive = hive;
-        this.rootDir = rootDir;
-        this.appsDir = appsDir;
-        this.poolDir = poolDir;
-        this.startScriptsDir = startScriptsDir;
-        this.fileAssocScriptsDir = fileAssocScriptsDir;
+        this.lpp = lpp;
     }
 
     /**
@@ -93,6 +87,7 @@ public class ClientCleanup {
 
         // Cleanup hive and pool
         log.info("Removing stale pooled applications that are not used any more...");
+        Path poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);
         for (Manifest.Key key : availableApps) {
             log.info("Deleting {}", key);
 
@@ -139,11 +134,12 @@ public class ClientCleanup {
 
         // Cleanup hive and launcher
         log.info("Removing stale launchers that are not used any more...");
+        Path homeDir = lpp.get(SpecialDirectory.HOME);
         for (Manifest.Key key : installed) {
             log.info("Deleting {}", key);
 
             Version version = VersionHelper.parse(key.getTag());
-            Path launcherPath = ClientPathHelper.getHome(rootDir, version);
+            Path launcherPath = ClientPathHelper.getHome(homeDir, version);
 
             // File-Locks could prevent that we can delete the folder
             // thus we first try to rename and then delete
@@ -165,10 +161,10 @@ public class ClientCleanup {
 
     /** Cleans the pool, scripts and apps directory */
     private void doCleanup() {
-        deleteDirIfEmpty(poolDir);
-        deleteDirIfEmpty(startScriptsDir);
-        deleteDirIfEmpty(fileAssocScriptsDir);
-        deleteDirIfEmpty(appsDir);
+        deleteDirIfEmpty(lpp.get(SpecialDirectory.MANIFEST_POOL));
+        deleteDirIfEmpty(lpp.get(SpecialDirectory.START_SCRIPTS));
+        deleteDirIfEmpty(lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS));
+        deleteDirIfEmpty(lpp.get(SpecialDirectory.APPS));
     }
 
     private static boolean deleteDirIfEmpty(Path path) {
