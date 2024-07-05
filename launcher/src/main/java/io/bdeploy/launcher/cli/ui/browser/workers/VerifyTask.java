@@ -1,7 +1,7 @@
 package io.bdeploy.launcher.cli.ui.browser.workers;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -13,20 +13,22 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
+import io.bdeploy.launcher.cli.ClientPathHelper;
 
 /**
- * Executes the Verify operation on the given hive and targetPath
+ * Executes the Verify operation on the given hive and targetPath.
  */
 public class VerifyTask extends HiveTask {
 
+    private final LauncherPathProvider lpp;
     private final ClickAndStartDescriptor clickAndStart;
-    private final Path rootDir;
 
-    public VerifyTask(List<Path> hives, Auditor auditor, ClickAndStartDescriptor clickAndStart, Path rootDir) {
-        super(hives, auditor);
+    public VerifyTask(LauncherPathProvider lpp, Auditor auditor, ClickAndStartDescriptor clickAndStart) throws IOException {
+        super(ClientPathHelper.getHives(lpp), auditor);
+        this.lpp = lpp;
         this.clickAndStart = clickAndStart;
-        this.rootDir = rootDir;
     }
 
     @Override
@@ -43,8 +45,7 @@ public class VerifyTask extends HiveTask {
 
         Manifest.Key manifest = cac.appConfig.application;
 
-        Path targetPath = rootDir.resolve("apps").resolve(SpecialDirectory.MANIFEST_POOL.getDirName())
-                .resolve(manifest.directoryFriendlyName());
+        Path targetPath = lpp.get(SpecialDirectory.MANIFEST_POOL).resolve(manifest.directoryFriendlyName());
 
         VerifyOperationResultDto result = new VerifyOperationResultDto(
                 hive.execute(new VerifyOperation().setTargetPath(targetPath).setManifest(manifest)));
@@ -62,5 +63,4 @@ public class VerifyTask extends HiveTask {
         }
         builder.append("\nRemaining " + result.unmodifiedFiles.size() + " files are unmodified.\n");
     }
-
 }

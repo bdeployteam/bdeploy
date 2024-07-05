@@ -35,5 +35,4 @@ public class PruneTask extends HiveTask {
             builder.append("Removed: ").append(object);
         }
     }
-
 }

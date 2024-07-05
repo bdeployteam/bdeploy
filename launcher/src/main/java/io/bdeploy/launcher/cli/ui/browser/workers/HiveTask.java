@@ -39,18 +39,18 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
         int i = 0;
         log.info("Executing '{}'", getTaskName());
         for (Path hiveDir : hives) {
-            Path rootDir = hiveDir.getParent();
+            Path homeDir = hiveDir.getParent();
             builder.append(hiveDir.toString()).append("\n");
             try (BHive hive = new BHive(hiveDir.toUri(),
                     auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hiveDir), getActivityReporter())) {
                 try {
                     setProgress(i++);
-                    hive.execute(new DirectoryLockOperation().setDirectory(rootDir));
+                    hive.execute(new DirectoryLockOperation().setDirectory(homeDir));
                     doExecute(hive);
                 } catch (Exception ex) {
                     builder.append("Failed: " + ExceptionHelper.mapExceptionCausesToReason(ex));
                 } finally {
-                    hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
+                    hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
                 }
             }
             builder.append("\n");
@@ -90,5 +90,4 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
     protected ActivityReporter getActivityReporter() {
         return new PropertyChangeActivityReporter(getPropertyChangeSupport());
     }
-
 }

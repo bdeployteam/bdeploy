@@ -517,8 +517,7 @@ public class BrowserDialog extends BaseDialog {
             progressBar.setIndeterminate(true);
             progressBar.setString("Verifying '" + app.clickAndStart.applicationId + "'");
 
-            List<Path> hives = ClientPathHelper.getHives(lpp);
-            VerifyTask task = new VerifyTask(hives, auditor, app.clickAndStart, homeDir);
+            VerifyTask task = new VerifyTask(lpp, auditor, app.clickAndStart);
             task.addPropertyChangeListener(this::doUpdateProgessBar);
             task.execute();
         } catch (Exception ex) {

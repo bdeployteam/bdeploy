@@ -11,7 +11,7 @@ import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.common.audit.Auditor;
 
 /**
- * Executes the Fsck operation the given hives
+ * Executes the FSCK operation the given hives
  */
 public class FsckTask extends HiveTask {
 
@@ -45,5 +45,4 @@ public class FsckTask extends HiveTask {
             builder.append("\n");
         }
     }
-
 }
