@@ -16,24 +16,26 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
 /**
- * A worker that refreshes the details of the installed applications.
+ * A worker that refreshes the details of the installed applications
  */
 public class AppRefresher extends SwingWorker<Void, Object> {
 
     private static final Logger log = LoggerFactory.getLogger(AppRefresher.class);
 
-    private final Path rootDir;
+    private final LauncherPathProvider lpp;
     private final Auditor auditor;
     private final Collection<ClientSoftwareConfiguration> apps;
 
-    public AppRefresher(Path rootDir, Auditor auditor, Collection<ClientSoftwareConfiguration> apps) {
-        this.rootDir = rootDir;
+    public AppRefresher(LauncherPathProvider lpp, Auditor auditor, Collection<ClientSoftwareConfiguration> apps) {
+        this.lpp = lpp;
         this.auditor = auditor;
         this.apps = apps;
     }
@@ -42,7 +44,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
     protected Void doInBackground() throws Exception {
         log.info("Fetching configurations...");
         int i = 0;
-        Path hivePath = rootDir.resolve("bhive");
+        Path hivePath = lpp.get(SpecialDirectory.BHIVE);
         try (BHive hive = new BHive(hivePath.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hivePath),
                 new ActivityReporter.Null())) {
             for (ClientSoftwareConfiguration app : apps) {
@@ -73,5 +75,4 @@ public class AppRefresher extends SwingWorker<Void, Object> {
         csc.clientAppCfg = cac;
         manifest.update(clickAndStart.applicationId, csc);
     }
-
 }

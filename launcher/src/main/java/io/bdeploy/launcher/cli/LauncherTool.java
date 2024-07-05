@@ -929,7 +929,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Create the click-and-start file.
         try {
-            ClientPathHelper.getOrCreateClickAndStart(homeDir, clickAndStart);
+            ClientPathHelper.getOrCreateClickAndStart(lpp, clickAndStart);
         } catch (IOException e) {
             log.error("Initial creation of click-and-start file failed.", e);
         }

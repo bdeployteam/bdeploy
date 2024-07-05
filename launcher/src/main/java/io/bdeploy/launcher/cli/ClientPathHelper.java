@@ -23,11 +23,6 @@ import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 public class ClientPathHelper {
 
     /**
-     * Name of the directory containing the launcher
-     */
-    public static final String LAUNCHER_DIR = "launcher";
-
-    /**
      * Name of the launcher.bat file
      */
     public static final String LAUNCHER_BAT = "launcher.bat";
@@ -95,10 +90,10 @@ public class ClientPathHelper {
     /**
      * Returns a list of all hives in the given directory.
      */
-    public static List<Path> getHives(Path rootDir) throws IOException {
+    public static List<Path> getHives(LauncherPathProvider lpp) throws IOException {
         List<Path> hives = new ArrayList<>();
-        hives.add(rootDir.resolve("bhive"));
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir,
+        hives.add(lpp.get(SpecialDirectory.BHIVE));
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(lpp.get(SpecialDirectory.HOME),
                 p -> p.getFileName().toString().toLowerCase().startsWith("bdeploy-"))) {
             Iterator<Path> dirs = stream.iterator();
             while (dirs.hasNext()) {
@@ -150,22 +145,15 @@ public class ClientPathHelper {
     /**
      * Returns the descriptor for the given application
      */
-    public static Path getOrCreateClickAndStart(Path rootDir, ClickAndStartDescriptor clickAndStart) throws IOException {
-        Path appDir = getAppHomeDir(rootDir, clickAndStart);
+    public static Path getOrCreateClickAndStart(LauncherPathProvider lpp, ClickAndStartDescriptor descr) throws IOException {
+        Path appDir = lpp.get(SpecialDirectory.APP, descr.applicationId);
         Path launchFile = appDir.resolve(LAUNCH_FILE_NAME);
 
         // Create if not existing
         if (!launchFile.toFile().isFile()) {
             PathHelper.mkdirs(appDir);
-            Files.write(launchFile, StorageHelper.toRawBytes(clickAndStart));
+            Files.write(launchFile, StorageHelper.toRawBytes(descr));
         }
         return launchFile;
-    }
-
-    /**
-     * Returns the home directory for the given application
-     */
-    public static Path getAppHomeDir(Path rootDir, ClickAndStartDescriptor clickAndStart) {
-        return rootDir.resolve("apps").resolve(clickAndStart.applicationId);
     }
 }

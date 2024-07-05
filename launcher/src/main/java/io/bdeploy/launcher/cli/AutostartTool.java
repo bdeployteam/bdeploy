@@ -79,7 +79,7 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
                         return appConfig.metadata.autostart;
                     })//
                     .forEach(appConfig -> {
-                        AppLauncher launcher = new AppLauncher(homeDir, appConfig, emptyArgs);
+                        AppLauncher launcher = new AppLauncher(lpp, appConfig, emptyArgs);
                         try {
                             launcher.execute();
                             launcher.get(15, TimeUnit.SECONDS);

@@ -22,20 +22,20 @@ public class AppLauncher extends SwingWorker<Object, Void> {
 
     private static final Logger log = LoggerFactory.getLogger(AppLauncher.class);
 
-    private final Path rootDir;
+    private final LauncherPathProvider lpp;
     private final List<String> args;
     private final ClientSoftwareConfiguration app;
 
-    public AppLauncher(Path rootDir, ClientSoftwareConfiguration app, List<String> args) {
-        this.rootDir = rootDir;
-        this.args = args;
+    public AppLauncher(LauncherPathProvider lpp, ClientSoftwareConfiguration app, List<String> args) {
+        this.lpp = lpp;
         this.app = app;
+        this.args = args;
     }
 
     @Override
     protected Object doInBackground() throws Exception {
-        Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
-        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
+        Path launcher = ClientPathHelper.getNativeLauncher(lpp);
+        Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, app.clickAndStart);
 
         List<String> command = new ArrayList<>();
         command.add(launcher.toFile().getAbsolutePath());
@@ -62,5 +62,4 @@ public class AppLauncher extends SwingWorker<Object, Void> {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-
 }

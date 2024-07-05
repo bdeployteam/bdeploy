@@ -17,20 +17,20 @@ import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
  */
 public class AppUpdater extends SwingWorker<Integer, Void> {
 
-    private final Path rootDir;
+    private final LauncherPathProvider lpp;
     private final List<String> args;
     private final ClientSoftwareConfiguration app;
 
-    public AppUpdater(Path rootDir, ClientSoftwareConfiguration app, List<String> args) {
-        this.rootDir = rootDir;
-        this.args = args;
+    public AppUpdater(LauncherPathProvider lpp, ClientSoftwareConfiguration app, List<String> args) {
+        this.lpp = lpp;
         this.app = app;
+        this.args = args;
     }
 
     @Override
     protected Integer doInBackground() throws Exception {
-        Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
-        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
+        Path launcher = ClientPathHelper.getNativeLauncher(lpp);
+        Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, app.clickAndStart);
 
         List<String> command = new ArrayList<>();
         command.add(launcher.toFile().getAbsolutePath());

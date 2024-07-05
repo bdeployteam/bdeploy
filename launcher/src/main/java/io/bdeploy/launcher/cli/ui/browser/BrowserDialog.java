@@ -97,9 +97,10 @@ public class BrowserDialog extends BaseDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient Path rootDir;
+    private final transient LauncherPathProvider lpp;
+    private final transient Path homeDir;
     private final transient Path bhiveDir;
-    private final transient boolean readonlyRoot;
+    private final transient boolean readonlyHome;
     private final transient Auditor auditor;
 
     private final OperatingSystem os;
@@ -125,12 +126,13 @@ public class BrowserDialog extends BaseDialog {
 
     private JProgressBar progressBar;
 
-    public BrowserDialog(Path rootDir, Path userArea) {
+    public BrowserDialog(LauncherPathProvider lpp, Path userArea) {
         super(new Dimension(1024, 768));
 
-        this.rootDir = rootDir;
-        this.bhiveDir = rootDir.resolve("bhive");
-        this.readonlyRoot = userArea != null;
+        this.lpp = lpp;
+        this.homeDir = lpp.get(SpecialDirectory.HOME);
+        this.bhiveDir = lpp.get(SpecialDirectory.BHIVE);
+        this.readonlyHome = userArea != null;
         this.auditor = userArea != null ? RollingFileAuditor.getFactory().apply(userArea) : null;
 
         this.os = OsHelper.getRunningOs();
@@ -389,8 +391,7 @@ public class BrowserDialog extends BaseDialog {
         footer.setBorder(new EmptyBorder(0, 10, 10, 10));
         footer.setLayout(new BorderLayout(15, 15));
 
-        JLabel home = new JLabel(
-                "<HTML><U>" + rootDir.toAbsolutePath().toString() + "</U>" + (readonlyRoot ? (" (readonly)") : "") + "</HTML>");
+        JLabel home = new JLabel("<HTML><U>" + homeDir.toString() + "</U>" + (readonlyHome ? (" (readonly)") : "") + "</HTML>");
         home.setToolTipText("Open home directory");
         home.setHorizontalAlignment(SwingConstants.LEFT);
         home.setOpaque(false);
@@ -459,7 +460,7 @@ public class BrowserDialog extends BaseDialog {
     /** Executes the prune operation on all local hives */
     private void onPruneButtonClicked(ActionEvent e) {
         try {
-            List<Path> hives = ClientPathHelper.getHives(rootDir);
+            List<Path> hives = ClientPathHelper.getHives(lpp);
 
             progressBar.setIndeterminate(false);
             progressBar.setValue(0);
@@ -478,7 +479,7 @@ public class BrowserDialog extends BaseDialog {
     /** Executes the fix operation on all local hives */
     private void onFsckButtonClicked(ActionEvent e) {
         try {
-            List<Path> hives = ClientPathHelper.getHives(rootDir);
+            List<Path> hives = ClientPathHelper.getHives(lpp);
 
             progressBar.setIndeterminate(false);
             progressBar.setValue(0);
@@ -503,7 +504,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setIndeterminate(true);
         progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
 
-        AppUpdater task = new AppUpdater(rootDir, app, args);
+        AppUpdater task = new AppUpdater(lpp, app, args);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.execute();
     }
@@ -516,8 +517,8 @@ public class BrowserDialog extends BaseDialog {
             progressBar.setIndeterminate(true);
             progressBar.setString("Verifying '" + app.clickAndStart.applicationId + "'");
 
-            List<Path> hives = ClientPathHelper.getHives(rootDir);
-            VerifyTask task = new VerifyTask(hives, auditor, app.clickAndStart, rootDir);
+            List<Path> hives = ClientPathHelper.getHives(lpp);
+            VerifyTask task = new VerifyTask(hives, auditor, app.clickAndStart, homeDir);
             task.addPropertyChangeListener(this::doUpdateProgessBar);
             task.execute();
         } catch (Exception ex) {
@@ -552,7 +553,7 @@ public class BrowserDialog extends BaseDialog {
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
         ClientSoftwareConfiguration config = getSelectedApps().get(0);
         ClickAndStartDescriptor clickAndStart = config.clickAndStart;
-        LauncherPathProvider lpp = new LauncherPathProvider(rootDir).setInstance(clickAndStart.applicationId);
+        LauncherPathProvider lpp = new LauncherPathProvider(homeDir).setInstance(clickAndStart.applicationId);
         try {
             scriptHelperCreator.apply(lpp).createScript(config.metadata, clickAndStart, true);
         } catch (IOException ex) {
@@ -571,7 +572,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setIndeterminate(true);
         progressBar.setString("Launching '" + app.clickAndStart.applicationId + "'");
 
-        AppLauncher task = new AppLauncher(rootDir, app, args);
+        AppLauncher task = new AppLauncher(lpp, app, args);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.execute();
     }
@@ -584,7 +585,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setMaximum(apps.size());
         progressBar.setString("Refreshing applications...");
 
-        AppRefresher task = new AppRefresher(rootDir, auditor, apps);
+        AppRefresher task = new AppRefresher(lpp, auditor, apps);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
@@ -595,7 +596,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setIndeterminate(true);
         progressBar.setString("Uninstalling '" + app.clickAndStart.applicationId + "'");
 
-        AppUninstaller task = new AppUninstaller(rootDir, app);
+        AppUninstaller task = new AppUninstaller(lpp, app);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
@@ -606,7 +607,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setIndeterminate(true);
         progressBar.setString("Reinstalling '" + app.clickAndStart.applicationId + "'");
 
-        AppReinstaller task = new AppReinstaller(rootDir, app);
+        AppReinstaller task = new AppReinstaller(lpp, app);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
@@ -666,8 +667,8 @@ public class BrowserDialog extends BaseDialog {
         launchButton.setEnabled(singleAppSelected);
         launchItem.setEnabled(singleAppSelected);
 
-        uninstallItem.setEnabled(!readonlyRoot && singleAppSelected);
-        uninstallButton.setEnabled(!readonlyRoot && singleAppSelected);
+        uninstallItem.setEnabled(!readonlyHome && singleAppSelected);
+        uninstallButton.setEnabled(!readonlyHome && singleAppSelected);
 
         boolean activateStartScriptItemEnabled = false;
         boolean activateFileAssocScriptItemEnabled = false;
@@ -697,23 +698,23 @@ public class BrowserDialog extends BaseDialog {
         activateStartScriptItem.setEnabled(activateStartScriptItemEnabled);
         activateFileAssocScriptItem.setEnabled(activateFileAssocScriptItemEnabled);
 
-        refreshItem.setEnabled(!readonlyRoot);
-        refreshButton.setEnabled(!readonlyRoot);
+        refreshItem.setEnabled(!readonlyHome);
+        refreshButton.setEnabled(!readonlyHome);
 
         // --customizeArgs and launch needs at version 3.3.0
         customizeAndLaunchItem.setEnabled(checkVersion(selectedApps, new Version(3, 3, 0, null)));
 
         // --updateOnly flag needs at least version 3.6.5
-        updateItem.setEnabled(!readonlyRoot && checkVersion(selectedApps, new Version(3, 6, 5, null)));
+        updateItem.setEnabled(!readonlyHome && checkVersion(selectedApps, new Version(3, 6, 5, null)));
 
         // Error fixing and pruning require write permissions
-        if (!readonlyRoot) {
+        if (!readonlyHome) {
             fsckButton.setEnabled(true);
             pruneButton.setEnabled(true);
         }
 
-        verifyButton.setEnabled(!readonlyRoot && singleAppSelected);
-        reinstallButton.setEnabled(!readonlyRoot && singleAppSelected);
+        verifyButton.setEnabled(!readonlyHome && singleAppSelected);
+        reinstallButton.setEnabled(!readonlyHome && singleAppSelected);
     }
 
     /** Returns if the selected applications have at least the given version */
@@ -740,7 +741,7 @@ public class BrowserDialog extends BaseDialog {
         @Override
         public void mouseClicked(MouseEvent e) {
             try {
-                Desktop.getDesktop().browse(rootDir.toUri());
+                Desktop.getDesktop().browse(homeDir.toUri());
             } catch (IOException ex) {
                 showErrorMessageDialog(BrowserDialog.this, "Failed to open home directory: " + ex.getMessage());
             }

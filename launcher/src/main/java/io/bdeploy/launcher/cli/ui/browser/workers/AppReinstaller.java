@@ -24,26 +24,24 @@ import io.bdeploy.launcher.cli.ProcessHelper;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 
 /**
- * A worker that reinstalls selected application
+ * A worker that reinstalls the selected application
  */
 public class AppReinstaller extends SwingWorker<Void, Object> {
 
     private static final Logger log = LoggerFactory.getLogger(AppReinstaller.class);
 
-    private final Path rootDir;
+    private final LauncherPathProvider lpp;
     private final ClientSoftwareConfiguration app;
 
-    public AppReinstaller(Path rootDir, ClientSoftwareConfiguration app) {
-        this.rootDir = rootDir;
+    public AppReinstaller(LauncherPathProvider lpp, ClientSoftwareConfiguration app) {
+        this.lpp = lpp;
         this.app = app;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
-
         uninstall();
         install();
-
         return null;
     }
 
@@ -66,7 +64,7 @@ public class AppReinstaller extends SwingWorker<Void, Object> {
         log.info("Deleting app from pool {}", appPoolDir.toFile().getAbsolutePath());
         PathHelper.deleteRecursiveRetry(appPoolDir);
 
-        Path appDir = rootDir.resolve("apps").resolve(app.clickAndStart.applicationId);
+        Path appDir = lpp.get(SpecialDirectory.APP, app.clickAndStart.applicationId);
         log.info("Deleting app folder {}", appDir.toFile().getAbsolutePath());
         PathHelper.deleteRecursiveRetry(appDir);
     }
@@ -76,8 +74,7 @@ public class AppReinstaller extends SwingWorker<Void, Object> {
         MasterNamedResource namedMaster = master.getNamedMaster(app.clickAndStart.groupId);
         ClientApplicationConfiguration clientAppCfg = namedMaster.getClientConfiguration(app.clickAndStart.instanceId,
                 app.clickAndStart.applicationId);
-        return rootDir.resolve("apps").resolve(SpecialDirectory.MANIFEST_POOL.getDirName())
-                .resolve(clientAppCfg.appConfig.application.directoryFriendlyName());
+        return lpp.get(SpecialDirectory.MANIFEST_POOL).resolve(clientAppCfg.appConfig.application.directoryFriendlyName());
     }
 
     private void install() throws IOException, InterruptedException {
@@ -100,13 +97,12 @@ public class AppReinstaller extends SwingWorker<Void, Object> {
 
     private List<String> getInstallCommand() throws IOException {
         List<String> command = new ArrayList<>();
-        Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
-        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
+        Path launcher = ClientPathHelper.getNativeLauncher(lpp);
+        Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, app.clickAndStart);
         command.add(launcher.toFile().getAbsolutePath());
         command.add(launchFile.toFile().getAbsolutePath());
         command.add("--updateOnly");
         return command;
 
     }
-
 }

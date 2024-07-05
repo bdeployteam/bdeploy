@@ -15,23 +15,24 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ProcessHelper;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 
 /**
- * A worker that invokes the native uninstaller and waits for its completion.
+ * A worker that invokes the native uninstaller and waits for its completion
  */
 public class AppUninstaller extends SwingWorker<Void, Object> {
 
     private static final Logger log = LoggerFactory.getLogger(AppUninstaller.class);
 
-    private final Path rootDir;
+    private final LauncherPathProvider lpp;
     private final ClientSoftwareConfiguration app;
 
-    public AppUninstaller(Path rootDir, ClientSoftwareConfiguration app) {
-        this.rootDir = rootDir;
+    public AppUninstaller(LauncherPathProvider lpp, ClientSoftwareConfiguration app) {
+        this.lpp = lpp;
         this.app = app;
     }
 
@@ -72,8 +73,8 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
         List<String> command = new ArrayList<>();
         // On Windows the BDeploy executable expects the click and start file
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
-            Path launchFile = ClientPathHelper.getOrCreateClickAndStart(rootDir, app.clickAndStart);
+            Path launcher = ClientPathHelper.getNativeLauncher(lpp);
+            Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, app.clickAndStart);
             command.add(launcher.toFile().getAbsolutePath());
             command.add("/Uninstall");
             command.add(launchFile.toFile().getAbsolutePath());
@@ -82,19 +83,18 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
 
         // On Linux the installer writes a special uninstall script
         // ATTENTION: This is not there if the application has been launched via click&start
-        Path appHomeDir = ClientPathHelper.getAppHomeDir(rootDir, app.clickAndStart);
-        Path uninstaller = appHomeDir.resolve("uninstall.run");
+        Path appDir = lpp.get(SpecialDirectory.APP);
+        Path uninstaller = appDir.resolve("uninstall.run");
         if (PathHelper.exists(uninstaller)) {
             command.add(uninstaller.toFile().getAbsolutePath());
             return command;
         }
 
         // Startup the native launcher and pass the uninstall arguments
-        Path launcher = ClientPathHelper.getNativeLauncher(new LauncherPathProvider(rootDir));
+        Path launcher = ClientPathHelper.getNativeLauncher(lpp);
         command.add(launcher.toFile().getAbsolutePath());
         command.add("uninstaller");
         command.add("--app=" + app.clickAndStart.applicationId);
         return command;
     }
-
 }

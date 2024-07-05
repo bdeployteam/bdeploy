@@ -49,7 +49,7 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
         // Try to get an user-area if the home is readonly
         Path userArea = PathHelper.isReadOnly(homeDir) ? ClientPathHelper.getUserAreaOrThrow() : null;
 
-        BrowserDialog dialog = new BrowserDialog(homeDir, userArea);
+        BrowserDialog dialog = new BrowserDialog(lpp, userArea);
         dialog.setVisible(true);
         dialog.searchApps();
         dialog.waitForExit();
