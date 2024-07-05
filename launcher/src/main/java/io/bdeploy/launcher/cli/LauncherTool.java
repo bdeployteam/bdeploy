@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -93,25 +92,6 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
-import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
-import io.bdeploy.interfaces.variables.CompositeResolver;
-import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
-import io.bdeploy.interfaces.variables.DelayedVariableResolver;
-import io.bdeploy.interfaces.variables.DeploymentPathResolver;
-import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
-import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
-import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
-import io.bdeploy.interfaces.variables.InstanceVariableResolver;
-import io.bdeploy.interfaces.variables.LocalHostnameResolver;
-import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
-import io.bdeploy.interfaces.variables.ManifestSelfResolver;
-import io.bdeploy.interfaces.variables.ManifestVariableResolver;
-import io.bdeploy.interfaces.variables.OsVariableResolver;
-import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
@@ -939,10 +919,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Handle script changes.
         OperatingSystem os = OsHelper.getRunningOs();
-        ClientApplicationDto metadata = newConfig.metadata;
-        handleScriptChanges(metadata, new LocalStartScriptHelper(//
+        ClientApplicationConfiguration newClientAppConfig = newConfig.clientAppCfg;
+        handleScriptChanges(newClientAppConfig, new LocalStartScriptHelper(//
                 os, auditor, lpp, SpecialDirectory.START_SCRIPTS), "start", startScriptsDir);
-        handleScriptChanges(metadata, new LocalFileAssocScriptHelper(//
+        handleScriptChanges(newClientAppConfig, new LocalFileAssocScriptHelper(//
                 os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS), "file association", fileAssocScriptsDir);
 
         log.info("Application successfully installed.");
@@ -1070,7 +1050,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Un-zip the downloaded ZIP containing the configuration files.
         ZipHelper.unzip(cfgZip, cfgPath);
 
-        TemplateHelper.processFileTemplates(cfgPath, createResolver(clientAppCfg));
+        TemplateHelper.processFileTemplates(cfgPath, ResolverHelper.createResolver(lpp, clientAppCfg));
 
         try {
             // Record the proper ID in the configuration check file.
@@ -1083,13 +1063,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         PathHelper.deleteRecursiveRetry(cfgZip);
     }
 
-    private void handleScriptChanges(ClientApplicationDto metadata, LocalScriptHelper scriptHelper, String scriptType,
+    private void handleScriptChanges(ClientApplicationConfiguration cfg, LocalScriptHelper scriptHelper, String scriptType,
             Path scriptDir) {
         try {
-            scriptHelper.createScript(metadata, clickAndStart, false);
+            scriptHelper.createScript(cfg, clickAndStart, false);
         } catch (FileAlreadyExistsException e) {
             log.warn("Failed to create  {} script in {} because a different application is already using the same identifier: {}",
-                    scriptType, scriptDir, scriptHelper.calculateScriptName(metadata));
+                    scriptType, scriptDir, scriptHelper.calculateScriptName(cfg));
         } catch (IOException e) {
             log.error("Failed to create {} script in {}", scriptType, scriptDir, e);
         }
@@ -1106,7 +1086,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
         }
 
-        VariableResolver appSpecificResolvers = createResolver(clientCfg);
+        VariableResolver appSpecificResolvers = ResolverHelper.createResolver(lpp, clientCfg);
 
         // Create the actual start command and replace all defined variables
         ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
@@ -1178,45 +1158,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
             }
         }
-    }
-
-    private CompositeResolver createResolver(ClientApplicationConfiguration clientCfg) {
-        // General resolvers
-        CompositeResolver resolvers = new CompositeResolver();
-        resolvers.add(new InstanceAndSystemVariableResolver(clientCfg.instanceConfig));
-        resolvers.add(new ConditionalExpressionResolver(resolvers));
-        resolvers.add(new ApplicationVariableResolver(clientCfg.appConfig));
-        resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, lpp.get(SpecialDirectory.APP), clientCfg.activeTag));
-        resolvers.add(new OsVariableResolver());
-        resolvers.add(new EnvironmentVariableResolver());
-        resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
-        resolvers.add(new EscapeJsonCharactersResolver(resolvers));
-        resolvers.add(new EscapeXmlCharactersResolver(resolvers));
-        resolvers.add(new EscapeYamlCharactersResolver(resolvers));
-
-        // Enable resolving of path variables
-        resolvers.add(new DeploymentPathResolver(lpp.toDeploymentPathProvider()));
-
-        // Enable resolving of manifest variables
-        Map<Key, Path> pooledSoftware = new HashMap<>();
-        pooledSoftware.put(clientCfg.appConfig.application,
-                poolDir.resolve(clientCfg.appConfig.application.directoryFriendlyName()));
-        for (Manifest.Key key : clientCfg.resolvedRequires) {
-            pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
-        }
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pooledSoftware)));
-
-        // Resolver for local hostname - with client warning enabled.
-        resolvers.add(new LocalHostnameResolver(true));
-
-        // Resolvers that are using the general ones to actually do the work
-        CompositeResolver appSpecificResolvers = new CompositeResolver();
-        appSpecificResolvers.add(new ApplicationParameterValueResolver(clientCfg.appConfig.id, clientCfg.instanceConfig));
-        appSpecificResolvers.add(new ManifestSelfResolver(clientCfg.appConfig.application, resolvers));
-        appSpecificResolvers.add(resolvers);
-
-        return appSpecificResolvers;
     }
 
     /** Decodes the additional arguments that are passed to the application. */

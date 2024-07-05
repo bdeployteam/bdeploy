@@ -554,7 +554,7 @@ public class BrowserDialog extends BaseDialog {
         ClickAndStartDescriptor clickAndStart = config.clickAndStart;
         LauncherPathProvider lpp = new LauncherPathProvider(homeDir).setInstance(clickAndStart.applicationId);
         try {
-            scriptHelperCreator.apply(lpp).createScript(config.metadata, clickAndStart, true);
+            scriptHelperCreator.apply(lpp).createScript(config.clientAppCfg, clickAndStart, true);
         } catch (IOException ex) {
             showErrorMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage());
         }

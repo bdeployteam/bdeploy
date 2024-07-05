@@ -14,13 +14,13 @@ import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
+import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
-import io.bdeploy.launcher.cli.ClientApplicationDto;
 
 public abstract class LocalScriptHelper {
 
@@ -42,14 +42,14 @@ public abstract class LocalScriptHelper {
      * @param override Whether to override existing scripts
      * @throws IOException If override is <code>false</code> and a different application is already using the same identifier
      */
-    public void createScript(ClientApplicationDto metadata, ClickAndStartDescriptor clickAndStart, boolean override)
+    public void createScript(ClientApplicationConfiguration clientCfg, ClickAndStartDescriptor clickAndStart, boolean override)
             throws IOException {
-        String scriptName = calculateScriptName(metadata);
+        String scriptName = calculateScriptName(clientCfg);
         if (StringHelper.isNullOrBlank(scriptName)) {
             return;
         }
 
-        String scriptContent = getScriptContent();
+        String scriptContent = getScriptContent(clientCfg);
         Path fullScriptPath = scriptDir.resolve(scriptName);
 
         Files.createDirectories(scriptDir);
@@ -66,16 +66,16 @@ public abstract class LocalScriptHelper {
             settingsManifest.write(settings);
         }
 
-        afterUpdateHook(metadata, fullScriptPath);
+        afterUpdateHook(clientCfg, fullScriptPath);
     }
 
-    protected void afterUpdateHook(ClientApplicationDto metadata, Path fullScriptPath) {
+    protected void afterUpdateHook(ClientApplicationConfiguration clientCfg, Path fullScriptPath) {
         // Do nothing by default
     }
 
-    public abstract String calculateScriptName(ClientApplicationDto metadata);
+    public abstract String calculateScriptName(ClientApplicationConfiguration clientCfg);
 
-    protected abstract String getScriptContent();
+    protected abstract String getScriptContent(ClientApplicationConfiguration clientCfg);
 
     protected abstract void updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo,
             boolean override);

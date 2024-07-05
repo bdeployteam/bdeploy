@@ -11,11 +11,12 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
-import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.scripts.LaunchMode;
 import io.bdeploy.launcher.cli.scripts.LocalScriptHelper;
@@ -30,18 +31,19 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
     }
 
     @Override
-    protected void afterUpdateHook(ClientApplicationDto metadata, Path fullScriptPath) {
-        String id = metadata.id;
+    protected void afterUpdateHook(ClientApplicationConfiguration clientCfg, Path fullScriptPath) {
+        ApplicationConfiguration appConfig = clientCfg.appConfig;
+        String id = appConfig.id;
         if (id == null) {
             log.error("Failed to create file association because no ID was given.");
             return;
         }
-        String fileAssocExtension = metadata.fileAssocExtension;
+        String fileAssocExtension = clientCfg.appDesc.processControl.fileAssocExtension;
         if (fileAssocExtension == null) {
             log.error("Failed to create file association for {} because no file association extension was given.", id);
             return;
         }
-        String appName = metadata.appName;
+        String appName = appConfig.name;
         if (appName == null) {
             log.error("Failed to create file association for {} files ({})", fileAssocExtension, id);
             return;
@@ -79,12 +81,12 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
     }
 
     @Override
-    public String calculateScriptName(ClientApplicationDto metadata) {
-        return ScriptUtils.getFileAssocIdentifier(os, metadata.fileAssocExtension);
+    public String calculateScriptName(ClientApplicationConfiguration clientCfg) {
+        return ScriptUtils.getFileAssocIdentifier(os, clientCfg.appDesc.processControl.fileAssocExtension);
     }
 
     @Override
-    protected String getScriptContent() {
+    protected String getScriptContent(ClientApplicationConfiguration clientCfg) {
         String envVar = LaunchMode.LAUNCH_MODE_ENV_VAR_NAME + "=" + LaunchMode.ASSOCIATION;
         Path launchFile = lpp.get(SpecialDirectory.APP).resolve(ClientPathHelper.LAUNCH_FILE_NAME);
         if (os == OperatingSystem.WINDOWS) {
