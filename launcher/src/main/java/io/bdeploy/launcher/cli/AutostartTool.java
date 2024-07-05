@@ -18,6 +18,8 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.AutostartTool.AutostartConfig;
@@ -44,25 +46,29 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
     @Override
     protected RenderableResult run(AutostartConfig config) {
-        Path rootDir = PathHelper.ofNullableStrig(config.homeDir());
-        if (rootDir == null) {
+        String homeDirString = config.homeDir();
+        if (homeDirString == null) {
             throw new IllegalStateException("Missing --homeDir argument");
         }
 
+        LauncherPathProvider lpp = new LauncherPathProvider(Path.of(homeDirString));
+        Path homeDir = lpp.get(SpecialDirectory.HOME);
+        Path logsDir = lpp.get(SpecialDirectory.LOGS);
+        Path bhiveDir = lpp.get(SpecialDirectory.BHIVE);
+
         if (!config.consoleLog()) {
             // always log into logs directory.
-            LauncherLoggingContextDataProvider.setLogDir(rootDir.resolve("logs").toAbsolutePath().normalize().toString());
+            LauncherLoggingContextDataProvider.setLogDir(logsDir.toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("autostart");
         }
 
-        Path hivePath = rootDir.resolve("bhive");
-
-        Path auditorPath = PathHelper.isReadOnly(rootDir) ? ClientPathHelper.getUserAreaOrThrow() : hivePath;
+        // Try to get an user-area if the home is readonly
+        Path auditorPath = PathHelper.isReadOnly(homeDir) ? ClientPathHelper.getUserAreaOrThrow() : bhiveDir;
         Auditor auditor = RollingFileAuditor.getFactory().apply(auditorPath);
 
         List<String> emptyArgs = List.of();
         Map<String, String> errors = new HashMap<>();
-        try (BHive hive = new BHive(hivePath.toUri(), auditor, new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
             new ClientSoftwareManifest(hive).list().parallelStream()//
                     .filter(appConfig -> appConfig.clickAndStart != null)//
                     .filter(appConfig -> {
@@ -74,7 +80,7 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
                         return appConfig.metadata.autostart;
                     })//
                     .forEach(appConfig -> {
-                        AppLauncher launcher = new AppLauncher(rootDir, appConfig, emptyArgs);
+                        AppLauncher launcher = new AppLauncher(homeDir, appConfig, emptyArgs);
                         try {
                             launcher.execute();
                             launcher.get(15, TimeUnit.SECONDS);

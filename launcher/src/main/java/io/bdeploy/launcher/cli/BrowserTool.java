@@ -7,6 +7,8 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.launcher.LauncherPathProvider;
+import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.BrowserTool.BrowserConfig;
 import io.bdeploy.launcher.cli.ui.browser.BrowserDialog;
 
@@ -30,26 +32,29 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
 
     @Override
     protected RenderableResult run(BrowserConfig config) {
-        Path rootDir = PathHelper.ofNullableStrig(config.homeDir());
-        if (rootDir == null) {
+        String homeDirString = config.homeDir();
+        if (homeDirString == null) {
             throw new IllegalStateException("Missing --homeDir argument");
         }
 
+        LauncherPathProvider lpp = new LauncherPathProvider(Path.of(homeDirString));
+        Path homeDir = lpp.get(SpecialDirectory.HOME);
+        Path logsDir = lpp.get(SpecialDirectory.LOGS);
+
         if (!config.consoleLog()) {
             // always log into logs directory.
-            LauncherLoggingContextDataProvider.setLogDir(rootDir.resolve("logs").toAbsolutePath().normalize().toString());
+            LauncherLoggingContextDataProvider.setLogDir(logsDir.toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("browser");
         }
 
-        // Try to get a user-area if the root is readonly
-        Path userArea = PathHelper.isReadOnly(rootDir) ? ClientPathHelper.getUserAreaOrThrow() : null;
+        // Try to get an user-area if the home is readonly
+        Path userArea = PathHelper.isReadOnly(homeDir) ? ClientPathHelper.getUserAreaOrThrow() : null;
 
-        BrowserDialog dialog = new BrowserDialog(rootDir, userArea);
+        BrowserDialog dialog = new BrowserDialog(homeDir, userArea);
         dialog.setVisible(true);
         dialog.searchApps();
         dialog.waitForExit();
 
         return null;
     }
-
 }

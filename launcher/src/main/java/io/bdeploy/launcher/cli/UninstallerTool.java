@@ -29,6 +29,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
@@ -56,6 +57,16 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     }
 
+    /** The {@link LauncherPathProvider} for this {@link UninstallerTool} */
+    private LauncherPathProvider lpp;
+    private Path homeDir;
+    private Path bhiveDir;
+    private Path appsDir;
+    private Path poolDir;
+    private Path startScriptsDir;
+    private Path fileAssocScriptsDir;
+    private Path appDir;
+
     public UninstallerTool() {
         super(UninstallerConfig.class);
     }
@@ -72,11 +83,18 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             return createResultWithErrorMessage("Aborted, no confirmation");
         }
 
-        Path rootDir = Paths.get(config.homeDir()).toAbsolutePath();
-        Path bhiveDir = rootDir.resolve("bhive");
+        lpp = new LauncherPathProvider(Paths.get(config.homeDir())).setInstance(config.app());
+        homeDir = lpp.get(SpecialDirectory.HOME);
+        bhiveDir = lpp.get(SpecialDirectory.BHIVE);
+        appsDir = lpp.get(SpecialDirectory.APPS);
+        poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);
+        startScriptsDir = lpp.get(SpecialDirectory.START_SCRIPTS);
+        fileAssocScriptsDir = lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS);
+        appDir = lpp.get(SpecialDirectory.APP);
+
         try (BHive hive = new BHive(bhiveDir.toUri(), RollingFileAuditor.getFactory().apply(bhiveDir),
                 new ActivityReporter.Null())) {
-            doUninstall(rootDir, hive, config.app());
+            doUninstall(hive, config.app());
         }
         return createSuccess();
     }
@@ -89,24 +107,20 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     }
 
     /** Uninstall the given application and removes all not required artifacts */
-    private void doUninstall(Path rootDir, BHive hive, String appId) {
+    private void doUninstall(BHive hive, String appId) {
         try {
-            hive.execute(new DirectoryLockOperation().setDirectory(rootDir));
+            hive.execute(new DirectoryLockOperation().setDirectory(homeDir));
 
             log.info("Removing application {}", appId);
-            Path appsDir = rootDir.resolve("apps");
-            Path poolDir = appsDir.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
-            Path startScriptsDir = appsDir.resolve(SpecialDirectory.START_SCRIPTS.getDirName());
-            Path fileAssocScriptsDir = appsDir.resolve(SpecialDirectory.FILE_ASSOC_SCRIPTS.getDirName());
 
             // Delegate removal to the delegated application
             ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
             ClientSoftwareConfiguration config = cmf.readNewest(appId, false);
             if (config != null && config.launcher != null) {
                 Version version = VersionHelper.tryParse(config.launcher.getTag());
-                doUninstallVersioned(rootDir, version, appId);
+                doUninstallVersioned(homeDir, version, appId);
             } else {
-                doUninstallApp(rootDir, appId);
+                doUninstallApp(appId);
             }
 
             // Remove corresponding scripts
@@ -129,7 +143,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
                     removeScript(hive, descriptor, fileAssocExtension, fileAssocScriptsDir, "file association",//
                             settings -> settings.getFileAssocScriptInfo(fileAssocIdentifier),//
                             settings -> settings.removeFileAssocScriptInfo(fileAssocIdentifier),//
-                            scriptPath -> uninstallFileAssoc(metadata, rootDir));
+                            scriptPath -> uninstallFileAssoc(metadata, homeDir));
                 }
             }
 
@@ -139,10 +153,10 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             }
 
             // Trigger cleanup to remove from hive and from pool
-            ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir, startScriptsDir, fileAssocScriptsDir);
+            ClientCleanup cleanup = new ClientCleanup(hive, homeDir, appsDir, poolDir, startScriptsDir, fileAssocScriptsDir);
             cleanup.run();
         } finally {
-            hive.execute(new DirectoryReleaseOperation().setDirectory(rootDir));
+            hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
         }
     }
 
@@ -212,9 +226,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /**
      * Removes the given application from this hive and from the pool
      */
-    private void doUninstallApp(Path rootDir, String appId) {
-        Path appsDir = rootDir.resolve("apps");
-        Path appDir = appsDir.resolve(appId);
+    private void doUninstallApp(String appId) {
         if (PathHelper.exists(appDir)) {
             PathHelper.deleteRecursiveRetry(appDir);
             log.info("Removed application folder {}", appDir);
@@ -226,13 +238,12 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /**
      * Removes the application stored in the given version specific directory
      */
-    private void doUninstallVersioned(Path rootDir, Version version, String appId) {
-        Path versionedRoot = ClientPathHelper.getHome(rootDir, version);
-        Path appsDir = versionedRoot.resolve("apps");
-        Path appDir = appsDir.resolve(appId);
-        if (PathHelper.exists(appDir)) {
-            PathHelper.deleteRecursiveRetry(appDir);
-            log.info("Removed application folder {}", appDir);
+    private void doUninstallVersioned(Path homeDir, Version version, String appId) {
+        Path versionedHome = ClientPathHelper.getHome(homeDir, version);
+        Path versionedAppDir = new LauncherPathProvider(versionedHome).get(SpecialDirectory.APP, appId);
+        if (PathHelper.exists(versionedAppDir)) {
+            PathHelper.deleteRecursiveRetry(versionedAppDir);
+            log.info("Removed application folder {}", versionedAppDir);
         }
     }
 }
