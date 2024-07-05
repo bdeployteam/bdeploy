@@ -245,7 +245,7 @@ public class InstanceNodeController {
         SortedMap<Manifest.Key, Path> exportedPaths = installPooledApplicationsFor(dc);
 
         // create a variable resolver which can expand all supported variables.
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(paths, exportedPaths)));
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(exportedPaths)));
 
         // render configuration files.
         TemplateHelper.processFileTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);

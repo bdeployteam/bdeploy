@@ -1,7 +1,6 @@
 package io.bdeploy.interfaces.variables;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertFalse;
-import static io.bdeploy.common.util.RuntimeAssert.assertTrue;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -10,21 +9,16 @@ import java.util.Map;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
  * Provides the absolute installation path as a String for a given Manifest.
  */
 public class ManifestRefPathProvider {
 
-    private final Path exportDir;
     private final Map<Manifest.Key, Path> paths;
 
-    public ManifestRefPathProvider(DeploymentPathProvider provider, Map<Manifest.Key, Path> paths) {
-        this.exportDir = provider.get(SpecialDirectory.BIN);
+    public ManifestRefPathProvider(Map<Manifest.Key, Path> paths) {
         this.paths = paths;
-
-        assertTrue(exportDir.isAbsolute(), "Given directory is not absolute: " + exportDir);
     }
 
     /**
@@ -68,5 +62,4 @@ public class ManifestRefPathProvider {
 
         return candidates.get(0);
     }
-
 }

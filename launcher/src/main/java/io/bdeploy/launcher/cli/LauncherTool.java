@@ -1210,7 +1210,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         for (Manifest.Key key : clientCfg.resolvedRequires) {
             pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
         }
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(dpp, pooledSoftware)));
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pooledSoftware)));
 
         // Resolver for local hostname - with client warning enabled.
         resolvers.add(new LocalHostnameResolver(true));
