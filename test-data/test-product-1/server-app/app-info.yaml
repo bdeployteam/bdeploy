@@ -87,4 +87,3 @@ startCommand:
       type: BOOLEAN
       mandatory: true
       defaultValue: false
-

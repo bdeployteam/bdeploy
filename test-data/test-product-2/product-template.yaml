@@ -75,4 +75,3 @@ groups:
   - application: client-app
     name: "Client {{T:text-param}}"
     description: "A default client application."
-    

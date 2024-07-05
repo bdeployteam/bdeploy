@@ -9,4 +9,3 @@ instanceVariables:
   - id: param.shared.exp
     value: "{{X:param.xshared}}"
     type: NUMERIC
-

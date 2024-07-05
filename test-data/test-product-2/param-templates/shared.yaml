@@ -16,4 +16,3 @@ parameters:
     parameter: "--text"
     mandatory: false
     type: NUMERIC
-

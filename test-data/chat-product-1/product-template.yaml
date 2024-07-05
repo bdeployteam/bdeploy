@@ -17,4 +17,3 @@ groups:
   - application: chat-app
     name: "The Chat App {{T:app-name}}"
     description: "The single chat application"
-    

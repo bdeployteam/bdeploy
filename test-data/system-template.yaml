@@ -50,4 +50,3 @@ instances:
     defaultMappings:
       - group: 'Chat App'
         node: 'master'
-
