@@ -104,7 +104,7 @@ public class InstanceNodeController {
         InstanceNodeConfiguration config = manifest.getConfiguration();
         this.resolvers.add(new InstanceAndSystemVariableResolver(manifest.getConfiguration()));
         this.resolvers.add(new ConditionalExpressionResolver(this.resolvers));
-        this.resolvers.add(new InstanceVariableResolver(config, paths, manifest.getKey().getTag()));
+        this.resolvers.add(new InstanceVariableResolver(config, paths.get(SpecialDirectory.ROOT), manifest.getKey().getTag()));
         this.resolvers.add(new DelayedVariableResolver(resolvers));
         this.resolvers.add(new OsVariableResolver());
         this.resolvers.add(new EnvironmentVariableResolver());
