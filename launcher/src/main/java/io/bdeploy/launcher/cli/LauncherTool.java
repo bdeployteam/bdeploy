@@ -1192,7 +1192,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         resolvers.add(new ConditionalExpressionResolver(resolvers));
         resolvers.add(new ApplicationVariableResolver(clientCfg.appConfig));
         resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, dpp, clientCfg.activeTag));
+        resolvers
+                .add(new InstanceVariableResolver(clientCfg.instanceConfig, dpp.get(SpecialDirectory.ROOT), clientCfg.activeTag));
         resolvers.add(new OsVariableResolver());
         resolvers.add(new EnvironmentVariableResolver());
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
@@ -1210,7 +1211,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         for (Manifest.Key key : clientCfg.resolvedRequires) {
             pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
         }
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(dpp, pooledSoftware)));
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pooledSoftware)));
 
         // Resolver for local hostname - with client warning enabled.
         resolvers.add(new LocalHostnameResolver(true));

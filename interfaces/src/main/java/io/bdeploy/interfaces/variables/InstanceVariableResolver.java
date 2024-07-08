@@ -1,8 +1,9 @@
 package io.bdeploy.interfaces.variables;
 
+import java.nio.file.Path;
+
 import io.bdeploy.api.deploy.v1.InstanceDeploymentInformationApi;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
  * A variable resolver capable to resolve instance specific variables.
@@ -10,13 +11,13 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 public class InstanceVariableResolver extends PrefixResolver {
 
     private final InstanceNodeConfiguration incf;
-    private final DeploymentPathProvider paths;
+    private final Path appDir;
     private final String tag;
 
-    public InstanceVariableResolver(InstanceNodeConfiguration incf, DeploymentPathProvider paths, String tag) {
+    public InstanceVariableResolver(InstanceNodeConfiguration incf, Path appDir, String tag) {
         super(Variables.INSTANCE_VALUE);
         this.incf = incf;
-        this.paths = paths;
+        this.appDir = appDir;
         this.tag = tag;
     }
 
@@ -38,14 +39,12 @@ public class InstanceVariableResolver extends PrefixResolver {
             case "PRODUCT_TAG":
                 return incf.product == null ? "" : incf.product.getTag();
             case "DEPLOYMENT_INFO_FILE":
-                if (paths == null) {
+                if (appDir == null) {
                     return InstanceDeploymentInformationApi.FILE_NAME; // used during validation
                 }
-                return paths.get(SpecialDirectory.ROOT).resolve(InstanceDeploymentInformationApi.FILE_NAME).toAbsolutePath()
-                        .toString();
+                return appDir.resolve(InstanceDeploymentInformationApi.FILE_NAME).normalize().toAbsolutePath().toString();
             default:
                 return null;
         }
     }
-
 }

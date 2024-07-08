@@ -73,7 +73,7 @@ class ValueResolverTest {
 
         CompositeResolver list = new CompositeResolver();
         list.add(new DeploymentPathResolver(dpp));
-        list.add(new ManifestVariableResolver(new ManifestRefPathProvider(dpp, mfs)));
+        list.add(new ManifestVariableResolver(new ManifestRefPathProvider(mfs)));
         list.add(new ParameterValueResolver(new ApplicationParameterProvider(dc)));
 
         // tests whether the use cases in the a1c start command work.
