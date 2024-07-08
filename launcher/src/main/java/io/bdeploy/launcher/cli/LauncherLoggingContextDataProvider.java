@@ -28,5 +28,4 @@ public class LauncherLoggingContextDataProvider implements ContextDataProvider {
     public static void setLogFileBaseName(String name) {
         logBaseName = name;
     }
-
 }

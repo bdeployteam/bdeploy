@@ -183,5 +183,4 @@ public class ClientSoftwareManifest {
         }
         return true;
     }
-
 }

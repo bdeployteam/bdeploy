@@ -13,5 +13,4 @@ public class SoftwareUpdateException extends RuntimeException {
     public SoftwareUpdateException(String appId, String details) {
         super(String.format("A required update for '%1$s' is available but cannot be installed. %2$s", appId, details));
     }
-
 }

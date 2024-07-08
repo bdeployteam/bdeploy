@@ -61,5 +61,4 @@ public class LauncherCli extends ToolBase {
     public static void main(String... args) throws Exception {
         new LauncherCli().toolMain(args);
     }
-
 }
