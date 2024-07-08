@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -18,7 +18,7 @@ import javax.swing.table.TableModel;
 
 import io.bdeploy.launcher.cli.ui.WindowHelper;
 
-class BrowserDialogTableHeaderRenderer extends JLabel implements TableCellRenderer {
+public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 

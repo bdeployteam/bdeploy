@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 
@@ -6,7 +6,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.Instan
  * Each value represents a columns of the browser dialog table. The order of the values is relevant because
  * {@link BrowserDialogTableColumn#ordinal() #ordinal()} is used to determine the index of the column in the table.
  */
-enum BrowserDialogTableColumn {
+public enum BrowserDialogTableColumn {
 
     APP("Application", String.class),
     IG("Instance Group", String.class),

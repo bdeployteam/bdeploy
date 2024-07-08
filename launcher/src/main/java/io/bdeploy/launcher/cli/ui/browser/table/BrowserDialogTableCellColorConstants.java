@@ -1,13 +1,13 @@
-package io.bdeploy.launcher.cli.ui.browser;
+package io.bdeploy.launcher.cli.ui.browser.table;
 
 import java.awt.Color;
 
 /**
  * Contains constants for {@link Color colors} which are used by the browser dialog table.
  */
-class BrowserDialogTableColorConstants {
+class BrowserDialogTableCellColorConstants {
 
-    private BrowserDialogTableColorConstants() {
+    private BrowserDialogTableCellColorConstants() {
     }
 
     static final Color DISABLED = Color.LIGHT_GRAY;
