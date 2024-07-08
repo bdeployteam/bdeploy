@@ -40,4 +40,3 @@ startCommand:
       groupName: "Client Parameters"
       mandatory: false
       defaultValue: "{{P:CONFIG}}/sub-dir-1/test1.txt"
-

@@ -245,4 +245,3 @@ endpoints:
         - id: 'myVersion'
           path: 'public/version'
           port: 1234
-

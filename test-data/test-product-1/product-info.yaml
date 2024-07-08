@@ -6,4 +6,3 @@ applications:
 - "client-app"
 configTemplates: config
 versionFile: "product-version.yaml"
-
