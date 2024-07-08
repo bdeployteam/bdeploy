@@ -414,7 +414,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 });
                 process = doDelegateLaunch(requiredVersion, config.launch());
                 log.info("Launcher successfully launched. PID={}", process.pid());
-                log.info("Check logs in {} for more details.", ClientPathHelper.getHome(homeDir, requiredVersion));
+                log.info("Check logs in {} for more details.", ClientPathHelper.getVersionedHome(homeDir, requiredVersion));
             } else {
                 if (!offlineMode) {
                     // The source server could have been migrated/converted to node. in this case, display a message.
@@ -655,7 +655,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Delegates launching of the application to the given version of the launcher. */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
-        LauncherPathProvider versionedLpp = new LauncherPathProvider(ClientPathHelper.getHome(homeDir, version));
+        LauncherPathProvider versionedLpp = new LauncherPathProvider(ClientPathHelper.getVersionedHome(homeDir, version));
         Path versionedLauncher = ClientPathHelper.getNativeLauncher(versionedLpp);
         Path versionedScriptLauncher = ClientPathHelper.getScriptLauncher(versionedLpp);
 
@@ -704,7 +704,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Set the home directory for the launcher. Required for older launchers. Newer launchers do not use the variable anymore.
             Map<String, String> env = b.environment();
-            env.put("BDEPLOY_HOME", versionedLpp.get(SpecialDirectory.HOME).toFile().getAbsolutePath());
+            env.put("BDEPLOY_HOME", versionedLpp.get(SpecialDirectory.HOME).toString());
 
             // Notify the launcher that it runs in a special mode. In this mode it will forward all exit codes without special handling.
             env.put(BDEPLOY_DELEGATE, "TRUE");
@@ -727,7 +727,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed. */
     private void doInstallLauncherSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
-        LauncherPathProvider versionedLpp = new LauncherPathProvider(ClientPathHelper.getHome(homeDir, version));
+        LauncherPathProvider versionedLpp = new LauncherPathProvider(ClientPathHelper.getVersionedHome(homeDir, version));
         Path versionedNativeLauncher = ClientPathHelper.getNativeLauncher(versionedLpp);
 
         if (PathHelper.exists(versionedNativeLauncher)) {
@@ -744,8 +744,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try (Transaction t = hive.getTransactions().begin()) {
             hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
         }
-        Path launcherHome = lpp.get(SpecialDirectory.LAUNCHER);
-        hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
+        hive.execute(new ExportOperation().setManifest(launcher).setTarget(lpp.get(SpecialDirectory.LAUNCHER)));
         log.info("Launcher successfully installed.");
     }
 
@@ -762,7 +761,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         Version version = requiredLauncher.getKey();
-        Path versionedHomeDir = ClientPathHelper.getHome(homeDir, version);
+        Path versionedHomeDir = ClientPathHelper.getVersionedHome(homeDir, version);
         if (PathHelper.isReadOnly(versionedHomeDir)) {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }

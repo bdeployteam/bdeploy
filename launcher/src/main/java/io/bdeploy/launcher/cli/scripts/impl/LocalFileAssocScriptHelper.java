@@ -55,8 +55,8 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
             command.add("/InstallApplication");
             command.add(ScriptUtils.getBDeployFileAssocId(id));
             command.add(ScriptUtils.getFullFileExtension(fileAssocExtension));
-            command.add(fullScriptPath.normalize().toAbsolutePath().toString());
-            command.add(lpp.get(SpecialDirectory.APP).resolve("icon.ico").toFile().getAbsolutePath());
+            command.add(fullScriptPath.toString());
+            command.add(lpp.get(SpecialDirectory.APP).resolve("icon.ico").toString());
             command.add(appName);
         } else {
             // Usage: ./file-assoc.sh "Action" "ID" "Extension" "Name of Application" "Exec-Path" "Icon"
@@ -64,7 +64,7 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
             command.add(id);
             command.add(ScriptUtils.getFullFileExtension(fileAssocExtension));
             command.add(appName);
-            command.add(fullScriptPath.normalize().toAbsolutePath().toString());
+            command.add(fullScriptPath.toString());
             // TODO: last argument is a 128x128 png image used as icon. if not given uses the bdeploy launcher icon (good enough for now).
         }
 

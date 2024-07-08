@@ -235,7 +235,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
      * Removes the application stored in the given version specific directory
      */
     private void doUninstallVersioned(Path homeDir, Version version, String appId) {
-        Path versionedHome = ClientPathHelper.getHome(homeDir, version);
+        Path versionedHome = ClientPathHelper.getVersionedHome(homeDir, version);
         Path versionedAppDir = new LauncherPathProvider(versionedHome).get(SpecialDirectory.APP, appId);
         if (PathHelper.exists(versionedAppDir)) {
             PathHelper.deleteRecursiveRetry(versionedAppDir);

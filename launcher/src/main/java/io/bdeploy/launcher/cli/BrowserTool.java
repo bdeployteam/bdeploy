@@ -38,11 +38,10 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
 
         LauncherPathProvider lpp = new LauncherPathProvider(Path.of(homeDirString));
         Path homeDir = lpp.get(SpecialDirectory.HOME);
-        Path logsDir = lpp.get(SpecialDirectory.LOGS);
 
         if (!config.consoleLog()) {
             // Always log into logs directory
-            LauncherLoggingContextDataProvider.setLogDir(logsDir.toString());
+            LauncherLoggingContextDataProvider.setLogDir(lpp.get(SpecialDirectory.LOGS).toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("browser");
         }
 

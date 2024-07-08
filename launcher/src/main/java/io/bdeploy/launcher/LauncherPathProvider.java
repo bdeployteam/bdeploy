@@ -38,8 +38,10 @@ public class LauncherPathProvider {
         /** <i>[BDEPLOY_HOME]/apps/[applicationId]</i> */
         APP(null),
 
+        /** <i> BDeploy/launcher/bin</i> */
+        LAUNCHER_BIN("bin"),
         /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/{@value LauncherPathProvider#DEFAULT_TAG}</i> */
-        BIN("bin"),
+        APP_BIN("bin"),
         /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/{@value LauncherPathProvider#DEFAULT_TAG}/config</i> */
         CONFIG("config");
 
@@ -120,11 +122,14 @@ public class LauncherPathProvider {
                 }
                 result = get(SpecialDirectory.APPS, applicationId).resolve(applicationId);
                 break;
-            case BIN:
+            case APP_BIN:
                 result = get(SpecialDirectory.APP, applicationId).resolve(dir.getDirName()).resolve(DEFAULT_TAG);
                 break;
             case CONFIG:
-                result = get(SpecialDirectory.BIN, applicationId).resolve(dir.getDirName());
+                result = get(SpecialDirectory.APP_BIN, applicationId).resolve(dir.getDirName());
+                break;
+            case LAUNCHER_BIN:
+                result = get(SpecialDirectory.LAUNCHER, applicationId).resolve(dir.getDirName());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown special directory: " + dir);

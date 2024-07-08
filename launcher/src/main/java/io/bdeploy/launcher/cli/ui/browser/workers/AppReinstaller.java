@@ -61,11 +61,11 @@ public class AppReinstaller extends SwingWorker<Void, Object> {
         log.info("Attempting to uninstall application {}", app.clickAndStart.applicationId);
 
         Path appPoolDir = getAppPoolDir();
-        log.info("Deleting app from pool {}", appPoolDir.toFile().getAbsolutePath());
+        log.info("Deleting app from pool {}", appPoolDir.toString());
         PathHelper.deleteRecursiveRetry(appPoolDir);
 
         Path appDir = lpp.get(SpecialDirectory.APP, app.clickAndStart.applicationId);
-        log.info("Deleting app folder {}", appDir.toFile().getAbsolutePath());
+        log.info("Deleting app folder {}", appDir.toString());
         PathHelper.deleteRecursiveRetry(appDir);
     }
 

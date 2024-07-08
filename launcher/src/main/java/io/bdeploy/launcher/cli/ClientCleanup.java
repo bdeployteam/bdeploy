@@ -139,7 +139,7 @@ public class ClientCleanup {
             log.info("Deleting {}", key);
 
             Version version = VersionHelper.parse(key.getTag());
-            Path launcherPath = ClientPathHelper.getHome(homeDir, version);
+            Path launcherPath = ClientPathHelper.getVersionedHome(homeDir, version);
 
             // File-Locks could prevent that we can delete the folder
             // thus we first try to rename and then delete

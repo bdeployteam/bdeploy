@@ -52,12 +52,11 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
         LauncherPathProvider lpp = new LauncherPathProvider(Path.of(homeDirString));
         Path homeDir = lpp.get(SpecialDirectory.HOME);
-        Path logsDir = lpp.get(SpecialDirectory.LOGS);
         Path bhiveDir = lpp.get(SpecialDirectory.BHIVE);
 
         if (!config.consoleLog()) {
             // Always log into logs directory
-            LauncherLoggingContextDataProvider.setLogDir(logsDir.toString());
+            LauncherLoggingContextDataProvider.setLogDir(lpp.get(SpecialDirectory.LOGS).toString());
             LauncherLoggingContextDataProvider.setLogFileBaseName("autostart");
         }
 

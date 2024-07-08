@@ -22,35 +22,25 @@ import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
  */
 public class ClientPathHelper {
 
-    /**
-     * Name of the launcher.bat file
-     */
+    /** Name of the launcher.bat file */
     public static final String LAUNCHER_BAT = "launcher.bat";
 
-    /**
-     * Name of the launch files
-     */
+    /** Name of the launch files */
     public static final String LAUNCH_FILE_NAME = "launch.bdeploy";
 
-    /**
-     * Name of the launcher on Windows
-     */
+    /** Name of the launcher on Windows */
     public static final String WIN_LAUNCHER = "BDeploy.exe";
 
-    /**
-     * Name of the launcher on Linux
-     */
+    /** Name of the launcher on Linux */
     public static final String LINUX_LAUNCHER = "launcher";
 
-    /**
-     * Name of the file association utility on Windows
-     */
+    /** Name of the file association utility on Windows */
     public static final String WIN_FILE_ASSOC = "FileAssoc.exe";
 
-    /**
-     * Name of the file association utility on Linux
-     */
+    /** Name of the file association utility on Linux */
     public static final String LINUX_FILE_ASSOC = "file-assoc.sh";
+
+    private static final String BDEPLOY_PREFIX = "bdeploy-";
 
     private ClientPathHelper() {
     }
@@ -66,7 +56,7 @@ public class ClientPathHelper {
             userArea = Path.of(userAreaEnv);
         } else if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             // On Windows we default to the local application data folder
-            userArea = Path.of(System.getenv("LOCALAPPDATA"), "BDeploy");
+            userArea = Path.of(System.getenv("LOCALAPPDATA"), SpecialDirectory.HOME.getDirName());
         } else {
             throw new IllegalStateException("No user area was found.");
         }
@@ -82,9 +72,8 @@ public class ClientPathHelper {
      * Returns the home directory for the given version. Each version will get its own directory where the launcher, the hive as
      * well as all apps are stored. Nothing is shared between different versions to prevent side-effects
      */
-    public static Path getHome(Path homeDir, Version version) {
-        String name = "bdeploy-" + version.toString();
-        return homeDir.resolve(name);
+    public static Path getVersionedHome(Path homeDir, Version version) {
+        return homeDir.resolve(BDEPLOY_PREFIX + version.toString());
     }
 
     /**
@@ -93,8 +82,10 @@ public class ClientPathHelper {
     public static List<Path> getHives(LauncherPathProvider lpp) throws IOException {
         List<Path> hives = new ArrayList<>();
         hives.add(lpp.get(SpecialDirectory.BHIVE));
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(lpp.get(SpecialDirectory.HOME),
-                p -> p.getFileName().toString().toLowerCase().startsWith("bdeploy-"))) {
+
+        Path homeDir = lpp.get(SpecialDirectory.HOME);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(homeDir,
+                p -> p.getFileName().toString().toLowerCase().startsWith(BDEPLOY_PREFIX))) {
             Iterator<Path> dirs = stream.iterator();
             while (dirs.hasNext()) {
                 Path nestedRoot = dirs.next();
@@ -112,10 +103,9 @@ public class ClientPathHelper {
      * Returns the native file association utility.
      */
     public static Path getNativeFileAssocTool(LauncherPathProvider lpp) {
-        Path launcherDir = lpp.get(SpecialDirectory.LAUNCHER);
         Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
-                ? launcherDir.resolve(WIN_FILE_ASSOC)
-                : launcherDir.resolve("bin").resolve(LINUX_FILE_ASSOC);
+                ? lpp.get(SpecialDirectory.LAUNCHER).resolve(WIN_FILE_ASSOC)
+                : lpp.get(SpecialDirectory.LAUNCHER_BIN).resolve(LINUX_FILE_ASSOC);
         return result.normalize().toAbsolutePath();
     }
 
@@ -123,10 +113,9 @@ public class ClientPathHelper {
      * Returns the native launcher used to start the application.
      */
     public static Path getNativeLauncher(LauncherPathProvider lpp) {
-        Path launcherDir = lpp.get(SpecialDirectory.LAUNCHER);
         Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
-                ? launcherDir.resolve(WIN_LAUNCHER)
-                : launcherDir.resolve("bin").resolve(LINUX_LAUNCHER);
+                ? lpp.get(SpecialDirectory.LAUNCHER).resolve(WIN_LAUNCHER)
+                : lpp.get(SpecialDirectory.LAUNCHER_BIN).resolve(LINUX_LAUNCHER);
         return result.normalize().toAbsolutePath();
     }
 
@@ -134,8 +123,7 @@ public class ClientPathHelper {
      * Returns the script launcher which can be used to launch with console being attached.
      */
     public static Path getScriptLauncher(LauncherPathProvider lpp) {
-        Path launcherDir = lpp.get(SpecialDirectory.LAUNCHER);
-        Path launcherBinDir = launcherDir.resolve("bin");
+        Path launcherBinDir = lpp.get(SpecialDirectory.LAUNCHER_BIN);
         Path result = OsHelper.getRunningOs() == OperatingSystem.WINDOWS//
                 ? launcherBinDir.resolve(LAUNCHER_BAT)
                 : launcherBinDir.resolve(LINUX_LAUNCHER);
