@@ -189,25 +189,26 @@ public class InstanceHistoryManager {
     }
 
     private String computeConfigTitle(Action action, String tag) {
+        String s = "Version " + tag + ": ";
         switch (action) {
             case CREATE:
-                return "Version " + tag + ": Created";
+                return s + "Created";
             case DELETE:
-                return "Version " + tag + ": Deleted";
+                return s + "Deleted";
             case INSTALL:
-                return "Version " + tag + ": Installed";
+                return s + "Installed";
             case UNINSTALL:
-                return "Version " + tag + ": Uninstalled";
+                return s + "Uninstalled";
             case ACTIVATE:
-                return "Version " + tag + ": Activated";
+                return s + "Activated";
             case DEACTIVATE:
-                return "Version " + tag + ": Deactivated";
+                return s + "Deactivated";
             case BANNER_SET:
-                return "Version " + tag + ": Banner set";
+                return s + "Banner set";
             case BANNER_CLEAR:
-                return "Version " + tag + ": Banner removed";
+                return s + "Banner removed";
             default:
-                return "";
+                return s + action.name();
         }
     }
 
@@ -232,7 +233,7 @@ public class InstanceHistoryManager {
             case RUNNING_STOP_PLANNED:
                 return process + " planned to stop";
             default:
-                return "";
+                return process + ' ' + state.name();
         }
     }
 

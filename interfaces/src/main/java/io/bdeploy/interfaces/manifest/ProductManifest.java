@@ -147,7 +147,7 @@ public class ProductManifest {
         if (entries.containsKey(pluginKey)) {
             TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(pluginKey)));
             tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(".jar")) {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.JAR_FILE_EXTENSION)) {
                     plugins.add(b.getElementId());
                 }
             }).build());
@@ -158,7 +158,7 @@ public class ProductManifest {
         if (entries.containsKey(templateKey)) {
             TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(templateKey)));
             tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
                     try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
                         templates.add(StorageHelper.fromYamlStream(is, InstanceTemplateDescriptor.class));
                     } catch (Exception e) {
@@ -174,7 +174,7 @@ public class ProductManifest {
         if (entries.containsKey(appTemplateKey)) {
             TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(appTemplateKey)));
             tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
                     try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
                         applicationTemplates.add(StorageHelper.fromYamlStream(is, ApplicationTemplateDescriptor.class));
                     } catch (Exception e) {
@@ -189,7 +189,7 @@ public class ProductManifest {
         if (entries.containsKey(paramTemplateKey)) {
             TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(paramTemplateKey)));
             tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
                     try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
                         paramTemplates.add(StorageHelper.fromYamlStream(is, ParameterTemplateDescriptor.class));
                     } catch (Exception e) {
@@ -204,7 +204,7 @@ public class ProductManifest {
         if (entries.containsKey(varTemplateKey)) {
             TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(varTemplateKey)));
             tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
                     try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
                         varTemplates.add(StorageHelper.fromYamlStream(is, InstanceVariableTemplateDescriptor.class));
                     } catch (Exception e) {

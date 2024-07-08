@@ -2,6 +2,7 @@ package io.bdeploy.launcher.cli.ui.browser;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -463,8 +464,7 @@ public class BrowserDialog extends BaseDialog {
             task.addPropertyChangeListener(this::doUpdateProgessBar);
             task.execute();
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Failed to prune local hives: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog(null, "Failed to prune local hives: " + ex.getMessage());
         }
     }
 
@@ -483,8 +483,7 @@ public class BrowserDialog extends BaseDialog {
             task.addPropertyChangeListener(this::doUpdateProgessBar);
             task.execute();
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Failed to fix errors in local hives: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog(null, "Failed to fix errors in local hives: " + ex.getMessage());
         }
     }
 
@@ -515,8 +514,7 @@ public class BrowserDialog extends BaseDialog {
             task.addPropertyChangeListener(this::doUpdateProgessBar);
             task.execute();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Failed to run verify operation: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog(null, "Failed to run verify operation: " + ex.getMessage());
         }
     }
 
@@ -551,8 +549,7 @@ public class BrowserDialog extends BaseDialog {
         try {
             scriptHelperCreator.apply(dpp).createScript(config.metadata, clickAndStart, true);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage());
         }
         doRefresh(model.getAll());
     }
@@ -729,6 +726,10 @@ public class BrowserDialog extends BaseDialog {
         return !apps.isEmpty();
     }
 
+    private static void showErrorMessageDialog(Component parent, String text) {
+        JOptionPane.showMessageDialog(parent, text, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
     private class OpenHomeFolder extends MouseAdapter {
 
         @Override
@@ -736,8 +737,7 @@ public class BrowserDialog extends BaseDialog {
             try {
                 Desktop.getDesktop().browse(rootDir.toUri());
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(BrowserDialog.this, "Failed to open home directory: " + ex.getMessage(), "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                showErrorMessageDialog(BrowserDialog.this, "Failed to open home directory: " + ex.getMessage());
             }
         }
     }

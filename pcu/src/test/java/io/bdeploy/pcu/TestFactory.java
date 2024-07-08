@@ -76,8 +76,6 @@ class TestFactory {
     public static ProcessController create(Path path, String name, boolean keepAlive, String argument) {
         path = path.resolve(UuidHelper.randomId());
         ProcessConfiguration config = createConfig(path, name, keepAlive, argument);
-        ProcessController controller = new ProcessController("Test", "V1", config, path);
-        return controller;
+        return new ProcessController("Test", "V1", config, path);
     }
-
 }

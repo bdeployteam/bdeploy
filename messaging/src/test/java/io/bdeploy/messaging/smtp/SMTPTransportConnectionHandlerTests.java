@@ -49,6 +49,7 @@ class SMTPTransportConnectionHandlerTests {
     @Test
     void testClosingClosedHandler() {
         try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {
+            // Do nothing - just test the closing
         }
         try (SMTPTransportConnectionHandler messageSender = new SMTPTransportConnectionHandler()) {
             messageSender.disconnect();

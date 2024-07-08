@@ -51,17 +51,17 @@ public class AppUpdater extends SwingWorker<Integer, Void> {
         try {
             int exitCode = get();
             if (exitCode != 0) {
-                JOptionPane.showMessageDialog(null, "Update failed with exit code " + exitCode + ". Check logs for more details.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                showErrorMessageDialog("Update failed with exit code " + exitCode + ". Check logs for more details.");
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            JOptionPane.showMessageDialog(null, "Failed to update application: " + ie.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog("Failed to update application: " + ie.getMessage());
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Failed to update application: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            showErrorMessageDialog("Failed to update application: " + ex.getMessage());
         }
     }
 
+    private static void showErrorMessageDialog(String text) {
+        JOptionPane.showMessageDialog(null, text, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 }
