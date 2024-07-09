@@ -14,7 +14,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.border.EmptyBorder;
 
 import com.google.common.base.Splitter;
 
@@ -52,7 +51,7 @@ public class TextAreaDialog extends BaseDialog {
         JPanel header = new JPanel();
         header.setBackground(Color.WHITE);
         header.setLayout(new GridLayout());
-        header.setBorder(new EmptyBorder(10, 10, 10, 10));
+        header.setBorder(DEFAULT_EMPTY_BORDER);
 
         headerText = new JLabel();
         headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16f));
@@ -66,7 +65,7 @@ public class TextAreaDialog extends BaseDialog {
         JPanel content = new JPanel();
         content.setBackground(Color.WHITE);
         content.setLayout(new BorderLayout(10, 10));
-        content.setBorder(new EmptyBorder(10, 10, 10, 10));
+        content.setBorder(DEFAULT_EMPTY_BORDER);
 
         contentText = new JLabel();
         content.add(contentText, BorderLayout.NORTH);
@@ -85,7 +84,7 @@ public class TextAreaDialog extends BaseDialog {
     /** Creates the widgets shown in the footer */
     private JPanel createFooter() {
         JPanel footer = new JPanel();
-        footer.setBorder(new EmptyBorder(10, 10, 10, 10));
+        footer.setBorder(DEFAULT_EMPTY_BORDER);
         footer.setLayout(new BorderLayout(15, 15));
 
         JPanel actionPanel = new JPanel();

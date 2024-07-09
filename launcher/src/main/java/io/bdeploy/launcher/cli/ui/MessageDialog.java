@@ -107,7 +107,7 @@ public class MessageDialog extends BaseDialog {
     private JPanel createHeaderArea() {
         JPanel header = new JPanel();
         header.setBackground(Color.WHITE);
-        header.setBorder(new EmptyBorder(10, 10, 10, 10));
+        header.setBorder(DEFAULT_EMPTY_BORDER);
         header.setLayout(new FlowLayout());
 
         headerIcon = new JLabel();
@@ -134,7 +134,7 @@ public class MessageDialog extends BaseDialog {
 
         JPanel errorContainer = new JPanel();
         errorContainer.setBackground(Color.WHITE);
-        errorContainer.setBorder(new EmptyBorder(10, 10, 10, 10));
+        errorContainer.setBorder(DEFAULT_EMPTY_BORDER);
         errorContainer.setLayout(new BorderLayout(15, 15));
 
         errorMessage = new JTextArea();
@@ -156,7 +156,7 @@ public class MessageDialog extends BaseDialog {
     /** Creates the widgets shown in the footer */
     private JPanel createFooter(JPanel content) {
         JPanel footer = new JPanel();
-        footer.setBorder(new EmptyBorder(10, 10, 10, 10));
+        footer.setBorder(DEFAULT_EMPTY_BORDER);
         footer.setLayout(new BorderLayout(15, 15));
 
         JPanel actionPanel = new JPanel();

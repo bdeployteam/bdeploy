@@ -112,7 +112,7 @@ public class FormatHelper {
         if (size <= 0) {
             return "0 B";
         }
-        int digitGroups = (int) (Math.log10(size) / Math.log10(1000));
+        int digitGroups = (int) (Math.log10(size) / 3);
         return SIZE_FORMAT.format(size / Math.pow(1000, digitGroups)) + " " + SIZE_UNITS[digitGroups];
     }
 }

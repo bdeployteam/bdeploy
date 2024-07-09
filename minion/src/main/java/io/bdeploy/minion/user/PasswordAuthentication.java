@@ -36,7 +36,8 @@ final class PasswordAuthentication implements Authenticator {
      */
     private static final int DEFAULT_COST = 16;
     private static final String ALGORITHM = "PBKDF2WithHmacSHA1";
-    private static final int SIZE = 128;
+    private static final int MIN_SIZE = 12;
+    private static final int MAX_SIZE = 128;
     private static final Pattern layout = Pattern.compile("\\$31\\$(\\d\\d?)\\$(.{43})");
     private static final SecureRandom random = new SecureRandom();
 
@@ -53,15 +54,16 @@ final class PasswordAuthentication implements Authenticator {
      * @return a secure authentication token to be stored for later authentication
      */
     public static String hash(char[] password) {
-        if (password.length < 12) {
-            throw new WebApplicationException("Password too short. Minimum: 12 characters.", Status.EXPECTATION_FAILED);
+        if (password.length < MIN_SIZE) {
+            throw new WebApplicationException("Password too short. Minimum: " + MIN_SIZE + " characters.",
+                    Status.EXPECTATION_FAILED);
+        }
+        if (password.length > MAX_SIZE) {
+            throw new WebApplicationException("Password too long. Maximum: " + MAX_SIZE + " characters.",
+                    Status.EXPECTATION_FAILED);
         }
 
-        if (password.length > 128) {
-            throw new WebApplicationException("Password too long. Maximum: 128 characters.", Status.EXPECTATION_FAILED);
-        }
-
-        byte[] salt = new byte[SIZE / 8];
+        byte[] salt = new byte[MAX_SIZE / 8];
         random.nextBytes(salt);
         byte[] dk = pbkdf2(password, salt, 1 << DEFAULT_COST);
         byte[] hash = new byte[salt.length + dk.length];
@@ -83,7 +85,7 @@ final class PasswordAuthentication implements Authenticator {
         }
         int iterations = iterations(Integer.parseInt(m.group(1)));
         byte[] hash = Base64.getUrlDecoder().decode(m.group(2));
-        byte[] salt = Arrays.copyOfRange(hash, 0, SIZE / 8);
+        byte[] salt = Arrays.copyOfRange(hash, 0, MAX_SIZE / 8);
         byte[] check = pbkdf2(password, salt, iterations);
         int zero = 0;
         for (int idx = 0; idx < check.length; ++idx) {
@@ -93,7 +95,7 @@ final class PasswordAuthentication implements Authenticator {
     }
 
     private static byte[] pbkdf2(char[] password, byte[] salt, int iterations) {
-        KeySpec spec = new PBEKeySpec(password, salt, iterations, SIZE);
+        KeySpec spec = new PBEKeySpec(password, salt, iterations, MAX_SIZE);
         try {
             SecretKeyFactory f = SecretKeyFactory.getInstance(ALGORITHM);
             return f.generateSecret(spec).getEncoded();
@@ -132,5 +134,4 @@ final class PasswordAuthentication implements Authenticator {
     public boolean isAuthenticationValid(UserInfo user, AuthenticationSettingsDto settings) {
         return !user.inactive;
     }
-
 }

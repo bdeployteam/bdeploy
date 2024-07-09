@@ -1,6 +1,7 @@
 package io.bdeploy.launcher.cli.branding;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -37,6 +38,7 @@ import io.bdeploy.launcher.cli.ui.WindowHelper;
 public class LauncherSplash implements LauncherSplashDisplay {
 
     private static final Logger log = LoggerFactory.getLogger(LauncherSplash.class);
+    private static final Dimension defaultDimension = new Dimension(480, 280);
 
     private final Path appDir;
     private Frame splash;
@@ -51,13 +53,14 @@ public class LauncherSplash implements LauncherSplashDisplay {
         if (GraphicsEnvironment.isHeadless()) {
             return;
         }
+
         splash = new JFrame("Splash");
         splash.setUndecorated(true);
-        splash.setSize(480, 280);
+        splash.setSize(defaultDimension);
         splash.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
         splashComp = new SplashGraphics();
-        splashComp.setSize(480, 280);
+        splashComp.setSize(defaultDimension);
         splashComp.setStatusText("Loading");
         splash.add(splashComp);
 

@@ -177,7 +177,7 @@ public class BrowserDialog extends BaseDialog {
     private JPanel createHeader() {
         JPanel header = new JPanel();
         header.setBackground(Color.WHITE);
-        header.setBorder(new EmptyBorder(10, 10, 10, 10));
+        header.setBorder(DEFAULT_EMPTY_BORDER);
         header.setLayout(new BorderLayout());
 
         launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
