@@ -15,7 +15,7 @@ LAUNCHER_PATH="${APP_HOME}/launcher"
 ACTION="${1:-add}"
 APP_ID="${2:-bdeploy}"
 APP_EXT="${3:-.bdeploy}"
-APP_NAME="${4:-BDeploy Click and Start Launcher}"
+APP_NAME="${4:-BDeploy Launcher}"
 APP_EXEC="${5:-${LAUNCHER_PATH}}"
 APP_ICON="${6}"
 

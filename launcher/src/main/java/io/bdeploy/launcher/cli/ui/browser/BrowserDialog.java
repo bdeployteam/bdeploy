@@ -138,7 +138,7 @@ public class BrowserDialog extends BaseDialog {
         this.sortModel = new TableRowSorter<>(model);
         this.table = new JTable(model);
 
-        setTitle("Client Applications");
+        setTitle("BDeploy Launcher");
 
         // Header area displaying a search field
         JPanel header = createHeader();
