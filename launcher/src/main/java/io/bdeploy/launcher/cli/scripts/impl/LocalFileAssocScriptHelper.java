@@ -101,7 +101,8 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
     }
 
     @Override
-    protected void updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo, boolean override) {
-        settings.putFileAssocScriptInfo(name, scriptInfo, override);
+    protected boolean updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo,
+            boolean override) {
+        return settings.putFileAssocScriptInfo(name, scriptInfo, override);
     }
 }

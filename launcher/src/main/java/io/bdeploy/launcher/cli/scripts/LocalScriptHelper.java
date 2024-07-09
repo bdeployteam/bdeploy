@@ -52,19 +52,20 @@ public abstract class LocalScriptHelper {
         String scriptContent = getScriptContent(clientCfg);
         Path fullScriptPath = scriptDir.resolve(scriptName);
 
+        boolean scriptIsActive;
+        try (BHive hive = new BHive(lpp.get(SpecialDirectory.BHIVE).toUri(), auditor, new ActivityReporter.Null())) {
+            LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(hive);
+            LocalClientApplicationSettings settings = settingsManifest.read();
+            scriptIsActive = updateSettings(settings, scriptName, new ScriptInfo(scriptName, clickAndStart), override);
+            settingsManifest.write(settings);
+        }
+
         Files.createDirectories(scriptDir);
-        if (override) {
+        if (scriptIsActive) {
             Files.deleteIfExists(fullScriptPath);
         }
         Files.writeString(fullScriptPath, scriptContent, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
         setExecutable(fullScriptPath);
-
-        try (BHive hive = new BHive(lpp.get(SpecialDirectory.BHIVE).toUri(), auditor, new ActivityReporter.Null())) {
-            LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(hive);
-            LocalClientApplicationSettings settings = settingsManifest.read();
-            updateSettings(settings, scriptName, new ScriptInfo(scriptName, clickAndStart), override);
-            settingsManifest.write(settings);
-        }
 
         afterUpdateHook(clientCfg, fullScriptPath);
     }
@@ -77,7 +78,7 @@ public abstract class LocalScriptHelper {
 
     protected abstract String getScriptContent(ClientApplicationConfiguration clientCfg);
 
-    protected abstract void updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo,
+    protected abstract boolean updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo,
             boolean override);
 
     private static void setExecutable(Path p) throws IOException {
