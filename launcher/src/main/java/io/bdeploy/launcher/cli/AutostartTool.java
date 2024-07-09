@@ -67,11 +67,9 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
                     .filter(appConfig -> appConfig.clickAndStart != null)//
                     .filter(appConfig -> {
                         LocalClientApplicationSettings settings = new LocalClientApplicationSettingsManifest(hive).read();
-                        if (settings != null) {
-                            Boolean autostartEnabled = settings.getAutostartEnabled(appConfig.clickAndStart);
-                            if (autostartEnabled != null) {
-                                return autostartEnabled;
-                            }
+                        Boolean autostartEnabled = settings.getAutostartEnabled(appConfig.clickAndStart);
+                        if (autostartEnabled != null) {
+                            return autostartEnabled;
                         }
                         return appConfig.metadata.autostart;
                     })//

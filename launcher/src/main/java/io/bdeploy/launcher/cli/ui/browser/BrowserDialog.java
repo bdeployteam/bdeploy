@@ -675,24 +675,22 @@ public class BrowserDialog extends BaseDialog {
             ClientSoftwareConfiguration singleApp = selectedApps.iterator().next();
             ClientApplicationDto singleAppMetadata = singleApp.metadata;
             if (singleAppMetadata != null) {
-                LocalClientApplicationSettings settings = null;
+                LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                if (settings != null) {
-                    ClickAndStartDescriptor clickAndStart = singleApp.clickAndStart;
 
-                    ScriptInfo startScriptInfo = settings.getStartScriptInfo(//
-                            ScriptUtils.getStartScriptIdentifier(os, singleAppMetadata.startScriptName));
-                    if (startScriptInfo != null && !clickAndStart.equals(startScriptInfo.getDescriptor())) {
-                        activateStartScriptItemEnabled = true;
-                    }
+                ClickAndStartDescriptor clickAndStart = singleApp.clickAndStart;
 
-                    ScriptInfo fileAssocScriptInfo = settings.getFileAssocScriptInfo(//
-                            ScriptUtils.getFileAssocIdentifier(os, singleAppMetadata.fileAssocExtension));
-                    if (fileAssocScriptInfo != null && !clickAndStart.equals(fileAssocScriptInfo.getDescriptor())) {
-                        activateFileAssocScriptItemEnabled = true;
-                    }
+                ScriptInfo startScriptInfo = settings.getStartScriptInfo(//
+                        ScriptUtils.getStartScriptIdentifier(os, singleAppMetadata.startScriptName));
+                if (startScriptInfo != null && !clickAndStart.equals(startScriptInfo.getDescriptor())) {
+                    activateStartScriptItemEnabled = true;
+                }
+                ScriptInfo fileAssocScriptInfo = settings.getFileAssocScriptInfo(//
+                        ScriptUtils.getFileAssocIdentifier(os, singleAppMetadata.fileAssocExtension));
+                if (fileAssocScriptInfo != null && !clickAndStart.equals(fileAssocScriptInfo.getDescriptor())) {
+                    activateFileAssocScriptItemEnabled = true;
                 }
             }
         }

@@ -43,15 +43,13 @@ public class BrowserDialogAutostartCellRenderer implements TableCellRenderer, UI
             if (metadata == null) {
                 component.setBackground(BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE);
             } else if (metadata.supportsAutostart) {
-                LocalClientApplicationSettings settings = null;
+                LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                if (settings != null) {
-                    Boolean autostartEnabled = settings.getAutostartEnabled(config.clickAndStart);
-                    if (autostartEnabled != null && autostartEnabled != metadata.autostart) {
-                        component.setBackground(BrowserDialogTableCellColorConstants.PAY_ATTENTION);
-                    }
+                Boolean autostartEnabled = settings.getAutostartEnabled(config.clickAndStart);
+                if (autostartEnabled != null && autostartEnabled != metadata.autostart) {
+                    component.setBackground(BrowserDialogTableCellColorConstants.PAY_ATTENTION);
                 }
             } else {
                 component.setBackground(BrowserDialogTableCellColorConstants.DISABLED);
