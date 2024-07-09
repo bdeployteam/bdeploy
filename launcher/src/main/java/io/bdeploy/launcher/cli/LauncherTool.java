@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -401,7 +402,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Successfully retrieved configuration from server.");
                 offlineMode = false;
             } catch (Exception e) {
-                if (!(ExceptionHelper.getRootCause(e) instanceof ConnectException)) {
+                Throwable rootCause = ExceptionHelper.getRootCause(e);
+                if ((rootCause instanceof ConnectException) || (rootCause instanceof UnknownHostException)) {
                     throw e;
                 }
                 clientAppCfg = Optional.of(new ClientSoftwareManifest(hive))
