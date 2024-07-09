@@ -140,7 +140,7 @@ final class SplashGraphics extends JPanel implements LauncherSplashDisplay {
             if (progressCurrent >= progressMax) {
                 fillWidth = progress.width;
             } else {
-                float factor = (float) progressCurrent / (float) progressMax;
+                double factor = (double) progressCurrent / (double) progressMax;
                 fillWidth = (int) (progress.width * factor);
             }
 
