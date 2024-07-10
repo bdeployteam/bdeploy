@@ -51,20 +51,16 @@ public class BrowserDialogScriptCellRenderer extends DefaultTableCellRenderer {
             if (metadata == null) {
                 backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
             } else {
-                LocalClientApplicationSettings settings = null;
+                LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                if (settings == null) {
-                    backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
-                } else {
-                    ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings, metadata);
-                    backgroundColor = scriptInfo == null//
-                            ? BrowserDialogTableCellColorConstants.DISABLED
-                            : config.clickAndStart.equals(scriptInfo.getDescriptor())//
-                                    ? BrowserDialogTableCellColorConstants.ENABLED//
-                                    : BrowserDialogTableCellColorConstants.PAY_ATTENTION;
-                }
+                ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings, metadata);
+                backgroundColor = scriptInfo == null//
+                        ? BrowserDialogTableCellColorConstants.DISABLED
+                        : config.clickAndStart.equals(scriptInfo.getDescriptor())//
+                                ? BrowserDialogTableCellColorConstants.ENABLED//
+                                : BrowserDialogTableCellColorConstants.PAY_ATTENTION;
             }
         } else {
             backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;

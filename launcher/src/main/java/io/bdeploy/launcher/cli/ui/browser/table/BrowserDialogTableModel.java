@@ -146,11 +146,9 @@ public class BrowserDialogTableModel extends AbstractTableModel {
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-                if (settings != null) {
-                    Boolean autostartEnabled = settings.getAutostartEnabled(apps.get(rowIndex).clickAndStart);
-                    if (autostartEnabled != null) {
-                        return autostartEnabled;
-                    }
+                Boolean autostartEnabled = settings.getAutostartEnabled(apps.get(rowIndex).clickAndStart);
+                if (autostartEnabled != null) {
+                    return autostartEnabled;
                 }
                 return metadata != null && metadata.autostart;
             case START_SCRIPT:

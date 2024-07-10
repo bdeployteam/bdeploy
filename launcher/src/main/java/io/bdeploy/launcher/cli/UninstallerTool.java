@@ -155,9 +155,6 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
         LocalClientApplicationSettingsManifest manifest = new LocalClientApplicationSettingsManifest(hive);
         LocalClientApplicationSettings settings = manifest.read();
-        if (settings == null) {
-            return;
-        }
 
         ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings);
         if (scriptInfo != null && descriptor.equals(scriptInfo.getDescriptor())) {

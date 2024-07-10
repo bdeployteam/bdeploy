@@ -54,7 +54,7 @@ public class LocalClientApplicationSettingsManifest {
     public LocalClientApplicationSettings read() {
         Optional<Long> currentlyActiveTag = hive.execute(new ManifestMaxIdOperation().setManifestName(MANIFEST_NAME));
         if (currentlyActiveTag.isEmpty()) {
-            return null;
+            return new LocalClientApplicationSettings();
         }
 
         Key key = new Manifest.Key(MANIFEST_NAME, currentlyActiveTag.get().toString());

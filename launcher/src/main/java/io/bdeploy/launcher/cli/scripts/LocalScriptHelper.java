@@ -62,9 +62,6 @@ public abstract class LocalScriptHelper {
         try (BHive hive = new BHive(launcherDir.resolve("bhive").toUri(), auditor, new ActivityReporter.Null())) {
             LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(hive);
             LocalClientApplicationSettings settings = settingsManifest.read();
-            if (settings == null) {
-                settings = new LocalClientApplicationSettings();
-            }
             updateSettings(settings, scriptName, new ScriptInfo(scriptName, clickAndStart), override);
             settingsManifest.write(settings);
         }
