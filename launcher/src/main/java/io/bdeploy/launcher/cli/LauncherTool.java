@@ -841,8 +841,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Installs the application with all requirements if necessary. */
     private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
             ClientApplicationConfiguration clientAppCfg, Auditor auditor) {
-        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
-
         // Update scripts
         OperatingSystem os = OsHelper.getRunningOs();
         updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
@@ -857,6 +855,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Application needs to be installed/updated: {}", missing);
 
         // Throw an exception if we do not have write permissions in the directory
+        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
         String appName = appCfg.name;
         if (readOnlyHomeDir) {
             throw new SoftwareUpdateException(appName, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));

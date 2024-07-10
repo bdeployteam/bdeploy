@@ -217,7 +217,6 @@ public class UpdateHelper {
 
         String project = props.getProperty("project");
         String version = props.getProperty("version");
-        boolean snapshot = Boolean.parseBoolean(props.getProperty("snapshot"));
 
         if (os == null) {
             os = OperatingSystem.valueOf(props.getProperty("os").toUpperCase());
@@ -231,7 +230,7 @@ public class UpdateHelper {
             throw new IllegalStateException("Cannot determin version for update package");
         }
 
-        if (snapshot) {
+        if (Boolean.parseBoolean(props.getProperty("snapshot"))) {
             name += SW_SNAPSHOT;
         }
 

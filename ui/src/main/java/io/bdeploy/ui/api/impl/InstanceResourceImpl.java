@@ -397,10 +397,6 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = InstanceManifest.of(hive, imKey);
         InstanceConfiguration config = im.getConfiguration();
 
-        // comparator only computed once per product (name), regardless of tag.
-        Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
-                k -> vss.getTagComparator(group, im.getConfiguration().product));
-
         Key activeVersion = null;
         Key activeProduct = null;
         try {
@@ -449,6 +445,10 @@ public class InstanceResourceImpl implements InstanceResource {
             configRoot.name = "/";
             readTree(configRoot, rootTv);
         }
+
+        // comparator only computed once per product (name), regardless of tag.
+        Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
+                k -> vss.getTagComparator(group, im.getConfiguration().product));
 
         boolean newerVersionAvailable = this.isNewerVersionAvailable(pmScan, config, productVersionComparator);
         String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, pmScan,
@@ -524,14 +524,13 @@ public class InstanceResourceImpl implements InstanceResource {
     public void deleteVersion(String instanceId, String tag) {
         // prevent delete if processes are running.
         InstanceManifest im = readInstance(instanceId);
-        RemoteService master = mp.getControllingMaster(hive, im.getManifest());
 
         if (getDeploymentStates(instanceId).installedTags.contains(tag)) {
             throw new WebApplicationException("Version " + tag + " is still installed, cannot delete", Status.EXPECTATION_FAILED);
         }
 
-        ResourceProvider.getVersionedResource(master, MasterRootResource.class, context).getNamedMaster(group)
-                .deleteVersion(instanceId, tag);
+        ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, im.getManifest()), MasterRootResource.class, context)
+                .getNamedMaster(group).deleteVersion(instanceId, tag);
 
         // now delete also on the central...
         Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
@@ -627,7 +626,6 @@ public class InstanceResourceImpl implements InstanceResource {
             String nodeName = entry.getKey();
             Manifest.Key manifestKey = entry.getValue();
 
-            InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
             InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, k -> {
                 // Node is not known any more but has configured applications
                 InstanceNodeConfigurationDto inc = new InstanceNodeConfigurationDto(k, null);
@@ -635,7 +633,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 return inc;
             });
 
-            nodeConfig.nodeConfiguration = manifest.getConfiguration();
+            nodeConfig.nodeConfiguration = InstanceNodeManifest.of(hive, manifestKey).getConfiguration();
         }
     }
 
@@ -817,7 +815,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
             // Request a new file where we can store the installer
             DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-            String token = ds.createNewToken();
 
             // Determine the target OS, and build the according installer.
             ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
@@ -857,6 +854,7 @@ public class InstanceResourceImpl implements InstanceResource {
             URI splashLocation = splashUrl.build(group, im.getConfiguration().id, appConfig.id);
 
             String fileName = "%1$s (%2$s - %3$s) - Installer";
+            String token = ds.createNewToken();
             Path installerPath = ds.getStoragePath(token);
             switch (applicationOs) {
                 case WINDOWS:
@@ -1253,8 +1251,6 @@ public class InstanceResourceImpl implements InstanceResource {
                     Status.NOT_FOUND);
         }
 
-        Map<String, MinionDto> minions = getMinionConfiguration(instance, state.activeTag);
-
         // note that we cannot resolve deployment paths here, but this *should* not matter for calculating a URI.
         CompositeResolver list = new CompositeResolver();
         list.add(new InstanceAndSystemVariableResolver(ic));
@@ -1274,7 +1270,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     Status.PRECONDITION_FAILED);
         }
 
-        MinionDto node = minions.get(nodeName);
+        MinionDto node = getMinionConfiguration(instance, state.activeTag).get(nodeName);
         return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath.getPreRenderable());
     }
 

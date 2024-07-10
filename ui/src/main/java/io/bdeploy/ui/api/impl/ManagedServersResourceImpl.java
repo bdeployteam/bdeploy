@@ -697,9 +697,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public void installUpdate(String groupName, String serverName, MinionUpdateDto updates) {
         try (ActionHandle h = af.run(Actions.MANAGED_UPDATE_INSTALL, groupName, null, serverName)) {
-            // Only retain server packages in the list of packages to install
-            Collection<Key> keys = updates.packagesToInstall;
-
             BHive hive = getInstanceGroupHive(groupName);
 
             ManagedMasters mm = new ManagedMasters(hive);
@@ -712,9 +709,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 throw new WebApplicationException("Cannot determine master node");
             }
 
-            // Trigger the update on the master node
+            // Trigger the update on the master node (only retain server packages in the list of packages to install)
             RemoteService svc = getConfiguredRemote(groupName, serverName);
-            Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
+            Collection<Key> server = updates.packagesToInstall.stream().filter(UpdateHelper::isBDeployServerKey).toList();
             UpdateHelper.update(svc, server, true, context);
 
             // update the information in the hive.
