@@ -49,15 +49,13 @@ public class ActionBridge {
     }
 
     private static final Logger log = LoggerFactory.getLogger(ActionBridge.class);
-
-    private final ActionService actions;
-    private final Map<String, ActionBridgeHandle> handles = new TreeMap<>();
-
-    private final ScheduledExecutorService reaper = Executors
-            .newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("ActionBridge Reaper"));
-
     /** The same timeout as used in the web ui, see servers.service.ts -> SYNC_TIMEOUT */
     private static final long SYNC_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
+
+    private final Map<String, ActionBridgeHandle> handles = new TreeMap<>();
+    private final ScheduledExecutorService reaper = Executors
+            .newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("ActionBridge Reaper"));
+    private final ActionService actions;
 
     public ActionBridge(ActionService svc) {
         this.actions = svc;

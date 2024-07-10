@@ -49,14 +49,13 @@ import jakarta.ws.rs.core.SecurityContext;
 public class CleanupHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupHelper.class);
+    private static Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
     private final SecurityContext securityContext;
     private final Minion minion;
     private final BHiveRegistry registry;
     private final MasterProvider provider;
     private final VersionSorterService vss;
-
-    private static Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
     /**
      * Constructor.

@@ -47,16 +47,14 @@ import io.bdeploy.common.util.PathHelper;
 public class ManifestDatabase extends LockableDatabase implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(ManifestDatabase.class);
-
-    private final Path root;
-    private final Path tmp;
-
-    private final List<ManifestSpawnListener> listeners = new ArrayList<>();
-
-    private ScheduledFuture<?> schedNotify;
-    private final List<Manifest.Key> added = new ArrayList<>();
     private static final ScheduledExecutorService NOTIFY_POOL = Executors.newScheduledThreadPool(2,
             new NamedDaemonThreadFactory("Manifest DB Notifier"));
+
+    private final List<ManifestSpawnListener> listeners = new ArrayList<>();
+    private final List<Manifest.Key> added = new ArrayList<>();
+    private final Path root;
+    private final Path tmp;
+    private ScheduledFuture<?> schedNotify;
 
     /**
      * A cache for Manifest objects which need to actually be loaded from disk.

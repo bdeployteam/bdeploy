@@ -69,14 +69,16 @@ import jakarta.ws.rs.core.Response;
  */
 public class ProcessController {
 
-    private final MdcLogger logger = new MdcLogger(ProcessController.class);
-
     /** Name of the file stored on-disk. Holds information to re-attach to the process */
     private static final String JSON_FILE = "app.json";
 
     /** Shown user on automated execution */
     private static final String DEFAULT_USER = ApiAccessToken.SYSTEM_USER;
 
+    /** In production, by default, don't wait for out.txt file lock */
+    private static boolean lockWait = false;
+
+    private final MdcLogger logger = new MdcLogger(ProcessController.class);
     private final Path processDir;
     private final String instanceId;
     private final String instanceTag;
@@ -154,9 +156,6 @@ public class ProcessController {
 
     /** The results of the last probe calls */
     private final Map<ProcessProbeType, ProcessProbeResultDto> lastProbeResults = new EnumMap<>(ProcessProbeType.class);
-
-    /** In production, by default, don't wait for out.txt file lock */
-    private static boolean lockWait = false;
 
     /**
      * Creates a new process controller for the given configuration.

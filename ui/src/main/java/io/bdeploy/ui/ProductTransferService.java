@@ -32,12 +32,12 @@ import jakarta.ws.rs.core.UriBuilder;
 @Service
 public class ProductTransferService {
 
-    @Inject
-    private ActionFactory af;
-
     private static final Logger log = LoggerFactory.getLogger(ProductTransferService.class);
     private final SortedMap<String, SortedSet<ProductDto>> inTransfer = new TreeMap<>();
     private final ExecutorService transferExec = Executors.newVirtualThreadPerTaskExecutor();
+
+    @Inject
+    private ActionFactory af;
 
     public void initTransfer(BHive instanceGroupHive, String groupName, ProductTransferDto data) {
         synchronized (inTransfer) {

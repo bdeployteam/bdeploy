@@ -41,9 +41,18 @@ import jakarta.ws.rs.ext.Provider;
 @Priority(Priorities.AUTHENTICATION)
 public class JerseyAuthenticationProvider implements ContainerRequestFilter, ContainerResponseFilter {
 
+    public static final String AUTHENTICATION_SCHEME = "Bearer";
+
+    private static final Logger log = LoggerFactory.getLogger(JerseyAuthenticationProvider.class);
     private static final String BDEPLOY_ALT_AUTH_HEADER = "X-BDeploy-Authorization";
     private static final String THREAD_ORIG_NAME = "THREAD_ORIG_NAME";
-    private static final Logger log = LoggerFactory.getLogger(JerseyAuthenticationProvider.class);
+    private static final String REALM = "BDeploy";
+    private static final String NO_AUTH = "unsecured";
+    private static final String WEAK_AUTH = "weak";
+
+    private final KeyStore store;
+    private final Predicate<String> userValidator;
+    private final JerseySessionManager sessionManager;
 
     @Inject
     private Auditor auditor;
@@ -93,14 +102,6 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         }
 
     }
-
-    public static final String AUTHENTICATION_SCHEME = "Bearer";
-    private static final String REALM = "BDeploy";
-    private static final String NO_AUTH = "unsecured";
-    private static final String WEAK_AUTH = "weak";
-    private final KeyStore store;
-    private final Predicate<String> userValidator;
-    private final JerseySessionManager sessionManager;
 
     public JerseyAuthenticationProvider(KeyStore store, Predicate<String> userValidator, JerseySessionManager sessionManager) {
         this.store = store;

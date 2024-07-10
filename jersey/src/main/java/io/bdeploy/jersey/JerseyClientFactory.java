@@ -55,17 +55,16 @@ public class JerseyClientFactory {
     }
 
     private static final Logger log = LoggerFactory.getLogger(JerseyClientFactory.class);
+    private static final Cache<RemoteService, JerseyClientFactory> factoryCache = CacheBuilder.newBuilder().maximumSize(100)
+            .expireAfterAccess(5, TimeUnit.MINUTES).build();
+
+    private final Set<com.fasterxml.jackson.databind.Module> additionalModules = new HashSet<>();
+    private final RemoteService svc;
 
     private SSLContext sslContext;
     private String bearer;
-    private final RemoteService svc;
-
-    private final Set<com.fasterxml.jackson.databind.Module> additionalModules = new HashSet<>();
     private JerseyObjectMapper mapperFeature;
     private WebTarget cachedTarget;
-
-    private static final Cache<RemoteService, JerseyClientFactory> factoryCache = CacheBuilder.newBuilder().maximumSize(100)
-            .expireAfterAccess(5, TimeUnit.MINUTES).build();
 
     /**
      * @param svc the {@link RemoteService} specification to create clients for.
