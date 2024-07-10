@@ -295,7 +295,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             if (targetNode == null || targetNode.isBlank()) {
                 continue; // nope
             }
-            if (targetNode.equals("Client Applications")) {
+            if ("Client Applications".equals(targetNode)) {
                 targetNode = InstanceManifest.CLIENT_NODE_NAME;
             }
 

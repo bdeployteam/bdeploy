@@ -71,7 +71,7 @@ public class Configuration {
         for (String arg : arguments) {
             if (inRemaining) {
                 remaining.add(arg);
-            } else if (arg.equals("--")) {
+            } else if ("--".equals(arg)) {
                 inRemaining = true;
             } else if (arg.startsWith("--")) {
                 String stripped = arg.substring(2);

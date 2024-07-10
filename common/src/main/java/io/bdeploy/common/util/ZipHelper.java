@@ -29,7 +29,8 @@ public class ZipHelper {
 
     /** Determines wheter a given URI points to a ZIP file. */
     public static boolean isZipUri(URI uri) {
-        return uri.getScheme().equals("jar") || (uri.getScheme().equals("file") && uri.toString().toLowerCase().endsWith(".zip"));
+        String scheme = uri.getScheme();
+        return "jar".equals(scheme) || ("file".equals(scheme) && uri.toString().toLowerCase().endsWith(".zip"));
     }
 
     /**

@@ -1135,7 +1135,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (Exception e) {
             // Ignore Exception
         }
-        if (hostname == null || hostname.equalsIgnoreCase("localhost")) {
+        if (hostname == null || "localhost".equalsIgnoreCase(hostname)) {
             hostname = NativeHostnameResolver.getHostname();
         }
         return hostname != null ? hostname : fallback;

@@ -91,7 +91,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         Path relRoot;
         if (ZipHelper.isZipUri(uri)) {
             try {
-                if (!uri.getScheme().equals("jar")) {
+                if (!"jar".equals(uri.getScheme())) {
                     uri = URI.create("jar:" + uri);
                 }
 

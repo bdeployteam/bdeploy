@@ -60,7 +60,7 @@ public class JerseyCustomErrorPages {
                         return img;
                     }
                     return TemplateHelper.process(LOGO_TEMPLATE, vv -> {
-                        if (vv.equals("CODE")) {
+                        if ("CODE".equals(vv)) {
                             return String.valueOf(code);
                         } else {
                             return null;
@@ -69,8 +69,6 @@ public class JerseyCustomErrorPages {
                 default:
                     return null;
             }
-
         });
     }
-
 }
