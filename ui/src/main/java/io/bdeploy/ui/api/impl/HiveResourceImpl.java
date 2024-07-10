@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +209,7 @@ public class HiveResourceImpl implements HiveResource {
             BHive hive = registry.get(hiveParam);
 
             SortedMap<ObjectId, Long> pruned = hive.execute(new PruneOperation());
-            Long sumFreedBytes = pruned.entrySet().stream().collect(Collectors.summingLong(Map.Entry::getValue));
+            Long sumFreedBytes = pruned.entrySet().stream().mapToLong(Map.Entry::getValue).sum();
 
             return FormatHelper.formatFileSize(sumFreedBytes);
         }

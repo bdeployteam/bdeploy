@@ -44,7 +44,7 @@ public class ObjectDatabase extends LockableDatabase {
      * is exceeded, the {@link ObjectDatabase} is required to stream the file
      * content into a temporary file before adding it to the database.
      */
-    static final long MAX_BUFFER_SIZE = 10l * 1024l * 1024l; // 10M
+    static final long MAX_BUFFER_SIZE = 10L * 1024 * 1024; // 10M
 
     private final Path root;
     private final Path tmp;

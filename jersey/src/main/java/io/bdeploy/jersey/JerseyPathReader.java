@@ -37,7 +37,7 @@ public class JerseyPathReader implements MessageBodyReader<Path> {
     public Path readFrom(Class<Path> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException {
         String cl = httpHeaders.getFirst(PATH_SIZE_HDR);
-        long length = -1l;
+        long length = -1;
         try {
             length = Long.parseLong(cl);
         } catch (NumberFormatException e) {

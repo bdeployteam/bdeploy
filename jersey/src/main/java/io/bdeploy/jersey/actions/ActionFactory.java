@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.SecurityContext;
 @Service
 public class ActionFactory {
 
-    private class IntermediateMultiHandle {
+    private static class IntermediateMultiHandle {
 
         ActionHandle handle;
         RuntimeException ex;

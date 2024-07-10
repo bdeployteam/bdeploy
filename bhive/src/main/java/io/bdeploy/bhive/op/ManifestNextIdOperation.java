@@ -19,7 +19,7 @@ public class ManifestNextIdOperation extends BHive.Operation<Long> {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
         Optional<Long> max = execute(new ManifestMaxIdOperation().setManifestName(key));
-        return max.orElse(0l) + 1;
+        return max.orElse(0L) + 1;
     }
 
     /**

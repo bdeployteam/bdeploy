@@ -140,7 +140,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(allStatus.processToNode.get(appId), appId);
             InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceId,
                     appStatus.status.instanceTag);
-            Optional<ApplicationConfiguration> app = findAppConfig(appStatus.status, Optional.ofNullable(cfg));
+            Optional<ApplicationConfiguration> app = findAppConfig(appStatus.status, cfg);
 
             DataResult result = createResultWithSuccessMessage(
                     "Details for " + appId + " of instance " + instanceId + " of instance group " + groupName)
@@ -201,13 +201,13 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
     }
 
     private Optional<ApplicationConfiguration> findAppConfig(ProcessStatusDto processStatusDto,
-            Optional<InstanceNodeConfigurationListDto> nodes) {
+            InstanceNodeConfigurationListDto nodes) {
         Optional<ApplicationConfiguration> app = Optional.empty();
-        if (!nodes.isPresent()) {
+        if (nodes == null) {
             return app;
         }
 
-        for (var node : nodes.get().nodeConfigDtos) {
+        for (var node : nodes.nodeConfigDtos) {
             app = node.nodeConfiguration.applications.stream().filter(a -> a.id.equals(processStatusDto.appId)).findFirst();
             if (app.isPresent()) {
                 break;
@@ -272,8 +272,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     return Optional.ofNullable(null);
                 }
             });
-            Optional<ApplicationConfiguration> cfg = findAppConfig(processEntry, nodes);
-            addProcessRows(table, pr, processEntry, instance, deploymentStates, cfg, overall);
+            Optional<ApplicationConfiguration> cfg = findAppConfig(processEntry, nodes.orElse(null));
+            addProcessRows(table, pr, processEntry, instance.orElse(null), deploymentStates, cfg.orElse(null), overall);
         }
 
         table.addFooter(" * Versions marked with '*' are out-of-sync (not running from the active version)");
@@ -316,9 +316,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .map(probe -> String.valueOf(probe.status)).orElse("");
     }
 
-    private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
-            Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates,
-            Optional<ApplicationConfiguration> cfg, InstanceProcessStatusDto overall) {
+    private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process, InstanceConfiguration instance,
+            InstanceStateRecord deploymentStates, ApplicationConfiguration cfg, InstanceProcessStatusDto overall) {
 
         ProcessDetailDto detail = pr.getDetails(overall.processToNode.get(process.appId), process.appId);
         ProcessHandleDto handle = detail.handle;
@@ -327,8 +326,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(process.appId) //
                 .cell(process.processState.name()) //
                 .cell(process.instanceTag + (process.instanceTag.equals(deploymentStates.activeTag) ? "" : "*")) //
-                .cell(instance.isPresent() ? instance.get().product.getTag() : "?") //
-                .cell(cfg.isPresent() ? cfg.get().processControl.startType : "?") //
+                .cell(instance == null ? "?" : instance.product.getTag()) //
+                .cell(cfg == null ? "?" : cfg.processControl.startType) //
                 .cell(handle == null ? "-" : FormatHelper.format(handle.startTime)) //
                 .cell(handle == null ? "-" : handle.user) //
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //

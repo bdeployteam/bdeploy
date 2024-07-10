@@ -28,7 +28,7 @@ public abstract class PrefixResolver implements VariableResolver {
 
         String expr = s.substring(prefixString.length());
 
-        if (prefix.getAllowArithmetics()) {
+        if (prefix.isArithmeticAllowed()) {
             // Even if arithmetics are enabled, they are only applicable if there is at least 1 colon and both parts can be parsed to long
             int lastColonIndex = expr.lastIndexOf(':');
             if (lastColonIndex != -1) {
