@@ -32,6 +32,7 @@ import io.bdeploy.launcher.cli.SoftwareUpdateException;
 public class MessageDialogs {
 
     private static final Logger log = LoggerFactory.getLogger(MessageDialogs.class);
+    private static final int ICON_SIZE = 32;
 
     private MessageDialogs() {
     }
@@ -41,7 +42,7 @@ public class MessageDialogs {
      */
     public static void showUpdateRequired(ClickAndStartDescriptor config, SoftwareUpdateException ex) {
         MessageDialog dialog = new MessageDialog("Software Update");
-        dialog.setHeaderIcon(WindowHelper.loadIcon("/update.png", 32, 32));
+        dialog.setHeaderIcon(WindowHelper.loadIcon("/update.png", ICON_SIZE, ICON_SIZE));
         dialog.setHeaderText("Software Update Required");
         dialog.setSummary("<html>A required software update is available " +  //
                 "but cannot be installed due to insufficient permissions. " + //
@@ -57,7 +58,7 @@ public class MessageDialogs {
      */
     public static void showLaunchFailed(ClickAndStartDescriptor config, Throwable ex) {
         MessageDialog dialog = new MessageDialog("Error");
-        dialog.setHeaderIcon(WindowHelper.loadIcon("/error.png", 32, 32));
+        dialog.setHeaderIcon(WindowHelper.loadIcon("/error.png", ICON_SIZE, ICON_SIZE));
         dialog.setHeaderText("Application could not be launched");
         dialog.setSummary("<html>Unexpected error occurred while launching the application. " + //
                 "If the problem persists, contact the system administrator.</html>");
@@ -72,7 +73,7 @@ public class MessageDialogs {
      */
     public static void showUninstallationFailed(ClickAndStartDescriptor config, Throwable ex) {
         MessageDialog dialog = new MessageDialog("Error");
-        dialog.setHeaderIcon(WindowHelper.loadIcon("/error.png", 32, 32));
+        dialog.setHeaderIcon(WindowHelper.loadIcon("/error.png", ICON_SIZE, ICON_SIZE));
         dialog.setHeaderText("Application could not be uninstalled");
         dialog.setSummary("<html>Unexpected error occurred while uninstalling the application. " + //
                 "If the problem persists, contact the system administrator.</html>");
@@ -86,7 +87,7 @@ public class MessageDialogs {
      */
     public static void showServerIsNode() {
         MessageDialog dialog = new MessageDialog("Server no longer available");
-        dialog.setHeaderIcon(WindowHelper.loadIcon("/refresh.png", 32, 32));
+        dialog.setHeaderIcon(WindowHelper.loadIcon("/refresh.png", ICON_SIZE, ICON_SIZE));
         dialog.setHeaderText("Server no longer available");
         dialog.setSummary("<html>The server has been migrated to a different location. " + //
                 "You need to re-download the application from the new location.</html>");

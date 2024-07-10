@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.util.OsHelper;
@@ -36,6 +37,8 @@ public class BaseDialog extends JFrame {
             throw new IllegalStateException("Cannot set system look&feel", e);
         }
     }
+
+    protected static final EmptyBorder DEFAULT_EMPTY_BORDER = new EmptyBorder(10, 10, 10, 10);
 
     private final transient Object lock = new Object();
     private int closeReason = 0;
