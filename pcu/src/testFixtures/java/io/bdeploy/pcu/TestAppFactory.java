@@ -18,10 +18,10 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 public class TestAppFactory {
 
@@ -167,7 +167,7 @@ public class TestAppFactory {
     private static ParameterDescriptor getEnv(String param, String desc, String def) {
         ParameterDescriptor e = getParam(param, desc, def);
 
-        e.type = ParameterType.ENVIRONMENT;
+        e.type = VariableType.ENVIRONMENT;
 
         return e;
     }

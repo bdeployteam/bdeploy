@@ -55,6 +55,7 @@ import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
+import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
@@ -70,6 +71,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -301,6 +303,8 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
+        applyProductInstanceVariables(instanceConfig, product);
+
         MasterRootResource root = getManagingRootResource(managedServer);
 
         root.getNamedMaster(group)
@@ -311,6 +315,14 @@ public class InstanceResourceImpl implements InstanceResource {
         // #syncInstance here,
         // it requires the association to already exist.
         rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
+    }
+
+    private void applyProductInstanceVariables(InstanceConfiguration config, ProductManifest product) {
+        if (product.getInstanceVariables() != null) {
+            for (VariableDescriptor instVar : product.getInstanceVariables()) {
+                config.instanceVariables.add(new VariableConfiguration(instVar));
+            }
+        }
     }
 
     private MasterRootResource getManagingRootResource(String managedServer) {
@@ -701,7 +713,9 @@ public class InstanceResourceImpl implements InstanceResource {
             List<ApplicationManifest> targetApps = target.getApplications().stream()
                     .map(k -> ApplicationManifest.of(hive, k, target)).toList();
 
-            return pus.update(state, target, current, targetApps, currentApps);
+            Manifest.Key sysKey = state.config.config.system;
+            SystemConfiguration systemConfig = sysKey == null ? null : SystemManifest.of(hive, sysKey).getConfiguration();
+            return pus.update(state, target, current, targetApps, currentApps, systemConfig);
         }
     }
 

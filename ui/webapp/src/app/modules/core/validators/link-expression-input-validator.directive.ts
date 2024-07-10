@@ -3,8 +3,8 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 import {
   ApplicationConfiguration,
   InstanceConfigurationDto,
-  ParameterType,
   SystemConfiguration,
+  VariableType,
 } from 'src/app/models/gen.dtos';
 import { createLinkedValue, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import {
@@ -30,7 +30,7 @@ export class LinkExpressionInputValidatorDirective implements Validator {
   @Input('appLinkExpressionInputValidatorProcess') process: ApplicationConfiguration;
   @Input('appLinkExpressionInputValidatorInstance') instance: InstanceConfigurationDto;
   @Input('appLinkExpressionInputValidatorSystem') system: SystemConfiguration;
-  @Input('appLinkExpressionInputValidatorType') type: ParameterType;
+  @Input('appLinkExpressionInputValidatorType') type: VariableType;
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value as string;
@@ -66,17 +66,17 @@ export class LinkExpressionInputValidatorDirective implements Validator {
       return errors;
     }
 
-    const type = this.type || ParameterType.STRING;
+    const type = this.type || VariableType.STRING;
     switch (type) {
-      case ParameterType.BOOLEAN:
+      case VariableType.BOOLEAN:
         if (expanded?.toLowerCase() !== 'true' && expanded?.toLowerCase() !== 'false') {
           errors[ID] = 'Link expression does not expand to a boolean value.';
           return errors;
         }
         break;
-      case ParameterType.NUMERIC:
-      case ParameterType.CLIENT_PORT:
-      case ParameterType.SERVER_PORT:
+      case VariableType.NUMERIC:
+      case VariableType.CLIENT_PORT:
+      case VariableType.SERVER_PORT:
         if (isNaN(Number(expanded))) {
           errors[ID] = 'Link expression does not expand to a numeric value.';
           return errors;

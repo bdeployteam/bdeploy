@@ -7,9 +7,9 @@ import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationDto,
   InstanceConfigurationDto,
-  ParameterType,
   SystemConfiguration,
   VariableConfiguration,
+  VariableType,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
@@ -102,7 +102,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   protected instance: InstanceConfigurationDto;
   protected system: SystemConfiguration;
   protected apps: ApplicationDto[];
-  protected typeValues: ParameterType[] = Object.values(ParameterType);
+  protected typeValues: VariableType[] = Object.values(VariableType);
   protected editorValues: string[];
 
   protected completionPrefixes = buildCompletionPrefixes();
@@ -275,7 +275,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
       id: '',
-      type: ParameterType.STRING,
+      type: VariableType.STRING,
       customEditor: null,
       value: { value: '', linkExpression: null },
       description: '',
@@ -334,11 +334,11 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
       });
   }
 
-  protected onTypeChange(value: ParameterType) {
+  protected onTypeChange(value: VariableType) {
     // check if we need to clear the value in case we switch from password to *something*.
     if (
       this.newValue.type !== value &&
-      this.newValue.type === ParameterType.PASSWORD &&
+      this.newValue.type === VariableType.PASSWORD &&
       !this.newValue.value.linkExpression
     ) {
       // type changed, it is not an expression and previously was password. clear the value.

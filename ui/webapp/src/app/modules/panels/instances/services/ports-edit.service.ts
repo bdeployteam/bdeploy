@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { ApplicationConfiguration, LinkedValueConfiguration, ParameterType } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, LinkedValueConfiguration, VariableType } from 'src/app/models/gen.dtos';
 import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { URLish } from 'src/app/modules/core/utils/url.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -9,7 +9,7 @@ import { ProcessEditService } from './process-edit.service';
 export interface PortParam {
   source: string;
   value: LinkedValueConfiguration;
-  type: ParameterType;
+  type: VariableType;
   name: string;
   description: string;
   port: string;
@@ -121,8 +121,8 @@ export class PortsEditService {
     return errors;
   }
 
-  private getPortValue(value: LinkedValueConfiguration, type: ParameterType): string {
-    if (type === ParameterType.URL) {
+  private getPortValue(value: LinkedValueConfiguration, type: VariableType): string {
+    if (type === VariableType.URL) {
       return new URLish(getPreRenderable(value)).port;
     }
     return value.value; // no link supported if not URL.
@@ -130,7 +130,7 @@ export class PortsEditService {
 
   // dont replace port.value as its a shared variable with the actual parameter
   private setPortValue(port: PortParam, value: string) {
-    if (port.type === ParameterType.URL) {
+    if (port.type === VariableType.URL) {
       const u = new URLish(getPreRenderable(port.value));
       u.port = value;
       const linkedValue = createLinkedValue(u.toString());
@@ -144,17 +144,17 @@ export class PortsEditService {
     port.port = value;
   }
 
-  private isPort(type: ParameterType) {
+  private isPort(type: VariableType) {
     switch (type) {
-      case ParameterType.CLIENT_PORT:
-      case ParameterType.SERVER_PORT:
-      case ParameterType.URL:
+      case VariableType.CLIENT_PORT:
+      case VariableType.SERVER_PORT:
+      case VariableType.URL:
         return true;
     }
     return false;
   }
 
-  private isPortExpression(value: LinkedValueConfiguration, type: ParameterType) {
+  private isPortExpression(value: LinkedValueConfiguration, type: VariableType) {
     const num = parseInt(this.getPortValue(value, type), 10);
     return isNaN(num);
   }

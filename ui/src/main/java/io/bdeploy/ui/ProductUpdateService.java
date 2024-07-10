@@ -3,6 +3,7 @@ package io.bdeploy.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.URLish;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -28,7 +30,8 @@ import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterCondition.ParameterConditionType;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -56,7 +59,8 @@ import io.bdeploy.interfaces.variables.ParameterValueResolver;
 public class ProductUpdateService {
 
     public InstanceUpdateDto update(InstanceUpdateDto instance, ProductManifest targetProduct, ProductManifest currentProduct,
-            List<ApplicationManifest> targetApplications, List<ApplicationManifest> currentApplications) {
+            List<ApplicationManifest> targetApplications, List<ApplicationManifest> currentApplications,
+            SystemConfiguration system) {
         List<ApplicationValidationDto> validationIssues = new ArrayList<>();
         instance.validation = validationIssues;
 
@@ -96,7 +100,58 @@ public class ProductUpdateService {
                     "Product version has updated configuration files. Please make sure to synchronize configuration files."));
         }
 
+        Set<String> systemVarIds = new HashSet<>();
+        if (system != null) {
+            for (VariableConfiguration sysVar : system.systemVariables) {
+                systemVarIds.add(sysVar.id);
+            }
+        }
+
+        recalculateInstanceVariables(instance, targetProduct, currentProduct, system);
+
         return instance;
+    }
+
+    private void recalculateInstanceVariables(InstanceUpdateDto instance, ProductManifest targetProduct,
+            ProductManifest currentProduct, SystemConfiguration system) {
+        Set<String> currentProductVarIds = new HashSet<>();
+        for (VariableDescriptor instVar : currentProduct.getInstanceVariables()) {
+            currentProductVarIds.add(instVar.id);
+        }
+        Set<String> targetProductVarIds = new HashSet<>();
+        for (VariableDescriptor instVar : targetProduct.getInstanceVariables()) {
+            targetProductVarIds.add(instVar.id);
+        }
+        Set<String> systemVarIds = new HashSet<>();
+        if (system != null) {
+            for (VariableConfiguration sysVar : system.systemVariables) {
+                systemVarIds.add(sysVar.id);
+            }
+        }
+
+        List<VariableConfiguration> instanceVariables = new ArrayList<>();
+        for (VariableConfiguration instanceVariable : instance.config.config.instanceVariables) {
+            String id = instanceVariable.id;
+            // remove (skip) all variables defined in current product and not in system or target product variables (outdated)
+            if (currentProductVarIds.contains(id) && !systemVarIds.contains(id) && !targetProductVarIds.contains(id)) {
+                continue;
+            }
+            // if existing variable is defined in target product then keep the variable
+            // and remove its id from targetProductVarIds so it is not reintroduced and overwritten later
+            if (targetProductVarIds.contains(id)) {
+                targetProductVarIds.remove(id);
+            }
+            instanceVariables.add(instanceVariable);
+        }
+
+        // add new instance variables defined by target products
+        for (VariableDescriptor instVar : targetProduct.getInstanceVariables()) {
+            if (targetProductVarIds.contains(instVar.id)) {
+                instanceVariables.add(new VariableConfiguration(instVar));
+            }
+        }
+
+        instance.config.config.instanceVariables = instanceVariables;
     }
 
     private void updateApplication(ApplicationConfiguration app, Set<ApplicationConfiguration> allApps,
@@ -499,7 +554,7 @@ public class ProductUpdateService {
             case CLIENT_PORT, SERVER_PORT, NUMERIC:
                 try {
                     long l = Long.parseLong(stringVal);
-                    if (paramDesc.type != ParameterType.NUMERIC && (l < 0 || l > (Short.MAX_VALUE * 2))) {
+                    if (paramDesc.type != VariableType.NUMERIC && (l < 0 || l > (Short.MAX_VALUE * 2))) {
                         result.add(new ApplicationValidationDto(process.id, paramDesc.id,
                                 "Value for port parameter is out of range: " + l));
                     }
@@ -528,7 +583,7 @@ public class ProductUpdateService {
         String expression = param.condition.expression;
 
         // we need a "target" type. in case of expression, this is our own type, in case of "parameter" it is the type of the target parameter
-        ParameterType targetType = param.type;
+        VariableType targetType = param.type;
         if (param.condition.parameter != null) {
             expression = "{{V:" + param.condition.parameter + "}}"; // compat with older model.
 
@@ -557,9 +612,9 @@ public class ProductUpdateService {
 
         switch (param.condition.must) {
             case BE_EMPTY:
-                return value.isBlank() || (targetType == ParameterType.BOOLEAN && value.trim().equals("false"));
+                return value.isBlank() || (targetType == VariableType.BOOLEAN && value.trim().equals("false"));
             case BE_NON_EMPTY:
-                return !value.isBlank() && !(targetType == ParameterType.BOOLEAN && value.trim().equals("false"));
+                return !value.isBlank() && !(targetType == VariableType.BOOLEAN && value.trim().equals("false"));
             case CONTAIN:
                 return value.contains(param.condition.value);
             case END_WITH:

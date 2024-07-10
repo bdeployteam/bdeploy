@@ -16,8 +16,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.google.common.collect.ImmutableList;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
 /**
@@ -110,7 +110,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
     private void fixupParameterDefaults(Collection<ParameterDescriptor> params) {
         for (var param : params) {
             if (!param.hasValue) {
-                param.type = ParameterType.BOOLEAN;
+                param.type = VariableType.BOOLEAN;
             }
         }
     }

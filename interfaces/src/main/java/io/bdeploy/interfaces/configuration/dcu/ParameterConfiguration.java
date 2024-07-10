@@ -7,7 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 
 /**
  * Describes a single parameter as configured in a configuration UI.
@@ -64,7 +64,7 @@ public class ParameterConfiguration {
             return;
         }
 
-        if (desc.type == ParameterType.ENVIRONMENT) {
+        if (desc.type == VariableType.ENVIRONMENT) {
             // not on CLI.
             target = ParameterConfigurationTarget.ENVIRONMENT;
             preRendered = List.of(desc.parameter, strValue);

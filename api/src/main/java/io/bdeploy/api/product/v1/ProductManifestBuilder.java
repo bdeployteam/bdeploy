@@ -48,6 +48,7 @@ public class ProductManifestBuilder {
     public static final String PRODUCT_DESC = "product.json";
     public static final String CONFIG_ENTRY = "config";
     public static final String PLUGINS_ENTRY = "plugins";
+    public static final String INSTANCE_VARIABLES_ENTRY = "instanceVariables";
     public static final String TEMPLATES_ENTRY = "templates";
     public static final String APP_TEMPLATES_ENTRY = "appTemplates";
     public static final String PARAM_TEMPLATES_ENTRY = "paramTemplates";
@@ -60,6 +61,7 @@ public class ProductManifestBuilder {
     private final ProductDescriptor desc;
     private Path configTemplates;
     private Path pluginFolder;
+    private final List<Path> instanceVariables = new ArrayList<>();
     private final List<Path> instanceTemplates = new ArrayList<>();
     private final List<Path> appTemplates = new ArrayList<>();
     private final List<Path> paramTemplates = new ArrayList<>();
@@ -86,6 +88,11 @@ public class ProductManifestBuilder {
 
     public synchronized ProductManifestBuilder addLabel(String key, String value) {
         labels.put(key, value);
+        return this;
+    }
+
+    public synchronized ProductManifestBuilder addInstanceVariables(Path dfnPath) {
+        instanceVariables.add(dfnPath);
         return this;
     }
 
@@ -161,6 +168,15 @@ public class ProductManifestBuilder {
                 }
             }).build());
         }
+
+        // import instance variable definitions
+        Tree.Builder instanceVarsTree = new Tree.Builder();
+        for (Path p : instanceVariables) {
+            ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
+            instanceVarsTree.add(new Tree.Key(id.toString() + YAML_FILE_EXTENSION, EntryType.BLOB), id);
+        }
+        tree.add(new Tree.Key(INSTANCE_VARIABLES_ENTRY, EntryType.TREE),
+                hive.execute(new InsertArtificialTreeOperation().setTree(instanceVarsTree)));
 
         // import instance templates
         Tree.Builder templTree = new Tree.Builder();
@@ -270,7 +286,18 @@ public class ProductManifestBuilder {
             builder.setPluginFolder(pluginPath);
         }
 
-        // 9. instance templates
+        // 9. instance variable definitions
+        if (prod.instanceVariableDefinitions != null && !prod.instanceVariableDefinitions.isEmpty()) {
+            for (String dfn : prod.instanceVariableDefinitions) {
+                Path dfnPath = descriptorPath.getParent().resolve(dfn);
+                if (!Files.isRegularFile(dfnPath)) {
+                    throw new IllegalStateException("Instance Variable Definition descriptor not found: " + dfnPath);
+                }
+                builder.addInstanceVariables(dfnPath);
+            }
+        }
+
+        // 10. instance templates
         if (prod.instanceTemplates != null && !prod.instanceTemplates.isEmpty()) {
             for (String tmpl : prod.instanceTemplates) {
                 Path tmplPath = descriptorPath.getParent().resolve(tmpl);
@@ -281,7 +308,7 @@ public class ProductManifestBuilder {
             }
         }
 
-        // 10. application templates
+        // 11. application templates
         if (prod.applicationTemplates != null && !prod.applicationTemplates.isEmpty()) {
             for (String tmpl : prod.applicationTemplates) {
                 Path tmplPath = descriptorPath.getParent().resolve(tmpl);
@@ -292,7 +319,7 @@ public class ProductManifestBuilder {
             }
         }
 
-        // 11. parameter templates
+        // 12. parameter templates
         if (prod.parameterTemplates != null && !prod.parameterTemplates.isEmpty()) {
             for (String tmpl : prod.parameterTemplates) {
                 Path tmplPath = descriptorPath.getParent().resolve(tmpl);
@@ -303,7 +330,7 @@ public class ProductManifestBuilder {
             }
         }
 
-        // 12. instance variable templates
+        // 13. instance variable templates
         if (prod.instanceVariableTemplates != null && !prod.instanceVariableTemplates.isEmpty()) {
             for (String tmpl : prod.instanceVariableTemplates) {
                 Path tmplPath = descriptorPath.getParent().resolve(tmpl);
@@ -314,7 +341,7 @@ public class ProductManifestBuilder {
             }
         }
 
-        // 13. generate product
+        // 14. generate product
         builder.insert(hive, prodKey, prod.product);
 
         return prodKey;
