@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,6 @@ import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationWeakenerProvider;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.UserValidator;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.errorpages.JerseyGrizzlyErrorPageGenerator;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
@@ -145,7 +145,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final JerseySessionManager sessionManager;
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
-    private UserValidator userValidator;
+    private Predicate<String> userValidator;
     private GrizzlyHttpContainer container;
 
     /**
@@ -185,7 +185,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     /**
      * @param validator a validator which can verify a user exists and is allowed to proceed.
      */
-    public void setUserValidator(UserValidator validator) {
+    public void setUserValidator(Predicate<String> validator) {
         this.userValidator = validator;
     }
 

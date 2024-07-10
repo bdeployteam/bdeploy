@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.function.Predicate;
 
 import javax.annotation.Priority;
 
@@ -98,10 +99,10 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private static final String NO_AUTH = "unsecured";
     private static final String WEAK_AUTH = "weak";
     private final KeyStore store;
-    private final UserValidator userValidator;
+    private final Predicate<String> userValidator;
     private final JerseySessionManager sessionManager;
 
-    public JerseyAuthenticationProvider(KeyStore store, UserValidator userValidator, JerseySessionManager sessionManager) {
+    public JerseyAuthenticationProvider(KeyStore store, Predicate<String> userValidator, JerseySessionManager sessionManager) {
         this.store = store;
         this.userValidator = userValidator;
         this.sessionManager = sessionManager;
@@ -162,7 +163,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
                 abortWithUnauthorized(requestContext);
             }
 
-            if (!api.isSystem() && userValidator != null && !userValidator.isValid(api.getIssuedTo())) {
+            if (!api.isSystem() && userValidator != null && !userValidator.test(api.getIssuedTo())) {
                 abortWithUnauthorized(requestContext);
             }
 
@@ -214,16 +215,4 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
             throw new IllegalStateException("Cannot verify access token.", e);
         }
     }
-
-    /**
-     * A {@link UserValidator} will verify that a successfully authenticated user is still valid.
-     * <p>
-     * The validator should make sure that the user is still available, active, etc.
-     */
-    @FunctionalInterface
-    public interface UserValidator {
-
-        public boolean isValid(String user);
-    }
-
 }
