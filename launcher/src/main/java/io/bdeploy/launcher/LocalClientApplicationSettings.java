@@ -46,13 +46,15 @@ public class LocalClientApplicationSettings {
      * @param scriptInfo The {@link ScriptInfo} to add to the internal {@link Map}
      * @param override Will use {@link Map#put(Object, Object)} if <code>true</code>, otherwise
      *            {@link Map#putIfAbsent(Object, Object)}
+     * @return <code>true</code> if the script is now considered active, otherwise <code>false</code>
      */
-    public void putStartScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
+    public boolean putStartScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
         if (override) {
             startScriptName2startDescriptor.put(scriptName, scriptInfo);
-        } else {
-            startScriptName2startDescriptor.putIfAbsent(scriptName, scriptInfo);
+            return true;
         }
+        startScriptName2startDescriptor.putIfAbsent(scriptName, scriptInfo);
+        return startScriptName2startDescriptor.get(scriptName).descriptor.equals(scriptInfo.descriptor);
     }
 
     /**
@@ -76,13 +78,15 @@ public class LocalClientApplicationSettings {
      * @param scriptInfo The {@link ScriptInfo} to add to the internal {@link Map}
      * @param override Will use {@link Map#put(Object, Object)} if <code>true</code>, otherwise
      *            {@link Map#putIfAbsent(Object, Object)}
+     * @return <code>true</code> if the script is now considered active, otherwise <code>false</code>
      */
-    public void putFileAssocScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
+    public boolean putFileAssocScriptInfo(String scriptName, ScriptInfo scriptInfo, boolean override) {
         if (override) {
             fileAssocScriptName2startDescriptor.put(scriptName, scriptInfo);
-        } else {
-            fileAssocScriptName2startDescriptor.putIfAbsent(scriptName, scriptInfo);
+            return true;
         }
+        fileAssocScriptName2startDescriptor.putIfAbsent(scriptName, scriptInfo);
+        return fileAssocScriptName2startDescriptor.get(scriptName).descriptor.equals(scriptInfo.descriptor);
     }
 
     /**

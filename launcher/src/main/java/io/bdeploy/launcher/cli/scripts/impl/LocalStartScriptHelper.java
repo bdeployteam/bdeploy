@@ -55,7 +55,8 @@ public class LocalStartScriptHelper extends LocalScriptHelper {
     }
 
     @Override
-    protected void updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo, boolean override) {
-        settings.putStartScriptInfo(name, scriptInfo, override);
+    protected boolean updateSettings(LocalClientApplicationSettings settings, String name, ScriptInfo scriptInfo,
+            boolean override) {
+        return settings.putStartScriptInfo(name, scriptInfo, override);
     }
 }

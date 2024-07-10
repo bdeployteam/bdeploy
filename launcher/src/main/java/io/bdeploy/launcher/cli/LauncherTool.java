@@ -8,7 +8,6 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -830,6 +829,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             ClientApplicationConfiguration clientAppCfg, Auditor auditor) {
         ApplicationConfiguration appCfg = clientAppCfg.appConfig;
 
+        // Update scripts
+        OperatingSystem os = OsHelper.getRunningOs();
+        updateScripts(clientAppCfg, new LocalStartScriptHelper(//
+                os, auditor, lpp, SpecialDirectory.START_SCRIPTS), "start", startScriptsDir);
+        updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(//
+                os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS), "file association", fileAssocScriptsDir);
+
         // Check if the application directory is already present
         Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
         if (missing.isEmpty()) {
@@ -916,15 +922,16 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);
 
-        // Handle script changes.
-        OperatingSystem os = OsHelper.getRunningOs();
-        ClientApplicationConfiguration newClientAppConfig = newConfig.clientAppCfg;
-        handleScriptChanges(newClientAppConfig, new LocalStartScriptHelper(//
-                os, auditor, lpp, SpecialDirectory.START_SCRIPTS), "start", startScriptsDir);
-        handleScriptChanges(newClientAppConfig, new LocalFileAssocScriptHelper(//
-                os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS), "file association", fileAssocScriptsDir);
-
         log.info("Application successfully installed.");
+    }
+
+    private void updateScripts(ClientApplicationConfiguration cfg, LocalScriptHelper scriptHelper, String scriptType,
+            Path scriptDir) {
+        try {
+            scriptHelper.createScript(cfg, clickAndStart, false);
+        } catch (IOException e) {
+            log.error("Failed to create {} script in {}", scriptType, scriptDir, e);
+        }
     }
 
     /**
@@ -1060,18 +1067,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Remove the temporary download file.
         PathHelper.deleteRecursiveRetry(cfgZip);
-    }
-
-    private void handleScriptChanges(ClientApplicationConfiguration cfg, LocalScriptHelper scriptHelper, String scriptType,
-            Path scriptDir) {
-        try {
-            scriptHelper.createScript(cfg, clickAndStart, false);
-        } catch (FileAlreadyExistsException e) {
-            log.warn("Failed to create  {} script in {} because a different application is already using the same identifier: {}",
-                    scriptType, scriptDir, scriptHelper.calculateScriptName(cfg));
-        } catch (IOException e) {
-            log.error("Failed to create {} script in {}", scriptType, scriptDir, e);
-        }
     }
 
     /** Launches the client process using the given configuration. */
