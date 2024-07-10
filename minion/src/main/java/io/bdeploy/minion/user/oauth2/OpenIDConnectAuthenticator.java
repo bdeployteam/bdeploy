@@ -135,13 +135,16 @@ public class OpenIDConnectAuthenticator implements Authenticator {
     }
 
     /**
-     * Queries configured server for the given user, authenticates it and updates the given user with information from the server.
+     * Queries configured server for the given user, authenticates it and updates
+     * the given user with information from the server.
      *
-     * @param user the user to check, will be updated with additional info on success.
+     * @param user the user to check, will be updated with additional info on
+     *            success.
      * @param password the password to check
      * @param settings the servers to query
      * @param trace collector for tracing information
-     * @return the successfully authenticated user, or <code>null</code> if not successful.
+     * @return the successfully authenticated user, or <code>null</code> if not
+     *         successful.
      */
     private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
         trace.log("  query server " + settings.oidcSettings.url);
@@ -180,7 +183,8 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         Scope scope = new Scope("openid", "email", "profile", "offline_access");
         URI tokenEndpoint = new URI(server.url);
 
-        // Request which combines all this. The response is expected to be an OIDC response, not just plain OAuth2
+        // Request which combines all this. The response is expected to be an OIDC
+        // response, not just plain OAuth2
         TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, grant, scope);
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
 
@@ -234,12 +238,14 @@ public class OpenIDConnectAuthenticator implements Authenticator {
     }
 
     /**
-     * Validates the existing token - either by looking at the timeout, of the JWT, or by querying the server using a refresh
+     * Validates the existing token - either by looking at the timeout, of the JWT,
+     * or by querying the server using a refresh
      * token.
      *
      * @param user the user to check
      * @param settings the configuration including the OIDC settings
-     * @return <code>true</code> if auth is valid, <code>false</code> otherwise, never planned to throw.
+     * @return <code>true</code> if auth is valid, <code>false</code> otherwise,
+     *         never planned to throw.
      */
     private boolean validateToken(UserInfo user, OIDCSettingsDto settings) {
         OIDCTokenCache cached = fromExternalTag(user.externalTag);
@@ -272,7 +278,10 @@ public class OpenIDConnectAuthenticator implements Authenticator {
                         return true;
                     }
                 } catch (Exception e) {
-                    log.warn("Cannot refresh token for {}", user.name, e);
+                    log.warn("Cannot refresh token for {}: {}", user.name, e.toString());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Exception:", e);
+                    }
                 }
 
                 return false;
