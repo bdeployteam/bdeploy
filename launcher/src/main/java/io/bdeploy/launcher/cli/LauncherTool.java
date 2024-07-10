@@ -403,7 +403,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 offlineMode = false;
             } catch (Exception e) {
                 Throwable rootCause = ExceptionHelper.getRootCause(e);
-                if ((rootCause instanceof ConnectException) || (rootCause instanceof UnknownHostException)) {
+                if (!(rootCause instanceof ConnectException) && !(rootCause instanceof UnknownHostException)) {
                     throw e;
                 }
                 clientAppCfg = Optional.of(new ClientSoftwareManifest(hive))
