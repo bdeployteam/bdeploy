@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
@@ -38,11 +39,12 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
 
     private final EndpointsConfiguration endpoints;
 
-    private final ProxyForwarder forwarder;
-    private final ProxyUnwrapper unwrapper;
+    private final Function<ProxiedRequestWrapper, ProxiedResponseWrapper> forwarder;
+    private final Function<ProxiedResponseWrapper, Response> unwrapper;
 
     public CommonProxyResourceImpl(String group, String instanceId, String applicationId, EndpointsConfiguration endpoints,
-            ProxyForwarder forwarder, ProxyUnwrapper unwrapper) {
+            Function<ProxiedRequestWrapper, ProxiedResponseWrapper> forwarder,
+            Function<ProxiedResponseWrapper, Response> unwrapper) {
         this.group = group;
         this.instanceId = instanceId;
         this.applicationId = applicationId;
@@ -95,37 +97,37 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
 
     @Override
     public Response head(String endpointId) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.HEAD)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, null, HttpMethod.HEAD)));
     }
 
     @Override
     public Response options(String endpointId) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.OPTIONS)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, null, HttpMethod.OPTIONS)));
     }
 
     @Override
     public Response get(String endpointId) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.GET)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, null, HttpMethod.GET)));
     }
 
     @Override
     public Response put(String endpointId, byte[] body) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, body, HttpMethod.PUT)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, body, HttpMethod.PUT)));
     }
 
     @Override
     public Response post(String endpointId, byte[] body) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, body, HttpMethod.POST)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, body, HttpMethod.POST)));
     }
 
     @Override
     public Response delete(String endpointId) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.DELETE)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, null, HttpMethod.DELETE)));
     }
 
     @Override
     public Response patch(String endpointId, byte[] body) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, body, HttpMethod.PATCH)));
+        return unwrapper.apply(forwarder.apply(wrap(endpointId, body, HttpMethod.PATCH)));
     }
 
 }
