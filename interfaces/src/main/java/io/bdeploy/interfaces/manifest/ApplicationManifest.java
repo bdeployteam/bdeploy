@@ -7,7 +7,7 @@ import java.io.InputStream;
 import javax.annotation.processing.Generated;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
-import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
@@ -21,7 +21,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
     private ApplicationDescriptor desc;
     private Manifest manifest;
 
-    public static ApplicationManifest of(BHive hive, Manifest.Key key, ProductManifest pm) {
+    public static ApplicationManifest of(BHiveExecution hive, Manifest.Key key, ProductManifest pm) {
         ApplicationManifest am = new ApplicationManifest();
 
         am.manifest = hive.execute(new ManifestLoadOperation().setManifest(key));
@@ -42,7 +42,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         return am;
     }
 
-    public byte[] readBrandingSplashScreen(BHive hive) {
+    public byte[] readBrandingSplashScreen(BHiveExecution hive) {
         if (desc.branding == null || desc.branding.splash == null || desc.branding.splash.image == null) {
             return null;
         }
@@ -57,7 +57,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         }
     }
 
-    public byte[] readBrandingIcon(BHive hive) {
+    public byte[] readBrandingIcon(BHiveExecution hive) {
         if (desc.branding == null || desc.branding.icon == null) {
             return null;
         }

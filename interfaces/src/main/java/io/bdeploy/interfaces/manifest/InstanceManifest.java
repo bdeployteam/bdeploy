@@ -101,7 +101,7 @@ public class InstanceManifest {
         return InstanceManifest.of(hive, new Manifest.Key(getRootName(instance), String.valueOf(tag.get())));
     }
 
-    public static InstanceManifest of(BHive hive, Manifest.Key key) {
+    public static InstanceManifest of(BHiveExecution hive, Manifest.Key key) {
         Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
 
         if (mf == null) {
@@ -250,7 +250,7 @@ public class InstanceManifest {
      *            {@link InstanceManifest}s.
      * @return a {@link SortedSet} with all available {@link InstanceManifest}s.
      */
-    public static SortedSet<Manifest.Key> scan(BHive hive, boolean onlyLatest) {
+    public static SortedSet<Manifest.Key> scan(BHiveExecution hive, boolean onlyLatest) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
 

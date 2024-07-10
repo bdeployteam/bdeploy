@@ -1,7 +1,6 @@
 package io.bdeploy.ui.dto;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import io.bdeploy.common.util.StringHelper;
@@ -31,7 +30,7 @@ public class HistoryResultDto {
     /**
      * Adds the all events matching the given filter.
      */
-    public void addAll(Collection<HistoryEntryDto> dtos, HistoryFilterDto filter) {
+    public void addAll(Iterable<HistoryEntryDto> dtos, HistoryFilterDto filter) {
         for (HistoryEntryDto dto : dtos) {
             add(dto, filter);
         }

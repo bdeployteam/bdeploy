@@ -1,7 +1,6 @@
 package io.bdeploy.common.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -13,7 +12,7 @@ public class FutureHelper {
     private FutureHelper() {
     }
 
-    public static void awaitAll(Collection<Future<?>> futures) {
+    public static void awaitAll(Iterable<Future<?>> futures) {
         List<Throwable> exceptions = new ArrayList<>();
 
         futures.forEach(t -> {
@@ -33,5 +32,4 @@ public class FutureHelper {
             throw ise;
         }
     }
-
 }

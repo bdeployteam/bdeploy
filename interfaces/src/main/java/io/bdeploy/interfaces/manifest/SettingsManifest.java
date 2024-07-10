@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
@@ -42,7 +43,7 @@ public class SettingsManifest {
     private SettingsManifest() {
     }
 
-    public static SettingsConfiguration read(BHive hive, SecretKeySpec key, boolean clearPasswords) {
+    public static SettingsConfiguration read(BHiveExecution hive, SecretKeySpec key, boolean clearPasswords) {
         Optional<Long> tag = hive.execute(new ManifestMaxIdOperation().setManifestName(SETTINGS_MANIFEST));
         if (!tag.isPresent()) {
             return new SettingsConfiguration();

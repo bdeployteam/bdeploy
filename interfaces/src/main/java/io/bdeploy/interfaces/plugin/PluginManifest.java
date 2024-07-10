@@ -5,6 +5,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
@@ -45,7 +46,7 @@ public class PluginManifest {
         return plugin;
     }
 
-    public static Set<Manifest.Key> scan(BHive hive) {
+    public static Set<Manifest.Key> scan(BHiveExecution hive) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation().setManifestName(PLUGIN_NS));
         for (Manifest.Key key : allKeys) {
@@ -57,7 +58,7 @@ public class PluginManifest {
         return result;
     }
 
-    public static PluginManifest of(BHive hive, Manifest.Key key) {
+    public static PluginManifest of(BHiveExecution hive, Manifest.Key key) {
         Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
         String label = mf.getLabels().get(PLUGIN_LABEL);
         if (label == null) {
