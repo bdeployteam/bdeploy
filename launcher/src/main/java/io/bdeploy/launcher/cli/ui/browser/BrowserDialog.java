@@ -189,10 +189,10 @@ public class BrowserDialog extends BaseDialog {
                 "Update the locally stored information (name, version...) of the selected applications");
 
         uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
-                "Launch the selected application");
+                "Uninstall the selected application");
 
         pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
-                "Remove the selected application");
+                "Prune the selected application");
 
         fsckButton = createHeaderButton("fixErrors", "Fix Errors", this::onFsckButtonClicked,//
                 "Fix any errors in the BHive");
