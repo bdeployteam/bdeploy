@@ -162,6 +162,6 @@ public class LauncherPathProvider {
         if (applicationId == null) {
             throw new IllegalArgumentException("An instance ID must be provided.");
         }
-        return new DeploymentPathProvider(get(SpecialDirectory.APP), null, applicationId, DEFAULT_TAG);
+        return new DeploymentPathProvider(get(SpecialDirectory.APPS), null, applicationId, DEFAULT_TAG);
     }
 }
