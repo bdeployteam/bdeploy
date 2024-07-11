@@ -20,7 +20,8 @@ import io.bdeploy.launcher.cli.scripts.ScriptUtils;
 
 public class LocalStartScriptHelper extends LocalScriptHelper {
 
-    public LocalStartScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
+    public LocalStartScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp,
+            SpecialDirectory scriptDir) {
         super(os, auditor, lpp, scriptDir);
     }
 
@@ -37,16 +38,16 @@ public class LocalStartScriptHelper extends LocalScriptHelper {
         Map<String, String> envVars = pc.startEnv;
         envVars.put(LaunchMode.LAUNCH_MODE_ENV_VAR_NAME, LaunchMode.PATH.toString());
 
-        String commandBlock = TemplateHelper.process(pc.start, appSpecificResolver).stream().collect(Collectors.joining(" "));
+        String commandBlock = TemplateHelper.process(pc.start, appSpecificResolver).stream()
+                .collect(Collectors.joining(" "));
 
         StringBuilder sb = new StringBuilder();
         if (os == OperatingSystem.WINDOWS) {
             sb.append("@echo off\n");
             envVars.forEach((k, v) -> sb.append("set \"").append(k).append('=').append(v).append("\"\n"));
-            sb.append("call ").append(commandBlock).append(" %*");
+            sb.append("call ").append(commandBlock).append(" %*\n");
             sb.append("exit /b %ERRORLEVEL%");
         } else {
-            //TODO Test non-windows behavior
             sb.append("#!/usr/bin/env bash\n");
             envVars.forEach((k, v) -> sb.append("export ").append(k).append("=\"").append(v).append("\"\n"));
             sb.append(commandBlock).append(" \"$@\"");
