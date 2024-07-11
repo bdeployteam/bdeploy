@@ -26,8 +26,8 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
 
     private static final Logger log = LoggerFactory.getLogger(LocalFileAssocScriptHelper.class);
 
-    public LocalFileAssocScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
-        super(os, auditor, lpp, scriptDir);
+    public LocalFileAssocScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp) {
+        super(os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS);
     }
 
     @Override

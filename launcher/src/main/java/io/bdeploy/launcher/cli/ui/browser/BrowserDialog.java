@@ -539,14 +539,12 @@ public class BrowserDialog extends BaseDialog {
 
     /** Activate the start script of the selected application */
     private void onActivateStartScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(lpp -> new LocalStartScriptHelper(//
-                os, auditor, lpp, SpecialDirectory.START_SCRIPTS), "start");
+        handleScriptChange(lpp -> new LocalStartScriptHelper(os, auditor, lpp), "start");
     }
 
     /** Activate the file association script of the selected application */
     private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(lpp -> new LocalFileAssocScriptHelper(//
-                os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS), "file association");
+        handleScriptChange(lpp -> new LocalFileAssocScriptHelper(os, auditor, lpp), "file association");
     }
 
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
