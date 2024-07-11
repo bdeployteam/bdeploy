@@ -831,10 +831,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Update scripts
         OperatingSystem os = OsHelper.getRunningOs();
-        updateScripts(clientAppCfg, new LocalStartScriptHelper(//
-                os, auditor, lpp, SpecialDirectory.START_SCRIPTS), "start", startScriptsDir);
-        updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(//
-                os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS), "file association", fileAssocScriptsDir);
+        updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
+        updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association", fileAssocScriptsDir);
 
         // Check if the application directory is already present
         Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
