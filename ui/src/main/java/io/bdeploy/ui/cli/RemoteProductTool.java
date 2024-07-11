@@ -81,6 +81,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
     @Override
     protected RenderableResult run(ProductConfig config, RemoteService remote) {
         if (config.list()) {
+            helpAndFailIfMissing(config.key(), "Missing --key");
             return list(remote, config);
         }
 
