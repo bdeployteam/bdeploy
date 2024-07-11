@@ -82,7 +82,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             return createResultWithErrorMessage("Aborted, no confirmation");
         }
 
-        lpp = new LauncherPathProvider(Paths.get(homeDirString)).setInstance(config.app());
+        lpp = new LauncherPathProvider(Paths.get(homeDirString)).setApplicationId(config.app());
         homeDir = lpp.get(SpecialDirectory.HOME);
         bhiveDir = lpp.get(SpecialDirectory.BHIVE);
         startScriptsDir = lpp.get(SpecialDirectory.START_SCRIPTS);

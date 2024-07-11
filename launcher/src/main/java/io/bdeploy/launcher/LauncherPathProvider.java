@@ -37,13 +37,13 @@ public class LauncherPathProvider {
 
         /** <i>[BDEPLOY_HOME]/apps/[applicationId]</i> */
         APP(null),
-
-        /** <i> BDeploy/launcher/bin</i> */
-        LAUNCHER_BIN("bin"),
         /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/{@value LauncherPathProvider#DEFAULT_TAG}</i> */
-        APP_BIN("bin"),
+        APP_BIN_TAG("bin"),
         /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/{@value LauncherPathProvider#DEFAULT_TAG}/config</i> */
-        CONFIG("config");
+        CONFIG("config"),
+
+        /** <i>[BDEPLOY_HOME]/launcher/bin</i> */
+        LAUNCHER_BIN("bin");
 
         private final String dirName;
 
@@ -77,7 +77,7 @@ public class LauncherPathProvider {
      * @param applicationId the ID of the client application to remember
      * @return <code>this</code>, for chaining convenience
      */
-    public LauncherPathProvider setInstance(String applicationId) {
+    public LauncherPathProvider setApplicationId(String applicationId) {
         this.applicationId = applicationId;
         return this;
     }
@@ -122,11 +122,11 @@ public class LauncherPathProvider {
                 }
                 result = get(SpecialDirectory.APPS, applicationId).resolve(applicationId);
                 break;
-            case APP_BIN:
+            case APP_BIN_TAG:
                 result = get(SpecialDirectory.APP, applicationId).resolve(dir.getDirName()).resolve(DEFAULT_TAG);
                 break;
             case CONFIG:
-                result = get(SpecialDirectory.APP_BIN, applicationId).resolve(dir.getDirName());
+                result = get(SpecialDirectory.APP_BIN_TAG, applicationId).resolve(dir.getDirName());
                 break;
             case LAUNCHER_BIN:
                 result = get(SpecialDirectory.LAUNCHER, applicationId).resolve(dir.getDirName());

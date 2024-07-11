@@ -302,7 +302,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to read " + config.launch(), e);
         }
 
-        lpp.setInstance(clickAndStart.applicationId);
+        lpp.setApplicationId(clickAndStart.applicationId);
         bhiveDir = lpp.get(SpecialDirectory.BHIVE);
         appDir = lpp.get(SpecialDirectory.APP);
         poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);

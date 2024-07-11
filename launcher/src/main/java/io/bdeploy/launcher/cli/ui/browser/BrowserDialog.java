@@ -577,7 +577,7 @@ public class BrowserDialog extends BaseDialog {
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
         ClientSoftwareConfiguration config = getSelectedApps().get(0);
         ClickAndStartDescriptor clickAndStart = config.clickAndStart;
-        LauncherPathProvider lpp = new LauncherPathProvider(homeDir).setInstance(clickAndStart.applicationId);
+        LauncherPathProvider lpp = new LauncherPathProvider(homeDir).setApplicationId(clickAndStart.applicationId);
         try {
             scriptHelperCreator.apply(lpp).createScript(config.clientAppCfg, clickAndStart, true);
         } catch (IOException ex) {
