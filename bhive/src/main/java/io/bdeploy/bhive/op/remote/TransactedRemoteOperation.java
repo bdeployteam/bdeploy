@@ -1,14 +1,13 @@
 package io.bdeploy.bhive.op.remote;
 
-import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHive.TransactedOperation;
 import io.bdeploy.common.security.RemoteService;
 
-@SuppressWarnings("unchecked")
-public abstract class TransactedRemoteOperation<T, X extends TransactedRemoteOperation<T, X>>
-        extends BHive.TransactedOperation<T> {
+public abstract class TransactedRemoteOperation<T, X extends TransactedRemoteOperation<T, X>> extends TransactedOperation<T> {
 
     private RemoteService remote;
 
+    @SuppressWarnings("unchecked")
     public X setRemote(RemoteService def) {
         this.remote = def;
         return (X) this;
@@ -17,5 +16,4 @@ public abstract class TransactedRemoteOperation<T, X extends TransactedRemoteOpe
     protected RemoteService getRemote() {
         return remote;
     }
-
 }

@@ -132,8 +132,8 @@ public class Configuration {
      * @param target the {@link Class} to map this {@link Configuration} to.
      * @return a proxy mapping to the {@link Configuration}.
      */
-    @SuppressWarnings("unchecked")
     public <T extends Annotation> T get(Class<? extends Annotation> target) {
+        @SuppressWarnings("unchecked")
         T proxy = (T) Proxy.newProxyInstance(target.getClassLoader(), new Class<?>[] { target }, this::doMap);
 
         // access each method once to initialize cache, run conversions and especially validations.
