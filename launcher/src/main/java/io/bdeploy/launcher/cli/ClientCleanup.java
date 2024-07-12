@@ -139,14 +139,14 @@ public class ClientCleanup {
             log.info("Deleting {}", key);
 
             Version version = VersionHelper.parse(key.getTag());
-            Path launcherPath = ClientPathHelper.getVersionedHome(homeDir, version);
+            Path versionedHome = ClientPathHelper.getVersionedHome(homeDir, version);
 
             // File-Locks could prevent that we can delete the folder
             // thus we first try to rename and then delete
-            if (PathHelper.exists(launcherPath)) {
-                Path tmpPath = launcherPath.getParent().resolve(launcherPath.getFileName() + "_delete");
+            if (PathHelper.exists(versionedHome)) {
+                Path tmpPath = versionedHome.getParent().resolve(versionedHome.getFileName() + "_delete");
                 try {
-                    PathHelper.moveAndDelete(launcherPath, tmpPath);
+                    PathHelper.moveAndDelete(versionedHome, tmpPath);
                 } catch (Exception e) {
                     log.warn("Unable to delete unused pooled application.", e);
                     return;
