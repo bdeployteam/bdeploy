@@ -699,7 +699,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             ProcessBuilder b = new ProcessBuilder(command);
             b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
-            b.directory(lpp.get(SpecialDirectory.LAUNCHER).toFile());
+            b.directory(versionedLpp.get(SpecialDirectory.LAUNCHER).toFile());
 
             // Set the home directory for the launcher. Required for older launchers. Newer launchers do not use the variable anymore.
             Map<String, String> env = b.environment();
@@ -743,7 +743,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try (Transaction t = hive.getTransactions().begin()) {
             hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
         }
-        hive.execute(new ExportOperation().setManifest(launcher).setTarget(lpp.get(SpecialDirectory.LAUNCHER)));
+        hive.execute(new ExportOperation().setManifest(launcher).setTarget(versionedLpp.get(SpecialDirectory.LAUNCHER)));
         log.info("Launcher successfully installed.");
     }
 
