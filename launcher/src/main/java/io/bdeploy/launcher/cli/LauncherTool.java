@@ -483,6 +483,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             if (clientAppCfg == null) {
                 log.info("Delegated launcher terminated with exit code {}.", exitCode);
                 doExit(exitCode);
+                return;
             }
 
             // Application request an update. We will terminate the launcher so that potential launcher updates are also applied.
@@ -649,6 +650,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             log.info("Found existing update marker. Exiting to allow updates to be installed.");
             doExit(UpdateHelper.CODE_RESTART);
+            return;
         }
 
         // On Linux we wait for some time until the marker disappears
