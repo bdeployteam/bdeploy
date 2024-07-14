@@ -61,7 +61,7 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
             var config = im.getConfiguration();
 
             if (config.system != null && config.system.getName().equals(newKey.getName())) {
-                // update instance reference to system;
+                // update instance reference to system
                 config.system = newKey;
                 try {
                     var update = new InstanceUpdateDto(new InstanceConfigurationDto(config, null), null);

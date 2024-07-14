@@ -26,7 +26,7 @@ public class FileSystemSpaceService {
         try {
             FileStore store = Files.getFileStore(path);
             if (store == null) {
-                return -1; // cannot check;
+                return -1; // cannot check
             }
             return store.getUsableSpace();
         } catch (Exception e) {
