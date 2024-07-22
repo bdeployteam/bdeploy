@@ -56,7 +56,7 @@ public class ClientPathHelper {
             userArea = Path.of(userAreaEnv);
         } else if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             // On Windows we default to the local application data folder
-            userArea = Path.of(System.getenv("LOCALAPPDATA"), SpecialDirectory.HOME.getDirName());
+            userArea = Path.of(System.getenv("LOCALAPPDATA"), "BDeploy");
         } else {
             throw new IllegalStateException("No user area was found.");
         }
