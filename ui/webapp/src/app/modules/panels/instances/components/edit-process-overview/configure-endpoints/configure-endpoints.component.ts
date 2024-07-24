@@ -8,8 +8,8 @@ import {
   HttpEndpoint,
   InstanceConfigurationDto,
   LinkedValueConfiguration,
+  ParameterType,
   SystemConfiguration,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -48,10 +48,10 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
   protected instance: InstanceConfigurationDto;
   protected system: SystemConfiguration;
 
-  protected readonly TYPE_STRING = VariableType.STRING;
-  protected readonly TYPE_PASSWORD = VariableType.PASSWORD;
-  protected readonly TYPE_PORT = VariableType.SERVER_PORT;
-  protected readonly TYPE_BOOLEAN = VariableType.BOOLEAN;
+  protected readonly TYPE_STRING = ParameterType.STRING;
+  protected readonly TYPE_PASSWORD = ParameterType.PASSWORD;
+  protected readonly TYPE_PORT = ParameterType.SERVER_PORT;
+  protected readonly TYPE_BOOLEAN = ParameterType.BOOLEAN;
 
   protected completionPrefixes = buildCompletionPrefixes();
   protected completions: ContentCompletion[];

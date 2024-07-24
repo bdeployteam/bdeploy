@@ -26,8 +26,8 @@ import {
   ParameterConfiguration,
   ParameterConfigurationTarget,
   ParameterDescriptor,
+  ParameterType,
   SystemConfiguration,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
@@ -292,7 +292,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       const descriptors = this.edit.application$.value.descriptor.startCommand.parameters;
 
       let initialValue = p.descriptor?.defaultValue;
-      if (p.descriptor?.type === VariableType.BOOLEAN && !initialValue) {
+      if (p.descriptor?.type === ParameterType.BOOLEAN && !initialValue) {
         initialValue = createLinkedValue('false');
       }
       if (p.descriptor.global) {
@@ -310,7 +310,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         pinned: false,
         preRendered: [],
         target:
-          p.descriptor.type === VariableType.ENVIRONMENT
+          p.descriptor.type === ParameterType.ENVIRONMENT
             ? ParameterConfigurationTarget.ENVIRONMENT
             : ParameterConfigurationTarget.COMMAND,
       };
@@ -516,7 +516,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   protected doPreRender(p: ParameterPair) {
     p.value.preRendered = this.edit.preRenderParameter(p.descriptor, p.value.value);
     p.value.target =
-      p.descriptor?.type === VariableType.ENVIRONMENT
+      p.descriptor?.type === ParameterType.ENVIRONMENT
         ? ParameterConfigurationTarget.ENVIRONMENT
         : ParameterConfigurationTarget.COMMAND;
     this.updatePreview$.next(true);

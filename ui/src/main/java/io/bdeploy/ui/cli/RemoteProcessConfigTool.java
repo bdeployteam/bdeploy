@@ -21,7 +21,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.ProductUpdateService;
@@ -297,7 +297,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             var fixed = false;
             String name = null;
             String defVal = null;
-            var type = VariableType.STRING;
+            var type = ParameterType.STRING;
 
             if (desc != null) {
                 name = desc.name;

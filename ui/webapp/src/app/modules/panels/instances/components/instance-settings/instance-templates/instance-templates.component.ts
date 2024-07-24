@@ -201,26 +201,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     );
     pcgs.forEach((p) => (p.processOrder = []));
 
-    const instance = this.instanceEdit.state$.value.config.config;
-    if (!instance.instanceVariables) {
-      instance.instanceVariables = [];
-    }
-
-    // apply instance variable values if set.
-    if (this.template.instanceVariableValues?.length) {
-      for (const v of this.template.instanceVariableValues) {
-        const instanceVariable = instance.instanceVariables.find((iv) => iv.id === v.id);
-        if (instanceVariable) {
-          instanceVariable.value = v.value;
-        } else {
-          console.warn(`Cannot set instance variable value for ${v.id}. Instance variable not found.`);
-        }
-      }
-    }
-
     // apply instance variables if set.
     if (this.template.instanceVariables?.length) {
+      const instance = this.instanceEdit.state$.value.config.config;
       for (const v of this.template.instanceVariables) {
+        if (!instance.instanceVariables) {
+          instance.instanceVariables = [];
+        }
         const processed = cloneDeep(v);
         const status: StatusMessage[] = [];
         processed.value = createLinkedValue(

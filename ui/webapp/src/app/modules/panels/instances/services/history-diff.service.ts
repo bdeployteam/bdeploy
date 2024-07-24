@@ -13,8 +13,8 @@ import {
   ParameterConfiguration,
   ParameterConfigurationTarget,
   ParameterDescriptor,
+  ParameterType,
   ProcessControlConfiguration,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
@@ -159,7 +159,7 @@ export class ParameterDiff {
     public descriptor: ParameterDescriptor,
   ) {
     // in case this is an environment variable, we can shorten things.
-    if (descriptor?.type === VariableType.ENVIRONMENT) {
+    if (descriptor?.type === ParameterType.ENVIRONMENT) {
       this.values.push(
         new Difference(
           `${descriptor.parameter}=${getPreRenderable(base?.value)}`,
@@ -172,7 +172,7 @@ export class ParameterDiff {
 
     // in case we KNOW this is a PASSWORD parameter, we want to pre-mask the value in each actual value.
     const maskingLV =
-      descriptor?.type === VariableType.PASSWORD
+      descriptor?.type === ParameterType.PASSWORD
         ? base?.value === null || base?.value === undefined
           ? compare?.value
           : base.value
@@ -370,12 +370,12 @@ export class VariableValueDiff {
     this.value = new Difference(
       getPreRenderable(base?.value),
       getPreRenderable(compare?.value),
-      base?.type === VariableType.PASSWORD || compare?.type === VariableType.PASSWORD
+      base?.type === ParameterType.PASSWORD || compare?.type === ParameterType.PASSWORD
         ? '*'.repeat(getPreRenderable(base.value)?.length)
         : null,
     );
     this.description = new Difference(base?.description, compare?.description);
-    this.type = new Difference(base?.type || VariableType.STRING, compare?.type || VariableType.STRING); // default is STRING
+    this.type = new Difference(base?.type || ParameterType.STRING, compare?.type || ParameterType.STRING); // default is STRING
     this.customEditor = new Difference(base?.customEditor, compare?.customEditor);
 
     this.diffType = getParentChangeType(

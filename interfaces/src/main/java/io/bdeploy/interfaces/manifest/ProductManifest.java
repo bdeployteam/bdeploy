@@ -3,9 +3,7 @@ package io.bdeploy.interfaces.manifest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,12 +39,10 @@ import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
-import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCache;
 import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCacheRecordV2;
 
@@ -68,13 +64,12 @@ public class ProductManifest {
     private final List<FlattenedInstanceTemplateConfiguration> instanceTemplates;
     private final List<FlattenedApplicationTemplateConfiguration> applicationTemplates;
     private final List<ParameterTemplateDescriptor> paramTemplates;
-    private final List<VariableDescriptor> instanceVariables;
 
     private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
             SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins,
             List<FlattenedInstanceTemplateConfiguration> instanceTemplates,
             List<FlattenedApplicationTemplateConfiguration> applicationTemplates,
-            List<ParameterTemplateDescriptor> paramTemplates, List<VariableDescriptor> instanceVariables) {
+            List<ParameterTemplateDescriptor> paramTemplates) {
         this.prodName = name;
         this.manifest = manifest;
         this.applications = applications;
@@ -85,7 +80,6 @@ public class ProductManifest {
         this.instanceTemplates = instanceTemplates;
         this.applicationTemplates = applicationTemplates;
         this.paramTemplates = paramTemplates;
-        this.instanceVariables = instanceVariables == null ? Collections.emptyList() : instanceVariables;
     }
 
     /**
@@ -106,8 +100,7 @@ public class ProductManifest {
 
             if (cached != null) {
                 return new ProductManifest(label, mf, cached.appRefs, cached.otherRefs, cached.desc, cached.cfgEntry,
-                        cached.plugins, cached.templates, cached.applicationTemplates, cached.paramTemplates,
-                        cached.instanceVariables);
+                        cached.plugins, cached.templates, cached.applicationTemplates, cached.paramTemplates);
             }
         } catch (Exception e) {
             // ignore, format changed...? will write updated version later.
@@ -158,24 +151,6 @@ public class ProductManifest {
                     plugins.add(b.getElementId());
                 }
             }).build());
-        }
-
-        List<VariableDescriptor> instanceVariables = new ArrayList<>();
-        Tree.Key instanceVarsKey = new Tree.Key(ProductManifestBuilder.INSTANCE_VARIABLES_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(instanceVarsKey)) {
-            Set<VariableDescriptor> instanceVariableSet = new HashSet<>(); // temporary set for deduplication
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(instanceVarsKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
-                        instanceVariableSet
-                                .addAll(StorageHelper.fromYamlStream(is, InstanceVariableDefinitionDescriptor.class).definitions);
-                    } catch (Exception e) {
-                        log.warn("Cannot load instance variable definitions from {}, {}", manifest, b.getPathString(), e);
-                    }
-                }
-            }).build());
-            instanceVariables.addAll(instanceVariableSet);
         }
 
         List<InstanceTemplateDescriptor> templates = new ArrayList<>();
@@ -247,7 +222,7 @@ public class ProductManifest {
         // store persistent information.
         try {
             cacheStorage.store(appRefs, otherRefs, desc, cfgEntry, plugins, resolvedInstanceTemplates, resolvedAppTemplates,
-                    paramTemplates, instanceVariables);
+                    paramTemplates);
         } catch (Exception e) {
             // there is a chance for a race condition here, which actually does not do any harm (except for a
             // tiny performance hit since two threads calculate this). in case two threads try to persist the
@@ -258,7 +233,7 @@ public class ProductManifest {
         }
 
         return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, resolvedInstanceTemplates,
-                resolvedAppTemplates, paramTemplates, instanceVariables);
+                resolvedAppTemplates, paramTemplates);
     }
 
     private static List<FlattenedInstanceTemplateConfiguration> resolveInstanceTemplates(
@@ -366,13 +341,6 @@ public class ProductManifest {
      */
     public SortedSet<Manifest.Key> getReferences() {
         return references;
-    }
-
-    /**
-     * @return the instance variables defined by the product
-     */
-    public List<VariableDescriptor> getInstanceVariables() {
-        return instanceVariables;
     }
 
     /**

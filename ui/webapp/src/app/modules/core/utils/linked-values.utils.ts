@@ -6,9 +6,9 @@ import {
   LinkedValueConfiguration,
   OperatingSystem,
   ParameterConfiguration,
+  ParameterType,
   SystemConfiguration,
   VariableConfiguration,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import { SpecialCharacterType, escapeSpecialCharacters } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
@@ -21,7 +21,7 @@ export function createLinkedValue(val: string): LinkedValueConfiguration {
     : { linkExpression: null, value: val };
 }
 
-export function getPreRenderable(config: LinkedValueConfiguration, type?: VariableType): string {
+export function getPreRenderable(config: LinkedValueConfiguration, type?: ParameterType): string {
   if (!config) {
     return '';
   }
@@ -36,7 +36,7 @@ export function getPreRenderable(config: LinkedValueConfiguration, type?: Variab
     return '';
   }
 
-  if (type === VariableType.PASSWORD) {
+  if (type === ParameterType.PASSWORD) {
     return '*'.repeat(value.length);
   }
 
@@ -245,7 +245,7 @@ function doMatchVariable(s: string, config: VariableConfiguration): boolean {
     s &&
     config &&
     (s === `{{X:${config.id}}}` ||
-      ([VariableType.NUMERIC, VariableType.CLIENT_PORT, VariableType.SERVER_PORT].includes(config.type) &&
+      ([ParameterType.NUMERIC, ParameterType.CLIENT_PORT, ParameterType.SERVER_PORT].includes(config.type) &&
         s.match(`{{X:${config.id}:${ARITH_EXPR}}}`) != null))
   );
 }
@@ -260,7 +260,7 @@ function doMatchProcessParameter(s: string, paramId: string, appName: string, th
   return s === `{{V:${appName}:${paramId}}}` || s.match(`{{V:${appName}:${paramId}:${ARITH_EXPR}}}`) != null;
 }
 
-function doExpand(wholeExpression: string, config: LinkedValueConfiguration, paramType?: VariableType): string {
+function doExpand(wholeExpression: string, config: LinkedValueConfiguration, paramType?: ParameterType): string {
   if (!wholeExpression || !config) {
     return '';
   }
@@ -282,7 +282,7 @@ function doExpand(wholeExpression: string, config: LinkedValueConfiguration, par
 
   if (paramType) {
     return attemptArithmethic &&
-      [VariableType.NUMERIC, VariableType.SERVER_PORT, VariableType.CLIENT_PORT].includes(paramType)
+      [ParameterType.NUMERIC, ParameterType.SERVER_PORT, ParameterType.CLIENT_PORT].includes(paramType)
       ? doAttemptArithmetic(inner, lastColonIndex, valueAsNumber) || getPreRenderable(config, paramType)
       : getPreRenderable(config, paramType);
   }

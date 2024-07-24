@@ -12,7 +12,6 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 
 /**
  * Caches static information for products.
@@ -24,7 +23,6 @@ public class ProductManifestStaticCacheRecordV2 {
     public final ProductDescriptor desc;
     public final ObjectId cfgEntry;
     public final List<ObjectId> plugins;
-    public final List<VariableDescriptor> instanceVariables;
     public final List<FlattenedInstanceTemplateConfiguration> templates;
     public final List<FlattenedApplicationTemplateConfiguration> applicationTemplates;
     public final List<ParameterTemplateDescriptor> paramTemplates;
@@ -35,8 +33,7 @@ public class ProductManifestStaticCacheRecordV2 {
             @JsonProperty("cfgEntry") ObjectId cfgEntry, @JsonProperty("plugins") List<ObjectId> plugins,
             @JsonProperty("templates") List<FlattenedInstanceTemplateConfiguration> templates,
             @JsonProperty("applicationTemplates") List<FlattenedApplicationTemplateConfiguration> applicationTemplates,
-            @JsonProperty("paramTemplates") List<ParameterTemplateDescriptor> paramTemplates,
-            @JsonProperty("instanceVariables") List<VariableDescriptor> instanceVariables) {
+            @JsonProperty("paramTemplates") List<ParameterTemplateDescriptor> paramTemplates) {
         this.appRefs = appRefs;
         this.otherRefs = otherRefs;
         this.desc = desc;
@@ -45,7 +42,6 @@ public class ProductManifestStaticCacheRecordV2 {
         this.templates = templates;
         this.applicationTemplates = applicationTemplates;
         this.paramTemplates = paramTemplates;
-        this.instanceVariables = instanceVariables;
     }
 
 }

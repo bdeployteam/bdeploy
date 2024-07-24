@@ -6,8 +6,8 @@ import {
   InstanceDto,
   InstanceNodeConfigurationListDto,
   MinionStatusDto,
+  ParameterType,
   SystemConfigurationDto,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -104,7 +104,7 @@ export class PortsService {
           const appDesc = cfgs.applications.find((a) => a.key.name === app.application.name)?.descriptor;
           const paramDesc = appDesc?.startCommand.parameters.find((p) => p.id === param.id);
 
-          if (!paramDesc || paramDesc.type !== VariableType.SERVER_PORT) {
+          if (!paramDesc || paramDesc.type !== ParameterType.SERVER_PORT) {
             continue;
           }
 

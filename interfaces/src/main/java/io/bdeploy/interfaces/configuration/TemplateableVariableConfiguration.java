@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 public class TemplateableVariableConfiguration extends VariableConfiguration {
 
@@ -15,7 +15,7 @@ public class TemplateableVariableConfiguration extends VariableConfiguration {
     @JsonCreator
     public TemplateableVariableConfiguration(@JsonProperty("template") String template, @JsonProperty("id") String id,
             @JsonProperty("value") LinkedValueConfiguration value, @JsonProperty("description") String description,
-            @JsonProperty("type") VariableType type, @JsonProperty("customEditor") String customEditor) {
+            @JsonProperty("type") ParameterType type, @JsonProperty("customEditor") String customEditor) {
         super(id, value, description, type, customEditor);
         this.template = template;
     }

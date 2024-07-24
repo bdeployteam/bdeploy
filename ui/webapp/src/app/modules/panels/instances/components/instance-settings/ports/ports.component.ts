@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
-import { VariableType } from 'src/app/models/gen.dtos';
+import { ParameterType } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   ACTION_CONFIRM,
@@ -71,7 +71,7 @@ export class PortsComponent implements OnInit {
       ? this.systems.systems$.value?.find((s) => s.key.name === this.edit.state$.value.config.config.system.name)
       : null;
     const nodeConfigDtos = this.instances.activeNodeCfgs$.value?.nodeConfigDtos;
-    for (const port of this.portEdit.ports$.value.filter((p) => p.type === VariableType.SERVER_PORT && p.app)) {
+    for (const port of this.portEdit.ports$.value.filter((p) => p.type === ParameterType.SERVER_PORT && p.app)) {
       const node = nodeConfigDtos?.find((nodeCfg) =>
         nodeCfg.nodeConfiguration.applications.some(
           (a) => a.application.name === port.app.application.name && a.application.tag === port.app.application.tag,

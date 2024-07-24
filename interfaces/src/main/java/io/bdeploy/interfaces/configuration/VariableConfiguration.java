@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 /**
  * Used as value object for instance and system variables alike.
@@ -23,7 +22,7 @@ public class VariableConfiguration {
     public String description;
 
     @JsonPropertyDescription("The type of the variable. A suitable editor will be provided to edit this variable.")
-    public VariableType type;
+    public ParameterType type;
 
     @JsonPropertyDescription("A potential custom editor ID which must be provided by a plugin.")
     public String customEditor;
@@ -35,18 +34,13 @@ public class VariableConfiguration {
 
     @JsonCreator
     public VariableConfiguration(@JsonProperty("id") String id, @JsonProperty("value") LinkedValueConfiguration value,
-            @JsonProperty("description") String description, @JsonProperty("type") VariableType type,
+            @JsonProperty("description") String description, @JsonProperty("type") ParameterType type,
             @JsonProperty("customEditor") String customEditor) {
         this.id = id;
         this.value = value;
         this.description = description;
         this.type = type;
         this.customEditor = customEditor;
-    }
-
-    public VariableConfiguration(VariableDescriptor avd) {
-        this(avd.id, avd.defaultValue == null ? new LinkedValueConfiguration("") : avd.defaultValue, avd.longDescription,
-                avd.type, avd.customEditor);
     }
 
 }

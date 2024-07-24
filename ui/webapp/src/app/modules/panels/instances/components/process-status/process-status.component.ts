@@ -10,10 +10,10 @@ import {
   HttpEndpoint,
   HttpEndpointType,
   InstanceNodeConfigurationDto,
+  ParameterType,
   ProcessDetailDto,
   ProcessProbeResultDto,
   ProcessState,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
@@ -41,7 +41,7 @@ export interface PinnedParameter {
   paramId: string;
   name: string;
   value: string;
-  type: VariableType;
+  type: ParameterType;
 }
 
 const colPinnedName: BdDataColumn<PinnedParameter> = {
