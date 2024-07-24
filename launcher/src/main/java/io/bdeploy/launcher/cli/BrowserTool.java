@@ -2,6 +2,7 @@ package io.bdeploy.launcher.cli;
 
 import java.nio.file.Path;
 
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -19,6 +20,7 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
     public @interface BrowserConfig {
 
         @Help("Directory where the launcher stores the hive as well as all applications.")
+        @EnvironmentFallback("BDEPLOY_INTERNAL_HOMEDIR")
         String homeDir();
 
         @Help(value = "Write log output to stdout instead of the log file.", arg = false)
