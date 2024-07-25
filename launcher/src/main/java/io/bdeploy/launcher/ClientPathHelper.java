@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli;
+package io.bdeploy.launcher;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -14,7 +14,6 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
-import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 
 /**

@@ -89,6 +89,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.launcher.ClientPathHelper;
 import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;

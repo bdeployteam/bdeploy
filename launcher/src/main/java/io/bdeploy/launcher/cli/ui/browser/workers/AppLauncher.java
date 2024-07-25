@@ -11,8 +11,8 @@ import javax.swing.SwingWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.launcher.ClientPathHelper;
 import io.bdeploy.launcher.LauncherPathProvider;
-import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
 /**
