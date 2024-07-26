@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnInit, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ParameterType } from 'src/app/models/gen.dtos';
+import { VariableType } from 'src/app/models/gen.dtos';
 import { NodeApplicationPort, PortsService } from 'src/app/modules/primary/instances/services/ports.service';
 import { PinnedParameter } from '../process-status.component';
 
@@ -27,7 +27,7 @@ export class PinnedParameterValueComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(): void {
-    if (this.record.type === ParameterType.BOOLEAN) {
+    if (this.record.type === VariableType.BOOLEAN) {
       this.booleanValue = this.record.value === 'true';
     }
   }

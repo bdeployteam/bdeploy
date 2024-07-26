@@ -20,7 +20,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -107,11 +107,11 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         fetchAndUpdateStates(config, ir, ports);
 
         for (var port : ports) {
-            if (port.type == ParameterType.CLIENT_PORT && !config.clients()) {
+            if (port.type == VariableType.CLIENT_PORT && !config.clients()) {
                 continue;
             }
 
-            if (port.type == ParameterType.SERVER_PORT) {
+            if (port.type == VariableType.SERVER_PORT) {
                 table.row().cell(port.getNodeName()).cell(port.appId).cell(port.appName).cell(port.processState)
                         .cell(port.processState.isRunning() && !activeTag.equals(port.runningTag) ? "*" : "")
                         .cell(port.description).cell(port.port).cell("SERVER").cell(port.state ? "open" : "closed")
@@ -127,7 +127,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
     private void fetchAndUpdateStates(PortsConfig config, InstanceResource ir, List<NodePort> allPorts) {
         // split by node to be able to fetch individual states per node and filter for server ports.
-        var ports = allPorts.stream().filter(np -> np.type == ParameterType.SERVER_PORT)
+        var ports = allPorts.stream().filter(np -> np.type == VariableType.SERVER_PORT)
                 .collect(Collectors.groupingBy(NodePort::getNodeName));
 
         // load the current process states
@@ -183,8 +183,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                     for (var param : config.start.parameters) {
                         var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(param.id))
                                 .findFirst().orElse(null);
-                        if (paramDesc != null
-                                && (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT)) {
+                        if (paramDesc != null && (paramDesc.type == VariableType.CLIENT_PORT
+                                || paramDesc.type == VariableType.SERVER_PORT)) {
                             try {
                                 var val = param.value.value;
                                 if (param.value.linkExpression != null) {
@@ -228,7 +228,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         final String appName;
         final String appId;
 
-        final ParameterType type;
+        final VariableType type;
         final String description;
         final int port;
 
@@ -236,7 +236,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         ProcessState processState;
         String runningTag;
 
-        public NodePort(String nodeName, String appName, String appId, ParameterType type, String description, int port) {
+        public NodePort(String nodeName, String appName, String appId, VariableType type, String description, int port) {
             this.nodeName = nodeName;
             this.appName = appName;
             this.appId = appId;

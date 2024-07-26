@@ -15,6 +15,7 @@ import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceVariableConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateControlGroup;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
@@ -31,6 +32,7 @@ public class FlattenedInstanceTemplateConfiguration {
     public String name;
     public String description;
     public List<VariableConfiguration> instanceVariables;
+    public List<InstanceVariableConfiguration> instanceVariableValues;
     public List<InstanceTemplateControlGroup> processControlGroups;
     public List<FlattenedInstanceTemplateGroupConfiguration> groups;
 
@@ -45,6 +47,7 @@ public class FlattenedInstanceTemplateConfiguration {
         this.name = original.name;
         this.description = original.description;
         this.processControlGroups = original.processControlGroups;
+        this.instanceVariableValues = original.instanceVariableValues;
         this.groups = original.groups.stream()
                 .map(g -> new FlattenedInstanceTemplateGroupConfiguration(g, appTpl, original.templateVariables)).filter(g -> {
                     if (g.applications.isEmpty()) {
