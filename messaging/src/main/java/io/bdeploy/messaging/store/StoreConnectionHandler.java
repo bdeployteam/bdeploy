@@ -117,7 +117,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
                 folder.close(false);
                 folder = null;
             } catch (MessagingException e) {
-                log.error("Exception while closing  " + getFolderAndUrlLogString(), e);
+                log.error("Exception while closing {}", getFolderAndUrlLogString(), e);
             }
         }
         super.disconnect();
@@ -135,7 +135,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             try {
                 service.connect();
             } catch (MessagingException e) {
-                log.error("Failed to connect to " + service.getURLName(), e);
+                log.error("Failed to connect to {}", service.getURLName(), e);
                 return;
             }
         }
@@ -144,7 +144,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             try {
                 folder.open(getFolderOpeningMode().value);
             } catch (MessagingException e) {
-                log.error("Failed to open " + getFolderAndUrlLogString(), e);
+                log.error("Failed to open {}", getFolderAndUrlLogString(), e);
                 return;
             }
         }
@@ -225,7 +225,7 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
             try {
                 subjectInfo = "(Subject=" + message.getSubject() + ')';
             } catch (MessagingException e) {
-                log.trace("Could not retrieve subject of message. " + info, e);
+                log.trace("Could not retrieve subject of message. {}", info, e);
             }
             info += subjectInfo;
 

@@ -105,7 +105,7 @@ public class MessageDataHolderBuilder {
         try {
             content = bodyPart.getContent();
         } catch (IOException e) {
-            log.error("Failed to extract content of body part with media type: " + mediaTypeToString(mediaType), e);
+            log.error("Failed to extract content of body part with media type: {}", mediaTypeToString(mediaType), e);
             return "";
         }
 
