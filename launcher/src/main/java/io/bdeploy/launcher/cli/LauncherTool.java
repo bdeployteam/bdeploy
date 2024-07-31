@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -371,23 +370,34 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             // Retrieve the client application configuration.
             boolean offlineMode;
             try (Activity info = reporter.start("Loading meta-data...")) {
-                log.info("Fetching configuration from server...");
+                log.info("Fetching client application configuration from server...");
                 clientAppCfg = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null)
                         .getNamedMaster(clickAndStart.groupId)
                         .getClientConfiguration(clickAndStart.instanceId, clickAndStart.applicationId);
-                log.info("Successfully retrieved configuration from server.");
+
+                log.info("Successfully fetched client application configuration from server.");
                 offlineMode = false;
             } catch (Exception e) {
                 Throwable rootCause = ExceptionHelper.getRootCause(e);
                 if (!(rootCause instanceof ConnectException) && !(rootCause instanceof UnknownHostException)) {
                     throw e;
                 }
-                clientAppCfg = Optional.of(new ClientSoftwareManifest(hive))
-                        .map(csm -> csm.readNewest(clickAndStart.applicationId, false)).map(csc -> csc.clientAppCfg).orElse(null);
-                if (clientAppCfg == null || !clientAppCfg.appDesc.processControl.offlineStartAllowed) {
-                    throw e;
+
+                log.info("Failed to fetch client application configuration from server. Reading local configuration...");
+                ClientSoftwareConfiguration clientSoftwareConfiguration = new ClientSoftwareManifest(hive)
+                        .readNewest(clickAndStart.applicationId, false);
+                if (clientSoftwareConfiguration == null) {
+                    throw new RuntimeException("Failed to read local client software configuration.", e);
                 }
-                log.info("Connection to server failed. Launching will continue in offline mode.");
+                clientAppCfg = clientSoftwareConfiguration.clientAppCfg;
+                if (clientAppCfg == null) {
+                    throw new RuntimeException("Failed to read local client application configuration.", e);
+                }
+                if (!clientAppCfg.appDesc.processControl.offlineStartAllowed) {
+                    throw new RuntimeException("Aborting launch because offline start is not enabled for the application.", e);
+                }
+
+                log.info("Successfully read local client application configuration.");
                 offlineMode = true;
             }
 
