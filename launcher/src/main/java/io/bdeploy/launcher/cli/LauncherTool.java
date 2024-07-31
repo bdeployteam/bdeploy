@@ -368,6 +368,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             cleanStaleTransactions(hive);
 
             // Retrieve the client application configuration.
+            ClientSoftwareConfiguration clientSoftwareConfiguration = null;
             boolean offlineMode;
             try (Activity info = reporter.start("Loading meta-data...")) {
                 log.info("Fetching client application configuration from server...");
@@ -384,8 +385,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
 
                 log.info("Failed to fetch client application configuration from server. Reading local configuration...");
-                ClientSoftwareConfiguration clientSoftwareConfiguration = new ClientSoftwareManifest(hive)
-                        .readNewest(clickAndStart.applicationId, false);
+                clientSoftwareConfiguration = new ClientSoftwareManifest(hive).readNewest(clickAndStart.applicationId, false);
                 if (clientSoftwareConfiguration == null) {
                     throw new RuntimeException("Failed to read local client software configuration.", e);
                 }
@@ -401,20 +401,23 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 offlineMode = true;
             }
 
+            // Check for and install launcher updates if necessary.
+            Entry<Version, Key> requiredLauncher;
             if (offlineMode) {
                 log.info("Continuing launch in offline mode...");
+                @SuppressWarnings("null")
+                Key launcher = clientSoftwareConfiguration.launcher;
+                requiredLauncher = Map.entry(VersionHelper.parse(launcher.getTag()), launcher);
             } else {
                 log.info("Continuing launch in online mode...");
+                requiredLauncher = doSelfUpdate(hive, reporter);
             }
-
-            // Check for and install launcher updates if necessary.
-            Entry<Version, Key> requiredLauncher = offlineMode ? null : doSelfUpdate(hive, reporter);
             Version requiredVersion = requiredLauncher == null ? VersionHelper.UNDEFINED : requiredLauncher.getKey();
 
             Process process = null;
             // Launch the application or delegate launching
             if (shouldDelegate(runningVersion, requiredVersion)) {
-                log.info("Application cannot be started with this launcher: Server is running an older version.");
+                log.info("Application cannot be started with this launcher: It expects an older launcher version.");
                 log.info("Delegating to launcher {}", requiredVersion);
                 doExecuteLocked(hive, reporter, () -> {
                     doInstallLauncherSideBySide(hive, requiredLauncher);
