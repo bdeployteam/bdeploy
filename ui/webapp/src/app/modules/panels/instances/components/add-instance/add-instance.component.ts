@@ -72,14 +72,19 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         this.config.id = r;
         this.subscription.add(
           this.products.products$.subscribe((products) => {
-            products?.forEach((p) => {
-              let item = this.prodList.find((x) => x.id === p.key.name);
-              if (!item) {
-                item = { id: p.key.name, name: p.name, versions: [] };
-                this.prodList.push(item);
+            const idsAndNamesAndVersions = new Map<string, [string, string[]]>();
+            products?.forEach((dto) => {
+              const id = dto.key.name;
+              if (!idsAndNamesAndVersions.has(id)) {
+                idsAndNamesAndVersions.set(id, [dto.name, []]);
               }
-              item.versions.push(p.key.tag);
+              idsAndNamesAndVersions.get(id)[1].push(dto.key.tag);
             });
+
+            this.prodList = Array.from(
+              idsAndNamesAndVersions,
+              ([key, value]) => <ProductRow>{ id: key, name: value[0], versions: value[1] },
+            );
             this.productNames = this.prodList.map((p) => p.name);
           }),
         );
