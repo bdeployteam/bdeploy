@@ -217,18 +217,20 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.purpose = purpose;
         cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), ttor);
 
+        SystemConfiguration system = systemKey != null ? SystemManifest.of(hive, systemKey).getConfiguration() : null;
         List<ApplicationManifest> apps = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
         List<InstanceNodeConfigurationDto> nodes;
         try {
-            nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), groupToNode, apps, ttor, nodeStates, (n, o) -> a -> {
-                if (o != null) {
-                    // need to check OS as well.
-                    var smk = ScopedManifestKey.parse(a.getKey());
-                    return o.equals(smk.getOperatingSystem()) && smk.getName().equals(pmf.getProduct() + "/" + n);
-                } else {
-                    return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
-                }
-            });
+            nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), groupToNode, apps, ttor, nodeStates, system,
+                    (n, o) -> a -> {
+                        if (o != null) {
+                            // need to check OS as well.
+                            var smk = ScopedManifestKey.parse(a.getKey());
+                            return o.equals(smk.getOperatingSystem()) && smk.getName().equals(pmf.getProduct() + "/" + n);
+                        } else {
+                            return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
+                        }
+                    });
         } catch (Exception e) {
             log.warn("Exception while creating instance {} through instance template {} from system template", cfg.name,
                     inst.templateName, e);
@@ -243,8 +245,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         InstanceUpdateDto iud = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, nodes), cfgFiles);
 
         try {
-            SystemConfiguration sc = systemKey != null ? SystemManifest.of(hive, systemKey).getConfiguration() : null;
-            List<ApplicationValidationDto> validation = pus.validate(iud, apps, sc);
+            List<ApplicationValidationDto> validation = pus.validate(iud, apps, system);
             if (!validation.isEmpty()) {
                 validation.forEach(v -> log.warn("Validation problem in instance: {}, app: {}, param: {}: {}", cfg.name, v.appId,
                         v.paramId, v.message));
@@ -272,7 +273,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
     private static List<InstanceNodeConfigurationDto> createInstanceNodesFromTemplate(InstanceConfiguration config,
             FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, List<ApplicationManifest> apps,
-            TrackingTemplateOverrideResolver ttor, Map<String, MinionStatusDto> nodeStates,
+            TrackingTemplateOverrideResolver ttor, Map<String, MinionStatusDto> nodeStates, SystemConfiguration system,
             BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter) {
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
 
@@ -305,7 +306,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                         var r = new InstanceNodeConfigurationDto(mappedToNode, new InstanceNodeConfiguration());
                         r.nodeConfiguration.copyRedundantFields(config);
 
-                        // NO need to care about (redundant!) instance variables, etc. This is done when saving the instance.
+                        r.nodeConfiguration.mergeVariables(config, system, null);
 
                         r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, ttor));
 
