@@ -13,7 +13,6 @@ import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.jersey.JerseyServer;
@@ -23,7 +22,6 @@ import io.bdeploy.minion.MinionRoot;
 /**
  * A {@link MinionRestartManager} which knows how to shut down a {@link JerseyServer} before exiting the JVM.
  */
-@SuppressFBWarnings("DM_EXIT")
 public class JerseyAwareMinionRestartManager implements MinionRestartManager {
 
     private static final Logger log = LoggerFactory.getLogger(JerseyAwareMinionRestartManager.class);

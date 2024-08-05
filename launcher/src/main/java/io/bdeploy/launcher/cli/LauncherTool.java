@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -1193,7 +1192,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Terminates the VM with the given exit code.
      * Careful: in tests will not exit but throw in case of non-zero and <b>continue</b> in case of zero exit code.
      */
-    @SuppressFBWarnings("DM_EXIT")
     private static void doExit(Integer exitCode) {
         // if we are in test mode, System.exit will exit the JVM running the test, so we don't do that.
         if (ToolBase.isTestMode()) {
