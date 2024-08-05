@@ -144,69 +144,75 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
 
     private RenderableResult doSetParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
             InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
-
+        String paramId = config.set();
         List<ParameterDescriptor> pdescs = dto.descriptor.startCommand.parameters;
-        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.set()));
-        int myDescIndex = CollectionHelper.indexOf(pdescs, p -> p.id.equals(config.set()));
+        int myDescIndex = CollectionHelper.indexOf(pdescs, p -> p.id.equals(paramId));
 
-        if (myDescIndex >= 0) {
+        boolean hasDescriptor = myDescIndex >= 0;
+        if (hasDescriptor) {
             checkCanSet(pdescs.get(myDescIndex), cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
         }
 
-        if (myIndex == -1 && myDescIndex >= 0) {
-            // not yet there, need to insert.
-            boolean insertLast = myDescIndex == (pdescs.size() - 1);
+        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(paramId));
+        String paramValue = config.value();
 
-            var param = new ParameterConfiguration();
-            param.id = config.set();
-            doSetParameterInternal(param, pdescs.get(myDescIndex), config.value(), nodecfg);
+        if (myIndex != -1) {
+            // Parameter already exists -> we just change its value
+            var existing = cfg.start.parameters.get(myIndex);
+            doSetParameterInternal(existing, pdescs.stream().filter(p -> p.id.equals(paramId)).findFirst().orElse(null),
+                    paramValue, nodecfg);
+        } else {
+            // Parameter does not yet exist -> we create a new one
+            ParameterConfiguration param = new ParameterConfiguration();
+            param.id = paramId;
 
-            if (!insertLast) {
-                // lookup the next descriptor which has a value in the parameter list. insert the new parameter right *before* the
-                // value for that descriptor. this handles custom parameters well as well.
-                int insertionIndex = -1;
-                for (int indexOfNextDesc = myDescIndex + 1; indexOfNextDesc < pdescs.size()
-                        && insertionIndex == -1; indexOfNextDesc++) {
-                    var descAtIndex = pdescs.get(indexOfNextDesc);
-                    insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(descAtIndex.id));
+            if (hasDescriptor) {
+                // Parameter has a descriptor -> it is not a custom parameter
+                doSetParameterInternal(param, pdescs.get(myDescIndex), paramValue, nodecfg);
+
+                boolean insertLast = myDescIndex == (pdescs.size() - 1);
+                if (!insertLast) {
+                    // Lookup the next descriptor which has a value in the parameter list. insert the new parameter right *before* the
+                    // value for that descriptor. This handles custom parameters well as well.
+                    int insertionIndex = -1;
+                    for (int indexOfNextDesc = myDescIndex + 1; indexOfNextDesc < pdescs.size()
+                            && insertionIndex == -1; indexOfNextDesc++) {
+                        var descAtIndex = pdescs.get(indexOfNextDesc);
+                        insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(descAtIndex.id));
+                    }
+
+                    if (insertionIndex == -1) {
+                        insertLast = true;
+                    } else {
+                        cfg.start.parameters.add(insertionIndex, param);
+                    }
                 }
 
-                if (insertionIndex == -1) {
-                    insertLast = true;
-                } else {
-                    cfg.start.parameters.add(insertionIndex, param);
-                }
-            }
-
-            if (insertLast) {
-                cfg.start.parameters.add(param);
-            }
-        } else if (myIndex == -1) {
-            // not found, and no descriptor - new custom parameter.
-            var param = new ParameterConfiguration();
-            param.id = config.set();
-            doSetParameterInternal(param, null, config.value(), nodecfg);
-
-            // if no predecessor insert first.
-            if (config.predecessor() != null) {
-                int insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.predecessor()));
-                if (insertionIndex == -1) {
-                    throw new IllegalArgumentException("Predecessor for custom parameter not found.");
-                }
-
-                // we want to insert *after* the element. if that element is the last one, insert at the end.
-                if (insertionIndex == (cfg.start.parameters.size() - 1)) {
+                if (insertLast) {
                     cfg.start.parameters.add(param);
-                } else {
-                    cfg.start.parameters.add(insertionIndex + 1, param);
                 }
             } else {
-                cfg.start.parameters.add(0, param);
+                // Parameter has no descriptor -> it is a custom parameter
+                doSetParameterInternal(param, null, paramValue, nodecfg);
+
+                // if no predecessor -> insert first
+                String predecessor = config.predecessor();
+                if (predecessor != null) {
+                    int insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(predecessor));
+                    if (insertionIndex == -1) {
+                        throw new IllegalArgumentException("Predecessor for custom parameter not found.");
+                    }
+
+                    // We want to insert *after* the element. If that element is the last one, insert at the end.
+                    if (insertionIndex == (cfg.start.parameters.size() - 1)) {
+                        cfg.start.parameters.add(param);
+                    } else {
+                        cfg.start.parameters.add(insertionIndex + 1, param);
+                    }
+                } else {
+                    cfg.start.parameters.add(0, param);
+                }
             }
-        } else {
-            var existing = cfg.start.parameters.get(myIndex);
-            doSetParameterInternal(existing, pdescs.stream().filter(p -> p.id.equals(config.set())).findFirst().orElse(null),
-                    config.value(), nodecfg);
         }
 
         checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
