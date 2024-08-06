@@ -42,6 +42,11 @@ class ProcessControllerHelper {
      * @return the formatted value
      */
     public static String formatDuration(Duration value) {
+        boolean valueOriginallyNegative = value.isNegative();
+        if (valueOriginallyNegative) {
+            value = value.multipliedBy(-1);
+        }
+
         List<String> parts = new ArrayList<>();
         long days = value.toDaysPart();
         if (days == 1) {
@@ -62,9 +67,9 @@ class ProcessControllerHelper {
             parts.add(minutes + " minutes");
         }
 
-        // Skip seconds if we have days, hours
+        // Skip seconds if we have days or hours
         if (days > 0 || hours > 0) {
-            return String.join(" ", parts);
+            return joinPartsAndNegativeSign(parts, valueOriginallyNegative);
         }
         long seconds = value.toSecondsPart();
         if (seconds == 1) {
@@ -75,7 +80,7 @@ class ProcessControllerHelper {
 
         // Skip milliseconds if we have minutes
         if (minutes > 0) {
-            return String.join(" ", parts);
+            return joinPartsAndNegativeSign(parts, valueOriginallyNegative);
         }
         long millis = value.toMillisPart();
         if (millis == 1) {
@@ -83,7 +88,13 @@ class ProcessControllerHelper {
         } else if (millis > 1 || parts.isEmpty()) {
             parts.add(millis + " milliseconds");
         }
-        return String.join(" ", parts);
+
+        return joinPartsAndNegativeSign(parts, valueOriginallyNegative);
+    }
+
+    private static String joinPartsAndNegativeSign(List<String> parts, boolean valueOriginallyNegative) {
+        String joinedParts = String.join(" ", parts);
+        return valueOriginallyNegative ? '-' + joinedParts : joinedParts;
     }
 
     /**
@@ -123,7 +134,7 @@ class ProcessControllerHelper {
         if (process != null && !process.isAlive()) {
             try {
                 return process.exitValue();
-            } catch(IllegalThreadStateException e) {
+            } catch (IllegalThreadStateException e) {
                 log.warn("Exited Process is still not reporting exit code, PID {}", process.pid(), e);
             }
         }
