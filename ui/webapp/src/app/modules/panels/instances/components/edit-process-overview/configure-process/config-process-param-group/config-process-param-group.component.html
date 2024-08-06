@@ -44,7 +44,7 @@
             <span *ngIf="!search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
             <span *ngIf="!!search">Configured or optional parameters match search.</span>
             <span
-              *ngIf="(groupForm.invalid || hasMissingRequired(group)) && !panel.expanded"
+              *ngIf="(groupForm.invalid || hasMissingRequired(group) || hasExistingForbidden(group)) && !panel.expanded"
               class="bd-warning-text text-xs"
               >Validation Failed</span
             >
@@ -60,7 +60,7 @@
                 [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
                 [icon]="group.isSelectMode ? 'check' : 'tune'"
                 tooltip="below"
-                [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !group.isSelectMode"
+                [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !hasExistingForbidden(group) && !group.isSelectMode"
                 [isToggle]="true"
                 [(toggle)]="group.isSelectMode"
                 appClickStopPropagation
@@ -81,7 +81,15 @@
             *ngIf="hasMissingRequired(group) && !group.isSelectMode && groupForm.valid"
           >
             <div class="flex justify-center items-center gap-1">
-              Use the <mat-icon>tune</mat-icon> buttons to add missing mandatory parameter(s).
+              Use the <mat-icon>tune</mat-icon> button to add missing mandatory parameter(s).
+            </div>
+          </span>
+          <span
+            class="bd-hint-text bd-warning-text"
+            *ngIf="hasExistingForbidden(group) && !group.isSelectMode && groupForm.valid"
+          >
+            <div class="flex justify-center items-center gap-1">
+              Use the <mat-icon>tune</mat-icon> button to remove forbidden mandatory parameter(s).
             </div>
           </span>
           <div

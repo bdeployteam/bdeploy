@@ -558,6 +558,20 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     );
   }
 
+  protected hasExistingForbidden(g: ParameterGroup): boolean {
+    if (g.isCustom) {
+      return false;
+    }
+    return (
+      g.pairs.filter(
+        (p) =>
+          p.descriptor?.mandatory &&
+          p.value?.value &&
+          !this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process),
+      )?.length > 0
+    );
+  }
+
   protected hasPairSearchMatch(p: ParameterPair): boolean {
     if (!this.search) {
       return true;
