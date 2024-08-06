@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,7 +86,7 @@ public class TemplateHelper {
         if (value == null || !value.contains(PATTERN_START)) {
             return value;
         }
-        return doProcess(value, valueResolver, shouldResolve, null);
+        return doProcess(value, valueResolver, shouldResolve, null, new Stack<>());
     }
 
     /**
@@ -108,13 +109,21 @@ public class TemplateHelper {
         if (value == null || !value.contains(PATTERN_START)) {
             return value;
         }
-        return doProcess(value, valueResolver, shouldResolve, valueId);
+        return doProcess(value, valueResolver, shouldResolve, valueId, new Stack<>());
     }
 
     /**
      * Recursively resolves the given input.
      */
-    private static String doProcess(String value, VariableResolver valueResolver, ShouldResolve shouldResolve, String valueId) {
+    private static String doProcess(String value, VariableResolver valueResolver, ShouldResolve shouldResolve, String valueId,
+            Stack<String> cycleDetector) {
+        if (cycleDetector.contains(value)) {
+            cycleDetector.push(value);
+            String chain = String.join(" -> ", cycleDetector);
+            log.error("Infinite loop detected: {}", chain);
+            throw new IllegalArgumentException("Infinite loop detected " + chain);
+        }
+
         StringBuilder builder = new StringBuilder();
         int currentStart = 0;
 
@@ -130,7 +139,9 @@ public class TemplateHelper {
                             + (valueId == null ? value : valueId));
                 }
                 // Resolve recursive as the replacement can also contains templates
-                resolved = doProcess(resolved, valueResolver, shouldResolve, valueId);
+                cycleDetector.push(value);
+                resolved = doProcess(resolved, valueResolver, shouldResolve, valueId, cycleDetector);
+                cycleDetector.pop();
             } else {
                 // Keep pattern for the unresolved intact so that we can resolve it later
                 resolved = PATTERN_START + resolved + PATTERN_END;
