@@ -34,6 +34,8 @@ describe('Groups Tests', () => {
       cy.contains('app-bd-data-card', groupName).should('not.exist');
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.screenshot('Doc_ModeTable');
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Toggle Card Mode');
