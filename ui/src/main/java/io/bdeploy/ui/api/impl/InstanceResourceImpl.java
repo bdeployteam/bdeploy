@@ -206,29 +206,48 @@ public class InstanceResourceImpl implements InstanceResource {
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
         SortedSet<Key> scan = ProductManifest.scan(hive);
 
+        InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
+
+        // load all products from repos as required by the instance group to repo mapping.
+        Map<String, SortedSet<Manifest.Key>> productKeysPerRepo = new TreeMap<>();
+        if (igc.productToRepo != null) {
+            for (String repo : igc.productToRepo.values()) {
+                BHive repoHive = reg.get(repo);
+                if (repoHive == null) {
+                    continue; // not found (anymore)
+                }
+                productKeysPerRepo.put(repo, ProductManifest.scan(repoHive));
+            }
+        }
+
         for (Key imKey : imKeys) {
-            result.add(getInstanceDto(imKey, scan, comparators));
+            result.add(getInstanceDto(imKey, scan, comparators, productKeysPerRepo));
         }
         return result;
     }
 
     private String getNewerVersionAvailableInRepository(InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
-            Comparator<String> productVersionComparator) {
+            Comparator<String> productVersionComparator, Map<String, SortedSet<Key>> productKeysPerRepo) {
         Key productKey = config.product;
         InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
         if (igc.productToRepo == null || !igc.productToRepo.containsKey(productKey.getName())) {
             return null;
         }
+
         String repo = igc.productToRepo.get(productKey.getName());
-        BHive repoHive = reg.get(repo);
-        if (repoHive == null) {
+        SortedSet<Key> keysInRepo = productKeysPerRepo.get(repo);
+
+        if (keysInRepo == null || keysInRepo.isEmpty()) {
             return null;
         }
-        ProductResource pr = rc.initResource(new ProductResourceImpl(repoHive, repo));
 
-        List<Key> productKeys = pr.list(productKey.getName()).stream().map(p -> p.key)
+        List<Key> productKeys = keysInRepo.stream().filter(p -> p.getName().equals(productKey.getName()))
                 .filter(key -> !instanceGroupProductKeys.contains(key)) // filter out product keys already imported/uploaded to instance group
                 .toList();
+
+        if (productKeys.isEmpty()) {
+            return null;
+        }
 
         return this.isNewerVersionAvailable(productKeys, config, productVersionComparator) ? repo : null;
     }
@@ -362,7 +381,8 @@ public class InstanceResourceImpl implements InstanceResource {
         return target;
     }
 
-    private InstanceDto getInstanceDto(Manifest.Key imKey, SortedSet<Key> pmScan, Map<String, Comparator<String>> comparators) {
+    private InstanceDto getInstanceDto(Manifest.Key imKey, SortedSet<Key> pmScan, Map<String, Comparator<String>> comparators,
+            Map<String, SortedSet<Key>> productKeysPerRepo) {
         InstanceManifest im = InstanceManifest.of(hive, imKey);
         InstanceConfiguration config = im.getConfiguration();
 
@@ -421,7 +441,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         boolean newerVersionAvailable = this.isNewerVersionAvailable(pmScan, config, productVersionComparator);
         String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, pmScan,
-                productVersionComparator);
+                productVersionComparator, productKeysPerRepo);
         return InstanceDto.create(imKey, config, activeProduct, newerVersionAvailable, newerVersionAvailableInRepository,
                 managedMaster, attributes, banner, im.getManifest(), activeVersion, overallState, configRoot);
     }
@@ -430,7 +450,19 @@ public class InstanceResourceImpl implements InstanceResource {
     public InstanceDto read(String instanceId) {
         InstanceManifest im = readInstance(instanceId);
         SortedSet<Key> pmScan = ProductManifest.scan(hive);
-        return getInstanceDto(im.getManifest(), pmScan, new TreeMap<>());
+
+        // was the product imported from a repo?
+        InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
+        Map<String, SortedSet<Manifest.Key>> productKeysPerRepo = new TreeMap<>();
+        String repo = igc.productToRepo == null ? null : igc.productToRepo.get(im.getConfiguration().product.getName());
+        if (repo != null) {
+            BHive repoHive = reg.get(repo);
+            if (repoHive != null) {
+                productKeysPerRepo.put(repo, ProductManifest.scan(repoHive));
+            }
+        }
+
+        return getInstanceDto(im.getManifest(), pmScan, new TreeMap<>(), productKeysPerRepo);
     }
 
     private InstanceManifest readInstance(String instanceId) {
