@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 
 public class JacksonHelper {
 
@@ -55,6 +56,7 @@ public class JacksonHelper {
         result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         result.registerModule(new Jdk8Module());
         result.registerModule(new JavaTimeModule());
+        result.registerModule(new BlackbirdModule());
 
         globalMapperCount.increment();
         if (log.isDebugEnabled()) {
