@@ -166,7 +166,7 @@ export class ActionsService {
     const instObs = instance || this.areas.instanceContext$;
     const itemObs = item || of(null);
 
-    // filter all server knwon actions and map them. let them through if they match any of the conditions.
+    // filter all server known actions and map them. let them through if they match any of the conditions.
     const serverObs = combineLatest([
       this.actions$.pipe(map((a) => a?.filter((x) => types.includes(x.action.type)))),
       groupObs,
