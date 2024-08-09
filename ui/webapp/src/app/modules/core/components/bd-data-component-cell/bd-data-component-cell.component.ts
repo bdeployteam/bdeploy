@@ -1,11 +1,22 @@
-import { Component, ComponentRef, Input, OnDestroy, OnInit, Type, ViewContainerRef, inject } from '@angular/core';
+import {
+  Component,
+  ComponentRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  Type,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
   selector: 'app-bd-data-component-cell',
   templateUrl: './bd-data-component-cell.component.html',
 })
-export class BdDataComponentCellComponent<T, X> implements OnInit, OnDestroy {
+export class BdDataComponentCellComponent<T, X> implements OnInit, OnChanges, OnDestroy {
   private readonly vc = inject(ViewContainerRef);
 
   @Input() record: T;
@@ -20,9 +31,13 @@ export class BdDataComponentCellComponent<T, X> implements OnInit, OnDestroy {
     this.componentRef.instance['column'] = this.column;
   }
 
-  ngOnDestroy(): void {
-    if (!this.componentRef) {
-      this.componentRef.destroy();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.record && this.componentRef?.instance) {
+      this.componentRef.instance['record'] = changes.record.currentValue;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.componentRef?.destroy();
   }
 }
