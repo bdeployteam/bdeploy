@@ -407,7 +407,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Continuing launch in offline mode...");
                 @SuppressWarnings("null")
                 Key launcher = clientSoftwareConfiguration.launcher;
-                requiredLauncher = Map.entry(VersionHelper.parse(launcher.getTag()), launcher);
+                requiredLauncher = launcher == null ? null : Map.entry(VersionHelper.parse(launcher.getTag()), launcher);
             } else {
                 log.info("Continuing launch in online mode...");
                 requiredLauncher = doSelfUpdate(hive, reporter);
