@@ -38,6 +38,7 @@ export class ConfigService {
   private readonly ngZone = inject(NgZone);
   private readonly icons = inject(MatIconRegistry);
   private readonly sanitizer = inject(DomSanitizer);
+  private static readonly defaultBackendSessionId = -1;
 
   public config: AppConfig;
   public webAuthCfg: WebAuthSettingsDto;
@@ -56,6 +57,7 @@ export class ConfigService {
 
   private backendTimeOffset = 0;
   private backendOffsetWarning = false;
+  private backendSessionId = ConfigService.defaultBackendSessionId;
 
   // prettier-ignore
   constructor() {
@@ -239,7 +241,7 @@ export class ConfigService {
 
     this.getBackendInfo()
       .pipe(retry({ delay: 2000 }))
-      .subscribe((r) => {
+      .subscribe((backendInfoDto) => {
         if (this.versionLock) {
           return;
         }
@@ -247,7 +249,7 @@ export class ConfigService {
         if (!this.config) {
           window.location.reload();
         } else {
-          this.doCheckVersion(r);
+          this.doCheckVersion(backendInfoDto);
         }
       });
   }
@@ -284,14 +286,10 @@ export class ConfigService {
           }
           throw e;
         }),
-        tap((v) => {
-          // wherever this call came from, we're not offline anymore in case we were!
-          this.offline$.next(false);
-
-          const serverTime = v.time;
-          const clientTime = Date.now();
-
+        tap((backendInfoDto) => {
           // calculate the time offset between the client and the server
+          const serverTime = backendInfoDto.time;
+          const clientTime = Date.now();
           this.backendTimeOffset = serverTime - clientTime;
 
           // log if we're exceeding a certain threshold
@@ -299,6 +297,22 @@ export class ConfigService {
             console.warn('Server time offset', this.backendTimeOffset, 'ms');
             this.backendOffsetWarning = true;
           }
+
+          // force a reload if the server was restarted
+          const oldBackendSessionId = this.backendSessionId;
+          const newBackendSessionId = backendInfoDto.sessionId;
+          this.backendSessionId = newBackendSessionId;
+          if (
+            oldBackendSessionId !== ConfigService.defaultBackendSessionId &&
+            oldBackendSessionId !== newBackendSessionId
+          ) {
+            console.info('SessionID changed!');
+            this.markServerOffline();
+            return;
+          }
+
+          // however we ended here, we're not offline anymore in case we were!
+          this.offline$.next(false);
         }),
       );
   }

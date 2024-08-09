@@ -11,9 +11,12 @@ import io.bdeploy.ui.api.MinionMode;
  */
 public class BackendInfoDto {
 
+    private static final long STATIC_SESSION_ID = System.currentTimeMillis();
+
     public Version version;
     public MinionMode mode;
     public long time;
+    public long sessionId;
     public String name;
     public boolean isNewGitHubReleaseAvailable;
     public boolean isInitialConnectionCheckFailed;
@@ -25,6 +28,7 @@ public class BackendInfoDto {
         this.version = version;
         this.mode = mode;
         this.time = System.currentTimeMillis();
+        this.sessionId = STATIC_SESSION_ID;
         this.name = name;
         this.isNewGitHubReleaseAvailable = isNewGitHubReleaseAvailable;
         this.isInitialConnectionCheckFailed = isInitialConnectionCheckFailed;
