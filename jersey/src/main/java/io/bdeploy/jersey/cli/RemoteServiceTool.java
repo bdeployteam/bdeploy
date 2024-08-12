@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Base class for all CLI tools which need to access a remote service. Figuring
- * out the {@link RemoteService} based on command line arguments is don entirely
+ * out the {@link RemoteService} based on command line arguments is done entirely
  * here.
  */
 public abstract class RemoteServiceTool<T extends Annotation> extends ConfiguredCliTool<T> {
