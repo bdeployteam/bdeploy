@@ -47,14 +47,14 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
         try {
             date1 = msg1.getSentDate();
         } catch (MessagingException e) {
-            log.error("Could not determine received date message " + msg1.getMessageNumber() + ". Comparator will return 0.", e);
+            log.error("Could not determine received date message {}. Comparator will return 0.", msg1.getMessageNumber(), e);
             return 0;
         }
         Date date2;
         try {
             date2 = msg2.getSentDate();
         } catch (MessagingException e) {
-            log.error("Could not determine received date message " + msg2.getMessageNumber() + ". Comparator will return 0.", e);
+            log.error("Could not determine received date message {}. Comparator will return 0.", msg2.getMessageNumber(), e);
             return 0;
         }
         return date1.compareTo(date2);
@@ -109,21 +109,21 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
         try {
             messageDataHolder = MessageDataHolderBuilder.build(message);
         } catch (MessagingException e) {
-            log.error("Failed to parse message {}" + message.getMessageNumber(), e);
+            log.error("Failed to parse message {}", message.getMessageNumber(), e);
             return;
         }
 
         try {
             listeners.forEach(listener -> listener.accept(messageDataHolder));
         } catch (RuntimeException e) {
-            log.error("Exception while executing listeners of message " + message.getMessageNumber(), e);
+            log.error("Exception while executing listeners of message {}", message.getMessageNumber(), e);
             return;
         }
 
         try {
             message.setFlag(Flag.SEEN, true);
         } catch (MessagingException e) {
-            log.error("Failed to set message " + message.getMessageNumber() + " to seen.", e);
+            log.error("Failed to set message {} to seen.", message.getMessageNumber(), e);
         }
     }
 

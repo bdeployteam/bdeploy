@@ -122,7 +122,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 }
             });
         } catch (MessagingException e) {
-            log.error("Failed to send NOOP to " + getFolderAndUrlLogString(), e);
+            log.error("Failed to send NOOP to {}", getFolderAndUrlLogString(), e);
             return;
         }
 
@@ -141,7 +141,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             getFolder().idle();
             supportsIdle = true;
         } catch (FolderClosedException | IllegalStateException e) {
-            log.error("Folder was closed -> idle handling could not be started | " + getFolderAndUrlLogString(), e);
+            log.error("Folder was closed -> idle handling could not be started | {}", getFolderAndUrlLogString(), e);
             return;
         } catch (MessagingException e) {
             supportsIdle = false;
@@ -155,7 +155,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 doFallbackIdle();
             }
         } catch (MessagingException e) {
-            log.error("Aborted idle handling due to unexpected exception |  " + getFolderAndUrlLogString(), e);
+            log.error("Aborted idle handling due to unexpected exception |  {}", getFolderAndUrlLogString(), e);
         } catch (InterruptedException e) {
             log.info("Interrupted idle thread | {}", getFolderAndUrlLogString());
             Thread.currentThread().interrupt();
