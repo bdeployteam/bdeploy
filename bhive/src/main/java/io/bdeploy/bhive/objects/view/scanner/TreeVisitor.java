@@ -2,6 +2,7 @@ package io.bdeploy.bhive.objects.view.scanner;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
@@ -25,7 +26,7 @@ public class TreeVisitor {
     private Consumer<ManifestRefView> manifestConsumer;
     private Consumer<MissingObjectView> missingConsumer;
     private Consumer<SkippedElementView> skippedConsumer;
-    private Function<TreeView, Boolean> treeConsumer;
+    private Predicate<TreeView> treeConsumer;
 
     private TreeVisitor() {
     }
@@ -53,7 +54,7 @@ public class TreeVisitor {
             skippedConsumer.accept((SkippedElementView) snapshot);
         }
         if (snapshot instanceof TreeView && treeConsumer != null) {
-            visitChildren = treeConsumer.apply((TreeView) snapshot);
+            visitChildren = treeConsumer.test((TreeView) snapshot);
         }
         return visitChildren;
     }
@@ -90,7 +91,7 @@ public class TreeVisitor {
         /**
          * Register a {@link Consumer} triggered when an entry is a {@link Manifest} reference within a {@link Tree}.
          * <p>
-         * Note that a {@link Manifest} reference will also trigger the {@link #onTree(Function)} {@link Function} as a
+         * Note that a {@link Manifest} reference will also trigger the {@link #onTree(Predicate)} {@link Function} as a
          * {@link Manifest} reference basically 'inserts' the {@link Manifest} root tree at that location in the source
          * {@link Tree}.
          */
@@ -121,7 +122,7 @@ public class TreeVisitor {
          *            of this {@link TreeView} should be visited.
          * @return this for chaining.
          */
-        public Builder onTree(Function<TreeView, Boolean> tree) {
+        public Builder onTree(Predicate<TreeView> tree) {
             result.treeConsumer = tree;
             return this;
         }

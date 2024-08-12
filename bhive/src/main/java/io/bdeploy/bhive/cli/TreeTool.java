@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import io.bdeploy.bhive.BHive;
@@ -107,12 +107,11 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
 
         // count size difference when updating to right - collect all only right or diff, but exclude objects with existing hash
         SortedSet<ObjectId> existingObjs = new TreeSet<>();
-        Function<ElementView, Boolean> enlist = ev -> {
+        Predicate<ElementView> enlist = ev -> {
             existingObjs.add(ev.getElementId());
             return true;
         };
-        original.visit(
-                new TreeVisitor.Builder().onBlob(enlist::apply).onTree(enlist::apply).onManifestRef(enlist::apply).build());
+        original.visit(new TreeVisitor.Builder().onBlob(enlist::test).onTree(enlist::test).onManifestRef(enlist::test).build());
 
         ObjectSizeOperation oso = new ObjectSizeOperation();
         diff.stream().filter(d -> d.getType() != DifferenceType.ONLY_LEFT).map(d -> d.getRight().getElementId())
