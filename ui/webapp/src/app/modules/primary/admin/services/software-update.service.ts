@@ -108,4 +108,8 @@ export class SoftwareUpdateService {
   public restartServer() {
     return this.http.get(`${this.apiPath()}/restart`);
   }
+
+  public createStackDump() {
+    return this.http.get(`${this.apiPath()}/stackdump`);
+  }
 }

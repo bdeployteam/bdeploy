@@ -97,4 +97,8 @@ public interface SoftwareUpdateResource {
     @Path("/restart")
     public void restartServer();
 
+    @GET
+    @Path("/stackdump")
+    public void createStackDump();
+
 }

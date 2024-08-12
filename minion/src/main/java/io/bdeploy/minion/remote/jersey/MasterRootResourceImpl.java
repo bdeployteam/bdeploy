@@ -34,6 +34,7 @@ import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -579,6 +580,11 @@ public class MasterRootResourceImpl implements MasterRootResource {
         // never-ending restart-server action which will notify the web-ui of pending restart.
         af.run(Actions.RESTART_SERVER);
         root.getRestartManager().performRestart(1_000);
+    }
+
+    @Override
+    public void createStackDump() {
+        Threads.dump(root.getLogDir(), "Running-Threads.dump");
     }
 
     @Override

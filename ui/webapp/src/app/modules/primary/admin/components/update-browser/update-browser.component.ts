@@ -66,4 +66,12 @@ export class UpdateBrowserComponent implements OnInit {
         this.software.restartServer().subscribe();
       });
   }
+
+  protected createStackDump() {
+    this.software.createStackDump().subscribe(() => {
+      this.dialog
+        .info('Stack Dump', 'The stack dump was created and can be found on the server logging page', 'monitoring')
+        .subscribe();
+    });
+  }
 }
