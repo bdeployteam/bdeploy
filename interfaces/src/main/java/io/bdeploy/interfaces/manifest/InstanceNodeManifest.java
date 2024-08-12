@@ -56,7 +56,7 @@ public class InstanceNodeManifest {
      * @param hive the {@link BHive} to scan for available {@link InstanceNodeManifest}s.
      * @return a {@link SortedSet} with all available {@link InstanceNodeManifest}s.
      */
-    public static SortedSet<Manifest.Key> scan(BHive hive) {
+    public static SortedSet<Manifest.Key> scan(BHiveExecution hive) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
         for (Manifest.Key key : allKeys) {

@@ -1,10 +1,10 @@
 package io.bdeploy.launcher.cli.ui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +24,7 @@ public class WindowHelper {
      *
      * @param window the window to center
      */
-    public static void center(Window window) {
+    public static void center(Component window) {
         Dimension windowSize = window.getSize();
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Rectangle bounds = ge.getDefaultScreenDevice().getDefaultConfiguration().getBounds();

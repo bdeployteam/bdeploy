@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 
 import io.bdeploy.bhive.util.StorageHelper;
@@ -24,17 +25,16 @@ public class FormDataHelper {
         return fdmp;
     }
 
-    public static InputStream getStreamFromMultiPart(FormDataMultiPart fdmp) {
-        RuntimeAssert.assertEquals(1, fdmp.getBodyParts().size(), "Expecting exactly one body part");
-        return fdmp.getBodyParts().get(0).getEntityAs(InputStream.class);
+    public static InputStream getStreamFromMultiPart(MultiPart mp) {
+        RuntimeAssert.assertEquals(1, mp.getBodyParts().size(), "Expecting exactly one body part");
+        return mp.getBodyParts().get(0).getEntityAs(InputStream.class);
     }
 
-    public static <T> T getYamlEntityFromMultiPart(FormDataMultiPart fdmp, Class<T> target) {
-        try (InputStream is = getStreamFromMultiPart(fdmp)) {
+    public static <T> T getYamlEntityFromMultiPart(MultiPart mp, Class<T> target) {
+        try (InputStream is = getStreamFromMultiPart(mp)) {
             return StorageHelper.fromYamlStream(is, target);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot data from multi-part", e);
         }
     }
-
 }

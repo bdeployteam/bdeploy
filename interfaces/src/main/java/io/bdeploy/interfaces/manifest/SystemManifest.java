@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -76,7 +77,7 @@ public class SystemManifest {
     /**
      * Loads a specified {@link SystemManifest} version.
      */
-    public static SystemManifest of(BHive hive, Manifest.Key key) {
+    public static SystemManifest of(BHiveExecution hive, Manifest.Key key) {
         if (key == null) {
             return null;
         }
@@ -109,7 +110,7 @@ public class SystemManifest {
     /**
      * Deletes all versions of the {@link SystemManifest} with the given system ID.
      */
-    public static void delete(BHive hive, String systemId) {
+    public static void delete(BHiveExecution hive, String systemId) {
         String name = getManifestName(systemId);
         hive.execute(new ManifestListOperation().setManifestName(name))
                 .forEach(m -> hive.execute(new ManifestDeleteOperation().setToDelete(m)));
@@ -118,7 +119,7 @@ public class SystemManifest {
     /**
      * List all {@link SystemManifest}s. Only the latest version is returned for each system.
      */
-    public static SortedSet<Manifest.Key> scan(BHive hive) {
+    public static SortedSet<Manifest.Key> scan(BHiveExecution hive) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation().setManifestName(MANIFEST_PREFIX));
 

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
@@ -205,7 +206,7 @@ public class DownloadServiceImpl implements DownloadService {
      * @param tag the tag of the manifest to export
      * @return a registered token available for download
      */
-    public String createOriginalZipAndRegister(BHive hive, String name, String tag) {
+    public String createOriginalZipAndRegister(BHiveExecution hive, String name, String tag) {
         Manifest.Key key = new Manifest.Key(name, tag);
         String token = createNewToken();
         Path targetFile = getStoragePath(token);
@@ -235,7 +236,7 @@ public class DownloadServiceImpl implements DownloadService {
         return token;
     }
 
-    public String downloadBHiveContent(BHive hive, ObjectId id, String dirName) {
+    public String downloadBHiveContent(BHiveExecution hive, ObjectId id, String dirName) {
         String token = createNewToken();
         Path targetFile = getStoragePath(token);
 
@@ -269,7 +270,7 @@ public class DownloadServiceImpl implements DownloadService {
      * @param tag the tag of the manifest to export
      * @return a registered token available for download
      */
-    public String createManifestZipAndRegister(BHive hive, String name, String tag) {
+    public String createManifestZipAndRegister(BHiveExecution hive, String name, String tag) {
         Manifest.Key key = new Manifest.Key(name, tag);
 
         // Determine required objects

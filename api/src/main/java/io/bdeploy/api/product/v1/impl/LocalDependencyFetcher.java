@@ -6,6 +6,7 @@ import java.util.TreeSet;
 
 import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
@@ -28,7 +29,7 @@ public class LocalDependencyFetcher implements DependencyFetcher {
         return smks;
     }
 
-    public static Manifest.Key resolveSingleLocal(BHive hive, String spec, OperatingSystem os) {
+    public static Manifest.Key resolveSingleLocal(BHiveExecution hive, String spec, OperatingSystem os) {
         Manifest.Key tmp = null;
         if (spec.contains(":")) {
             tmp = Manifest.Key.parse(spec); // key without OS
@@ -56,5 +57,4 @@ public class LocalDependencyFetcher implements DependencyFetcher {
         }
         return result.getKey();
     }
-
 }
