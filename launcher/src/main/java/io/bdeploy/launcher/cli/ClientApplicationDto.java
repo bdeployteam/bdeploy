@@ -16,36 +16,6 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 public class ClientApplicationDto {
 
     /**
-     * Creates a new instance using the given configuration
-     */
-    public static ClientApplicationDto create(ClickAndStartDescriptor desc, ClientApplicationConfiguration cfg) {
-        ClientApplicationDto dto = new ClientApplicationDto();
-
-        dto.instanceGroupTitle = cfg.instanceGroupTitle;
-        if (dto.instanceGroupTitle == null) {
-            // Older versions do not provide a title so we fallback to the group
-            dto.instanceGroupTitle = desc.groupId;
-        }
-
-        InstanceNodeConfiguration instanceConfig = cfg.instanceConfig;
-        dto.instanceName = instanceConfig.name;
-        dto.purpose = instanceConfig.purpose;
-        dto.product = instanceConfig.product;
-
-        ProcessControlDescriptor processControlDescr = cfg.appDesc.processControl;
-        dto.supportsAutostart = processControlDescr.supportsAutostart;
-        dto.startScriptName = processControlDescr.startScriptName;
-        dto.fileAssocExtension = processControlDescr.fileAssocExtension;
-
-        ApplicationConfiguration appConfig = cfg.appConfig;
-        dto.id = appConfig.id;
-        dto.appName = appConfig.name;
-        dto.autostart = appConfig.processControl.autostart;
-
-        return dto;
-    }
-
-    /**
      * Globally unique identifier of the application
      */
     public String id;
@@ -94,4 +64,34 @@ public class ClientApplicationDto {
      * The file extension that the file association will be bound to
      */
     public String fileAssocExtension;
+
+    /**
+     * Creates a new instance using the given configuration
+     */
+    public static ClientApplicationDto create(ClickAndStartDescriptor desc, ClientApplicationConfiguration cfg) {
+        ClientApplicationDto dto = new ClientApplicationDto();
+
+        dto.instanceGroupTitle = cfg.instanceGroupTitle;
+        if (dto.instanceGroupTitle == null) {
+            // Older versions do not provide a title so we fallback to the group
+            dto.instanceGroupTitle = desc.groupId;
+        }
+
+        InstanceNodeConfiguration instanceConfig = cfg.instanceConfig;
+        dto.instanceName = instanceConfig.name;
+        dto.purpose = instanceConfig.purpose;
+        dto.product = instanceConfig.product;
+
+        ProcessControlDescriptor processControlDescr = cfg.appDesc.processControl;
+        dto.supportsAutostart = processControlDescr.supportsAutostart;
+        dto.startScriptName = processControlDescr.startScriptName;
+        dto.fileAssocExtension = processControlDescr.fileAssocExtension;
+
+        ApplicationConfiguration appConfig = cfg.appConfig;
+        dto.id = appConfig.id;
+        dto.appName = appConfig.name;
+        dto.autostart = appConfig.processControl.autostart;
+
+        return dto;
+    }
 }

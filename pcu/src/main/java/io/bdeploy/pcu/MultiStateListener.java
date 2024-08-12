@@ -13,8 +13,12 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  */
 public class MultiStateListener implements Consumer<ProcessStateChangeDto>, AutoCloseable {
 
-    private final ProcessController pc;
     private final Map<ProcessState, Runnable> actions = new EnumMap<>(ProcessState.class);
+    private final ProcessController pc;
+
+    private MultiStateListener(ProcessController pc) {
+        this.pc = pc;
+    }
 
     /**
      * Creates a new listener that gets notified whenever the state of the process is changed.
@@ -23,10 +27,6 @@ public class MultiStateListener implements Consumer<ProcessStateChangeDto>, Auto
         var listener = new MultiStateListener(pc);
         pc.addStatusListener(listener);
         return listener;
-    }
-
-    private MultiStateListener(ProcessController pc) {
-        this.pc = pc;
     }
 
     @Override
@@ -47,5 +47,4 @@ public class MultiStateListener implements Consumer<ProcessStateChangeDto>, Auto
             consumer.run();
         }
     }
-
 }

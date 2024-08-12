@@ -59,28 +59,26 @@ import io.bdeploy.common.util.ZipHelper;
  */
 public class BHive implements AutoCloseable, BHiveExecution {
 
-    private static final String POOLREF = ".poolref";
-
     private static final Logger log = LoggerFactory.getLogger(BHive.class);
+    private static final String POOLREF = ".poolref";
+    private static final LoadingCache<String, Object> syncCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES)
+            .build(CacheLoader.from(k -> new Object()));
 
     private final URI uri;
     private final FileSystem zipFs;
     private final Path objTmp;
     private final Path markerTmp;
     private final BHiveTransactions transactions;
-    private ObjectDatabase objects;
     private final ManifestDatabase manifests;
     private final ActivityReporter reporter;
     private final Auditor auditor;
-    private int parallelism = 4;
-    private boolean auditSlowOps = true;
-    private boolean isPooling = false;
 
     private Predicate<String> lockContentValidator = null;
     private Supplier<String> lockContentSupplier = null;
-
-    private static final LoadingCache<String, Object> syncCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(CacheLoader.from(k -> new Object()));
+    private int parallelism = 4;
+    private boolean auditSlowOps = true;
+    private boolean isPooling = false;
+    private ObjectDatabase objects;
 
     /**
      * Creates a new hive instance. Supports ZIP and directory hives.
@@ -376,10 +374,10 @@ public class BHive implements AutoCloseable, BHiveExecution {
      */
     public abstract static class Operation<T> implements Callable<T>, BHiveExecution {
 
+        private static final AtomicInteger fileOpNum = new AtomicInteger(0);
         private BHive hive;
         private ObjectManager mgr;
         private ExecutorService fileOps;
-        private static final AtomicInteger fileOpNum = new AtomicInteger(0);
 
         /** Counter how often an operation should be retried. 0 means no retries at all */
         private int retryCount = 0;

@@ -44,16 +44,15 @@ import jakarta.ws.rs.core.Response.Status;
 public class MinionStatusResourceImpl implements MinionStatusResource {
 
     private static final Logger log = LoggerFactory.getLogger(MinionStatusResourceImpl.class);
+    private static final ScheduledExecutorService monitorUpdate = Executors.newSingleThreadScheduledExecutor();
+
+    private final MinionMonitoringDto rollingMonitoring = new MinionMonitoringDto();
 
     @Inject
     private MinionRoot root;
 
     @Inject
     private BHiveRegistry registry;
-
-    private final MinionMonitoringDto rollingMonitoring = new MinionMonitoringDto();
-
-    private static final ScheduledExecutorService monitorUpdate = Executors.newSingleThreadScheduledExecutor();
 
     @Inject
     @Named(JerseyServer.START_TIME)

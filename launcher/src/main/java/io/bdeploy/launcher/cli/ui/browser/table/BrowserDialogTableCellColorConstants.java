@@ -7,9 +7,6 @@ import java.awt.Color;
  */
 class BrowserDialogTableCellColorConstants {
 
-    private BrowserDialogTableCellColorConstants() {
-    }
-
     static final Color DISABLED = Color.LIGHT_GRAY;
     static final Color ENABLED = Color.GREEN;
     static final Color PAY_ATTENTION = new Color(255, 255, 140);
@@ -18,4 +15,7 @@ class BrowserDialogTableCellColorConstants {
     static final Color PURPOSE_DEVELOPMENT = new Color(51, 170, 0);
     static final Color PURPOSE_TEST = new Color(51, 170, 255);
     static final Color PURPOSE_PRODUCTIVE = Color.WHITE;
+
+    private BrowserDialogTableCellColorConstants() {
+    }
 }

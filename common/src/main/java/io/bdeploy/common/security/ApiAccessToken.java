@@ -19,13 +19,13 @@ import java.util.concurrent.TimeUnit;
 public class ApiAccessToken {
 
     public static final String SYSTEM_USER = "BDeploy System";
+    public static final ScopedPermission ADMIN_PERMISSION = new ScopedPermission(ScopedPermission.Permission.ADMIN);
 
     String it; // issuedTo
     List<ScopedPermission> c = new ArrayList<>(); // permissions
     long ia; // issuedAt
     long vu; // validUntil
     boolean wt; // weakToken
-    public static final ScopedPermission ADMIN_PERMISSION = new ScopedPermission(ScopedPermission.Permission.ADMIN);
 
     public String getIssuedTo() {
         return it;
