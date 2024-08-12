@@ -9,7 +9,7 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class AttachmentUtils {
 
-    private static final String HASH = "#";
+    private static final String SEPARATOR = "#";
 
     private AttachmentUtils() {
     }
@@ -19,8 +19,8 @@ public class AttachmentUtils {
      *
      * @return The name of the attachment (excluding the file extension)
      */
-    public static String getAttachmentNameFromData(String name, String instanceId, String managedServerName) {
-        return name + HASH + instanceId + HASH + managedServerName;
+    public static String getAttachmentNameFromData(String groupId, String instanceId, String managedServerName) {
+        return groupId + SEPARATOR + instanceId + SEPARATOR + managedServerName;
     }
 
     /**
@@ -50,7 +50,7 @@ public class AttachmentUtils {
      */
     public static String[] getAttachmentDataFromName(Path path) {
         String fileName = path.getFileName().toString();
-        String[] split = FilenameUtils.removeExtension(fileName).split(HASH);
+        String[] split = FilenameUtils.removeExtension(fileName).split(SEPARATOR);
         if (split.length != 3) {
             throw new IllegalArgumentException("Filename " + fileName + " could not be parsed.");
         }
