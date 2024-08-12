@@ -537,7 +537,7 @@ public class ProductUpdateService {
         try {
             stringVal = rawExpr == null ? paramValue.value.value : TemplateHelper.process(rawExpr, resolver);
         } catch (IllegalArgumentException e) {
-            // some expansion was not good;
+            // some expansion was not good
             result.add(
                     new ApplicationValidationDto(process.id, paramDesc.id, "Cannot resolve link expressions: " + e.getMessage()));
             return;

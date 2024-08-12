@@ -120,7 +120,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     }
 
     protected SecurityContext getLocalContext() {
-        return null; // always null for the CLI. The server will infer the context from the token;
+        return null; // Always null for the CLI. The server will infer the context from the token.
     }
 
     private RemoteService createServiceFromLLM(RemoteConfig rc, boolean optional, LocalLoginManager llm) {
