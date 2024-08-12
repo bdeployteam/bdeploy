@@ -41,6 +41,9 @@ public class ProductDescriptor {
     @JsonPropertyDescription("A relative path (from product-info.yaml) to a directory containing plugins which are to be made available dynamically when configuring an instance using this product.")
     public String pluginFolder;
 
+    @JsonPropertyDescription("A list of relative paths to ('instance-variable-definitions.yaml') YAML files containing instance variable definitions.")
+    public List<String> instanceVariableDefinitions = new ArrayList<>();
+
     @JsonPropertyDescription("A list of relative paths to ('instance-template.yaml') YAML files containing instance templates.")
     public List<String> instanceTemplates = new ArrayList<>();
 

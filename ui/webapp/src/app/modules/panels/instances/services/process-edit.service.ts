@@ -17,11 +17,11 @@ import {
   ParameterConfiguration,
   ParameterConfigurationTarget,
   ParameterDescriptor,
-  ParameterType,
   ProcessControlConfiguration,
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateParameter,
+  VariableType,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -170,7 +170,7 @@ export class ProcessEditService {
         if (own) {
           own.preRendered = this.preRenderParameter(param, own.value);
           own.target =
-            param.type === ParameterType.ENVIRONMENT
+            param.type === VariableType.ENVIRONMENT
               ? ParameterConfigurationTarget.ENVIRONMENT
               : ParameterConfigurationTarget.COMMAND;
         }
@@ -282,7 +282,7 @@ export class ProcessEditService {
       return [strValue];
     }
 
-    if (desc.type === ParameterType.ENVIRONMENT) {
+    if (desc.type === VariableType.ENVIRONMENT) {
       return [desc.parameter, strValue];
     }
 
@@ -294,7 +294,7 @@ export class ProcessEditService {
         return [desc.parameter, strValue];
       }
       return [desc.parameter + desc.valueSeparator + strValue];
-    } else if (desc.type === ParameterType.BOOLEAN && strValue === 'false') {
+    } else if (desc.type === VariableType.BOOLEAN && strValue === 'false') {
       return [];
     }
     return [desc.parameter];
@@ -327,7 +327,7 @@ export class ProcessEditService {
             p.value = values[id];
             p.preRendered = this.preRenderParameter(desc, p.value);
             p.target =
-              desc.type === ParameterType.ENVIRONMENT
+              desc.type === VariableType.ENVIRONMENT
                 ? ParameterConfigurationTarget.ENVIRONMENT
                 : ParameterConfigurationTarget.COMMAND;
           }
@@ -381,7 +381,7 @@ export class ProcessEditService {
           pinned: false,
           preRendered: this.preRenderParameter(p, val),
           target:
-            p.type === ParameterType.ENVIRONMENT
+            p.type === VariableType.ENVIRONMENT
               ? ParameterConfigurationTarget.ENVIRONMENT
               : ParameterConfigurationTarget.COMMAND,
         };
@@ -458,9 +458,9 @@ export class ProcessEditService {
       case ParameterConditionType.END_WITH:
         return value.endsWith(param.condition.value);
       case ParameterConditionType.BE_EMPTY:
-        return value.trim().length <= 0 || (targetType === ParameterType.BOOLEAN && value.trim() === 'false');
+        return value.trim().length <= 0 || (targetType === VariableType.BOOLEAN && value.trim() === 'false');
       case ParameterConditionType.BE_NON_EMPTY:
-        return value.trim().length > 0 && !(targetType === ParameterType.BOOLEAN && value.trim() === 'false');
+        return value.trim().length > 0 && !(targetType === VariableType.BOOLEAN && value.trim() === 'false');
     }
   }
 }

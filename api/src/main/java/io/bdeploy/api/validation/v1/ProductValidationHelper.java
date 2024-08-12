@@ -129,7 +129,7 @@ public class ProductValidationHelper {
             prod = StorageHelper.fromYamlStream(is, ProductDescriptor.class);
             List<String> paths = Stream
                     .of(prod.applicationTemplates, prod.instanceTemplates, prod.instanceVariableTemplates,
-                            prod.parameterTemplates)
+                            prod.parameterTemplates, prod.instanceVariableDefinitions)
                     .filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
 
             for (String pathStr : paths) {

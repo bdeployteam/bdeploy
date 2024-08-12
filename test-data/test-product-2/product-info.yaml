@@ -1,25 +1,28 @@
 # yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/productInfoYaml
 
-name: "Demo Product"
-product: "io.bdeploy/demo"
+name: 'Demo Product'
+product: 'io.bdeploy/demo'
 vendor: BDeploy Team
 applications:
-- "server-app"
-- "client-app"
+  - 'server-app'
+  - 'client-app'
 configTemplates: config
 
 instanceTemplates:
-- "product-template.yaml"
-- "override-template.yaml"
+  - 'product-template.yaml'
+  - 'override-template.yaml'
+
+instanceVariableDefinitions:
+  - 'instance-variable-definitions.yaml'
 
 applicationTemplates:
-- "app-templates/server-with-sleep.yaml"
-- "app-templates/server-with-template.yaml"
+  - 'app-templates/server-with-sleep.yaml'
+  - 'app-templates/server-with-template.yaml'
 
 parameterTemplates:
-- "param-templates/shared.yaml"
+  - 'param-templates/shared.yaml'
 
 instanceVariableTemplates:
-- "variable-template.yaml"
+  - 'variable-template.yaml'
 
-versionFile: "product-version.yaml"
+versionFile: 'product-version.yaml'

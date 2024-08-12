@@ -20,8 +20,8 @@ import {
   InstanceConfigurationDto,
   LinkedValueConfiguration,
   ManifestKey,
-  ParameterType,
   SystemConfiguration,
+  VariableType,
 } from 'src/app/models/gen.dtos';
 import { getRenderPreview } from '../../utils/linked-values.utils';
 import { bdValidationMessage } from '../../validators/messages';
@@ -50,14 +50,14 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   @Input() disabled: boolean;
   @Input() editorDisabled: boolean;
   @Input() defaultValue: LinkedValueConfiguration;
-  private _type: ParameterType;
-  @Input() set type(v: ParameterType) {
+  private _type: VariableType;
+  @Input() set type(v: VariableType) {
     this._type = v;
     if (this.isBoolean() && !this.isLink() && !this.internalValue.value) {
       this.internalValue.value = 'false';
     }
   }
-  get type(): ParameterType {
+  get type(): VariableType {
     return this._type;
   }
   @Input() customEditor: string;
@@ -115,7 +115,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     });
 
     // init with lock in case of password - which is the default to prevent timing issues, reset for all others.
-    if (this.type !== ParameterType.PASSWORD || this.customEditor) {
+    if (this.type !== VariableType.PASSWORD || this.customEditor) {
       this.passwordLock = false;
     }
   }
@@ -189,7 +189,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   }
 
   protected isBoolean() {
-    return this.type === ParameterType.BOOLEAN;
+    return this.type === VariableType.BOOLEAN;
   }
 
   protected isLink() {
@@ -200,7 +200,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   }
 
   protected isPort() {
-    return this.type === ParameterType.CLIENT_PORT || this.type === ParameterType.SERVER_PORT;
+    return this.type === VariableType.CLIENT_PORT || this.type === VariableType.SERVER_PORT;
   }
 
   protected getInputType() {
@@ -208,11 +208,11 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
       return undefined;
     }
     switch (this.type) {
-      case ParameterType.CLIENT_PORT:
-      case ParameterType.SERVER_PORT:
-      case ParameterType.NUMERIC:
+      case VariableType.CLIENT_PORT:
+      case VariableType.SERVER_PORT:
+      case VariableType.NUMERIC:
         return 'number';
-      case ParameterType.PASSWORD:
+      case VariableType.PASSWORD:
         return 'password';
     }
   }
@@ -236,15 +236,15 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
     // check type;
     switch (this.type) {
-      case ParameterType.BOOLEAN:
+      case VariableType.BOOLEAN:
         if (val !== 'true' && val !== 'false') {
           console.log(`Value is a boolean, but the value is not true or false, resetting to default.`);
           reset = true;
         }
         break;
-      case ParameterType.NUMERIC:
-      case ParameterType.CLIENT_PORT:
-      case ParameterType.SERVER_PORT:
+      case VariableType.NUMERIC:
+      case VariableType.CLIENT_PORT:
+      case VariableType.SERVER_PORT:
         if (isNaN(Number(val))) {
           console.log(`Value is not a number: ${val}, resetting to default.`);
           reset = true;
@@ -283,14 +283,14 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   }
 
   protected makeValueLink() {
-    if (this.type === ParameterType.PASSWORD) {
+    if (this.type === VariableType.PASSWORD) {
       this.doChangeLink(''); // DON'T ever apply a password to the plain text editor, rather clear it.
     }
     this.doChangeLink(this.internalValue?.value);
   }
 
   protected makeValuePlain() {
-    if (this.type === ParameterType.PASSWORD) {
+    if (this.type === VariableType.PASSWORD) {
       this.doChangeValue('');
       return;
     }
