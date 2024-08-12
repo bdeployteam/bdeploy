@@ -69,7 +69,7 @@ public class ObjectScope implements Comparable<ObjectScope> {
 
         // the scope matches. the score is the percentage of present scope parts, so compare length.
         // if our scope is longer than the compare scope we limit the match to 100 - full match.
-        return Math.min(100, Math.round((100f * other.scope.size()) / scope.size()));
+        return Math.min(100, (int) Math.round(100.0 * other.scope.size() / scope.size()));
     }
 
     public int length() {
