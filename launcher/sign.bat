@@ -1,10 +1,10 @@
 @echo off
 
-rem This script will sign all BDeploy executables
+rem This script will sign all BDeploy executables.
 rem This only works if the code signing tools are installed on this windows machine.
 rem The EV certificate requires a hardware token in addition to the certificate.
 
-rem Prerequisites: 
+rem Prerequisites:
 rem Connect the hardware token
 rem Download Windows 10 SDK:  https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/
 rem Download SafeNet Drivers: https://support.globalsign.com/ssl/ssl-certificates-installation/safenet-drivers#Windows
