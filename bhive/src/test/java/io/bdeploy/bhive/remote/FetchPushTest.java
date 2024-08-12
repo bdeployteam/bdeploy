@@ -308,4 +308,22 @@ class FetchPushTest extends RemoteHiveTestBase {
         }
     }
 
+    @Test
+    void fetchWithRemovedManifest(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+        try (BHive fetchHive = new BHive(tmp.resolve("hive").toUri(), null, r)) {
+            FetchOperation op = new FetchOperation();
+            op.setRemote(svc);
+            op.addManifest(new Manifest.Key("does-not-exist", "v1"));
+
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics tx = fetchHive.execute(op);
+                assertEquals(0, tx.sumManifests);
+            }
+
+            // another case would be that the manifest "disappears" in between the rh.getManifestInventory() call in FetchOperation
+            // and the initiation of the actual transfer from the remote (which checks again). However this is not unit testable
+            // due to the atomicity of the operation.
+        }
+    }
+
 }
