@@ -64,7 +64,7 @@ public class InteractiveShell extends ConfiguredCliTool<ShellConfig> {
                 }
             }
 
-            return null; // the shell itself has no result. the commands to have.
+            return null; // The shell itself has no result. Only the individual commands do.
         } finally {
             ToolBase.setFailWithException(false);
         }
