@@ -421,9 +421,9 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         DataTable table = createDataTable();
         table.setCaption("Instances of " + config.instanceGroup() + " on " + remote.getUri());
 
-        table.column("ID", 15).column("Name *", 20).column(new DataTableColumn("Version", "Ver.", 4)).column("Installed", 9)
+        table.column("ID", 15).column("Name", 20).column(new DataTableColumn("Version", "Ver.", 4)).column("Installed", 9)
                 .column("Active", 6).column("Purpose", 11).column("Product", 25).column("Product Version", 20)
-                .column("System", 20).column("Description *", 40);
+                .column("System", 20).column("Description", 40);
 
         if (central) {
             table.column("Target Server", 20);
