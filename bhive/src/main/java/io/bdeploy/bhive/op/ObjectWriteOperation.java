@@ -10,7 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CountingOutputStream;
 
@@ -32,6 +36,7 @@ import io.bdeploy.common.util.StreamHelper;
 @ReadOnlyOperation
 public class ObjectWriteOperation extends BHive.Operation<Long> {
 
+    public static final Logger log = LoggerFactory.getLogger(ObjectWriteOperation.class);
     public static final int BUFFER_SIZE = 8192;
 
     @AuditWith(AuditStrategy.COLLECTION_PEEK)
@@ -45,10 +50,23 @@ public class ObjectWriteOperation extends BHive.Operation<Long> {
     public Long call() throws Exception {
         RuntimeAssert.assertNotNull(output);
 
+        Set<Manifest.Key> missing = new TreeSet<>();
+
         for (Manifest.Key key : new ArrayList<>(manifests)) {
+            if (!Boolean.TRUE.equals(execute(new ManifestExistsOperation().setManifest(key)))) {
+                // manifest is missing for whatever reason, we warn about it and don't send anything related to it.
+                // the caller can find manifest keys which are not in the result set but in the request to figure out
+                // if certain manifests where left out.
+                log.warn("Cannot send manifest {} because it is missing from BHive", key);
+                missing.add(key);
+                continue;
+            }
             Collection<Key> refs = execute(new ManifestRefScanOperation().setAllowMissingObjects(true).setManifest(key)).values();
             manifests.addAll(refs);
         }
+
+        // filter out missing manifests to avoid failure in this case.
+        manifests.removeAll(missing);
 
         // Collect the entire size that we are going to transfer.
         // ATTENTION: insertion order is important.

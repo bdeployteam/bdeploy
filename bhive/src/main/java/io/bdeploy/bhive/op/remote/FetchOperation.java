@@ -62,7 +62,8 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
 
                 for (Manifest.Key key : manifests) {
                     if (!manifest2Tree.containsKey(key)) {
-                        throw new IllegalArgumentException("Manifest not found: " + key);
+                        log.warn("Requested manifest not found anymore on remote: {}", key);
+                        continue;
                     }
                     if (getManifestDatabase().hasManifest(key)) {
                         continue;
