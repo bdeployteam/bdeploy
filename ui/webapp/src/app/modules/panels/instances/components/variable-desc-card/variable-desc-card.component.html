@@ -1,4 +1,35 @@
-<mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
+<mat-card appearance="outlined" *ngIf="!!descriptor" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
+  <div>Parameter <strong>{{ descriptor.name }}</strong><em *ngIf="descriptor.fixed"> (fixed)</em></div>
+  <div class="grid grid-cols-[100px_auto] gap-1 p-2.5">
+    <strong><div>Name:</div></strong>
+    <div>{{ descriptor.name }}</div>
+    <strong><div>Description:</div></strong>
+    <div>{{ descriptor.longDescription }}</div>
+    <strong><div>Internal ID:</div></strong>
+    <div>
+      <code>{{ descriptor.id }}</code>
+    </div>
+    <strong><div>Type:</div></strong>
+    <div>
+      <code>{{ descriptor.type }}</code>
+    </div>
+    <strong><div>Default Value:</div></strong>
+    <div class="break-all">
+      <code *ngIf="!!descriptor.defaultValue?.value; else defaultIsExpression"
+        >{{ descriptor.defaultValue ? (descriptor.type === 'PASSWORD' ?
+        '*'.repeat(descriptor.defaultValue?.value?.length) : descriptor.defaultValue?.value) : '(none)' }}</code
+      >
+      <ng-template #defaultIsExpression>
+        <code
+          >{{ descriptor.defaultValue ? (descriptor.type === 'PASSWORD' ?
+          '*'.repeat(descriptor.defaultValue?.linkExpression?.length) : descriptor.defaultValue?.linkExpression) :
+          '(none)' }}</code
+        >
+      </ng-template>
+    </div>
+  </div>
+</mat-card>
+<mat-card *ngIf="!descriptor" appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
   <div>Variable <strong>{{ variable?.id }}</strong></div>
   <div class="p-2.5 grid grid-cols-[100px_auto] gap-1">
     <strong><div>Description:</div></strong>

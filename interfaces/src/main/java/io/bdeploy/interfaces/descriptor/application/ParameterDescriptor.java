@@ -43,9 +43,6 @@ public class ParameterDescriptor extends VariableDescriptor implements Comparabl
     @JsonPropertyDescription("Whether this parameter is mandatory. Optional parameters (the default) need to be added by a template or by the user explicitly through the configuration UI. Defaults to 'false'")
     public boolean mandatory = false;
 
-    @JsonPropertyDescription("Whether this parameter cannot be changed by the user (uses a fixed value). If set to true, a defaultValue must be specified if required. Defaults to 'false'.")
-    public boolean fixed = false;
-
     @JsonPropertyDescription("A condition which must be met for this parameter to be configurable/visible to the user.")
     public ParameterCondition condition;
 

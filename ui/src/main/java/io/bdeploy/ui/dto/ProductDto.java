@@ -10,6 +10,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
 public class ProductDto implements Comparable<ProductDto> {
@@ -23,6 +24,7 @@ public class ProductDto implements Comparable<ProductDto> {
     public List<FlattenedInstanceTemplateConfiguration> instanceTemplates;
     public List<FlattenedApplicationTemplateConfiguration> applicationTemplates;
     public SortedSet<Manifest.Key> references;
+    public List<VariableDescriptor> instanceVariables;
 
     public static ProductDto create(ProductManifest manifest) {
         ProductDto dto = new ProductDto();
@@ -36,6 +38,7 @@ public class ProductDto implements Comparable<ProductDto> {
         dto.applicationTemplates = manifest.getApplicationTemplates();
         // no parameter templates intentionally - they are expanded in ApplicationManifest
         dto.references = manifest.getReferences();
+        dto.instanceVariables = manifest.getInstanceVariables();
         return dto;
     }
 

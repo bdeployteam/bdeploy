@@ -1,0 +1,105 @@
+.local-headers-align .mat-expansion-panel-header-title,
+.local-headers-align .mat-expansion-panel-header-description {
+  flex-basis: 0;
+  align-items: center;
+}
+
+.local-headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.local-headers-align .mat-expansion-panel-header .mat-content {
+  overflow: visible;
+}
+
+.local-select-wrapper {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  top: 5px;
+  width: 45px;
+  height: 42px;
+
+  background-color: var(--bd-bg-disabled);
+
+  border-radius: 3px 0px 0px 3px;
+}
+
+.local-toggle-wrapper {
+  position: relative;
+  top: 5px;
+  width: 30px;
+  height: 42px;
+
+  background-color: var(--bd-bg-disabled);
+
+  border-radius: 3px 0px 0px 3px;
+}
+
+.local-add-remove:hover {
+  color: var(--bd-accent);
+}
+
+.local-edit-desc {
+  position: relative;
+  top: -4px;
+}
+
+.local-edit-desc > mat-icon {
+  position: relative;
+  top: 8px;
+
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.local-pin-inactive {
+  color: var(--bd-text-disabled);
+}
+
+.local-pin-inactive:hover {
+  color: var(--bd-text);
+}
+
+.local-pin-active {
+  color: var(--bd-primary);
+}
+
+.local-form-input .local-hover-button:not(.local-pin-active) {
+  display: none !important;
+}
+
+.local-form-input:hover .local-hover-button {
+  display: block !important;
+}
+
+.local-form-input-actions > * {
+  margin-left: 10px;
+}
+
+.local-toggle-group {
+  height: 21px;
+}
+
+.local-toggle-group .mat-button-toggle-label-content {
+  padding: 2px 5px !important;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.local-toggle-group .mat-button-toggle-checked:not(.mat-button-toggle-disabled) {
+  background-color: var(--bd-accent);
+  color: var(--bd-accent-contrast) !important;
+}
+
+.local-toggle-group mat-icon {
+  font-size: 16px !important;
+  width: 16px;
+  height: 16px;
+}

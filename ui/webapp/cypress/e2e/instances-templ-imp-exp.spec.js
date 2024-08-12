@@ -143,11 +143,15 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-instance-variables', () => {
-      cy.contains('tr', '5') // template var sleep value. cannot search by var name as it is used in another expansion.
-        .should('exist')
-        .within(() => {
-          cy.get('button[data-cy=Edit]').click();
+      cy.contains('mat-expansion-panel', 'Custom Variables').within(() => {
+        cy.get('mat-panel-title').click();
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+
+        cy.get('app-bd-form-input[name="param.xshared_val"]').within(() => {
+          cy.get('input[name="param.xshared_val"]').should('have.value', '5');
+          cy.contains('mat-icon', 'edit').click({ force: true });
         });
+      });
 
       cy.contains('app-bd-notification-card', 'Edit Variable').within(() => {
         cy.fillFormInput('value_val', '7');

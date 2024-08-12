@@ -85,21 +85,6 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [panel]="true" header="Instance Variables" [route]="['..']">
     <div class="flex-auto"></div>
-    <app-bd-button text="Add" icon="add" (click)="onAdd(addTemplate)"></app-bd-button>
-    <app-bd-button
-      text="Copy Selected"
-      icon="content_copy"
-      [collapsed]="false"
-      (click)="doCopy()"
-      [disabled]="!checked?.length"
-    ></app-bd-button>
-    <app-bd-button
-      text="Paste"
-      icon="content_paste_go"
-      [collapsed]="false"
-      [disabled]="!clipboardVars?.length"
-      (click)="doPaste()"
-    ></app-bd-button>
     <app-bd-button
       text="Apply"
       icon="check"
@@ -113,12 +98,160 @@
   <app-bd-dialog-content>
     <div class="flex justify-center">
       <div class="flex-auto flex flex-col gap-2.5">
-        <app-bd-data-table
-          [records]="records"
-          [columns]="columns"
-          [checkMode]="true"
-          [(checked)]="checked"
-        ></app-bd-data-table>
+        <mat-accordion [multi]="true" class="local-headers-align">
+          <ng-container *ngFor="let group of groups$ | async; trackBy: doTrack">
+            <mat-expansion-panel #panel *ngIf="hasGroupSearchMatch(group)">
+              <mat-expansion-panel-header>
+                <mat-panel-title> {{ group.name }} </mat-panel-title>
+                <mat-panel-description *ngIf="!(narrow$ | async)">
+                  <span>{{ getValueCount(group) }}/{{ group.pairs.length }} variables shown.</span>
+                  <span *ngIf="groupForm.invalid && !panel.expanded" class="bd-warning-text text-xs"
+                    >Validation Failed</span
+                  >
+                  <div *ngIf="panel.expanded" class="flex gap-1">
+                    <app-bd-button
+                      *ngIf="group.isCustom"
+                      text="Copy Selected"
+                      icon="content_copy"
+                      (click)="doCopy()"
+                      [disabled]="!checked?.length || !group.isSelectMode"
+                      appClickStopPropagation
+                    ></app-bd-button>
+                    <app-bd-button
+                      *ngIf="group.isCustom"
+                      text="Paste"
+                      icon="content_paste_go"
+                      [disabled]="!clipboardVars?.length"
+                      (click)="doPaste()"
+                      appClickStopPropagation
+                    ></app-bd-button>
+                    <app-bd-button
+                      *ngIf="group.isCustom"
+                      text="Add Custom Variable"
+                      icon="add"
+                      (click)="onAddCustomVariable(addTemplate)"
+                      appClickStopPropagation
+                    ></app-bd-button>
+                    <app-bd-button
+                      *ngIf="group.isCustom"
+                      [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Variables'"
+                      [icon]="group.isSelectMode ? 'check' : 'tune'"
+                      tooltip="below"
+                      [disabled]="!group.pairs.length && !group.isSelectMode"
+                      [isToggle]="true"
+                      [(toggle)]="group.isSelectMode"
+                      appClickStopPropagation
+                    ></app-bd-button>
+                  </div>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <form #groupForm="ngForm" class="flex flex-col">
+                <div *ngIf="group.isSelectMode" class="flex justify-start items-center pt-5 self-center bd-hint-text">
+                  <span class="local-edit-desc">
+                    Use the <mat-icon>delete</mat-icon> button to remove variables. When you are done, press the
+                    <mat-icon>check</mat-icon> button to confirm.
+                  </span>
+                </div>
+                <div
+                  class="pt-5 grid grid-cols-1 gap-x-2.5 gap-y-1"
+                  [ngClass]="getValueCount(group) <= 1 && !group.isSelectMode ? [] : ['md:grid-cols-2']"
+                >
+                  <!-- Empty group hint -->
+                  <div *ngIf="getValueCount(group) === 0 && !group.isSelectMode" class="bd-hint-text">
+                    No variables are currently configured in this group.
+                  </div>
+
+                  <!-- Single variable -->
+                  <ng-container *ngFor="let p of sortPairs(group.pairs)">
+                    <div
+                      [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
+                      class="flex"
+                      *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
+                    >
+                      <ng-template #popup>
+                        <app-variable-desc-card
+                          [descriptor]="p.descriptor"
+                          [variable]="p.value"
+                        ></app-variable-desc-card>
+                      </ng-template>
+
+                      <!-- Checkbox for select mode... -->
+                      <div
+                        *ngIf="group.isSelectMode"
+                        class="flex flex-col justify-center items-center"
+                        [class.local-select-wrapper]="group.isCustom"
+                        [class.local-toggle-wrapper]="!group.isCustom"
+                      >
+                        <mat-checkbox
+                          *ngIf="group.isCustom"
+                          [checked]="isChecked(p)"
+                          (change)="toggleCheck(p)"
+                          appClickStopPropagation
+                          class="truncate local-table-checkbox"
+                        ></mat-checkbox>
+                        <mat-icon
+                          *ngIf="group.isCustom"
+                          (click)="onRemoveCustomVariable(p)"
+                          matTooltip="Click to remove this custom variable"
+                          [matTooltipShowDelay]="500"
+                          matRipple
+                          class="local-add-remove cursor-pointer"
+                          >delete</mat-icon
+                        >
+                      </div>
+
+                      <ng-template #actions>
+                        <ng-container *ngIf="!group.isSelectMode">
+                          <mat-icon
+                            *ngIf="group.isCustom"
+                            class="local-hover-button cursor-pointer"
+                            matTooltip="Click to edit the variable"
+                            [matTooltipShowDelay]="500"
+                            (click)="onEditCustomVariable(p, editTemplate)"
+                            appClickStopPropagation
+                            >edit</mat-icon
+                          >
+                        </ng-container>
+                      </ng-template>
+
+                      <!-- editor for the linked value, including custom editor plugins, etc. -->
+                      <app-bd-value-editor
+                        [label]="!!p.descriptor ? p.descriptor.name : p.value.id"
+                        [name]="p.value.id"
+                        [ngModel]="p.value?.value"
+                        (ngModelChange)="doChangeVariable(p, $event)"
+                        [defaultValue]="p.descriptor?.defaultValue"
+                        errorDisplay="immediate"
+                        [required]="!!p.descriptor"
+                        [appBdPopup]="popup"
+                        appBdPopupTrigger="hover"
+                        [appBdPopupDelay]="1000"
+                        appBdPopupPosition="above-right"
+                        [disabled]="group.isSelectMode || p.descriptor?.fixed"
+                        [editorDisabled]="!p.editorEnabled"
+                        [suggested]="p.descriptor?.suggestedValues"
+                        class="local-form-input flex-auto"
+                        [instance]="instance"
+                        [system]="system"
+                        [applications]="apps"
+                        [type]="p.descriptor?.type || p.value.type"
+                        [completionPrefixes]="completionPrefixes"
+                        [completions]="completions"
+                        [customEditor]="p.descriptor?.customEditor"
+                        (customEditorLoaded)="doSetCustomEditorState(p, $event)"
+                        [product]="instance?.config?.product"
+                        [group]="(groups.current$ | async)?.name"
+                        [appServerIssuesValidator]="p.value ? p.value.id : p.descriptor.id"
+                        [actions]="actions"
+                      >
+                      </app-bd-value-editor>
+                    </div>
+                  </ng-container>
+                </div>
+              </form>
+            </mat-expansion-panel>
+          </ng-container>
+        </mat-accordion>
       </div>
     </div>
   </app-bd-dialog-content>

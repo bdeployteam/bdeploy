@@ -79,7 +79,12 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-instance-variables', () => {
-      cy.get('button[data-cy^="Add"]').click();
+      cy.contains('mat-expansion-panel', 'Custom Variables').within(() => {
+        cy.get('mat-panel-title').click();
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+        cy.get('button[data-cy^="Add Custom Variable"]').click();
+      });
+
       cy.contains('app-bd-notification-card', 'Add Variable').within(() => {
         cy.fillFormInput('id', 'io.bdeploy.var');
         cy.fillFormInput('value_val', 'TheValue');
