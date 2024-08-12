@@ -9,7 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.Threads;
@@ -63,7 +62,6 @@ public class BaseDialog extends JFrame {
     /**
      * Blocks the current thread until the main window is closed.
      */
-    @SuppressFBWarnings(value = { "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" })
     public int waitForExit() {
         Threads.wait(lock, this::isShowing);
         return closeReason;

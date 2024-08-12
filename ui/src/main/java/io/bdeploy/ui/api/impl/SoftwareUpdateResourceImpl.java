@@ -372,4 +372,10 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         root.restartServer();
     }
 
+    @Override
+    public void createStackDump() {
+        CommonUpdateResource root = ResourceProvider.getResource(minion.getSelf(), CommonUpdateResource.class, context);
+        root.createStackDump();
+    }
+
 }

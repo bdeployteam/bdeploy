@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import com.codahale.metrics.Timer;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.audit.NullAuditor;
@@ -44,7 +43,6 @@ import io.bdeploy.common.util.VersionHelper;
 /**
  * Main CLI entry point base class.
  */
-@SuppressFBWarnings
 public abstract class ToolBase {
 
     private static final String[] LOGO = { //
@@ -497,7 +495,6 @@ public abstract class ToolBase {
      *
      * @see Configuration
      */
-    @SuppressFBWarnings
     public abstract static class ConfiguredCliTool<T extends Annotation> extends CliTool {
 
         private final Class<T> configClass;

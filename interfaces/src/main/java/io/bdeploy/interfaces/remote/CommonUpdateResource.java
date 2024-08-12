@@ -48,4 +48,11 @@ public interface CommonUpdateResource {
     @Path("/restart")
     public void restartServer();
 
+    /**
+     * Create a stackdump of the server.
+     */
+    @GET
+    @Path("/stackdump")
+    public void createStackDump();
+
 }
