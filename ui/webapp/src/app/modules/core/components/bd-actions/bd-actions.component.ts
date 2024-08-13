@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Observable, forkJoin, map, of, skipWhile, switchMap, take, timer } from 'rxjs';
 import { ActionBroadcastDto, ActionExecution, ActionScope } from 'src/app/models/gen.dtos';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ActionsService } from '../../services/actions.service';
 
@@ -11,6 +12,7 @@ import { ActionsService } from '../../services/actions.service';
 })
 export class BdActionsComponent {
   private readonly instances = inject(InstancesService);
+  private readonly groups = inject(GroupsService);
   protected readonly actions = inject(ActionsService);
 
   // to update duration values every second.
@@ -28,6 +30,12 @@ export class BdActionsComponent {
     } else if (dto.scope === ActionScope.BHIVE) {
       return of([dto.description, dto.action.bhive, dto.action.item]).pipe(map(filteredJoiner));
     } else {
+      // if we are in global scope (i.e. not inside an instance group), we cannot rely on instance information at all :(
+      // thus we need to show the raw data. This is ok, since we're only showing those to admins anyway!
+      if (!this.groups.current$.value) {
+        return of([dto.description, dto.action.bhive, dto.action.instance, dto.action.item]).pipe(map(filteredJoiner));
+      }
+
       // this is the observable to wait for instance to be loaded.
       const inst = this.instances.instances$.pipe(
         skipWhile((i) => !i),
