@@ -36,7 +36,7 @@ import io.bdeploy.common.util.StreamHelper;
 @ReadOnlyOperation
 public class ObjectWriteOperation extends BHive.Operation<Long> {
 
-    public static final Logger log = LoggerFactory.getLogger(ObjectWriteOperation.class);
+    private static final Logger log = LoggerFactory.getLogger(ObjectWriteOperation.class);
     public static final int BUFFER_SIZE = 8192;
 
     @AuditWith(AuditStrategy.COLLECTION_PEEK)
