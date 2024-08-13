@@ -50,14 +50,12 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         String process();
 
         @Help(value = "Show the process parameters for the given process", arg = false)
-        boolean showParameters()
-
-        default false;
+        boolean showParameters() default false;
 
         @Help("Set the given parameter. If there is no parameter descriptor with the given ID, a custom parameter will be added using --predecessor to determine the location")
         String set();
 
-        @Help("The value to set the parmeter to")
+        @Help("The value to set the parameter to")
         String value();
 
         @Help("In case of adding a custom parameter this must be provided to find the correct insertion point for the custom parameter and must reference an existing and configured parameter ID")
@@ -111,46 +109,37 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         return createNoOp();
     }
 
-    private RenderableResult doRemoveParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
-            InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
+    private RenderableResult doShowParameters(ApplicationConfiguration app, ApplicationDto dto) {
+        DataTable table = createDataTable();
 
-        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.remove()));
-        ParameterDescriptor desc = dto.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(config.remove()))
-                .findFirst().orElse(null);
+        table.setCaption("Start Parameters of " + app.name + " (" + app.id + ")");
+        table.column("ID", 25).column("Name", 25).column("Value", 30).column("Type", 12).column("Custom", 6).column("Fixed", 5)
+                .column("Mandatory", 9).column("Default", 20);
 
-        checkCanRemove(desc);
-        doRemoveParamterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
-        checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
+        for (var param : app.start.parameters) {
+            var desc = dto.descriptor.startCommand.parameters.stream().filter(d -> d.id.equals(param.id)).findFirst()
+                    .orElse(null);
 
-        return doUpdateInstance(ir, instance, nodecfg);
-    }
+            var custom = desc == null;
+            var mandatory = false;
+            var fixed = false;
+            String name = null;
+            String defVal = null;
+            var type = VariableType.STRING;
 
-    private void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
-            InstanceNodeConfigurationDto node, ParameterConfiguration toRemove) {
-        cfg.start.parameters.remove(toRemove);
-        ParameterDescriptor desc = appDesc.startCommand.parameters.stream().filter(p -> p.id.equals(toRemove.id)).findAny()
-                .orElse(null);
-
-        // check whether all conditions are still met, remove things no longer supported.
-        if (desc != null) {
-            var resolver = ProductUpdateService.createResolver(node, cfg);
-            for (var p : cfg.start.parameters) {
-                if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
-                    // the parameter is no longer supported, need to remove it.
-                    doRemoveParamterInternal(cfg, appDesc, node, p);
-                }
+            if (desc != null) {
+                name = desc.name;
+                defVal = desc.defaultValue != null ? desc.defaultValue.getPreRenderable() : null;
+                mandatory = desc.mandatory;
+                fixed = desc.fixed;
+                type = desc.type;
             }
-        }
-    }
 
-    private void checkCanRemove(ParameterDescriptor desc) {
-        if (desc == null) {
-            return; // custom
+            table.row().cell(param.id).cell(name).cell(param.value != null ? param.value.getPreRenderable() : null).cell(type)
+                    .cell(custom ? "*" : null).cell(fixed ? "*" : null).cell(mandatory ? "*" : null).cell(defVal).build();
         }
 
-        if (desc.mandatory) {
-            throw new IllegalArgumentException("Cannot remove mandatory parameter");
-        }
+        return table;
     }
 
     private RenderableResult doSetParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
@@ -174,7 +163,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
 
             if (!insertLast) {
                 // lookup the next descriptor which has a value in the parameter list. insert the new parameter right *before* the
-                // value for that descriptor. this handles custom parmeters well as well.
+                // value for that descriptor. this handles custom parameters well as well.
                 int insertionIndex = -1;
                 for (int indexOfNextDesc = myDescIndex + 1; indexOfNextDesc < pdescs.size()
                         && insertionIndex == -1; indexOfNextDesc++) {
@@ -225,10 +214,32 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         return doUpdateInstance(ir, instance, nodecfg);
     }
 
-    private InstanceNodeConfigurationDto findNodeForApp(InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg) {
-        return nodecfg.nodeConfigDtos.stream()
-                .filter(n -> n.nodeConfiguration.applications.stream().anyMatch(a -> a.id.equals(cfg.id))).findAny()
-                .orElseThrow();
+    private RenderableResult doRemoveParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
+            InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
+
+        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.remove()));
+        ParameterDescriptor desc = dto.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(config.remove()))
+                .findFirst().orElse(null);
+
+        checkCanRemove(desc);
+        doRemoveParamterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
+        checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
+
+        return doUpdateInstance(ir, instance, nodecfg);
+    }
+
+    private void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
+            InstanceNodeConfigurationDto node) {
+        if (desc.fixed) {
+            throw new IllegalArgumentException("Cannot set fixed parameter value");
+        }
+
+        if (desc.condition != null) {
+            var resolver = ProductUpdateService.createResolver(node, app);
+            if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
+                throw new IllegalArgumentException("Parameter condition not met");
+            }
+        }
     }
 
     private void doSetParameterInternal(ParameterConfiguration param, ParameterDescriptor desc, String value,
@@ -252,6 +263,40 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
+    private void checkCanRemove(ParameterDescriptor desc) {
+        if (desc == null) {
+            return; // custom
+        }
+
+        if (desc.mandatory) {
+            throw new IllegalArgumentException("Cannot remove mandatory parameter");
+        }
+    }
+
+    private void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
+            InstanceNodeConfigurationDto node, ParameterConfiguration toRemove) {
+        cfg.start.parameters.remove(toRemove);
+        ParameterDescriptor desc = appDesc.startCommand.parameters.stream().filter(p -> p.id.equals(toRemove.id)).findAny()
+                .orElse(null);
+
+        // check whether all conditions are still met, remove things no longer supported.
+        if (desc != null) {
+            var resolver = ProductUpdateService.createResolver(node, cfg);
+            for (var p : cfg.start.parameters) {
+                if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
+                    // the parameter is no longer supported, need to remove it.
+                    doRemoveParamterInternal(cfg, appDesc, node, p);
+                }
+            }
+        }
+    }
+
+    private InstanceNodeConfigurationDto findNodeForApp(InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg) {
+        return nodecfg.nodeConfigDtos.stream()
+                .filter(n -> n.nodeConfiguration.applications.stream().anyMatch(a -> a.id.equals(cfg.id))).findAny()
+                .orElseThrow();
+    }
+
     private void checkNoMandatoryConditionalChanges(ApplicationConfiguration app, ApplicationDescriptor appDesc,
             InstanceNodeConfigurationListDto nodes) {
         // check if mandatory conditional parameters should be added
@@ -265,53 +310,6 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
                 }
             }
         }
-    }
-
-    private void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
-            InstanceNodeConfigurationDto node) {
-        if (desc.fixed) {
-            throw new IllegalArgumentException("Cannot set fixed parameter value");
-        }
-
-        if (desc.condition != null) {
-            var resolver = ProductUpdateService.createResolver(node, app);
-            if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
-                throw new IllegalArgumentException("Parameter condition not met");
-            }
-        }
-    }
-
-    private RenderableResult doShowParameters(ApplicationConfiguration app, ApplicationDto dto) {
-        DataTable table = createDataTable();
-
-        table.setCaption("Start Parameters of " + app.name + " (" + app.id + ")");
-        table.column("ID", 25).column("Name", 25).column("Value", 30).column("Type", 12).column("Custom", 6).column("Fixed", 5)
-                .column("Mandatory", 9).column("Default", 20);
-
-        for (var param : app.start.parameters) {
-            var desc = dto.descriptor.startCommand.parameters.stream().filter(d -> d.id.equals(param.id)).findFirst()
-                    .orElse(null);
-
-            var custom = desc == null;
-            var mandatory = false;
-            var fixed = false;
-            String name = null;
-            String defVal = null;
-            var type = VariableType.STRING;
-
-            if (desc != null) {
-                name = desc.name;
-                defVal = desc.defaultValue != null ? desc.defaultValue.getPreRenderable() : null;
-                mandatory = desc.mandatory;
-                fixed = desc.fixed;
-                type = desc.type;
-            }
-
-            table.row().cell(param.id).cell(name).cell(param.value != null ? param.value.getPreRenderable() : null).cell(type)
-                    .cell(custom ? "*" : null).cell(fixed ? "*" : null).cell(mandatory ? "*" : null).cell(defVal).build();
-        }
-
-        return table;
     }
 
     private RenderableResult doUpdateInstance(InstanceResource ir, InstanceDto instance, InstanceNodeConfigurationListDto nodes) {
@@ -335,5 +333,4 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             return table;
         }
     }
-
 }
