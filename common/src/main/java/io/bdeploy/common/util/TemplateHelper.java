@@ -121,7 +121,7 @@ public class TemplateHelper {
             cycleDetector.push(value);
             String chain = String.join(" -> ", cycleDetector);
             log.error("Infinite loop detected: {}", chain);
-            throw new IllegalArgumentException("Infinite loop detected " + chain);
+            throw new IllegalArgumentException("Infinite loop detected: " + chain);
         }
 
         StringBuilder builder = new StringBuilder();

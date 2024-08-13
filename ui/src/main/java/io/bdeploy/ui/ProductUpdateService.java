@@ -100,13 +100,6 @@ public class ProductUpdateService {
                     "Product version has updated configuration files. Please make sure to synchronize configuration files."));
         }
 
-        Set<String> systemVarIds = new HashSet<>();
-        if (system != null) {
-            for (VariableConfiguration sysVar : system.systemVariables) {
-                systemVarIds.add(sysVar.id);
-            }
-        }
-
         recalculateInstanceVariables(instance, targetProduct, currentProduct, system);
 
         return instance;
@@ -115,13 +108,17 @@ public class ProductUpdateService {
     private void recalculateInstanceVariables(InstanceUpdateDto instance, ProductManifest targetProduct,
             ProductManifest currentProduct, SystemConfiguration system) {
         Set<String> currentProductVarIds = new HashSet<>();
-        for (VariableDescriptor instVar : currentProduct.getInstanceVariables()) {
-            currentProductVarIds.add(instVar.id);
+        if (currentProduct != null) {
+            for (VariableDescriptor instVar : currentProduct.getInstanceVariables()) {
+                currentProductVarIds.add(instVar.id);
+            }
         }
+
         Set<String> targetProductVarIds = new HashSet<>();
         for (VariableDescriptor instVar : targetProduct.getInstanceVariables()) {
             targetProductVarIds.add(instVar.id);
         }
+
         Set<String> systemVarIds = new HashSet<>();
         if (system != null) {
             for (VariableConfiguration sysVar : system.systemVariables) {
