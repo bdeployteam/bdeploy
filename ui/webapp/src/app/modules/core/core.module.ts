@@ -98,6 +98,7 @@ import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-f
 import { BdServerSyncButtonComponent } from './components/bd-server-sync-button/bd-server-sync-button.component';
 import { BdTerminalComponent } from './components/bd-terminal/bd-terminal.component';
 import { BdValueEditorComponent } from './components/bd-value-editor/bd-value-editor.component';
+import { BdVariableGroupsComponent } from './components/bd-variable-groups/bd-variable-groups.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { ConnectionVersionComponent } from './components/connection-version/connection-version.component';
 import { LoginComponent } from './components/login/login.component';
@@ -215,6 +216,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdBreadcrumbsComponent,
     BdManifestDeleteActionComponent,
     BdBHiveBrowserComponent,
+    BdVariableGroupsComponent,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
@@ -351,6 +353,7 @@ function loadAppConfig(cfgService: ConfigService) {
     EditItemInListValidatorDirective,
     LinkExpressionInputValidatorDirective,
     RevalidateOnDirective,
+    BdVariableGroupsComponent,
   ],
 })
 export class CoreModule {}
