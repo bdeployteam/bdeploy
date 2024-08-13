@@ -18,6 +18,8 @@ export interface VariablePair {
 }
 
 export function groupVariables(descriptors: VariableDescriptor[], values: VariableConfiguration[]): VariableGroup[] {
+  descriptors = descriptors || [];
+  values = values || [];
   // group all variable descriptors and configurations together for simple iteration in the template.
   const r: VariableGroup[] = [];
   for (const d of descriptors) {

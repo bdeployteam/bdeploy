@@ -14,11 +14,11 @@
   <app-bd-dialog-content>
     <bd-variable-groups
       [groups]="groups$ | async"
+      [completionPrefixes]="completionPrefixes"
       [completions]="completions"
       [instance]="instance"
       [system]="system"
       [apps]="apps"
-      [typeValues]="typeValues"
       [editorValues]="editorValues"
       [dialog]="dialog"
       [variableList]="(edit.state$ | async).config.config.instanceVariables"

@@ -7,15 +7,33 @@ systemVariables:
   - id: test.system.var
     description: 'A test system variable'
     value: testValue
+  - id: system.variable.string
+    name: 'String System Variable Definition'
+    longDescription: 'The system variable of type STRING'
+    type: 'STRING'
+    defaultValue: 'defaultDefinedV1'
+    groupName: 'System Variable Definitions'
+  - id: system.variable.numeric
+    name: 'Numeric System Variable Definition'
+    longDescription: 'The system variable of type NUMERIC'
+    type: 'NUMERIC'
+    defaultValue: 1020
+    groupName: 'System Variable Definitions'
+  - id: system.variable.count
+    name: 'System Variable Definition Count'
+    description: 'Count of system variable definitions'
+    type: 'NUMERIC'
+    value: 3
+    groupName: 'System Meta Information'
 
 templateVariables:
   - id: node-id
-    name: "The Node Number"
-    description: "The Node ID Base"
+    name: 'The Node Number'
+    description: 'The Node ID Base'
     defaultValue: 0
   - id: cell-base-name
-    name: "The Node Base Name"
-    defaultValue: "Node"
+    name: 'The Node Base Name'
+    defaultValue: 'Node'
 
 instances:
   - name: 'Demo Instance'

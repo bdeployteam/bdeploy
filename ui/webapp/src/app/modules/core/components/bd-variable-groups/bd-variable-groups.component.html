@@ -36,6 +36,7 @@
       (ngModelChange)="onTypeChange($event)"
     ></app-bd-form-select>
     <app-bd-form-select
+      *ngIf="editorValues"
       [(ngModel)]="newValue.customEditor"
       [values]="editorValues"
       name="editor"
@@ -46,7 +47,7 @@
 </ng-template>
 
 <ng-template #editTemplate>
-  <div>Provide a new value or description for <strong>{{newValue.id}}</strong>.</div>
+  <div>Provide a new value and/or description for <strong>{{newValue.id}}</strong>.</div>
   <form #editForm="ngForm">
     <app-bd-value-editor
       [(ngModel)]="newValue.value"
@@ -73,6 +74,7 @@
       (ngModelChange)="onTypeChange($event)"
     ></app-bd-form-select>
     <app-bd-form-select
+      *ngIf="editorValues"
       [(ngModel)]="newValue.customEditor"
       [values]="editorValues"
       name="editor"

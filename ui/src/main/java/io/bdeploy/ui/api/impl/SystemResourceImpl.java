@@ -12,6 +12,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideResolver;
@@ -243,9 +244,10 @@ public class SystemResourceImpl implements SystemResource {
         if (request.template.systemVariables != null && !request.template.systemVariables.isEmpty()) {
             for (var v : request.template.systemVariables) {
                 // expand template variables inline for each system variable.
-                v.value = new LinkedValueConfiguration(
-                        TemplateHelper.process(v.value.getPreRenderable(), ttor, ttor::canResolve));
-                scd.config.systemVariables.add(v);
+                v.defaultValue = new LinkedValueConfiguration(
+                        TemplateHelper.process(v.defaultValue.getPreRenderable(), ttor, ttor::canResolve));
+                scd.config.systemVariableDefinitions.add(v);
+                scd.config.systemVariables.add(new VariableConfiguration(v));
             }
         }
 

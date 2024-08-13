@@ -56,7 +56,6 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   @Input() instance: InstanceConfigurationDto;
   @Input() system: SystemConfiguration;
   @Input() apps: ApplicationDto[];
-  @Input() typeValues: VariableType[] = Object.values(VariableType);
   @Input() editorValues: string[];
 
   @Input() dialog: BdDialogComponent;
@@ -67,6 +66,8 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   protected clipboardVars: ConfigVariable[];
   protected checked: ConfigVariable[] = [];
   protected isCustomGroupSelected = false;
+
+  protected typeValues: VariableType[] = Object.values(VariableType);
 
   protected newValue: VariableConfiguration;
   protected newUsedIds: string[] = [];
@@ -143,25 +144,25 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     const newVars: VariableConfiguration[] = [];
     const existingVars: VariableConfiguration[] = [];
     const varList = this.variableList ? this.variableList : [];
-    this.clipboardVars.forEach((instanceVar: ConfigVariable) => {
-      const found = varList.some((iv) => iv.id === instanceVar.value.id);
+    this.clipboardVars.forEach((configVar: ConfigVariable) => {
+      const found = varList.some((iv) => iv.id === configVar.value.id);
       if (found) {
-        existingVars.push(instanceVar.value);
+        existingVars.push(configVar.value);
       } else {
-        newVars.push(instanceVar.value);
+        newVars.push(configVar.value);
       }
     });
-    let message = `${this.clipboardVars.length} instance variables copied from clipboard. `;
+    let message = `${this.clipboardVars.length} variables copied from clipboard. `;
     if (newVars.length) {
       varList.push(...newVars);
       varList.sort((a, b) => a.id.localeCompare(b.id));
       this.variableListChanged.emit(varList);
-      message += `Added ${newVars.length} instance variables. `;
+      message += `Added ${newVars.length} variables. `;
     } else {
-      message += 'No new instance variables to add. ';
+      message += 'No new variables to add. ';
     }
     if (existingVars.length) {
-      message += `Skipped ${existingVars.length} instance variables for conflicting with existing ones.`;
+      message += `Skipped ${existingVars.length} variables for conflicting with existing ones.`;
     }
     this.snackbar.open(message, 'DISMISS');
   }
@@ -180,13 +181,13 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
       (data) => {
         this.clipboardVars = null;
         try {
-          const instanceVariables: ConfigVariable[] = JSON.parse(data);
-          const validNames = instanceVariables.every((iv) => !!iv.name);
-          const validVariables = instanceVariables.every((iv) => !!iv.value && !!iv.value.id);
+          const variables: ConfigVariable[] = JSON.parse(data);
+          const validNames = variables.every((iv) => !!iv.name);
+          const validVariables = variables.every((iv) => !!iv.value && !!iv.value.id);
           if (!validNames || !validVariables) {
-            console.error(`Invalid instance variables format.`);
+            console.error(`Invalid variables format.`);
           }
-          this.clipboardVars = instanceVariables;
+          this.clipboardVars = variables;
         } catch (e) {
           console.error('Unable to parse from clipboard', e);
         }

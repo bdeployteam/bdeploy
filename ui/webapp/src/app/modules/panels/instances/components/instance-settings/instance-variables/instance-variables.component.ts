@@ -5,7 +5,6 @@ import {
   InstanceConfigurationDto,
   SystemConfiguration,
   VariableConfiguration,
-  VariableType,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -37,7 +36,6 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   protected instance: InstanceConfigurationDto;
   protected system: SystemConfiguration;
   protected apps: ApplicationDto[];
-  protected typeValues: VariableType[] = Object.values(VariableType);
   protected editorValues: string[];
 
   protected completions: ContentCompletion[];
