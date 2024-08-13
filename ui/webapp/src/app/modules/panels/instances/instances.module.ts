@@ -73,7 +73,6 @@ import { PinnedParameterValueComponent } from './components/process-status/pinne
 import { ProbeStatusComponent } from './components/process-status/probe-status/probe-status.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { ProductVersionDetailsCellComponent } from './components/product-version-details-cell/product-version-details-cell.component';
-import { VariableDescCardComponent } from './components/variable-desc-card/variable-desc-card.component';
 import { VerifyResultComponent } from './components/verify-result/verify-result.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 import { CustomNodeFilterPipe, NodeFilterPipe } from './utils/filter-node';
@@ -149,7 +148,6 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     PinnedParameterValueComponent,
     InstanceVariablesComponent,
     PortTypeCellComponent,
-    VariableDescCardComponent,
     AllowedValuesValidatorDirective,
     SystemOnServerValidatorDirective,
     ConfigFilesActionsComponent,
