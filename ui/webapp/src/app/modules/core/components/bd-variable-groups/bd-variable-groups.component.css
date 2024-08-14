@@ -55,19 +55,7 @@
   padding-right: 3px;
 }
 
-.local-pin-inactive {
-  color: var(--bd-text-disabled);
-}
-
-.local-pin-inactive:hover {
-  color: var(--bd-text);
-}
-
-.local-pin-active {
-  color: var(--bd-primary);
-}
-
-.local-form-input .local-hover-button:not(.local-pin-active) {
+.local-form-input .local-hover-button {
   display: none !important;
 }
 

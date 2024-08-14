@@ -98,6 +98,7 @@ import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-f
 import { BdServerSyncButtonComponent } from './components/bd-server-sync-button/bd-server-sync-button.component';
 import { BdTerminalComponent } from './components/bd-terminal/bd-terminal.component';
 import { BdValueEditorComponent } from './components/bd-value-editor/bd-value-editor.component';
+import { BdVariableDescCardComponent } from './components/bd-variable-desc-card/bd-variable-desc-card.component';
 import { BdVariableGroupsComponent } from './components/bd-variable-groups/bd-variable-groups.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { ConnectionVersionComponent } from './components/connection-version/connection-version.component';
@@ -217,6 +218,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdManifestDeleteActionComponent,
     BdBHiveBrowserComponent,
     BdVariableGroupsComponent,
+    BdVariableDescCardComponent,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
@@ -341,6 +343,8 @@ function loadAppConfig(cfgService: ConfigService) {
     BdBreadcrumbsComponent,
     BdManifestDeleteActionComponent,
     BdBHiveBrowserComponent,
+    BdVariableGroupsComponent,
+    BdVariableDescCardComponent,
 
     // validators
     IdentifierValidator,
@@ -353,7 +357,6 @@ function loadAppConfig(cfgService: ConfigService) {
     EditItemInListValidatorDirective,
     LinkExpressionInputValidatorDirective,
     RevalidateOnDirective,
-    BdVariableGroupsComponent,
   ],
 })
 export class CoreModule {}

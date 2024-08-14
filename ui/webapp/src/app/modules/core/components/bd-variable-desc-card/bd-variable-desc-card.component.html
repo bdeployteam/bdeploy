@@ -1,5 +1,5 @@
 <mat-card appearance="outlined" *ngIf="!!descriptor" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
-  <div>Parameter <strong>{{ descriptor.name }}</strong><em *ngIf="descriptor.fixed"> (fixed)</em></div>
+  <div>Variable <strong>{{ descriptor.name }}</strong><em *ngIf="descriptor.fixed"> (fixed)</em></div>
   <div class="grid grid-cols-[100px_auto] gap-1 p-2.5">
     <strong><div>Name:</div></strong>
     <div>{{ descriptor.name }}</div>
