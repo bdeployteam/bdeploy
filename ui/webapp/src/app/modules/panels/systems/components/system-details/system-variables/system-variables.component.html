@@ -1,86 +1,6 @@
-<ng-template #addTemplate>
-  <div>Provide an ID, a value and an optional description for the new variable.</div>
-  <form #addForm="ngForm">
-    <app-bd-form-input
-      [(ngModel)]="newValue.id"
-      name="id"
-      label="Variable ID"
-      required
-      appTrimmed
-      appEditUniqueValueValidator
-      [disallowedValues]="newUsedIds"
-      errorDisplay="immediate"
-    ></app-bd-form-input>
-    <app-bd-value-editor
-      [(ngModel)]="newValue.value"
-      name="value"
-      label="Value"
-      [required]="true"
-      [type]="newValue.type"
-      [system]="system.config"
-      [completionPrefixes]="completionPrefixes"
-      [completions]="completions"
-    ></app-bd-value-editor>
-    <app-bd-form-input [(ngModel)]="newValue.description" name="description" label="Description"></app-bd-form-input>
-    <mat-divider></mat-divider>
-    <app-bd-form-select
-      [ngModel]="newValue.type"
-      [values]="typeValues"
-      name="type"
-      label="Value Type"
-      (ngModelChange)="onTypeChange($event)"
-    ></app-bd-form-select>
-  </form>
-</ng-template>
-
-<ng-template #editTemplate>
-  <div>Provide a new value and/or description for <strong>{{newValue.id}}</strong>.</div>
-  <form #editForm="ngForm">
-    <app-bd-value-editor
-      [(ngModel)]="newValue.value"
-      name="value"
-      label="Value"
-      [required]="true"
-      [type]="newValue.type"
-      [system]="system.config"
-      [completionPrefixes]="completionPrefixes"
-      [completions]="completions"
-    ></app-bd-value-editor>
-    <app-bd-form-input [(ngModel)]="newValue.description" name="description" label="Description"></app-bd-form-input>
-    <mat-divider></mat-divider>
-    <app-bd-form-select
-      [ngModel]="newValue.type"
-      [values]="typeValues"
-      name="type"
-      label="Value Type"
-      (ngModelChange)="onTypeChange($event)"
-    ></app-bd-form-select>
-  </form>
-</ng-template>
-
 <app-bd-dialog>
   <app-bd-dialog-toolbar [panel]="true" header="System Variables - {{ system?.config?.name }}" [route]="['..']">
     <div class="flex-auto"></div>
-    <app-bd-button
-      text="Add"
-      icon="add"
-      [disabled]="(saving$ | async) || !(auth.isCurrentScopeWrite$ | async)"
-      (click)="onAdd(addTemplate)"
-    ></app-bd-button>
-    <app-bd-button
-      text="Copy Selected"
-      icon="content_copy"
-      [collapsed]="false"
-      (click)="doCopy()"
-      [disabled]="!checked?.length"
-    ></app-bd-button>
-    <app-bd-button
-      text="Paste"
-      icon="content_paste_go"
-      [collapsed]="false"
-      [disabled]="!clipboardVars?.length"
-      (click)="doPaste()"
-    ></app-bd-button>
     <app-bd-button
       text="Save"
       icon="save"
@@ -93,15 +13,14 @@
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex justify-center">
-      <div class="flex-auto flex flex-col gap-2.5" *ngIf="system">
-        <app-bd-data-table
-          [records]="records"
-          [columns]="columns"
-          [checkMode]="true"
-          [(checked)]="checked"
-        ></app-bd-data-table>
-      </div>
-    </div>
+    <bd-variable-groups
+      [groups]="groups$ | async"
+      [completionPrefixes]="completionPrefixes"
+      [completions]="completions"
+      [system]="system?.config"
+      [dialog]="dialog"
+      [variableList]="(edit.current$ | async).config.systemVariables"
+      (variableListChanged)="onVariableListChange($event)"
+    ></bd-variable-groups>
   </app-bd-dialog-content>
 </app-bd-dialog>

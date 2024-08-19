@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
-import io.bdeploy.interfaces.configuration.VariableConfiguration;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 
 @JsonClassDescription("Defines a template which can be used to create a process systems consisting of many instances.")
 public class SystemTemplateDescriptor {
@@ -23,7 +23,7 @@ public class SystemTemplateDescriptor {
     public List<TemplateVariable> templateVariables = new ArrayList<>();
 
     @JsonPropertyDescription("A set of system variable definitions included in this template.")
-    public List<VariableConfiguration> systemVariables;
+    public List<VariableDescriptor> systemVariables = new ArrayList<>();
 
     @JsonPropertyDescription("The list of instances to create when this template is applied.")
     public List<InstanceTemplateReferenceDescriptor> instances = new ArrayList<>();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 
 /**
  * Represents a System, which is an encapsulation of instances within an instance group, e.g. "Productive System", "Test System",
@@ -33,4 +34,8 @@ public class SystemConfiguration {
      */
     public List<VariableConfiguration> systemVariables = new ArrayList<>();
 
+    /**
+     * The definitions for available globally addressable configuration variables
+     */
+    public List<VariableDescriptor> systemVariableDefinitions = new ArrayList<>();
 }

@@ -46,12 +46,14 @@ public class VariableDescriptor {
     @JsonPropertyDescription("The human readable short name of the variable.")
     public String name;
 
+    @JsonAlias("description")
     @JsonPropertyDescription("A human readable description aiding humans in configuring this variable's value.")
     public String longDescription;
 
     @JsonPropertyDescription("The arbitrary name of a group. Variables with the same groupName are grouped in the UI to help the user in identifying variables that belong together.")
     public String groupName;
 
+    @JsonAlias("value")
     @JsonPropertyDescription("The default value for this variable.")
     public LinkedValueConfiguration defaultValue = null;
 
