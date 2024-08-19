@@ -113,7 +113,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         boolean versionReport();
 
         @Help(value = "Instead of grouping by instance group, sort the result table by server version", arg = false)
-        boolean sortByVersion();
+        boolean sortByVersion() default false;
     }
 
     public RemoteCentralTool() {
