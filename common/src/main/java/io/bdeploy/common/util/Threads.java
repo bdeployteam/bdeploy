@@ -85,7 +85,7 @@ public class Threads {
 
     /**
      * Create a stackdump of the running server.
-     * 
+     *
      * @param targetDir the target directory to create dumps in
      * @param dumpName the dump base name. existing dumps will be cycled (max 3 dumps).
      */
@@ -109,8 +109,7 @@ public class Threads {
         try {
             dumpThread.join(Duration.ofSeconds(10).toMillis());
         } catch (InterruptedException e) {
-            // ignored, we want to restart anyhow!
+            Thread.currentThread().interrupt();
         }
     }
-
 }
