@@ -127,7 +127,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.api.ProcessResource;
-import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.ApplicationDto;
 import io.bdeploy.ui.dto.ConfigDirDto;
