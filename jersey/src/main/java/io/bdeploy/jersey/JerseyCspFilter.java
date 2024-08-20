@@ -43,7 +43,7 @@ public class JerseyCspFilter extends BaseFilter {
 
             // user interface proxy requests should not add those headers.
             String uri = c.getRequest().getRequestURI();
-            if (uri.contains("/upx/") || uri.equals("/api/proxy")) {
+            if (uri.contains("/upx/") || "/api/proxy".equals(uri)) {
                 needHdrs = false;
             }
 

@@ -78,7 +78,7 @@ public class InteractiveShell extends ConfiguredCliTool<ShellConfig> {
                 System.out.print("> ");
             }
             String command = br.readLine();
-            if (command == null || command.equals("exit")) {
+            if (command == null || "exit".equals(command)) {
                 return false;
             }
             command = command.trim();

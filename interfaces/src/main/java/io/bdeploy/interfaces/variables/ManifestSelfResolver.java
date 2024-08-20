@@ -20,7 +20,7 @@ public class ManifestSelfResolver extends PrefixResolver {
 
     @Override
     protected String doResolve(String variable) {
-        if (variable.equals("SELF")) {
+        if ("SELF".equals(variable)) {
             String scoped = prefix.format(manifestKey.toString());
             return parentResolver.apply(scoped);
         }

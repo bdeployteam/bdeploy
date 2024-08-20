@@ -71,7 +71,7 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
     }
 
     private ProxiedRequestWrapper wrap(String fullPath, byte[] body, String method) {
-        Map<String, ProxiedRequestCookie> cookies = request.getCookies().entrySet().stream().filter(e -> !e.getKey().equals("st"))
+        Map<String, ProxiedRequestCookie> cookies = request.getCookies().entrySet().stream().filter(e -> !"st".equals(e.getKey()))
                 .collect(Collectors.toMap(Entry::getKey, e -> {
                     Cookie k = e.getValue();
                     return new ProxiedRequestWrapper.ProxiedRequestCookie(k.getName(), k.getValue(), k.getVersion(), k.getPath(),

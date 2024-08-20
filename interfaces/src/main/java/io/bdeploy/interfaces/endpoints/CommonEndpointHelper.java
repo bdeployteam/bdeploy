@@ -134,7 +134,7 @@ public class CommonEndpointHelper {
         try {
             LinkedValueConfiguration enabled = process(rawEndpoint.enabled, p);
             String pr = enabled.getPreRenderable();
-            if (pr == null || pr.isBlank() || pr.equals("false")) {
+            if (pr == null || pr.isBlank() || "false".equals(pr)) {
                 return null;
             }
         } catch (Exception e) {

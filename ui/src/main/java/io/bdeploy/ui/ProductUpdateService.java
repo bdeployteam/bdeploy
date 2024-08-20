@@ -609,9 +609,9 @@ public class ProductUpdateService {
 
         switch (param.condition.must) {
             case BE_EMPTY:
-                return value.isBlank() || (targetType == VariableType.BOOLEAN && value.trim().equals("false"));
+                return value.isBlank() || (targetType == VariableType.BOOLEAN && "false".equals(value.trim()));
             case BE_NON_EMPTY:
-                return !value.isBlank() && !(targetType == VariableType.BOOLEAN && value.trim().equals("false"));
+                return !value.isBlank() && !(targetType == VariableType.BOOLEAN && "false".equals(value.trim()));
             case CONTAIN:
                 return value.contains(param.condition.value);
             case END_WITH:

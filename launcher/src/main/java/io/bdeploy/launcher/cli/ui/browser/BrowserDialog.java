@@ -652,7 +652,7 @@ public class BrowserDialog extends BaseDialog {
         if (e.getNewValue() == StateValue.DONE) {
             progressBar.setVisible(false);
         }
-        if (e.getPropertyName().equals("progress")) {
+        if ("progress".equals(e.getPropertyName())) {
             progressBar.setValue((int) e.getNewValue());
         }
         if (e.getPropertyName().equals(PropertyChangeActivityReporter.ACTIVITY_NAME)) {

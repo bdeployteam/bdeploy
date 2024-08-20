@@ -16,7 +16,7 @@ public class InstanceTemplateHelper {
 
     public static ProductDto findMatchingProductOrFail(InstanceTemplateReferenceDescriptor instance, List<ProductDto> products) {
         boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
-                || instance.productVersionRegex.equals(".*"));
+                || ".*".equals(instance.productVersionRegex));
 
         // the list is ordered - the first matching product is also the best matching version of that product.
         Optional<ProductDto> product = products.stream().filter(p -> {

@@ -142,7 +142,7 @@ public class PluginResourceImpl implements PluginResource {
             }
 
             if (hasEditor) {
-                if (candidate == null || candidate.version.equals("unknown") || isNewerVersion(candidate.version, info.version)) {
+                if (candidate == null || "unknown".equals(candidate.version) || isNewerVersion(candidate.version, info.version)) {
                     candidate = info;
                 }
             }
