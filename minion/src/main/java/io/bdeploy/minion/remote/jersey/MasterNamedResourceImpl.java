@@ -979,7 +979,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             idd.entries.addAll(iddes);
                         }
                     } catch (Exception e) {
-                        log.warn("Problem fetching data directory of {}", nodeName, e);
+                        log.warn("Problem fetching directory of {}", nodeName, e);
                         idd.problem = e.toString();
                     }
 
