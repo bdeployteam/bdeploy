@@ -50,14 +50,12 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         String process();
 
         @Help(value = "Show the process parameters for the given process", arg = false)
-        boolean showParameters()
-
-        default false;
+        boolean showParameters() default false;
 
         @Help("Set the given parameter. If there is no parameter descriptor with the given ID, a custom parameter will be added using --predecessor to determine the location")
         String set();
 
-        @Help("The value to set the parmeter to")
+        @Help("The value to set the parameter to")
         String value();
 
         @Help("In case of adding a custom parameter this must be provided to find the correct insertion point for the custom parameter and must reference an existing and configured parameter ID")
@@ -111,176 +109,6 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         return createNoOp();
     }
 
-    private RenderableResult doRemoveParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
-            InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
-
-        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.remove()));
-        ParameterDescriptor desc = dto.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(config.remove()))
-                .findFirst().orElse(null);
-
-        checkCanRemove(desc);
-        doRemoveParamterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
-        checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
-
-        return doUpdateInstance(ir, instance, nodecfg);
-    }
-
-    private void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
-            InstanceNodeConfigurationDto node, ParameterConfiguration toRemove) {
-        cfg.start.parameters.remove(toRemove);
-        ParameterDescriptor desc = appDesc.startCommand.parameters.stream().filter(p -> p.id.equals(toRemove.id)).findAny()
-                .orElse(null);
-
-        // check whether all conditions are still met, remove things no longer supported.
-        if (desc != null) {
-            var resolver = ProductUpdateService.createResolver(node, cfg);
-            for (var p : cfg.start.parameters) {
-                if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
-                    // the parameter is no longer supported, need to remove it.
-                    doRemoveParamterInternal(cfg, appDesc, node, p);
-                }
-            }
-        }
-    }
-
-    private void checkCanRemove(ParameterDescriptor desc) {
-        if (desc == null) {
-            return; // custom
-        }
-
-        if (desc.mandatory) {
-            throw new IllegalArgumentException("Cannot remove mandatory parameter");
-        }
-    }
-
-    private RenderableResult doSetParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
-            InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
-
-        List<ParameterDescriptor> pdescs = dto.descriptor.startCommand.parameters;
-        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.set()));
-        int myDescIndex = CollectionHelper.indexOf(pdescs, p -> p.id.equals(config.set()));
-
-        if (myDescIndex >= 0) {
-            checkCanSet(pdescs.get(myDescIndex), cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
-        }
-
-        if (myIndex == -1 && myDescIndex >= 0) {
-            // not yet there, need to insert.
-            boolean insertLast = myDescIndex == (pdescs.size() - 1);
-
-            var param = new ParameterConfiguration();
-            param.id = config.set();
-            doSetParameterInternal(param, pdescs.get(myDescIndex), config.value(), nodecfg);
-
-            if (!insertLast) {
-                // lookup the next descriptor which has a value in the parameter list. insert the new parameter right *before* the
-                // value for that descriptor. this handles custom parmeters well as well.
-                int insertionIndex = -1;
-                for (int indexOfNextDesc = myDescIndex + 1; indexOfNextDesc < pdescs.size()
-                        && insertionIndex == -1; indexOfNextDesc++) {
-                    var descAtIndex = pdescs.get(indexOfNextDesc);
-                    insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(descAtIndex.id));
-                }
-
-                if (insertionIndex == -1) {
-                    insertLast = true;
-                } else {
-                    cfg.start.parameters.add(insertionIndex, param);
-                }
-            }
-
-            if (insertLast) {
-                cfg.start.parameters.add(param);
-            }
-        } else if (myIndex == -1) {
-            // not found, and no descriptor - new custom parameter.
-            var param = new ParameterConfiguration();
-            param.id = config.set();
-            doSetParameterInternal(param, null, config.value(), nodecfg);
-
-            // if no predecessor insert first.
-            if (config.predecessor() != null) {
-                int insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.predecessor()));
-                if (insertionIndex == -1) {
-                    throw new IllegalArgumentException("Predecessor for custom parameter not found.");
-                }
-
-                // we want to insert *after* the element. if that element is the last one, insert at the end.
-                if (insertionIndex == (cfg.start.parameters.size() - 1)) {
-                    cfg.start.parameters.add(param);
-                } else {
-                    cfg.start.parameters.add(insertionIndex + 1, param);
-                }
-            } else {
-                cfg.start.parameters.add(0, param);
-            }
-        } else {
-            var existing = cfg.start.parameters.get(myIndex);
-            doSetParameterInternal(existing, pdescs.stream().filter(p -> p.id.equals(config.set())).findFirst().orElse(null),
-                    config.value(), nodecfg);
-        }
-
-        checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
-
-        return doUpdateInstance(ir, instance, nodecfg);
-    }
-
-    private InstanceNodeConfigurationDto findNodeForApp(InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg) {
-        return nodecfg.nodeConfigDtos.stream()
-                .filter(n -> n.nodeConfiguration.applications.stream().anyMatch(a -> a.id.equals(cfg.id))).findAny()
-                .orElseThrow();
-    }
-
-    private void doSetParameterInternal(ParameterConfiguration param, ParameterDescriptor desc, String value,
-            InstanceNodeConfigurationListDto nodes) {
-        param.value = new LinkedValueConfiguration(value);
-        param.preRender(desc);
-
-        // align global parameters.
-        if (desc != null && desc.global) {
-            for (var node : nodes.nodeConfigDtos) {
-                for (var napp : node.nodeConfiguration.applications) {
-                    for (var p : napp.start.parameters) {
-                        p.value = new LinkedValueConfiguration(value);
-                        p.preRender(nodes.applications.stream().filter(a -> a.key.getName().equals(napp.application.getName()))
-                                .map(a -> a.descriptor.startCommand.parameters.stream().filter(x -> x.id.equals(p.id)).findFirst()
-                                        .orElse(null))
-                                .findFirst().orElse(null));
-                    }
-                }
-            }
-        }
-    }
-
-    private void checkNoMandatoryConditionalChanges(ApplicationConfiguration app, ApplicationDescriptor appDesc,
-            InstanceNodeConfigurationListDto nodes) {
-        // check if mandatory conditional parameters should be added
-        var resolver = ProductUpdateService.createResolver(findNodeForApp(nodes, app), app);
-        for (var pd : appDesc.startCommand.parameters) {
-            if (pd.condition != null && pd.mandatory) {
-                var v = app.start.parameters.stream().filter(x -> x.id.equals(pd.id)).findFirst();
-                if (v.isEmpty() && ProductUpdateService.meetsCondition(appDesc, pd, resolver)) {
-                    // this is simply not possible on the CLI, needs the web UI.
-                    throw new IllegalStateException("New mandatory parameters would need addition due to condition changes.");
-                }
-            }
-        }
-    }
-
-    private void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
-            InstanceNodeConfigurationDto node) {
-        if (desc.fixed) {
-            throw new IllegalArgumentException("Cannot set fixed parameter value");
-        }
-
-        if (desc.condition != null) {
-            var resolver = ProductUpdateService.createResolver(node, app);
-            if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
-                throw new IllegalArgumentException("Parameter condition not met");
-            }
-        }
-    }
-
     private RenderableResult doShowParameters(ApplicationConfiguration app, ApplicationDto dto) {
         DataTable table = createDataTable();
 
@@ -314,6 +142,182 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         return table;
     }
 
+    private RenderableResult doSetParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
+            InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
+        String paramId = config.set();
+        List<ParameterDescriptor> pdescs = dto.descriptor.startCommand.parameters;
+        int myDescIndex = CollectionHelper.indexOf(pdescs, p -> p.id.equals(paramId));
+
+        boolean hasDescriptor = myDescIndex >= 0;
+        if (hasDescriptor) {
+            checkCanSet(pdescs.get(myDescIndex), cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
+        }
+
+        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(paramId));
+        String paramValue = config.value();
+
+        if (myIndex != -1) {
+            // Parameter already exists -> we just change its value
+            var existing = cfg.start.parameters.get(myIndex);
+            doSetParameterInternal(existing, pdescs.stream().filter(p -> p.id.equals(paramId)).findFirst().orElse(null),
+                    paramValue, nodecfg);
+        } else {
+            // Parameter does not yet exist -> we create a new one
+            ParameterConfiguration param = new ParameterConfiguration();
+            param.id = paramId;
+
+            if (hasDescriptor) {
+                // Parameter has a descriptor -> it is not a custom parameter
+                doSetParameterInternal(param, pdescs.get(myDescIndex), paramValue, nodecfg);
+
+                boolean insertLast = myDescIndex == (pdescs.size() - 1);
+                if (!insertLast) {
+                    // Lookup the next descriptor which has a value in the parameter list. insert the new parameter right *before* the
+                    // value for that descriptor. This handles custom parameters well as well.
+                    int insertionIndex = -1;
+                    for (int indexOfNextDesc = myDescIndex + 1; indexOfNextDesc < pdescs.size()
+                            && insertionIndex == -1; indexOfNextDesc++) {
+                        var descAtIndex = pdescs.get(indexOfNextDesc);
+                        insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(descAtIndex.id));
+                    }
+
+                    if (insertionIndex == -1) {
+                        insertLast = true;
+                    } else {
+                        cfg.start.parameters.add(insertionIndex, param);
+                    }
+                }
+
+                if (insertLast) {
+                    cfg.start.parameters.add(param);
+                }
+            } else {
+                // Parameter has no descriptor -> it is a custom parameter
+                doSetParameterInternal(param, null, paramValue, nodecfg);
+
+                // if no predecessor -> insert first
+                String predecessor = config.predecessor();
+                if (predecessor != null) {
+                    int insertionIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(predecessor));
+                    if (insertionIndex == -1) {
+                        throw new IllegalArgumentException("Predecessor for custom parameter not found.");
+                    }
+
+                    // We want to insert *after* the element. If that element is the last one, insert at the end.
+                    if (insertionIndex == (cfg.start.parameters.size() - 1)) {
+                        cfg.start.parameters.add(param);
+                    } else {
+                        cfg.start.parameters.add(insertionIndex + 1, param);
+                    }
+                } else {
+                    cfg.start.parameters.add(0, param);
+                }
+            }
+        }
+
+        checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
+
+        return doUpdateInstance(ir, instance, nodecfg);
+    }
+
+    private RenderableResult doRemoveParameter(ProcessManipulationConfig config, InstanceResource ir, InstanceDto instance,
+            InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg, ApplicationDto dto) {
+
+        int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.remove()));
+        ParameterDescriptor desc = dto.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(config.remove()))
+                .findFirst().orElse(null);
+
+        checkCanRemove(desc);
+        doRemoveParamterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
+        checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
+
+        return doUpdateInstance(ir, instance, nodecfg);
+    }
+
+    private void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
+            InstanceNodeConfigurationDto node) {
+        if (desc.fixed) {
+            throw new IllegalArgumentException("Cannot set fixed parameter value");
+        }
+
+        if (desc.condition != null) {
+            var resolver = ProductUpdateService.createResolver(node, app);
+            if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
+                throw new IllegalArgumentException("Parameter condition not met");
+            }
+        }
+    }
+
+    private void doSetParameterInternal(ParameterConfiguration param, ParameterDescriptor desc, String value,
+            InstanceNodeConfigurationListDto nodes) {
+        param.value = new LinkedValueConfiguration(value);
+        param.preRender(desc);
+
+        // align global parameters.
+        if (desc != null && desc.global) {
+            for (var node : nodes.nodeConfigDtos) {
+                for (var napp : node.nodeConfiguration.applications) {
+                    for (var p : napp.start.parameters) {
+                        p.value = new LinkedValueConfiguration(value);
+                        p.preRender(nodes.applications.stream().filter(a -> a.key.getName().equals(napp.application.getName()))
+                                .map(a -> a.descriptor.startCommand.parameters.stream().filter(x -> x.id.equals(p.id)).findFirst()
+                                        .orElse(null))
+                                .findFirst().orElse(null));
+                    }
+                }
+            }
+        }
+    }
+
+    private void checkCanRemove(ParameterDescriptor desc) {
+        if (desc == null) {
+            return; // custom
+        }
+
+        if (desc.mandatory) {
+            throw new IllegalArgumentException("Cannot remove mandatory parameter");
+        }
+    }
+
+    private void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
+            InstanceNodeConfigurationDto node, ParameterConfiguration toRemove) {
+        cfg.start.parameters.remove(toRemove);
+        ParameterDescriptor desc = appDesc.startCommand.parameters.stream().filter(p -> p.id.equals(toRemove.id)).findAny()
+                .orElse(null);
+
+        // check whether all conditions are still met, remove things no longer supported.
+        if (desc != null) {
+            var resolver = ProductUpdateService.createResolver(node, cfg);
+            for (var p : cfg.start.parameters) {
+                if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
+                    // the parameter is no longer supported, need to remove it.
+                    doRemoveParamterInternal(cfg, appDesc, node, p);
+                }
+            }
+        }
+    }
+
+    private InstanceNodeConfigurationDto findNodeForApp(InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg) {
+        return nodecfg.nodeConfigDtos.stream()
+                .filter(n -> n.nodeConfiguration.applications.stream().anyMatch(a -> a.id.equals(cfg.id))).findAny()
+                .orElseThrow();
+    }
+
+    private void checkNoMandatoryConditionalChanges(ApplicationConfiguration app, ApplicationDescriptor appDesc,
+            InstanceNodeConfigurationListDto nodes) {
+        // check if mandatory conditional parameters should be added
+        var resolver = ProductUpdateService.createResolver(findNodeForApp(nodes, app), app);
+        for (var pd : appDesc.startCommand.parameters) {
+            if (pd.condition != null && pd.mandatory) {
+                var v = app.start.parameters.stream().filter(x -> x.id.equals(pd.id)).findFirst();
+                if (v.isEmpty() && ProductUpdateService.meetsCondition(appDesc, pd, resolver)) {
+                    // this is simply not possible on the CLI, needs the web UI.
+                    throw new IllegalStateException("New mandatory parameters would need addition due to condition changes.");
+                }
+            }
+        }
+    }
+
     private RenderableResult doUpdateInstance(InstanceResource ir, InstanceDto instance, InstanceNodeConfigurationListDto nodes) {
         InstanceUpdateDto update = new InstanceUpdateDto(
                 new InstanceConfigurationDto(instance.instanceConfiguration, nodes.nodeConfigDtos), null);
@@ -335,5 +339,4 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             return table;
         }
     }
-
 }
