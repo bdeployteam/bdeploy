@@ -296,8 +296,35 @@ public class BrowserDialog extends BaseDialog {
         columnF.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
                 .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, metadata.fileAssocExtension))));
 
-        // Launch on double click
-        table.addMouseListener(new DoubleClickListener());
+        // Add MouseAdapter
+        table.addMouseListener(new MouseAdapter() {
+
+            // Select single row on right-click
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    int row = table.rowAtPoint(e.getPoint());
+                    if (row >= 0 && row < table.getRowCount()) {
+                        table.setRowSelectionInterval(row, row);
+                    } else {
+                        table.clearSelection();
+                    }
+                }
+            }
+
+            // Launch on double click
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 2) {
+                    return;
+                }
+                List<ClientSoftwareConfiguration> apps = getSelectedApps();
+                if (apps.size() != 1) {
+                    return;
+                }
+                doLaunch(apps.get(0), Collections.emptyList());
+            }
+        });
 
         // Launch on enter key
         InputMap inputMap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -743,22 +770,6 @@ public class BrowserDialog extends BaseDialog {
                 showErrorMessageDialog(BrowserDialog.this, "Failed to open home directory: " + ex.getMessage());
             }
         }
-    }
-
-    private class DoubleClickListener extends MouseAdapter {
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() != 2) {
-                return;
-            }
-            List<ClientSoftwareConfiguration> apps = getSelectedApps();
-            if (apps.size() != 1) {
-                return;
-            }
-            doLaunch(apps.get(0), Collections.emptyList());
-        }
-
     }
 
     private class EnterAction extends AbstractAction {
