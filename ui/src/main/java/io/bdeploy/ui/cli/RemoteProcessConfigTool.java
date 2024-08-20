@@ -303,16 +303,22 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
                 .orElseThrow();
     }
 
+    //TODO We should eventually implement a handling to allow for those changes via the CLI so that the CLI becomes as powerful as the WebUI.
     private void checkNoMandatoryConditionalChanges(ApplicationConfiguration app, ApplicationDescriptor appDesc,
             InstanceNodeConfigurationListDto nodes) {
-        // check if mandatory conditional parameters should be added
+        // Check if mandatory conditional parameters must be added/removed
         var resolver = ProductUpdateService.createResolver(findNodeForApp(nodes, app), app);
         for (var pd : appDesc.startCommand.parameters) {
             if (pd.condition != null && pd.mandatory) {
-                var v = app.start.parameters.stream().filter(x -> x.id.equals(pd.id)).findFirst();
-                if (v.isEmpty() && ProductUpdateService.meetsCondition(appDesc, pd, resolver)) {
-                    // this is simply not possible on the CLI, needs the web UI.
-                    throw new IllegalStateException("New mandatory parameters would need addition due to condition changes.");
+                boolean paramExists = app.start.parameters.stream().anyMatch(paramConfig -> pd.id.equals(paramConfig.id));
+                boolean conditionMet = ProductUpdateService.meetsCondition(appDesc, pd, resolver);
+                if (!paramExists && conditionMet) {
+                    throw new UnsupportedOperationException(
+                            "A mandatory parameters would need to be created due to condition changes. This is only possible in the WebUI.");
+                }
+                if (paramExists && !conditionMet) {
+                    throw new UnsupportedOperationException(
+                            "A mandatory parameters would need to be deleted due to condition changes. This is only possible in the WebUI.");
                 }
             }
         }
