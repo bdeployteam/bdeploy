@@ -35,7 +35,7 @@ import jakarta.ws.rs.NotFoundException;
 @Service
 public class ActionBridge {
 
-    private final class ActionBridgeHandle {
+    private static final class ActionBridgeHandle {
 
         ObjectChangeClientWebSocket ws;
         RemoteService svc;

@@ -1,6 +1,7 @@
 package io.bdeploy.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,10 +23,10 @@ class URLishTest {
     void miniUrlish() {
         URLish u = new URLish("host");
 
-        assertEquals(null, u.scheme);
+        assertNull(u.scheme);
         assertEquals("host", u.hostname);
-        assertEquals(null, u.port);
-        assertEquals(null, u.pathAndQuery);
+        assertNull(u.port);
+        assertNull(u.pathAndQuery);
 
         assertEquals("host", u.toString());
     }
@@ -34,7 +35,7 @@ class URLishTest {
     void noSchemeUrlish() {
         URLish u = new URLish("host:1/path");
 
-        assertEquals(null, u.scheme);
+        assertNull(u.scheme);
         assertEquals("host", u.hostname);
         assertEquals("1", u.port);
         assertEquals("/path", u.pathAndQuery);
@@ -48,7 +49,7 @@ class URLishTest {
 
         assertEquals("scheme://", u.scheme);
         assertEquals("host", u.hostname);
-        assertEquals(null, u.port);
+        assertNull(u.port);
         assertEquals("/path", u.pathAndQuery);
 
         assertEquals("scheme://host/path", u.toString());
@@ -61,7 +62,7 @@ class URLishTest {
         assertEquals("scheme://", u.scheme);
         assertEquals("host", u.hostname);
         assertEquals("1", u.port);
-        assertEquals(null, u.pathAndQuery);
+        assertNull(u.pathAndQuery);
 
         assertEquals("scheme://host:1", u.toString());
     }

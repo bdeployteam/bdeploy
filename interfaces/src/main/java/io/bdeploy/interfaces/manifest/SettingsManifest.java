@@ -60,7 +60,7 @@ public class SettingsManifest {
 
     public static void write(BHive hive, SettingsConfiguration config, SecretKeySpec key) {
         try (Transaction t = hive.getTransactions().begin()) {
-            Long tag = hive.execute(new ManifestMaxIdOperation().setManifestName(SETTINGS_MANIFEST)).orElse(1l);
+            Long tag = hive.execute(new ManifestMaxIdOperation().setManifestName(SETTINGS_MANIFEST)).orElse(1L);
             Manifest.Builder builder = new Manifest.Builder(new Manifest.Key(SETTINGS_MANIFEST, Long.toString(tag + 1)));
             Tree.Builder tree = new Tree.Builder();
 

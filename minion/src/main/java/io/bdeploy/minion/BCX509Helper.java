@@ -94,8 +94,7 @@ public class BCX509Helper {
 
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
-        keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), passphrase,
-                new java.security.cert.Certificate[] { cert });
+        keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), passphrase, new Certificate[] { cert });
 
         try (OutputStream os = Files.newOutputStream(target)) {
             keyStore.store(os, passphrase);

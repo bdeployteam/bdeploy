@@ -17,8 +17,8 @@ import io.bdeploy.bhive.util.StorageHelper;
 
 class SerializerTest extends DbTestBase {
 
-    private final ObjectId OID1 = randomId();
-    private final ObjectId OID2 = randomId();
+    private static final ObjectId OID1 = randomId();
+    private static final ObjectId OID2 = randomId();
 
     @Test
     void serializeOid() {
@@ -48,13 +48,16 @@ class SerializerTest extends DbTestBase {
         assertThat(r.getChildren().get(key2).compareTo(id2), is(0));
 
         for (Tree.Key k : r.getChildren().keySet()) {
-            switch (k.getName()) {
+            String name = k.getName();
+            switch (name) {
                 case "xx1":
                     assertThat(k.getType(), is(Tree.EntryType.BLOB));
                     break;
                 case "xx2":
                     assertThat(k.getType(), is(Tree.EntryType.TREE));
                     break;
+                default:
+                    throw new IllegalStateException("Key with name " + name + " is not recognized by this test.");
             }
         }
     }

@@ -533,7 +533,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
             InstanceConfiguration vCfg = ir.readVersion(instance.instanceConfiguration.id, version.key.getTag());
 
-            if (config.purpose() != null && !config.purpose().equals(vCfg.purpose)) {
+            if (config.purpose() != null && config.purpose() != vCfg.purpose) {
                 continue;
             }
 

@@ -858,15 +858,19 @@ public class InstanceResourceImpl implements InstanceResource {
 
             String fileName = "%1$s (%2$s - %3$s) - Installer";
             Path installerPath = ds.getStoragePath(token);
-            if (applicationOs == OperatingSystem.WINDOWS) {
-                fileName = fileName + ".exe";
-                createWindowsInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation,
-                        splashLocation);
-            } else if (applicationOs == OperatingSystem.LINUX || applicationOs == OperatingSystem.MACOS) {
-                fileName = fileName + ".run";
-                createLinuxInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation);
-            } else {
-                throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
+            switch (applicationOs) {
+                case WINDOWS:
+                    fileName += ".exe";
+                    createWindowsInstaller(im,//
+                            appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
+                    break;
+                case LINUX, MACOS:
+                    fileName += ".run";
+                    createLinuxInstaller(im,//
+                            appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation);
+                    break;
+                default:
+                    throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
             }
             fileName = String.format(fileName, appConfig.name, group, im.getConfiguration().name);
 

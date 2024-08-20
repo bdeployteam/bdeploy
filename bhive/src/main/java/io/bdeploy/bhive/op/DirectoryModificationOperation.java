@@ -8,7 +8,7 @@ import io.bdeploy.bhive.BHive;
 
 public abstract class DirectoryModificationOperation extends BHive.Operation<Void> {
 
-    protected static final int RETRIES = 100000;
+    protected static final int RETRIES = 100_000;
     protected static final int SLEEP_MILLIS = 10;
     protected Path directory;
 

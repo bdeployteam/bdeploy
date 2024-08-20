@@ -226,7 +226,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                         if (o != null) {
                             // need to check OS as well.
                             var smk = ScopedManifestKey.parse(a.getKey());
-                            return o.equals(smk.getOperatingSystem()) && smk.getName().equals(pmf.getProduct() + "/" + n);
+                            return o == smk.getOperatingSystem() && smk.getName().equals(pmf.getProduct() + "/" + n);
                         } else {
                             return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
                         }

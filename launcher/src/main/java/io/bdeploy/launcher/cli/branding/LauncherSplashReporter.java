@@ -53,7 +53,9 @@ public class LauncherSplashReporter implements ActivityReporter {
 
     @Override
     public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
-        return new SplashActivity(activity, maxValue, currentValue);
+        SplashActivity splashActivity = new SplashActivity(activity, maxValue, currentValue);
+        splashActivity.pushToStack();
+        return splashActivity;
     }
 
     private final class SplashActivity implements Activity {
@@ -71,7 +73,9 @@ public class LauncherSplashReporter implements ActivityReporter {
             this.maxAmount = maxValue;
             this.currentAmount = currentValue != null ? currentValue : localCurrent::sum;
             this.startTime = System.currentTimeMillis();
+        }
 
+        void pushToStack() {
             activityStack.push(this);
         }
 

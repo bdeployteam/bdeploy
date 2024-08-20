@@ -114,7 +114,7 @@ public class MessageDialog extends BaseDialog {
         header.add(headerIcon);
 
         headerText = new JLabel();
-        headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16f));
+        headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16F));
         headerText.setForeground(new Color(255, 79, 73));
         header.add(headerText);
 
@@ -129,7 +129,7 @@ public class MessageDialog extends BaseDialog {
         content.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         errorSummary = new JLabel();
-        errorSummary.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12f));
+        errorSummary.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12F));
         content.add(errorSummary);
 
         JPanel errorContainer = new JPanel();
@@ -140,7 +140,7 @@ public class MessageDialog extends BaseDialog {
         errorMessage = new JTextArea();
         errorMessage.setEditable(false);
         errorMessage.setLineWrap(true);
-        errorMessage.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12f));
+        errorMessage.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12F));
         errorContainer.add(errorMessage, BorderLayout.PAGE_START);
 
         errorDetails = new JTextArea();

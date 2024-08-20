@@ -93,11 +93,11 @@ public enum Variables {
     ;
 
     private final String prefix;
-    private final boolean allowArithmetics;
+    private final boolean arithmeticAllowed;
 
-    private Variables(String prefix, boolean allowArithmetics) {
+    private Variables(String prefix, boolean arithmeticAllowed) {
         this.prefix = prefix;
-        this.allowArithmetics = allowArithmetics;
+        this.arithmeticAllowed = arithmeticAllowed;
     }
 
     /**
@@ -111,7 +111,7 @@ public enum Variables {
         return this.prefix;
     }
 
-    public boolean getAllowArithmetics() {
-        return this.allowArithmetics;
+    public boolean isArithmeticAllowed() {
+        return this.arithmeticAllowed;
     }
 }

@@ -54,7 +54,7 @@ public class TextAreaDialog extends BaseDialog {
         header.setBorder(DEFAULT_EMPTY_BORDER);
 
         headerText = new JLabel();
-        headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16f));
+        headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16F));
         header.add(headerText);
 
         return header;

@@ -11,8 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -146,7 +146,7 @@ public class ZipHelper {
     }
 
     private static Set<PosixFilePermission> getPosixPermissionsAsSet(int mode) {
-        Set<PosixFilePermission> permissionSet = new HashSet<>();
+        Set<PosixFilePermission> permissionSet = EnumSet.noneOf(PosixFilePermission.class);
         if ((mode & 0400) == 0400) {
             permissionSet.add(PosixFilePermission.OWNER_READ);
         }
@@ -176,5 +176,4 @@ public class ZipHelper {
         }
         return permissionSet;
     }
-
 }
