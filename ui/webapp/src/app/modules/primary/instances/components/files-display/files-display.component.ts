@@ -185,6 +185,13 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
 
         this.tabIndex = remoteDirs.indexOf(remoteDir);
         this.selectedPath = findFilePath(remoteDir, decodedPathData.path);
+
+        // if selected path could not be determined it means that the current path is empty -> redirect to origin of current node
+        if (!this.selectedPath) {
+          this.selectPath(remoteDir);
+          return;
+        }
+
         this.bdOnSearch(this.searchTerm);
       }),
     );
