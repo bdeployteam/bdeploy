@@ -1,6 +1,6 @@
 import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, HostBinding, inject } from '@angular/core';
-import { encodeDataFilePath } from 'src/app/modules/panels/instances/utils/data-file-utils';
+import { encodeFilePath } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { ActionsService } from '../../services/actions.service';
@@ -42,7 +42,7 @@ export class MainNavMenuComponent {
   protected readonly areas = inject(NavAreasService);
   protected readonly actions = inject(ActionsService);
 
-  protected masterNode = encodeDataFilePath({ minion: 'master', path: '' });
+  protected masterNode = encodeFilePath({ minion: 'master', path: '' });
 
   @HostBinding('@menuOpenClose') get animationState() {
     return this.areas.menuMaximized$.value ? 'open' : 'closed';

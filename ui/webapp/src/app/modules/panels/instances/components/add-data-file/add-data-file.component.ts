@@ -6,7 +6,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
-import { decodeDataFilePath } from '../../utils/data-file-utils';
+import { decodeFilePath } from '../../utils/data-file-utils';
 
 @Component({
   selector: 'app-add-data-file',
@@ -54,7 +54,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
         if (!minions?.length || !route?.params?.['path']) {
           return;
         }
-        const path = decodeDataFilePath(route.params['path']);
+        const path = decodeFilePath(route.params['path']);
         this.fileMinion$.next(minions.find((minion) => path.minion === minion));
         this.currentPath$.next(path.path + (path.path ? '/' : ''));
       }),

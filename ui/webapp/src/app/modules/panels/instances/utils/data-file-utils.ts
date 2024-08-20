@@ -1,11 +1,11 @@
 import { Base64 } from 'js-base64';
 import { FileListEntry, FilePath } from 'src/app/modules/primary/instances/services/files.service';
 
-export function encodeDataFilePath(dfp: { minion: string; path: string }): string {
-  return Base64.encode(JSON.stringify({ minion: dfp.minion, path: dfp.path }));
+export function encodeFilePath(filePath: { minion: string; path: string }): string {
+  return Base64.encode(JSON.stringify({ minion: filePath.minion, path: filePath.path }));
 }
 
-export function decodeDataFilePath(encodedPath: string): { minion: string; path: string } {
+export function decodeFilePath(encodedPath: string): { minion: string; path: string } {
   try {
     return JSON.parse(Base64.decode(encodedPath));
   } catch {
@@ -13,33 +13,33 @@ export function decodeDataFilePath(encodedPath: string): { minion: string; path:
   }
 }
 
-export function getDescendants(dfp: FilePath): FilePath[] {
-  if (!dfp) {
+export function getDescendants(filePath: FilePath): FilePath[] {
+  if (!filePath) {
     return null;
   }
-  const arr = [dfp];
-  dfp.children?.flatMap((child) => getDescendants(child)).forEach((descendant) => arr.push(descendant));
+  const arr = [filePath];
+  filePath.children?.flatMap((child) => getDescendants(child)).forEach((descendant) => arr.push(descendant));
   return arr;
 }
 
-export function findDataFilePath(dfp: FilePath, path: string): FilePath {
-  if (!dfp) {
+export function findFilePath(filePath: FilePath, path: string): FilePath {
+  if (!filePath) {
     return null;
   }
-  if (dfp.path === path) {
-    return dfp;
+  if (filePath.path === path) {
+    return filePath;
   }
-  return dfp.children.map((child) => findDataFilePath(child, path)).find((i) => !!i);
+  return filePath.children.map((child) => findFilePath(child, path)).find((i) => !!i);
 }
 
-export function toFileList(dfp: FilePath): FileListEntry[] {
-  if (dfp.children.length === 0) {
-    return [dfp];
+export function toFileList(filePath: FilePath): FileListEntry[] {
+  if (filePath.children.length === 0) {
+    return [filePath];
   }
-  return dfp.children.flatMap((i) => toFileList(i));
+  return filePath.children.flatMap((i) => toFileList(i));
 }
 
-export function constructDataFilePaths(
+export function constructFilePath(
   minion: string,
   entries: FileListEntry[],
   selectPath: (p: FilePath) => void,
@@ -61,7 +61,7 @@ export function constructDataFilePaths(
     addNode(minion, root, e, paths, selectPath);
   }
   calculateSizeAndLastModifiedDate(root);
-  sortDataFiles(root);
+  sortFiles(root);
   return root;
 }
 
@@ -122,8 +122,8 @@ function addNode(
   Folders are sorted by names asc
   Files are sorted by lastModified desc
   */
-function sortDataFiles(dfp: FilePath) {
-  dfp.children.sort((a, b) => {
+function sortFiles(filePath: FilePath) {
+  filePath.children.sort((a, b) => {
     const aIsFolder = a.children.length;
     const bIsFolder = b.children.length;
     if (aIsFolder && bIsFolder) {
@@ -134,5 +134,5 @@ function sortDataFiles(dfp: FilePath) {
     }
     return aIsFolder ? -1 : 1;
   });
-  dfp.children.forEach((child) => sortDataFiles(child));
+  filePath.children.forEach((child) => sortFiles(child));
 }
