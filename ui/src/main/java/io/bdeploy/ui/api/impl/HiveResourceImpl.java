@@ -160,14 +160,11 @@ public class HiveResourceImpl implements HiveResource {
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
         ObjectId id = (dto.id != null && !dto.id.isBlank()) ? ObjectId.parse(dto.id)
                 : hive.execute(new ManifestLoadOperation().setManifest(new Manifest.Key(dto.mName, dto.mTag))).getRoot();
-        switch (dto.type) {
-            case TREE:
-                return ds.download(ds.downloadBHiveContent(hive, id, dto.name));
-            case MANIFEST:
-                return ds.download(ds.createOriginalZipAndRegister(hive, dto.mName, dto.mTag));
-            default:
-                return download(hiveParam, dto.id);
-        }
+        return switch (dto.type) {
+            case TREE -> ds.download(ds.downloadBHiveContent(hive, id, dto.name));
+            case MANIFEST -> ds.download(ds.createOriginalZipAndRegister(hive, dto.mName, dto.mTag));
+            default -> download(hiveParam, dto.id);
+        };
     }
 
     private List<HiveEntryDto> list(BHive hive, ObjectId objectId) {

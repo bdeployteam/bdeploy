@@ -75,24 +75,15 @@ public class DeploymentPathProvider {
      * @return the {@link Path} to the {@link SpecialDirectory}
      */
     public Path get(SpecialDirectory dir) {
-        switch (dir) {
-            case ROOT:
-                return rootDir;
-            case DATA:
-                return get(SpecialDirectory.ROOT).resolve(dir.dirName);
-            case BIN:
-                return get(SpecialDirectory.ROOT).resolve(dir.dirName).resolve(tagId);
-            case MANIFEST_POOL:
-                // Note: this reaches outside of the given "root" deploymentDir - assumes that the parent is shared by all instances
-                return get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName);
-            case INSTANCE_MANIFEST_POOL:
-                return get(SpecialDirectory.ROOT).resolve(dir.dirName);
-            case CONFIG, RUNTIME:
-                return get(SpecialDirectory.BIN).resolve(dir.dirName);
-            case LOG_DATA:
-                // Note: Default path of logData is equal to DATA for compatibility with older versions
-                return logDataDir != null ? logDataDir : get(SpecialDirectory.DATA);
-        }
-        throw new IllegalArgumentException("Unhandled special directory: " + dir);
+        return switch (dir) {
+            case ROOT -> rootDir;
+            case DATA -> get(SpecialDirectory.ROOT).resolve(dir.dirName);
+            case BIN -> get(SpecialDirectory.ROOT).resolve(dir.dirName).resolve(tagId);
+            case MANIFEST_POOL -> get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName); // Reaches outside of the given "root" deploymentDir - assumes that the parent is shared by all instances
+            case INSTANCE_MANIFEST_POOL -> get(SpecialDirectory.ROOT).resolve(dir.dirName);
+            case CONFIG, RUNTIME -> get(SpecialDirectory.BIN).resolve(dir.dirName);
+            case LOG_DATA -> logDataDir != null ? logDataDir : get(SpecialDirectory.DATA); // Default path of logData is equal to DATA for compatibility with older versions
+            default -> throw new IllegalArgumentException("Unhandled special directory: " + dir);
+        };
     }
 }
