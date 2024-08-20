@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
-import { CrumbInfo } from 'src/app/modules/core/components/bd-breadcrumbs/bd-breadcrumbs.component';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
@@ -119,7 +118,6 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   protected tabIndex: number = -1;
 
   protected selectedPath: FilePath;
-  protected crumbs: CrumbInfo[] = [];
   protected instance: InstanceDto;
   protected columns: BdDataColumn<FilePath>[];
   protected isDataFiles: boolean;
