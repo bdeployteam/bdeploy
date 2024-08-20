@@ -2,6 +2,9 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -11,6 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +31,6 @@ import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
-import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
@@ -37,6 +40,7 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
@@ -271,16 +275,33 @@ public class InstanceManifest {
         }
 
         for (Manifest.Key key : idKeys) {
-            if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(key)))) {
-                // might have been deleted meanwhile.
-                continue;
-            }
             Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key).setNullOnError(true));
             if (mf != null && mf.getLabels().containsKey(INSTANCE_LABEL)) {
                 result.add(key);
             }
         }
         return result;
+    }
+
+    /**
+     * <b>Quickly</b> "guesses" instance IDs by looking at top level manifest IDs which match
+     * the pattern of our UUIDs assigned to instances. This is way faster than actually scanning
+     * for instances. The result may only be used for very specific things, like e.g. as searchable
+     * strings for instance groups, where a "false" match is not critical.
+     */
+    public static Set<String> quickGuessIds(BHiveExecution hive) {
+        return hive.execute(new BHive.Operation<Set<String>>() {
+
+            public Set<String> call() {
+                try (Stream<Path> walk = Files.walk(getManifestDatabase().getRoot(), 1)) {
+                    return walk.filter(Files::isDirectory).map(Path::getFileName).map(Path::toString)
+                            .filter(d -> UuidHelper.UUID_PATTERN.matcher(d).find()).collect(Collectors.toSet());
+                } catch (IOException ioe) {
+                    log.info("Cannot quick-guess instance IDs", ioe);
+                    return Collections.emptySet();
+                }
+            }
+        });
     }
 
     /**

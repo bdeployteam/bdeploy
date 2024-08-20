@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -132,22 +133,14 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     private InstanceGroupConfigurationDto getInstanceGroupConfigurationDto(BHive hive) {
         InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
 
-        if (cfg == null) {
+        if (cfg == null || !isAuthorized(new ScopedPermission(cfg.name, Permission.CLIENT))) {
             return null;
         }
 
-        if (!isAuthorized(new ScopedPermission(cfg.name, Permission.CLIENT))) {
-            return null;
-        }
-
-        // Fetch instance group's instance IDs and add them to searchable text
-        List<String> instanceIds = new ArrayList<>();
-        SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
-        for (Key imKey : imKeys) {
-            // shortcut for performance reasons: calculate the instance ID from its key instead of loading the instance.
-            // this information is only used for searching, so it is not *that* important.
-            instanceIds.add(imKey.getName().substring(0, imKey.getName().indexOf('/')));
-        }
+        // Fetch instance group's instance IDs and add them to searchable text.
+        // This does not need to be 100% exact, i.e. if a "wrong" text slips in this
+        // is not dramatic in this case. Thus we use a quick mechanism for an (educated) guess.
+        Set<String> instanceIds = InstanceManifest.quickGuessIds(hive);
 
         return new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds));
     }
