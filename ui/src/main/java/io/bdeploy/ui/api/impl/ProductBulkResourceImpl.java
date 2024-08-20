@@ -83,6 +83,7 @@ public class ProductBulkResourceImpl implements ProductBulkResource {
 
         rspos.runAndAwaitAll("Bulk-Delete", actions, hive.getTransactions());
 
+        ProductManifest.invalidateScanCache(hive);
         deleted.keys().asIterator().forEachRemaining(key -> changes.remove(ObjectChangeType.PRODUCT, key));
 
         return result;

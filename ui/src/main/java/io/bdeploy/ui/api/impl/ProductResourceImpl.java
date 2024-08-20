@@ -151,6 +151,7 @@ public class ProductResourceImpl implements ProductResource {
             hive.execute(new ManifestDeleteOperation().setToDelete(key));
             apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
 
+            ProductManifest.invalidateScanCache(hive);
             changes.remove(ObjectChangeType.PRODUCT, key);
         }
     }

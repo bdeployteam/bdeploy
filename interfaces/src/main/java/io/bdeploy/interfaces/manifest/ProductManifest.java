@@ -13,6 +13,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -57,6 +61,8 @@ import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCacheRecordV2
 public class ProductManifest {
 
     private static final Logger log = LoggerFactory.getLogger(ProductManifest.class);
+    private static final Cache<BHive, SortedSet<Manifest.Key>> SCAN_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES).softValues().build();
 
     private final SortedSet<Manifest.Key> applications;
     private final SortedSet<Manifest.Key> references;
@@ -380,19 +386,42 @@ public class ProductManifest {
      * @return a {@link SortedSet} with all available {@link ProductManifest}s.
      */
     public static SortedSet<Manifest.Key> scan(BHive hive) {
-        SortedSet<Manifest.Key> result = new TreeSet<>();
+        try {
+            // product scanning and classification takes quite considerable time if done repeatedly. we cache the information
+            // for a short period of time (a few minutes). Both adding (through spawn listener) and removing (through resources/UI/CLI)
+            // will invalidate the cache earlier. Thus *normally* there should be no lag, but worst case an update would take
+            // up to 5 minutes to be visible in the UI in case a product updates from a *very* unexpected direction.
+            return SCAN_CACHE.get(hive, () -> {
+                SortedSet<Manifest.Key> result = new TreeSet<>();
 
-        // filter out internal (meta, etc.) manifests right away so we don't waste time checking.
-        Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation()).stream().filter(k -> !k.getName().startsWith("."))
-                .collect(Collectors.toSet());
+                // filter out internal (meta, etc.) manifests right away so we don't waste time checking.
+                // this list is internally cached already, however this cache is not sufficient here...
+                Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation()).stream()
+                        .filter(k -> !k.getName().startsWith(".")).collect(Collectors.toSet());
 
-        PersistentManifestClassification<ProductClassification> pc = new PersistentManifestClassification<>(hive, "products",
-                m -> new ProductClassification(m.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)));
+                // the persistent classification already improves performance *a lot*. However also loading
+                // this classification over and over again takes a lot of time. Thus this layer is cached once
+                // more on layer up using soft references to further improve performance.
+                PersistentManifestClassification<ProductClassification> pc = new PersistentManifestClassification<>(hive,
+                        "products",
+                        m -> new ProductClassification(m.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)));
 
-        pc.loadAndUpdate(allKeys);
-        pc.getClassifications().entrySet().stream().filter(e -> e.getValue().isProduct).map(Entry::getKey).forEach(result::add);
+                pc.loadAndUpdate(allKeys);
+                pc.getClassifications().entrySet().stream().filter(e -> e.getValue().isProduct).map(Entry::getKey)
+                        .forEach(result::add);
 
-        return result;
+                return result;
+            });
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Cannot scan for products", e);
+        }
+    }
+
+    /**
+     * Force re-scanning for product manifests and updating of the persistent classification cache on next access.
+     */
+    public static void invalidateScanCache(BHive hive) {
+        SCAN_CACHE.invalidate(hive);
     }
 
     public static final class ProductClassification {
