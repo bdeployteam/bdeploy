@@ -176,7 +176,7 @@ if [ -d "\$APP_HOME/update/next" ]; then
         fi
 
         rm -rf "\$APP_HOME/update/next"
-        rm "\$APP_HOME/update/.updating"
+        rm -f "\$APP_HOME/update/.updating"
     else
         echo "No update to be applied has been found. Restarting."
     fi
