@@ -92,7 +92,6 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
 
   private readonly searchColumns: BdDataColumn<FilePath>[] = [colAvatar, colPath, colItems, colModTime, colSize];
   private readonly defaultColumns: BdDataColumn<FilePath>[];
-
   private readonly colDownload: BdDataColumn<FilePath> = {
     id: 'download',
     name: 'Downl.',
@@ -111,16 +110,16 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
     actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
 
+  protected readonly isDataFiles: boolean;
+
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected records$ = new BehaviorSubject<FilePath[]>(null);
   protected noactive$ = new BehaviorSubject<boolean>(true);
-  protected nodes$ = new BehaviorSubject<FilePath[]>(null);
+  protected remoteDirs$ = new BehaviorSubject<FilePath[]>(null);
   protected tabIndex: number = -1;
-
   protected selectedPath: FilePath;
   protected instance: InstanceDto;
   protected columns: BdDataColumn<FilePath>[];
-  protected isDataFiles: boolean;
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
@@ -142,51 +141,51 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
     );
 
     this.subscription.add(
-      this.filesService.directories$.subscribe((dd) => {
-        if (!dd) {
-          this.nodes$.next(null);
+      this.filesService.directories$.subscribe((remoteDirectories) => {
+        if (!remoteDirectories) {
+          this.remoteDirs$.next(null);
           return;
         }
 
-        const nodes = [];
-        for (const dir of dd) {
-          const entries: FileListEntry[] = [];
-          if (dir.problem) {
-            console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
+        const remoteDirs: FilePath[] = [];
+        for (const remoteDirectory of remoteDirectories) {
+          if (remoteDirectory.problem) {
+            console.warn(`Problem reading files from ${remoteDirectory.minion}: ${remoteDirectory.problem}`);
             continue;
           }
-          for (const entry of dir.entries) {
-            entries.push({ directory: dir, entry });
-          }
 
-          const node = constructFilePath(dir.minion, entries, (p) => this.selectPath(p));
-          nodes.push(node);
+          const remoteDirEntries: FileListEntry[] = remoteDirectory.entries.map(
+            (entry) => <FileListEntry>{ directory: remoteDirectory, entry },
+          );
+          remoteDirs.push(constructFilePath(remoteDirectory.minion, remoteDirEntries, (p) => this.selectPath(p)));
         }
+        remoteDirs.sort((filePath) => (filePath.minion === 'master' ? -1 : 0)); // remote directory of master node must be first
 
-        nodes.sort((a) => (a.minion === 'master' ? -1 : 0)); // master node must be first
-
-        this.nodes$.next(nodes);
-
+        this.remoteDirs$.next(remoteDirs);
         this.loading$.next(false);
       }),
     );
 
     this.subscription.add(
-      combineLatest([this.areas.primaryRoute$, this.nodes$]).subscribe(([route, nodes]) => {
-        if (!nodes?.length || !route?.params?.['path']) {
+      combineLatest([this.areas.primaryRoute$, this.remoteDirs$]).subscribe(([route, remoteDirs]) => {
+        if (!remoteDirs?.length || !route?.params?.['path']) {
           this.selectedPath = null;
           this.records$.next(null);
           return;
         }
-        const path = decodeFilePath(route.params['path']);
-        const node = nodes.find((filePath) => filePath.minion === path.minion);
-        this.tabIndex = nodes.indexOf(node);
-        this.selectedPath = findFilePath(node, path.path);
-        this.bdOnSearch(this.searchTerm);
-        // if path encoded node is not found, select first node (which should be master)
-        if (!node) {
-          this.selectPath(nodes[0]);
+
+        const decodedPathData = decodeFilePath(route.params['path']);
+        const remoteDir = remoteDirs.find((filePath) => filePath.minion === decodedPathData.minion);
+
+        // if the path encoded remote directory is not found, select first one (which should belong to the master node)
+        if (!remoteDir) {
+          this.selectPath(remoteDirs[0]);
+          return;
         }
+
+        this.tabIndex = remoteDirs.indexOf(remoteDir);
+        this.selectedPath = findFilePath(remoteDir, decodedPathData.path);
+        this.bdOnSearch(this.searchTerm);
       }),
     );
 
@@ -201,10 +200,10 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
     this.searchTerm = value || '';
     if (this.searchTerm) {
       this.columns = this.searchColumns;
-      const records = this.selectedPath?.children
+      const filtered = this.selectedPath?.children
         ?.flatMap((child) => getDescendants(child))
         ?.filter((descendant) => descendant.name.indexOf(this.searchTerm) !== -1);
-      this.records$.next(records);
+      this.records$.next(filtered);
     } else {
       this.columns = this.defaultColumns;
       this.records$.next(this.selectedPath?.children);
@@ -249,7 +248,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
 
   protected onTabChange(e: MatTabChangeEvent) {
     if (this.tabIndex !== e.index) {
-      this.selectPath(this.nodes$.value[e.index]);
+      this.selectPath(this.remoteDirs$.value[e.index]);
     }
   }
 

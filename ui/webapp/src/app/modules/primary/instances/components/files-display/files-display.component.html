@@ -41,12 +41,12 @@
     <ng-template #active>
       <ng-container *ngIf="servers.isCurrentInstanceSynchronized$ | async; else isNotSynchronized">
         <mat-tab-group
-          *ngIf="(nodes$ | async)?.length > 1"
+          *ngIf="(remoteDirs$ | async)?.length > 1"
           animationDuration="0ms"
           [selectedIndex]="tabIndex"
           (selectedTabChange)="onTabChange($event)"
         >
-          <mat-tab *ngFor="let node of nodes$ | async" [label]="node.minion"> </mat-tab>
+          <mat-tab *ngFor="let node of remoteDirs$ | async" [label]="node.minion"> </mat-tab>
         </mat-tab-group>
         <div class="mt-2 mx-1.5">
           <app-bd-breadcrumbs *ngIf="selectedPath" [crumbs]="selectedPath.crumbs"></app-bd-breadcrumbs>
