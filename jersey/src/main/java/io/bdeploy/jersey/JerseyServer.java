@@ -64,6 +64,7 @@ import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringSamplerService;
 import io.bdeploy.jersey.resources.ActionResourceImpl;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
+import io.bdeploy.jersey.resources.RedirectOnApiRootAccessImpl;
 import jakarta.annotation.Priority;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.Priorities;
@@ -295,10 +296,12 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             sslEngine.setEnabledCipherSuites(getSupportedCiphers(ctx, cipherSuites));
 
-            // default features
+            // default features - also for plugins.
             registerDefaultResources(rc);
 
-            server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
+            // this redirects from /api to / - not in the default resources as we *do not* want this for plugins.
+            rc.register(RedirectOnApiRootAccessImpl.class);
+
             container = ContainerFactory.createContainer(GrizzlyHttpContainer.class, rc);
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, container, true, sslEngine, false);
             for (Map.Entry<HttpHandlerRegistration, HttpHandler> regs : preRegistrations.entrySet()) {
