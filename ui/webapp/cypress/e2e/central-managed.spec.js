@@ -17,11 +17,13 @@ describe('Central/Managed Basic Test', function () {
 
   it('Attaches a managed server to the central server (managed part)', () => {
     cy.visitManaged('/');
+    cy.waitUntilContentLoaded();
     cy.attachManagedSide(groupName);
   });
 
   it('Attaches a managed server to the central server (central part)', () => {
     cy.visitCentral('/');
+    cy.waitUntilContentLoaded();
     cy.attachCentralSide(groupName);
   });
 
@@ -59,11 +61,13 @@ describe('Central/Managed Basic Test', function () {
 
   it('Re-attaches the managed server to the central server (managed part)', () => {
     cy.visitManaged('/');
+    cy.waitUntilContentLoaded();
     cy.attachManagedSide(groupName);
   });
 
   it('Re-attaches the managed server to the central server (central part)', () => {
     cy.visitCentral('/');
+    cy.waitUntilContentLoaded();
     cy.attachCentralSide(groupName);
   });
 
