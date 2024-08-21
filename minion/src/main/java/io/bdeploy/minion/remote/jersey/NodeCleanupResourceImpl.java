@@ -137,14 +137,12 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
 
     @Override
     public void perform(List<CleanupAction> actions) {
-        boolean needPrune = false;
         for (CleanupAction action : actions) {
             switch (action.type) {
                 case DELETE_FOLDER:
                     doDeleteFolder(Paths.get(action.what));
                     break;
                 case DELETE_MANIFEST:
-                    needPrune = true;
                     doDeleteManifest(root.getHive(), Key.parse(action.what));
                     break;
                 case TRUNCATE_META_MANIFEST:
@@ -155,9 +153,8 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
             }
         }
 
-        if (needPrune) {
-            root.getHive().execute(new PruneOperation());
-        }
+        // always prune, to clean up e.g. rotating manifest left-overs (runtime history, ...)
+        root.getHive().execute(new PruneOperation());
     }
 
     private void doDeleteManifest(BHive hive, Key key) {

@@ -150,9 +150,9 @@ public class CleanupHelper {
         for (CleanupAction action : group.actions) {
             action.execute(securityContext, provider, hive);
         }
-        if (!group.actions.isEmpty()) {
-            hive.execute(new PruneOperation());
-        }
+
+        // always prune to clean up things that are left over even if WE did nothing.
+        hive.execute(new PruneOperation());
     }
 
     private void executeForMinion(CleanupGroup group) {
