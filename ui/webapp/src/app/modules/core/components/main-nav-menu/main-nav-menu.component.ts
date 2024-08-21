@@ -56,6 +56,6 @@ export class MainNavMenuComponent {
   }
 
   goToGitHub(): void {
-    window.open('https://github.com/bdeployteam/bdeploy/releases/latest', '_blank').focus();
+    window.open('https://github.com/bdeployteam/bdeploy/releases/latest', '_blank', 'noreferrer').focus();
   }
 }
