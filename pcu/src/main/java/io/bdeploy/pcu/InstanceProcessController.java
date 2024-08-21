@@ -2,15 +2,12 @@ package io.bdeploy.pcu;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 import com.google.common.collect.Sets;
@@ -47,13 +44,8 @@ public class InstanceProcessController {
 
     private final MdcLogger logger = new MdcLogger(InstanceProcessController.class);
 
-    /** Guards access to the map */
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private final Lock readLock = rwLock.readLock();
-    private final Lock writeLock = rwLock.writeLock();
-
     /** Maps the tag of an instance to the list of processes */
-    private final Map<String, ProcessList> processMap = new HashMap<>();
+    private final Map<String, ProcessList> processMap = new ConcurrentHashMap<>();
 
     /** The currently active tag */
     private String activeTag;
@@ -81,46 +73,40 @@ public class InstanceProcessController {
      */
     public void createProcessControllers(DeploymentPathProvider pathProvider, VariableResolver resolver, InstanceNodeManifest inm,
             String tag, ProcessGroupConfiguration groupConfig, MinionRuntimeHistoryManager runtimeHistory) {
-        try {
-            writeLock.lock();
+        ProcessList processList = new ProcessList(tag, groupConfig);
+        processMap.put(tag, processList);
 
-            ProcessList processList = new ProcessList(tag, groupConfig);
-            processMap.put(tag, processList);
+        // Fetch all process control groups which are available.
+        processList.setControlGroupsFromConfig(inm);
 
-            // Fetch all process control groups which are available.
-            processList.setControlGroupsFromConfig(inm);
-
-            // Add a new controller for each application
-            for (ProcessConfiguration config : groupConfig.applications) {
-                Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.id);
-                ProcessController controller = new ProcessController(groupConfig.id, tag, config, processDir);
-                CompositeResolver resolverWithApp = new CompositeResolver();
-                if (inm != null) {
-                    resolverWithApp.add(new ApplicationParameterValueResolver(config.id, inm.getConfiguration()));
-                }
-                resolverWithApp.add(resolver);
-                controller.setVariableResolver(resolverWithApp);
-
-                if (runtimeHistory != null) {
-                    controller.addStatusListener(event -> {
-                        // Do not record planned events and transitions.
-                        if (event.newState == ProcessState.RUNNING_STOP_PLANNED) {
-                            return;
-                        }
-                        // Do not record internal state changes
-                        if (event.newState == ProcessState.RUNNING && event.oldState == ProcessState.RUNNING_UNSTABLE) {
-                            return;
-                        }
-                        ProcessStatusDto status = controller.getStatus();
-                        runtimeHistory.recordEvent(status.pid, status.exitCode, status.processState, config.name, event.user);
-                    });
-                }
-
-                processList.add(controller);
-                logger.log(l -> l.debug("Creating new process controller."), tag, config.id);
+        // Add a new controller for each application
+        for (ProcessConfiguration config : groupConfig.applications) {
+            Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.id);
+            ProcessController controller = new ProcessController(groupConfig.id, tag, config, processDir);
+            CompositeResolver resolverWithApp = new CompositeResolver();
+            if (inm != null) {
+                resolverWithApp.add(new ApplicationParameterValueResolver(config.id, inm.getConfiguration()));
             }
-        } finally {
-            writeLock.unlock();
+            resolverWithApp.add(resolver);
+            controller.setVariableResolver(resolverWithApp);
+
+            if (runtimeHistory != null) {
+                controller.addStatusListener(event -> {
+                    // Do not record planned events and transitions.
+                    if (event.newState == ProcessState.RUNNING_STOP_PLANNED) {
+                        return;
+                    }
+                    // Do not record internal state changes
+                    if (event.newState == ProcessState.RUNNING && event.oldState == ProcessState.RUNNING_UNSTABLE) {
+                        return;
+                    }
+                    ProcessStatusDto status = controller.getStatus();
+                    runtimeHistory.recordEvent(status.pid, status.exitCode, status.processState, config.name, event.user);
+                });
+            }
+
+            processList.add(controller);
+            logger.log(l -> l.debug("Creating new process controller."), tag, config.id);
         }
     }
 
@@ -139,17 +125,12 @@ public class InstanceProcessController {
     public void recover() {
         Map<String, Integer> tag2Running = new TreeMap<>();
         logger.log(l -> l.info("Checking which applications are alive."));
-        try {
-            readLock.lock();
-            for (ProcessList list : processMap.values()) {
-                int running = list.recover();
-                if (running == 0) {
-                    continue;
-                }
-                tag2Running.put(list.getInstanceTag(), running);
+        for (ProcessList list : processMap.values()) {
+            int running = list.recover();
+            if (running == 0) {
+                continue;
             }
-        } finally {
-            readLock.unlock();
+            tag2Running.put(list.getInstanceTag(), running);
         }
 
         // Print out a summary. Indicate if applications across different versions are running
@@ -173,17 +154,12 @@ public class InstanceProcessController {
             return;
         }
         // Check auto-start flag of instance
-        try {
-            readLock.lock();
-            ProcessList list = processMap.get(activeTag);
-            if (!list.processConfig.autoStart) {
-                logger.log(l -> l.info("Autostart not configured. Applications remain stopped."), activeTag);
-                return;
-            }
-            logger.log(l -> l.info("Auto-Starting applications."), activeTag);
-        } finally {
-            readLock.unlock();
+        ProcessList list = processMap.get(activeTag);
+        if (!list.processConfig.autoStart) {
+            logger.log(l -> l.info("Autostart not configured. Applications remain stopped."), activeTag);
+            return;
         }
+        logger.log(l -> l.info("Auto-Starting applications."), activeTag);
 
         // Proceed with normal startup of all processes
         startAll(null);
@@ -228,21 +204,16 @@ public class InstanceProcessController {
      * @param user the user who triggered the stop - null for default user
      */
     public void startAll(String user) {
-        try {
-            readLock.lock();
+        performStartOperation((list, running) -> {
+            // Start all missing applications
+            logger.log(l -> l.info("Starting all applications."), activeTag);
 
-            performStartOperation((list, running) -> {
-                // Start all missing applications
-                logger.log(l -> l.info("Starting all applications."), activeTag);
-
-                BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, list);
-                strategy.startAll(user, running, list.controllers.entrySet().stream()
-                        .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
-                        .map(Entry::getKey).toList());
-            });
-        } finally {
-            readLock.unlock();
-        }
+            BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, list);
+            strategy.startAll(user, running,
+                    list.controllers.entrySet().stream()
+                            .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
+                            .map(Entry::getKey).toList());
+        });
     }
 
     /**
@@ -270,20 +241,14 @@ public class InstanceProcessController {
      * @param user the user who triggered the start
      */
     public void start(List<String> applicationIds, String user) {
-        try {
-            readLock.lock();
+        performStartOperation((list, running) -> {
+            // Start all missing applications
+            logger.log(l -> l.info("Starting applications: {}", applicationIds), activeTag);
 
-            performStartOperation((list, running) -> {
-                // Start all missing applications
-                logger.log(l -> l.info("Starting applications: {}", applicationIds), activeTag);
-
-                // Let the desired strategy start all processes
-                BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, list);
-                strategy.startAll(user, running, applicationIds);
-            });
-        } finally {
-            readLock.unlock();
-        }
+            // Let the desired strategy start all processes
+            BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, list);
+            strategy.startAll(user, running, applicationIds);
+        });
     }
 
     /**
@@ -309,17 +274,12 @@ public class InstanceProcessController {
      * @return information about running applications.
      */
     public InstanceNodeStatusDto getStatus() {
-        try {
-            readLock.lock();
-            InstanceNodeStatusDto status = new InstanceNodeStatusDto();
-            status.activeTag = activeTag;
-            for (Map.Entry<String, ProcessList> entry : processMap.entrySet()) {
-                status.add(entry.getKey(), entry.getValue().getStatus());
-            }
-            return status;
-        } finally {
-            readLock.unlock();
+        InstanceNodeStatusDto status = new InstanceNodeStatusDto();
+        status.activeTag = activeTag;
+        for (Map.Entry<String, ProcessList> entry : processMap.entrySet()) {
+            status.add(entry.getKey(), entry.getValue().getStatus());
         }
+        return status;
     }
 
     /**
@@ -345,16 +305,11 @@ public class InstanceProcessController {
      * TESTING only: Detaches all running applications so that they cannot be controlled any more.
      */
     public void detach() {
-        try {
-            readLock.lock();
-            for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
-                for (ProcessController controller : running.values()) {
-                    controller.detach();
-                }
+        for (ProcessList list : processMap.values()) {
+            Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
+            for (ProcessController controller : running.values()) {
+                controller.detach();
             }
-        } finally {
-            readLock.unlock();
         }
     }
 
@@ -389,19 +344,14 @@ public class InstanceProcessController {
      * @return the controller or {@code null} if the application is not running
      */
     private ProcessController findProcessController(String applicationId, Set<ProcessState> filters) {
-        try {
-            readLock.lock();
-            for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> app2Controller = list.getWithState(filters);
-                ProcessController processController = app2Controller.get(applicationId);
-                if (processController != null) {
-                    return processController;
-                }
+        for (ProcessList list : processMap.values()) {
+            Map<String, ProcessController> app2Controller = list.getWithState(filters);
+            ProcessController processController = app2Controller.get(applicationId);
+            if (processController != null) {
+                return processController;
             }
-            return null;
-        } finally {
-            readLock.unlock();
         }
+        return null;
     }
 
 }

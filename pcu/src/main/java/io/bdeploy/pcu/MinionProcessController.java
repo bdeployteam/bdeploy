@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
@@ -27,13 +24,8 @@ public class MinionProcessController {
 
     private final MdcLogger logger = new MdcLogger(MinionProcessController.class);
 
-    /** Guards access to the map */
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private final Lock readLock = rwLock.readLock();
-    private final Lock writeLock = rwLock.writeLock();
-
     /** Maps the UID of an instance to its controller */
-    private final Map<String, InstanceProcessController> instance2Controller = new TreeMap<>();
+    private final Map<String, InstanceProcessController> instance2Controller = new ConcurrentHashMap<>();
 
     /**
      * Sets the active manifest versions for each deployed instance.
@@ -58,24 +50,14 @@ public class MinionProcessController {
      * Recovers any processes that are still running.
      */
     public void recover() {
-        try {
-            readLock.lock();
-            doParallelAndWait("Recover", instance2Controller.values().stream().map(c -> (Runnable) (c::recover)).toList());
-        } finally {
-            readLock.unlock();
-        }
+        doParallelAndWait("Recover", instance2Controller.values().stream().map(c -> (Runnable) (c::recover)).toList());
     }
 
     /**
      * Starts all applications of the activated tag if the corresponding auto-start flag is set in the configuration.
      */
     public void autoStart() {
-        try {
-            readLock.lock();
-            doParallelAndWait("AutoStart", instance2Controller.values().stream().map(c -> (Runnable) (c::autoStart)).toList());
-        } finally {
-            readLock.unlock();
-        }
+        doParallelAndWait("AutoStart", instance2Controller.values().stream().map(c -> (Runnable) (c::autoStart)).toList());
     }
 
     private void doParallelAndWait(String name, List<Runnable> logic) {
@@ -104,18 +86,13 @@ public class MinionProcessController {
      */
     public InstanceProcessController getOrCreate(BHive hive, InstanceNodeManifest inm) {
         String instanceId = inm.getId();
-        try {
-            writeLock.lock();
-            InstanceProcessController controller = instance2Controller.get(instanceId);
-            if (controller == null) {
-                controller = new InstanceProcessController(instanceId);
-                instance2Controller.put(instanceId, controller);
-                logger.log(l -> l.debug("Creating new instance controller."), instanceId);
-            }
-            return controller;
-        } finally {
-            writeLock.unlock();
+        InstanceProcessController controller = instance2Controller.get(instanceId);
+        if (controller == null) {
+            controller = new InstanceProcessController(instanceId);
+            instance2Controller.put(instanceId, controller);
+            logger.log(l -> l.debug("Creating new instance controller."), instanceId);
         }
+        return controller;
     }
 
     /**
