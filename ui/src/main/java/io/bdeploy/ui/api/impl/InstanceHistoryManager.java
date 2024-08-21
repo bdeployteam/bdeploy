@@ -189,52 +189,32 @@ public class InstanceHistoryManager {
     }
 
     private String computeConfigTitle(Action action, String tag) {
-        String s = "Version " + tag + ": ";
-        switch (action) {
-            case CREATE:
-                return s + "Created";
-            case DELETE:
-                return s + "Deleted";
-            case INSTALL:
-                return s + "Installed";
-            case UNINSTALL:
-                return s + "Uninstalled";
-            case ACTIVATE:
-                return s + "Activated";
-            case DEACTIVATE:
-                return s + "Deactivated";
-            case BANNER_SET:
-                return s + "Banner set";
-            case BANNER_CLEAR:
-                return s + "Banner removed";
-            default:
-                return s + action.name();
-        }
+        return "Version " + tag + ": " + switch (action) {
+            case CREATE -> "Created";
+            case DELETE -> "Deleted";
+            case INSTALL -> "Installed";
+            case UNINSTALL -> "Uninstalled";
+            case ACTIVATE -> "Activated";
+            case DEACTIVATE -> "Deactivated";
+            case BANNER_SET -> "Banner set";
+            case BANNER_CLEAR -> "Banner removed";
+            default -> action.name();
+        };
     }
 
     private String computeRuntimeTitle(ProcessState state, String process) {
-        switch (state) {
-            case RUNNING_NOT_STARTED:
-                return process + " started";
-            case RUNNING:
-                return process + " finished startup";
-            case RUNNING_UNSTABLE:
-                return process + " restarted";
-            case RUNNING_NOT_ALIVE:
-                return process + " liveness probe failed";
-            case STOPPED:
-                return process + " stopped";
-            case CRASHED_WAITING:
-                return process + " crashed";
-            case CRASHED_PERMANENTLY:
-                return process + " crashed permanently.";
-            case STOPPED_START_PLANNED:
-                return process + " planned to start";
-            case RUNNING_STOP_PLANNED:
-                return process + " planned to stop";
-            default:
-                return process + ' ' + state.name();
-        }
+        return process + switch (state) {
+            case RUNNING_NOT_STARTED -> " started";
+            case RUNNING -> " finished startup";
+            case RUNNING_UNSTABLE -> " restarted";
+            case RUNNING_NOT_ALIVE -> " liveness probe failed";
+            case STOPPED -> " stopped";
+            case CRASHED_WAITING -> " crashed";
+            case CRASHED_PERMANENTLY -> " crashed permanently.";
+            case STOPPED_START_PLANNED -> " planned to start";
+            case RUNNING_STOP_PLANNED -> " planned to stop";
+            default -> ' ' + state.name();
+        };
     }
 
     private UserInfo computeUser(String user) {

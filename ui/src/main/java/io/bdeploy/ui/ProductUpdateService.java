@@ -607,22 +607,14 @@ public class ProductUpdateService {
             return param.condition.must == ParameterConditionType.BE_EMPTY;
         }
 
-        switch (param.condition.must) {
-            case BE_EMPTY:
-                return value.isBlank() || (targetType == VariableType.BOOLEAN && "false".equals(value.trim()));
-            case BE_NON_EMPTY:
-                return !value.isBlank() && !(targetType == VariableType.BOOLEAN && "false".equals(value.trim()));
-            case CONTAIN:
-                return value.contains(param.condition.value);
-            case END_WITH:
-                return value.endsWith(param.condition.value);
-            case EQUAL:
-                return value.equals(param.condition.value);
-            case START_WITH:
-                return value.startsWith(param.condition.value);
-        }
-
-        return true;
+        return switch (param.condition.must) {
+            case BE_EMPTY -> value.isBlank() || (targetType == VariableType.BOOLEAN && "false".equals(value.trim()));
+            case BE_NON_EMPTY -> !value.isBlank() && !(targetType == VariableType.BOOLEAN && "false".equals(value.trim()));
+            case CONTAIN -> value.contains(param.condition.value);
+            case END_WITH -> value.endsWith(param.condition.value);
+            case EQUAL -> value.equals(param.condition.value);
+            case START_WITH -> value.startsWith(param.condition.value);
+            default -> true;
+        };
     }
-
 }

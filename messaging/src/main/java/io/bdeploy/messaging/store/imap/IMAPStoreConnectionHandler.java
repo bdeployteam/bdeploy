@@ -52,32 +52,30 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     @Override
     protected Session createSession(Properties properties) throws NoSuchProviderException {
         String protocol = getProtocol();
-        switch (protocol) {
-            case "imap":
+        return switch (protocol) {
+            case "imap" -> {
                 properties.put("mail.imap.starttls.enable", "true");
                 properties.put("mail.imap.peek", "true");
                 properties.put("mail.imap.minidletime", "1000");
-                return Session.getInstance(properties);
-            case "imaps":
+                yield Session.getInstance(properties);
+            }
+            case "imaps" -> {
                 properties.put("mail.imaps.peek", "true");
                 properties.put("mail.imaps.minidletime", "1000");
-                return Session.getInstance(properties);
-            default:
-                throw getNoSuchProviderException(protocol);
-        }
+                yield Session.getInstance(properties);
+            }
+            default -> throw getNoSuchProviderException(protocol);
+        };
     }
 
     @Override
     protected IMAPStore createService(URLName url) throws NoSuchProviderException {
         String protocol = getProtocol();
-        switch (protocol) {
-            case "imap":
-                return new IMAPStore(getSession(), url);
-            case "imaps":
-                return new IMAPSSLStore(getSession(), url);
-            default:
-                throw getNoSuchProviderException(protocol);
-        }
+        return switch (protocol) {
+            case "imap" -> new IMAPStore(getSession(), url);
+            case "imaps" -> new IMAPSSLStore(getSession(), url);
+            default -> throw getNoSuchProviderException(protocol);
+        };
     }
 
     @Override

@@ -105,35 +105,17 @@ public class LauncherPathProvider {
      * @see #get(SpecialDirectory)
      */
     public Path get(SpecialDirectory dir, String applicationId) {
-        Path result;
-        switch (dir) {
-            case HOME:
-                result = homeDir;
-                break;
-            case APPS, BHIVE, LAUNCHER, LOGS:
-                result = get(SpecialDirectory.HOME, applicationId).resolve(dir.getDirName());
-                break;
-            case MANIFEST_POOL, START_SCRIPTS, FILE_ASSOC_SCRIPTS:
-                result = get(SpecialDirectory.APPS, applicationId).resolve(dir.getDirName());
-                break;
-            case APP:
-                if (applicationId == null) {
-                    throw new UnsupportedOperationException("Navigation to " + dir + " requires an application ID.");
-                }
-                result = get(SpecialDirectory.APPS, applicationId).resolve(applicationId);
-                break;
-            case APP_BIN_TAG:
-                result = get(SpecialDirectory.APP, applicationId).resolve(dir.getDirName()).resolve(DEFAULT_TAG);
-                break;
-            case CONFIG:
-                result = get(SpecialDirectory.APP_BIN_TAG, applicationId).resolve(dir.getDirName());
-                break;
-            case LAUNCHER_BIN:
-                result = get(SpecialDirectory.LAUNCHER, applicationId).resolve(dir.getDirName());
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown special directory: " + dir);
-        }
+        Path result = switch (dir) {
+            case HOME -> homeDir;
+            case APPS, BHIVE, LAUNCHER, LOGS -> get(SpecialDirectory.HOME, applicationId).resolve(dir.getDirName());
+            case MANIFEST_POOL, START_SCRIPTS, FILE_ASSOC_SCRIPTS -> get(SpecialDirectory.APPS, applicationId)
+                    .resolve(dir.getDirName());
+            case APP -> get(SpecialDirectory.APPS, applicationId).resolve(applicationId);
+            case APP_BIN_TAG -> get(SpecialDirectory.APP, applicationId).resolve(dir.getDirName()).resolve(DEFAULT_TAG);
+            case CONFIG -> get(SpecialDirectory.APP_BIN_TAG, applicationId).resolve(dir.getDirName());
+            case LAUNCHER_BIN -> get(SpecialDirectory.LAUNCHER, applicationId).resolve(dir.getDirName());
+            default -> throw new IllegalArgumentException("Unknown special directory: " + dir);
+        };
         return result.normalize().toAbsolutePath();
     }
 
