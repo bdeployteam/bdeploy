@@ -18,6 +18,7 @@ import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
@@ -100,6 +101,7 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
                 if (log.isDebugEnabled()) {
                     log.debug("Product update for {}: {}", hiveName, key);
                 }
+                ProductManifest.invalidateScanCache(hive);
                 events.create(ObjectChangeType.PRODUCT, key, new ObjectScope(hiveName));
             } else if (mf.getLabels().containsKey(InstanceManifest.INSTANCE_LABEL)) {
                 // it is an instance!
