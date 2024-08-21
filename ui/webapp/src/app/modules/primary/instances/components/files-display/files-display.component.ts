@@ -13,10 +13,10 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import {
-  constructDataFilePaths,
-  decodeDataFilePath,
-  encodeDataFilePath,
-  findDataFilePath,
+  constructFilePath,
+  decodeFilePath,
+  encodeFilePath,
+  findFilePath,
   getDescendants,
   toFileList,
 } from 'src/app/modules/panels/instances/utils/data-file-utils';
@@ -159,7 +159,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
             entries.push({ directory: dir, entry });
           }
 
-          const node = constructDataFilePaths(dir.minion, entries, (p) => this.selectPath(p));
+          const node = constructFilePath(dir.minion, entries, (p) => this.selectPath(p));
           nodes.push(node);
         }
 
@@ -178,10 +178,10 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
           this.records$.next(null);
           return;
         }
-        const path = decodeDataFilePath(route.params['path']);
+        const path = decodeFilePath(route.params['path']);
         const node = nodes.find((filePath) => filePath.minion === path.minion);
         this.tabIndex = nodes.indexOf(node);
-        this.selectedPath = findDataFilePath(node, path.path);
+        this.selectedPath = findFilePath(node, path.path);
         this.bdOnSearch(this.searchTerm);
         // if path encoded node is not found, select first node (which should be master)
         if (!node) {
@@ -244,7 +244,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   }
 
   protected selectPath(path: FilePath) {
-    this.router.navigate(['..', encodeDataFilePath(path)], { relativeTo: this.activatedRoute });
+    this.router.navigate(['..', encodeFilePath(path)], { relativeTo: this.activatedRoute });
   }
 
   protected onTabChange(e: MatTabChangeEvent) {
