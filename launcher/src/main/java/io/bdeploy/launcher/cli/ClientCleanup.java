@@ -67,9 +67,6 @@ public class ClientCleanup {
 
     /** Removes old application versions not required anymore */
     private void doCleanApps() {
-        // Collect all required software
-        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
-
         // Collect all available software in the hive
         Set<Key> availableApps = getAvailableApps();
         if (availableApps.isEmpty()) {
@@ -78,7 +75,7 @@ public class ClientCleanup {
         }
 
         // Remove all the software that is still required
-        Set<Key> requiredApps = mf.getRequiredKeys();
+        Set<Key> requiredApps = new ClientSoftwareManifest(hive).getRequiredKeys();
         availableApps.removeAll(requiredApps);
         if (availableApps.isEmpty()) {
             log.info("All pooled applications are still in-use.");

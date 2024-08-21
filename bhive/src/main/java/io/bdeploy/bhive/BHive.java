@@ -171,7 +171,6 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
     public synchronized void disablePooling() {
         Path relRoot = Paths.get(uri);
-        Path poolRefFile = relRoot.resolve(POOLREF);
 
         ObjectDatabase newobj = new ObjectDatabase(relRoot.resolve("objects"), objTmp, reporter, transactions);
 
@@ -181,7 +180,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
             throw new IllegalStateException("Cannot unpool BHive", e);
         }
 
-        PathHelper.deleteIfExistsRetry(poolRefFile);
+        PathHelper.deleteIfExistsRetry(relRoot.resolve(POOLREF));
         this.isPooling = false;
         this.objects = newobj;
     }
