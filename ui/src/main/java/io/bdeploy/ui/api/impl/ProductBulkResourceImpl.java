@@ -60,7 +60,7 @@ public class ProductBulkResourceImpl implements ProductBulkResource {
                     throw new WebApplicationException("Cannot identify " + key + " to delete", Status.BAD_REQUEST);
                 }
 
-                if (isProductInUse(key)) {
+                if (!ProductResourceImpl.internalCheckUsedIn(hive, key).isEmpty()) {
                     throw new WebApplicationException("Product version is still in use", Status.BAD_REQUEST);
                 }
 
@@ -87,11 +87,6 @@ public class ProductBulkResourceImpl implements ProductBulkResource {
         deleted.keys().asIterator().forEachRemaining(key -> changes.remove(ObjectChangeType.PRODUCT, key));
 
         return result;
-    }
-
-    private boolean isProductInUse(Manifest.Key checkKey) {
-        return InstanceManifest.scan(hive, false).stream().map(k -> InstanceManifest.of(hive, k))
-                .anyMatch(im -> im.getConfiguration().product.equals(checkKey));
     }
 
 }
