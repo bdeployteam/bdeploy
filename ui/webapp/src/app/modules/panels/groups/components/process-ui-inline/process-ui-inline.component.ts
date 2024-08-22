@@ -138,6 +138,6 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   }
 
   private openUrl(url: string) {
-    window.open(url, '_blank', 'noreferrer,noopener');
+    window.open(url, '_blank', 'noreferrer');
   }
 }

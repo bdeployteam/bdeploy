@@ -214,7 +214,7 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
   }
 
   private openUrl(url: string) {
-    window.open(url, '_blank', 'noreferrer,noopener');
+    window.open(url, '_blank', 'noreferrer');
   }
 
   private cpWithSlash(cp: string) {

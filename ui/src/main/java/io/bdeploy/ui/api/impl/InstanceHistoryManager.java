@@ -205,7 +205,7 @@ public class InstanceHistoryManager {
     private String computeRuntimeTitle(ProcessState state, String process) {
         return process + switch (state) {
             case RUNNING_NOT_STARTED -> " started";
-            case RUNNING -> " finished startup";
+            case RUNNING -> " is alive";
             case RUNNING_UNSTABLE -> " restarted";
             case RUNNING_NOT_ALIVE -> " liveness probe failed";
             case STOPPED -> " stopped";

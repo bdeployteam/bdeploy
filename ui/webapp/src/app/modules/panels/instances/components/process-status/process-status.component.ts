@@ -380,7 +380,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   }
 
   private openUiEndpointDirect(r: ProcessUiEndpoint) {
-    window.open(r.directUri, '_blank', 'noreferrer,noopener');
+    window.open(r.directUri, '_blank', 'noreferrer');
   }
 
   private openInline(r: ProcessUiEndpoint) {
