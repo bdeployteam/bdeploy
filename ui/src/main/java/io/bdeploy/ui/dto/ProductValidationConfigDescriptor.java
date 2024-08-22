@@ -6,6 +6,7 @@ import java.util.Map;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
@@ -22,6 +23,8 @@ public class ProductValidationConfigDescriptor {
     public List<InstanceTemplateDescriptor> instanceTemplates;
 
     public List<InstanceVariableTemplateDescriptor> instanceVariableTemplates;
+
+    public List<InstanceVariableDefinitionDescriptor> instanceVariableDefinitions;
 
     public List<ParameterTemplateDescriptor> parameterTemplates;
 

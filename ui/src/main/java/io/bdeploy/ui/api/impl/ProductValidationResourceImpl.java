@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -36,6 +37,7 @@ import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideReso
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
@@ -79,10 +81,20 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
 
         // validate all the templates.
+        issues.addAll(validateInstanceVariableDefinitions(config));
         issues.addAll(validateInstanceTemplates(config));
         issues.addAll(validateApplicationTemplates(config));
 
         return new ProductValidationResponseApi(issues);
+    }
+
+    private List<ProductValidationIssueApi> validateInstanceVariableDefinitions(ProductValidationConfigDescriptor desc) {
+        Set<String> ids = new HashSet<>();
+        Set<String> duplicateIds = desc.instanceVariableDefinitions.stream().flatMap(ivd -> ivd.definitions.stream())
+                .map(descriptor -> descriptor.id).filter(id -> !ids.add(id)).collect(Collectors.toSet());
+        return duplicateIds.isEmpty() ? Collections.emptyList()
+                : Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Duplicate instance variable definition IDs: " + String.join(", ", duplicateIds)));
     }
 
     private List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
@@ -356,6 +368,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 InstanceVariableTemplateDescriptor.class, validator, Schema.instanceVariableTemplateYaml);
         config.parameterTemplates = parse(dir, dir, config.product.parameterTemplates, ParameterTemplateDescriptor.class,
                 validator, Schema.parameterTemplateYaml);
+        config.instanceVariableDefinitions = parse(dir, dir, config.product.instanceVariableDefinitions,
+                InstanceVariableDefinitionDescriptor.class, validator, Schema.instanceVariableDefinitionYaml);
 
         config.applications = new HashMap<>();
         var apps = Optional.ofNullable(config.productValidation.applications).orElseGet(Collections::emptyMap);
