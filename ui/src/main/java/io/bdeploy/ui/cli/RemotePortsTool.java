@@ -183,8 +183,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                     for (var param : config.start.parameters) {
                         var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(param.id))
                                 .findFirst().orElse(null);
-                        if (paramDesc != null && (paramDesc.type == VariableType.CLIENT_PORT
-                                || paramDesc.type == VariableType.SERVER_PORT)) {
+                        if (paramDesc != null
+                                && (paramDesc.type == VariableType.CLIENT_PORT || paramDesc.type == VariableType.SERVER_PORT)) {
                             try {
                                 var val = param.value.value;
                                 if (param.value.linkExpression != null) {
@@ -223,18 +223,18 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
     private static class NodePort {
 
-        final String nodeName;
+        private final String nodeName;
 
-        final String appName;
-        final String appId;
+        private final String appName;
+        private final String appId;
 
-        final VariableType type;
-        final String description;
-        final int port;
+        private final VariableType type;
+        private final String description;
+        private final int port;
 
-        boolean state;
-        ProcessState processState;
-        String runningTag;
+        private boolean state;
+        private ProcessState processState;
+        private String runningTag;
 
         public NodePort(String nodeName, String appName, String appId, VariableType type, String description, int port) {
             this.nodeName = nodeName;

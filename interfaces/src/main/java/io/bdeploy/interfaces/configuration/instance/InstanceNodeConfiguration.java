@@ -208,7 +208,7 @@ public class InstanceNodeConfiguration {
 
     private static final class TrackingInstanceAndSystemVariableResolver extends InstanceAndSystemVariableResolver {
 
-        Set<String> used = new TreeSet<>();
+        private final Set<String> used = new TreeSet<>();
 
         public TrackingInstanceAndSystemVariableResolver(InstanceNodeConfiguration node) {
             super(node);

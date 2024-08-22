@@ -175,7 +175,7 @@ public class BHiveRegistry implements AutoCloseable {
      */
     private static final class HiveFinder extends SimpleFileVisitor<Path> {
 
-        List<Path> hives = new ArrayList<>();
+        private final List<Path> hives = new ArrayList<>();
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -192,5 +192,4 @@ public class BHiveRegistry implements AutoCloseable {
             return FileVisitResult.CONTINUE;
         }
     }
-
 }

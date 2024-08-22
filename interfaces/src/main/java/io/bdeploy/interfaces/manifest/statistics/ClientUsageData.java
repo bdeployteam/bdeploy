@@ -14,7 +14,7 @@ public class ClientUsageData {
     private final SimpleDateFormat sdf;
 
     // day -> applicationId -> hostname -> count
-    SortedMap<String, SortedMap<String, SortedMap<String, Integer>>> clientUsage = new TreeMap<>();
+    private final SortedMap<String, SortedMap<String, SortedMap<String, Integer>>> clientUsage = new TreeMap<>();
 
     public ClientUsageData() {
         sdf = new SimpleDateFormat("yyyy-MM-dd");

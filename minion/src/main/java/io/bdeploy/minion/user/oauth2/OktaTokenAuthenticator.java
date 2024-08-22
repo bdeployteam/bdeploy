@@ -141,14 +141,11 @@ public class OktaTokenAuthenticator implements Authenticator {
 
         public String name;
         public String email;
-
     }
 
     private static final class OktaAccessTokenInfo {
 
-        String accessToken;
-        String userinfoUrl;
-
+        private String accessToken;
+        private String userinfoUrl;
     }
-
 }

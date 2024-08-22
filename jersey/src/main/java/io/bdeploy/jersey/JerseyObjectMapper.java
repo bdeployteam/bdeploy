@@ -19,7 +19,7 @@ import jakarta.ws.rs.ext.Provider;
 public class JerseyObjectMapper implements ContextResolver<ObjectMapper> {
 
     @Inject
-    Iterable<Module> additionalModules;
+    private Iterable<Module> additionalModules;
 
     private final ObjectMapper mapper;
 

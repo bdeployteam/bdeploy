@@ -36,7 +36,7 @@ public class LoggingAdminResourceImpl implements LoggingAdminResource {
     private SecurityContext context;
 
     @Inject
-    RemoteEntryStreamRequestService resrs;
+    private RemoteEntryStreamRequestService resrs;
 
     @Override
     public List<RemoteDirectory> getLogDirectories() {

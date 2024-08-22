@@ -7,12 +7,11 @@ import jakarta.ws.rs.core.UriInfo;
 public class RedirectOnApiRootAccessImpl implements RedirectOnApiRootAccess {
 
     @Context
-    UriInfo uri;
+    private UriInfo uri;
 
     @Override
     public Response redirectMe() {
         // go one up, which is skipping /api
         return Response.temporaryRedirect(this.uri.getBaseUri().resolve("..")).build();
     }
-
 }

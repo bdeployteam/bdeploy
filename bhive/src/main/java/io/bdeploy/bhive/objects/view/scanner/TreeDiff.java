@@ -133,8 +133,8 @@ public class TreeDiff {
 
     private static class FlattenedTreeEntry {
 
-        ElementView element;
-        Tree.EntryType type;
+        private final ElementView element;
+        private final Tree.EntryType type;
 
         FlattenedTreeEntry(ElementView element, Tree.EntryType type) {
             this.element = element;
@@ -142,5 +142,4 @@ public class TreeDiff {
         }
 
     }
-
 }
