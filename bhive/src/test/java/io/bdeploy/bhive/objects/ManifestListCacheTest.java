@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
 
 class ManifestListCacheTest extends DbTestBase {
 
@@ -22,9 +23,14 @@ class ManifestListCacheTest extends DbTestBase {
         Manifest.Key key3 = new Manifest.Key("xtest/app1/x", "v1.0");
         Manifest.Key key4 = new Manifest.Key("xtest/app2/x", "v2.0");
 
+        ObjectId ojectId1 = ObjectId.parse("001c4d13605b848cda4429cfa8646e7379e07024");
+        ObjectId ojectId2 = ObjectId.parse("001e5ba6f6d0da7d241cbd241b5255f31227bb91");
+        ObjectId ojectId3 = ObjectId.parse("1a1d239fb0ae469b2ccf198d1f960f918d462389");
+        ObjectId ojectId4 = ObjectId.parse("1a2fb269120648bc126c1108e5f9ee3db7aa3b3a");
+
         try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
-            db.addManifest(new Manifest.Builder(key1).setRoot(randomId()).build(null), false);
-            db.addManifest(new Manifest.Builder(key2).setRoot(randomId()).build(null), false);
+            db.addManifest(new Manifest.Builder(key1).setRoot(ojectId1).build(null), false);
+            db.addManifest(new Manifest.Builder(key2).setRoot(ojectId2).build(null), false);
         }
 
         try (ManifestDatabase db = new ManifestDatabase(dbDir.resolve("../manifests"))) {
@@ -38,8 +44,8 @@ class ManifestListCacheTest extends DbTestBase {
             assertEquals(1, db.getAllForName("xtest").size());
             assertEquals(1, db.getAllForName("xtest/app2").size());
 
-            db.addManifest(new Manifest.Builder(key3).setRoot(randomId()).build(null), false);
-            db.addManifest(new Manifest.Builder(key4).setRoot(randomId()).build(null), false);
+            db.addManifest(new Manifest.Builder(key3).setRoot(ojectId3).build(null), false);
+            db.addManifest(new Manifest.Builder(key4).setRoot(ojectId4).build(null), false);
 
             assertTrue(db.hasManifest(key3));
             assertTrue(db.hasManifest(key4));

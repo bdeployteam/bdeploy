@@ -27,7 +27,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
-import io.bdeploy.bhive.objects.DbTestBase;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ImportFileOperation;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -80,7 +79,7 @@ class RemoteHiveTest extends RemoteHiveTestBase {
         // request objectids. send the root id of the manifest and a random id. the random id must be returned
         SortedSet<ObjectId> testIds = new TreeSet<>();
         testIds.add(reference.getRoot());
-        ObjectId randomId = DbTestBase.randomId();
+        ObjectId randomId = ObjectId.parse("7e0e96a1caea2fd3303fab5587b99983738b1539");
         testIds.add(randomId);
         Set<ObjectId> existing = getRemote().getMissingObjects(testIds);
         assertThat(existing.size(), is(1));
