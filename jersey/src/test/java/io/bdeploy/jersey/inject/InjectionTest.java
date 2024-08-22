@@ -22,17 +22,17 @@ class InjectionTest {
     });
 
     @Test
-    void injectSimpleString(InjectionTestResource rs) {
+    void testInjectSimpleString(InjectionTestResource rs) {
         assertEquals(TEST, rs.retrieveInjected());
     }
 
     @Test
-    void injectProvidedString(InjectionTestResource rs) {
+    void testInjectProvidedString(InjectionTestResource rs) {
         assertEquals(TEST, rs.retrieveInjectedProvider());
     }
 
     @Test
-    void injectUserPrincipal(InjectionTestResource rs) {
+    void testInjectUserPrincipal(InjectionTestResource rs) {
         // test tokens committed along with the tests are issued to the actual user.
         assertEquals(System.getProperty("user.name"), rs.retrieveUserFromToken());
     }

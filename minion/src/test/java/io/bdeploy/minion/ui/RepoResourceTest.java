@@ -40,7 +40,7 @@ import jakarta.ws.rs.core.Response;
 class RepoResourceTest {
 
     @Test
-    void crud(SoftwareRepositoryResource repos) {
+    void testCrud(SoftwareRepositoryResource repos) {
         assertTrue(repos.list().isEmpty());
 
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
@@ -75,7 +75,7 @@ class RepoResourceTest {
     }
 
     @Test
-    void sw(SoftwareRepositoryResource repos, DownloadService dlService, RemoteService service, @TempDir Path tmp,
+    void testSw(SoftwareRepositoryResource repos, DownloadService dlService, RemoteService service, @TempDir Path tmp,
             ActivityReporter reporter) throws IOException {
         assertTrue(repos.list().isEmpty());
 

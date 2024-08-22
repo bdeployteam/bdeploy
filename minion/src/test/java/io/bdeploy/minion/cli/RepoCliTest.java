@@ -28,7 +28,7 @@ class RepoCliTest {
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    void crud(CommonRootResource master, MinionRoot root) {
+    void testCrud(CommonRootResource master, MinionRoot root) {
         assertTrue(master.getSoftwareRepositories().isEmpty());
 
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
@@ -47,7 +47,8 @@ class RepoCliTest {
     }
 
     @Test
-    void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root) throws IOException {
+    void testToolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root)
+            throws IOException {
         tools.execute(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
                 "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc");
 

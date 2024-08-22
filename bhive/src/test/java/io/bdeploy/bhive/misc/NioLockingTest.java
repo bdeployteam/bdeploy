@@ -43,7 +43,7 @@ class NioLockingTest {
     }
 
     @Test
-    void twoThreadLockTest() throws Exception {
+    void testTwoThreadLock() throws Exception {
         Path lockFile = Files.createTempFile("locktest-", ".tmp");
         ExecutorService pool = Executors.newFixedThreadPool(4);
         long start = System.currentTimeMillis();

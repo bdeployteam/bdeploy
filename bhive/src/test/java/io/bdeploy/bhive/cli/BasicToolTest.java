@@ -121,7 +121,7 @@ class BasicToolTest {
     }
 
     @Test
-    void helpTest(@TempDir Path tmp) {
+    void testBhiveCliMain(@TempDir Path tmp) {
         ToolBase.setTestMode(true);
 
         assertThrows(IllegalArgumentException.class, () -> {

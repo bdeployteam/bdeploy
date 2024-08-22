@@ -35,7 +35,7 @@ import io.bdeploy.minion.TestMinion;
 class MinionPoolingTest {
 
     @Test
-    void pooling(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local,
+    void testPooling(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local,
             BHiveRegistry reg) throws Exception {
         Path pool = root.getRootDir().resolve("objpool"); // pool target of test server.
 

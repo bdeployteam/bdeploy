@@ -29,7 +29,7 @@ class RootTest {
     }
 
     @Test
-    void root(RemoteService service, JerseyClientFactory f) {
+    void testRoot(RemoteService service, JerseyClientFactory f) {
         URI rootUri = UriBuilder.fromUri("https://localhost:" + service.getUri().getPort()).build();
 
         WebTarget root = ClientBuilder.newBuilder().sslContext(ClientSslContextAccessor.get(f)).hostnameVerifier((h, s) -> true)

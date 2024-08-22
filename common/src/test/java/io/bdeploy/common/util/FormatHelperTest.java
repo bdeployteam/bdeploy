@@ -13,7 +13,7 @@ class FormatHelperTest {
             .getDecimalSeparator();
 
     @Test
-    void formatDurationTest() {
+    void testFormatDuration() {
         String result1 = FormatHelper.formatDuration(-1);
         assertEquals("59 min 59 sec 999 ms", result1);
         String result2 = FormatHelper.formatDuration(0);
@@ -35,7 +35,7 @@ class FormatHelperTest {
     }
 
     @Test
-    void formatRemainingTimeTest() {
+    void testFormatRemainingTime() {
         String result1 = FormatHelper.formatRemainingTime(-1);
         assertEquals("0 secs", result1);
         String result2 = FormatHelper.formatRemainingTime(0);
@@ -57,7 +57,7 @@ class FormatHelperTest {
     }
 
     @Test
-    void formatTransferRateTest() {
+    void testFormatTransferRate() {
         String resultBothZero = FormatHelper.formatTransferRate(0, 0);
         assertEquals("N/A", resultBothZero);
 
@@ -104,7 +104,7 @@ class FormatHelperTest {
     }
 
     @Test
-    void formatFileSizeTest() {
+    void testFormatFileSize() {
         String result1 = FormatHelper.formatFileSize(-1);
         assertEquals("0 B", result1);
         String result2 = FormatHelper.formatFileSize(0);

@@ -109,7 +109,7 @@ class ValueResolverTest {
     }
 
     @Test
-    void osConditional() {
+    void testOperatingSystemConditional() {
         OsVariableResolver resolver = new OsVariableResolver();
 
         OperatingSystem current = OsHelper.getRunningOs();

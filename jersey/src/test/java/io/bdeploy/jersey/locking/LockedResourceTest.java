@@ -24,7 +24,7 @@ class LockedResourceTest {
     private static final Logger log = LoggerFactory.getLogger(LockedResourceTest.class);
 
     @Test
-    void blockWrites(LockedResource rsrc) throws Exception {
+    void testBlockWrites(LockedResource rsrc) throws Exception {
         assertEquals("Hello", rsrc.getValue());
 
         // start 2 threads, 2nd one should block and not throw an exception

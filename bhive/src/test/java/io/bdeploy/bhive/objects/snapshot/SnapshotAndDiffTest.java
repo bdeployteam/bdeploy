@@ -32,7 +32,7 @@ import io.bdeploy.common.util.PathHelper;
 class SnapshotAndDiffTest {
 
     @Test
-    void scannerTest(@TempDir Path tmp, BHive hive) throws IOException {
+    void testScanner(@TempDir Path tmp, BHive hive) throws IOException {
         Path plain = ContentHelper.genSimpleTestTree(tmp, "s1");
         Path newFile = ContentHelper.genSimpleTestTree(tmp, "s2");
         Path rmFile = ContentHelper.genSimpleTestTree(tmp, "s3");
@@ -81,7 +81,7 @@ class SnapshotAndDiffTest {
     }
 
     @Test
-    void missingTest(@TempDir Path tmp, BHive hive) throws IOException {
+    void testMissing(@TempDir Path tmp, BHive hive) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "s1");
         Manifest.Key key = new Manifest.Key("k", "1");
 
@@ -114,7 +114,7 @@ class SnapshotAndDiffTest {
     }
 
     @Test
-    void damageTest(@TempDir Path tmp, BHive hive) throws IOException {
+    void testDamaged(@TempDir Path tmp, BHive hive) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "s1");
         Manifest.Key key = new Manifest.Key("k", "1");
 
@@ -149,7 +149,7 @@ class SnapshotAndDiffTest {
     }
 
     @Test
-    void skipTest(@TempDir Path tmp, BHive hive) throws IOException {
+    void testSkip(@TempDir Path tmp, BHive hive) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "s1");
         Manifest.Key key = new Manifest.Key("k", "1");
 

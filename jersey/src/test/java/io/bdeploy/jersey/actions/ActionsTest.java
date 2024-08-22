@@ -21,7 +21,7 @@ import jakarta.ws.rs.WebApplicationException;
 class ActionsTest {
 
     @Test
-    void actions() throws Exception {
+    void testActions() throws Exception {
         var created = new AtomicReference<>(new CompletableFuture<>());
         var removed = new AtomicReference<>(new CompletableFuture<>());
 

@@ -49,7 +49,7 @@ import io.bdeploy.ui.api.Minion;
 class SpecialManifestsTest {
 
     @Test
-    void customerManifest(BHive hive) {
+    void testCustomerManifest(BHive hive) {
         InstanceGroupManifest cm = new InstanceGroupManifest(hive);
 
         assertNull(cm.read(), "Customer Descriptor should not yet be present");
@@ -74,7 +74,7 @@ class SpecialManifestsTest {
     }
 
     @Test
-    void productAndApplicationManifest(BHive hive, @TempDir Path tmp) {
+    void testProductAndApplicationManifest(BHive hive, @TempDir Path tmp) {
         Path app = TestAppFactory.createDummyApp("dummy", tmp);
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("app", OsHelper.getRunningOs()), "1.0");
 
@@ -103,7 +103,7 @@ class SpecialManifestsTest {
     }
 
     @Test
-    void instanceManifest(BHive hive, @TempDir Path tmp) throws IOException {
+    void testInstanceManifest(BHive hive, @TempDir Path tmp) throws IOException {
         String id = UuidHelper.randomId();
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("app", OsHelper.getRunningOs()), "1.0");
         Path app = TestAppFactory.createDummyApp("dummy", tmp);

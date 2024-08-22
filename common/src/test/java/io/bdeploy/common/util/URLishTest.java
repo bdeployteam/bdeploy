@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class URLishTest {
 
     @Test
-    void fullUrlish() {
+    void testFullUrlish() {
         URLish u = new URLish("scheme://host:1/path");
 
         assertEquals("scheme://", u.scheme);
@@ -20,7 +20,7 @@ class URLishTest {
     }
 
     @Test
-    void miniUrlish() {
+    void testMiniUrlish() {
         URLish u = new URLish("host");
 
         assertNull(u.scheme);
@@ -32,7 +32,7 @@ class URLishTest {
     }
 
     @Test
-    void noSchemeUrlish() {
+    void testNoSchemeUrlish() {
         URLish u = new URLish("host:1/path");
 
         assertNull(u.scheme);
@@ -44,7 +44,7 @@ class URLishTest {
     }
 
     @Test
-    void noPortUrlish() {
+    void testNoPortUrlish() {
         URLish u = new URLish("scheme://host/path");
 
         assertEquals("scheme://", u.scheme);
@@ -56,7 +56,7 @@ class URLishTest {
     }
 
     @Test
-    void noPathUrlish() {
+    void testNoPathUrlish() {
         URLish u = new URLish("scheme://host:1");
 
         assertEquals("scheme://", u.scheme);
@@ -68,7 +68,7 @@ class URLishTest {
     }
 
     @Test
-    void modifyUrlish() {
+    void testModifyUrlish() {
         URLish u = new URLish("scheme://host:1/path");
         assertEquals("scheme://host:1/path", u.toString());
 

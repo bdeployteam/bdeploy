@@ -21,12 +21,12 @@ class SerializerTest extends DbTestBase {
     private static final ObjectId OID2 = randomId();
 
     @Test
-    void serializeOid() {
+    void testSerializeOid() {
         assertThat(OID1.compareTo(roundtrip(OID1)), is(0));
     }
 
     @Test
-    void serializeTree() {
+    void testSerializeTree() {
         ObjectId id1 = OID1;
         ObjectId id2 = OID2;
 
@@ -85,7 +85,7 @@ class SerializerTest extends DbTestBase {
     }
 
     @Test
-    void serializeManifest() {
+    void testSerializeManifest() {
         ObjectId id1 = OID1;
 
         String timeStr = Long.toString(System.currentTimeMillis());

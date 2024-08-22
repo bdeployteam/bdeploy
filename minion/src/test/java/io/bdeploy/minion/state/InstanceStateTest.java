@@ -27,7 +27,7 @@ import io.bdeploy.minion.TestMinion;
 class InstanceStateTest {
 
     @Test
-    void writeRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
+    void testWriteRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
             throws IOException {
         Key instanceKey = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, false);
 
