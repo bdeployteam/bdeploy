@@ -12,7 +12,7 @@ import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 public class ExistingFileValidator extends ExistingPathValidator {
 
     @Override
-    public boolean validate(String value) {
-        return super.validate(value) && p.toFile().isFile();
+    public boolean test(String value) {
+        return super.test(value) && p.toFile().isFile();
     }
 }

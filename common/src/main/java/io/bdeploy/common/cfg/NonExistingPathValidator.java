@@ -17,7 +17,7 @@ import io.bdeploy.common.util.PathHelper;
 public class NonExistingPathValidator implements ConfigValidator<String> {
 
     @Override
-    public boolean validate(String value) {
+    public boolean test(String value) {
         Path p = Paths.get(value);
         if (Files.isDirectory(p)) {
             // Empty directories are OK.

@@ -17,7 +17,7 @@ public class HostnameValidator implements ConfigValidator<String> {
             .compile("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)*[a-z0-9][a-z0-9-]{0,61}[a-z0-9]");
 
     @Override
-    public boolean validate(String value) {
+    public boolean test(String value) {
         return HOSTNAME_PATTERN.matcher(value.toLowerCase()).matches();
     }
 }

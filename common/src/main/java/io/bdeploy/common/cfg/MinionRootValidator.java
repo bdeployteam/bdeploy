@@ -13,8 +13,8 @@ import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 public class MinionRootValidator extends ExistingDirectoryValidator {
 
     @Override
-    public boolean validate(String value) {
-        return super.validate(value) && (isRegularFile("etc/state.json") || isRegularFile("etc/state.json.bak"));
+    public boolean test(String value) {
+        return super.test(value) && (isRegularFile("etc/state.json") || isRegularFile("etc/state.json.bak"));
     }
 
     private boolean isRegularFile(String s) {
