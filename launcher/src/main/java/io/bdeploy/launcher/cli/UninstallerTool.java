@@ -60,7 +60,6 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /** The {@link LauncherPathProvider} for this {@link UninstallerTool} */
     private LauncherPathProvider lpp;
     private Path homeDir;
-    private Path bhiveDir;
     private Path startScriptsDir;
     private Path fileAssocScriptsDir;
     private Path appDir;
@@ -85,11 +84,11 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
         lpp = new LauncherPathProvider(Paths.get(homeDirString)).setApplicationId(config.app());
         homeDir = lpp.get(SpecialDirectory.HOME);
-        bhiveDir = lpp.get(SpecialDirectory.BHIVE);
         startScriptsDir = lpp.get(SpecialDirectory.START_SCRIPTS);
         fileAssocScriptsDir = lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS);
         appDir = lpp.get(SpecialDirectory.APP);
 
+        Path bhiveDir = lpp.get(SpecialDirectory.BHIVE);
         try (BHive hive = new BHive(bhiveDir.toUri(), RollingFileAuditor.getFactory().apply(bhiveDir),
                 new ActivityReporter.Null())) {
             doUninstall(hive, instanceId);

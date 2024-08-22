@@ -254,9 +254,6 @@ public class BrowserDialog extends BaseDialog {
 
     /** Creates the widgets shown in the content */
     private JPanel createContent() {
-        JMenuItem verifyItem;
-        JMenuItem reinstallItem;
-
         JPanel content = new JPanel();
         content.setBackground(Color.WHITE);
         content.setLayout(new BorderLayout(10, 10));
@@ -373,12 +370,12 @@ public class BrowserDialog extends BaseDialog {
         activateFileAssocScriptItem.setToolTipText("Associate files with this application.");
         activateFileAssocScriptItem.addActionListener(this::onActivateFileAssocScriptButtonClicked);
 
-        verifyItem = new JMenuItem(verifyButton.getText());
+        JMenuItem verifyItem = new JMenuItem(verifyButton.getText());
         verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
         verifyItem.setToolTipText(verifyButton.getToolTipText());
         verifyItem.addActionListener(this::onVerifyButtonClicked);
 
-        reinstallItem = new JMenuItem(reinstallButton.getText());
+        JMenuItem reinstallItem = new JMenuItem(reinstallButton.getText());
         reinstallItem.setIcon(WindowHelper.loadIcon("/reinstall.png", 16, 16));
         reinstallItem.setToolTipText(reinstallButton.getToolTipText());
         reinstallItem.addActionListener(this::onReinstallButtonClicked);
@@ -566,20 +563,20 @@ public class BrowserDialog extends BaseDialog {
 
     /** Activate the start script of the selected application */
     private void onActivateStartScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(lpp -> new LocalStartScriptHelper(os, auditor, lpp), "start");
+        handleScriptChange(pathProvider -> new LocalStartScriptHelper(os, auditor, pathProvider), "start");
     }
 
     /** Activate the file association script of the selected application */
     private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(lpp -> new LocalFileAssocScriptHelper(os, auditor, lpp), "file association");
+        handleScriptChange(pathProvider -> new LocalFileAssocScriptHelper(os, auditor, pathProvider), "file association");
     }
 
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
         ClientSoftwareConfiguration config = getSelectedApps().get(0);
         ClickAndStartDescriptor clickAndStart = config.clickAndStart;
-        LauncherPathProvider lpp = new LauncherPathProvider(homeDir).setApplicationId(clickAndStart.applicationId);
+        LauncherPathProvider pathProvider = new LauncherPathProvider(homeDir).setApplicationId(clickAndStart.applicationId);
         try {
-            scriptHelperCreator.apply(lpp).createScript(config.clientAppCfg, clickAndStart, true);
+            scriptHelperCreator.apply(pathProvider).createScript(config.clientAppCfg, clickAndStart, true);
         } catch (IOException ex) {
             showErrorMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage());
         }

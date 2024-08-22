@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.Response.Status;
  */
 public class VersionSorterServiceImpl implements VersionSorterService {
 
-    public static final Logger log = LoggerFactory.getLogger(VersionSorterServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(VersionSorterServiceImpl.class);
 
     private final PluginManager manager;
     private final BHiveRegistry reg;

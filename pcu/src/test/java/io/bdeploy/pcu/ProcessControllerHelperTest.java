@@ -6,7 +6,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-public class ProcessControllerHelperTest {
+class ProcessControllerHelperTest {
 
     @Test
     void testFormatDuration() {

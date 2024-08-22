@@ -309,7 +309,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void testFetchWithRemovedManifest(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testFetchWithRemovedManifest(@TempDir Path tmp, RemoteService svc, ActivityReporter r) {
         try (BHive fetchHive = new BHive(tmp.resolve("hive").toUri(), null, r)) {
             FetchOperation op = new FetchOperation();
             op.setRemote(svc);
@@ -325,5 +325,4 @@ class FetchPushTest extends RemoteHiveTestBase {
             // due to the atomicity of the operation.
         }
     }
-
 }

@@ -72,8 +72,8 @@ class RemoteConfigFilesCliTest {
         assertEquals("ONLY-INSTANCE", result.get(1).get("Status"));
 
         Path testTarget1 = tmp.resolve("dl1.txt");
-        result = tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--instanceGroup=demo", "--uuid=" + id, "--export=test.txt", "--target=" + testTarget1);
+        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + id, "--export=test.txt", "--target=" + testTarget1);
 
         String content = Files.readString(testTarget1);
         assertEquals("Teststring", content);
@@ -85,8 +85,8 @@ class RemoteConfigFilesCliTest {
                 "--uuid=" + id, "--update=test.txt", "--source=" + testSource2);
 
         Path testTarget2 = tmp.resolve("dl2.txt");
-        result = tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--instanceGroup=demo", "--uuid=" + id, "--export=test.txt", "--target=" + testTarget2);
+        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + id, "--export=test.txt", "--target=" + testTarget2);
 
         content = Files.readString(testTarget2);
         assertEquals("Another Teststring", content);

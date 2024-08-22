@@ -129,7 +129,7 @@ public class CleanupHelper {
      *
      * @param groups the {@link List} of {@link CleanupGroup}s as calculated by {@link #calculate()}.
      */
-    public void execute(List<CleanupGroup> groups) {
+    public void execute(Iterable<CleanupGroup> groups) {
         for (CleanupGroup group : groups) {
             if (group.instanceGroup != null) {
                 executeForGroup(group);

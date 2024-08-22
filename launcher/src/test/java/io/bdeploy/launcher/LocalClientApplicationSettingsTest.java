@@ -17,7 +17,7 @@ import io.bdeploy.launcher.LocalClientApplicationSettings.ScriptInfo;
 /**
  * Contains unit tests for {@link LocalClientApplicationSettings}.
  */
-public class LocalClientApplicationSettingsTest {
+class LocalClientApplicationSettingsTest {
 
     private static final ClickAndStartDescriptor descr1 = new ClickAndStartDescriptor();
     private static final ClickAndStartDescriptor descr2 = new ClickAndStartDescriptor();
