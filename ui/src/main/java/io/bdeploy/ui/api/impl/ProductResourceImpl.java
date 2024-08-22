@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -166,6 +167,15 @@ public class ProductResourceImpl implements ProductResource {
     public List<InstanceUsageDto> getProductUsedIn(String name, String tag) {
         Manifest.Key checkKey = new Manifest.Key(name, tag);
 
+        List<InstanceUsageDto> result = internalCheckUsedIn(hive, checkKey);
+
+        return result;
+    }
+
+    /**
+     * Check if a product is still in use by any instance, and if yes, returnes a list of usage informations.
+     */
+    static List<InstanceUsageDto> internalCheckUsedIn(BHive hive, Manifest.Key checkKey) {
         // InstanceManifests using the product version grouped by instance
         Map<String, Set<InstanceManifest>> id2imSet = InstanceManifest.scan(hive, false).stream()
                 .map(k -> InstanceManifest.of(hive, k)).filter(im -> im.getConfiguration().product.equals(checkKey))
@@ -177,19 +187,32 @@ public class ProductResourceImpl implements ProductResource {
             // grouped by ID so we need to read the installed state only once per instance.
             Set<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
 
-            mfSet.stream().filter(mf -> installedTags.contains(mf.getManifest().getTag())).sorted(
-                    (a, b) -> Long.compare(Long.parseLong(a.getManifest().getTag()), Long.parseLong(b.getManifest().getTag())))
-                    .forEach(mf -> {
-                        InstanceUsageDto dto = new InstanceUsageDto();
-                        dto.id = mf.getConfiguration().id;
-                        dto.name = mf.getConfiguration().name;
-                        dto.description = mf.getConfiguration().description;
-                        dto.tag = mf.getManifest().getTag();
-                        result.add(dto);
-                    });
-        }
+            if (installedTags.isEmpty()) {
+                // in this case, we take the latest, and need to still block this product version from removal.
+                // (instance was created, but never installed (yet)).
+                InstanceManifest newest = mfSet.stream()
+                        .sorted((a, b) -> Integer.parseInt(b.getManifest().getTag(), Integer.parseInt(a.getManifest().getTag())))
+                        .findFirst().get();
 
+                result.add(createUsage(newest));
+            } else {
+                mfSet.stream().filter(mf -> installedTags.contains(mf.getManifest().getTag())).sorted((a, b) -> Long
+                        .compare(Long.parseLong(a.getManifest().getTag()), Long.parseLong(b.getManifest().getTag())))
+                        .forEach(mf -> {
+                            result.add(createUsage(mf));
+                        });
+            }
+        }
         return result;
+    }
+
+    private static InstanceUsageDto createUsage(InstanceManifest mf) {
+        InstanceUsageDto dto = new InstanceUsageDto();
+        dto.id = mf.getConfiguration().id;
+        dto.name = mf.getConfiguration().name;
+        dto.description = mf.getConfiguration().description;
+        dto.tag = mf.getManifest().getTag();
+        return dto;
     }
 
     @Override

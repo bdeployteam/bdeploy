@@ -132,8 +132,13 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
     this.dialog
       .confirm(
         `Delete Version`,
-        `This instance version and all its history will be deleted and <strong>cannot be restored</strong>. Are you sure you want to do this?`,
-        'delete',
+        'This instance version and all its history will be deleted and <strong>cannot be restored</strong>. ' +
+          'Note that this will <strong>not</strong> free up significant disc space on any server.' +
+          '<br><br>This operation is <strong>not recommended</strong> under most circumstances, with the exception of technical maintenance.' +
+          'Performing this operation might require additional manual maintenance afterwards!' +
+          '<br><br>If you are sure, confirm using I UNDERSTAND.',
+        'warning',
+        'I UNDERSTAND',
       )
       .subscribe((r) => {
         if (!r) {
