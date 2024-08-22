@@ -1,5 +1,6 @@
 package io.bdeploy.ui;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.codec.binary.Base64;
 import org.jvnet.hk2.annotations.Service;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -22,6 +24,9 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
@@ -395,34 +400,40 @@ public class ProductUpdateService {
         return result;
     }
 
-    public List<ApplicationValidationDto> validate(InstanceUpdateDto instance, List<ApplicationManifest> applications,
+    public List<ApplicationValidationDto> validate(InstanceUpdateDto updateDto, List<ApplicationManifest> applications,
             SystemConfiguration system) {
         List<ApplicationValidationDto> result = new ArrayList<>();
+        InstanceConfigurationDto instance = updateDto.config;
+        List<InstanceNodeConfigurationDto> nodes = instance.nodeDtos;
 
-        // TODO: CT_BDEPLOY-56 - skip validation on server side for 7.1.0.
-        // if (instance.files != null && !instance.config.nodeDtos.isEmpty()) {
-        //     InstanceNodeConfigurationDto nodeConfig = instance.config.nodeDtos.getFirst();
-        //     VariableResolver resolver = createResolver(nodeConfig, null);
-        //     for (FileStatusDto file : instance.files) {
-        //         if (file.type == FileStatusType.DELETE) {
-        //             continue;
-        //         }
-        //         try {
-        //             String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
-        //             TemplateHelper.process(content, resolver, str -> true, file.file);
-        //         } catch (Exception e) {
-        //             result.add(new ApplicationValidationDto(file.file, null, e.getMessage()));
-        //         }
-        //     }
-        // }
+        // Validate configuration files
+        List<FileStatusDto> files = updateDto.files;
+        if (files != null) {
+            files.removeIf(file -> file.type == FileStatusType.DELETE);
+            if (!files.isEmpty()) {
+                for (var node : nodes) {
+                    if (InstanceManifest.CLIENT_NODE_NAME.equals(node.nodeName)) {
+                        // TODO implement validation for client applications
+                    } else {
+                        VariableResolver resolver = createResolver(node, null);
+                        for (FileStatusDto file : files) {
+                            String filePath = file.file;
+                            try {
+                                String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
+                                TemplateHelper.process(content, resolver, str -> true, filePath);
+                            } catch (Exception e) {
+                                result.add(new ApplicationValidationDto(filePath, null,
+                                        e.getMessage() + " on node " + node.nodeName));
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-        // there is nothing in the base config which requires excessive validation right now. mandatory fields are
-        // validated in the client(s) individually.
-
+        // Validate applications and processes
         Map<String, String> processNames = new TreeMap<>();
-
-        for (var node : instance.config.nodeDtos) {
-            // again. the node configuration itself does not carry much information which needs validation.
+        for (var node : nodes) {
             for (var process : node.nodeConfiguration.applications) {
                 var desc = applications.stream().filter(m -> m.getKey().getName().equals(process.application.getName()))
                         .map(ApplicationManifest::getDescriptor).findFirst();
@@ -442,7 +453,7 @@ public class ProductUpdateService {
                 }
 
                 // update variables in case we modified them in the instance config.
-                node.nodeConfiguration.mergeVariables(instance.config.config, system, null);
+                node.nodeConfiguration.mergeVariables(instance.config, system, null);
 
                 VariableResolver res = createResolver(node, process);
 
