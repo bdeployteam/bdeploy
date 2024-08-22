@@ -243,9 +243,9 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
       .message({
         header: 'Edit Variable',
         icon: 'edit',
-        template,
         validation: () => !!this.editForm && this.editForm.valid,
         actions: [ACTION_CANCEL, ACTION_OK],
+        template,
       })
       .subscribe((r) => {
         const value = this.newValue;
@@ -300,12 +300,12 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     if (!this.search) {
       return true;
     }
-
     for (const p of g.pairs) {
       if (this.hasPairSearchMatch(p)) {
         return true;
       }
     }
+    return false;
   }
 
   protected hasPairSearchMatch(p: VariablePair): boolean {
