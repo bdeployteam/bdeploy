@@ -6,8 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +87,7 @@ public class TemplateHelper {
         if (value == null || !value.contains(PATTERN_START)) {
             return value;
         }
-        return doProcess(value, valueResolver, shouldResolve, null, new Stack<>());
+        return doProcess(value, valueResolver, shouldResolve, null, new ArrayDeque<>());
     }
 
     /**
@@ -109,14 +110,14 @@ public class TemplateHelper {
         if (value == null || !value.contains(PATTERN_START)) {
             return value;
         }
-        return doProcess(value, valueResolver, shouldResolve, valueId, new Stack<>());
+        return doProcess(value, valueResolver, shouldResolve, valueId, new ArrayDeque<>());
     }
 
     /**
      * Recursively resolves the given input.
      */
     private static String doProcess(String value, VariableResolver valueResolver, ShouldResolve shouldResolve, String valueId,
-            Stack<String> cycleDetector) {
+            Deque<String> cycleDetector) {
         if (cycleDetector.contains(value)) {
             cycleDetector.push(value);
             String chain = String.join(" -> ", cycleDetector);
