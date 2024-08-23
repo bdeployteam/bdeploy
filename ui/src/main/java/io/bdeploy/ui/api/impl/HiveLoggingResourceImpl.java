@@ -26,7 +26,7 @@ public class HiveLoggingResourceImpl implements HiveLoggingResource {
     private SecurityContext context;
 
     @Inject
-    RemoteEntryStreamRequestService resrs;
+    private RemoteEntryStreamRequestService resrs;
 
     private final String hive;
 

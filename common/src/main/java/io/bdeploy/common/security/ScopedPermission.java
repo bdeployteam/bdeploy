@@ -42,7 +42,7 @@ public final class ScopedPermission {
          */
         ADMIN(4);
 
-        int level;
+        private final int level;
 
         /**
          * Creates a new permission with the given level. Higher level means higher permissions.

@@ -30,8 +30,8 @@ class DataTableText extends DataTableBase {
         CONTENT(CONTENT_START, CONTENT_END),
         BOTTOM(BOTTOM_START, BOTTOM_END);
 
-        char start;
-        char stop;
+        private final char start;
+        private final char stop;
 
         private HrMode(char start, char stop) {
             this.start = start;

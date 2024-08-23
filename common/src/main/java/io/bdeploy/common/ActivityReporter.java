@@ -351,7 +351,7 @@ public interface ActivityReporter {
 
         private static final class NullActivity implements ActivityReporter.Activity {
 
-            long startTime = System.currentTimeMillis();
+            private final long startTime = System.currentTimeMillis();
 
             @Override
             public void worked(long amount) {
@@ -377,9 +377,6 @@ public interface ActivityReporter {
             public boolean isCancelRequested() {
                 return false;
             }
-
         }
-
     }
-
 }

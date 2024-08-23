@@ -37,14 +37,14 @@ public class ActionBridge {
 
     private static final class ActionBridgeHandle {
 
-        ObjectChangeClientWebSocket ws;
-        RemoteService svc;
-        long begin;
+        private final RemoteService svc;
+        private final long begin;
+        private ObjectChangeClientWebSocket ws;
 
         public ActionBridgeHandle(ObjectChangeClientWebSocket ws, RemoteService svc, long begin) {
-            this.ws = ws;
             this.svc = svc;
             this.begin = begin;
+            this.ws = ws;
         }
     }
 

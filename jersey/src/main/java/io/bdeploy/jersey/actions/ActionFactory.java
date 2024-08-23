@@ -18,8 +18,8 @@ public class ActionFactory {
 
     private static class IntermediateMultiHandle {
 
-        ActionHandle handle;
-        RuntimeException ex;
+        private ActionHandle handle;
+        private RuntimeException ex;
     }
 
     @Inject

@@ -22,10 +22,11 @@ public class ApiAccessToken {
     public static final ScopedPermission ADMIN_PERMISSION = new ScopedPermission(ScopedPermission.Permission.ADMIN);
 
     String it; // issuedTo
-    List<ScopedPermission> c = new ArrayList<>(); // permissions
-    long ia; // issuedAt
-    long vu; // validUntil
-    boolean wt; // weakToken
+
+    private final List<ScopedPermission> c = new ArrayList<>(); // permissions
+    private long ia; // issuedAt
+    private long vu; // validUntil
+    private boolean wt; // weakToken
 
     public String getIssuedTo() {
         return it;
@@ -49,7 +50,7 @@ public class ApiAccessToken {
 
     public static final class Builder {
 
-        ApiAccessToken token = new ApiAccessToken();
+        private final ApiAccessToken token = new ApiAccessToken();
 
         public Builder() {
             token.ia = System.currentTimeMillis();

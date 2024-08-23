@@ -21,7 +21,7 @@ import jakarta.ws.rs.core.Response.StatusType;
 public class JerseyAuditingFilter implements ContainerResponseFilter {
 
     @Inject
-    Auditor auditor;
+    private Auditor auditor;
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {

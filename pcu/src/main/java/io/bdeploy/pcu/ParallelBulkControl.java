@@ -21,7 +21,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
  */
 public class ParallelBulkControl extends AbstractBulkControl {
 
-    final MdcLogger logger = new MdcLogger(ParallelBulkControl.class);
+    private final MdcLogger logger = new MdcLogger(ParallelBulkControl.class);
 
     private final ExecutorService parallelExec;
 
