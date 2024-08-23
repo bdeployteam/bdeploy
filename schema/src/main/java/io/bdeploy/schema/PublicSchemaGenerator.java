@@ -1,9 +1,11 @@
 package io.bdeploy.schema;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -26,7 +28,6 @@ import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
@@ -116,12 +117,18 @@ public class PublicSchemaGenerator {
                 compatUid.put("description", "DEPRECATED: Compatibility with 'id' property.");
             }
 
-            // for compatibility with existing files, we need to properly allow 'lifenessProbe' properties.
-            if (scope.getType().isInstanceOf(ProcessControlDescriptor.class)) {
-                ObjectNode on = (ObjectNode) node.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-
-                JsonNode newProbe = on.get("livenessProbe");
-                on.set("lifenessProbe", newProbe);
+            // add aliases
+            for (Field field : scope.getType().getErasedType().getFields()) {
+                JsonAlias jsonAlias = field.getAnnotation(JsonAlias.class);
+                // ignore id field, special use case that is handled above
+                if ("id".equals(field.getName()) || jsonAlias == null) {
+                    continue;
+                }
+                ObjectNode propertiesNode = (ObjectNode) node.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+                JsonNode fieldNode = propertiesNode.get(field.getName());
+                for (String alias : jsonAlias.value()) {
+                    propertiesNode.set(alias, fieldNode);
+                }
             }
         });
 
