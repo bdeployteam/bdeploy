@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/api" />
+            <option value="$PROJECT_DIR$/bhive" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/dcu" />
+            <option value="$PROJECT_DIR$/doc" />
+            <option value="$PROJECT_DIR$/interfaces" />
+            <option value="$PROJECT_DIR$/jersey" />
+            <option value="$PROJECT_DIR$/launcher" />
+            <option value="$PROJECT_DIR$/logging" />
+            <option value="$PROJECT_DIR$/messaging" />
+            <option value="$PROJECT_DIR$/minion" />
+            <option value="$PROJECT_DIR$/pcu" />
+            <option value="$PROJECT_DIR$/schema" />
+            <option value="$PROJECT_DIR$/test-data" />
+            <option value="$PROJECT_DIR$/ui" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
