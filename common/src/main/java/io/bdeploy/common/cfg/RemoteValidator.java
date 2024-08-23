@@ -12,7 +12,7 @@ public class RemoteValidator implements ConfigValidator<String> {
     public static final String API_SUFFIX = "/api";
 
     @Override
-    public boolean validate(String value) {
+    public boolean test(String value) {
         String lower = value.toLowerCase();
 
         // Allow local paths and file URLs

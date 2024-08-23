@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -297,7 +298,7 @@ public class Configuration {
                 }
 
                 ConfigValidator<?> v = validator.getDeclaredConstructor().newInstance();
-                if (!v.validate(cast(value))) {
+                if (!v.test(cast(value))) {
                     throw new IllegalArgumentException("--" + m.getName() + ": " + String.format(msg.value(), value));
                 }
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
@@ -497,15 +498,13 @@ public class Configuration {
         String value();
     }
 
-    @FunctionalInterface
-    public interface ConfigValidator<T> {
-
-        /**
-         * Validates a single value.
-         *
-         * @param value the parameter value.
-         * @return whether the value is valid.
-         */
-        public boolean validate(T value);
+    /**
+     * Used to validate a value.
+     * <p>
+     * This interface is just a wrapper for {@link Predicate}.
+     *
+     * @param <T> The type of the value that shall be tested
+     */
+    public interface ConfigValidator<T> extends Predicate<T> {
     }
 }

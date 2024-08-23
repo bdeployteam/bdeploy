@@ -24,7 +24,7 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
     private static final Logger log = LoggerFactory.getLogger(PathOwnershipValidator.class);
 
     @Override
-    public boolean validate(String value) {
+    public boolean test(String value) {
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             return true; // Don't check on windows, as windows does not suffer the problem as hard.
         }
