@@ -248,21 +248,29 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private void doSetParameterInternal(ParameterConfiguration param, ParameterDescriptor desc, String value,
+    private void doSetParameterInternal(ParameterConfiguration inputParam, ParameterDescriptor inputDesc, String value,
             InstanceNodeConfigurationListDto nodes) {
-        param.value = new LinkedValueConfiguration(value);
-        param.preRender(desc);
+        inputParam.value = new LinkedValueConfiguration(value);
+        inputParam.preRender(inputDesc);
 
-        // align global parameters.
-        if (desc != null && desc.global) {
-            for (var node : nodes.nodeConfigDtos) {
-                for (var napp : node.nodeConfiguration.applications) {
-                    for (var p : napp.start.parameters) {
-                        p.value = new LinkedValueConfiguration(value);
-                        p.preRender(nodes.applications.stream().filter(a -> a.key.getName().equals(napp.application.getName()))
-                                .map(a -> a.descriptor.startCommand.parameters.stream().filter(x -> x.id.equals(p.id)).findFirst()
-                                        .orElse(null))
-                                .findFirst().orElse(null));
+        if (inputDesc == null || !inputDesc.global) {
+            return;
+        }
+
+        // align global parameters
+        for (var node : nodes.nodeConfigDtos) {                   // for each                                       node of the instance
+            for (var app : node.nodeConfiguration.applications) { // for each                   application of each node of the instance
+                for (var param : app.start.parameters) {          // for each parameter of each application of each node of the instance
+                    String paramId = param.id;
+                    if (paramId.equals(inputParam.id)) {          // for each parameter of each application of each node of the instance that the same ID as the inputParam
+                        nodes.applications.stream().flatMap(appDto -> appDto.descriptor.startCommand.parameters.stream())
+                                .filter(descr -> paramId.equals(descr.id)).findAny().ifPresent(desc -> {
+                                    if (!desc.global) {
+                                        return;
+                                    }
+                                    param.value = inputParam.value;
+                                    param.preRender(desc);
+                                });
                     }
                 }
             }
