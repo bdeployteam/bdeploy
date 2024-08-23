@@ -24,7 +24,7 @@ import io.bdeploy.minion.TestMinion;
 class UserGroupDatabaseTest {
 
     @Test
-    void groupScopedPermission(MinionRoot root) {
+    void testGroupScopedPermission(MinionRoot root) {
         UserDatabase users = root.getUsers();
         UserGroupDatabase groups = root.getUserGroups();
         String userName = "JunitTest";
@@ -60,7 +60,7 @@ class UserGroupDatabaseTest {
     }
 
     @Test
-    void groupGlobalPermission(MinionRoot root) {
+    void testGroupGlobalPermission(MinionRoot root) {
         UserDatabase users = root.getUsers();
         UserGroupDatabase groups = root.getUserGroups();
         String userName = "JunitTest";
@@ -90,7 +90,7 @@ class UserGroupDatabaseTest {
     }
 
     @Test
-    void allUsersGroupIsPresentByDefault(MinionRoot root) {
+    void testAllUsersGroupIsPresentByDefault(MinionRoot root) {
         UserDatabase users = root.getUsers();
         UserGroupDatabase groups = root.getUserGroups();
         String userName = "JunitTest";

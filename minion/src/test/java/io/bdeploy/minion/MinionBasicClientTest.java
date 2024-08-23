@@ -17,7 +17,7 @@ import io.bdeploy.ui.api.Minion;
 class MinionBasicClientTest {
 
     @Test
-    void listMinionsTest(MasterRootResource master) {
+    void testListMinions(MasterRootResource master) {
         Map<String, MinionStatusDto> minions = master.getNodes();
         assertThat(minions.size(), is(1));
         assertThat(minions.get(Minion.DEFAULT_NAME), is(notNullValue()));

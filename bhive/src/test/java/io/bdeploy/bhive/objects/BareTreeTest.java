@@ -20,7 +20,7 @@ import io.bdeploy.common.TestActivityReporter;
 class BareTreeTest {
 
     @Test
-    void impExp(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
+    void testImportExport(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
         Path hiveDir = tmp.resolve("hive");
         Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
         Path myTarget = tmp.resolve("target");

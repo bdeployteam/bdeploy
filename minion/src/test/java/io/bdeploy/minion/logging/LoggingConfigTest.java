@@ -26,7 +26,7 @@ import io.bdeploy.minion.TestMinion;
 class LoggingConfigTest {
 
     @Test
-    void updateConfig(MinionStatusResource msr, @TempDir Path tmp, MinionRoot mr) throws Exception {
+    void testUpdateConfig(MinionStatusResource msr, @TempDir Path tmp, MinionRoot mr) throws Exception {
         String dummyContent = "<Configuration/>";
         Path dummyCfg = tmp.resolve("log4j2.xml");
         Files.write(dummyCfg, Collections.singletonList(dummyContent));
@@ -41,7 +41,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void readFiles(CommonRootResource crr, MinionRoot mr) throws Exception {
+    void testReadFiles(CommonRootResource crr, MinionRoot mr) throws Exception {
         Files.write(mr.getLogDir().resolve("server.log"), Collections.singleton("log1"));
         Files.write(mr.getLogDir().resolve("server-1.log"), Collections.singleton("log2"));
 

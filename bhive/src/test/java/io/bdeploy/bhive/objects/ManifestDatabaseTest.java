@@ -20,7 +20,7 @@ import io.bdeploy.bhive.model.Manifest;
 class ManifestDatabaseTest extends DbTestBase {
 
     @Test
-    void storeAndRead(@TempDir Path tmp) {
+    void testStoreAndRead(@TempDir Path tmp) {
         Path dbDir = tmp.resolve("manifests");
 
         Manifest.Key key = new Manifest.Key("test/app1", "v1.0");

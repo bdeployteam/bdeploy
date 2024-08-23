@@ -54,7 +54,7 @@ class MetricsTest {
     }
 
     @Test
-    void fetchMetrics(JerseyClientFactory f, Producer producer) {
+    void testFetchMetrics(JerseyClientFactory f, Producer producer) {
         producer.update("X");
 
         // injection not supported for built-in resources.

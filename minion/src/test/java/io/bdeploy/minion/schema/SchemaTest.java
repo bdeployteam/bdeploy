@@ -24,14 +24,14 @@ import io.bdeploy.schema.PublicSchemaValidator;
 class SchemaTest {
 
     @Test
-    void generateSchemasTest(PublicSchemaResource rsrc) {
+    void testGenerateSchemas(PublicSchemaResource rsrc) {
         for (Schema s : Schema.values()) {
             assertNotNull(rsrc.getSchema(s));
         }
     }
 
     @Test
-    void validateSchemaTest() throws IOException {
+    void testValidateSchema() throws IOException {
         ApplicationDescriptor desc = new ApplicationDescriptor();
         desc.name = "Test";
 

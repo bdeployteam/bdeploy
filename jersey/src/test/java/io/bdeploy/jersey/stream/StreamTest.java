@@ -33,7 +33,7 @@ class StreamTest {
     }
 
     @Test
-    void download(StreamTestResource rs) throws Exception {
+    void testDownload(StreamTestResource rs) throws Exception {
         byte[] sourceBytes = Files.readAllBytes(src);
 
         Path localFile = rs.download();
@@ -48,7 +48,7 @@ class StreamTest {
     }
 
     @Test
-    void upload(StreamTestResource rs) throws IOException {
+    void testUpload(StreamTestResource rs) throws IOException {
         rs.upload(src);
 
         byte[] sourceBytes = Files.readAllBytes(src);

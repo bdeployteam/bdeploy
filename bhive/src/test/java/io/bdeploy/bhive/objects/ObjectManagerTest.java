@@ -88,7 +88,7 @@ class ObjectManagerTest extends DbTestBase {
 
     @SlowTest
     @Test
-    void importLarge(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    void testImportLarge(@TempDir Path tmp, ActivityReporter r) throws IOException {
         Path mySource = tmp.resolve("src");
 
         ExecutorService s = Executors.newFixedThreadPool(4);

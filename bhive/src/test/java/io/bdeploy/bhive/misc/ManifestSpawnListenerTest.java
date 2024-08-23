@@ -83,7 +83,7 @@ class ManifestSpawnListenerTest {
     }
 
     @Test
-    void faultyListener(BHive test) {
+    void testFaultyListener(BHive test) {
         Manifest.Key key1 = new Manifest.Key("test", "1");
 
         ManifestSpawnListener l1 = k -> {
@@ -103,7 +103,7 @@ class ManifestSpawnListenerTest {
     }
 
     @Test
-    void parallelAddStorm(BHive test) throws Exception {
+    void testParallelAddStorm(BHive test) throws Exception {
         LongAdder notifyCount = new LongAdder();
 
         ManifestSpawnListener l1 = k -> {

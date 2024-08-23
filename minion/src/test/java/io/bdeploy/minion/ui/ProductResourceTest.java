@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.Response;
 class ProductResourceTest {
 
     @Test
-    void products(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testProducts(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
 
@@ -44,7 +44,7 @@ class ProductResourceTest {
     }
 
     @Test
-    void createZip(MinionRoot minion, InstanceGroupResource root, RemoteService remote, DownloadService dlService,
+    void testCreateZip(MinionRoot minion, InstanceGroupResource root, RemoteService remote, DownloadService dlService,
             @TempDir Path tmp) throws IOException {
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
@@ -60,7 +60,7 @@ class ProductResourceTest {
     }
 
     @Test
-    void copyProduct(InstanceGroupResource root, SoftwareRepositoryResource repos, RemoteService remote, @TempDir Path tmp)
+    void testCopyProduct(InstanceGroupResource root, SoftwareRepositoryResource repos, RemoteService remote, @TempDir Path tmp)
             throws IOException {
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);

@@ -14,7 +14,7 @@ import io.bdeploy.common.util.VersionHelper;
 class VersionTest {
 
     @Test
-    void version() {
+    void testVersion() {
         Version v = VersionHelper.parse("1.2.3");
 
         assertEquals(1, v.getMajor());
@@ -38,7 +38,7 @@ class VersionTest {
     }
 
     @Test
-    void sorting() {
+    void testSorting() {
         SortedSet<Version> vs = new TreeSet<>();
 
         assertTrue(VersionHelper.compare("1.2.3", "1.0.0") > 0);

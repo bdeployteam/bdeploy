@@ -18,7 +18,7 @@ class DynamicTest {
     TestServer ext = new TestServer(locator);
 
     @Test
-    void registerDynamic(JerseyClientFactory f) {
+    void testRegisterDynamic(JerseyClientFactory f) {
         locator.register("test", "value");
 
         DynamicTestResourceLocator svc = f.getProxyClient(DynamicTestResourceLocator.class);

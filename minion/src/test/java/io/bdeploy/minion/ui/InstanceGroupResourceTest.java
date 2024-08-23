@@ -24,7 +24,7 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 class InstanceGroupResourceTest {
 
     @Test
-    void crud(InstanceGroupResource res, JerseyClientFactory factory) throws IOException {
+    void testCrud(InstanceGroupResource res, JerseyClientFactory factory) throws IOException {
         assertTrue(res.list().isEmpty());
 
         InstanceGroupConfiguration cfg = new InstanceGroupConfiguration();

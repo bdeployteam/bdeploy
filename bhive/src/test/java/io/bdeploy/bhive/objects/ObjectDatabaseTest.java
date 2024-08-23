@@ -72,7 +72,7 @@ class ObjectDatabaseTest extends DbTestBase {
     @SlowTest
     @ParameterizedTest
     @ValueSource(ints = { 512, 1024, 4096, 1024 * 1024 })
-    void compareStreamWithInMemoryHash(int fsz, @TempDir Path tmp, ActivityReporter r) throws IOException {
+    void testCompareStreamWithInMemoryHash(int fsz, @TempDir Path tmp, ActivityReporter r) throws IOException {
         Path tmpDir = tmp.resolve("stream");
         List<Path> paths = new ArrayList<>();
         for (int i = 0; i < 100; ++i) {

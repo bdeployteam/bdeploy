@@ -24,7 +24,7 @@ import io.bdeploy.ui.dto.ApplicationDto;
 class ApplicationResourceTest {
 
     @Test
-    void applications(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testApplications(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
 

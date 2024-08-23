@@ -27,7 +27,7 @@ class TemplateHelperTest {
     };
 
     @Test
-    void resolveAllPatterns() {
+    void testResolveAllPatterns() {
         // Recursive replacement of patterns
         assertEquals(R, TemplateHelper.process("{{a}}", RESOLVER));
         assertEquals(R, TemplateHelper.process("{{b}}", RESOLVER));
@@ -43,7 +43,7 @@ class TemplateHelperTest {
     }
 
     @Test
-    void resolveDelayedPatterns() {
+    void testResolveDelayedPatterns() {
         // Variable should be resolved as it is not delayed
         assertEquals(R, TemplateHelper.process("{{a}}", RESOLVER, DELAY_RESOLVING_B));
 
@@ -55,7 +55,7 @@ class TemplateHelperTest {
     }
 
     @Test
-    void notMatchingPattern() {
+    void testNotMatchingPattern() {
         assertEquals("|a|", TemplateHelper.process("|a|", RESOLVER));
     }
 }

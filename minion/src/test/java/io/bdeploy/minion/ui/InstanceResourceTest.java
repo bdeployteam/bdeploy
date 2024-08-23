@@ -80,7 +80,7 @@ class InstanceResourceTest {
     }
 
     @Test
-    void getConfiguration(InstanceGroupResource root, @TempDir Path tmpDir, RemoteService remote) throws Exception {
+    void testGetConfiguration(InstanceGroupResource root, @TempDir Path tmpDir, RemoteService remote) throws Exception {
         addNodes(remote);
 
         // Prepare and push group
@@ -128,7 +128,7 @@ class InstanceResourceTest {
     }
 
     @Test
-    void updateConfiguration(InstanceGroupResource root, RemoteService remote, @TempDir Path tmpDir) throws Exception {
+    void testUpdateConfiguration(InstanceGroupResource root, RemoteService remote, @TempDir Path tmpDir) throws Exception {
         addNodes(remote);
 
         // Prepare and push group
@@ -227,7 +227,7 @@ class InstanceResourceTest {
     }
 
     @Test
-    void crud(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testCrud(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
         addNodes(remote);
 
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
@@ -267,7 +267,7 @@ class InstanceResourceTest {
     }
 
     @Test
-    void multipleVersions(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testMultipleVersions(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
         addNodes(remote);
 
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
@@ -306,7 +306,7 @@ class InstanceResourceTest {
     }
 
     @Test
-    void checkPortStates(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws Exception {
+    void testCheckPortStates(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws Exception {
         addNodes(remote);
 
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();

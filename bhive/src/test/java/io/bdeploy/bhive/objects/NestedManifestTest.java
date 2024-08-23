@@ -47,7 +47,7 @@ import io.bdeploy.common.TestActivityReporter;
 class NestedManifestTest extends DbTestBase {
 
     @Test
-    void nestedManifests(@TempDir Path rootd, ActivityReporter reporter) throws IOException {
+    void testNestedManifests(@TempDir Path rootd, ActivityReporter reporter) throws IOException {
         Path tmp = ContentHelper.genSimpleTestTree(rootd, "source");
         Path mdbDir = rootd.resolve("mf");
 
@@ -103,7 +103,7 @@ class NestedManifestTest extends DbTestBase {
     }
 
     @Test
-    void refCache(BHive hive, @TempDir Path rootd) throws IOException {
+    void testRefCache(BHive hive, @TempDir Path rootd) throws IOException {
         Path tmp = ContentHelper.genSimpleTestTree(rootd, "source");
 
         Manifest.Key na = new Manifest.Key("nested-a", "v1");

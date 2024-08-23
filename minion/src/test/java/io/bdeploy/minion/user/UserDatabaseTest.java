@@ -26,7 +26,7 @@ import io.bdeploy.minion.TestMinion;
 class UserDatabaseTest {
 
     @Test
-    void userRoles(MinionRoot root) {
+    void testUserRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
         db.createLocalUser("JunitTest", "JunitTestJunitTest", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
@@ -52,7 +52,7 @@ class UserDatabaseTest {
     }
 
     @Test
-    void userCleanup(MinionRoot root) {
+    void testUserCleanup(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
         db.createLocalUser("JunitTest", "JunitTestJunitTest", null);
@@ -67,7 +67,7 @@ class UserDatabaseTest {
     }
 
     @Test
-    void crud(MinionRoot root) {
+    void testCrud(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
         db.createLocalUser("JunitTest", "JunitTestJunitTest",
@@ -96,7 +96,7 @@ class UserDatabaseTest {
     }
 
     @Test
-    void userNames(MinionRoot root) {
+    void testUserNames(MinionRoot root) {
         UserDatabase db = root.getUsers();
         int originalSize = db.getAllNames().size();
 

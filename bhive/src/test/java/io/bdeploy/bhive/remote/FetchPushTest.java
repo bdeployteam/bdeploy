@@ -38,7 +38,7 @@ import io.bdeploy.common.security.RemoteService;
 class FetchPushTest extends RemoteHiveTestBase {
 
     @Test
-    void rePushWithExistingRemoteRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testRePushWithExistingRemoteRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
                 BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
@@ -71,7 +71,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void reFetchWithExistingLocalRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testReFetchWithExistingLocalRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
                 BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
@@ -109,7 +109,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void pushWithExistingRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testPushWithExistingRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
                 BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
@@ -142,7 +142,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void fetchWithExistingRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testFetchWithExistingRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
                 BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
@@ -183,7 +183,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void pushWithPrunedRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testPushWithPrunedRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
@@ -216,7 +216,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void pushFetchWithRefsClean(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testPushFetchWithRefsClean(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
                 BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Manifest.Key root = createManifestWithRefs(tmp, local);
@@ -270,7 +270,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void pushFetchWithRefsPartial(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testPushFetchWithRefsPartial(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
                 BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Manifest.Key root = createManifestWithRefs(tmp, local);
@@ -309,7 +309,7 @@ class FetchPushTest extends RemoteHiveTestBase {
     }
 
     @Test
-    void fetchWithRemovedManifest(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+    void testFetchWithRemovedManifest(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         try (BHive fetchHive = new BHive(tmp.resolve("hive").toUri(), null, r)) {
             FetchOperation op = new FetchOperation();
             op.setRemote(svc);

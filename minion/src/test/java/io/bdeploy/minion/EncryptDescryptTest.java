@@ -18,7 +18,7 @@ class EncryptDescryptTest {
     }
 
     @Test
-    void test(MinionRoot minion) {
+    void testEncryptDecrypt(MinionRoot minion) {
         TestPayload pl = new TestPayload();
         pl.testString = "Test String";
         pl.testBytes = new byte[] { 0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE };

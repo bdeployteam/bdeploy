@@ -34,7 +34,7 @@ class MetaManifestTest {
     }
 
     @Test
-    void crudMeta(BHive hive, @TempDir Path temp) throws IOException {
+    void testCrudMeta(BHive hive, @TempDir Path temp) throws IOException {
         MyMeta metaShared = new MyMeta();
         metaShared.value = "test";
         metaShared.timestamp = System.currentTimeMillis();
