@@ -83,7 +83,7 @@ public class ChangeEventManager {
     }
 
     public void remove(ObjectChangeType type, Manifest.Key key, ObjectScope s) {
-        remove(type, key, scope.getObjectScope(), Collections.emptyMap());
+        remove(type, key, s, Collections.emptyMap());
     }
 
     public void remove(ObjectChangeType type, Manifest.Key key, ObjectScope s, Map<String, String> details) {
