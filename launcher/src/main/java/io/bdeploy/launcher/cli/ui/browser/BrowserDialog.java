@@ -108,11 +108,12 @@ public class BrowserDialog extends BaseDialog {
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel;
     private final JTable table;
 
-    private JButton launchButton;
     private JButton refreshButton;
-    private JButton uninstallButton;
     private JButton pruneButton;
     private JButton fsckButton;
+
+    private JButton launchButton;
+    private JButton uninstallButton;
     private JButton verifyButton;
     private JButton reinstallButton;
 
@@ -182,20 +183,20 @@ public class BrowserDialog extends BaseDialog {
         header.setBorder(DEFAULT_EMPTY_BORDER);
         header.setLayout(new BorderLayout());
 
-        launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
-                "Launch the selected application");
-
         refreshButton = createHeaderButton("refresh", "Refresh", this::onRefreshButtonClicked,//
                 "Update the locally stored information (name, version...) of the selected applications");
-
-        uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
-                "Uninstall the selected application");
 
         pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
                 "Prune the selected application");
 
         fsckButton = createHeaderButton("fixErrors", "Fix Errors", this::onFsckButtonClicked,//
                 "Fix any errors in the BHive");
+
+        launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
+                "Launch the selected application");
+
+        uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
+                "Uninstall the selected application");
 
         verifyButton = createHeaderButton("verify", "Verify", this::onVerifyButtonClicked,//
                 "Check if selected application has missing or modified files");
@@ -207,14 +208,12 @@ public class BrowserDialog extends BaseDialog {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
         toolbar.setBackground(Color.WHITE);
-        toolbar.add(launchButton);
         toolbar.add(refreshButton);
-        toolbar.add(new JToolBar.Separator());
-        toolbar.add(uninstallButton);
-        toolbar.add(new JToolBar.Separator());
         toolbar.add(pruneButton);
         toolbar.add(fsckButton);
         toolbar.add(new JToolBar.Separator());
+        toolbar.add(launchButton);
+        toolbar.add(uninstallButton);
         toolbar.add(verifyButton);
         toolbar.add(reinstallButton);
         header.add(toolbar, BorderLayout.WEST);
@@ -436,26 +435,6 @@ public class BrowserDialog extends BaseDialog {
         sortModel.setRowFilter(new BrowserDialogTableFilter(text.trim().toLowerCase()));
     }
 
-    /** Returns the selected applications */
-    private List<ClientSoftwareConfiguration> getSelectedApps() {
-        List<ClientSoftwareConfiguration> apps = new ArrayList<>();
-        for (int pos : table.getSelectedRows()) {
-            int idx = sortModel.convertRowIndexToModel(pos);
-            apps.add(model.get(idx));
-        }
-        return apps;
-    }
-
-    /** Notification that the selected app should be launched */
-    private void onLaunchButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        List<String> args = new ArrayList<>();
-        if (e.getSource() == customizeAndLaunchItem) {
-            args.add("--customizeArgs");
-        }
-        doLaunch(app, args);
-    }
-
     /** Notification that the selected apps should be refreshed */
     private void onRefreshButtonClicked(ActionEvent e) {
         List<ClientSoftwareConfiguration> apps = getSelectedApps();
@@ -475,12 +454,6 @@ public class BrowserDialog extends BaseDialog {
             apps.addAll(newAppMap.values());
         }
         doRefresh(apps);
-    }
-
-    /** Notification that the selected app should be removed */
-    private void onUninstallButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        doUninstall(app);
     }
 
     /** Executes the prune operation on all local hives */
@@ -519,6 +492,32 @@ public class BrowserDialog extends BaseDialog {
         } catch (IOException ex) {
             showErrorMessageDialog(null, "Failed to fix errors in local hives: " + ex.getMessage());
         }
+    }
+
+    /** Returns the selected applications */
+    private List<ClientSoftwareConfiguration> getSelectedApps() {
+        List<ClientSoftwareConfiguration> apps = new ArrayList<>();
+        for (int pos : table.getSelectedRows()) {
+            int idx = sortModel.convertRowIndexToModel(pos);
+            apps.add(model.get(idx));
+        }
+        return apps;
+    }
+
+    /** Notification that the selected app should be launched */
+    private void onLaunchButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        List<String> args = new ArrayList<>();
+        if (e.getSource() == customizeAndLaunchItem) {
+            args.add("--customizeArgs");
+        }
+        doLaunch(app, args);
+    }
+
+    /** Notification that the selected app should be removed */
+    private void onUninstallButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        doUninstall(app);
     }
 
     /** Notification that the selected app should be updated */
@@ -663,10 +662,13 @@ public class BrowserDialog extends BaseDialog {
     /** Updates the enabled state of all buttons */
     private void doUpdateButtonState() {
         if (progressBar.isVisible()) {
+            refreshButton.setEnabled(false);
+            pruneButton.setEnabled(false);
+            fsckButton.setEnabled(false);
+
             launchItem.setEnabled(false);
             customizeAndLaunchItem.setEnabled(false);
             updateItem.setEnabled(false);
-            refreshButton.setEnabled(false);
 
             uninstallItem.setEnabled(false);
             uninstallButton.setEnabled(false);
@@ -675,9 +677,6 @@ public class BrowserDialog extends BaseDialog {
 
             refreshItem.setEnabled(false);
             refreshButton.setEnabled(false);
-
-            fsckButton.setEnabled(false);
-            pruneButton.setEnabled(false);
 
             verifyButton.setEnabled(false);
             reinstallButton.setEnabled(false);
@@ -724,17 +723,17 @@ public class BrowserDialog extends BaseDialog {
         refreshItem.setEnabled(!readonlyHome);
         refreshButton.setEnabled(!readonlyHome);
 
-        // --customizeArgs and launch needs at version 3.3.0
-        customizeAndLaunchItem.setEnabled(checkVersion(selectedApps, new Version(3, 3, 0, null)));
-
-        // --updateOnly flag needs at least version 3.6.5
-        updateItem.setEnabled(!readonlyHome && checkVersion(selectedApps, new Version(3, 6, 5, null)));
-
         // Error fixing and pruning require write permissions
         if (!readonlyHome) {
             fsckButton.setEnabled(true);
             pruneButton.setEnabled(true);
         }
+
+        // --customizeArgs and launch needs at version 3.3.0
+        customizeAndLaunchItem.setEnabled(checkVersion(selectedApps, new Version(3, 3, 0, null)));
+
+        // --updateOnly flag needs at least version 3.6.5
+        updateItem.setEnabled(!readonlyHome && checkVersion(selectedApps, new Version(3, 6, 5, null)));
 
         verifyButton.setEnabled(!readonlyHome && singleAppSelected);
         reinstallButton.setEnabled(!readonlyHome && singleAppSelected);
