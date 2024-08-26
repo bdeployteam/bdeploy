@@ -262,7 +262,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             for (var app : node.nodeConfiguration.applications) { // for each                   application of each node of the instance
                 for (var param : app.start.parameters) {          // for each parameter of each application of each node of the instance
                     String paramId = param.id;
-                    if (paramId.equals(inputParam.id)) {          // for each parameter of each application of each node of the instance that the same ID as the inputParam
+                    if (paramId.equals(inputParam.id)) {          // for each parameter of each application of each node of the instance that has the same ID as the inputParam
                         nodes.applications.stream().flatMap(appDto -> appDto.descriptor.startCommand.parameters.stream())
                                 .filter(descr -> paramId.equals(descr.id)).findAny().ifPresent(desc -> {
                                     if (!desc.global) {
