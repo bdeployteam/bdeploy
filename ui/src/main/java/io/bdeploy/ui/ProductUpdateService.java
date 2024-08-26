@@ -84,11 +84,11 @@ public class ProductUpdateService {
             }
         }
 
-        for (var app : allApps.keySet()) {
-            var node = allApps.get(app);
-
-            updateApplication(app, allApps.keySet(), targetProduct, currentApplications, targetApplications, validationIssues,
-                    createResolver(node, app));
+        Set<ApplicationConfiguration> apps = allApps.keySet();
+        for (var entry : allApps.entrySet()) {
+            ApplicationConfiguration app = entry.getKey();
+            updateApplication(app, apps, targetProduct, currentApplications, targetApplications, validationIssues,
+                    createResolver(entry.getValue(), app));
         }
 
         if (currentProduct == null) {
@@ -543,7 +543,7 @@ public class ProductUpdateService {
         // check allowed values per type.
         switch (paramDesc.type) {
             case BOOLEAN:
-                if (!stringVal.equals("true") && !stringVal.equals("false")) {
+                if (!"true".equals(stringVal) && !"false".equals(stringVal)) {
                     result.add(new ApplicationValidationDto(process.id, paramDesc.id,
                             "Boolean parameter should have value 'true' or 'false', has '" + stringVal + "' instead."));
                 }

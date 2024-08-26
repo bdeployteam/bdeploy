@@ -9,11 +9,11 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
@@ -104,7 +104,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     public void updateSelf(List<Key> target) {
         // check if all minions are online.
         BackendInfoResource bi = rc.initResource(new BackendInfoResourceImpl());
-        Set<OperatingSystem> required = new TreeSet<>();
+        Set<OperatingSystem> required = EnumSet.noneOf(OperatingSystem.class);
         for (var entry : bi.getNodeStatus().entrySet()) {
             required.add(entry.getValue().config.os);
         }

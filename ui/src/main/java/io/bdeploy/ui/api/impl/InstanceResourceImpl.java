@@ -522,15 +522,13 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public void deleteVersion(String instanceId, String tag) {
-        // prevent delete if processes are running.
-        InstanceManifest im = readInstance(instanceId);
-
+        // prevent delete if processes are installed.
         if (getDeploymentStates(instanceId).installedTags.contains(tag)) {
             throw new WebApplicationException("Version " + tag + " is still installed, cannot delete", Status.EXPECTATION_FAILED);
         }
 
-        ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, im.getManifest()), MasterRootResource.class, context)
-                .getNamedMaster(group).deleteVersion(instanceId, tag);
+        ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, readInstance(instanceId).getManifest()),
+                MasterRootResource.class, context).getNamedMaster(group).deleteVersion(instanceId, tag);
 
         // now delete also on the central...
         Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
@@ -624,16 +622,13 @@ public class InstanceResourceImpl implements InstanceResource {
         // but missing
         for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
             String nodeName = entry.getKey();
-            Manifest.Key manifestKey = entry.getValue();
-
             InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, k -> {
                 // Node is not known any more but has configured applications
                 InstanceNodeConfigurationDto inc = new InstanceNodeConfigurationDto(k, null);
                 result.nodeConfigDtos.add(inc);
                 return inc;
             });
-
-            nodeConfig.nodeConfiguration = InstanceNodeManifest.of(hive, manifestKey).getConfiguration();
+            nodeConfig.nodeConfiguration = InstanceNodeManifest.of(hive, entry.getValue()).getConfiguration();
         }
     }
 
@@ -813,9 +808,6 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceManifest im = InstanceManifest.load(hive, instanceId, state.activeTag);
             ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
 
-            // Request a new file where we can store the installer
-            DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-
             // Determine the target OS, and build the according installer.
             ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
             OperatingSystem applicationOs = applicationKey.getOperatingSystem();
@@ -852,6 +844,9 @@ public class InstanceResourceImpl implements InstanceResource {
             URI launcherLocation = launcherUri.build(new Object[] { applicationOs.name().toLowerCase() }, false);
             URI iconLocation = iconUri.build(group, im.getConfiguration().id, appConfig.id);
             URI splashLocation = splashUrl.build(group, im.getConfiguration().id, appConfig.id);
+
+            // Request a new file where we can store the installer
+            DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
 
             String fileName = "%1$s (%2$s - %3$s) - Installer";
             String token = ds.createNewToken();

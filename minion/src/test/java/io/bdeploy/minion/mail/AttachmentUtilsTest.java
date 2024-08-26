@@ -6,7 +6,7 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
-public class AttachmentUtilsTest {
+class AttachmentUtilsTest {
 
     private static final String SEPARATOR = "#";
 

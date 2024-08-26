@@ -18,7 +18,7 @@ import io.bdeploy.launcher.cli.scripts.impl.LocalStartScriptHelper;
 /**
  * Contains tests for scripts related classes.
  */
-public class ScriptsTest {
+class ScriptsTest {
 
     private static final Path homeDir = Path.of("test").toAbsolutePath();
     private final LauncherPathProvider lpp = new LauncherPathProvider(homeDir);

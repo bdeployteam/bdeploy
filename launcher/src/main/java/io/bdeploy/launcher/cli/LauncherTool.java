@@ -387,14 +387,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Failed to fetch client application configuration from server. Reading local configuration...");
                 clientSoftwareConfiguration = new ClientSoftwareManifest(hive).readNewest(clickAndStart.applicationId, false);
                 if (clientSoftwareConfiguration == null) {
-                    throw new RuntimeException("Failed to read local client software configuration.", e);
+                    throw new IllegalStateException("Failed to read local client software configuration.", e);
                 }
                 clientAppCfg = clientSoftwareConfiguration.clientAppCfg;
                 if (clientAppCfg == null) {
-                    throw new RuntimeException("Failed to read local client application configuration.", e);
+                    throw new IllegalStateException("Failed to read local client application configuration.", e);
                 }
                 if (!clientAppCfg.appDesc.processControl.offlineStartAllowed) {
-                    throw new RuntimeException("Aborting launch because offline start is not enabled for the application.", e);
+                    throw new IllegalStateException("Aborting launch because offline start is not enabled for the application.",
+                            e);
                 }
 
                 log.info("Successfully read local client application configuration.");

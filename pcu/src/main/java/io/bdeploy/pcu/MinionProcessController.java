@@ -85,14 +85,10 @@ public class MinionProcessController {
      * @param inm the current instance node manifest
      */
     public InstanceProcessController getOrCreate(BHive hive, InstanceNodeManifest inm) {
-        String instanceId = inm.getId();
-        InstanceProcessController controller = instance2Controller.get(instanceId);
-        if (controller == null) {
-            controller = new InstanceProcessController(instanceId);
-            instance2Controller.put(instanceId, controller);
+        return instance2Controller.computeIfAbsent(inm.getId(), instanceId -> {
             logger.log(l -> l.debug("Creating new instance controller."), instanceId);
-        }
-        return controller;
+            return new InstanceProcessController(instanceId);
+        });
     }
 
     /**

@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Contains unit tests for {@link WindowHelper}.
  */
-public class WindowHelperTest {
+class WindowHelperTest {
 
-    private static final int defaultIconSize = 32;
+    private static final int DEFAULT_ICON_SIZE = 32;
 
     @Test
     void testIconLoading() {
@@ -23,7 +23,7 @@ public class WindowHelperTest {
             assertThrowsExactly(IllegalArgumentException.class, () -> WindowHelper.loadIcon(icon, 0, 0));
             assertThrowsExactly(IllegalArgumentException.class, () -> WindowHelper.loadIcon(icon, 0, 1));
             assertThrowsExactly(IllegalArgumentException.class, () -> WindowHelper.loadIcon(icon, 1, 0));
-            assertNotNull(WindowHelper.loadIcon(icon, defaultIconSize, defaultIconSize));
+            assertNotNull(WindowHelper.loadIcon(icon, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE));
             assertNotNull(WindowHelper.loadIcon(icon, 1, 1));
             assertNotNull(WindowHelper.loadIcon(icon, 100, 100));
             assertNotNull(WindowHelper.loadIcon(icon, 1000, 1000));
