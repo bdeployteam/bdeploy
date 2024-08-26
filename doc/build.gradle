@@ -6,7 +6,6 @@ ext.buildRetype = { task ->
 	    } else {
 	        commandLine (["npx.cmd", "retypeapp", "build"])
 	    }
-        println "Retype done"
     }
 }
 
@@ -24,9 +23,13 @@ task retypeUserDoc(type: Exec) { t ->
     buildRetype(t)
 }
 
-task build {
+task doc {
    // dummy
 }
 
-build.dependsOn retypeDevDoc
-build.dependsOn retypeUserDoc
+task clean {
+    delete project.buildDir
+}
+
+doc.dependsOn retypeDevDoc
+doc.dependsOn retypeUserDoc

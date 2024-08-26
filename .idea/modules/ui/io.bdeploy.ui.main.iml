@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$/../../../ui/webapp" dumb="true">
+      <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/.nyc_output" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/coverage" />
+    </content>
+  </component>
+</module>

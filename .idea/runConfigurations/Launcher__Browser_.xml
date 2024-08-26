@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Launcher (Browser)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="io.bdeploy.launcher.cli.LauncherCli" />
+    <module name="io.bdeploy.launcher.main" />
+    <option name="PROGRAM_PARAMETERS" value="--homeDir=$ProjectFileDir$/../runtime/launcher-idea" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/../runtime/" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.bdeploy.launcher.cli.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

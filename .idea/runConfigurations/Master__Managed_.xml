@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Master (Standalone)" type="Application" factoryName="Application">
+  <configuration default="false" name="Master (Managed)" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="io.bdeploy.minion.cli.MinionServerCli" />
     <module name="io.bdeploy.minion.main" />
-    <option name="PROGRAM_PARAMETERS" value="-vv start --root=$ProjectFileDir$/../runtime/master --allowCors --consoleLog" />
+    <option name="PROGRAM_PARAMETERS" value="-vv start --root=$ProjectFileDir$/../runtime/managed --allowCors --consoleLog" />
     <option name="VM_PARAMETERS" value="-XX:+HeapDumpOnOutOfMemoryError -Xmx256m" />
-    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/../runtime/master" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/../runtime/managed" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="io.bdeploy.minion.cli.*" />

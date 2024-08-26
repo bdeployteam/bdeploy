@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start-central": "ng serve -c central",
+    "start-managed": "ng serve -c managed",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint"

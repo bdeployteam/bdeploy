@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Managed Backend &amp; Dev UI" type="CompoundRunConfigurationType">
+    <toRun name="Master (Managed)" type="Application" />
+    <toRun name="Chrome (Managed)" type="JavascriptDebugType" />
+    <toRun name="Dev UI (Managed)" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>
