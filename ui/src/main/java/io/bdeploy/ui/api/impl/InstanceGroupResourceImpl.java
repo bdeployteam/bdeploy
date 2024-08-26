@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
@@ -140,9 +142,16 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         // Fetch instance group's instance IDs and add them to searchable text.
         // This does not need to be 100% exact, i.e. if a "wrong" text slips in this
         // is not dramatic in this case. Thus we use a quick mechanism for an (educated) guess.
-        Set<String> instanceIds = InstanceManifest.quickGuessIds(hive);
+        Set<String> searchableTexts = new TreeSet<>(InstanceManifest.quickGuessIds(hive));
 
-        return new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds));
+        // also allow to search by managed server name and url
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
+            List<ManagedMasterDto> servers = ms.getManagedServers(cfg.name);
+            searchableTexts.addAll(servers.stream().map(s -> s.hostName + " " + s.uri).collect(Collectors.toSet()));
+        }
+
+        return new InstanceGroupConfigurationDto(cfg, String.join(" ", searchableTexts));
     }
 
     private boolean isAuthorized(ScopedPermission requiredPermission) {
