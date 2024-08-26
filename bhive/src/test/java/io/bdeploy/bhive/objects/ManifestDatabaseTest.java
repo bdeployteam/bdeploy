@@ -16,17 +16,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
 
 class ManifestDatabaseTest extends DbTestBase {
 
     @Test
     void testStoreAndRead(@TempDir Path tmp) {
         Path dbDir = tmp.resolve("manifests");
+        ObjectId ojectId = ObjectId.parse("000fb6b1d68b158a996dc17fa3e137a5f2751757");
 
         Manifest.Key key = new Manifest.Key("test/app1", "v1.0");
         try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
-            Manifest.Builder mf = new Manifest.Builder(key).setRoot(randomId()).addLabel("test", "label");
-
+            Manifest.Builder mf = new Manifest.Builder(key).setRoot(ojectId).addLabel("test", "label");
             db.addManifest(mf.build(null), false);
         }
 

@@ -129,7 +129,7 @@ class ObjectManagerTest extends DbTestBase {
 
             ObjectId testTree = mgr.insertTree(
                     new Tree.Builder().add(new Tree.Key("app", EntryType.MANIFEST), mgr.insertManifestReference(refKey))
-                            .add(new Tree.Key("missing", EntryType.BLOB), randomId())
+                            .add(new Tree.Key("missing", EntryType.BLOB), ObjectId.parse("1e0c3f6cd90bc02a0d398a977467047bd944ce04"))
                             .add(new Tree.Key("apptree", EntryType.TREE), tree).build());
 
             TreeView snapshot = mgr.scan(testTree, Integer.MAX_VALUE, true);

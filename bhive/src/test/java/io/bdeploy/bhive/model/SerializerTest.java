@@ -17,8 +17,8 @@ import io.bdeploy.bhive.util.StorageHelper;
 
 class SerializerTest extends DbTestBase {
 
-    private static final ObjectId OID1 = randomId();
-    private static final ObjectId OID2 = randomId();
+    private static final ObjectId OID1 = ObjectId.parse("00000c10b594720c2c0dde2b61cface985744728");
+    private static final ObjectId OID2 = ObjectId.parse("000f80e76d65bf38348d1e74d52227b86bbee035");
 
     @Test
     void testSerializeOid() {

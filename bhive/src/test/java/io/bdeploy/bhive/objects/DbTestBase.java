@@ -4,13 +4,11 @@
 package io.bdeploy.bhive.objects;
 
 import java.nio.file.Path;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TestActivityReporter;
 
@@ -33,10 +31,4 @@ public class DbTestBase {
     protected Path getObjectDatabasePath() {
         return dbPath;
     }
-
-    public static ObjectId randomId() {
-        byte[] bytes = UUID.randomUUID().toString().getBytes();
-        return ObjectId.create(bytes, 0, bytes.length);
-    }
-
 }
