@@ -184,7 +184,7 @@ public class BrowserDialog extends BaseDialog {
         header.setLayout(new BorderLayout());
 
         refreshButton = createHeaderButton("refresh", "Refresh", this::onRefreshButtonClicked,//
-                "Update the locally stored information (name, version...) of the selected applications");
+                "Update the locally stored information (name, version...) of all applications");
 
         pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
                 "Prune the selected application");
@@ -345,10 +345,10 @@ public class BrowserDialog extends BaseDialog {
         customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/customizeAndLaunch.png", 16, 16));
         customizeAndLaunchItem.addActionListener(this::onLaunchButtonClicked);
 
-        refreshItem = new JMenuItem(refreshButton.getText());
+        refreshItem = new JMenuItem("Refresh Application");
         refreshItem.setIcon(WindowHelper.loadIcon("/refresh.png", 16, 16));
-        refreshItem.setToolTipText(refreshButton.getToolTipText());
-        refreshItem.addActionListener(this::onRefreshButtonClicked);
+        refreshItem.setToolTipText("Update the locally stored information (name, version...) of the selected application");
+        refreshItem.addActionListener(this::onRefreshItemClicked);
 
         updateItem = new JMenuItem("Update");
         updateItem.setIcon(WindowHelper.loadIcon("/update.png", 16, 16));
@@ -435,25 +435,10 @@ public class BrowserDialog extends BaseDialog {
         sortModel.setRowFilter(new BrowserDialogTableFilter(text.trim().toLowerCase()));
     }
 
-    /** Notification that the selected apps should be refreshed */
+    /** Notification that all apps should be refreshed */
     private void onRefreshButtonClicked(ActionEvent e) {
-        List<ClientSoftwareConfiguration> apps = getSelectedApps();
-
-        // Refresh and remember which apps have been added to the hive
-        Map<String, ClientSoftwareConfiguration> oldAppMap = model.asMap();
         searchApps();
-        Map<String, ClientSoftwareConfiguration> newAppMap = model.asMap();
-        newAppMap.keySet().removeAll(oldAppMap.keySet());
-
-        // If nothing is selected we refresh all apps
-        // If there is something selected we refresh the selection
-        // AND all apps that have been added to the hive
-        if (apps.isEmpty()) {
-            apps.addAll(model.getAll());
-        } else {
-            apps.addAll(newAppMap.values());
-        }
-        doRefresh(apps);
+        doRefresh(model.getAll());
     }
 
     /** Executes the prune operation on all local hives */
@@ -502,6 +487,21 @@ public class BrowserDialog extends BaseDialog {
             apps.add(model.get(idx));
         }
         return apps;
+    }
+
+    /** Notification that the selected apps should be refreshed */
+    private void onRefreshItemClicked(ActionEvent e) {
+        List<ClientSoftwareConfiguration> apps = getSelectedApps();
+
+        // Refresh and remember which apps have been added to the hive
+        Map<String, ClientSoftwareConfiguration> oldAppMap = model.asMap();
+        searchApps();
+        Map<String, ClientSoftwareConfiguration> newAppMap = model.asMap();
+        newAppMap.keySet().removeAll(oldAppMap.keySet());
+
+        // Refresh the selection and all apps that have been added to the hive
+        apps.addAll(newAppMap.values());
+        doRefresh(apps);
     }
 
     /** Notification that the selected app should be launched */
@@ -601,11 +601,13 @@ public class BrowserDialog extends BaseDialog {
 
     /** Refreshes the given applications */
     private void doRefresh(List<ClientSoftwareConfiguration> apps) {
+        int size = apps.size();
+
         progressBar.setIndeterminate(false);
         progressBar.setValue(0);
         progressBar.setMinimum(0);
-        progressBar.setMaximum(apps.size());
-        progressBar.setString("Refreshing applications...");
+        progressBar.setMaximum(size);
+        progressBar.setString("Refreshing " + size + " application" + (size == 1 ? "" : "s") + "...");
 
         AppRefresher task = new AppRefresher(lpp, auditor, apps);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
