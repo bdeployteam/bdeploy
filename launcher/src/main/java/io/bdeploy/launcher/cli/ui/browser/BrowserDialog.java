@@ -265,6 +265,7 @@ public class BrowserDialog extends BaseDialog {
 
         // Notify on selection changes
         ListSelectionModel selectionModel = table.getSelectionModel();
+        selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selectionModel.addListSelectionListener(this::onSelectionChanged);
 
         // Setup a nicer header
@@ -420,6 +421,7 @@ public class BrowserDialog extends BaseDialog {
         home.setHorizontalAlignment(SwingConstants.LEFT);
         home.setOpaque(false);
         home.setBackground(Color.WHITE);
+        home.setForeground(new Color(0, 0, 238));
         home.addMouseListener(new OpenHomeFolder());
         footer.add(home, BorderLayout.WEST);
 
