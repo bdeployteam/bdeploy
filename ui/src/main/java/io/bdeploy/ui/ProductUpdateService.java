@@ -1,7 +1,9 @@
 package io.bdeploy.ui;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jvnet.hk2.annotations.Service;
@@ -29,6 +32,7 @@ import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
@@ -407,29 +411,7 @@ public class ProductUpdateService {
         List<InstanceNodeConfigurationDto> nodes = instance.nodeDtos;
 
         // Validate configuration files
-        List<FileStatusDto> files = updateDto.files;
-        if (files != null) {
-            files.removeIf(file -> file.type == FileStatusType.DELETE);
-            if (!files.isEmpty()) {
-                for (var node : nodes) {
-                    if (InstanceManifest.CLIENT_NODE_NAME.equals(node.nodeName)) {
-                        // TODO implement validation for client applications
-                    } else {
-                        VariableResolver resolver = createResolver(node, null);
-                        for (FileStatusDto file : files) {
-                            String filePath = file.file;
-                            try {
-                                String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
-                                TemplateHelper.process(content, resolver, str -> true, filePath);
-                            } catch (Exception e) {
-                                result.add(new ApplicationValidationDto(filePath, null,
-                                        e.getMessage() + " on node " + node.nodeName));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        validateFiles(result, nodes, updateDto.files);
 
         // Validate applications and processes
         Map<String, String> processNames = new TreeMap<>();
@@ -464,6 +446,46 @@ public class ProductUpdateService {
         }
 
         return result;
+    }
+
+    private static void validateFiles(List<ApplicationValidationDto> result, List<InstanceNodeConfigurationDto> nodes,
+            List<FileStatusDto> files) {
+        if (files == null) {
+            return;
+        }
+        files.removeIf(file -> file.type == FileStatusType.DELETE);
+        if (files.isEmpty()) {
+            return;
+        }
+        for (var node : nodes) {
+            String nodeName = node.nodeName;
+            VariableResolver resolver = createResolver(node, null);
+            if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
+                node.nodeConfiguration.applications.stream()//
+                        .map(app -> app.processControl.configDirs)//
+                        .filter(dirsString -> dirsString != null)//
+                        .forEach(dirsString -> {
+                            String[] split = ProcessControlConfiguration.CONFIG_DIRS_SPLIT_PATTERN.split(dirsString);
+                            Set<String> configDirs = Arrays.stream(split).map(s -> s.substring(1)).collect(Collectors.toSet());
+                            files.stream()//
+                                    .filter(file -> configDirs.contains(Path.of(file.file).getParent().toString()))//
+                                    .forEach(file -> validateFile(result, resolver, "Client Applications", file));
+                        });
+            } else {
+                files.forEach(file -> validateFile(result, resolver, nodeName, file));
+            }
+        }
+    }
+
+    private static void validateFile(List<ApplicationValidationDto> result, VariableResolver resolver, String nodeName,
+            FileStatusDto file) {
+        String filePath = file.file;
+        try {
+            String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
+            TemplateHelper.process(content, resolver, str -> true, filePath);
+        } catch (Exception e) {
+            result.add(new ApplicationValidationDto(filePath, null, e.getMessage() + " on node" + nodeName));
+        }
     }
 
     public static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {

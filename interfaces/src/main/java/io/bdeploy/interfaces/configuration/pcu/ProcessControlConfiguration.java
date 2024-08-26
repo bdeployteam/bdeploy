@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.bdeploy.interfaces.descriptor.application.LivenessProbeDescriptor;
@@ -52,6 +54,8 @@ public class ProcessControlConfiguration {
     public LivenessProbeDescriptor livenessProbe;
 
     // ################################################# only for client applications #################################################
+
+    public static final Pattern CONFIG_DIRS_SPLIT_PATTERN = Pattern.compile(",");
 
     /**
      * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
