@@ -174,7 +174,7 @@ public class BHivePoolOrganizer {
         log.info("Finished re-organization.");
     }
 
-    private void removeFromHives(Map<String, BHive> hivesById, long current, Map<String, List<ObjectId>> toRemove) {
+    private static void removeFromHives(Map<String, BHive> hivesById, long current, Map<String, List<ObjectId>> toRemove) {
         if (log.isTraceEnabled()) {
             log.trace("...{}", current);
         }
@@ -188,7 +188,7 @@ public class BHivePoolOrganizer {
         toRemove.clear();
     }
 
-    private void moveToPool(ObjectDatabase poolDb, ObjectId id, List<BHive> origins) {
+    private static void moveToPool(ObjectDatabase poolDb, ObjectId id, List<BHive> origins) {
         // try to find a valid file.
         for (BHive origin : origins) {
             Path source = origin.execute(new InternalFindValidSourceOperation().setObjectId(id));

@@ -61,7 +61,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
         return null;
     }
 
-    private void doUpdate(BHive hive, ClientSoftwareConfiguration app) {
+    private static void doUpdate(BHive hive, ClientSoftwareConfiguration app) {
         ClickAndStartDescriptor clickAndStart = app.clickAndStart;
 
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);

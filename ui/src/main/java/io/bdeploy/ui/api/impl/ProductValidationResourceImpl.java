@@ -88,7 +88,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return new ProductValidationResponseApi(issues);
     }
 
-    private List<ProductValidationIssueApi> validateInstanceVariableDefinitions(ProductValidationConfigDescriptor desc) {
+    private static List<ProductValidationIssueApi> validateInstanceVariableDefinitions(ProductValidationConfigDescriptor desc) {
         Set<String> ids = new HashSet<>();
         Set<String> duplicateIds = desc.instanceVariableDefinitions.stream().flatMap(ivd -> ivd.definitions.stream())
                 .map(descriptor -> descriptor.id).filter(id -> !ids.add(id)).collect(Collectors.toSet());
@@ -170,7 +170,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return result;
     }
 
-    private List<ProductValidationIssueApi> visitSingleInstanceVariable(TemplateableVariableConfiguration tvc,
+    private static List<ProductValidationIssueApi> visitSingleInstanceVariable(TemplateableVariableConfiguration tvc,
             ProductValidationConfigDescriptor desc, TrackingTemplateOverrideResolver res,
             List<TemplateableVariableDefaultConfiguration> defaults) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
@@ -203,7 +203,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return result;
     }
 
-    private Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
+    private static Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
             ApplicationTemplateDescriptor a) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
@@ -259,7 +259,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return result;
     }
 
-    private List<ProductValidationIssueApi> validateFlatApplicationTemplate(FlattenedApplicationTemplateConfiguration tpl,
+    private static List<ProductValidationIssueApi> validateFlatApplicationTemplate(FlattenedApplicationTemplateConfiguration tpl,
             ProductValidationConfigDescriptor descriptor) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
@@ -307,7 +307,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
     }
 
-    private List<ParameterDescriptor> expandTemplateRecursive(String app, ParameterDescriptor param,
+    private static List<ParameterDescriptor> expandTemplateRecursive(String app, ParameterDescriptor param,
             List<ParameterTemplateDescriptor> parameterTemplates, List<ProductValidationIssueApi> issues) {
         List<ParameterTemplateDescriptor> templates = parameterTemplates.stream().filter(t -> t.id.equals(param.template))
                 .toList();
@@ -390,7 +390,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 : filenames.stream().map(dir::resolve).map(path -> parse(root, path, klass, validator, schema)).toList();
     }
 
-    private <T> T parse(Path root, Path path, Class<T> klass, PublicSchemaValidator validator, Schema schema) {
+    private static <T> T parse(Path root, Path path, Class<T> klass, PublicSchemaValidator validator, Schema schema) {
         if (schema != null) {
             List<String> result = validator.validate(schema, path);
             if (!result.isEmpty()) {

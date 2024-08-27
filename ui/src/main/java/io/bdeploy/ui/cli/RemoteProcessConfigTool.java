@@ -234,7 +234,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         return doUpdateInstance(ir, instance, nodecfg);
     }
 
-    private void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
+    private static void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
             InstanceNodeConfigurationDto node) {
         if (desc.fixed) {
             throw new IllegalArgumentException("Cannot set fixed parameter value");
@@ -248,7 +248,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private void doSetParameterInternal(ParameterConfiguration inputParam, ParameterDescriptor inputDesc, String value,
+    private static void doSetParameterInternal(ParameterConfiguration inputParam, ParameterDescriptor inputDesc, String value,
             InstanceNodeConfigurationListDto nodes) {
         inputParam.value = new LinkedValueConfiguration(value);
         inputParam.preRender(inputDesc);
@@ -277,7 +277,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private void checkCanRemove(ParameterDescriptor desc) {
+    private static void checkCanRemove(ParameterDescriptor desc) {
         if (desc == null) {
             return; // custom
         }
@@ -287,7 +287,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
+    private static void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
             InstanceNodeConfigurationDto node, ParameterConfiguration toRemove) {
         cfg.start.parameters.remove(toRemove);
         ParameterDescriptor desc = appDesc.startCommand.parameters.stream().filter(p -> p.id.equals(toRemove.id)).findAny()
@@ -305,7 +305,8 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private InstanceNodeConfigurationDto findNodeForApp(InstanceNodeConfigurationListDto nodecfg, ApplicationConfiguration cfg) {
+    private static InstanceNodeConfigurationDto findNodeForApp(InstanceNodeConfigurationListDto nodecfg,
+            ApplicationConfiguration cfg) {
         return nodecfg.nodeConfigDtos.stream()
                 .filter(n -> n.nodeConfiguration.applications.stream().anyMatch(a -> a.id.equals(cfg.id))).findAny()
                 .orElseThrow();

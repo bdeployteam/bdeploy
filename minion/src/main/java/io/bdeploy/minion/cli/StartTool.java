@@ -169,7 +169,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         }
     }
 
-    private void conCheck(MinionRoot r) {
+    private static void conCheck(MinionRoot r) {
         try {
             // we're way earlier than any node manager, so we need to read information ourselves.
             MinionManifest mm = new MinionManifest(r.getHive());
@@ -189,7 +189,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         }
     }
 
-    private void setupServerNode(MasterConfig config, JerseyServer srv) {
+    private static void setupServerNode(MasterConfig config, JerseyServer srv) {
         if (config.publishWebapp()) {
             UiResources.registerNode(srv);
         }
@@ -212,7 +212,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                 r.isInitialConnectionCheckFailed());
     }
 
-    private BHiveRegistry setupServerCommon(ActivityReporter repo, MinionRoot r, JerseyServer srv, MasterConfig config) {
+    private static BHiveRegistry setupServerCommon(ActivityReporter repo, MinionRoot r, JerseyServer srv, MasterConfig config) {
         r.onStartup(config.consoleLog());
         srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
 

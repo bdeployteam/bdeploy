@@ -29,7 +29,7 @@ public class ChangeEventManager {
     @Inject
     private ObjectChangeBroadcaster bc;
 
-    private Map<String, String> detailsFromKey(Manifest.Key key) {
+    private static Map<String, String> detailsFromKey(Manifest.Key key) {
         return Map.of(ObjectChangeDetails.KEY_NAME.name(), key.getName(), ObjectChangeDetails.KEY_TAG.name(), key.getTag());
     }
 

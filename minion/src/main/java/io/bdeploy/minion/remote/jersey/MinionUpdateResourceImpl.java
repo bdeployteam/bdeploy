@@ -150,7 +150,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
         }
     }
 
-    private void checkCompatiblity(Key key, BHive h) {
+    private static void checkCompatiblity(Key key, BHive h) {
         try (InputStream is = h.execute(
                 new TreeEntryLoadOperation().setRootTree(h.execute(new ManifestLoadOperation().setManifest(key)).getRoot())
                         .setRelativePath("version.properties"))) {

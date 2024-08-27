@@ -26,7 +26,7 @@ public class VerifyOperationResultDto {
         unmodifiedFiles = getByStatus(list, UNMODIFIED);
     }
 
-    private List<String> getByStatus(List<VerifiedBlobView> list, VerifyOpStatus status) {
+    private static List<String> getByStatus(List<VerifiedBlobView> list, VerifyOpStatus status) {
         return list.stream().filter(view -> view.status == status).map(blob -> blob.path).toList();
     }
 }

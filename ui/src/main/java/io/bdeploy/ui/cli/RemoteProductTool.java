@@ -178,7 +178,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         return table;
     }
 
-    private boolean matchesVersion(ProductDto dto, ProductConfig config) {
+    private static boolean matchesVersion(ProductDto dto, ProductConfig config) {
         if (config.version() == null) {
             return true;
         }

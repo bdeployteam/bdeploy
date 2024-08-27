@@ -260,14 +260,14 @@ public class LauncherSplash implements LauncherSplashDisplay {
         }
     }
 
-    private Rectangle convert(ApplicationSplashAreaDescriptor area) {
+    private static Rectangle convert(ApplicationSplashAreaDescriptor area) {
         if (area == null) {
             return null;
         }
         return new Rectangle(area.x, area.y, area.width, area.height);
     }
 
-    private BufferedImage load(byte[] bytes) {
+    private static BufferedImage load(byte[] bytes) {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             return ImageIO.read(bais);
         } catch (Exception e) {

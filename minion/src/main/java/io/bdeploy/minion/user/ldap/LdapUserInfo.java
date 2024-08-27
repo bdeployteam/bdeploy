@@ -36,7 +36,7 @@ public class LdapUserInfo {
         processMembers(attributes);
     }
 
-    private String getAttribute(Attributes attributes, String key) throws NamingException {
+    private static String getAttribute(Attributes attributes, String key) throws NamingException {
         if (key == null || key.isBlank()) {
             return null;
         }

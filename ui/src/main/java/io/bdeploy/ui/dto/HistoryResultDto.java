@@ -46,7 +46,7 @@ public class HistoryResultDto {
         events.add(dto);
     }
 
-    private boolean matches(HistoryEntryDto dto, HistoryFilterDto filter) {
+    private static boolean matches(HistoryEntryDto dto, HistoryFilterDto filter) {
         // Skip events of the wrong type
         if (dto.type == HistoryEntryType.CREATE && !filter.showCreateEvents) {
             return false;

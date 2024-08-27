@@ -188,7 +188,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
         admin.removeUserFromGroup(group.id, config.removeUser());
     }
 
-    private UserGroupInfo getGroup(String name, AuthAdminResource admin) {
+    private static UserGroupInfo getGroup(String name, AuthAdminResource admin) {
         return admin.getAllUserGroups().stream().filter(g -> name.equalsIgnoreCase(g.name)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Group not found: " + name));
     }

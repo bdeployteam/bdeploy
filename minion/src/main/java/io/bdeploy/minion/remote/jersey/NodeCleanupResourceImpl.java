@@ -49,10 +49,10 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
         BHive hive = root.getHive();
 
         // by default, filter well known things except for launchers, we want to clean them.
-        Predicate<Key> wellKnownFilter = this::isNotWellKnownExcludingLauncher;
+        Predicate<Key> wellKnownFilter = NodeCleanupResourceImpl::isNotWellKnownExcludingLauncher;
         if (root.getSelfConfig().master) {
             // I am a master, I need launchers. Don't remove ANY launcher.
-            wellKnownFilter = this::isNotWellKnown;
+            wellKnownFilter = NodeCleanupResourceImpl::isNotWellKnown;
         }
 
         Set<Key> allMfs = hive.execute(new ManifestListOperation()); // list ALL
@@ -125,12 +125,12 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
         return notExecuted;
     }
 
-    private boolean isNotWellKnownExcludingLauncher(Key key) {
+    private static boolean isNotWellKnownExcludingLauncher(Key key) {
         return !((key.getName().startsWith("meta/") && !key.getName().startsWith("meta/launcher"))
                 || key.getName().startsWith("users/") || key.getName().startsWith("usergroups/"));
     }
 
-    private boolean isNotWellKnown(Key key) {
+    private static boolean isNotWellKnown(Key key) {
         return !((key.getName().startsWith("meta/")) || key.getName().startsWith("users/")
                 || key.getName().startsWith("usergroups/"));
     }
@@ -157,7 +157,7 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
         root.getHive().execute(new PruneOperation());
     }
 
-    private void doDeleteManifest(BHive hive, Key key) {
+    private static void doDeleteManifest(BHive hive, Key key) {
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
     }
 

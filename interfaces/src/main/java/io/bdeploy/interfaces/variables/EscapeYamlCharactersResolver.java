@@ -24,7 +24,7 @@ public class EscapeYamlCharactersResolver extends PrefixResolver {
         return escape(parentResolver.apply(variable));
     }
 
-    private String escape(String unescaped) {
+    private static String escape(String unescaped) {
         if (unescaped == null) {
             return null;
         }

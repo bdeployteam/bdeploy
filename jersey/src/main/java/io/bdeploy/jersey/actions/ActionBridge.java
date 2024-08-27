@@ -130,7 +130,7 @@ public class ActionBridge {
         return ws;
     }
 
-    private void closeHandle(ActionBridgeHandle handle) {
+    private static void closeHandle(ActionBridgeHandle handle) {
         if (handle.ws != null) {
             handle.ws.close();
         }
@@ -179,7 +179,7 @@ public class ActionBridge {
         }
     }
 
-    private ActionBroadcastDto deserialize(String event) {
+    private static ActionBroadcastDto deserialize(String event) {
         try {
             return JacksonHelper.getDefaultJsonObjectMapper().readValue(event, ActionBroadcastDto.class);
         } catch (JsonProcessingException e) {

@@ -139,7 +139,7 @@ public class AuthResourceImpl implements AuthResource {
         return Response.ok().cookie(buildSessionCookie(0, "")).build();
     }
 
-    private NewCookie buildSessionCookie(long validitySeconds, String token) {
+    private static NewCookie buildSessionCookie(long validitySeconds, String token) {
         return new NewCookie.Builder(SessionManager.SESSION_COOKIE).value(token).version(1).path("/")
                 .maxAge((int) validitySeconds).sameSite(SameSite.STRICT).httpOnly(true).build();
     }

@@ -96,7 +96,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         return createSuccess();
     }
 
-    private boolean confirmDelete() {
+    private static boolean confirmDelete() {
         int result = JOptionPane.showConfirmDialog(null,
                 "Are you sure you want to delete this application? This CANNOT be undone.", "Uninstall",
                 JOptionPane.YES_NO_OPTION);
@@ -234,7 +234,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /**
      * Removes the application stored in the given version specific directory
      */
-    private void doUninstallVersioned(Path homeDir, Version version, String appId) {
+    private static void doUninstallVersioned(Path homeDir, Version version, String appId) {
         Path versionedHome = ClientPathHelper.getVersionedHome(homeDir, version);
         Path versionedAppDir = new LauncherPathProvider(versionedHome).get(SpecialDirectory.APP, appId);
         if (PathHelper.exists(versionedAppDir)) {

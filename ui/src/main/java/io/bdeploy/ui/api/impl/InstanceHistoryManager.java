@@ -188,7 +188,7 @@ public class InstanceHistoryManager {
         return result;
     }
 
-    private String computeConfigTitle(Action action, String tag) {
+    private static String computeConfigTitle(Action action, String tag) {
         return "Version " + tag + ": " + switch (action) {
             case CREATE -> "Created";
             case DELETE -> "Deleted";
@@ -202,7 +202,7 @@ public class InstanceHistoryManager {
         };
     }
 
-    private String computeRuntimeTitle(ProcessState state, String process) {
+    private static String computeRuntimeTitle(ProcessState state, String process) {
         return process + switch (state) {
             case RUNNING_NOT_STARTED -> " started";
             case RUNNING -> " is alive";
@@ -234,7 +234,7 @@ public class InstanceHistoryManager {
         return userInfo;
     }
 
-    private HistoryEntryType computeType(Action action) {
+    private static HistoryEntryType computeType(Action action) {
         if (action == Action.CREATE || action == Action.DELETE) {
             return HistoryEntryType.CREATE;
         }

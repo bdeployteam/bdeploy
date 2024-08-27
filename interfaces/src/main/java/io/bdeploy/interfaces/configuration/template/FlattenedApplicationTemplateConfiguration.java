@@ -75,7 +75,7 @@ public class FlattenedApplicationTemplateConfiguration {
         resolveRecursive(original, appTpl, instTplVar, resolveOverrides(overrides, original.fixedVariables));
     }
 
-    private List<TemplateVariableFixedValueOverride> resolveOverrides(List<TemplateVariableFixedValueOverride> fromOutside,
+    private static List<TemplateVariableFixedValueOverride> resolveOverrides(List<TemplateVariableFixedValueOverride> fromOutside,
             List<TemplateVariableFixedValueOverride> fromSelf) {
 
         // the overrides from the outside always take precedence

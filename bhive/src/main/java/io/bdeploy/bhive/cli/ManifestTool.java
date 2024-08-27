@@ -183,7 +183,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
         }
     }
 
-    private boolean matches(Manifest.Key x, ManifestConfig config) {
+    private static boolean matches(Manifest.Key x, ManifestConfig config) {
         if (config.manifest().isEmpty()) {
             return true;
         }

@@ -130,7 +130,7 @@ public class RollingFileAuditor implements Auditor {
     /**
      * Creates a rolling file appender that write audit entries to a human readable log file.
      */
-    private RollingFileAppender createFileAppender(Path logDir) {
+    private static RollingFileAppender createFileAppender(Path logDir) {
         RollingFileAppender.Builder<?> builder = RollingFileAppender.newBuilder();
         builder.setName("auditLogger");
         builder.withFileName(logDir.resolve(LOG_TXT_FILENAME).toString());

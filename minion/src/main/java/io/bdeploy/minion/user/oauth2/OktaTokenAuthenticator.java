@@ -107,7 +107,7 @@ public class OktaTokenAuthenticator implements Authenticator {
         return verifyAndUpdateSearchResult(user, String.valueOf(password), performRequest(info, trace));
     }
 
-    private OktaUserInfo performRequest(OktaAccessTokenInfo tokens, AuthTrace trace) {
+    private static OktaUserInfo performRequest(OktaAccessTokenInfo tokens, AuthTrace trace) {
         try {
             var jcf = JerseyClientFactory.get(new URI(tokens.userinfoUrl), tokens.accessToken);
 
@@ -122,7 +122,7 @@ public class OktaTokenAuthenticator implements Authenticator {
         }
     }
 
-    private UserInfo verifyAndUpdateSearchResult(UserInfo user, String token, OktaUserInfo u) {
+    private static UserInfo verifyAndUpdateSearchResult(UserInfo user, String token, OktaUserInfo u) {
         if (u == null) {
             return null;
         }

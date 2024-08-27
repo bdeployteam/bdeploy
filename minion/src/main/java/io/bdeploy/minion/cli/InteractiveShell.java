@@ -97,7 +97,7 @@ public class InteractiveShell extends ConfiguredCliTool<ShellConfig> {
         return true;
     }
 
-    private String[] splitCommand(String command) {
+    private static String[] splitCommand(String command) {
         List<String> matchList = new ArrayList<>();
         Matcher regexMatcher = CLI_SPLIT.matcher(command);
         while (regexMatcher.find()) {

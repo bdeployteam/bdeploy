@@ -167,7 +167,7 @@ public class HiveResourceImpl implements HiveResource {
         };
     }
 
-    private List<HiveEntryDto> list(BHive hive, ObjectId objectId) {
+    private static List<HiveEntryDto> list(BHive hive, ObjectId objectId) {
         Tree tree = hive.execute(new TreeLoadOperation().setTree(objectId));
         List<HiveEntryDto> result = new ArrayList<>();
         tree.getChildren().keySet().stream().forEach(key -> {

@@ -173,7 +173,7 @@ public interface ActivityReporter {
             output.flush();
         }
 
-        private void catchAll(Runnable x) {
+        private static void catchAll(Runnable x) {
             try {
                 x.run();
             } catch (Exception e) {

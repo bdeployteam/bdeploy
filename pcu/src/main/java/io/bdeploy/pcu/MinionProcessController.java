@@ -60,7 +60,7 @@ public class MinionProcessController {
         doParallelAndWait("AutoStart", instance2Controller.values().stream().map(c -> (Runnable) (c::autoStart)).toList());
     }
 
-    private void doParallelAndWait(String name, List<Runnable> logic) {
+    private static void doParallelAndWait(String name, List<Runnable> logic) {
         try (ExecutorService es = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name(name).factory())) {
             // need to use collection to satisfy the java compiler...
             FutureHelper.awaitAll(logic.stream().map(es::submit).collect(Collectors.toCollection(() -> new ArrayList<>())));

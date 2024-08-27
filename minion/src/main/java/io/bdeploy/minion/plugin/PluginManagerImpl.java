@@ -225,7 +225,7 @@ public class PluginManagerImpl implements PluginManager {
         }
     }
 
-    private PluginInfoDto getInfoFromHandle(PluginInternalHandle handle) {
+    private static PluginInfoDto getInfoFromHandle(PluginInternalHandle handle) {
         Collection<CustomEditor> customEditors = Collections.emptyList();
         try {
             customEditors = handle.plugin.getCustomEditors();
@@ -248,7 +248,7 @@ public class PluginManagerImpl implements PluginManager {
      * Creates a new {@link PluginInternalHandle} by loading the given JAR file, creating a classloader and instantiating the
      * plugin.
      */
-    private PluginInternalHandle loadFile(Path plugin) {
+    private static PluginInternalHandle loadFile(Path plugin) {
         PluginHeader hdr;
         try (InputStream is = Files.newInputStream(plugin)) {
             hdr = PluginHeader.read(is);
@@ -302,14 +302,14 @@ public class PluginManagerImpl implements PluginManager {
         }
     }
 
-    private String withLeadingSlash(String string) {
+    private static String withLeadingSlash(String string) {
         if (string.startsWith("/")) {
             return string;
         }
         return "/" + string;
     }
 
-    private String withTrailingSlash(String string) {
+    private static String withTrailingSlash(String string) {
         if (string.endsWith("/")) {
             return string;
         }
@@ -339,7 +339,7 @@ public class PluginManagerImpl implements PluginManager {
         }
     }
 
-    private void unloadFile(PluginInternalHandle handle) throws IOException {
+    private static void unloadFile(PluginInternalHandle handle) throws IOException {
         handle.plugin = null;
         if (handle.pluginLoader != null) {
             handle.pluginLoader.close();

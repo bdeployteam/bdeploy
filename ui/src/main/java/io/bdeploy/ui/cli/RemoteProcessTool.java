@@ -194,13 +194,13 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return getOrderedProcessEntries(config, ir, activeTag).stream().map(processEntry -> processEntry.appId).toList();
     }
 
-    private void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
+    private static void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
         while (!stateSupplier.get().isStopped()) {
             Threads.sleep(pollIntervalMs);
         }
     }
 
-    private Optional<ApplicationConfiguration> findAppConfig(ProcessStatusDto processStatusDto,
+    private static Optional<ApplicationConfiguration> findAppConfig(ProcessStatusDto processStatusDto,
             InstanceNodeConfigurationListDto nodes) {
         Optional<ApplicationConfiguration> app = Optional.empty();
         if (nodes == null) {
@@ -216,7 +216,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return app;
     }
 
-    private void addProcessDetails(DataResult result, ProcessHandleDto pdd, String indent) {
+    private static void addProcessDetails(DataResult result, ProcessHandleDto pdd, String indent) {
         result.addField("Process PID=" + pdd.pid, String.format("%1$s└[cpu=%2$ds] %3$s %4$s", indent, pdd.totalCpuDuration,
                 pdd.command, (pdd.arguments != null && pdd.arguments.length > 0 ? String.join(" ", pdd.arguments) : "")));
 
@@ -288,7 +288,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return table;
     }
 
-    private List<ProcessStatusDto> getOrderedProcessEntries(RemoteProcessConfig config, InstanceResource ir, String activeTag) {
+    private static List<ProcessStatusDto> getOrderedProcessEntries(RemoteProcessConfig config, InstanceResource ir,
+            String activeTag) {
         String instanceId = config.uuid();
         String controlGroupName = config.controlGroupName();
         String controlGroupNodeName = config.controlGroupNodeName();
@@ -308,7 +309,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return status.values().stream().sorted(comparator).toList();
     }
 
-    private String getLastProbeStatus(ProcessDetailDto appStatus, ProcessProbeType type) {
+    private static String getLastProbeStatus(ProcessDetailDto appStatus, ProcessProbeType type) {
         if (appStatus.lastProbes == null) {
             return "";
         }

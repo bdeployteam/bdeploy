@@ -187,7 +187,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         }
     }
 
-    private boolean isTokenBasedAuthentication(String authorizationHeader) {
+    private static boolean isTokenBasedAuthentication(String authorizationHeader) {
         // Check if the Authorization header is valid
         // It must not be null and must be prefixed with "Bearer" plus a whitespace
         // The authentication scheme comparison must be case-insensitive
@@ -195,7 +195,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
                 && authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
     }
 
-    private void abortWithUnauthorized(ContainerRequestContext requestContext) {
+    private static void abortWithUnauthorized(ContainerRequestContext requestContext) {
         // Abort the filter chain with a 401 status code response
         // The WWW-Authenticate header is sent along with the response
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)

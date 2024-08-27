@@ -213,7 +213,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         }
     }
 
-    private RequiredPermission createDynamicAnnotation(RequiredPermission perm, Permission dynPerm) {
+    private static RequiredPermission createDynamicAnnotation(RequiredPermission perm, Permission dynPerm) {
         return new RequiredPermission() {
 
             @Override
@@ -250,7 +250,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
      * @param scopeParam the name of the parameter to find
      * @return the actual value
      */
-    private String getScopedValue(ExtendedUriInfo uriInfo, String scopeParam, boolean optional) {
+    private static String getScopedValue(ExtendedUriInfo uriInfo, String scopeParam, boolean optional) {
         if (scopeParam == null || scopeParam.isEmpty()) {
             return null;
         }

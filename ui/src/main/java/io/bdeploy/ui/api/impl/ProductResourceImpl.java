@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -285,8 +284,8 @@ public class ProductResourceImpl implements ProductResource {
 
             assertNullOrRelativePath(pd.configTemplates);
             assertNullOrRelativePath(pd.versionFile);
-            pd.instanceTemplates.forEach(this::assertNullOrRelativePath);
-            pd.applicationTemplates.forEach(this::assertNullOrRelativePath);
+            pd.instanceTemplates.forEach(ProductResourceImpl::assertNullOrRelativePath);
+            pd.applicationTemplates.forEach(ProductResourceImpl::assertNullOrRelativePath);
             assertNullOrRelativePath(pd.pluginFolder);
 
             Path vDesc = desc.getParent().resolve(pd.versionFile);
@@ -314,7 +313,7 @@ public class ProductResourceImpl implements ProductResource {
         return result;
     }
 
-    private void assertNullOrRelativePath(String p) {
+    private static void assertNullOrRelativePath(String p) {
         if (p != null) {
             RuntimeAssert.assertFalse(p.contains("..") || p.startsWith("/"), String.format(RELPATH_ERROR, p));
         }

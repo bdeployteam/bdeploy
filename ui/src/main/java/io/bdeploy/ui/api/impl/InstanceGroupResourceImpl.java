@@ -383,7 +383,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         return result;
     }
 
-    private InstanceClientAppsDto listClientApps(InstanceManifest im, BHive hive, OperatingSystem os) {
+    private static InstanceClientAppsDto listClientApps(InstanceManifest im, BHive hive, OperatingSystem os) {
         SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
         Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
         if (clientKey == null) {
@@ -414,7 +414,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         return clientApps;
     }
 
-    private InstanceUiEndpointsDto listUiEndpoints(InstanceManifest im, BHive hive) {
+    private static InstanceUiEndpointsDto listUiEndpoints(InstanceManifest im, BHive hive) {
         SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
 
         InstanceUiEndpointsDto allInstEps = new InstanceUiEndpointsDto();

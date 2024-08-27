@@ -57,7 +57,7 @@ public class JerseyExceptionMapper implements ExceptionMapper<Exception> {
         return Response.status(code, ExceptionHelper.mapExceptionCausesToReason(exception)).build();
     }
 
-    private boolean hasCancelException(Throwable e) {
+    private static boolean hasCancelException(Throwable e) {
         while (e != null) {
             if (e instanceof InvocationTargetException) {
                 e = ((InvocationTargetException) e).getTargetException();

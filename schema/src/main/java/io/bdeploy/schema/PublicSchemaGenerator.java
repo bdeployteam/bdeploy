@@ -135,7 +135,7 @@ public class PublicSchemaGenerator {
         generator = new SchemaGenerator(cfgBuilder.build());
     }
 
-    private void exlusiveField(ArrayNode oneOf, SchemaGenerationContext context, String prop, String... excludes) {
+    private static void exlusiveField(ArrayNode oneOf, SchemaGenerationContext context, String prop, String... excludes) {
         ObjectNode obj = oneOf.addObject();
         obj.putArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(prop);
         var excl = obj.putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));

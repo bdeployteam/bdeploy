@@ -485,8 +485,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
     }
 
-    private List<InstanceVersionDto> filterByAllInstalledOrActive(List<InstanceVersionDto> versions, InstanceStateRecord state,
-            InstanceConfig config) {
+    private static List<InstanceVersionDto> filterByAllInstalledOrActive(List<InstanceVersionDto> versions,
+            InstanceStateRecord state, InstanceConfig config) {
         List<InstanceVersionDto> filtered = new ArrayList<>();
         boolean isDefaultSearch = !config.all() && !config.installed() && !config.active();
         InstanceVersionDto latestInstalled = null;
@@ -522,7 +522,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         return filtered;
     }
 
-    private List<InstanceVersionDto> filterByVersionAndPurpose(List<InstanceVersionDto> versions, InstanceDto instance,
+    private static List<InstanceVersionDto> filterByVersionAndPurpose(List<InstanceVersionDto> versions, InstanceDto instance,
             InstanceConfig config, InstanceResource ir) {
         List<InstanceVersionDto> filtered = new ArrayList<>();
 
@@ -553,7 +553,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
     }
 
-    private boolean confirmDelete(InstanceConfig config, InstanceResource ir) {
+    private static boolean confirmDelete(InstanceConfig config, InstanceResource ir) {
         String instanceName = ir.read(config.uuid()).instanceConfiguration.name;
         String confirmation = System.console().readLine("Delete instance %1$s (%2$s)? This CANNOT be undone. (Y/N)? ",
                 config.uuid(), instanceName);

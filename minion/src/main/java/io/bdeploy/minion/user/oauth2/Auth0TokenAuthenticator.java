@@ -103,7 +103,7 @@ public class Auth0TokenAuthenticator implements Authenticator {
                 performRequest(server, String.valueOf(password), trace));
     }
 
-    private Auth0UserInfo performRequest(Auth0SettingsDto settings, String token, AuthTrace trace) {
+    private static Auth0UserInfo performRequest(Auth0SettingsDto settings, String token, AuthTrace trace) {
         try {
             var jcf = JerseyClientFactory.get(new URI("https://" + settings.domain + "/userinfo"), token);
             return jcf.getBaseTarget().request().get(Auth0UserInfo.class);
@@ -116,7 +116,7 @@ public class Auth0TokenAuthenticator implements Authenticator {
         }
     }
 
-    private UserInfo verifyAndUpdateSearchResult(UserInfo user, String token, Auth0UserInfo u) {
+    private static UserInfo verifyAndUpdateSearchResult(UserInfo user, String token, Auth0UserInfo u) {
         if (u == null) {
             return null;
         }

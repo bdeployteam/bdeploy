@@ -633,7 +633,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Waits for some time until another launcher has finished installing updates. */
-    private void waitForLauncherUpdates(Path updateMarker) throws IOException {
+    private static void waitForLauncherUpdates(Path updateMarker) throws IOException {
         // No one is installing updates.
         if (!Files.isRegularFile(updateMarker)) {
             return;
@@ -730,7 +730,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Returns whether launching should be delegated to another (older) launcher. */
-    private boolean shouldDelegate(Version running, Version required) {
+    private static boolean shouldDelegate(Version running, Version required) {
         // If the local or the required version is undefined we launch with whatever we have.
         if (VersionHelper.isUndefined(running) || VersionHelper.isUndefined(required)) {
             return false;
@@ -1025,7 +1025,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return missing;
     }
 
-    private boolean checkForCurrentConfigFiles(ObjectId configTree, Path cfgPath) {
+    private static boolean checkForCurrentConfigFiles(ObjectId configTree, Path cfgPath) {
         Path checkFile = cfgPath.resolve(CONFIG_DIR_CHECK_FILE);
         if (PathHelper.exists(checkFile)) {
             try (InputStream is = Files.newInputStream(checkFile)) {
@@ -1129,7 +1129,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    private String getHostname(String fallback) {
+    private static String getHostname(String fallback) {
         String hostname = null;
         try {
             hostname = InetAddress.getLocalHost().getCanonicalHostName();
@@ -1169,7 +1169,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Decodes the additional arguments that are passed to the application. */
     @SuppressWarnings("unchecked")
-    private Collection<String> decodeAdditionalArguments(String appendArgs) {
+    private static Collection<String> decodeAdditionalArguments(String appendArgs) {
         if (appendArgs == null || appendArgs.isBlank()) {
             return Collections.emptyList();
         }

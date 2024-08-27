@@ -749,7 +749,7 @@ public class BrowserDialog extends BaseDialog {
     }
 
     /** Returns if the selected applications have at least the given version */
-    private boolean checkVersion(List<ClientSoftwareConfiguration> apps, Version minVersion) {
+    private static boolean checkVersion(List<ClientSoftwareConfiguration> apps, Version minVersion) {
         for (ClientSoftwareConfiguration app : apps) {
             Key launcher = app.launcher;
             if (launcher == null) {

@@ -137,7 +137,7 @@ public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable
     /**
      * Creates a rolling file appender that write audit entries to a human readable log file.
      */
-    private synchronized RollingFileAppender createFileAppender(Path logDir) {
+    private static synchronized RollingFileAppender createFileAppender(Path logDir) {
         RollingFileAppender.Builder<?> builder = RollingFileAppender.newBuilder();
         builder.setName("outLogger[" + logDir + "]");
         builder.withFileName(logDir.resolve(OUT_TXT).toString());
