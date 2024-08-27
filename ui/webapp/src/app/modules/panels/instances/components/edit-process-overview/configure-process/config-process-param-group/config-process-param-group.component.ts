@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { NgControl, NgForm } from '@angular/forms';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { debounceTime, map, skipWhile } from 'rxjs/operators';
 import {
@@ -36,6 +37,7 @@ import {
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
+import { ClipboardService } from 'src/app/modules/core/services/clipboard.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
 import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -73,6 +75,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   private readonly bop = inject(BreakpointObserver);
   private readonly systems = inject(SystemsService);
   private readonly searchService = inject(SearchService);
+  private readonly snackbar = inject(MatSnackBar);
+  private readonly clipboardService = inject(ClipboardService);
+
   protected readonly edit = inject(ProcessEditService);
   protected readonly instances = inject(InstanceEditService);
   protected readonly groups = inject(GroupsService);
@@ -82,6 +87,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   protected search: string;
   protected process: ApplicationConfiguration;
   protected app: ApplicationDto;
+
+  protected clipboardParams: ParameterConfiguration[];
+  protected checked: ParameterConfiguration[] = [];
 
   protected instance$ = new BehaviorSubject<InstanceConfigurationDto>(null);
   protected system$ = new BehaviorSubject<SystemConfiguration>(null);
@@ -248,6 +256,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     );
 
     this.subscription.add(this.searchService.register(this));
+
+    this.subscription.add(this.clipboardService.clipboard$.subscribe((cb) => this.readFromClipboard(cb.data)));
   }
 
   private buildCompletions(): ContentCompletion[] {
@@ -284,6 +294,89 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
   protected getValueCount(g: ParameterGroup) {
     return g.pairs.filter((p) => !!p.value && this.hasPairSearchMatch(p)).length;
+  }
+
+  protected isChecked(p: ParameterPair) {
+    return this.checked.some((param) => param.id === p.value.id);
+  }
+
+  protected toggleCheck(p: ParameterPair) {
+    const isChecked = this.isChecked(p);
+    if (isChecked) {
+      this.checked = this.checked.filter((param) => param.id !== p?.value?.id);
+    } else {
+      this.checked.push(p.value);
+    }
+  }
+
+  protected doCopy() {
+    const json = JSON.stringify(this.checked, null, '\t');
+    navigator.clipboard.writeText(json).then(
+      () =>
+        this.snackbar.open('Copied to clipboard successfully', null, {
+          duration: 1000,
+        }),
+      () =>
+        this.snackbar.open('Unable to write to clipboard', null, {
+          duration: 1000,
+        }),
+    );
+  }
+
+  protected doPaste() {
+    if (!this.clipboardParams?.length) {
+      this.snackbar.open('Unable to read from clipboard', null, {
+        duration: 1000,
+      });
+      return;
+    }
+    let addedCnt = 0;
+    let skippedCnt = 0;
+    this.clipboardParams.forEach((param: ParameterConfiguration) => {
+      const paramList = this.edit.process$.value.start.parameters;
+      const found = paramList.some((p) => p.id === param.id);
+      if (found) {
+        skippedCnt++;
+        return;
+      }
+      this.customTemp = {
+        predecessor: null,
+        id: param.id,
+        value: param.value.linkExpression || param.value.value,
+        isEdit: false,
+      };
+      this.insertCustomParameterAtCorrectPosition();
+      this.customTemp = null;
+      addedCnt++;
+    });
+    let message = `${this.clipboardParams.length} parameters copied from clipboard.`;
+    if (addedCnt > 0) {
+      message += ` Added ${addedCnt} parameters at the beginning of the command (predecessor information is not copied).`;
+    } else {
+      message += ' No new parameters to add.';
+    }
+    if (skippedCnt > 0) {
+      message += ` Skipped ${skippedCnt} parameters for conflicting with existing ones.`;
+    }
+    this.snackbar.open(message, 'DISMISS');
+  }
+
+  private readFromClipboard(data: string) {
+    this.clipboardParams = null;
+    if (!data) {
+      return;
+    }
+    try {
+      const params: ParameterConfiguration[] = JSON.parse(data);
+      const validIds = params.every((iv) => !!iv.id);
+      if (!validIds) {
+        console.error(`Invalid parameters format`);
+      } else {
+        this.clipboardParams = params;
+      }
+    } catch (e) {
+      console.error('Unable to parse from clipboard', e);
+    }
   }
 
   protected doAddRemoveParameter(g: ParameterGroup, p: ParameterPair) {

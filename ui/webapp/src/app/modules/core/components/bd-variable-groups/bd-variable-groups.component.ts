@@ -13,7 +13,7 @@ import {
 import { NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, interval, startWith, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   ApplicationDto,
   CustomEditor,
@@ -32,7 +32,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { VariableGroup, VariablePair } from 'src/app/modules/core/utils/variable-utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
-import { Platform } from '@angular/cdk/platform';
+import { ClipboardService } from '../../services/clipboard.service';
 
 interface ConfigVariable {
   name: string;
@@ -48,7 +48,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   private readonly snackbar = inject(MatSnackBar);
   private readonly searchService = inject(SearchService);
   private readonly bop = inject(BreakpointObserver);
-  private readonly platform = inject(Platform);
+  private readonly clipboardService = inject(ClipboardService);
   protected readonly instanceGroups = inject(GroupsService);
 
   @Input() groups: VariableGroup[];
@@ -90,17 +90,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
       }),
     );
 
-    // need to skip this for firefox. They implemented the API, but it causes troubles.
-    // currently, firefox can ONLY do this in browser extensions, not websites.
-    if (this.platform.FIREFOX) {
-      console.log('Clipboard access not supported on Firefox!');
-    } else {
-      this.subscription.add(
-        interval(1000)
-          .pipe(startWith(null))
-          .subscribe(() => this.readFromClipboard()),
-      );
-    }
+    this.subscription.add(this.clipboardService.clipboard$.subscribe((cb) => this.readFromClipboard(cb.data)));
   }
 
   ngOnDestroy(): void {
@@ -175,54 +165,23 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     this.snackbar.open(message, 'DISMISS');
   }
 
-  private readFromClipboard() {
-    if (!navigator.clipboard.readText) {
-      // must be firefox. firefox allows reading the clipboard *only* from browser
-      // extensions but never from web pages itself. it is rumored that there is a config
-      // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
-      // change browser behaviour in tests.
-      this.clipboardVars = null;
-      console.error('Clipboard access is not supported in this browser. Pasting applications is not possible.');
+  private readFromClipboard(data: string) {
+    this.clipboardVars = null;
+    if (!data) {
       return;
     }
-
-    const perm = 'clipboard-read' as PermissionName; // required due to TS bug.
-    navigator.permissions.query({ name: perm }).then(
-      (value: PermissionStatus) => {
-        if (value.state !== 'granted') {
-          // otherwise 'prompt' is open - not an error
-          if (value.state === 'denied') {
-            this.clipboardVars = null;
-            console.log('No permission to read from the clipboard, pasting not possible.');
-          }
-        }
-      },
-      (reason) => {
-        this.clipboardVars = null;
-        console.log(`Cannot check clipboard permission (${reason}).`);
-      },
-    );
-
-    navigator.clipboard.readText().then(
-      (data) => {
-        this.clipboardVars = null;
-        try {
-          const variables: ConfigVariable[] = JSON.parse(data);
-          const validNames = variables.every((iv) => !!iv.name);
-          const validVariables = variables.every((iv) => !!iv.value && !!iv.value.id);
-          if (!validNames || !validVariables) {
-            console.error(`Invalid variables format.`);
-          }
-          this.clipboardVars = variables;
-        } catch (e) {
-          console.error('Unable to parse from clipboard', e);
-        }
-      },
-      (e) => {
-        console.error('Unable to read from clipboard', e);
-        this.clipboardVars = null;
-      },
-    );
+    try {
+      const variables: ConfigVariable[] = JSON.parse(data);
+      const validNames = variables.every((iv) => !!iv.name);
+      const validVariables = variables.every((iv) => !!iv.value && !!iv.value.id);
+      if (!validNames || !validVariables) {
+        console.error(`Invalid variables format.`);
+      } else {
+        this.clipboardVars = variables;
+      }
+    } catch (e) {
+      console.error('Unable to parse from clipboard', e);
+    }
   }
 
   protected onAddCustomVariable(templ: TemplateRef<unknown>) {

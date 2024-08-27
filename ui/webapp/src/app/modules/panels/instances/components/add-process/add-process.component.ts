@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject, combineLatest, interval, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
@@ -13,12 +13,12 @@ import {
   OperatingSystem,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ClipboardData, ClipboardService } from 'src/app/modules/core/services/clipboard.service';
 import { getAppKeyName, getAppOs, updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../services/process-edit.service';
 import { AppTemplateNameComponent } from './app-template-name/app-template-name.component';
-import { Platform } from '@angular/cdk/platform';
 
 export interface AppRow {
   app: AppGroup;
@@ -50,7 +50,7 @@ const colAppName: BdDataColumn<AppRow> = {
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
   private readonly edit = inject(ProcessEditService);
-  private readonly platform = inject(Platform);
+  private readonly clipboardService = inject(ClipboardService);
   protected readonly instanceEdit = inject(InstanceEditService);
   protected readonly servers = inject(ServersService);
 
@@ -149,19 +149,13 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       this.loading$.next(false);
     });
 
-    // need to skip this for firefox. They implemented the API, but it causes troubles.
-    // currently, firefox can ONLY do this in browser extensions, not websites.
-    if (this.platform.FIREFOX) {
-      this.clipBoardError$.next('Clipboard access not supported on Firefox!');
-    } else {
-      this.subscription.add(
-        combineLatest([
-          this.edit.node$.pipe(distinctUntilChanged()),
-          this.instanceEdit.nodes$,
-          interval(1000),
-        ]).subscribe(([node, nodeConfigs]) => this.readFromClipboard(node, nodeConfigs[node.nodeName])),
-      );
-    }
+    this.subscription.add(
+      combineLatest([
+        this.edit.node$.pipe(distinctUntilChanged()),
+        this.instanceEdit.nodes$,
+        this.clipboardService.clipboard$,
+      ]).subscribe(([node, nodeConfigs, cb]) => this.readFromClipboard(node, nodeConfigs[node.nodeName], cb)),
+    );
   }
 
   ngOnDestroy(): void {
@@ -172,74 +166,39 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     this.edit.addProcessPaste(cfg);
   }
 
-  private readFromClipboard(node: InstanceNodeConfigurationDto, minion: MinionDto) {
-    this.clipBoardError$.next(null);
-
-    if (!navigator.clipboard.readText) {
-      // must be firefox. firefox allows reading the clipboard *only* from browser
-      // extensions but never from web pages itself. it is rumored that there is a config
-      // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
-      // change browser behaviour in tests.
-      this.clipBoardCfg$.next(null);
-      this.clipBoardError$.next(
-        'Clipboard access is not supported in this browser. Pasting applications is not possible.',
-      );
+  private readFromClipboard(node: InstanceNodeConfigurationDto, minion: MinionDto, cb: ClipboardData) {
+    this.clipBoardError$.next(cb.error ? `Pasting is not possible: ${cb.error}` : null);
+    this.clipBoardCfg$.next(null);
+    if (!cb.data) {
       return;
     }
 
-    // check clipboard content on init.
-    const perm = 'clipboard-read' as PermissionName; // required due to TS bug.
-    navigator.permissions.query({ name: perm }).then(
-      (value: PermissionStatus) => {
-        if (value.state !== 'granted') {
-          // otherwise 'prompt' is open - not an error
-          if (value.state === 'denied') {
-            this.clipBoardCfg$.next(null);
-            this.clipBoardError$.next('No permission to read from the clipboard, pasting not possible.');
-          }
-        }
-      },
-      (reason) => {
-        this.clipBoardCfg$.next(null);
-        this.clipBoardError$.next(`Cannot check clipboard permission (${reason}).`);
-      },
-    );
+    const data = cb.data;
+    let appConfig: ApplicationConfiguration = null;
+    try {
+      appConfig = JSON.parse(data) as ApplicationConfiguration;
+    } catch (e) {
+      return; // this is not an error, it's just not an application configuration :)
+    }
 
-    // in ANY case we try to read, and ignore any error, since the attempt to read prompts the user for permission.
-    navigator.clipboard.readText().then((data) => {
-      let appConfig: ApplicationConfiguration = null;
-      try {
-        appConfig = JSON.parse(data) as ApplicationConfiguration;
-      } catch (e) {
-        this.clipBoardCfg$.next(null);
-        return; // this is not an error, its just not an application configuration :)
+    // change OS if required
+    if (!this.isClientNode(node)) {
+      appConfig.application = updateAppOs(appConfig.application, minion.os);
+    }
+
+    this.edit.getApplication(appConfig.application.name).subscribe((app) => {
+      if (!app?.descriptor) {
+        return; // app or descriptor not found -> product mismatch?
+      }
+      if (
+        (app.descriptor.type === ApplicationType.SERVER && this.isClientNode(node)) ||
+        (app.descriptor.type === ApplicationType.CLIENT && !this.isClientNode(node))
+      ) {
+        return; // not an error, just not suitable to paste
       }
 
-      // change OS if required
-      if (!this.isClientNode(node)) {
-        appConfig.application = updateAppOs(appConfig.application, minion.os);
-      }
-
-      this.edit.getApplication(appConfig.application.name).subscribe({
-        next: (app) => {
-          if (!app?.descriptor) {
-            return; // app or descriptor not found -> product mismatch?
-          }
-          if (
-            (app.descriptor.type === ApplicationType.SERVER && this.isClientNode(node)) ||
-            (app.descriptor.type === ApplicationType.CLIENT && !this.isClientNode(node))
-          ) {
-            return; // not an error, just not suitable to paste
-          }
-
-          // raw, unprocessed.
-          this.clipBoardCfg$.next(appConfig);
-        },
-        error: (err) => {
-          console.log(`Error when reading clipboard: ${err}`);
-          this.clipBoardCfg$.next(null);
-        },
-      });
+      // raw, unprocessed.
+      this.clipBoardCfg$.next(appConfig);
     });
   }
 

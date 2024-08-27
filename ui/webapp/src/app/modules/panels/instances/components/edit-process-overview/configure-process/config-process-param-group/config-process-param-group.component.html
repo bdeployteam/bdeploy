@@ -51,6 +51,22 @@
             <div *ngIf="panel.expanded" class="flex gap-1">
               <app-bd-button
                 *ngIf="group.isCustom"
+                text="Copy Selected"
+                icon="content_copy"
+                (click)="doCopy()"
+                [disabled]="!checked?.length || !group.isSelectMode"
+                appClickStopPropagation
+              ></app-bd-button>
+              <app-bd-button
+                *ngIf="group.isCustom"
+                text="Paste"
+                icon="content_paste_go"
+                [disabled]="!clipboardParams?.length"
+                (click)="doPaste()"
+                appClickStopPropagation
+              ></app-bd-button>
+              <app-bd-button
+                *ngIf="group.isCustom"
                 text="Add Custom Parameter"
                 icon="add"
                 (click)="onAddCustomParameter(addCustom)"
@@ -113,7 +129,19 @@
                 </ng-template>
 
                 <!-- Checkbox for select mode... -->
-                <div class="local-select-wrapper flex flex-col justify-center items-center" *ngIf="group.isSelectMode">
+                <div
+                  class="flex flex-col justify-center items-center"
+                  *ngIf="group.isSelectMode"
+                  [class.local-select-wrapper]="group.isCustom"
+                  [class.local-toggle-wrapper]="!group.isCustom"
+                >
+                  <mat-checkbox
+                    *ngIf="group.isCustom"
+                    [checked]="isChecked(p)"
+                    (change)="toggleCheck(p)"
+                    appClickStopPropagation
+                    class="truncate local-table-checkbox"
+                  ></mat-checkbox>
                   <mat-icon
                     *ngFor="let canToggle of [canAddRemove(p) | async]"
                     (click)="!canToggle ? null : doAddRemoveParameter(group, p)"

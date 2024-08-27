@@ -166,9 +166,7 @@
                   <!-- Checkbox for select mode... -->
                   <div
                     *ngIf="group.isCustom && isCustomGroupSelected"
-                    class="flex flex-col justify-center items-center"
-                    [class.local-select-wrapper]="group.isCustom"
-                    [class.local-toggle-wrapper]="!group.isCustom"
+                    class="local-select-wrapper flex flex-col justify-center items-center"
                   >
                     <mat-checkbox
                       [checked]="isChecked(p)"
