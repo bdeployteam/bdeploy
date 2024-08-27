@@ -77,6 +77,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
@@ -545,12 +546,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 List<ObjectId> configTrees = new ArrayList<>();
                 // client applications *may* specify config directories.
                 for (var app : inc.applications) {
-                    if (app.processControl == null || StringHelper.isNullOrEmpty(app.processControl.configDirs)) {
+                    String configDirs = app.processControl.configDirs;
+                    if (app.processControl == null || StringHelper.isNullOrEmpty(configDirs)) {
                         continue; // no dirs set.
                     }
 
                     // we have directories set, and need to create a dedicated config tree for the application.
-                    String[] allowedPaths = app.processControl.configDirs.split(",");
+                    String[] allowedPaths = ProcessControlConfiguration.CONFIG_DIRS_SPLIT_PATTERN.split(configDirs);
 
                     // remove unwanted paths from p.
                     ObjectId appTree = applyConfigUpdates(config.configTree, p -> applyConfigRestrictions(allowedPaths, p, p));
