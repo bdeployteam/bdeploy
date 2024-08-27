@@ -126,6 +126,7 @@ import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
 import { ServerConnectionUrlSyntaxValidator } from './validators/server-connection-url-syntax-validator.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
+import { PlatformModule } from '@angular/cdk/platform';
 
 function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -234,6 +235,7 @@ function loadAppConfig(cfgService: ConfigService) {
   ],
   imports: [
     CommonModule,
+    PlatformModule,
     DragDropModule,
     CdkScrollableModule,
     TextFieldModule,

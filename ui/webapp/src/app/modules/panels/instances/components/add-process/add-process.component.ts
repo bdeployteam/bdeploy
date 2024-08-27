@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, combineLatest, interval, of } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
+import { BehaviorSubject, combineLatest, interval, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
@@ -18,6 +18,7 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../services/process-edit.service';
 import { AppTemplateNameComponent } from './app-template-name/app-template-name.component';
+import { Platform } from '@angular/cdk/platform';
 
 export interface AppRow {
   app: AppGroup;
@@ -49,6 +50,7 @@ const colAppName: BdDataColumn<AppRow> = {
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
   private readonly edit = inject(ProcessEditService);
+  private readonly platform = inject(Platform);
   protected readonly instanceEdit = inject(InstanceEditService);
   protected readonly servers = inject(ServersService);
 
@@ -147,11 +149,19 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       this.loading$.next(false);
     });
 
-    this.subscription.add(
-      combineLatest([this.edit.node$.pipe(distinctUntilChanged()), this.instanceEdit.nodes$, interval(1000)]).subscribe(
-        ([node, nodeConfigs]) => this.readFromClipboard(node, nodeConfigs[node.nodeName]),
-      ),
-    );
+    // need to skip this for firefox. They implemented the API, but it causes troubles.
+    // currently, firefox can ONLY do this in browser extensions, not websites.
+    if (this.platform.FIREFOX) {
+      this.clipBoardError$.next('Clipboard access not supported on Firefox!');
+    } else {
+      this.subscription.add(
+        combineLatest([
+          this.edit.node$.pipe(distinctUntilChanged()),
+          this.instanceEdit.nodes$,
+          interval(1000),
+        ]).subscribe(([node, nodeConfigs]) => this.readFromClipboard(node, nodeConfigs[node.nodeName])),
+      );
+    }
   }
 
   ngOnDestroy(): void {
