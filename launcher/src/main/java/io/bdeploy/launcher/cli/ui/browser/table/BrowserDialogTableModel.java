@@ -139,8 +139,8 @@ public class BrowserDialogTableModel extends AbstractTableModel {
                 return metadata != null ? metadata.product.getTag() : "N/A";
             case REMOTE:
                 return app.clickAndStart.host.getUri().toString();
-            case LVERSION:
-                return app.launcher != null ? app.launcher.getTag() : "";
+            case SERVER_VERSION:
+                return metadata != null ? metadata.serverVersion : "N/A";
             case AUTOSTART:
                 LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {

@@ -233,7 +233,12 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     /**
      * Removes the application stored in the given version specific directory
+     *
+     * @deprecated This code remains to allow uninstallation of old delegated launcher applications, but since
+     *             7.2.0 delegated launchers are no longer in use, so this will only ever be used to uninstall
+     *             out-dated client applications.
      */
+    @Deprecated(since = "7.2.0")
     private static void doUninstallVersioned(Path homeDir, Version version, String appId) {
         Path versionedHome = ClientPathHelper.getVersionedHome(homeDir, version);
         Path versionedAppDir = new LauncherPathProvider(versionedHome).get(SpecialDirectory.APP, appId);

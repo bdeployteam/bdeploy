@@ -3,7 +3,6 @@ package io.bdeploy.launcher.cli;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
@@ -107,33 +106,29 @@ public class ClientCleanup {
         }
     }
 
-    /** Removes all launchers that are not required any more */
+    /**
+     * Removes all launchers that are not required anymore.
+     *
+     * @deprecated The delegated launcher removal in 7.2.0 means that no delegate launchers are created anymore,
+     *             and therefore no cleaning of them should be required. However, this code is still kept so that
+     *             old delegate launchers that are left over from pre-updated launchers are being deleted.
+     */
+    @Deprecated(since = "7.2.0")
     private void doCleanLaunchers() {
-        // Collect all required launchers
-        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
-        Set<Key> required = mf.getRequiredLauncherKeys();
-
-        // The currently running launcher is always required
-        Set<Key> installed = getAvailableLaunchers();
-        Iterator<Key> iter = installed.iterator();
-        while (iter.hasNext()) {
-            Key key = iter.next();
-            if (key.getTag().equalsIgnoreCase(VersionHelper.getVersion().toString())) {
-                iter.remove();
-            }
-        }
-
-        // Remove all the software that is still required
-        installed.removeAll(required);
-        if (installed.isEmpty()) {
-            log.info("All installed launchers are still in-use.");
+        String launcherKey = UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER;
+        String currentLauncherVersion = VersionHelper.getVersion().toString();
+        Set<Key> launchersToDelete = hive.execute(new ManifestListOperation()).stream()//
+                .filter(key -> key.getName().startsWith(launcherKey))//
+                .filter(key -> !currentLauncherVersion.equalsIgnoreCase(key.getTag()))//
+                .collect(Collectors.toCollection(HashSet::new));
+        if (launchersToDelete.isEmpty()) {
             return;
         }
 
         // Cleanup hive and launcher
-        log.info("Removing stale launchers that are not used any more...");
+        log.info("Removing stale launchers that are not used anymore...");
         Path homeDir = lpp.get(SpecialDirectory.HOME);
-        for (Manifest.Key key : installed) {
+        for (Manifest.Key key : launchersToDelete) {
             log.info("Deleting {}", key);
 
             Version version = VersionHelper.parse(key.getTag());
@@ -154,7 +149,6 @@ public class ClientCleanup {
             // Delete manifest as last operation
             hive.execute(new ManifestDeleteOperation().setToDelete(key));
         }
-
     }
 
     /** Cleans the pool, scripts and apps directory */
@@ -217,20 +211,6 @@ public class ClientCleanup {
     private Set<Key> getAvailableApps() {
         Set<Key> allKeys = hive.execute(new ManifestListOperation());
         return allKeys.stream().filter(ClientCleanup::isApp).collect(Collectors.toSet());
-    }
-
-    /**
-     * Returns a list of all launchers available in the hive
-     */
-    private Set<Key> getAvailableLaunchers() {
-        Set<Key> allKeys = hive.execute(new ManifestListOperation());
-        return allKeys.stream().filter(ClientCleanup::isLauncher).collect(Collectors.toCollection(HashSet::new));
-    }
-
-    /** Returns whether or not the given manifest refers to a launcher */
-    private static boolean isLauncher(Key key) {
-        String launcherKey = UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER;
-        return key.getName().startsWith(launcherKey);
     }
 
     /** Returns whether or not the given manifest refers to an application */

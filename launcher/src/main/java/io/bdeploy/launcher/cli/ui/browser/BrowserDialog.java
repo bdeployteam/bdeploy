@@ -51,9 +51,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.Version;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -693,7 +691,8 @@ public class BrowserDialog extends BaseDialog {
         }
 
         List<ClientSoftwareConfiguration> selectedApps = getSelectedApps();
-        boolean singleAppSelected = selectedApps.size() == 1;
+        int selectedAppsCount = selectedApps.size();
+        boolean singleAppSelected = selectedAppsCount == 1;
 
         launchButton.setEnabled(singleAppSelected);
         launchItem.setEnabled(singleAppSelected);
@@ -738,29 +737,12 @@ public class BrowserDialog extends BaseDialog {
             pruneButton.setEnabled(true);
         }
 
-        // --customizeArgs and launch needs at version 3.3.0
-        customizeAndLaunchItem.setEnabled(checkVersion(selectedApps, new Version(3, 3, 0, null)));
-
-        // --updateOnly flag needs at least version 3.6.5
-        updateItem.setEnabled(!readonlyHome && checkVersion(selectedApps, new Version(3, 6, 5, null)));
+        boolean anyAppSelected = selectedAppsCount > 0;
+        customizeAndLaunchItem.setEnabled(anyAppSelected);
+        updateItem.setEnabled(!readonlyHome && anyAppSelected);
 
         verifyButton.setEnabled(!readonlyHome && singleAppSelected);
         reinstallButton.setEnabled(!readonlyHome && singleAppSelected);
-    }
-
-    /** Returns if the selected applications have at least the given version */
-    private static boolean checkVersion(List<ClientSoftwareConfiguration> apps, Version minVersion) {
-        for (ClientSoftwareConfiguration app : apps) {
-            Key launcher = app.launcher;
-            if (launcher == null) {
-                continue;
-            }
-            Version version = VersionHelper.tryParse(launcher.getTag());
-            if (version.compareTo(minVersion) < 0) {
-                return false;
-            }
-        }
-        return !apps.isEmpty();
     }
 
     private static void showErrorMessageDialog(Component parent, String text) {

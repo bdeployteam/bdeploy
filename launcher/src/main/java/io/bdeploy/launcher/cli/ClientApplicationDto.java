@@ -51,6 +51,11 @@ public class ClientApplicationDto {
     public boolean supportsAutostart;
 
     /**
+     * The version of the server that this client application stems from.
+     */
+    public String serverVersion;
+
+    /**
      * Whether the server wants the application to autostart on system boot
      */
     public boolean autostart;
@@ -91,6 +96,8 @@ public class ClientApplicationDto {
         dto.id = appConfig.id;
         dto.appName = appConfig.name;
         dto.autostart = appConfig.processControl.autostart;
+
+        dto.serverVersion = LauncherTool.getServerVersion(desc).toString();
 
         return dto;
     }

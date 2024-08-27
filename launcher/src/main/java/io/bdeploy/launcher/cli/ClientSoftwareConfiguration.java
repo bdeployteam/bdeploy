@@ -18,7 +18,11 @@ public class ClientSoftwareConfiguration {
      * This key is ONLY written in case that launching of the application is delegated to another launcher. This information is
      * used during cleanup so that the launcher is kept as long as at least one software manifest is referencing it.
      * </p>
+     *
+     * @deprecated The delegate launcher removal in 7.2.0 made this field obsolete. The only reason that it remains for now, is so
+     *             that the uninstallation of old client applications can continue to work properly.
      */
+    @Deprecated(since = "7.2.0")
     public Manifest.Key launcher;
 
     /**
