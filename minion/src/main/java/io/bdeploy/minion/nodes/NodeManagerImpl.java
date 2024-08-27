@@ -122,21 +122,25 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
             log.debug("Fetch status of {} minions", config.values().size());
         }
 
-        for (String minion : config.values().keySet()) {
-            // fetch an existing request.
-            var existing = requests.get(minion);
+        try {
+            for (String minion : config.values().keySet()) {
+                // fetch an existing request.
+                var existing = requests.get(minion);
 
-            if (existing != null && !existing.isDone()) {
-                // something is already running - we don't start another one.
-                // best case: it finishes "soon" - worst case it is "stuck"
-                if (log.isDebugEnabled()) {
-                    log.debug("Status request to {} still running", minion);
+                if (existing != null && !existing.isDone()) {
+                    // something is already running - we don't start another one.
+                    // best case: it finishes "soon" - worst case it is "stuck"
+                    if (log.isDebugEnabled()) {
+                        log.debug("Status request to {} still running", minion);
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            // start async request to a single minion.
-            requests.put(minion, contact.submit(() -> fetchNodeState(minion)));
+                // start async request to a single minion.
+                requests.put(minion, contact.submit(() -> fetchNodeState(minion)));
+            }
+        } catch (Exception e) {
+            log.warn("Unexpected exception while checking node states", e);
         }
     }
 
