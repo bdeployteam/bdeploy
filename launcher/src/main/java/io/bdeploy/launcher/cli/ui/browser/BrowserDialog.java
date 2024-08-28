@@ -577,7 +577,7 @@ public class BrowserDialog extends BaseDialog {
         } catch (IOException ex) {
             showErrorMessageDialog(null, "Failed to change active " + scriptType + " script: " + ex.getMessage());
         }
-        doRefresh(model.getAll());
+        searchApps();
     }
 
     /** Notification that the selected rows have changed */
