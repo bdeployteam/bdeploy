@@ -109,6 +109,9 @@ public class LinkedValueConfiguration {
 
     }
 
+    // TODO ManagedServersResourceImpl#getUpdates ensures that we do not communicate with managed servers older than version 5.
+    // This deprecated code is therefore ready for actual removal.
+
     /**
      * Compatibility module when we act as REST client so we send the original format of values.
      * <p>
