@@ -110,12 +110,8 @@ publishing {
                         name = 'Markus Duft'
                     }
                     developer {
-                        id = 'mheiss'
-                        name = 'Michael Heiss'
-                    }
-                    developer {
-                        id = 'turlaub'
-                        name = 'Thomas Urlaub'
+                        id = 'TheTechnolog'
+                        name = 'Daniel Kargl'
                     }
                 }
             }
