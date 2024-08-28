@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.ClientPathHelper;
 import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
@@ -70,11 +71,14 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
     }
 
     private List<String> getUninstallCommand() throws IOException {
+        ClickAndStartDescriptor clickAndStart = app.clickAndStart;
+        String appId = clickAndStart.applicationId;
+
         List<String> command = new ArrayList<>();
         // On Windows the BDeploy executable expects the click and start file
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             Path launcher = ClientPathHelper.getNativeLauncher(lpp);
-            Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, app.clickAndStart);
+            Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, clickAndStart);
             command.add(launcher.toString());
             command.add("/Uninstall");
             command.add(launchFile.toString());
@@ -83,7 +87,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
 
         // On Linux the installer writes a special uninstall script
         // ATTENTION: This is not there if the application has been launched via click&start
-        Path uninstaller = lpp.get(SpecialDirectory.APP).resolve("uninstall.run");
+        Path uninstaller = lpp.get(SpecialDirectory.APP, appId).resolve("uninstall.run");
         if (PathHelper.exists(uninstaller)) {
             command.add(uninstaller.toString());
             return command;
@@ -93,7 +97,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
         Path launcher = ClientPathHelper.getNativeLauncher(lpp);
         command.add(launcher.toString());
         command.add("uninstaller");
-        command.add("--app=" + app.clickAndStart.applicationId);
+        command.add("--app=" + appId);
         return command;
     }
 }
