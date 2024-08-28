@@ -17,6 +17,7 @@ public enum Actions {
     INSTALL(ActionScope.VERSION, true, "Install Instance Version"),
     UNINSTALL(ActionScope.VERSION, true, "Uninstall Instance Version"),
     ACTIVATE(ActionScope.VERSION, true, "Activate Instance Version"),
+    SYNC_NODE(ActionScope.INSTANCE, true, "Synchronize Node"),
 
     START_INSTANCE(ActionScope.INSTANCE, true, "Start Instance"),
     STOP_INSTANCE(ActionScope.INSTANCE, true, "Stop Instance"),

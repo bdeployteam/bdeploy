@@ -82,6 +82,7 @@ import { EditCustomIdValidatorDirective } from './validators/edit-custom-id-vali
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
 import { SystemOnServerValidatorDirective } from './validators/system-on-server-validator.directive';
+import { PlatformModule } from '@angular/cdk/platform';
 
 @NgModule({
   declarations: [
@@ -155,6 +156,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
   ],
   imports: [
     CommonModule,
+    PlatformModule,
     CoreModule,
     InstancesRoutingModule,
     PrimaryInstancesModule,

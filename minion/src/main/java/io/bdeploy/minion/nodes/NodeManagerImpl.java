@@ -1,23 +1,5 @@
 package io.bdeploy.minion.nodes;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.jvnet.hk2.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.VersionHelper;
@@ -38,6 +20,13 @@ import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
+import org.jvnet.hk2.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class NodeManagerImpl implements NodeManager, AutoCloseable {
@@ -122,22 +111,35 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
             log.debug("Fetch status of {} minions", config.values().size());
         }
 
-        for (String minion : config.values().keySet()) {
-            // fetch an existing request.
-            var existing = requests.get(minion);
+        try {
+            for (String minion : config.values().keySet()) {
+                // fetch an existing request.
+                var existing = requests.get(minion);
 
-            if (existing != null && !existing.isDone()) {
-                // something is already running - we don't start another one.
-                // best case: it finishes "soon" - worst case it is "stuck"
-                if (log.isDebugEnabled()) {
-                    log.debug("Status request to {} still running", minion);
+                if (existing != null && !existing.isDone()) {
+                    // something is already running - we don't start another one.
+                    // best case: it finishes "soon" - worst case it is "stuck"
+                    if (log.isDebugEnabled()) {
+                        log.debug("Status request to {} still running", minion);
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            // start async request to a single minion.
-            requests.put(minion, contact.submit(() -> fetchNodeState(minion)));
+                // start async request to a single minion.
+                requests.put(minion, contact.submit(() -> fetchNodeState(minion)));
+            }
+        } catch (Exception e) {
+            log.warn("Unexpected exception while checking node states", e);
         }
+    }
+
+    public void synchronizeNode(String node) {
+        boolean isStandaloneOrManaged = root.getMode() == MinionMode.MANAGED || root.getMode() == MinionMode.STANDALONE;
+        if (!isStandaloneOrManaged) {
+            log.warn("Skipping node synchronization - only possible on MANAGED or STANDALONE.");
+            return;
+        }
+        nodeSynchronizer.sync(node);
     }
 
     /**
@@ -167,7 +169,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
                 boolean isStandaloneOrManaged = root.getMode() == MinionMode.MANAGED || root.getMode() == MinionMode.STANDALONE;
                 if (isStandaloneOrManaged && !Objects.equals(node, self) && status.get(node).offline && !msd.offline) {
-                    nodeSynchronizer.sync(node);
+                    synchronizeNode(node);
                 }
                 msd.nodeSynchronizationStatus = nodeSynchronizer.getStatus(node);
 

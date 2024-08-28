@@ -270,48 +270,45 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             log.info(msg);
             throw new WebApplicationException(msg, Status.EXPECTATION_FAILED);
         }
-
         InstanceManifest imf = InstanceManifest.load(hive, instanceId, null);
-        InstanceStateRecord state = imf.getState(hive).read();
-        String instanceActiveTag = state.activeTag;
 
-        NodeProcessResource npr = nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context);
-        InstanceNodeStatusDto nodeStatus = npr.getStatus(instanceId);
+        try (var handle = af.run(Actions.SYNC_NODE, name, imf.getConfiguration().id, nodeName)) {
+            InstanceStateRecord state = imf.getState(hive).read();
+            String instanceActiveTag = state.activeTag;
 
-        NodeDeploymentResource deployment = ResourceProvider.getResource(node.remote, NodeDeploymentResource.class, context);
+            NodeProcessResource npr = nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context);
+            InstanceNodeStatusDto nodeStatus = npr.getStatus(instanceId);
 
-        // if node active tag is different from current active tag -> deactivate
-        String nodeActiveTag = nodeStatus.activeTag;
-        if (nodeActiveTag != null && !nodeActiveTag.equals(instanceActiveTag)) {
-            Manifest.Key toDeactivate = getNodeKey(nodeName, instanceId, nodeActiveTag);
-            log.debug("Deactivating {}", toDeactivate);
-            deployment.deactivate(toDeactivate);
-        }
+            NodeDeploymentResource deployment = ResourceProvider.getResource(node.remote, NodeDeploymentResource.class, context);
 
-        // make sure every installed version is installed on the node if applicable
-        for (String installedTag : state.installedTags) {
-            Manifest.Key toInstall = getNodeKey(nodeName, instanceId, installedTag);
-            if (toInstall == null) {
-                continue;
+            // if node active tag is different from current active tag -> deactivate
+            String nodeActiveTag = nodeStatus.activeTag;
+            if (nodeActiveTag != null && !nodeActiveTag.equals(instanceActiveTag)) {
+                Manifest.Key toDeactivate = getNodeKey(nodeName, instanceId, nodeActiveTag);
+                log.debug("Deactivating {}", toDeactivate);
+                deployment.deactivate(toDeactivate);
             }
-            try (var handle = af.run(Actions.INSTALL, name, imf.getConfiguration().id, toInstall.getTag())) {
+
+            // make sure every installed version is installed on the node if applicable
+            for (String installedTag : state.installedTags) {
+                Manifest.Key toInstall = getNodeKey(nodeName, instanceId, installedTag);
+                if (toInstall == null) {
+                    continue;
+                }
+
                 log.debug("Installing {}", toInstall);
                 installOnNode(nodeName, toInstall);
             }
-        }
 
-        // activate current active version on node if applicable
-        if (instanceActiveTag != null && !instanceActiveTag.equals(nodeActiveTag)) {
-            Manifest.Key toActivate = getNodeKey(nodeName, instanceId, instanceActiveTag);
-            if (toActivate != null) {
-                try (var handle = af.run(Actions.ACTIVATE, name, imf.getConfiguration().id, instanceActiveTag)) {
+            // activate current active version on node if applicable
+            if (instanceActiveTag != null && !instanceActiveTag.equals(nodeActiveTag)) {
+                Manifest.Key toActivate = getNodeKey(nodeName, instanceId, instanceActiveTag);
+                if (toActivate != null) {
                     log.debug("Activating {}", toActivate);
                     deployment.activate(toActivate);
                 }
             }
         }
-
-        log.info("Done syncing instance {} on node {}", imf.getManifest(), nodeName);
     }
 
     // returns null if node is not present in instance version
@@ -619,10 +616,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     /**
-     * Client applications can specify a set of allowed paths. From the current config tree and this set of allowed
-     * paths, we remove all paths which are not allowed. This builds a dedicated per-application configuration
-     * which is allowed to be provided to clients - this avoids sending sensitive config files which should only
-     * be available on servers.
+     * Client applications can specify a set of allowed paths. From the current config tree and this set of allowed paths, we
+     * remove all paths which are not allowed. This builds a dedicated per-application configuration which is allowed to be
+     * provided to clients - this avoids sending sensitive config files which should only be available on servers.
      */
     private void applyConfigRestrictions(String[] allowedPaths, Path p, Path root) {
         try (DirectoryStream<Path> list = Files.newDirectoryStream(p)) {
@@ -667,8 +663,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             } else if (expectedTag != null) {
                 oldConfig = InstanceManifest.load(hive, instanceConfig.id, null);
                 if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
-                    throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
-                            + ", current=" + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
+                    throw new WebApplicationException(
+                            "Expected version is not the current one: expected=" + expectedTag + ", current="
+                                    + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
                 }
             }
 
@@ -774,7 +771,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             String attachmentMimeType) {
         MailSenderSettingsDto mailSenderSettingsDto = root.getSettings().mailSenderSettings;
 
-        InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
+        InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress)
+                ? null
                 : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
         InternetAddress receiverAddress = MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress);
 
@@ -936,8 +934,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void deleteVersion(String instanceId, String tag) {
         try (var handle = af.run(Actions.DELETE_INSTANCE_VERSION, name, instanceId, tag)) {
             Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
-            InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.DELETE, context.getUserPrincipal().getName(),
-                    null);
+            InstanceManifest.of(hive, key).getHistory(hive)
+                    .recordAction(Action.DELETE, context.getUserPrincipal().getName(), null);
             InstanceManifest.delete(hive, key);
         }
     }
@@ -997,8 +995,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public EntryChunk getEntryContent(String nodeName, RemoteDirectoryEntry entry, long offset, long limit) {
-        return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, context).getEntryContent(entry,
-                offset, limit);
+        return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, context)
+                .getEntryContent(entry, offset, limit);
     }
 
     @Override
@@ -1157,8 +1155,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 // Find node where the application is running
                 Optional<String> node = status.node2Applications.entrySet().stream()
                         .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
-                                && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
-                        .map(Entry::getKey).findFirst();
+                                && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED).map(Entry::getKey)
+                        .findFirst();
 
                 if (node.isEmpty()) {
                     continue; // ignore - not deployed.
@@ -1276,8 +1274,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public ProcessDetailDto getProcessDetailsFromNode(String instanceId, String appId, String node) {
         try {
-            return nodes.getNodeResourceIfOnlineOrThrow(node, NodeProcessResource.class, context).getProcessDetails(instanceId,
-                    appId);
+            return nodes.getNodeResourceIfOnlineOrThrow(node, NodeProcessResource.class, context)
+                    .getProcessDetails(instanceId, appId);
         } catch (Exception e) {
             throw new WebApplicationException("Cannot fetch process status from " + node + " for " + instanceId + ", " + appId,
                     e);
@@ -1297,8 +1295,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
         }
 
-        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).writeToStdin(instanceId, applicationId,
-                data);
+        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
+                .writeToStdin(instanceId, applicationId, data);
     }
 
     @Override
