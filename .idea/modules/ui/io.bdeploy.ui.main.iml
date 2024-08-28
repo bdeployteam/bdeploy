@@ -5,6 +5,8 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/.nyc_output" />
       <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/coverage" />
       <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/.vscode" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/.nx" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/out-tsc" />
     </content>
   </component>
 </module>
