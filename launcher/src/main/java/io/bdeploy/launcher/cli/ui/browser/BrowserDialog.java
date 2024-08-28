@@ -113,9 +113,9 @@ public class BrowserDialog extends BaseDialog {
     private JButton fsckButton;
 
     private JButton launchButton;
+    private JButton reinstallButton;
     private JButton uninstallButton;
     private JButton verifyButton;
-    private JButton reinstallButton;
 
     private JMenuItem launchItem;
     private JMenuItem customizeAndLaunchItem;
@@ -185,24 +185,19 @@ public class BrowserDialog extends BaseDialog {
 
         refreshButton = createHeaderButton("refresh", "Refresh", this::onRefreshButtonClicked,//
                 "Update the locally stored information (name, version...) of all applications");
-
         pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
                 "Prune the selected application");
-
         fsckButton = createHeaderButton("fixErrors", "Fix Errors", this::onFsckButtonClicked,//
                 "Fix any errors in the BHive");
 
         launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
                 "Launch the selected application");
-
-        uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
-                "Uninstall the selected application");
-
-        verifyButton = createHeaderButton("verify", "Verify", this::onVerifyButtonClicked,//
-                "Check if selected application has missing or modified files");
-
         reinstallButton = createHeaderButton("reinstall", "Reinstall", this::onReinstallButtonClicked,//
                 "Reinstall the selected application");
+        uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
+                "Uninstall the selected application");
+        verifyButton = createHeaderButton("verify", "Verify", this::onVerifyButtonClicked,//
+                "Check if selected application has missing or modified files");
 
         // Toolbar on the left side
         JToolBar toolbar = new JToolBar();
@@ -213,9 +208,11 @@ public class BrowserDialog extends BaseDialog {
         toolbar.add(fsckButton);
         toolbar.add(new JToolBar.Separator());
         toolbar.add(launchButton);
-        toolbar.add(uninstallButton);
-        toolbar.add(verifyButton);
+        toolbar.add(new JToolBar.Separator());
         toolbar.add(reinstallButton);
+        toolbar.add(uninstallButton);
+        toolbar.add(new JToolBar.Separator());
+        toolbar.add(verifyButton);
         header.add(toolbar, BorderLayout.WEST);
 
         // Search panel on the right side
@@ -355,11 +352,6 @@ public class BrowserDialog extends BaseDialog {
         updateItem.setToolTipText("Installs the latest available version of the selected application");
         updateItem.addActionListener(this::onUpdateButtonClicked);
 
-        uninstallItem = new JMenuItem(uninstallButton.getText());
-        uninstallItem.setIcon(WindowHelper.loadIcon("/uninstall.png", 16, 16));
-        uninstallItem.setToolTipText(uninstallButton.getToolTipText());
-        uninstallItem.addActionListener(this::onUninstallButtonClicked);
-
         activateStartScriptItem = new JMenuItem("Activate Start Script");
         activateStartScriptItem.setIcon(WindowHelper.loadIcon("/enable.png", 16, 16));
         activateStartScriptItem.setToolTipText("Set this application to be started with its given script name.");
@@ -370,15 +362,20 @@ public class BrowserDialog extends BaseDialog {
         activateFileAssocScriptItem.setToolTipText("Associate files with this application.");
         activateFileAssocScriptItem.addActionListener(this::onActivateFileAssocScriptButtonClicked);
 
-        JMenuItem verifyItem = new JMenuItem(verifyButton.getText());
-        verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
-        verifyItem.setToolTipText(verifyButton.getToolTipText());
-        verifyItem.addActionListener(this::onVerifyButtonClicked);
-
         JMenuItem reinstallItem = new JMenuItem(reinstallButton.getText());
         reinstallItem.setIcon(WindowHelper.loadIcon("/reinstall.png", 16, 16));
         reinstallItem.setToolTipText(reinstallButton.getToolTipText());
         reinstallItem.addActionListener(this::onReinstallButtonClicked);
+
+        uninstallItem = new JMenuItem(uninstallButton.getText());
+        uninstallItem.setIcon(WindowHelper.loadIcon("/uninstall.png", 16, 16));
+        uninstallItem.setToolTipText(uninstallButton.getToolTipText());
+        uninstallItem.addActionListener(this::onUninstallButtonClicked);
+
+        JMenuItem verifyItem = new JMenuItem(verifyButton.getText());
+        verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
+        verifyItem.setToolTipText(verifyButton.getToolTipText());
+        verifyItem.addActionListener(this::onVerifyButtonClicked);
 
         JPopupMenu menu = new JPopupMenu();
         menu.add(launchItem);
@@ -387,13 +384,13 @@ public class BrowserDialog extends BaseDialog {
         menu.add(refreshItem);
         menu.add(updateItem);
         menu.add(new JSeparator());
-        menu.add(uninstallItem);
-        menu.add(new JSeparator());
         menu.add(activateStartScriptItem);
         menu.add(activateFileAssocScriptItem);
         menu.add(new JSeparator());
-        menu.add(verifyItem);
         menu.add(reinstallItem);
+        menu.add(uninstallItem);
+        menu.add(new JSeparator());
+        menu.add(verifyItem);
         table.setComponentPopupMenu(menu);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -514,12 +511,6 @@ public class BrowserDialog extends BaseDialog {
         doLaunch(app, args);
     }
 
-    /** Notification that the selected app should be removed */
-    private void onUninstallButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        doUninstall(app);
-    }
-
     /** Notification that the selected app should be updated */
     private void onUpdateButtonClicked(ActionEvent e) {
         ClientSoftwareConfiguration app = getSelectedApps().get(0);
@@ -532,6 +523,33 @@ public class BrowserDialog extends BaseDialog {
         AppUpdater task = new AppUpdater(lpp, app, args);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.execute();
+    }
+
+    /** Activate the start script of the selected application */
+    private void onActivateStartScriptButtonClicked(ActionEvent e) {
+        handleScriptChange(pathProvider -> new LocalStartScriptHelper(os, auditor, pathProvider), "start");
+    }
+
+    /** Activate the file association script of the selected application */
+    private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
+        handleScriptChange(pathProvider -> new LocalFileAssocScriptHelper(os, auditor, pathProvider), "file association");
+    }
+
+    /** Reinstall a selected application */
+    private void onReinstallButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
+
+        String message = "Are you sure you want to reinstall '" + appName + "'?";
+        int result = JOptionPane.showConfirmDialog(this, message, "Reinstall", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            doReinstall(app);
+        }
+    }
+
+    /** Notification that the selected app should be removed */
+    private void onUninstallButtonClicked(ActionEvent e) {
+        doUninstall(getSelectedApps().get(0));
     }
 
     /** Executes the verify operation on a selected application */
@@ -548,28 +566,6 @@ public class BrowserDialog extends BaseDialog {
         } catch (Exception ex) {
             showErrorMessageDialog(null, "Failed to run verify operation: " + ex.getMessage());
         }
-    }
-
-    /** Reinstall a selected application */
-    private void onReinstallButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
-
-        String message = "Are you sure you want to reinstall '" + appName + "'?";
-        int result = JOptionPane.showConfirmDialog(this, message, "Reinstall", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            doReinstall(app);
-        }
-    }
-
-    /** Activate the start script of the selected application */
-    private void onActivateStartScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(pathProvider -> new LocalStartScriptHelper(os, auditor, pathProvider), "start");
-    }
-
-    /** Activate the file association script of the selected application */
-    private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
-        handleScriptChange(pathProvider -> new LocalFileAssocScriptHelper(os, auditor, pathProvider), "file association");
     }
 
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
