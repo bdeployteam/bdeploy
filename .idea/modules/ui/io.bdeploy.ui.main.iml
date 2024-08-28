@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$/../../../ui/webapp" dumb="true">
       <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/.nyc_output" />
       <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/coverage" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../ui/webapp/.vscode" />
     </content>
   </component>
 </module>
