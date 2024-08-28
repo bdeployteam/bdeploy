@@ -217,6 +217,7 @@ export class ProcessEditService {
         keepAlive: application.descriptor.processControl.supportsKeepAlive,
         noOfRetries: application.descriptor.processControl.noOfRetries,
         startupProbe: application.descriptor.processControl.startupProbe,
+        lifenessProbe: null,
         livenessProbe: application.descriptor.processControl.livenessProbe,
         configDirs: application.descriptor.processControl.configDirs,
         autostart: application.descriptor.processControl.supportsAutostart,
