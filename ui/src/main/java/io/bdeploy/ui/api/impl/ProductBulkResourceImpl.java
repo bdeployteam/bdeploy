@@ -11,7 +11,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.actions.Actions;
-import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.actions.ActionFactory;

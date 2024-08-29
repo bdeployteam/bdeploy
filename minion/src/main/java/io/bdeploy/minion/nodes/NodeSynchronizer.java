@@ -1,5 +1,19 @@
 package io.bdeploy.minion.nodes;
 
+import static io.bdeploy.interfaces.minion.NodeSynchronizationStatus.NOT_SYNCHRONIZED;
+import static io.bdeploy.interfaces.minion.NodeSynchronizationStatus.SYNCHRONIZATION_FAILED;
+import static io.bdeploy.interfaces.minion.NodeSynchronizationStatus.SYNCHRONIZED;
+import static io.bdeploy.interfaces.minion.NodeSynchronizationStatus.SYNCHRONIZING;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.NodeSynchronizationStatus;
@@ -9,18 +23,6 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.dto.InstanceDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static io.bdeploy.interfaces.minion.NodeSynchronizationStatus.*;
 
 public class NodeSynchronizer {
 

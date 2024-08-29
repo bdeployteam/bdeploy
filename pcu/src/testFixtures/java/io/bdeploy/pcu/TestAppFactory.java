@@ -18,10 +18,10 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
-import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 
 public class TestAppFactory {
 
