@@ -207,7 +207,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         return result;
     }
 
-    private VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
+    private static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
         // limited to resolvers which could yield a valid port value, considering potential cross-references.
         CompositeResolver res = new CompositeResolver();
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));

@@ -311,8 +311,8 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
             assertNullOrRelativePath(pd.configTemplates);
             assertNullOrRelativePath(pd.versionFile);
-            pd.instanceTemplates.forEach(this::assertNullOrRelativePath);
-            pd.applicationTemplates.forEach(this::assertNullOrRelativePath);
+            pd.instanceTemplates.forEach(SoftwareResourceImpl::assertNullOrRelativePath);
+            pd.applicationTemplates.forEach(SoftwareResourceImpl::assertNullOrRelativePath);
             assertNullOrRelativePath(pd.pluginFolder);
 
             Path vDesc = desc.getParent().resolve(pd.versionFile);
@@ -371,7 +371,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         }
     }
 
-    private void assertNullOrRelativePath(String p) {
+    private static void assertNullOrRelativePath(String p) {
         if (p == null) {
             return;
         }

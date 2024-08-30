@@ -255,7 +255,7 @@ public class UserDatabase implements AuthService {
         return specialAuths.entrySet().stream().filter(e -> alist.contains(e.getKey())).map(Entry::getValue).toList();
     }
 
-    private <T> boolean hasNonNull(T[] ts) {
+    private static <T> boolean hasNonNull(T[] ts) {
         if (ts == null || ts.length == 0) {
             return false;
         }
@@ -472,7 +472,7 @@ public class UserDatabase implements AuthService {
         return false;
     }
 
-    private void logSuccess(AuthTrace trace, UserInfo info) {
+    private static void logSuccess(AuthTrace trace, UserInfo info) {
         trace.log("Retrieved User:");
         trace.log("  Name: " + info.name);
         trace.log("  Full Name: " + info.fullName);

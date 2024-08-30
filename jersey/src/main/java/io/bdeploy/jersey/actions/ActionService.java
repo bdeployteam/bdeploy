@@ -202,7 +202,7 @@ public class ActionService {
         }
     }
 
-    private String serialize(ActionBroadcastDto dtos) {
+    private static String serialize(ActionBroadcastDto dtos) {
         try {
             return JacksonHelper.getDefaultJsonObjectMapper().writeValueAsString(dtos);
         } catch (JsonProcessingException e) {

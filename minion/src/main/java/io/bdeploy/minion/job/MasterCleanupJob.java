@@ -125,7 +125,7 @@ public class MasterCleanupJob implements Job {
      *
      * @param mr the {@link MinionRoot} of the master minion
      */
-    private void performCleanup(MinionRoot mr) {
+    private static void performCleanup(MinionRoot mr) {
         log.info("Performing cleanup on all nodes");
 
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).

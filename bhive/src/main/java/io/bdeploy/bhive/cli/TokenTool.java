@@ -106,7 +106,7 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
                 aat.getPermissions().toString());
     }
 
-    private void importExistingToken(Path keystore, char[] passphrase, String sigPack) {
+    private static void importExistingToken(Path keystore, char[] passphrase, String sigPack) {
         SecurityHelper helper = SecurityHelper.getInstance();
 
         try {

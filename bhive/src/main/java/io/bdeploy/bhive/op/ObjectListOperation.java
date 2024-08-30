@@ -109,7 +109,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
         }
     }
 
-    private List<ObjectId> flattenTree(TreeView tv) {
+    private static List<ObjectId> flattenTree(TreeView tv) {
         List<ObjectId> result = new ArrayList<>();
         for (ElementView child : tv.getChildren().values()) {
             if (child instanceof BlobView) {

@@ -69,7 +69,7 @@ public class NodeSynchronizer {
         });
     }
 
-    private boolean syncInstanceGroup(InstanceResource ir, MasterNamedResource mnr, InstanceGroupConfigurationDto group,
+    private static boolean syncInstanceGroup(InstanceResource ir, MasterNamedResource mnr, InstanceGroupConfigurationDto group,
             String nodeName) {
         List<InstanceDto> instances = ir.list();
         for (InstanceDto instance : instances) {

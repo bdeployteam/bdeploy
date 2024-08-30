@@ -114,7 +114,7 @@ public class TreeElementDiff {
         }
     }
 
-    private String format(ElementView s, Tree.EntryType t) {
+    private static String format(ElementView s, Tree.EntryType t) {
         return "[" + t.name() + "]" + s.getElementId();
     }
 

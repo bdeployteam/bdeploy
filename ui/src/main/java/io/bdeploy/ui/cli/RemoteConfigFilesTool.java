@@ -167,7 +167,7 @@ public class RemoteConfigFilesTool extends RemoteServiceTool<ConfigFilesConfig> 
         return table;
     }
 
-    private String getStatusString(ConfigFileDto file) {
+    private static String getStatusString(ConfigFileDto file) {
         if (file.instanceId == null) {
             return "ONLY-PRODUCT";
         } else {
@@ -181,7 +181,7 @@ public class RemoteConfigFilesTool extends RemoteServiceTool<ConfigFilesConfig> 
         }
     }
 
-    private String toBase64(String filepath) {
+    private static String toBase64(String filepath) {
         try {
             byte[] fileContent = Files.readAllBytes(Paths.get(filepath));
             return Base64.getEncoder().encodeToString(fileContent);

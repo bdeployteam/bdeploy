@@ -318,7 +318,7 @@ public class ObjectManager {
      * @param child {@link Path} to the file to check
      * @param hint a potential pre-calculated {@link ContentInfo}
      */
-    private void setExecutable(Path child, ContentInfo hint) throws IOException {
+    private static void setExecutable(Path child, ContentInfo hint) throws IOException {
         PosixFileAttributeView view = PathHelper.getPosixView(child);
         if (view != null) {
             hint = PathHelper.getContentInfo(child, hint);

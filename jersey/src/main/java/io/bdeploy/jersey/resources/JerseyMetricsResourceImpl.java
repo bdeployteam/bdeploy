@@ -60,7 +60,7 @@ public class JerseyMetricsResourceImpl implements JerseyMetricsResource {
         return hm;
     }
 
-    private <T> GaugeMetric<T> readGauge(Gauge<T> m) {
+    private static <T> GaugeMetric<T> readGauge(Gauge<T> m) {
         GaugeMetric<T> gm = new GaugeMetric<>();
         gm.value = m.getValue();
         return gm;
@@ -87,18 +87,18 @@ public class JerseyMetricsResourceImpl implements JerseyMetricsResource {
         return cm;
     }
 
-    private void updateFields(CounterFields fields, Counting counting) {
+    private static void updateFields(CounterFields fields, Counting counting) {
         fields.value = counting.getCount();
     }
 
-    private void updateFields(MeterFields fields, Metered metered) {
+    private static void updateFields(MeterFields fields, Metered metered) {
         fields.meanRate = metered.getMeanRate();
         fields.oneMinRate = metered.getOneMinuteRate();
         fields.fiveMinRate = metered.getFiveMinuteRate();
         fields.fifteenMinRate = metered.getFifteenMinuteRate();
     }
 
-    private void updateFields(HistogramFields fields, Sampling sampled) {
+    private static void updateFields(HistogramFields fields, Sampling sampled) {
         Snapshot samples = sampled.getSnapshot();
         fields.min = samples.getMin();
         fields.max = samples.getMax();

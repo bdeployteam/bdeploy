@@ -148,7 +148,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
         }
     }
 
-    private ProxiedResponseWrapper wrap(Response resp) {
+    private static ProxiedResponseWrapper wrap(Response resp) {
         ProxiedResponseWrapper wrapper = new ProxiedResponseWrapper();
 
         wrapper.headers = resp.getStringHeaders();

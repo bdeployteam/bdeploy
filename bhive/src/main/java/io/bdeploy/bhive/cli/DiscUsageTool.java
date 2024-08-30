@@ -95,7 +95,7 @@ public class DiscUsageTool extends ConfiguredCliTool<DiscUsageConfig> {
         return result;
     }
 
-    private void calculateUsage(BHive hive, Manifest.Key key, DataTable result) {
+    private static void calculateUsage(BHive hive, Manifest.Key key, DataTable result) {
         LongAdder refs = new LongAdder();
 
         // find all objects.

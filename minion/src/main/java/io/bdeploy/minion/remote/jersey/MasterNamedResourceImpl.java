@@ -180,7 +180,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         this.name = name;
     }
 
-    private InstanceState getState(InstanceManifest im, BHive hive) {
+    private static InstanceState getState(InstanceManifest im, BHive hive) {
         return im.getState(hive);
     }
 
@@ -469,7 +469,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
-    private void assureTagMatch(String targetTag, String actualTag) {
+    private static void assureTagMatch(String targetTag, String actualTag) {
         if (targetTag == null || actualTag == null) {
             throw new WebApplicationException("Cannot determine target or actual tag of instance object",
                     Status.INTERNAL_SERVER_ERROR);
@@ -574,7 +574,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return key;
     }
 
-    private void cleanCommandDuplicates(CommandConfiguration command) {
+    private static void cleanCommandDuplicates(CommandConfiguration command) {
         if (command == null || command.parameters == null || command.parameters.isEmpty()) {
             return;
         }
@@ -620,7 +620,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
      * remove all paths which are not allowed. This builds a dedicated per-application configuration which is allowed to be
      * provided to clients - this avoids sending sensitive config files which should only be available on servers.
      */
-    private void applyConfigRestrictions(String[] allowedPaths, Path p, Path root) {
+    private static void applyConfigRestrictions(String[] allowedPaths, Path p, Path root) {
         try (DirectoryStream<Path> list = Files.newDirectoryStream(p)) {
             for (Path path : list) {
                 if (Files.isDirectory(path)) {
@@ -803,7 +803,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return next.toString();
     }
 
-    private InstanceNodeConfiguration updateControlGroups(InstanceNodeConfiguration nodeConfiguration) {
+    private static InstanceNodeConfiguration updateControlGroups(InstanceNodeConfiguration nodeConfiguration) {
         if (nodeConfiguration.controlGroups.isEmpty()) {
             // nothing defined yet, fill it with the default - processes in configuration order.
             ProcessControlGroupConfiguration defGrp = new ProcessControlGroupConfiguration();
@@ -871,7 +871,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
-    private void applyUpdates(List<FileStatusDto> updates, Path cfgDir) {
+    private static void applyUpdates(List<FileStatusDto> updates, Path cfgDir) {
         for (FileStatusDto update : updates) {
             Path file = cfgDir.resolve(update.file.replace("\\", "/"));
             if (!file.normalize().startsWith(cfgDir)) {

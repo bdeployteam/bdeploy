@@ -39,7 +39,7 @@ public class StringEntryChunkDto {
         this.binary = binary;
     }
 
-    private boolean isBinary(byte[] bytes) {
+    private static boolean isBinary(byte[] bytes) {
         for (byte b : bytes) {
             if (b == 0) {
                 return true;

@@ -48,7 +48,7 @@ public class ActionFactory {
         return actions.start(new Action(action, group, instance, item), as.get());
     }
 
-    private IntermediateMultiHandle tryMap(Supplier<ActionHandle> producer) {
+    private static IntermediateMultiHandle tryMap(Supplier<ActionHandle> producer) {
         IntermediateMultiHandle h = new IntermediateMultiHandle();
         try {
             h.handle = producer.get();
@@ -58,7 +58,7 @@ public class ActionFactory {
         return h;
     }
 
-    private ActionHandle multiHandle(List<IntermediateMultiHandle> handles) {
+    private static ActionHandle multiHandle(List<IntermediateMultiHandle> handles) {
         List<IntermediateMultiHandle> withError = handles.stream().filter(h -> h.ex != null).collect(Collectors.toList());
         if (!withError.isEmpty()) {
             // we had an exception! close all established handles and throw.
@@ -83,18 +83,18 @@ public class ActionFactory {
 
     public ActionHandle runMulti(Actions action, String group, Collection<String> instances) {
         return instances.stream().map(i -> tryMap(() -> run(action, group, i)))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), this::multiHandle));
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ActionFactory::multiHandle));
     }
 
     public ActionHandle runMulti(Actions action, String group, String instance, Collection<String> items) {
         return items.stream().map(i -> tryMap(() -> run(action, group, instance, i)))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), this::multiHandle));
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ActionFactory::multiHandle));
     }
 
     public ActionHandle runMultiAs(Actions action, String group, String instance, Collection<String> items,
             Supplier<ActionExecution> as) {
         return items.stream().map(i -> tryMap(() -> runAs(action, group, instance, i, as)))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), this::multiHandle));
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ActionFactory::multiHandle));
     }
 
 }

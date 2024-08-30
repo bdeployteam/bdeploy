@@ -172,8 +172,8 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         return verifyAndUpdateSearchResult(user, performRequest(user, server, grant, trace));
     }
 
-    private OIDCTokenResponse performRequest(UserInfo user, OIDCSettingsDto server, AuthorizationGrant grant, AuthTrace trace)
-            throws ParseException, IOException, URISyntaxException {
+    private static OIDCTokenResponse performRequest(UserInfo user, OIDCSettingsDto server, AuthorizationGrant grant,
+            AuthTrace trace) throws ParseException, IOException, URISyntaxException {
         // Configured credentials which allow BDeploy to connect to the OIDC endpoint.
         ClientID clientID = new ClientID(server.client);
         Secret clientSecret = new Secret(server.secret);
@@ -226,14 +226,14 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         return user;
     }
 
-    private String toExternalTag(OIDCTokenResponse r) {
+    private static String toExternalTag(OIDCTokenResponse r) {
         return new String(
                 StorageHelper.toRawBytes(
                         new OIDCTokenCache(r.getOIDCTokens().getIDTokenString(), r.getTokens().getRefreshToken().toString())),
                 StandardCharsets.UTF_8);
     }
 
-    private OIDCTokenCache fromExternalTag(String tag) {
+    private static OIDCTokenCache fromExternalTag(String tag) {
         return StorageHelper.fromRawBytes(tag.getBytes(StandardCharsets.UTF_8), OIDCTokenCache.class);
     }
 
@@ -294,7 +294,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         return true;
     }
 
-    private JWT getJwt(String token) {
+    private static JWT getJwt(String token) {
         try {
             return JWTParser.parse(token);
         } catch (Exception e) {

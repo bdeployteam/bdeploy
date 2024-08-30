@@ -69,7 +69,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
      * @param inm the {@link InstanceNodeManifest} to read state from.
      * @return the {@link InstanceState}, potentially migrated from "old" information in {@link MinionState}.
      */
-    private InstanceState getState(InstanceNodeManifest inm, BHive hive) {
+    private static InstanceState getState(InstanceNodeManifest inm, BHive hive) {
         return inm.getState(hive);
     }
 

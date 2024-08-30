@@ -83,7 +83,7 @@ public class ApplicationParameterProvider {
         return TemplateHelper.updateReferences(params.get(0).value.getPreRenderable(), r -> updateReference(app, r));
     }
 
-    private String updateReference(ApplicationConfiguration app, String templateRef) {
+    private static String updateReference(ApplicationConfiguration app, String templateRef) {
         if (templateRef != null && templateRef.startsWith(Variables.PARAMETER_VALUE.getPrefix())) {
             String actualRef = templateRef.substring(Variables.PARAMETER_VALUE.getPrefix().length());
 

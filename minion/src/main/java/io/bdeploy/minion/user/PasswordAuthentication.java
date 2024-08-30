@@ -78,7 +78,7 @@ final class PasswordAuthentication implements Authenticator {
      *
      * @return true if the password and token match
      */
-    private boolean verify(char[] password, String token) {
+    private static boolean verify(char[] password, String token) {
         Matcher m = layout.matcher(token);
         if (!m.matches()) {
             throw new IllegalArgumentException("Invalid token format");

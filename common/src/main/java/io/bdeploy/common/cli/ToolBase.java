@@ -287,7 +287,7 @@ public abstract class ToolBase {
         }
     }
 
-    private String getToolCategory(Class<? extends CliTool> clazz) {
+    private static String getToolCategory(Class<? extends CliTool> clazz) {
         ToolCategory annotation = clazz.getAnnotation(ToolCategory.class);
         if (annotation == null || annotation.value() == null) {
             return "Ungrouped Tools";

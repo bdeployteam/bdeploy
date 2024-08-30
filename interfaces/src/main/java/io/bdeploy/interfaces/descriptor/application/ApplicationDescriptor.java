@@ -107,7 +107,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
         }
     }
 
-    private void fixupParameterDefaults(Collection<ParameterDescriptor> params) {
+    private static void fixupParameterDefaults(Collection<ParameterDescriptor> params) {
         for (var param : params) {
             if (!param.hasValue) {
                 param.type = VariableType.BOOLEAN;
@@ -133,7 +133,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
         }
     }
 
-    private void fixupCommandExpansion(List<ParameterTemplateDescriptor> templates, List<ParameterDescriptor> params) {
+    private static void fixupCommandExpansion(List<ParameterTemplateDescriptor> templates, List<ParameterDescriptor> params) {
         ParameterDescriptor toReplace = null;
         do {
             toReplace = params.stream().filter(p -> p.template != null).findFirst().orElse(null);

@@ -164,7 +164,7 @@ public class LdapAuthenticator implements Authenticator {
         return result.toArray(String[]::new);
     }
 
-    private UserInfo verifyAndUpdateSearchResult(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx,
+    private static UserInfo verifyAndUpdateSearchResult(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx,
             SearchResult sr) throws NamingException {
         String userDn = String.valueOf(sr.getAttributes().get(LDAP_DN).get(0));
 
@@ -192,7 +192,7 @@ public class LdapAuthenticator implements Authenticator {
         return () -> iterator;
     }
 
-    private LdapContext createServerContext(LDAPSettingsDto server) throws NamingException {
+    private static LdapContext createServerContext(LDAPSettingsDto server) throws NamingException {
         Properties env = new Properties();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, server.server);
@@ -206,7 +206,7 @@ public class LdapAuthenticator implements Authenticator {
         return ctx;
     }
 
-    private void closeServerContext(DirContext ctx) throws NamingException {
+    private static void closeServerContext(DirContext ctx) throws NamingException {
         ctx.close();
     }
 
@@ -316,7 +316,7 @@ public class LdapAuthenticator implements Authenticator {
         return users;
     }
 
-    private String exception2String(String message, Exception exception) {
+    private static String exception2String(String message, Exception exception) {
         try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
             exception.printStackTrace(pw);
             return message + '\n' + sw.toString();

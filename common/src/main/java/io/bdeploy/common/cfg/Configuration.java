@@ -253,7 +253,7 @@ public class Configuration {
         return conversion;
     }
 
-    private String getParameterConfigurationHint(Class<?> returnType, String methodName, Object object) {
+    private static String getParameterConfigurationHint(Class<?> returnType, String methodName, Object object) {
         StringBuilder hint = new StringBuilder();
 
         hint.append("Could not resolve " + methodName + " parameter. ");
@@ -271,7 +271,7 @@ public class Configuration {
         return hint.toString();
     }
 
-    private UnaryOperator<Object> getMapper(Method method) {
+    private static UnaryOperator<Object> getMapper(Method method) {
         ConfigurationValueMapping mapping = method.getAnnotation(ConfigurationValueMapping.class);
         UnaryOperator<Object> mapper = s -> s;
 
@@ -285,7 +285,7 @@ public class Configuration {
         return mapper;
     }
 
-    private void validateOrThrow(Object value, Method m, Class<? extends ConfigValidator<?>>[] validators) {
+    private static void validateOrThrow(Object value, Method m, Class<? extends ConfigValidator<?>>[] validators) {
         if (validators == null) {
             return;
         }

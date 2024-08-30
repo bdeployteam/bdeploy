@@ -178,7 +178,7 @@ public class LocalLoginManager {
 
     }
 
-    private SSLContext createTrustAllContext() {
+    private static SSLContext createTrustAllContext() {
         try {
             SSLContext sslcontext = SSLContext.getInstance("TLS");
 

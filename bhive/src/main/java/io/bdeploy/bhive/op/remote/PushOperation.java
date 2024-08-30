@@ -138,7 +138,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     /**
      * Find all {@link ObjectId}s referenced by the given trees (flat).
      */
-    private Set<ObjectId> getRequiredObjects(List<TreeView> missingTrees) {
+    private static Set<ObjectId> getRequiredObjects(List<TreeView> missingTrees) {
         Set<ObjectId> result = new LinkedHashSet<>();
         for (TreeView view : missingTrees) {
             for (ElementView child : view.getChildren().values()) {

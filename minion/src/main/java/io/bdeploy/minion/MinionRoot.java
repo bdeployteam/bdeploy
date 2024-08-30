@@ -268,7 +268,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.consoleLog = consoleLog;
 
         // as early as possible.
-        ObjectId baseline = updateLoggingConfiguration(this::withBuiltinLogConfig);
+        ObjectId baseline = updateLoggingConfiguration(MinionRoot::withBuiltinLogConfig);
         modifyState(s -> s.logConfigId = baseline);
 
         doMigrate();
@@ -394,7 +394,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return baseline;
     }
 
-    private void createLogBackup(ObjectId baseline, Path cfgPath) {
+    private static void createLogBackup(ObjectId baseline, Path cfgPath) {
         Path backup = null;
         try (InputStream is = Files.newInputStream(cfgPath)) {
             ObjectId local = ObjectId.createFromStreamNoCopy(is);
@@ -421,7 +421,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return config.resolve("log4j2.xml");
     }
 
-    private ObjectId withBuiltinLogConfig(Function<InputStream, ObjectId> function) {
+    private static ObjectId withBuiltinLogConfig(Function<InputStream, ObjectId> function) {
         try (InputStream builtin = MinionRoot.class.getResourceAsStream("/log4j2.xml")) {
             return function.apply(builtin);
         } catch (IOException e) {

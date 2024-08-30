@@ -356,7 +356,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         return result;
     }
 
-    private void waitASecond() {
+    private static void waitASecond() {
         try {
             Thread.sleep(1_000);
         } catch (InterruptedException e) {
@@ -483,7 +483,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
     }
 
-    private List<Throwable> performUpdate(Manifest.Key version, SortedMap<String, MinionUpdateResource> toUpdate) {
+    private static List<Throwable> performUpdate(Manifest.Key version, SortedMap<String, MinionUpdateResource> toUpdate) {
         List<Throwable> problems = new ArrayList<>();
         toUpdate.entrySet().forEach(entry -> {
             try {
@@ -566,7 +566,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         return toUpdate;
     }
 
-    private OperatingSystem getTargetOsFromUpdate(Key version) {
+    private static OperatingSystem getTargetOsFromUpdate(Key version) {
         ScopedManifestKey scoped = ScopedManifestKey.parse(version);
         if (scoped == null) {
             throw new IllegalStateException("Cannot determin OS from key " + version);

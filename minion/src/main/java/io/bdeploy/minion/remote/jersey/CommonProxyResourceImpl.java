@@ -86,11 +86,11 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
                 request.getMediaType() == null ? null : request.getMediaType().toString(), cookies);
     }
 
-    private String getSubPath(HttpEndpoint endpoint, String fullPath) {
+    private static String getSubPath(HttpEndpoint endpoint, String fullPath) {
         return fullPath.substring(endpoint.id.length());
     }
 
-    private Map<String, List<String>> filterBDeployParameters(MultivaluedMap<String, String> queryParameters) {
+    private static Map<String, List<String>> filterBDeployParameters(MultivaluedMap<String, String> queryParameters) {
         return queryParameters.entrySet().stream().filter(e -> !e.getKey().startsWith("BDeploy_"))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }

@@ -44,7 +44,7 @@ public class MultiLocalDependencyFetcher implements DependencyFetcher {
             resolved = LocalDependencyFetcher.resolveSingleLocal(source, dep, os);
             if (resolved != null) {
                 // copy found dependency into target
-                this.copyDependency(source, target, resolved);
+                copyDependency(source, target, resolved);
                 return resolved;
             }
         }
@@ -52,7 +52,7 @@ public class MultiLocalDependencyFetcher implements DependencyFetcher {
         throw new IllegalStateException("Cannot resolve dependency " + dep + " for " + os);
     }
 
-    private void copyDependency(BHive source, BHive target, Key resolved) {
+    private static void copyDependency(BHive source, BHive target, Key resolved) {
         Set<ObjectId> objectIds = source.execute(new ObjectListOperation().addManifest(resolved));
         CopyOperation op = new CopyOperation().setDestinationHive(target).addManifest(resolved).addObject(objectIds);
         source.execute(op);

@@ -333,7 +333,7 @@ public class CleanupHelper {
      * @param context the instance group context with collected data for
      * @return a Map containing all products in use (productKeyName -> List of productKeys sorted by tag ascending)
      */
-    private Map<String, List<Key>> collectProductsInUse(CleanupInstanceGroupContext context) {
+    private static Map<String, List<Key>> collectProductsInUse(CleanupInstanceGroupContext context) {
         // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
 
         // create a map with all installed instance versions (instanceKeyName -> set of tags)
@@ -388,7 +388,7 @@ public class CleanupHelper {
      * @param context the instance group context with collected data for
      * @return List of {@link CleanupAction}s
      */
-    private List<CleanupAction> calculateMetaManifests(CleanupInstanceGroupContext context) {
+    private static List<CleanupAction> calculateMetaManifests(CleanupInstanceGroupContext context) {
         log.info("Calculate stale meta-manifests in group {}", context.getInstanceGroupConfiguration().name);
 
         List<CleanupAction> actions = new ArrayList<>();

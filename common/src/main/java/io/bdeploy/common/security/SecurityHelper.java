@@ -390,7 +390,7 @@ public class SecurityHelper {
         return ks;
     }
 
-    private PrivateKey getPrivateKey(KeyStore ks, char[] passphrase) throws GeneralSecurityException {
+    private static PrivateKey getPrivateKey(KeyStore ks, char[] passphrase) throws GeneralSecurityException {
         // find the "newest" alias, assume aliases are numbers
         return (PrivateKey) ks.getKey(ROOT_ALIAS, passphrase);
     }
@@ -398,7 +398,7 @@ public class SecurityHelper {
     /**
      * Load the public certificate from the given {@link KeyStore}.
      */
-    private Certificate getCertificate(KeyStore ks) throws KeyStoreException {
+    private static Certificate getCertificate(KeyStore ks) throws KeyStoreException {
         String alias = ROOT_ALIAS;
         if (!ks.containsAlias(ROOT_ALIAS)) {
             alias = CERT_ALIAS;
@@ -419,7 +419,7 @@ public class SecurityHelper {
         return encode(signature);
     }
 
-    private Signature getSignatureAlgorithm() throws NoSuchAlgorithmException {
+    private static Signature getSignatureAlgorithm() throws NoSuchAlgorithmException {
         return Signature.getInstance("SHA256withRSA");
     }
 

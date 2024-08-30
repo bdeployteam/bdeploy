@@ -114,7 +114,7 @@ public class ProductUpdateService {
         return instance;
     }
 
-    private void recalculateInstanceVariables(InstanceUpdateDto instance, ProductManifest targetProduct,
+    private static void recalculateInstanceVariables(InstanceUpdateDto instance, ProductManifest targetProduct,
             ProductManifest currentProduct, SystemConfiguration system) {
         Set<String> currentProductVarIds = new HashSet<>();
         if (currentProduct != null) {
@@ -217,7 +217,7 @@ public class ProductUpdateService {
         }
     }
 
-    private List<ParameterConfiguration> reorderParameters(List<ParameterConfiguration> values,
+    private static List<ParameterConfiguration> reorderParameters(List<ParameterConfiguration> values,
             List<ParameterDescriptor> descriptors) {
         List<ParameterConfiguration> reordered = new ArrayList<>();
 
@@ -254,7 +254,7 @@ public class ProductUpdateService {
         return reordered;
     }
 
-    private List<HttpEndpoint> updateEndpoints(List<HttpEndpoint> values, List<HttpEndpoint> descriptors) {
+    private static List<HttpEndpoint> updateEndpoints(List<HttpEndpoint> values, List<HttpEndpoint> descriptors) {
         List<HttpEndpoint> result = new ArrayList<>();
 
         // each descriptor must be present, prefer existing config, otherwise add default.
@@ -374,7 +374,7 @@ public class ProductUpdateService {
         }
     }
 
-    private Optional<ParameterConfiguration> getParameter(ApplicationConfiguration config, String id) {
+    private static Optional<ParameterConfiguration> getParameter(ApplicationConfiguration config, String id) {
         Optional<ParameterConfiguration> para = Optional.empty();
 
         if (config != null && config.start != null && config.start.parameters != null) {
@@ -535,7 +535,7 @@ public class ProductUpdateService {
         return result;
     }
 
-    private void validateParameter(ApplicationConfiguration process, ApplicationDescriptor appDesc,
+    private static void validateParameter(ApplicationConfiguration process, ApplicationDescriptor appDesc,
             ParameterConfiguration paramValue, ParameterDescriptor paramDesc, List<ApplicationValidationDto> result,
             VariableResolver resolver) {
         // check condition.

@@ -215,7 +215,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         return createSuccess();
     }
 
-    private void updateSelf(MinionRoot mr, Path ks, char[] ksp) throws GeneralSecurityException, IOException {
+    private static void updateSelf(MinionRoot mr, Path ks, char[] ksp) throws GeneralSecurityException, IOException {
         SecurityHelper helper = SecurityHelper.getInstance();
         ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
 

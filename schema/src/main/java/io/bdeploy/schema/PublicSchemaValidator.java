@@ -47,10 +47,10 @@ public class PublicSchemaValidator {
 
         jsonSchema.initializeValidators();
 
-        return jsonSchema.validate(node).stream().map(this::messageToString).toList();
+        return jsonSchema.validate(node).stream().map(PublicSchemaValidator::messageToString).toList();
     }
 
-    private String messageToString(ValidationMessage m) {
+    private static String messageToString(ValidationMessage m) {
         return "[" + m.getType() + "] " + m.getMessage();
     }
 

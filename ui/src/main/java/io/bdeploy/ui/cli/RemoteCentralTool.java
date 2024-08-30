@@ -400,7 +400,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         return createSuccess().addField("Instance Group", group);
     }
 
-    private void checkMode(BackendInfoDto version, MinionMode expected) {
+    private static void checkMode(BackendInfoDto version, MinionMode expected) {
         if (version.mode != expected) {
             throw new IllegalArgumentException("Target server has wrong mode for the requested command: " + version.mode);
         }

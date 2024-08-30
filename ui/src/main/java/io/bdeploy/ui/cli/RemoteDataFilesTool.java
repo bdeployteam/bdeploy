@@ -142,7 +142,7 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         return dto;
     }
 
-    private String toBase64(String filepath) {
+    private static String toBase64(String filepath) {
         try {
             byte[] fileContent = Files.readAllBytes(Paths.get(filepath));
             return Base64.getEncoder().encodeToString(fileContent);
@@ -228,11 +228,11 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         return result;
     }
 
-    private int countFiles(Map<RemoteDirectory, List<RemoteDirectoryEntry>> matchingFiles) {
+    private static int countFiles(Map<RemoteDirectory, List<RemoteDirectoryEntry>> matchingFiles) {
         return matchingFiles.values().stream().mapToInt(List::size).sum();
     }
 
-    private boolean matches(String filter, String path, boolean isRegex) {
+    private static boolean matches(String filter, String path, boolean isRegex) {
         if (filter == null) {
             return true;
         }

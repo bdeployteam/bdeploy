@@ -102,7 +102,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         });
     }
 
-    private MinionStatusDto createStarting(MinionDto node) {
+    private static MinionStatusDto createStarting(MinionDto node) {
         return MinionStatusDto.createOffline(node, "Starting...");
     }
 

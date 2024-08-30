@@ -61,7 +61,7 @@ public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCel
     }
 
     /** Returns the sort order for the given column */
-    private SortOrder getSortOrder(JTable t, int colIdx) {
+    private static SortOrder getSortOrder(JTable t, int colIdx) {
         RowSorter<? extends TableModel> sorter = t.getRowSorter();
         for (SortKey key : sorter.getSortKeys()) {
             if (key.getColumn() == colIdx) {

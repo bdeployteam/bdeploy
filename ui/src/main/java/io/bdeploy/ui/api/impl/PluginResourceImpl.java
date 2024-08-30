@@ -192,7 +192,7 @@ public class PluginResourceImpl implements PluginResource {
     /**
      * @return whether v2 is newer than v1
      */
-    private boolean isNewerVersion(String v1, String v2) {
+    private static boolean isNewerVersion(String v1, String v2) {
         try {
             Version ver1 = VersionHelper.tryParse(v1);
             Version ver2 = VersionHelper.tryParse(v2);

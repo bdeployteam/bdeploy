@@ -250,10 +250,10 @@ public class InstanceResourceImpl implements InstanceResource {
             return null;
         }
 
-        return this.isNewerVersionAvailable(productKeys, config, productVersionComparator) ? repo : null;
+        return isNewerVersionAvailable(productKeys, config, productVersionComparator) ? repo : null;
     }
 
-    private boolean isNewerVersionAvailable(Collection<Key> keys, InstanceConfiguration config,
+    private static boolean isNewerVersionAvailable(Collection<Key> keys, InstanceConfiguration config,
             Comparator<String> productVersionComparator) {
         String productName = config.product.getName();
         String productTag = config.product.getTag();
@@ -275,7 +275,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
     }
 
-    private void readTree(ConfigDirDto parent, TreeView tv) {
+    private static void readTree(ConfigDirDto parent, TreeView tv) {
         for (Map.Entry<String, ElementView> entry : tv.getChildren().entrySet()) {
             if (entry.getValue() instanceof TreeView x) {
                 ConfigDirDto child = new ConfigDirDto();
@@ -335,7 +335,7 @@ public class InstanceResourceImpl implements InstanceResource {
         rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
     }
 
-    private void applyProductInstanceVariables(InstanceConfiguration config, ProductManifest product) {
+    private static void applyProductInstanceVariables(InstanceConfiguration config, ProductManifest product) {
         if (product.getInstanceVariables() != null) {
             for (VariableDescriptor instVar : product.getInstanceVariables()) {
                 config.instanceVariables.add(new VariableConfiguration(instVar));
@@ -348,7 +348,7 @@ public class InstanceResourceImpl implements InstanceResource {
         return ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context);
     }
 
-    private void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
+    private static void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
         if (minion.getMode() != MinionMode.CENTRAL) {
             return;
         }
@@ -450,7 +450,7 @@ public class InstanceResourceImpl implements InstanceResource {
         Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
                 k -> vss.getTagComparator(group, im.getConfiguration().product));
 
-        boolean newerVersionAvailable = this.isNewerVersionAvailable(pmScan, config, productVersionComparator);
+        boolean newerVersionAvailable = isNewerVersionAvailable(pmScan, config, productVersionComparator);
         String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, pmScan,
                 productVersionComparator, productKeysPerRepo);
         return InstanceDto.create(imKey, config, activeProduct, newerVersionAvailable, newerVersionAvailableInRepository,
