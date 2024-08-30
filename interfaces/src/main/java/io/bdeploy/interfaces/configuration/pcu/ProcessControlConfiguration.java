@@ -3,6 +3,7 @@ package io.bdeploy.interfaces.configuration.pcu;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.descriptor.application.LivenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
@@ -52,6 +53,22 @@ public class ProcessControlConfiguration {
      */
     @JsonAlias("lifenessProbe")
     public LivenessProbeDescriptor livenessProbe;
+
+    /**
+     * Compatibility module when we act as REST client so we send the original name of the livenessProbe.
+     * <p>
+     * This enables new CENTRAL minions to still save configuration with older MANAGED minions (7.1.0 and older).
+     * <p>
+     * In the future we can remove this bridge and everybody will use the new format.
+     *
+     * @deprecated This is here for compatibility of central with managed servers which run older releases. This should be removed
+     *             at the point where central servers are allowed to force managed servers to be newer than 7.1.0.
+     */
+    @Deprecated(since = "7.1.0", forRemoval = true)
+    @JsonProperty
+    public LivenessProbeDescriptor getLifenessProbe() {
+        return livenessProbe;
+    }
 
     // ################################################# only for client applications #################################################
 
