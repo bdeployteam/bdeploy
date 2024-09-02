@@ -147,7 +147,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         requestContext.setProperty(PERM_SCOPE, authScope);
     }
 
-    private String getRequiredPermissionScope(ExtendedUriInfo uriInfo, ResourceMethod resourceMethod) {
+    private static String getRequiredPermissionScope(ExtendedUriInfo uriInfo, ResourceMethod resourceMethod) {
         Method method = resourceMethod.getInvocable().getDefinitionMethod();
         RequiredPermissionScope requiredPermissionScope = method.getAnnotation(RequiredPermissionScope.class);
         if (requiredPermissionScope == null) {

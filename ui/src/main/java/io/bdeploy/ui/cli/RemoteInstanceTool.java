@@ -466,7 +466,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         return table;
     }
 
-    private List<InstanceVersionDto> sortFilterLimit(List<InstanceVersionDto> versions, InstanceStateRecord state,
+    private static List<InstanceVersionDto> sortFilterLimit(List<InstanceVersionDto> versions, InstanceStateRecord state,
             InstanceDto instance, InstanceConfig config, InstanceResource ir) {
         // sort versions in descending order (latest first)
         versions.sort((a, b) -> Long.compare(Long.parseLong(b.key.getTag()), Long.parseLong(a.key.getTag())));

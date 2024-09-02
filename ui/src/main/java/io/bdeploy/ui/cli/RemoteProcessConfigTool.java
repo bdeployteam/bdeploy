@@ -313,7 +313,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
     }
 
     //TODO We should eventually implement a handling to allow for those changes via the CLI so that the CLI becomes as powerful as the WebUI.
-    private void checkNoMandatoryConditionalChanges(ApplicationConfiguration app, ApplicationDescriptor appDesc,
+    private static void checkNoMandatoryConditionalChanges(ApplicationConfiguration app, ApplicationDescriptor appDesc,
             InstanceNodeConfigurationListDto nodes) {
         // Check if mandatory conditional parameters must be added/removed
         var resolver = ProductUpdateService.createResolver(findNodeForApp(nodes, app), app);

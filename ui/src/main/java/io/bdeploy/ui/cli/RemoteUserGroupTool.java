@@ -141,7 +141,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
         }
     }
 
-    private void remove(UserGroupConfig config, AuthAdminResource admin) {
+    private static void remove(UserGroupConfig config, AuthAdminResource admin) {
         UserGroupInfo group = getGroup(config.remove(), admin);
         admin.deleteUserGroups(group.id);
     }

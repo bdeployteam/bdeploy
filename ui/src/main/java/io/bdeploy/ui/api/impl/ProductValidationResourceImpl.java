@@ -64,7 +64,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
     }
 
-    private ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
+    private static ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
         List<ProductValidationIssueApi> issues = new ArrayList<>();
 
         // validate all application commands, parameters, etc.
@@ -97,7 +97,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                         "Duplicate instance variable definition IDs: " + String.join(", ", duplicateIds)));
     }
 
-    private List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
+    private static List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
         return desc.instanceTemplates.stream().map(t -> {
             try {
                 var issues = validateFlatInstanceTemplate(
@@ -114,7 +114,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
     }
 
-    private List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
+    private static List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
         return desc.applicationTemplates.stream().map(a -> {
             try {
                 var issues = validateFlatApplicationTemplate(
@@ -131,8 +131,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
     }
 
-    private Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnInstance(InstanceTemplateDescriptor t,
-            ProductValidationConfigDescriptor desc) {
+    private static Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnInstance(
+            InstanceTemplateDescriptor t, ProductValidationConfigDescriptor desc) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
         // validate on instanceVariable values, application names and application startParameters
@@ -236,7 +236,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return result;
     }
 
-    private List<ProductValidationIssueApi> validateFlatInstanceTemplate(FlattenedInstanceTemplateConfiguration tpl,
+    private static List<ProductValidationIssueApi> validateFlatInstanceTemplate(FlattenedInstanceTemplateConfiguration tpl,
             ProductValidationConfigDescriptor descriptor) {
         List<String> controlGroupsInTemplate = tpl.processControlGroups.stream().map(c -> c.name).toList();
         List<ProductValidationIssueApi> result = new ArrayList<>();
@@ -277,7 +277,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return "<anonymous> (" + s + ")";
     }
 
-    private void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,
+    private static void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,
             List<ParameterTemplateDescriptor> parameterTemplates) {
 
         // expand and verify parameter templates
@@ -384,7 +384,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return config;
     }
 
-    private <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass, PublicSchemaValidator validator,
+    private static <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass, PublicSchemaValidator validator,
             Schema schema) {
         return filenames == null ? Collections.emptyList()
                 : filenames.stream().map(dir::resolve).map(path -> parse(root, path, klass, validator, schema)).toList();

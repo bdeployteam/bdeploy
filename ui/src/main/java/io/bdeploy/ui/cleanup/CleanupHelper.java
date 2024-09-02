@@ -277,7 +277,7 @@ public class CleanupHelper {
      * @param context the instance group context with collected data
      * @return a list of {@link CleanupActions} for products and their applications
      */
-    private List<CleanupAction> calculateProducts(CleanupInstanceGroupContext context) {
+    private static List<CleanupAction> calculateProducts(CleanupInstanceGroupContext context) {
         log.info("Calculate products to clean in group {}", context.getInstanceGroupConfiguration().name);
 
         List<CleanupAction> actions = new ArrayList<>();

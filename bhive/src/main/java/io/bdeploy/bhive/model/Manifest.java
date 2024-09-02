@@ -232,7 +232,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             // calculate references directly, and persistently cache them here.
             SortedSet<ReferenceKey> referenced = new TreeSet<>();
             TreeView state = hive.execute(new ScanOperation().setTree(tree).setFollowReferences(false));
-            state.visit(new TreeVisitor.Builder().onMissing(this::missing).onManifestRef(m -> {
+            state.visit(new TreeVisitor.Builder().onMissing(Manifest.Builder::missing).onManifestRef(m -> {
                 referenced.add(new ReferenceKey(path + m.getPathString(), m.getReferenced(), depth + m.getPath().size()));
                 Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(m.getReferenced()));
                 if (mf.references != null) {
@@ -252,7 +252,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             return referenced;
         }
 
-        private void missing(MissingObjectView m) {
+        private static void missing(MissingObjectView m) {
             throw new IllegalStateException("Missing object: " + m.getElementId() + " at " + m.getPath());
         }
 

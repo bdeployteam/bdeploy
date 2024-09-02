@@ -146,7 +146,8 @@ public class OpenIDConnectAuthenticator implements Authenticator {
      * @return the successfully authenticated user, or <code>null</code> if not
      *         successful.
      */
-    private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
+    private static UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings,
+            AuthTrace trace) {
         trace.log("  query server " + settings.oidcSettings.url);
         try {
             UserInfo found = performUserSearch(user, password, settings.oidcSettings, trace);
@@ -163,7 +164,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, OIDCSettingsDto server, AuthTrace trace)
+    private static UserInfo performUserSearch(UserInfo user, char[] password, OIDCSettingsDto server, AuthTrace trace)
             throws ParseException, IOException, URISyntaxException {
         // Credentials of the user to be authenticated
         Secret pwd = new Secret(String.valueOf(password));
@@ -205,7 +206,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         return (OIDCTokenResponse) tokenResponse.toSuccessResponse();
     }
 
-    private UserInfo verifyAndUpdateSearchResult(UserInfo user, OIDCTokenResponse response) {
+    private static UserInfo verifyAndUpdateSearchResult(UserInfo user, OIDCTokenResponse response) {
         if (response == null) {
             return null;
         }
@@ -247,7 +248,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
      * @return <code>true</code> if auth is valid, <code>false</code> otherwise,
      *         never planned to throw.
      */
-    private boolean validateToken(UserInfo user, OIDCSettingsDto settings) {
+    private static boolean validateToken(UserInfo user, OIDCSettingsDto settings) {
         OIDCTokenCache cached = fromExternalTag(user.externalTag);
         JWT jwt = getJwt(cached.token);
 

@@ -160,7 +160,7 @@ public class ProductUpdateService {
         instance.config.config.instanceVariables = instanceVariables;
     }
 
-    private void updateApplication(ApplicationConfiguration app, Set<ApplicationConfiguration> allApps,
+    private static void updateApplication(ApplicationConfiguration app, Set<ApplicationConfiguration> allApps,
             ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
             List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues,
             VariableResolver resolver) {
@@ -275,7 +275,7 @@ public class ProductUpdateService {
         return result;
     }
 
-    private List<ParameterConfiguration> updateParameters(ApplicationConfiguration app, ApplicationDescriptor appDesc,
+    private static List<ParameterConfiguration> updateParameters(ApplicationConfiguration app, ApplicationDescriptor appDesc,
             List<ParameterConfiguration> values, List<ParameterDescriptor> descriptors, List<ParameterDescriptor> oldDescriptors,
             Set<ApplicationConfiguration> allApps, List<ApplicationValidationDto> validation, VariableResolver resolver) {
 
@@ -337,7 +337,7 @@ public class ProductUpdateService {
         return values;
     }
 
-    private void createParameter(ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
+    private static void createParameter(ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
             List<ParameterConfiguration> values, Set<ApplicationConfiguration> allApps) {
         ParameterConfiguration cfg = new ParameterConfiguration();
         cfg.id = desc.id;
@@ -388,7 +388,7 @@ public class ProductUpdateService {
         return para;
     }
 
-    private CommandConfiguration createCommand(ExecutableDescriptor desc, ApplicationDescriptor appDesc,
+    private static CommandConfiguration createCommand(ExecutableDescriptor desc, ApplicationDescriptor appDesc,
             Set<ApplicationConfiguration> allApps, VariableResolver resolver) {
         CommandConfiguration result = new CommandConfiguration();
 
@@ -513,7 +513,7 @@ public class ProductUpdateService {
         return res;
     }
 
-    private List<ApplicationValidationDto> validateCommand(ApplicationConfiguration process, ApplicationDescriptor appDesc,
+    private static List<ApplicationValidationDto> validateCommand(ApplicationConfiguration process, ApplicationDescriptor appDesc,
             CommandConfiguration command, ExecutableDescriptor desc, VariableResolver resolver) {
         List<ApplicationValidationDto> result = new ArrayList<>();
 

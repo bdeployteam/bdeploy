@@ -80,7 +80,8 @@ public class Auth0TokenAuthenticator implements Authenticator {
      * @param trace collector for tracing information
      * @return the successfully authenticated user, or <code>null</code> if not successful.
      */
-    private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
+    private static UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings,
+            AuthTrace trace) {
         trace.log("  verify auth0 token for " + user.name);
         try {
             UserInfo found = performUserSearch(user, password, settings.auth0Settings, trace);
@@ -97,7 +98,7 @@ public class Auth0TokenAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, Auth0SettingsDto server, AuthTrace trace) {
+    private static UserInfo performUserSearch(UserInfo user, char[] password, Auth0SettingsDto server, AuthTrace trace) {
         // Credentials of the user to be authenticated
         return verifyAndUpdateSearchResult(user, String.valueOf(password),
                 performRequest(server, String.valueOf(password), trace));

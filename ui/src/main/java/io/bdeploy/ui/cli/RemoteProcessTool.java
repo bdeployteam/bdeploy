@@ -184,7 +184,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return createSuccess();
     }
 
-    private List<String> getAppIds(RemoteProcessConfig config, InstanceResource ir) {
+    private static List<String> getAppIds(RemoteProcessConfig config, InstanceResource ir) {
         String appId = config.application();
         if (!isNullOrEmpty(appId)) {
             return List.of(appId);
@@ -317,8 +317,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .map(probe -> String.valueOf(probe.status)).orElse("");
     }
 
-    private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process, InstanceConfiguration instance,
-            InstanceStateRecord deploymentStates, ApplicationConfiguration cfg, InstanceProcessStatusDto overall) {
+    private static void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
+            InstanceConfiguration instance, InstanceStateRecord deploymentStates, ApplicationConfiguration cfg,
+            InstanceProcessStatusDto overall) {
 
         ProcessDetailDto detail = pr.getDetails(overall.processToNode.get(process.appId), process.appId);
         ProcessHandleDto handle = detail.handle;

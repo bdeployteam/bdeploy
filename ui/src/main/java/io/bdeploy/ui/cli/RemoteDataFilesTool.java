@@ -134,7 +134,7 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         return createSuccess().addField("Uploaded file as ", config.fileTarget());
     }
 
-    private FileStatusDto toFileStatusDto(DataFilesConfig config) {
+    private static FileStatusDto toFileStatusDto(DataFilesConfig config) {
         FileStatusDto dto = new FileStatusDto();
         dto.type = config.force() ? FileStatusType.EDIT : FileStatusType.ADD;
         dto.file = config.fileTarget();
@@ -215,7 +215,8 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         return table;
     }
 
-    private Map<RemoteDirectory, List<RemoteDirectoryEntry>> getMatchingFiles(DataFilesConfig config, InstanceResource ir) {
+    private static Map<RemoteDirectory, List<RemoteDirectoryEntry>> getMatchingFiles(DataFilesConfig config,
+            InstanceResource ir) {
         var processResource = ir.getProcessResource(config.uuid());
         var result = new HashMap<RemoteDirectory, List<RemoteDirectoryEntry>>();
         for (var dirSnapshot : processResource.getDataDirSnapshot()) {

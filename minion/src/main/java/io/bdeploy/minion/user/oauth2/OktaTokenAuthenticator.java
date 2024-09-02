@@ -83,7 +83,8 @@ public class OktaTokenAuthenticator implements Authenticator {
      * @param trace collector for tracing information
      * @return the successfully authenticated user, or <code>null</code> if not successful.
      */
-    private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
+    private static UserInfo findAuthenticateUpdate(UserInfo user, char[] password, AuthenticationSettingsDto settings,
+            AuthTrace trace) {
         trace.log("  verify okta token for " + user.name);
         try {
             UserInfo found = performUserSearch(user, password, trace);
@@ -100,7 +101,7 @@ public class OktaTokenAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, AuthTrace trace) throws JacksonException {
+    private static UserInfo performUserSearch(UserInfo user, char[] password, AuthTrace trace) throws JacksonException {
         // Credentials of the user to be authenticated
         OktaAccessTokenInfo info = JacksonHelper.getDefaultJsonObjectMapper().readValue(String.valueOf(password),
                 OktaAccessTokenInfo.class);

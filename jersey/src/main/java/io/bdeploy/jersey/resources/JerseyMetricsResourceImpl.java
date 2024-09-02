@@ -34,7 +34,7 @@ public class JerseyMetricsResourceImpl implements JerseyMetricsResource {
         return allBundles;
     }
 
-    private MetricBundle getMetricBundle(MetricRegistry reg) {
+    private static MetricBundle getMetricBundle(MetricRegistry reg) {
         MetricBundle bundle = new MetricBundle();
         for (Map.Entry<String, Metric> entry : reg.getMetrics().entrySet()) {
             Metric m = entry.getValue();
@@ -53,7 +53,7 @@ public class JerseyMetricsResourceImpl implements JerseyMetricsResource {
         return bundle;
     }
 
-    private HistogramMetric readHistogram(Histogram m) {
+    private static HistogramMetric readHistogram(Histogram m) {
         HistogramMetric hm = new HistogramMetric();
         updateFields(hm.counter, m);
         updateFields(hm.histogram, m);
@@ -66,7 +66,7 @@ public class JerseyMetricsResourceImpl implements JerseyMetricsResource {
         return gm;
     }
 
-    private TimerMetric readTimer(Timer m) {
+    private static TimerMetric readTimer(Timer m) {
         TimerMetric tm = new TimerMetric();
         updateFields(tm.counter, m);
         updateFields(tm.meter, m);
@@ -74,14 +74,14 @@ public class JerseyMetricsResourceImpl implements JerseyMetricsResource {
         return tm;
     }
 
-    private MeterMetric readMeter(Meter m) {
+    private static MeterMetric readMeter(Meter m) {
         MeterMetric mm = new MeterMetric();
         updateFields(mm.counter, m);
         updateFields(mm.meter, m);
         return mm;
     }
 
-    private CounterMetric readCounter(Counter m) {
+    private static CounterMetric readCounter(Counter m) {
         CounterMetric cm = new CounterMetric();
         updateFields(cm.counter, m);
         return cm;

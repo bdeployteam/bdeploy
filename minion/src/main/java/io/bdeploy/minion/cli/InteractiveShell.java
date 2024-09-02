@@ -71,7 +71,7 @@ public class InteractiveShell extends ConfiguredCliTool<ShellConfig> {
     }
 
     /** Reads the next line and executes it. Returns false to terminate the shell */
-    private boolean readAndExecute(BufferedReader br, boolean headless) {
+    private static boolean readAndExecute(BufferedReader br, boolean headless) {
         MinionServerCli cli = new MinionServerCli();
         try {
             if (!headless) {

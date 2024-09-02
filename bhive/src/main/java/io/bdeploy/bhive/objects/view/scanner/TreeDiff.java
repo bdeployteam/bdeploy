@@ -97,8 +97,9 @@ public class TreeDiff {
                 return result;
             }
 
-            snapshot.visit(new TreeVisitor.Builder().onMissing(this::invalid).onSkipped(this::invalid).onBlob(this::blob)
-                    .onManifestRef(this::manifest).onTree(this::tree).build());
+            snapshot.visit(new TreeVisitor.Builder().onMissing(TreeDiff.FlattenedTree::invalid)
+                    .onSkipped(TreeDiff.FlattenedTree::invalid).onBlob(this::blob).onManifestRef(this::manifest)
+                    .onTree(this::tree).build());
 
             return result;
         }
@@ -124,7 +125,7 @@ public class TreeDiff {
             return true;
         }
 
-        private void invalid(ElementView sn) {
+        private static void invalid(ElementView sn) {
             throw new IllegalStateException(
                     "Diff on damaged trees not supported, missing " + sn.getPath() + " [" + sn.getElementId() + "]");
         }

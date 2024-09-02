@@ -254,7 +254,7 @@ public class SecurityHelper {
      * @param cert the certificate to use to check the signature against.
      * @return the verified payload if checks are OK, <code>null</code> otherwise.
      */
-    private <T> T doVerifyPayload(Class<T> clazz, SignedPayload t, Certificate cert) throws GeneralSecurityException {
+    private static <T> T doVerifyPayload(Class<T> clazz, SignedPayload t, Certificate cert) throws GeneralSecurityException {
         byte[] payloadBytes = decode(t.p);
         T payload;
         try {
@@ -410,7 +410,7 @@ public class SecurityHelper {
         throw new IllegalStateException("KeyStore does not contain a certificate");
     }
 
-    private String getRawSignature(String data, PrivateKey pk) throws GeneralSecurityException {
+    private static String getRawSignature(String data, PrivateKey pk) throws GeneralSecurityException {
         Signature rsa = getSignatureAlgorithm();
         rsa.initSign(pk);
         rsa.update(data.getBytes(StandardCharsets.UTF_8));
@@ -423,7 +423,7 @@ public class SecurityHelper {
         return Signature.getInstance("SHA256withRSA");
     }
 
-    private SignedPayload getSignedToken(Object payload, PrivateKey pk) throws GeneralSecurityException, IOException {
+    private static SignedPayload getSignedToken(Object payload, PrivateKey pk) throws GeneralSecurityException, IOException {
         String toSign = getMapper().writeValueAsString(payload);
         String signature = getRawSignature(toSign, pk);
 
