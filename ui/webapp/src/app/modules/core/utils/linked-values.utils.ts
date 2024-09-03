@@ -10,7 +10,7 @@ import {
   VariableConfiguration,
   VariableType,
 } from 'src/app/models/gen.dtos';
-import { SpecialCharacterType, escapeSpecialCharacters } from './escape-special-characters.utils';
+import { escapeSpecialCharacters, SpecialCharacterType } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
 
 const ARITH_EXPR = `(\\+|-|)?[0-9]+`;
@@ -508,7 +508,8 @@ export function gatherSpecialExpansions(
     preview: '<result>',
     link: '{{IF:condition?valueIfTrue:valueIfFalse}}',
     group: null,
-    matches: (s) => s.startsWith('{{IF:') && s.endsWith('}}') && s.split('?').length === 1 && s.split(':').length === 2,
+    matches: (s) =>
+      s.startsWith('{{IF:') && s.endsWith('}}') && s.split('?').length === 2 && s.split('?')[1].split(':').length === 2,
     expand: (s) => expandCondition(s, instance, process, system),
   });
 
