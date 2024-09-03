@@ -43,6 +43,10 @@ public interface SystemResource {
     public SystemTemplateDto loadTemplate(FormDataMultiPart fdmp, @Optional @QueryParam("server") String server);
 
     @POST
+    @Path("import-missing-products")
+    public SystemTemplateDto importMissingProducts(SystemTemplateDto template);
+
+    @POST
     @Path("apply")
     @RequiredPermission(permission = Permission.WRITE)
     public SystemTemplateResultDto applyTemplate(SystemTemplateRequestDto request);

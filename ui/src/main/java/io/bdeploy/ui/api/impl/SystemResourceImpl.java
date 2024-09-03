@@ -2,6 +2,7 @@ package io.bdeploy.ui.api.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -30,11 +31,13 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
-import io.bdeploy.ui.dto.ObjectChangeType;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
 import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.dto.SystemTemplateDto;
 import io.bdeploy.ui.dto.SystemTemplateRequestDto;
@@ -157,17 +160,53 @@ public class SystemResourceImpl implements SystemResource {
 
         // load all products that are available. this will also give us all templates, so we can assure they are all there.
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
+        SoftwareRepositoryResource srr = rc.initResource(new SoftwareRepositoryResourceImpl());
         List<ProductDto> products = pr.list(null);
 
-        // check whether all requested products and the requested template IN the product(s) are present.
+        // check whether all requested products and the requested template IN the product(s) are present or could be imported.
         for (InstanceTemplateReferenceDescriptor instance : template.instances) {
-            ProductDto product = InstanceTemplateHelper.findMatchingProductOrFail(instance, products);
-            result.products.add(product);
+            Optional<ProductDto> product = InstanceTemplateHelper.findMatchingProduct(instance, products);
+            if (product.isPresent()) {
+                result.products.add(product.get());
+            } else {
+                LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
+                req.productId = instance.productId;
+                req.version = instance.productVersionRegex;
+                req.regex = true;
+                ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
+                if (result.productsToImport.stream().noneMatch(p -> p.key.equals(toImport.key))) {
+                    result.productsToImport.add(toImport);
+                }
+            }
         }
 
         result.template = template;
 
         return result;
+    }
+
+    @Override
+    public SystemTemplateDto importMissingProducts(SystemTemplateDto template) {
+        if (template.productsToImport.isEmpty()) {
+            return template;
+        }
+
+        ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
+
+        for (ProductKeyWithSourceDto p : template.productsToImport) {
+            pr.copyProduct(p.groupOrRepo, p.key.getName(), List.of(p.key.getTag()));
+        }
+
+        List<ProductDto> products = pr.list(null);
+
+        for (ProductKeyWithSourceDto imported : template.productsToImport) {
+            ProductDto product = products.stream().filter(p -> imported.key.equals(p.key)).findFirst().orElseThrow(
+                    () -> new WebApplicationException("Cannot find imported product " + imported.key, Status.NOT_ACCEPTABLE));
+            template.products.add(product);
+        }
+        template.productsToImport.clear();
+
+        return template;
     }
 
     @Override

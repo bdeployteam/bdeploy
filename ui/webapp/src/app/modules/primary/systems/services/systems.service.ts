@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import {
   ObjectChangeType,
   SystemConfigurationDto,
+  SystemTemplateDto,
   SystemTemplateRequestDto,
   SystemTemplateResultDto,
 } from 'src/app/models/gen.dtos';
@@ -55,6 +56,13 @@ export class SystemsService {
 
   public getTemplateUploadUrl(): string {
     return this.apiPath(this.groups.current$.value?.name);
+  }
+
+  public importMissingProducts(template: SystemTemplateDto): Observable<SystemTemplateDto> {
+    return this.http.post<SystemTemplateDto>(
+      `${this.apiPath(this.groups.current$.value?.name)}/import-missing-products`,
+      template,
+    );
   }
 
   public apply(request: SystemTemplateRequestDto): Observable<SystemTemplateResultDto> {

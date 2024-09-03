@@ -1,5 +1,6 @@
 describe('System Template Tests', () => {
   var groupName = 'Demo';
+  var repoName = 'DemoRepo';
 
   beforeEach(() => {
     cy.login();
@@ -12,8 +13,9 @@ describe('System Template Tests', () => {
     cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
 
-    cy.visit('/');
-    cy.uploadProductIntoGroup(groupName, 'chat-product-1-direct.zip');
+    cy.createRepo(repoName);
+
+    cy.uploadProductIntoRepo(repoName, 'chat-product-1-direct.zip');
   });
 
   it('Creates Instances From System Template', () => {
@@ -32,6 +34,12 @@ describe('System Template Tests', () => {
         cy.contains('Drop System Template').should('not.exist');
 
         cy.contains("Loaded 'Test System'").should('exist');
+        cy.get('button[data-cy^=Next]').should('be.enabled').click();
+      });
+
+      cy.get('[data-cy=step-import-missing-products]').within(() => {
+        cy.contains('1 product from the template is missing and needs to be imported').should('exist');
+        cy.contains('io.bdeploy/chat-app/product:1.0.0').should('exist');
         cy.get('button[data-cy^=Next]').should('be.enabled').click();
       });
 

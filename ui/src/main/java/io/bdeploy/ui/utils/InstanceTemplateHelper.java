@@ -15,6 +15,23 @@ public class InstanceTemplateHelper {
     }
 
     public static ProductDto findMatchingProductOrFail(InstanceTemplateReferenceDescriptor instance, List<ProductDto> products) {
+        Optional<ProductDto> product = findMatchingProduct(instance, products);
+
+        if (product.isEmpty()) {
+            boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
+                    || ".*".equals(instance.productVersionRegex));
+            throw new WebApplicationException(
+                    "Cannot find matching product with ID '" + instance.productId
+                            + (hasRegex ? ("' (with version matching: " + instance.productVersionRegex + ")") : "'")
+                            + " or matching version does not have instance template named '" + instance.templateName + "'",
+                    Status.NOT_ACCEPTABLE);
+        }
+
+        return product.get();
+    }
+
+    public static Optional<ProductDto> findMatchingProduct(InstanceTemplateReferenceDescriptor instance,
+            List<ProductDto> products) {
         boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
                 || ".*".equals(instance.productVersionRegex));
 
@@ -33,15 +50,7 @@ public class InstanceTemplateHelper {
             return p.instanceTemplates.stream().anyMatch(t -> t.name.equals(instance.templateName));
         }).findFirst();
 
-        if (product.isEmpty()) {
-            throw new WebApplicationException(
-                    "Cannot find matching product with ID '" + instance.productId
-                            + (hasRegex ? ("' (with version matching: " + instance.productVersionRegex + ")") : "'")
-                            + " or matching version does not have instance template named '" + instance.templateName + "'",
-                    Status.NOT_ACCEPTABLE);
-        }
-
-        return product.get();
+        return product;
     }
 
 }

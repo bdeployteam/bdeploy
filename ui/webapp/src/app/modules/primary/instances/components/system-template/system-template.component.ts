@@ -21,12 +21,20 @@ import {
   InstanceTemplateReferenceStatus,
   ManagedMasterDto,
   ProductDto,
+  ProductKeyWithSourceDto,
   SystemTemplateDto,
   SystemTemplateRequestDto,
   SystemTemplateResultDto,
   TemplateVariable,
 } from './../../../../../models/gen.dtos';
 import { GroupsService } from './../../../groups/services/groups.service';
+
+interface ImportProductsState {
+  error?: string;
+  message?: string;
+  loading?: boolean;
+  completed: boolean;
+}
 
 export class TemplateSelection {
   public ref: InstanceTemplateReferenceDescriptor;
@@ -47,6 +55,18 @@ export class TemplateSelection {
   public requiredVariables: TemplateVariable[] = [];
   public isAllVariablesSet: boolean;
 }
+
+const colImportRepo: BdDataColumn<ProductKeyWithSourceDto> = {
+  id: 'repo',
+  name: 'Repo',
+  data: (r) => r.groupOrRepo,
+};
+
+const colImportProduct: BdDataColumn<ProductKeyWithSourceDto> = {
+  id: 'product',
+  name: 'Product',
+  data: (r) => `${r.key.name}:${r.key.tag}`,
+};
 
 const colInstanceName: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   id: 'name',
@@ -120,6 +140,8 @@ export class SystemTemplateComponent implements OnInit {
   ];
 
   protected systemNames$: Observable<string[]>;
+  protected importProductsState: ImportProductsState = { completed: false };
+  protected readonly importProductCols: BdDataColumn<ProductKeyWithSourceDto>[] = [colImportRepo, colImportProduct];
 
   protected onUploadResult: (status: UploadStatus) => string = (s) => {
     if (s.state === UploadState.FAILED) {
@@ -162,6 +184,47 @@ export class SystemTemplateComponent implements OnInit {
     this.file = null;
   }
 
+  private onSelectImportMissingProductsStep() {
+    const toImport = this.template.productsToImport;
+
+    if (toImport.length === 0) {
+      this.importProductsState = { completed: true };
+      setTimeout(() => {
+        this.stepper.next();
+      });
+      return;
+    }
+
+    this.importProductsState = {
+      message:
+        toImport.length === 1
+          ? '1 product from the template is missing and needs to be imported'
+          : `${toImport.length} products from the template are missing and need to be imported`,
+      completed: false,
+    };
+  }
+
+  protected onImportMissingProducts() {
+    this.importProductsState = {
+      message: 'Importing...',
+      loading: true,
+      completed: false,
+    };
+    this.systems.importMissingProducts(this.template).subscribe({
+      next: (template) => {
+        this.template = template;
+        this.importProductsState = { completed: true };
+        setTimeout(() => this.stepper.next());
+      },
+      error: (e) => {
+        this.importProductsState = {
+          error: e.message,
+          completed: false,
+        };
+      },
+    });
+  }
+
   protected onStepSelectionChange(event: StepperSelectionEvent) {
     switch (event.selectedIndex) {
       case 0:
@@ -173,17 +236,21 @@ export class SystemTemplateComponent implements OnInit {
         break;
       case 2:
         this.stepper.steps.get(1).editable = false; // no back.
-        this.onSelectNameAndPurposeStep();
+        this.onSelectImportMissingProductsStep();
         break;
       case 3:
         this.stepper.steps.get(2).editable = false; // no back.
-        this.onQuerySystemTemplateVariablesStep();
+        this.onSelectNameAndPurposeStep();
         break;
       case 4:
         this.stepper.steps.get(3).editable = false; // no back.
-        this.onConfigureInstanceTemplatesStep();
+        this.onQuerySystemTemplateVariablesStep();
         break;
       case 5:
+        this.stepper.steps.get(4).editable = false; // no back.
+        this.onConfigureInstanceTemplatesStep();
+        break;
+      case 6:
         this.onApplyStep();
         break;
     }
@@ -192,30 +259,28 @@ export class SystemTemplateComponent implements OnInit {
   private onApplyStep() {
     this.stepper.steps.forEach((s) => (s.editable = false));
 
-    {
-      const data: SystemTemplateRequestDto = {
-        name: this.name,
-        purpose: this.purpose,
-        minion: this.selectedServer?.hostName,
-        template: this.template.template,
-        groupMappings: this.templates.map((t) => ({
-          instanceName: t.expandedName,
-          productKey: t.product.key,
-          groupToNode: t.groups,
-          templateVariableValues: t.variables,
-        })),
-        templateVariableValues: this.systemVariables,
-      };
+    const data: SystemTemplateRequestDto = {
+      name: this.name,
+      purpose: this.purpose,
+      minion: this.selectedServer?.hostName,
+      template: this.template.template,
+      groupMappings: this.templates.map((t) => ({
+        instanceName: t.expandedName,
+        productKey: t.product.key,
+        groupToNode: t.groups,
+        templateVariableValues: t.variables,
+      })),
+      templateVariableValues: this.systemVariables,
+    };
 
-      this.systems.apply(data).subscribe((resultDto) => {
-        this.result = resultDto;
-        this.resultIsSuccess =
-          resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) === -1;
-        this.resultHasWarnings =
-          resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !== -1;
-        this.stepper.next();
-      });
-    }
+    this.systems.apply(data).subscribe((resultDto) => {
+      this.result = resultDto;
+      this.resultIsSuccess =
+        resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) === -1;
+      this.resultHasWarnings =
+        resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !== -1;
+      this.stepper.next();
+    });
   }
 
   private onQuerySystemTemplateVariablesStep() {

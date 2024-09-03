@@ -380,6 +380,8 @@ public class ProductResourceImpl implements ProductResource {
             }
             igc.productToRepo.put(productName, softwareRepository);
             igr.update(this.group, igc);
+
+            ProductManifest.invalidateScanCache(hive);
         }
     }
 

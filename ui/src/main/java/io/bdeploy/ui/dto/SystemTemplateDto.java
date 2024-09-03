@@ -15,4 +15,6 @@ public class SystemTemplateDto {
 
     public Map<String, MinionStatusDto> nodes;
 
+    public List<ProductKeyWithSourceDto> productsToImport = new ArrayList<>();
+
 }

@@ -71,6 +71,35 @@
             </div>
           </div>
         </mat-step>
+        <mat-step label="Missing Products" [completed]="importProductsState.completed">
+          <div [attr.data-cy]="'step-import-missing-products'" class="flex flex-col gap-2.5 p-2.5">
+            <app-bd-notification-card
+              *ngIf="importProductsState.error"
+              icon="warning"
+              type="warning"
+              header="Failed to import products"
+            >
+              <div class="text-justify">{{ importProductsState.error }}</div>
+            </app-bd-notification-card>
+            <div>{{ importProductsState.message }}</div>
+            <app-bd-data-table
+              *ngIf="template?.productsToImport"
+              [records]="template.productsToImport"
+              [columns]="importProductCols"
+              [sortData]="null"
+            ></app-bd-data-table>
+            <mat-spinner *ngIf="importProductsState.loading" [diameter]="24"></mat-spinner>
+            <div class="flex">
+              <app-bd-button
+                color="primary"
+                [collapsed]="false"
+                text="Next"
+                [disabled]="importProductsState.loading"
+                (click)="onImportMissingProducts()"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
         <mat-step label="Name and Purpose" [completed]="name && purpose">
           <div [attr.data-cy]="'step-name-purpose'" class="flex flex-col gap-2.5 p-2.5">
             <form #namePurposeForm="ngForm">

@@ -28,3 +28,4 @@ import './bdeploy.common';
 import './bdeploy.login';
 import './bdeploy.groups';
 import './bdeploy.instances';
+import './bdeploy.sw-repo';
