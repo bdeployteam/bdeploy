@@ -120,7 +120,7 @@ public class MessageDialogs {
         builder.append("*** BDeploy properties: \n");
         builder.append("LauncherVersion=").append(VersionHelper.getVersion()).append("\n");
         if (config != null) {
-            builder.append("ServerVersion=").append(getServerVersion(config)).append("\n");
+            builder.append("ServerVersion=").append(LauncherTool.getServerVersion(config).toString()).append("\n");
             builder.append("ApplicationId=").append(config.applicationId).append("\n");
             builder.append("GroupId=").append(config.groupId).append("\n");
             builder.append("InstanceId=").append(config.instanceId).append("\n");
@@ -177,14 +177,5 @@ public class MessageDialogs {
 
         // No specific information to display
         return null;
-    }
-
-    /** Returns the version of the remove BDdeploy server */
-    private static String getServerVersion(ClickAndStartDescriptor config) {
-        try {
-            return LauncherTool.getServerVersion(config).toString();
-        } catch (Exception ex) {
-            return ex.getMessage();
-        }
     }
 }
