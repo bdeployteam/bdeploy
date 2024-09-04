@@ -2,6 +2,16 @@
   <app-bd-dialog-toolbar header="Instance Settings" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
+    <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
+      <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+      <div class="bd-secondary-text">Instance ID:</div>
+      <div class="bd-secondary-text">
+        <app-bd-identifier
+          [showCopyButton]="true"
+          [id]="(edit.current$ | async)?.instanceConfiguration?.id"
+        ></app-bd-identifier>
+      </div>
+    </div>
     <div class="flex flex-col gap-2.5">
       <app-bd-panel-button
         text="Base Configuration..."
