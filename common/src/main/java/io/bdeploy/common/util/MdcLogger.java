@@ -50,7 +50,7 @@ public class MdcLogger {
      */
     public static final String MDC_NAME = "BDEPLOY";
 
-    private final Logger logger;
+    private final Logger log;
     private Object[] mdcData = new Object[0];
 
     /**
@@ -59,7 +59,7 @@ public class MdcLogger {
      * @param clazz the class used by the logger
      */
     public MdcLogger(Class<?> clazz) {
-        this.logger = LoggerFactory.getLogger(clazz);
+        this.log = LoggerFactory.getLogger(clazz);
     }
 
     /**
@@ -79,7 +79,7 @@ public class MdcLogger {
      *            the logger to be used to write the log statement
      */
     public void log(Consumer<Logger> writer) {
-        doLog(logger, writer, mdcData);
+        doLog(log, writer, mdcData);
     }
 
     /**
@@ -94,7 +94,7 @@ public class MdcLogger {
     public void log(Consumer<Logger> writer, Object... mdcData) {
         Object[] unifiedMdc = Arrays.copyOf(this.mdcData, this.mdcData.length + mdcData.length);
         System.arraycopy(mdcData, 0, unifiedMdc, this.mdcData.length, mdcData.length);
-        doLog(logger, writer, unifiedMdc);
+        doLog(log, writer, unifiedMdc);
     }
 
     /** Writes the desired log statement */

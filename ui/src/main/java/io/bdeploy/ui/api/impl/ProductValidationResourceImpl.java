@@ -353,7 +353,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
     }
 
-    private ProductValidationConfigDescriptor parse(Path dir, PublicSchemaValidator validator) {
+    private static ProductValidationConfigDescriptor parse(Path dir, PublicSchemaValidator validator) {
         ProductValidationConfigDescriptor config = new ProductValidationConfigDescriptor();
 
         config.productValidation = parse(dir, dir.resolve(ProductValidationDescriptorApi.FILE_NAME),

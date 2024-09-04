@@ -15,6 +15,8 @@ import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
  */
 public class ProcessControlConfiguration {
 
+    public static final Pattern CONFIG_DIRS_SPLIT_PATTERN = Pattern.compile(",");
+
     // ################################################# only for server applications #################################################
 
     /**
@@ -71,8 +73,6 @@ public class ProcessControlConfiguration {
     }
 
     // ################################################# only for client applications #################################################
-
-    public static final Pattern CONFIG_DIRS_SPLIT_PATTERN = Pattern.compile(",");
 
     /**
      * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
