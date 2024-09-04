@@ -13,18 +13,18 @@ class DataTableCsv extends DataTableBase {
     }
 
     @Override
-    public void render() {
-        out().println(String.join(",",
-                getColumns().stream().map(c -> DataRenderingHelper.quoteCsv(c.getLabel())).collect(Collectors.toList())));
+    public void doRender() {
+        output.println(String.join(",",
+                columns.stream().map(c -> DataRenderingHelper.quoteCsv(c.getLabel())).collect(Collectors.toList())));
 
-        for (List<DataTableCell> row : getRows()) {
+        for (List<DataTableCell> row : rows) {
             for (int y = 0; y < row.size(); ++y) {
-                out().print(DataRenderingHelper.quoteCsv(row.get(y).getData()));
+                output.print(DataRenderingHelper.quoteCsv(row.get(y).getData()));
 
                 if (y != (row.size() - 1)) {
-                    out().print(StringHelper.repeat(",", row.get(y).getSpan()));
+                    output.print(StringHelper.repeat(",", row.get(y).getSpan()));
                 } else {
-                    out().println();
+                    output.println();
                 }
             }
         }

@@ -11,49 +11,19 @@ import io.bdeploy.common.util.StringHelper;
  */
 abstract class DataTableBase implements DataTable {
 
-    private final PrintStream output;
+    protected final PrintStream output;
+    protected final List<DataTableColumn> columns = new ArrayList<>();
+    protected final List<List<DataTableCell>> rows = new ArrayList<>();
+    protected final List<String> footers = new ArrayList<>();
+    protected String caption;
 
-    private String caption;
     private ExitCode exitCode = ExitCode.OK;
-
-    private final List<DataTableColumn> columns = new ArrayList<>();
-    private final List<List<DataTableCell>> rows = new ArrayList<>();
-    private final List<String> footers = new ArrayList<>();
 
     /**
      * @param output the output to render to.
      */
     protected DataTableBase(PrintStream output) {
         this.output = output;
-    }
-
-    /**
-     * @return the output to render to.
-     */
-    protected PrintStream out() {
-        return output;
-    }
-
-    /**
-     * @return the set caption or <code>null</code> if there should be no caption.
-     */
-    protected String getCaption() {
-        return caption;
-    }
-
-    /**
-     * @return all currently defined data rows. Each row contains a series of cells whos accumulated span must equal the number of
-     *         columns.
-     */
-    protected List<List<DataTableCell>> getRows() {
-        return rows;
-    }
-
-    /**
-     * @return all curreclty defined footers.
-     */
-    protected List<String> getFooters() {
-        return footers;
     }
 
     /**
@@ -132,15 +102,7 @@ abstract class DataTableBase implements DataTable {
     }
 
     @Override
-    public List<DataTableColumn> getColumns() {
-        return columns;
-    }
-
-    @Override
     public DataTable row(List<DataTableCell> list) {
-        if (list.stream().map(i -> i.getSpan()).reduce(0, Integer::sum) != columns.size()) {
-            throw new IllegalStateException("Column count mismatch in data table");
-        }
         rows.add(list);
         return this;
     }
@@ -167,4 +129,18 @@ abstract class DataTableBase implements DataTable {
         return this.exitCode;
     }
 
+    @Override
+    public final void render() {
+        int columnCount = columns.size();
+        for (int i = 0; i < rows.size(); i++) {
+            List<DataTableCell> row = rows.get(i);
+            if (row.stream().map(DataTableCell::getSpan).reduce(0, Integer::sum) != columnCount) {
+                throw new IllegalStateException(
+                        "Number of cells in row " + (i + 1) + " does not match the column count of " + columnCount);
+            }
+        }
+        doRender();
+    }
+
+    abstract void doRender();
 }

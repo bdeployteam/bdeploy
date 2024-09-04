@@ -74,25 +74,23 @@ class DataTableText extends DataTableBase {
 
     @Override
     public DataTable addHorizontalRuler() {
-        row(Collections.singletonList(new HrCell(getColumns().size())));
+        row(Collections.singletonList(new HrCell(columns.size())));
         return this;
     }
 
     @Override
-    public void render() {
+    public void doRender() {
         List<String> buffer = new ArrayList<>();
-        List<DataTableColumn> columns = getColumns();
-        List<List<DataTableCell>> rows = getRows();
 
         adjustColumnsWidth();
 
         // caption
-        if (getCaption() != null) {
+        if (caption != null) {
             buffer.add(hr(HrMode.TOP));
-            buffer.add(StringHelper.repeat(" ", indent) + content(getCaption(), 0, columns.size()));
+            buffer.add(StringHelper.repeat(" ", indent) + content(caption, 0, columns.size()));
         }
 
-        buffer.add(hr(getCaption() != null ? HrMode.CONTENT : HrMode.TOP));
+        buffer.add(hr(caption != null ? HrMode.CONTENT : HrMode.TOP));
 
         // headers
         if (!hideHeaders) {
@@ -130,11 +128,11 @@ class DataTableText extends DataTableBase {
             }
         }
 
-        if (!getFooters().isEmpty()) {
+        if (!footers.isEmpty()) {
             buffer.add(hr(HrMode.CONTENT));
         }
-        for (String footer : getFooters()) {
-            buffer.add(content(footer, 0, getColumns().size()));
+        for (String footer : footers) {
+            buffer.add(content(footer, 0, columns.size()));
         }
 
         buffer.add(hr(HrMode.BOTTOM));
@@ -142,7 +140,6 @@ class DataTableText extends DataTableBase {
     }
 
     private void adjustColumnsWidth() {
-        List<List<DataTableCell>> rows = getRows();
         if (rows.isEmpty()) {
             return;
         }
@@ -162,7 +159,6 @@ class DataTableText extends DataTableBase {
         }
 
         // adjust column width
-        List<DataTableColumn> columns = getColumns();
         for (int i = 0; i < columns.size(); i++) {
             DataTableColumn column = columns.get(i);
             column.setMaxCellLength(colIdxToMaxCellLength.get(i));
@@ -170,7 +166,6 @@ class DataTableText extends DataTableBase {
     }
 
     private List<List<DataTableCell>> wrapRow(List<DataTableCell> raw) {
-        List<DataTableColumn> columns = getColumns();
         List<List<DataTableCell>> expandedRows = new ArrayList<>();
 
         Map<Integer, List<DataTableCell>> perColumn = new TreeMap<>();
@@ -263,7 +258,7 @@ class DataTableText extends DataTableBase {
                 from = index + 1;
             }
 
-            out().println(finalLine.toString());
+            output.println(finalLine.toString());
         }
     }
 
@@ -271,7 +266,6 @@ class DataTableText extends DataTableBase {
         text = text.replace("\t", "    ");
 
         StringBuilder builder = new StringBuilder();
-        List<DataTableColumn> columns = getColumns();
         List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + span);
 
         // width of text per column and space for separators (3 * (num columns - 1))
@@ -296,8 +290,6 @@ class DataTableText extends DataTableBase {
 
     private String hr(HrMode mode) {
         StringBuilder builder = new StringBuilder();
-        List<DataTableColumn> columns = getColumns();
-
         builder.append(StringHelper.repeat(" ", indent)).append(mode.start).append(CELL_NONE);
         for (int i = 0; i < columns.size(); ++i) {
             DataTableColumn column = columns.get(i);
@@ -318,5 +310,4 @@ class DataTableText extends DataTableBase {
             super("-", span);
         }
     }
-
 }

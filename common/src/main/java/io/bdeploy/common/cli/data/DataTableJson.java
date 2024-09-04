@@ -10,35 +10,35 @@ class DataTableJson extends DataTableBase {
     }
 
     @Override
-    public void render() {
-        out().println("[");
+    public void doRender() {
+        output.println("[");
 
-        for (int i = 0; i < getRows().size(); ++i) {
-            List<DataTableCell> row = getRows().get(i);
+        for (int i = 0; i < rows.size(); ++i) {
+            List<DataTableCell> row = rows.get(i);
 
-            out().print("  { ");
+            output.print("  { ");
 
             int colIndex = 0;
             for (int y = 0; y < row.size(); ++y) {
-                DataTableColumn col = getColumns().get(colIndex);
+                DataTableColumn col = columns.get(colIndex);
 
-                out().print(DataRenderingHelper.quoteJson(col.getName()) + ": "
+                output.print(DataRenderingHelper.quoteJson(col.getName()) + ": "
                         + DataRenderingHelper.quoteJson(row.get(y).getData()));
 
                 if (y == (row.size() - 1)) {
-                    if (i == (getRows().size() - 1)) {
-                        out().println(" }");
+                    if (i == (rows.size() - 1)) {
+                        output.println(" }");
                     } else {
-                        out().println(" },");
+                        output.println(" },");
                     }
                 } else {
-                    out().print(", ");
+                    output.print(", ");
                 }
 
                 colIndex += row.get(y).getSpan();
             }
         }
 
-        out().println("]");
+        output.println("]");
     }
 }
