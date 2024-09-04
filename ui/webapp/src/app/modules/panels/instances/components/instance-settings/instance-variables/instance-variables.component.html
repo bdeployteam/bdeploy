@@ -21,7 +21,7 @@
       [apps]="apps"
       [editorValues]="editorValues"
       [dialog]="dialog"
-      [variableList]="(edit.state$ | async).config.config.instanceVariables"
+      [variableList]="(edit.state$ | async)?.config?.config?.instanceVariables"
       (variableListChanged)="onVariableListChange($event)"
     ></bd-variable-groups>
   </app-bd-dialog-content>
