@@ -79,6 +79,12 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
     }
 
     @Override
+    public void restart() {
+        actions.run(Actions.RESTART_SERVER);
+        root.getRestartManager().performRestart(1_000);
+    }
+
+    @Override
     public void prepare(Key key, boolean clean) {
         // cannot prevent at LEAST for unit tests.
         if (VersionHelper.isRunningUndefined()) {

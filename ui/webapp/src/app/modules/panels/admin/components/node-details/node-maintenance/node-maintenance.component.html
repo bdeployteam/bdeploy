@@ -5,7 +5,7 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-1" *ngIf="state">
       <span
-        >The operations below allow to remotely perform maintenance actions on the node. These actions can help in
+      >The operations below allow to remotely perform maintenance actions on the node. These actions can help in
         repairing or cleaning up node storage.</span
       >
       <app-bd-button
@@ -16,6 +16,15 @@
         (click)="doRepairAndPrune()"
         [loadingWhen$]="mappedRepair$"
       ></app-bd-button>
+
+      <app-bd-button
+        text="Restart Node"
+        icon="restart_alt"
+        [collapsed]="false"
+        [disabled]="state.offline || state.config.master"
+        (click)="doRestartNode()"
+        [loadingWhen$]="mappedRestart$">
+      </app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

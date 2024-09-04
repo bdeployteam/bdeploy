@@ -71,6 +71,7 @@ public enum Actions {
     REMOVE_NODE(ActionScope.GLOBAL, true, "Remove Node"),
     CONVERT_TO_NODE(ActionScope.GLOBAL, true, "Convert existing Server to Node"),
     REPLACE_NODE(ActionScope.GLOBAL, true, "Replace Node"),
+    RESTART_NODE(ActionScope.GLOBAL, true, "Restart Node"),
 
     FSCK_NODE(ActionScope.GLOBAL, true, "Consistency Check on Node"),
     PRUNE_NODE(ActionScope.GLOBAL, true, "Prune on Node"),
