@@ -298,9 +298,16 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
       return true;
     }
 
-    // search name, description, value.
+    // search by name, description, value, id.
     return (
-      [p.descriptor?.name, p.descriptor?.longDescription, p.value?.value]
+      [
+        p.descriptor?.name,
+        p.descriptor?.longDescription,
+        p.value?.id,
+        p.value?.description,
+        p.value?.value?.value,
+        p.value?.value?.linkExpression,
+      ]
         .join(' ')
         .toLowerCase()
         .indexOf(this.search.toLowerCase()) !== -1
