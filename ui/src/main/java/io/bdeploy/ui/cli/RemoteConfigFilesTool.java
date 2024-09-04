@@ -145,7 +145,7 @@ public class RemoteConfigFilesTool extends RemoteServiceTool<ConfigFilesConfig> 
         try {
             Files.write(Paths.get(config.target()), raw, StandardOpenOption.CREATE_NEW);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot write " + config.target());
+            throw new IllegalStateException("Cannot write " + config.target(), e);
         }
 
         return createSuccess();

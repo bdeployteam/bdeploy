@@ -53,7 +53,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
             StreamHelper.copy(fis, baos);
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to read splash screen for " + key);
+            throw new IllegalStateException("Failed to read splash screen for " + key, e);
         }
     }
 
@@ -67,7 +67,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
             StreamHelper.copy(fis, baos);
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to read icon for " + key);
+            throw new IllegalStateException("Failed to read icon for " + key, e);
         }
     }
 

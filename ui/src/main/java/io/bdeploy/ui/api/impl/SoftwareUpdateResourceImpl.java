@@ -139,7 +139,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
             Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), targetFile);
             return UpdateHelper.importUpdate(targetFile, unpackTmp, getHive());
         } catch (IOException e) {
-            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
+            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), e, Status.BAD_REQUEST);
         } finally {
             PathHelper.deleteRecursiveRetry(unpackTmp);
             PathHelper.deleteRecursiveRetry(targetFile);

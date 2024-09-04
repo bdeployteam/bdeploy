@@ -331,7 +331,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                         "BDeploy home directory has changed. Expected: " + storedPath + " Got: " + homeDir);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to read from " + bdeployHomePath.toAbsolutePath());
+            throw new IllegalStateException("Failed to read from " + bdeployHomePath.toAbsolutePath(), e);
         }
     }
 
@@ -340,7 +340,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             Files.write(bdeployHomePath, config.homeDir().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to save BDEPLOY_HOME value into file");
+            throw new IllegalStateException("Failed to save BDEPLOY_HOME value into file", e);
         }
     }
 
@@ -609,7 +609,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             log.info("Restarting...");
             doExit(UpdateHelper.CODE_RESTART);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot create update marker");
+            throw new IllegalStateException("Cannot create update marker", e);
         }
     }
 
@@ -889,7 +889,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             StreamHelper.copy(input, output);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "Cannot read ZIP response from configuration files request for " + clickAndStart.applicationId);
+                    "Cannot read ZIP response from configuration files request for " + clickAndStart.applicationId, e);
         }
 
         // Un-zip the downloaded ZIP containing the configuration files.

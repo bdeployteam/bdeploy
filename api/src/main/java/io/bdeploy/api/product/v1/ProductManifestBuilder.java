@@ -428,7 +428,7 @@ public class ProductManifestBuilder {
         try (InputStream is = Files.newInputStream(appPath)) {
             appDesc = StorageHelper.fromYamlStream(is, ApplicationDescriptorApi.class);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot read " + appPath);
+            throw new IllegalStateException("Cannot read " + appPath, e);
         }
 
         RuntimeAssert.assertTrue(appDesc.supportedOperatingSystems.contains(os),

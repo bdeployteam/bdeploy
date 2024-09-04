@@ -42,7 +42,7 @@ public class PublicSchemaValidator {
             String rawSchema = generator.generateSchema(schema);
             jsonSchema = JsonSchemaFactory.getInstance(VersionFlag.V202012).getSchema(rawSchema);
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot read JSON schema for " + schema);
+            throw new IllegalStateException("Cannot read JSON schema for " + schema, e);
         }
 
         jsonSchema.initializeValidators();

@@ -224,7 +224,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         try (InputStream is = Files.newInputStream(source)) {
             mmd = StorageHelper.fromStream(is, ManagedMasterDto.class);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot read managed master information from " + source);
+            throw new IllegalArgumentException("Cannot read managed master information from " + source, e);
         }
 
         mmd.description = config.description();
@@ -250,7 +250,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
             try {
                 Files.writeString(target, ident);
             } catch (IOException e) {
-                throw new IllegalArgumentException("Cannot write central identification to " + target);
+                throw new IllegalArgumentException("Cannot write central identification to " + target, e);
             }
 
             return createResultWithSuccessMessage(
@@ -393,7 +393,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         try {
             ident = Files.readString(source, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot read content of " + source);
+            throw new IllegalArgumentException("Cannot read content of " + source, e);
         }
 
         String group = msr.manualAttachCentral(ident);

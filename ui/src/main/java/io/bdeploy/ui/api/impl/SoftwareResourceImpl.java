@@ -149,7 +149,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         try {
             Files.copy(FormDataHelper.getStreamFromMultiPart(fdmp), targetFile);
         } catch (IOException e) {
-            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
+            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), e, Status.BAD_REQUEST);
         }
 
         // Read all product manifests
@@ -225,7 +225,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             }
 
         } catch (IOException e) {
-            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
+            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), e, Status.BAD_REQUEST);
         }
         return dto;
     }
@@ -259,7 +259,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
             return dto;
         } catch (IOException e) {
-            throw new WebApplicationException("Failed to import file: " + e.getMessage(), Status.BAD_REQUEST);
+            throw new WebApplicationException("Failed to import file: " + e.getMessage(), e, Status.BAD_REQUEST);
         }
     }
 

@@ -50,7 +50,7 @@ public class ObjectReferenceDatabase extends ObjectDatabase {
             return JacksonHelper.getDefaultJsonObjectMapper().readValue(is, new TypeReference<SortedSet<String>>() {
             });
         } catch (IOException ioe) {
-            throw new IllegalStateException("Cannot read references from object counter db");
+            throw new IllegalStateException("Cannot read references from object counter db", ioe);
         }
     }
 
