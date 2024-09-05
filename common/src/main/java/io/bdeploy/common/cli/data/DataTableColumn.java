@@ -12,7 +12,7 @@ public class DataTableColumn {
 
     /**
      * @param label a human readable label for the column. A machine readable name will be calculated by removing spaces and
-     *            lower-camel-casing words.
+     *            camel-casing words.
      * @param preferredWidth the preferred width of the column.
      */
     public DataTableColumn(String label, int preferredWidth) {

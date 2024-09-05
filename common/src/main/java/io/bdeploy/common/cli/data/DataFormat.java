@@ -3,12 +3,17 @@ package io.bdeploy.common.cli.data;
 import java.io.PrintStream;
 
 /**
- * The different DataTable formats.
+ * The different data output formats.
  */
 public enum DataFormat {
 
+    /** Output will be given in a human readable format. */
     TEXT,
+
+    /** Output will be given in CSV. */
     CSV,
+
+    /** Output will be given in JSON. */
     JSON;
 
     public DataTable createTable(PrintStream target) {
