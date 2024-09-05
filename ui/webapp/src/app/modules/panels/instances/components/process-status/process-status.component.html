@@ -44,9 +44,11 @@
       </div>
     </app-bd-notification-card>
     <div *ngIf="processConfig" class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
-      <mat-icon class="local-id-labels">fingerprint</mat-icon>
-      <div class="local-id-labels">Process ID:</div>
-      <div class="local-id-labels"><app-bd-identifier [id]="processConfig?.id"></app-bd-identifier></div>
+      <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+      <div class="bd-secondary-text">Process ID:</div>
+      <div class="bd-secondary-text">
+        <app-bd-identifier [showCopyButton]="true" [id]="processConfig?.id"></app-bd-identifier>
+      </div>
 
       <mat-icon>flight_takeoff</mat-icon>
       <div>Start Type:</div>

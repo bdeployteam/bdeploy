@@ -17,13 +17,12 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="app$ | async as app">
-      <div class="grid grid-cols-[80px_auto] gap-1">
-        <strong>ID:</strong>
-        <div>{{ app.client.id }}</div>
-        <strong>Name:</strong>
-        <div>{{ app.client.description }}</div>
-        <strong>Instance:</strong>
-        <div>{{ app.instanceName }}</div>
+      <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
+        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+        <div class="bd-secondary-text">Process ID:</div>
+        <div class="bd-secondary-text">
+          <app-bd-identifier [showCopyButton]="true" [id]="app.client.id"></app-bd-identifier>
+        </div>
       </div>
       <app-bd-expand-button text="Usage Statistics" icon="insights" [expanded]="true">
         <div class="local-graph flex">

@@ -17,6 +17,13 @@
           synchronize the server to enable editing.
         </div>
       </app-bd-notification-card>
+      <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
+        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+        <div class="bd-secondary-text">System ID:</div>
+        <div class="bd-secondary-text">
+          <app-bd-identifier [showCopyButton]="true" [id]="(edit.current$ | async)?.config?.id"></app-bd-identifier>
+        </div>
+      </div>
       <app-bd-expand-button text="Used In" icon="settings_system_daydream">
         <app-bd-data-table
           [records]="instancesUsing$ | async"
