@@ -414,6 +414,13 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
+    public void restartNode(String name) {
+        try (var handle = af.run(Actions.RESTART_NODE, null, null, name)) {
+            nodes.getNodeResourceIfOnlineOrThrow(name, MinionUpdateResource.class, context).restart();
+        }
+    }
+
+    @Override
     public Version getUpdateApiVersion() {
         return UpdateHelper.currentApiVersion();
     }

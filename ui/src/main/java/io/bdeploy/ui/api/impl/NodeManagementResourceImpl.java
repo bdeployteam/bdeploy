@@ -87,9 +87,7 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
 
     @Override
     public void replaceNode(String name, RemoteService node) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
+        throwIfCentral();
         ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).replaceNode(name, node);
     }
 
@@ -100,6 +98,12 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
         result.pruned = FormatHelper.formatFileSize(
                 ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).pruneNode(name));
         return result;
+    }
+
+    @Override
+    public void restartNode(String name) {
+        throwIfCentral();
+        ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).restartNode(name);
     }
 
     private void throwIfCentral() {

@@ -28,6 +28,8 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.BackendInfoResource;
+import io.bdeploy.ui.api.NodeManagementResource;
+import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.cli.RemoteMasterTool.RemoteMasterConfig;
 
 @Help("Investigate a remote master minion")
@@ -46,7 +48,13 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         @Help("Path to a launcher distribution (ZIP) which will be pushed to the master")
         String launcher();
 
-        @Help(value = "Don't ask for confirmation before initiating the update process on the remote", arg = false)
+        @Help(value = "Restart the server", arg = false)
+        boolean restart() default false;
+
+        @Help("The minion to restart. Restarts the master if not given.")
+        String minion();
+
+        @Help(value = "Don't ask for confirmation when running potentially harmful actions.", arg = false)
         boolean yes() default false;
     }
 
@@ -72,8 +80,34 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             }
 
             return pushLauncher(svc, zip);
+        } else if (config.restart()) {
+            return restartServer(config, svc);
         } else {
             return createNoOp();
+        }
+    }
+
+    private RenderableResult restartServer(RemoteMasterConfig config, RemoteService svc) {
+        try {
+            String toRestart = config.minion();
+            if (toRestart == null) {
+                toRestart = "master";
+            }
+            if (!config.yes()) {
+                System.out.println("Confirm restarting " + toRestart + " using Enter, or abort using CTRL+C");
+                System.in.read();
+            }
+
+            if (config.minion() == null) {
+                SoftwareUpdateResource swup = ResourceProvider.getResource(svc, SoftwareUpdateResource.class, getLocalContext());
+                swup.restartServer();
+            } else {
+                NodeManagementResource nmr = ResourceProvider.getResource(svc, NodeManagementResource.class, getLocalContext());
+                nmr.restartNode(toRestart);
+            }
+            return createSuccess();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to query user response", e);
         }
     }
 

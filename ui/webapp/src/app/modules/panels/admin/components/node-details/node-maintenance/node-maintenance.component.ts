@@ -16,6 +16,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
   protected readonly nodesAdmin = inject(NodesAdminService);
 
   private readonly repairing$ = new BehaviorSubject<boolean>(false);
+  private readonly restarting$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
 
   protected nodeName$ = new BehaviorSubject<string>(null);
@@ -27,6 +28,8 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
     null,
     this.nodeName$,
   );
+
+  protected mappedRestart$ = this.actions.action([Actions.RESTART_NODE], this.restarting$, null, null, this.nodeName$);
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
@@ -64,6 +67,20 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
               const pruneMessage = `Prune freed <strong>${pruned}</strong> on ${this.nodeName$.value}.`;
               this.dialog.info(`Repair and Prune`, `${repairMessage}<br/>${pruneMessage}`, 'build').subscribe();
             });
+        }
+      });
+  }
+
+  protected doRestartNode() {
+    this.dialog
+      .confirm('Restart', 'Restarting the node will make it temporarily unavailable.')
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.restarting$.next(true);
+          this.nodesAdmin
+            .restartNode(this.nodeName$.value)
+            .pipe(finalize(() => this.restarting$.next(false)))
+            .subscribe(() => {});
         }
       });
   }

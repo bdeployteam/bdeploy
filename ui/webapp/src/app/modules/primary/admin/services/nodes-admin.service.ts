@@ -83,4 +83,10 @@ export class NodesAdminService {
       .post<RepairAndPruneResultDto>(`${this.apiPath()}/nodes/${nodeName}/repair-and-prune`, null)
       .pipe(measure(`Repair and Prune node ${nodeName}`));
   }
+
+  public restartNode(nodeName: string): Observable<unknown> {
+    return this.http
+      .post<unknown>(`${this.apiPath()}/nodes/${nodeName}/restart`, null)
+      .pipe(measure(`Restart node ${nodeName}`));
+  }
 }

@@ -45,4 +45,11 @@ public interface MinionUpdateResource {
     @GET
     @Path("/convertToNode")
     public void convertToNode();
+
+    /**
+     * Restart the current server.
+     */
+    @GET
+    @Path("/restart")
+    public void restart();
 }

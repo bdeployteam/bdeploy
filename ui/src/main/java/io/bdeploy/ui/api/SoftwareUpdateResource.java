@@ -95,10 +95,10 @@ public interface SoftwareUpdateResource {
 
     @GET
     @Path("/restart")
+    @RequiredPermission(permission = Permission.ADMIN)
     public void restartServer();
 
     @GET
     @Path("/stackdump")
     public void createStackDump();
-
 }
