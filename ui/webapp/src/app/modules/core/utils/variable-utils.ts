@@ -39,7 +39,12 @@ export function groupVariables(descriptors: VariableDescriptor[], values: Variab
       value: values.find((v) => v.id === d.id),
       editorEnabled: true, // used to lock once custom editor is loaded.
     };
-    grp.pairs.push(pair);
+
+    if (!pair.value) {
+      console.error(`variable descriptor ${d.name} does not have a matching value`);
+    } else {
+      grp.pairs.push(pair);
+    }
   }
 
   // sort groups by name, ungrouped variables come last.

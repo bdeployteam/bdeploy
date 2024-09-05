@@ -85,7 +85,7 @@ describe('System Template Tests', () => {
     cy.screenshot('Doc_SystemTemplate_Done');
   });
 
-  it('Check Instances', () => {
+  it('Checks Instances', () => {
     cy.visit('/');
     cy.enterGroup(groupName);
 
@@ -100,7 +100,7 @@ describe('System Template Tests', () => {
     });
   });
 
-  it('Check System Variables', () => {
+  it('Checks System Variables', () => {
     cy.visit('/');
     cy.enterGroup(groupName);
 
@@ -179,6 +179,66 @@ describe('System Template Tests', () => {
         );
         cy.get('button[data-cy^=Yes]').click();
       });
+    });
+  });
+
+  it('Checks Instance Variables', () => {
+    cy.visit('/');
+    cy.enterInstance(groupName, 'Demo Instance');
+    cy.pressMainNavButton('Instance Configuration');
+
+    cy.pressMainNavButton('Instance Configuration');
+
+    cy.inMainNavFlyin('app-instance-settings', () => {
+      cy.get('button[data-cy^="Instance Variables"]').click();
+    });
+
+    cy.contains('mat-expansion-panel', 'Custom Variables').within(() => {
+      cy.contains('mat-panel-description', '3/3 variables shown').should('exist');
+      cy.get('mat-panel-title').click();
+      cy.get('app-bd-form-input[name="param.global_val"]').within(() => {
+        cy.get('input[name="param.global_val"]').should('have.value', 'demo');
+      });
+      cy.get('app-bd-form-input[name="param.xshared_val"]').within(() => {
+        cy.get('input[name="param.xshared_val"]').should('have.value', '10');
+      });
+      cy.get('mat-panel-title').click();
+    });
+
+    cy.contains('mat-expansion-panel', 'Ungrouped Variables').within(() => {
+      cy.contains('mat-panel-description', '2/2 variables shown').should('exist');
+      cy.get('mat-panel-title').click();
+      cy.get('app-bd-form-input[name="product.instance.ungrouped.variable1_val"]').within(() => {
+        cy.get('input[name="product.instance.ungrouped.variable1_val"]').should('have.value', '26.7.2024');
+      });
+      cy.get('app-bd-form-input[name="product.instance.ungrouped.variable2_val"]').within(() => {
+        cy.get('input[name="product.instance.ungrouped.variable2_val"]').should('have.value', '27.7.2024');
+      });
+      cy.get('mat-panel-title').click();
+    });
+
+    cy.contains('mat-expansion-panel', 'Product Description Variables').within(() => {
+      cy.contains('mat-panel-description', '3/3 variables shown').should('exist');
+      cy.get('mat-panel-title').click();
+      cy.get('app-bd-form-input[name="product.instance.variable3_val"]').within(() => {
+        cy.get('input[name="product.instance.variable3_val"]').should('have.value', 'teenagers');
+      });
+      cy.get('app-bd-form-input[name="product.instance.variable2_val"]').within(() => {
+        cy.get('input[name="product.instance.variable2_val"]').should('have.value', 'admin');
+      });
+      cy.get('mat-panel-title').click();
+    });
+
+    cy.contains('mat-expansion-panel', 'Instance Variable Definitions').within(() => {
+      cy.contains('mat-panel-description', '2/2 variables shown').should('exist');
+      cy.get('mat-panel-title').click();
+      cy.get('app-bd-form-input[name="instance.variable.v1_val"]').within(() => {
+        cy.get('input[name="instance.variable.v1_val"]').should('have.value', 'defaultDefinedV1');
+      });
+      cy.get('app-bd-form-input[name="instance.variable.v2_val"]').within(() => {
+        cy.get('input[name="instance.variable.v2_val"]').should('have.value', 'defaultDefinedV2');
+      });
+      cy.get('mat-panel-title').click();
     });
   });
 });

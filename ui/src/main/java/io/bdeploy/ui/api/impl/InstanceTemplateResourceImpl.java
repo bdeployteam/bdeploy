@@ -215,7 +215,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.system = systemKey;
         // cfg.configTree = pmf.getConfigTemplateTreeId(); // not allowed.
         cfg.purpose = purpose;
-        cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), ttor);
+        cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), ttor, pmf);
 
         SystemConfiguration system = systemKey != null ? SystemManifest.of(hive, systemKey).getConfiguration() : null;
         List<ApplicationManifest> apps = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
@@ -520,13 +520,19 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static List<VariableConfiguration> createInstanceVariablesFromTemplate(FlattenedInstanceTemplateConfiguration tpl,
-            TrackingTemplateOverrideResolver ttor) {
+            TrackingTemplateOverrideResolver ttor, ProductManifest pmf) {
 
         List<VariableConfiguration> result = new ArrayList<>();
 
         for (var v : tpl.instanceVariables) {
             v.value = new LinkedValueConfiguration(TemplateHelper.process(v.value.getPreRenderable(), ttor, ttor::canResolve));
             result.add(v);
+        }
+
+        for (var pv : pmf.getInstanceVariables()) {
+            if (result.stream().noneMatch(v -> v.id.equals(pv.id))) {
+                result.add(new VariableConfiguration(pv));
+            }
         }
 
         return result;
