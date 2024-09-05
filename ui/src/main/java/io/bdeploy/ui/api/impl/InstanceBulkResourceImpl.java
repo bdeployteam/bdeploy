@@ -325,7 +325,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     }
 
     @Override
-    public BulkOperationResultDto deleteBulk(List<String> instances) {
+    public BulkOperationResultDto deleteBulk(Set<String> instances) {
         var result = new BulkOperationResultDto();
         var sync = new ConcurrentHashMap<Manifest.Key, String>();
 
@@ -348,11 +348,6 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         // now sync and fire update for all manipulated instances.
         syncBulk(sync.keySet());
-
-        // TODO: check who actually fires change events. should be the master directly (?) and the sync in
-        // case of central (only!). no resources in the UI should ever fire?
-        sync.entrySet().forEach(e -> changes.remove(ObjectChangeType.INSTANCE, e.getKey(),
-                new ObjectScope(group, e.getValue(), e.getKey().getTag())));
 
         return result;
     }

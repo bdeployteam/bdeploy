@@ -64,9 +64,6 @@ public class SystemResourceImpl implements SystemResource {
     @Inject
     private MasterProvider mp;
 
-    @Inject
-    private ChangeEventManager changes;
-
     public SystemResourceImpl(String group, BHive hive) {
         this.group = group;
         this.hive = hive;
@@ -122,10 +119,6 @@ public class SystemResourceImpl implements SystemResource {
 
         msr.delete(systemId);
         syncSystem(key);
-
-        if (minion.getMode() != MinionMode.CENTRAL) {
-            changes.remove(ObjectChangeType.SYSTEM, key);
-        }
     }
 
     private void syncSystem(Manifest.Key systemKey) {

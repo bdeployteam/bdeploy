@@ -248,12 +248,12 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
     /**
      * @return all {@link Key}s found in the database's filesystem.
      */
-    public Set<Manifest.Key> getAllManifests() {
+    public SortedSet<Manifest.Key> getAllManifests() {
         // structure is dir:root/dir:name/dir:name/file:tag
         return collectManifestsCached(root);
     }
 
-    private Set<Manifest.Key> collectManifestsCached(Path r) {
+    private SortedSet<Manifest.Key> collectManifestsCached(Path r) {
         Path normalized = r.normalize();
         try {
             synchronized (manifestListCache) {
@@ -266,8 +266,8 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
         }
     }
 
-    private Set<Manifest.Key> collectManifests(Path scanRoot) {
-        Set<Manifest.Key> result = new TreeSet<>();
+    private SortedSet<Manifest.Key> collectManifests(Path scanRoot) {
+        SortedSet<Manifest.Key> result = new TreeSet<>();
         try {
             long xctpCount = 0;
             do {
@@ -314,7 +314,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      *            If the name includes a ':', it is treated as a fully qualified manifest key.
      * @return the list of manifests which matched the name.
      */
-    public Set<Manifest.Key> getAllForName(String name) {
+    public SortedSet<Manifest.Key> getAllForName(String name) {
         if (name.contains(":")) {
             // if the name is fully qualified, it is either there or not.
             SortedSet<Manifest.Key> result = new TreeSet<>();
