@@ -96,7 +96,7 @@
               <app-bd-button
                 color="primary"
                 text="Install"
-                icon="layers"
+                icon="deployed_code_update"
                 (click)="doInstall(currentInstance.instance.tag)"
                 [collapsed]="isInstalled"
                 [disabled]="(mappedInstall$ | async) || isInstalled || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
@@ -106,7 +106,7 @@
               <app-bd-button
                 color="primary"
                 text="Activate"
-                icon="star"
+                icon="deployed_code_alert"
                 (click)="doActivate(currentInstance.instance.tag)"
                 [collapsed]="!isInstalled"
                 [disabled]="(mappedActivate$ | async) || !isInstalled || !(auth.isCurrentScopeWrite$ | async)"

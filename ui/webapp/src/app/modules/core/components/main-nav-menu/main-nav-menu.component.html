@@ -141,7 +141,7 @@
 
   <app-main-nav-button
     [visible]="!!(areas.instanceContext$ | async)"
-    icon="history"
+    icon="deployed_code_history"
     text="Instance History"
     [collapsed]="!scope.expanded"
     [route]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]"

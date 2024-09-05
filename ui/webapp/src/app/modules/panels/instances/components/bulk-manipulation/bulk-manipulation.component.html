@@ -61,7 +61,7 @@
         [disabled]="!selections.length || (instance.overallStatesLoading$ | async)"
         [loadingWhen$]="instance.overallStatesLoading$"
         text="Fetch Instance States"
-        svgIcon="sync-all"
+        icon="cloud_sync"
         (click)="onFetchStates()"
       ></app-bd-button>
       <mat-divider></mat-divider>
@@ -80,7 +80,7 @@
         [disabled]="!selections.length || (mappedInstall$ | async)"
         [loadingWhen$]="mappedInstall$"
         text="Install Latest Version"
-        icon="layers"
+        icon="deployed_code_update"
         (click)="onInstall()"
       ></app-bd-button>
       <app-bd-button
@@ -88,7 +88,7 @@
         [disabled]="!selections.length || (mappedActivate$ | async)"
         [loadingWhen$]="mappedActivate$"
         text="Activate Latest Version..."
-        icon="star"
+        icon="deployed_code_alert"
         (click)="onActivate()"
       ></app-bd-button>
       <mat-divider></mat-divider>

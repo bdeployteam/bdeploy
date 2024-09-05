@@ -94,7 +94,7 @@
         <ng-container *ngIf="state$ | async as state">
           <mat-divider></mat-divider>
           <app-bd-notification-card
-            icon="history"
+            icon="sync"
             [type]="'warning'"
             [dismissable]="false"
             header="Server Not Synchronized"
@@ -108,7 +108,7 @@
           <app-bd-button
             [collapsed]="false"
             text="Install"
-            icon="layers"
+            icon="deployed_code_update"
             color="primary"
             [disabled]="(mappedInstall$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
             (click)="doInstall()"
@@ -117,7 +117,7 @@
           <app-bd-button
             [collapsed]="false"
             text="Activate"
-            icon="star"
+            icon="deployed_code_alert"
             color="primary"
             [disabled]="
               (mappedActivate$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
@@ -128,7 +128,7 @@
           <app-bd-button
             [collapsed]="false"
             text="Uninstall"
-            icon="layers_clear"
+            icon="delete_forever"
             [disabled]="
               (mappedUninstall$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
@@ -140,7 +140,7 @@
     </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(entry$ | async)">
-    <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="No Information">
+    <app-bd-notification-card icon="deployed_code_history" [type]="'warning'" [dismissable]="false" header="No Information">
       <div class="text-justify">
         The selected history entry cannot be retrieved. Please select another one from the list.
       </div>

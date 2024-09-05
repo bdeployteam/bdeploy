@@ -49,7 +49,7 @@
       <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
         <app-bd-notification-card
           *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-          icon="history"
+          icon="sync"
           type="warning"
           [dismissable]="false"
           header="Server Not Synchronized"
