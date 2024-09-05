@@ -920,13 +920,15 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void delete(String instanceId) {
         try (var handle = af.run(Actions.DELETE_INSTANCE, name, instanceId)) {
-            Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceId));
+            SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceId));
 
             // make sure all is uninstalled.
             allInstanceObjects.stream().filter(i -> i.getName().equals(InstanceManifest.getRootName(instanceId)))
                     .forEach(this::uninstall);
 
             allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+
+            changes.remove(ObjectChangeType.INSTANCE, allInstanceObjects.first(), new ObjectScope(name, instanceId));
         }
     }
 
@@ -937,6 +939,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             InstanceManifest.of(hive, key).getHistory(hive)
                     .recordAction(Action.DELETE, context.getUserPrincipal().getName(), null);
             InstanceManifest.delete(hive, key);
+
+            changes.remove(ObjectChangeType.INSTANCE, key, new ObjectScope(name, instanceId, tag), Map.of("partial", "true"));
         }
     }
 

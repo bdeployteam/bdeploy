@@ -16,7 +16,10 @@ import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.api.impl.ChangeEventManager;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -34,6 +37,9 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
 
     @Inject
     private MinionRoot root;
+
+    @Inject
+    private ChangeEventManager changes;
 
     private final String name;
 
@@ -91,6 +97,9 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
         }
 
         SystemManifest.delete(hive, id);
+
+        // tag does not matter in this case.
+        changes.remove(ObjectChangeType.SYSTEM, new Manifest.Key(manifestName, "0"), new ObjectScope(name));
     }
 
 }

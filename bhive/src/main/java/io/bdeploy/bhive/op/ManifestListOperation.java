@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.op;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
@@ -10,12 +11,12 @@ import io.bdeploy.bhive.model.Manifest;
  * Lists all {@link Manifest}s available in the {@link BHive}.
  */
 @ReadOnlyOperation
-public class ManifestListOperation extends BHive.Operation<Set<Manifest.Key>> {
+public class ManifestListOperation extends BHive.Operation<SortedSet<Manifest.Key>> {
 
     private String key;
 
     @Override
-    public Set<Manifest.Key> call() throws Exception {
+    public SortedSet<Manifest.Key> call() throws Exception {
         if (key == null) {
             return getManifestDatabase().getAllManifests();
         } else {

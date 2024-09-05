@@ -71,7 +71,7 @@ public interface InstanceBulkResource {
     @POST
     @Path("/bulkDelete")
     @RequiredPermission(permission = Permission.ADMIN)
-    public BulkOperationResultDto deleteBulk(List<String> instances);
+    public BulkOperationResultDto deleteBulk(Set<String> instances);
 
     /**
      * @param instances instances where the current latest version is to be installed.

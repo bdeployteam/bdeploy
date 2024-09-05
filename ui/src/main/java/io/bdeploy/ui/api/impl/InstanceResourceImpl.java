@@ -516,8 +516,6 @@ public class InstanceResourceImpl implements InstanceResource {
         root.getNamedMaster(group).delete(instance);
 
         syncInstance(minion, rc, group, instance);
-
-        versions.forEach(v -> changes.remove(ObjectChangeType.INSTANCE, v.key));
     }
 
     @Override
@@ -537,9 +535,6 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        if (minion.getMode() != MinionMode.CENTRAL) {
-            changes.remove(ObjectChangeType.INSTANCE, key, Map.of("partial", "true"));
-        }
     }
 
     @Override
