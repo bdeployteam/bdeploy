@@ -224,7 +224,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             return findNestedReferences(hive, root, "", 0);
         }
 
-        private SortedSet<ReferenceKey> findNestedReferences(BHiveExecution hive, ObjectId tree, String path, long depth) {
+        private static SortedSet<ReferenceKey> findNestedReferences(BHiveExecution hive, ObjectId tree, String path, long depth) {
             if (hive == null) {
                 return null;
             }

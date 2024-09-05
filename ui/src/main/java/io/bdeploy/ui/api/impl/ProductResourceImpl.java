@@ -165,10 +165,7 @@ public class ProductResourceImpl implements ProductResource {
     @Override
     public List<InstanceUsageDto> getProductUsedIn(String name, String tag) {
         Manifest.Key checkKey = new Manifest.Key(name, tag);
-
-        List<InstanceUsageDto> result = internalCheckUsedIn(hive, checkKey);
-
-        return result;
+        return internalCheckUsedIn(hive, checkKey);
     }
 
     /**
@@ -197,9 +194,7 @@ public class ProductResourceImpl implements ProductResource {
             } else {
                 mfSet.stream().filter(mf -> installedTags.contains(mf.getManifest().getTag())).sorted((a, b) -> Long
                         .compare(Long.parseLong(a.getManifest().getTag()), Long.parseLong(b.getManifest().getTag())))
-                        .forEach(mf -> {
-                            result.add(createUsage(mf));
-                        });
+                        .forEach(mf -> result.add(createUsage(mf)));
             }
         }
         return result;

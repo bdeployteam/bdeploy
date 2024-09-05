@@ -170,7 +170,6 @@ public class JerseyServerMonitor {
             public void onThreadReleaseEvent(AbstractThreadPool threadPool, Thread thread) {
                 poolCurrentSize.set(threadPool.getSize());
             }
-
         });
 
         monitoringConfig.getWebServerConfig().addProbes(new HttpServerProbe.Adapter() {

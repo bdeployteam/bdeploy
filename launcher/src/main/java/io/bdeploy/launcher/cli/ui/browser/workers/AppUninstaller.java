@@ -72,7 +72,6 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
 
     private List<String> getUninstallCommand() throws IOException {
         ClickAndStartDescriptor clickAndStart = app.clickAndStart;
-        String appId = clickAndStart.applicationId;
 
         List<String> command = new ArrayList<>();
         // On Windows the BDeploy executable expects the click and start file
@@ -87,6 +86,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
 
         // On Linux the installer writes a special uninstall script
         // ATTENTION: This is not there if the application has been launched via click&start
+        String appId = clickAndStart.applicationId;
         Path uninstaller = lpp.get(SpecialDirectory.APP, appId).resolve("uninstall.run");
         if (PathHelper.exists(uninstaller)) {
             command.add(uninstaller.toString());

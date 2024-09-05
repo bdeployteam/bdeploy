@@ -188,7 +188,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
     /**
      * @return the configured pool path. Note that this may return a path even though not (yet) pooling due to a missing restart.
      */
-    public synchronized Path getPoolPath() {
+    public final synchronized Path getPoolPath() {
         if (ZipHelper.isZipUri(uri)) {
             return null;
         }

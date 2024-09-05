@@ -463,7 +463,7 @@ public class ProductUpdateService {
             if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
                 node.nodeConfiguration.applications.stream()//
                         .map(app -> app.processControl.configDirs)//
-                        .filter(dirsString -> dirsString != null)//
+                        .filter(Objects::nonNull)//
                         .forEach(dirsString -> {
                             String[] split = ProcessControlConfiguration.CONFIG_DIRS_SPLIT_PATTERN.split(dirsString);
                             Set<String> configDirs = Arrays.stream(split).map(s -> s.substring(1)).collect(Collectors.toSet());
