@@ -92,4 +92,9 @@ public interface NodeManagementResource {
     @Path("/nodes/{name}/restart")
     @RequiredPermission(permission = Permission.ADMIN)
     public void restartNode(@PathParam("name") String name);
+
+    @POST
+    @Path("/nodes/{name}/shutdown")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void shutdownNode(@PathParam("name") String name);
 }

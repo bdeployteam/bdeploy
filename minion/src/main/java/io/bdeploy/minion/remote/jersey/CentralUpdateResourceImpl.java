@@ -91,7 +91,7 @@ public class CentralUpdateResourceImpl implements CommonUpdateResource {
     public void restartServer() {
         // never-ending restart-server action which will notify the web-ui of pending restart.
         actions.run(Actions.RESTART_SERVER);
-        root.getRestartManager().performRestart(1_000);
+        root.getServerProcessManager().performRestart(1_000);
     }
 
     @Override

@@ -89,4 +89,10 @@ export class NodesAdminService {
       .post<unknown>(`${this.apiPath()}/nodes/${nodeName}/restart`, null)
       .pipe(measure(`Restart node ${nodeName}`));
   }
+
+  public shutdownNode(nodeName: string): Observable<unknown> {
+    return this.http
+      .post<unknown>(`${this.apiPath()}/nodes/${nodeName}/shutdown`, null)
+      .pipe(measure(`Shutdown node ${nodeName}`));
+  }
 }

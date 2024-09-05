@@ -72,6 +72,7 @@ public enum Actions {
     CONVERT_TO_NODE(ActionScope.GLOBAL, true, "Convert existing Server to Node"),
     REPLACE_NODE(ActionScope.GLOBAL, true, "Replace Node"),
     RESTART_NODE(ActionScope.GLOBAL, true, "Restart Node"),
+    SHUTDOWN_NODE(ActionScope.GLOBAL, true, "Shutdown Node"),
 
     FSCK_NODE(ActionScope.GLOBAL, true, "Consistency Check on Node"),
     PRUNE_NODE(ActionScope.GLOBAL, true, "Prune on Node"),
@@ -89,6 +90,7 @@ public enum Actions {
 
     STARTING_SERVER(ActionScope.GLOBAL, true, "Starting Up..."),
     RESTART_SERVER(ActionScope.GLOBAL, true, "Restarting Server..."),
+    SHUTDOWN_SERVER(ActionScope.GLOBAL, true, "Shutting Down Server..."),
     UPDATE(ActionScope.GLOBAL, true, "Installing Server Update...");
 
     private final ActionScope scope;

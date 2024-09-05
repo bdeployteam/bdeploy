@@ -147,7 +147,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private final ExecuteUnreadMessagesReceiver mailReceiver = new ExecuteUnreadMessagesReceiver();
 
     private Path updates;
-    private MinionRestartManager restartManager = t -> log.error("No Update Manager, cannot update Minion!");
+    private MinionServerProcessManager serverProcessManager = new MinionServerProcessManager.NoopServerProcessManager();
 
     private Scheduler scheduler;
     private PluginManager pluginManager;
@@ -247,17 +247,17 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * @param manager a replacement for the default {@link MinionRestartManager}.
+     * @param manager a replacement for the default {@link MinionServerProcessManager}.
      */
-    public void setRestartManager(MinionRestartManager manager) {
-        this.restartManager = manager;
+    public void setServerProcessManager(MinionServerProcessManager manager) {
+        this.serverProcessManager = manager;
     }
 
     /**
-     * @return the {@link MinionRestartManager} responsible for restarting this minion.
+     * @return the {@link MinionServerProcessManager} responsible for restarting this minion.
      */
-    public MinionRestartManager getRestartManager() {
-        return restartManager;
+    public MinionServerProcessManager getServerProcessManager() {
+        return serverProcessManager;
     }
 
     /**
