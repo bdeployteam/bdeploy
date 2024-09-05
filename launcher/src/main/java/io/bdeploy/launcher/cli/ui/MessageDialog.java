@@ -10,6 +10,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -27,26 +28,26 @@ public class MessageDialog extends BaseDialog {
 
     private static final String SHOW_DETAILS_LABEL = "Show Details";
     private static final String HIDE_MESSAGE_LABEL = "Hide Details";
-    private static final Dimension DEFAULT_DIMENSION = new Dimension(650, 300);
+    private static final Dimension DEFAULT_DIMENSION = new Dimension(650, 250);
     private static final Dimension DETAIL_DIMENSION = new Dimension(650, 450);
 
     /** Flag which page is displayed in the content */
     private boolean messagePage = true;
 
-    /** Contains the detailed error message */
-    protected JTextArea errorDetails;
-
-    /** Label containing a nice human readable error message */
-    protected JLabel errorSummary;
-
-    /** Label containing a more technical error message */
-    protected JTextArea errorMessage;
-
     /** Label containing the header icon */
-    protected JLabel headerIcon;
+    private JLabel headerIcon;
 
     /** Label containing the header text */
-    protected JLabel headerText;
+    private JLabel headerText;
+
+    /** Label containing a nice human readable error message */
+    private JLabel errorSummary;
+
+    /** Label containing a more technical error message */
+    private JTextArea errorMessage;
+
+    /** Contains the detailed error message */
+    private JTextArea errorDetails;
 
     /**
      * Creates a new dialog with a header, content and footer area
@@ -57,7 +58,7 @@ public class MessageDialog extends BaseDialog {
 
         // Header area displaying icon and text
         JPanel header = createHeaderArea();
-        add(header, BorderLayout.NORTH);
+        add(header, BorderLayout.PAGE_START);
 
         // Content are displaying a hint
         JPanel content = createContentArea();
@@ -106,7 +107,6 @@ public class MessageDialog extends BaseDialog {
     /** Creates the widgets shown in the header */
     private JPanel createHeaderArea() {
         JPanel header = new JPanel();
-        header.setBackground(Color.WHITE);
         header.setBorder(DEFAULT_EMPTY_BORDER);
         header.setLayout(new FlowLayout());
 
@@ -123,61 +123,56 @@ public class MessageDialog extends BaseDialog {
 
     /** Creates the widgets shown in the content */
     private JPanel createContentArea() {
-        JPanel content = new JPanel();
-        content.setLayout(new CardLayout());
-        content.setBackground(Color.WHITE);
-        content.setBorder(new EmptyBorder(10, 10, 10, 10));
-
         errorSummary = new JLabel();
         errorSummary.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12F));
-        content.add(errorSummary);
-
-        JPanel errorContainer = new JPanel();
-        errorContainer.setBackground(Color.WHITE);
-        errorContainer.setBorder(DEFAULT_EMPTY_BORDER);
-        errorContainer.setLayout(new BorderLayout(15, 15));
 
         errorMessage = new JTextArea();
         errorMessage.setEditable(false);
         errorMessage.setLineWrap(true);
         errorMessage.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12F));
-        errorContainer.add(errorMessage, BorderLayout.PAGE_START);
 
         errorDetails = new JTextArea();
         errorDetails.setEditable(false);
         errorDetails.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-        JScrollPane scrollPane = new JScrollPane(errorDetails);
-        errorContainer.add(scrollPane, BorderLayout.CENTER);
 
+        JPanel errorContainer = new JPanel();
+        errorContainer.setLayout(new BorderLayout(0, 5));
+        errorContainer.add(errorMessage, BorderLayout.PAGE_START);
+        errorContainer.add(new JScrollPane(errorDetails), BorderLayout.CENTER);
+
+        JPanel content = new JPanel();
+        content.setLayout(new CardLayout());
+        content.setBorder(new EmptyBorder(10, 10, 10, 10));
+        content.add(errorSummary);
         content.add(errorContainer);
         return content;
     }
 
     /** Creates the widgets shown in the footer */
     private JPanel createFooter(JPanel content) {
-        JPanel footer = new JPanel();
-        footer.setBorder(DEFAULT_EMPTY_BORDER);
-        footer.setLayout(new BorderLayout(15, 15));
-
-        JPanel actionPanel = new JPanel();
-        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-
         JButton details = new JButton();
         details.setText(SHOW_DETAILS_LABEL);
         details.addActionListener(a -> toggleDetails(content, details));
-        actionPanel.add(details);
 
         JButton clipboard = new JButton();
-        clipboard.setIcon(WindowHelper.loadIcon("/copy.png", 16, 16));
+        clipboard.setIcon(WindowHelper.loadSvgIcon("copy").derive(16, 16));
         clipboard.setToolTipText("Copy to Clipboard");
         clipboard.addActionListener(a -> doCopyToClipboard());
+
+        JPanel actionPanel = new JPanel();
+        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        actionPanel.add(details);
+        actionPanel.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
         actionPanel.add(clipboard);
-        footer.add(actionPanel, BorderLayout.WEST);
 
         JButton close = new JButton("Close");
         close.addActionListener(a -> doClose(0));
-        footer.add(close, BorderLayout.EAST);
 
+        JPanel footer = new JPanel();
+        footer.setBorder(DEFAULT_EMPTY_BORDER);
+        footer.setLayout(new BorderLayout(15, 15));
+        footer.add(actionPanel, BorderLayout.LINE_START);
+        footer.add(close, BorderLayout.LINE_END);
         return footer;
     }
 

@@ -21,7 +21,6 @@ import io.bdeploy.launcher.cli.ui.WindowHelper;
 public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCellRenderer {
 
     private static final long serialVersionUID = 1L;
-    private static final int ICON_SIZE = 16;
 
     public BrowserDialogTableHeaderRenderer() {
         setOpaque(true);
@@ -47,10 +46,10 @@ public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCel
         SortOrder sortOrder = getSortOrder(t, colIdx);
         switch (sortOrder) {
             case ASCENDING:
-                setIcon(WindowHelper.loadIcon("/arrow_up.png", ICON_SIZE, ICON_SIZE));
+                setIcon(WindowHelper.loadSvgIcon("arrow_up"));
                 break;
             case DESCENDING:
-                setIcon(WindowHelper.loadIcon("/arrow_down.png", ICON_SIZE, ICON_SIZE));
+                setIcon(WindowHelper.loadSvgIcon("arrow_down"));
                 break;
             case UNSORTED:
                 setIcon(null);

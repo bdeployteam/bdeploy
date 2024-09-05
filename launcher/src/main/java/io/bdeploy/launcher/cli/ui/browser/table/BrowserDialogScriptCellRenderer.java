@@ -1,7 +1,7 @@
 package io.bdeploy.launcher.cli.ui.browser.table;
 
-import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.function.BiFunction;
@@ -40,33 +40,27 @@ public class BrowserDialogScriptCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
         super.getTableCellRendererComponent(t, v, s, f, r, c);
-        if (s) {
-            return this;
-        }
 
-        Color backgroundColor;
+        boolean isActive = false;
         if (t.getModel() instanceof BrowserDialogTableModel bdTableModel) {
             ClientSoftwareConfiguration config = bdTableModel.get(sortModel.convertRowIndexToModel(r));
             ClientApplicationDto metadata = config.metadata;
-            if (metadata == null) {
-                backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
-            } else {
+            if (metadata != null) {
                 LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
                 ScriptInfo scriptInfo = scriptInfoExtractor.apply(settings, metadata);
-                backgroundColor = scriptInfo == null//
-                        ? BrowserDialogTableCellColorConstants.DISABLED
-                        : config.clickAndStart.equals(scriptInfo.getDescriptor())//
-                                ? BrowserDialogTableCellColorConstants.ENABLED//
-                                : BrowserDialogTableCellColorConstants.PAY_ATTENTION;
+                isActive = scriptInfo != null && config.clickAndStart.equals(scriptInfo.getDescriptor());
             }
-        } else {
-            backgroundColor = BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE;
         }
 
-        setBackground(backgroundColor);
+        setEnabled(isActive);
+        if (isActive) {
+            setFont(getFont().deriveFont(Font.BOLD));
+            setText(getText() + " (active)");
+        }
+
         return this;
     }
 }

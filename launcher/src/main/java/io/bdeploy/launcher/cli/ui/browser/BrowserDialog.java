@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 import javax.swing.AbstractAction;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -35,7 +37,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
@@ -107,27 +108,34 @@ public class BrowserDialog extends BaseDialog {
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel;
     private final JTable table;
 
-    private JButton refreshButton;
+    private JButton refreshAllButton;
     private JButton pruneButton;
     private JButton fsckButton;
 
     private JButton launchButton;
+    private JButton customizeAndLaunchButton;
+    private JButton refreshSelectedButton;
+    private JButton activateStartScriptButton;
+    private JButton activateFileAssocScriptButton;
+    private JButton updateButton;
+    private JButton verifyButton;
     private JButton reinstallButton;
     private JButton uninstallButton;
-    private JButton verifyButton;
 
     private JMenuItem launchItem;
     private JMenuItem customizeAndLaunchItem;
-    private JMenuItem refreshItem;
-    private JMenuItem updateItem;
-    private JMenuItem uninstallItem;
+    private JMenuItem refreshSelectedItem;
     private JMenuItem activateStartScriptItem;
     private JMenuItem activateFileAssocScriptItem;
+    private JMenuItem updateItem;
+    private JMenuItem verifyItem;
+    private JMenuItem reinstallItem;
+    private JMenuItem uninstallItem;
 
     private JProgressBar progressBar;
 
     public BrowserDialog(LauncherPathProvider lpp, Path userArea) {
-        super(new Dimension(1024, 768));
+        super(1333);
 
         this.lpp = lpp;
         this.homeDir = lpp.get(SpecialDirectory.HOME);
@@ -141,6 +149,9 @@ public class BrowserDialog extends BaseDialog {
         this.table = new JTable(model);
 
         setTitle("BDeploy Launcher");
+
+        // Initialize buttons and context menu items
+        createButtonsAndItems();
 
         // Header area displaying a search field
         JPanel header = createHeader();
@@ -158,7 +169,7 @@ public class BrowserDialog extends BaseDialog {
         KeyboardFocusManager keyManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         keyManager.addKeyEventDispatcher(e -> {
             if (e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_F5) {
-                onRefreshButtonClicked(null);
+                onRefreshAllEvent(null);
                 return true;
             }
             return false;
@@ -185,54 +196,68 @@ public class BrowserDialog extends BaseDialog {
         doUpdateButtonState();
     }
 
+    private void createButtonsAndItems() {
+        // Context insensitive buttons
+        refreshAllButton = createJButton("refresh", "Refresh All", this::onRefreshAllEvent,//
+                "Update the locally stored information (name, version...) of all applications");
+        pruneButton = createJButton("prune", "Prune", this::onPruneEvent,//
+                "Prune the selected application");
+        fsckButton = createJButton("fixErrors", "Fix Errors", this::onFsckEvent,//
+                "Fix any errors in the BHive");
+
+        // Context sensitive buttons
+        launchButton = createJButton("launch", "Launch", this::onLaunchEvent,//
+                "Launch the selected application");
+        customizeAndLaunchButton = createJButton("customizeAndLaunch", "Customize & Launch", this::onLaunchEvent,//
+                "Open a dialog to modify the application arguments before launching");
+        refreshSelectedButton = createJButton("refresh", "Refresh Selected", this::onRefreshSelectedEvent,//
+                "Update the locally stored information (name, version...) of the selected application");
+        activateStartScriptButton = createJButton("enable", "Activate Start Script", this::onActivateStartScriptEvent,//
+                "Set the selected application to be started with its given script name");
+        activateFileAssocScriptButton = createJButton("enable", "Activate File Association", this::onActivateFileAssocScriptEvent,//
+                "Associate files with the selected application");
+        updateButton = createJButton("update", "Update", this::onUpdateEvent,//
+                "Install the latest available version of the selected application");
+        verifyButton = createJButton("verify", "Verify", this::onVerifyEvent,//
+                "Check if the selected application has missing or modified files");
+        reinstallButton = createJButton("reinstall", "Reinstall", this::onReinstallEvent,//
+                "Reinstall the selected application");
+        uninstallButton = createJButton("uninstall", "Uninstall", this::onUninstallEvent,//
+                "Uninstall the selected application");
+
+        // Context menu items
+        launchItem = createMenuItemFromButton(launchButton);
+        customizeAndLaunchItem = createMenuItemFromButton(customizeAndLaunchButton);
+        refreshSelectedItem = createMenuItemFromButton(refreshSelectedButton);
+        activateStartScriptItem = createMenuItemFromButton(activateStartScriptButton);
+        activateFileAssocScriptItem = createMenuItemFromButton(activateFileAssocScriptButton);
+        updateItem = createMenuItemFromButton(updateButton);
+        verifyItem = createMenuItemFromButton(verifyButton);
+        reinstallItem = createMenuItemFromButton(reinstallButton);
+        uninstallItem = createMenuItemFromButton(uninstallButton);
+    }
+
     /** Creates the widgets shown in the header */
     private JPanel createHeader() {
         JPanel header = new JPanel();
-        header.setBackground(Color.WHITE);
-        header.setBorder(DEFAULT_EMPTY_BORDER);
-        header.setLayout(new BorderLayout());
-
-        refreshButton = createHeaderButton("refresh", "Refresh", this::onRefreshButtonClicked,//
-                "Update the locally stored information (name, version...) of all applications");
-        pruneButton = createHeaderButton("prune", "Prune", this::onPruneButtonClicked,//
-                "Prune the selected application");
-        fsckButton = createHeaderButton("fixErrors", "Fix Errors", this::onFsckButtonClicked,//
-                "Fix any errors in the BHive");
-
-        launchButton = createHeaderButton("launch", "Launch", this::onLaunchButtonClicked,//
-                "Launch the selected application");
-        reinstallButton = createHeaderButton("reinstall", "Reinstall", this::onReinstallButtonClicked,//
-                "Reinstall the selected application");
-        uninstallButton = createHeaderButton("uninstall", "Uninstall", this::onUninstallButtonClicked,//
-                "Uninstall the selected application");
-        verifyButton = createHeaderButton("verify", "Verify", this::onVerifyButtonClicked,//
-                "Check if selected application has missing or modified files");
+        header.setLayout(new BoxLayout(header, BoxLayout.LINE_AXIS));
+        header.setBorder(new EmptyBorder(5, 10, 0, 10));
 
         // Toolbar on the left side
-        JToolBar toolbar = new JToolBar();
-        toolbar.setFloatable(false);
-        toolbar.setBackground(Color.WHITE);
-        toolbar.add(refreshButton);
-        toolbar.add(pruneButton);
-        toolbar.add(fsckButton);
-        toolbar.add(new JToolBar.Separator());
-        toolbar.add(launchButton);
-        toolbar.add(new JToolBar.Separator());
-        toolbar.add(reinstallButton);
-        toolbar.add(uninstallButton);
-        toolbar.add(new JToolBar.Separator());
-        toolbar.add(verifyButton);
-        header.add(toolbar, BorderLayout.WEST);
+        header.add(refreshAllButton);
+        header.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        header.add(pruneButton);
+        header.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        header.add(fsckButton);
+        header.add(Box.createHorizontalGlue());
 
         // Search panel on the right side
         JPanel searchPanel = new JPanel();
-        searchPanel.setBackground(Color.WHITE);
         searchPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-        header.add(searchPanel, BorderLayout.EAST);
+        header.add(searchPanel);
 
         JLabel searchLabel = new JLabel("Search:", SwingConstants.RIGHT);
         searchLabel.setOpaque(true);
-        searchLabel.setBackground(Color.WHITE);
         searchPanel.add(searchLabel);
 
         JTextField searchField = new JTextField(30);
@@ -244,36 +269,21 @@ public class BrowserDialog extends BaseDialog {
             }
         });
         searchPanel.add(searchField);
-        return header;
-    }
 
-    private static JButton createHeaderButton(String iconName, String text, ActionListener listener, String tooltip) {
-        JButton btn = new JButton();
-        btn.setText(text);
-        btn.setToolTipText(tooltip);
-        btn.setIcon(WindowHelper.loadIcon('/' + iconName + ".png", 24, 24));
-        btn.addActionListener(listener);
-        btn.setBackground(Color.WHITE);
-        return btn;
+        return header;
     }
 
     /** Creates the widgets shown in the content */
     private JPanel createContent() {
-        JPanel content = new JPanel();
-        content.setBackground(Color.WHITE);
-        content.setLayout(new BorderLayout(10, 10));
-        content.setBorder(new EmptyBorder(0, 10, 10, 10));
-
-        table.setRowHeight(25);
-        table.setBackground(Color.WHITE);
         table.setShowHorizontalLines(true);
+        table.setRowHeight(25);
 
         // Notify on selection changes
         ListSelectionModel selectionModel = table.getSelectionModel();
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        selectionModel.addListSelectionListener(this::onSelectionChanged);
+        selectionModel.addListSelectionListener(this::onSelectionChangedEvent);
 
-        // Setup a nicer header
+        // Setup a nicer table header
         JTableHeader header = table.getTableHeader();
         header.setDefaultRenderer(new BrowserDialogTableHeaderRenderer());
 
@@ -341,76 +351,57 @@ public class BrowserDialog extends BaseDialog {
         sortModel.setSortKeys(Collections.singletonList(sortKey));
 
         // Context menu
-        launchItem = new JMenuItem(launchButton.getText());
-        launchItem.setIcon(WindowHelper.loadIcon("/launch.png", 16, 16));
-        launchItem.setToolTipText(launchButton.getToolTipText());
-        launchItem.addActionListener(this::onLaunchButtonClicked);
-
-        customizeAndLaunchItem = new JMenuItem("Customize & Launch");
-        customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching");
-        customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/customizeAndLaunch.png", 16, 16));
-        customizeAndLaunchItem.addActionListener(this::onLaunchButtonClicked);
-
-        refreshItem = new JMenuItem("Refresh Application");
-        refreshItem.setIcon(WindowHelper.loadIcon("/refresh.png", 16, 16));
-        refreshItem.setToolTipText("Update the locally stored information (name, version...) of the selected application");
-        refreshItem.addActionListener(this::onRefreshItemClicked);
-
-        updateItem = new JMenuItem("Update");
-        updateItem.setIcon(WindowHelper.loadIcon("/update.png", 16, 16));
-        updateItem.setToolTipText("Installs the latest available version of the selected application");
-        updateItem.addActionListener(this::onUpdateButtonClicked);
-
-        activateStartScriptItem = new JMenuItem("Activate Start Script");
-        activateStartScriptItem.setIcon(WindowHelper.loadIcon("/enable.png", 16, 16));
-        activateStartScriptItem.setToolTipText("Set this application to be started with its given script name.");
-        activateStartScriptItem.addActionListener(this::onActivateStartScriptButtonClicked);
-
-        activateFileAssocScriptItem = new JMenuItem("Activate File Association");
-        activateFileAssocScriptItem.setIcon(WindowHelper.loadIcon("/enable.png", 16, 16));
-        activateFileAssocScriptItem.setToolTipText("Associate files with this application.");
-        activateFileAssocScriptItem.addActionListener(this::onActivateFileAssocScriptButtonClicked);
-
-        JMenuItem reinstallItem = new JMenuItem(reinstallButton.getText());
-        reinstallItem.setIcon(WindowHelper.loadIcon("/reinstall.png", 16, 16));
-        reinstallItem.setToolTipText(reinstallButton.getToolTipText());
-        reinstallItem.addActionListener(this::onReinstallButtonClicked);
-
-        uninstallItem = new JMenuItem(uninstallButton.getText());
-        uninstallItem.setIcon(WindowHelper.loadIcon("/uninstall.png", 16, 16));
-        uninstallItem.setToolTipText(uninstallButton.getToolTipText());
-        uninstallItem.addActionListener(this::onUninstallButtonClicked);
-
-        JMenuItem verifyItem = new JMenuItem(verifyButton.getText());
-        verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
-        verifyItem.setToolTipText(verifyButton.getToolTipText());
-        verifyItem.addActionListener(this::onVerifyButtonClicked);
-
         JPopupMenu menu = new JPopupMenu();
         menu.add(launchItem);
         menu.add(customizeAndLaunchItem);
-        menu.add(new JSeparator());
-        menu.add(refreshItem);
-        menu.add(updateItem);
+        menu.add(refreshSelectedItem);
         menu.add(new JSeparator());
         menu.add(activateStartScriptItem);
         menu.add(activateFileAssocScriptItem);
         menu.add(new JSeparator());
+        menu.add(updateItem);
+        menu.add(verifyItem);
         menu.add(reinstallItem);
         menu.add(uninstallItem);
-        menu.add(new JSeparator());
-        menu.add(verifyItem);
         table.setComponentPopupMenu(menu);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBackground(Color.WHITE);
-        scrollPane.setBorder(new EmptyBorder(10, 0, 0, 0));
-        content.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
+        // Progress bar
         progressBar = new JProgressBar();
         progressBar.setVisible(false);
         progressBar.setStringPainted(true);
-        content.add(progressBar, BorderLayout.SOUTH);
+
+        // Context sensitive toolbar
+        Dimension toolbarSeparatorDimension = new Dimension(10, 0);
+        JPanel toolbar = new JPanel();
+        toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.LINE_AXIS));
+        toolbar.setBorder(new EmptyBorder(5, 10, 5, 10));
+        toolbar.add(Box.createHorizontalGlue());
+        toolbar.add(uninstallButton);
+        toolbar.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        toolbar.add(reinstallButton);
+        toolbar.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        toolbar.add(verifyButton);
+        toolbar.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        toolbar.add(updateButton);
+        toolbar.add(Box.createRigidArea(toolbarSeparatorDimension));
+        toolbar.add(activateFileAssocScriptButton);
+        toolbar.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        toolbar.add(activateStartScriptButton);
+        toolbar.add(Box.createRigidArea(toolbarSeparatorDimension));
+        toolbar.add(refreshSelectedButton);
+        toolbar.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        toolbar.add(customizeAndLaunchButton);
+        toolbar.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
+        toolbar.add(launchButton);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
+        content.add(scrollPane);
+        content.add(progressBar);
+        content.add(toolbar);
 
         return content;
     }
@@ -425,15 +416,32 @@ public class BrowserDialog extends BaseDialog {
         home.setToolTipText("Open home directory");
         home.setHorizontalAlignment(SwingConstants.LEFT);
         home.setOpaque(false);
-        home.setBackground(Color.WHITE);
         home.setForeground(new Color(0, 0, 238));
         home.addMouseListener(new OpenHomeFolder());
-        footer.add(home, BorderLayout.WEST);
+        footer.add(home, BorderLayout.LINE_START);
 
         JLabel version = new JLabel("Launcher version: " + VersionHelper.getVersion().toString());
-        footer.add(version, BorderLayout.EAST);
+        footer.add(version, BorderLayout.LINE_END);
 
         return footer;
+    }
+
+    private static JButton createJButton(String iconName, String text, ActionListener listener, String tooltip) {
+        JButton btn = new JButton(text);
+        btn.setToolTipText(tooltip);
+        btn.setIcon(WindowHelper.loadSvgIcon(iconName));
+        btn.addActionListener(listener);
+        return btn;
+    }
+
+    private static JMenuItem createMenuItemFromButton(JButton source) {
+        JMenuItem menuItem = new JMenuItem(source.getText());
+        menuItem.setToolTipText(source.getToolTipText());
+        menuItem.setIcon(source.getIcon());
+        for (ActionListener listener : source.getActionListeners()) {
+            menuItem.addActionListener(listener);
+        }
+        return menuItem;
     }
 
     /** Notification that the search field has changed */
@@ -442,13 +450,13 @@ public class BrowserDialog extends BaseDialog {
     }
 
     /** Notification that all apps should be refreshed */
-    private void onRefreshButtonClicked(ActionEvent e) {
+    private void onRefreshAllEvent(ActionEvent e) {
         searchApps();
         doRefresh(model.getAll());
     }
 
     /** Executes the prune operation on all local hives */
-    private void onPruneButtonClicked(ActionEvent e) {
+    private void onPruneEvent(ActionEvent e) {
         try {
             List<Path> hives = ClientPathHelper.getHives(lpp);
 
@@ -467,7 +475,7 @@ public class BrowserDialog extends BaseDialog {
     }
 
     /** Executes the fix operation on all local hives */
-    private void onFsckButtonClicked(ActionEvent e) {
+    private void onFsckEvent(ActionEvent e) {
         try {
             List<Path> hives = ClientPathHelper.getHives(lpp);
 
@@ -495,8 +503,19 @@ public class BrowserDialog extends BaseDialog {
         return apps;
     }
 
+    /** Notification that the selected app should be launched */
+    private void onLaunchEvent(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        List<String> args = new ArrayList<>();
+        Object source = e.getSource();
+        if (source == customizeAndLaunchButton || source == customizeAndLaunchItem) {
+            args.add("--customizeArgs");
+        }
+        doLaunch(app, args);
+    }
+
     /** Notification that the selected apps should be refreshed */
-    private void onRefreshItemClicked(ActionEvent e) {
+    private void onRefreshSelectedEvent(ActionEvent e) {
         List<ClientSoftwareConfiguration> apps = getSelectedApps();
 
         // Refresh and remember which apps have been added to the hive
@@ -510,71 +529,14 @@ public class BrowserDialog extends BaseDialog {
         doRefresh(apps);
     }
 
-    /** Notification that the selected app should be launched */
-    private void onLaunchButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        List<String> args = new ArrayList<>();
-        if (e.getSource() == customizeAndLaunchItem) {
-            args.add("--customizeArgs");
-        }
-        doLaunch(app, args);
-    }
-
-    /** Notification that the selected app should be updated */
-    private void onUpdateButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        List<String> args = new ArrayList<>();
-        args.add("--updateOnly");
-
-        progressBar.setIndeterminate(true);
-        progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
-
-        AppUpdater task = new AppUpdater(lpp, app, args);
-        task.addPropertyChangeListener(this::doUpdateProgessBar);
-        task.execute();
-    }
-
     /** Activate the start script of the selected application */
-    private void onActivateStartScriptButtonClicked(ActionEvent e) {
+    private void onActivateStartScriptEvent(ActionEvent e) {
         handleScriptChange(pathProvider -> new LocalStartScriptHelper(os, auditor, pathProvider), "start");
     }
 
     /** Activate the file association script of the selected application */
-    private void onActivateFileAssocScriptButtonClicked(ActionEvent e) {
+    private void onActivateFileAssocScriptEvent(ActionEvent e) {
         handleScriptChange(pathProvider -> new LocalFileAssocScriptHelper(os, auditor, pathProvider), "file association");
-    }
-
-    /** Reinstall a selected application */
-    private void onReinstallButtonClicked(ActionEvent e) {
-        ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
-
-        String message = "Are you sure you want to reinstall '" + appName + "'?";
-        int result = JOptionPane.showConfirmDialog(this, message, "Reinstall", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            doReinstall(app);
-        }
-    }
-
-    /** Notification that the selected app should be removed */
-    private void onUninstallButtonClicked(ActionEvent e) {
-        doUninstall(getSelectedApps().get(0));
-    }
-
-    /** Executes the verify operation on a selected application */
-    private void onVerifyButtonClicked(ActionEvent e) {
-        try {
-            ClientSoftwareConfiguration app = getSelectedApps().get(0);
-
-            progressBar.setIndeterminate(true);
-            progressBar.setString("Verifying '" + app.clickAndStart.applicationId + "'");
-
-            VerifyTask task = new VerifyTask(lpp, auditor, app.clickAndStart);
-            task.addPropertyChangeListener(this::doUpdateProgessBar);
-            task.execute();
-        } catch (Exception ex) {
-            showErrorMessageDialog(null, "Failed to run verify operation: " + ex.getMessage());
-        }
     }
 
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
@@ -589,8 +551,55 @@ public class BrowserDialog extends BaseDialog {
         searchApps();
     }
 
+    /** Notification that the selected app should be updated */
+    private void onUpdateEvent(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        List<String> args = new ArrayList<>();
+        args.add("--updateOnly");
+
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
+
+        AppUpdater task = new AppUpdater(lpp, app, args);
+        task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.execute();
+    }
+
+    /** Executes the verify operation on a selected application */
+    private void onVerifyEvent(ActionEvent e) {
+        try {
+            ClientSoftwareConfiguration app = getSelectedApps().get(0);
+
+            progressBar.setIndeterminate(true);
+            progressBar.setString("Verifying '" + app.clickAndStart.applicationId + "'");
+
+            VerifyTask task = new VerifyTask(lpp, auditor, app.clickAndStart);
+            task.addPropertyChangeListener(this::doUpdateProgessBar);
+            task.execute();
+        } catch (Exception ex) {
+            showErrorMessageDialog(null, "Failed to run verify operation: " + ex.getMessage());
+        }
+    }
+
+    /** Reinstall a selected application */
+    private void onReinstallEvent(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
+
+        String message = "Are you sure you want to reinstall '" + appName + "'?";
+        int result = JOptionPane.showConfirmDialog(this, message, "Reinstall", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            doReinstall(app);
+        }
+    }
+
+    /** Notification that the selected app should be removed */
+    private void onUninstallEvent(ActionEvent e) {
+        doUninstall(getSelectedApps().get(0));
+    }
+
     /** Notification that the selected rows have changed */
-    private void onSelectionChanged(ListSelectionEvent e) {
+    private void onSelectionChangedEvent(ListSelectionEvent e) {
         doUpdateButtonState();
     }
 
@@ -669,80 +678,85 @@ public class BrowserDialog extends BaseDialog {
     /** Updates the enabled state of all buttons */
     private void doUpdateButtonState() {
         if (progressBar.isVisible()) {
-            refreshButton.setEnabled(false);
+            refreshAllButton.setEnabled(false);
             pruneButton.setEnabled(false);
             fsckButton.setEnabled(false);
 
             launchItem.setEnabled(false);
+            launchButton.setEnabled(false);
             customizeAndLaunchItem.setEnabled(false);
-            updateItem.setEnabled(false);
-
-            uninstallItem.setEnabled(false);
-            uninstallButton.setEnabled(false);
+            customizeAndLaunchButton.setEnabled(false);
+            refreshSelectedItem.setEnabled(false);
+            refreshSelectedButton.setEnabled(false);
 
             activateStartScriptItem.setEnabled(false);
+            activateStartScriptButton.setEnabled(false);
+            activateFileAssocScriptItem.setEnabled(false);
+            activateFileAssocScriptButton.setEnabled(false);
 
-            refreshItem.setEnabled(false);
-            refreshButton.setEnabled(false);
-
+            updateItem.setEnabled(false);
+            updateButton.setEnabled(false);
+            verifyItem.setEnabled(false);
             verifyButton.setEnabled(false);
+            reinstallItem.setEnabled(false);
             reinstallButton.setEnabled(false);
+            uninstallItem.setEnabled(false);
+            uninstallButton.setEnabled(false);
             return;
         }
 
         List<ClientSoftwareConfiguration> selectedApps = getSelectedApps();
-        int selectedAppsCount = selectedApps.size();
-        boolean singleAppSelected = selectedAppsCount == 1;
+        boolean singleAppSelected = selectedApps.size() == 1;
+        boolean writeAllowed = !readonlyHome;
+        boolean writeAllowedAndSingleAppSelected = singleAppSelected && writeAllowed;
+
+        refreshAllButton.setEnabled(writeAllowed);
+        fsckButton.setEnabled(writeAllowed);
+        pruneButton.setEnabled(writeAllowed);
 
         launchButton.setEnabled(singleAppSelected);
         launchItem.setEnabled(singleAppSelected);
+        customizeAndLaunchButton.setEnabled(singleAppSelected);
+        customizeAndLaunchItem.setEnabled(singleAppSelected);
+        refreshSelectedButton.setEnabled(writeAllowedAndSingleAppSelected);
+        refreshSelectedItem.setEnabled(writeAllowedAndSingleAppSelected);
 
-        uninstallItem.setEnabled(!readonlyHome && singleAppSelected);
-        uninstallButton.setEnabled(!readonlyHome && singleAppSelected);
-
-        boolean activateStartScriptItemEnabled = false;
-        boolean activateFileAssocScriptItemEnabled = false;
+        boolean activateStartScriptEnabled = false;
+        boolean activateFileAssocScriptEnabled = false;
         if (singleAppSelected) {
             ClientSoftwareConfiguration singleApp = selectedApps.iterator().next();
             ClientApplicationDto singleAppMetadata = singleApp.metadata;
             if (singleAppMetadata != null) {
+                ClickAndStartDescriptor clickAndStart = singleApp.clickAndStart;
                 LocalClientApplicationSettings settings;
                 try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
                     settings = new LocalClientApplicationSettingsManifest(hive).read();
                 }
-
-                ClickAndStartDescriptor clickAndStart = singleApp.clickAndStart;
-
-                ScriptInfo startScriptInfo = settings.getStartScriptInfo(//
-                        ScriptUtils.getStartScriptIdentifier(os, singleAppMetadata.startScriptName));
+                ScriptInfo startScriptInfo = settings
+                        .getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, singleAppMetadata.startScriptName));
                 if (startScriptInfo != null && !clickAndStart.equals(startScriptInfo.getDescriptor())) {
-                    activateStartScriptItemEnabled = true;
+                    activateStartScriptEnabled = true;
                 }
-                ScriptInfo fileAssocScriptInfo = settings.getFileAssocScriptInfo(//
-                        ScriptUtils.getFileAssocIdentifier(os, singleAppMetadata.fileAssocExtension));
+                ScriptInfo fileAssocScriptInfo = settings
+                        .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, singleAppMetadata.fileAssocExtension));
                 if (fileAssocScriptInfo != null && !clickAndStart.equals(fileAssocScriptInfo.getDescriptor())) {
-                    activateFileAssocScriptItemEnabled = true;
+                    activateFileAssocScriptEnabled = true;
                 }
             }
         }
-        activateStartScriptItem.setEnabled(activateStartScriptItemEnabled);
-        activateFileAssocScriptItem.setEnabled(activateFileAssocScriptItemEnabled);
+        activateStartScriptButton.setEnabled(activateStartScriptEnabled);
+        activateStartScriptItem.setEnabled(activateStartScriptEnabled);
+        activateFileAssocScriptButton.setEnabled(activateFileAssocScriptEnabled);
+        activateFileAssocScriptItem.setEnabled(activateFileAssocScriptEnabled);
 
-        refreshItem.setEnabled(!readonlyHome);
-        refreshButton.setEnabled(!readonlyHome);
-
-        // Error fixing and pruning require write permissions
-        if (!readonlyHome) {
-            fsckButton.setEnabled(true);
-            pruneButton.setEnabled(true);
-        }
-
-        boolean anyAppSelected = selectedAppsCount > 0;
-        customizeAndLaunchItem.setEnabled(anyAppSelected);
-        updateItem.setEnabled(!readonlyHome && anyAppSelected);
-
-        verifyButton.setEnabled(!readonlyHome && singleAppSelected);
-        reinstallButton.setEnabled(!readonlyHome && singleAppSelected);
+        verifyButton.setEnabled(writeAllowedAndSingleAppSelected);
+        verifyItem.setEnabled(writeAllowedAndSingleAppSelected);
+        reinstallButton.setEnabled(writeAllowedAndSingleAppSelected);
+        reinstallItem.setEnabled(writeAllowedAndSingleAppSelected);
+        updateButton.setEnabled(writeAllowedAndSingleAppSelected);
+        updateItem.setEnabled(writeAllowedAndSingleAppSelected);
+        uninstallButton.setEnabled(writeAllowedAndSingleAppSelected);
+        uninstallItem.setEnabled(writeAllowedAndSingleAppSelected);
     }
 
     private static void showErrorMessageDialog(Component parent, String text) {

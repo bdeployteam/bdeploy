@@ -1,14 +1,13 @@
 package io.bdeploy.launcher.cli.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,12 +29,12 @@ public class TextAreaDialog extends BaseDialog {
     private JLabel hintText;
 
     public TextAreaDialog() {
-        super(new Dimension(800, 600));
+        super(800);
         setTitle("Customize Application Arguments");
 
         // Header area displaying icon and text
         JPanel header = createHeaderArea();
-        add(header, BorderLayout.NORTH);
+        add(header, BorderLayout.PAGE_START);
 
         // Content are displaying a hint
         JPanel content = createContentArea();
@@ -48,58 +47,51 @@ public class TextAreaDialog extends BaseDialog {
 
     /** Creates the widgets shown in the header */
     private JPanel createHeaderArea() {
-        JPanel header = new JPanel();
-        header.setBackground(Color.WHITE);
-        header.setLayout(new GridLayout());
-        header.setBorder(DEFAULT_EMPTY_BORDER);
-
         headerText = new JLabel();
         headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16F));
-        header.add(headerText);
 
+        JPanel header = new JPanel();
+        header.setLayout(new GridLayout());
+        header.setBorder(DEFAULT_EMPTY_BORDER);
+        header.add(headerText);
         return header;
     }
 
     /** Creates the widgets shown in the content */
     private JPanel createContentArea() {
+        contentText = new JLabel();
+        textArea = new JTextArea();
+        hintText = new JLabel();
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+
         JPanel content = new JPanel();
-        content.setBackground(Color.WHITE);
         content.setLayout(new BorderLayout(10, 10));
         content.setBorder(DEFAULT_EMPTY_BORDER);
-
-        contentText = new JLabel();
-        content.add(contentText, BorderLayout.NORTH);
-
-        textArea = new JTextArea();
-        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        content.add(scrollPane, BorderLayout.CENTER);
-
-        hintText = new JLabel();
-        content.add(hintText, BorderLayout.SOUTH);
-
+        content.add(contentText, BorderLayout.PAGE_START);
+        content.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        content.add(hintText, BorderLayout.PAGE_END);
         return content;
     }
 
     /** Creates the widgets shown in the footer */
     private JPanel createFooter() {
-        JPanel footer = new JPanel();
-        footer.setBorder(DEFAULT_EMPTY_BORDER);
-        footer.setLayout(new BorderLayout(15, 15));
-
-        JPanel actionPanel = new JPanel();
-        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        footer.add(actionPanel, BorderLayout.EAST);
-
         JButton cancel = new JButton("Cancel");
         cancel.addActionListener(a -> doClose(-1));
-        actionPanel.add(cancel);
 
         JButton launch = new JButton("Launch");
         launch.setFont(launch.getFont().deriveFont(Font.BOLD));
         launch.addActionListener(a -> doClose(0));
+
+        JPanel actionPanel = new JPanel();
+        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        actionPanel.add(cancel);
+        actionPanel.add(Box.createRigidArea(BUTTON_SEPARATOR_DIMENSION));
         actionPanel.add(launch);
 
+        JPanel footer = new JPanel();
+        footer.setBorder(DEFAULT_EMPTY_BORDER);
+        footer.setLayout(new BorderLayout(15, 15));
+        footer.add(actionPanel, BorderLayout.LINE_END);
         return footer;
     }
 
@@ -110,7 +102,7 @@ public class TextAreaDialog extends BaseDialog {
         headerText.setText(appName);
         contentText.setText("<html>The following arguments are passed to the application:");
         hintText.setText(
-                "<html><i>Hint:</i> Arguments can be <b>added</b>, <b>removed</b> or <b>changed</b> as desired. Each line is treated as a single argument.</html>");
+                "<html><i>Hint:</i> Arguments can be <b>added</b>, <b>removed</b> and <b>changed</b> as desired. Each line is treated as a single argument.</html>");
 
         // Extract the arguments and prepare for displaying
         List<String> args = command.subList(1, command.size());

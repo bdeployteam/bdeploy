@@ -1,7 +1,6 @@
 package io.bdeploy.launcher.cli.ui;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,24 +9,18 @@ import org.junit.jupiter.api.Test;
  */
 class WindowHelperTest {
 
-    private static final int DEFAULT_ICON_SIZE = 32;
-
+    /**
+     * Note that the actual testing capabilities of this test are very limited. WindowHelper#loadSvgIcon _never_ returns
+     * <code>null</code>. A failed load would just result in a be a red icon.
+     */
     @Test
     void testIconLoading() {
-        String[] icons = { "/arrow_down.png", "/arrow_up.png", "/copy.png", "/customizeAndLaunch.png", "/enable.png",
-                "/error.png", "/fixErrors.png", "/launch.png", "/logo16.png", "/logo24.png", "/logo32.png", "/logo48.png",
-                "/logo64.png", "/logo128.png", "/logo256.png", "/prune.png", "/refresh.png", "/reinstall.png", "/splash.png",
-                "/uninstall.png", "/update.png", "/verify.png" };
+        String[] icons = { "arrow_down", "arrow_up", "copy", "customizeAndLaunch", "enable", "error", "fixErrors", "launch",
+                "logo16", "logo24", "logo32", "logo48", "logo64", "logo128", "logo256", "prune", "refresh", "reinstall", "splash",
+                "splash-new", "uninstall", "update", "verify" };
 
         for (String icon : icons) {
-            assertThrowsExactly(IllegalArgumentException.class, () -> WindowHelper.loadIcon(icon, 0, 0));
-            assertThrowsExactly(IllegalArgumentException.class, () -> WindowHelper.loadIcon(icon, 0, 1));
-            assertThrowsExactly(IllegalArgumentException.class, () -> WindowHelper.loadIcon(icon, 1, 0));
-            assertNotNull(WindowHelper.loadIcon(icon, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE));
-            assertNotNull(WindowHelper.loadIcon(icon, 1, 1));
-            assertNotNull(WindowHelper.loadIcon(icon, 100, 100));
-            assertNotNull(WindowHelper.loadIcon(icon, 1000, 1000));
-            assertNotNull(WindowHelper.loadIcon(icon, 37, 876));
+            assertNotNull(WindowHelper.loadSvgIcon(icon));
         }
     }
 }
