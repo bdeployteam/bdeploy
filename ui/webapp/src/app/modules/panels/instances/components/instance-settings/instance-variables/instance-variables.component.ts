@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, combineLatest, of, tap } from 'rxjs';
 import {
   ApplicationDto,
@@ -22,6 +22,7 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
 @Component({
   selector: 'app-instance-variables',
   templateUrl: './instance-variables.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly systems = inject(SystemsService);

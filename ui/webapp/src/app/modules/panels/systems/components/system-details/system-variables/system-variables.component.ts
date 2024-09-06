@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, of, switchMap } from 'rxjs';
 import { InstanceDto, SystemConfigurationDto } from 'src/app/models/gen.dtos';
@@ -20,6 +20,7 @@ const MAGIC_ABORT = 'abort_save';
 @Component({
   selector: 'app-system-variables',
   templateUrl: './system-variables.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);
