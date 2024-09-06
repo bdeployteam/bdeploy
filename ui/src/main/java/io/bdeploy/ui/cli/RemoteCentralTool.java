@@ -305,53 +305,8 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         try (Activity prepare = getActivityReporter().start("Fetching server information from instance groups...",
                 groups.size())) {
             for (var group : groups) {
-                List<ManagedMasterDto> mmds;
-                try {
-                    mmds = msr.getManagedServers(group);
-                } catch (Exception e) {
-                    out().println("Cannot fetch information for " + group + ": " + e.toString());
-                    if (isVerbose()) {
-                        e.printStackTrace(out());
-                    }
+                if (collectMinionsForGroup(config, msr, group, table, rowsByVersion))
                     continue;
-                }
-
-                for (var mmd : mmds) {
-                    var row = table.row().cell(group).cell(mmd.hostName)
-                            .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never");
-
-                    MinionDto master = null;
-                    Set<Version> versions = new TreeSet<>();
-                    for (var node : mmd.minions.entrySet()) {
-                        if (node.getValue().master) {
-                            if (master != null) {
-                                out().println("Warning: multiple masters found for " + mmd.hostName + " in " + group);
-                            }
-                            master = node.getValue();
-                        }
-                        if (node.getValue().version != null) {
-                            versions.add(node.getValue().version);
-                        }
-                    }
-
-                    if (master == null) {
-                        out().println("Warning: no master found for " + mmd.hostName + " in " + group);
-                    }
-
-                    if (master == null) {
-                        row.cell("Unkown").cell(versions.size());
-                    } else {
-                        var mver = master.version;
-                        row.cell(mver.toString()).cell(versions.stream().filter(v -> !mver.equals(v)).count());
-                    }
-
-                    if (config.sortByVersion()) {
-                        var key = master == null ? VersionHelper.UNDEFINED : master.version;
-                        rowsByVersion.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
-                    } else {
-                        row.build();
-                    }
-                }
 
                 prepare.workAndCancelIfRequested(1);
             }
@@ -367,6 +322,58 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         }
 
         return table;
+    }
+
+    private boolean collectMinionsForGroup(CentralConfig config, ManagedServersResource msr, String group, DataTable table,
+            Map<Version, List<DataTableRowBuilder>> rowsByVersion) {
+        List<ManagedMasterDto> mmds;
+        try {
+            mmds = msr.getManagedServers(group);
+        } catch (Exception e) {
+            out().println("Cannot fetch information for " + group + ": " + e.toString());
+            if (isVerbose()) {
+                e.printStackTrace(out());
+            }
+            return true;
+        }
+
+        for (var mmd : mmds) {
+            var row = table.row().cell(group).cell(mmd.hostName)
+                    .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never");
+
+            MinionDto master = null;
+            Set<Version> versions = new TreeSet<>();
+            for (var node : mmd.minions.entrySet()) {
+                if (node.getValue().master) {
+                    if (master != null) {
+                        out().println("Warning: multiple masters found for " + mmd.hostName + " in " + group);
+                    }
+                    master = node.getValue();
+                }
+                if (node.getValue().version != null) {
+                    versions.add(node.getValue().version);
+                }
+            }
+
+            if (master == null) {
+                out().println("Warning: no master found for " + mmd.hostName + " in " + group);
+            }
+
+            if (master == null) {
+                row.cell("Unkown").cell(versions.size());
+            } else {
+                var mver = master.version;
+                row.cell(mver.toString()).cell(versions.stream().filter(v -> !mver.equals(v)).count());
+            }
+
+            if (config.sortByVersion()) {
+                var key = master == null ? VersionHelper.UNDEFINED : master.version;
+                rowsByVersion.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
+            } else {
+                row.build();
+            }
+        }
+        return false;
     }
 
     private DataResult getManagedServerIdent(CentralConfig config, BackendInfoResource bir, BackendInfoDto version) {
