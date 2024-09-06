@@ -338,14 +338,14 @@ public abstract class ToolBase {
         return result;
     }
 
-    public void register(Class<? extends CliTool> tool) {
+    public final void register(Class<? extends CliTool> tool) {
         namesOf(tool).forEach(name -> tools.put(name, tool));
     }
 
     /**
      * Sets a factory for proper auditors to be used by the tool.
      */
-    public void setAuditorFactory(Function<Path, Auditor> auditorFactory) {
+    public final void setAuditorFactory(Function<Path, Auditor> auditorFactory) {
         this.auditorFactory = auditorFactory;
     }
 

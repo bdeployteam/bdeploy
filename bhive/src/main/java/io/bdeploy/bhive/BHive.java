@@ -149,7 +149,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         Path poolRefFile = relRoot.resolve(POOLREF);
         if (PathHelper.exists(poolRefFile)) {
             Path recorded = getPoolPath();
-            if (!recorded.equals(poolPath) && !force) {
+            if (recorded == null || (!recorded.equals(poolPath) && !force)) {
                 throw new UnsupportedOperationException("Pooling is already configured to a different location");
             }
         }

@@ -59,17 +59,17 @@ public abstract class StoreConnectionHandler<S extends Store, F extends Folder>/
     private F folder;
 
     @Override
-    public void addListener(FolderListener listener) {
+    public final void addListener(FolderListener listener) {
         this.folderListeners.add(listener);
     }
 
     @Override
-    public void addListener(MessageChangedListener listener) {
+    public final void addListener(MessageChangedListener listener) {
         this.messageChangedListeners.add(listener);
     }
 
     @Override
-    public void addListener(MessageCountListener listener) {
+    public final void addListener(MessageCountListener listener) {
         this.messageCountListeners.add(listener);
     }
 
