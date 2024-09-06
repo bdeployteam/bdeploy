@@ -421,6 +421,13 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
+    public void shutdownNode(String name) {
+        try (var handle = af.run(Actions.SHUTDOWN_NODE, null, null, name)) {
+            nodes.getNodeResourceIfOnlineOrThrow(name, MinionUpdateResource.class, context).shutdown();
+        }
+    }
+
+    @Override
     public Version getUpdateApiVersion() {
         return UpdateHelper.currentApiVersion();
     }
@@ -586,7 +593,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
     public void restartServer() {
         // never-ending restart-server action which will notify the web-ui of pending restart.
         af.run(Actions.RESTART_SERVER);
-        root.getRestartManager().performRestart(1_000);
+        root.getServerProcessManager().performRestart(1_000);
     }
 
     @Override

@@ -57,7 +57,7 @@ import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonDirectoryEntryResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
-import io.bdeploy.minion.remote.jersey.JerseyAwareMinionRestartManager;
+import io.bdeploy.minion.remote.jersey.JerseyAwareMinionServerProcessManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
 import io.bdeploy.minion.remote.jersey.MasterSettingsResourceImpl;
 import io.bdeploy.minion.remote.jersey.MinionStatusResourceImpl;
@@ -217,7 +217,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
 
         srv.setAuditor(r.getAuditor());
-        r.setRestartManager(new JerseyAwareMinionRestartManager(srv, r));
+        r.setServerProcessManager(new JerseyAwareMinionServerProcessManager(srv, r));
 
         return registerCommonResources(srv, r, repo);
     }

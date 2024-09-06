@@ -32,6 +32,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.MinionServerProcessManager;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.minion.cli.MinionServerCli;
@@ -64,7 +65,13 @@ class MinionUpdateTest {
 
     void doTestUpdate(MinionRoot root, RemoteService remote, Path tmp, BHive local) {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
-        root.setRestartManager(t -> updateTriggered.set(true));
+        root.setServerProcessManager(new MinionServerProcessManager.NoopServerProcessManager() {
+
+            @Override
+            public void performRestart(long timeout) {
+                updateTriggered.set(true);
+            }
+        });
         root.onStartup(true);
 
         Path updateSource = TestAppFactory.createDummyApp("minion", tmp);
@@ -111,7 +118,13 @@ class MinionUpdateTest {
 
     void doTestZippedUpdate(MinionRoot root, RemoteService svc, Path tmp, String auth) throws IOException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
-        root.setRestartManager(t -> updateTriggered.set(true));
+        root.setServerProcessManager(new MinionServerProcessManager.NoopServerProcessManager() {
+
+            @Override
+            public void performRestart(long timeout) {
+                updateTriggered.set(true);
+            }
+        });
 
         // generate test app into a ZIP
         Path zip = tmp.resolve("xxx-2.0.0.zip");

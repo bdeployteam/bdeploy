@@ -28,6 +28,7 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.BackendInfoResource;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.cli.RemoteMasterTool.RemoteMasterConfig;
@@ -51,7 +52,10 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         @Help(value = "Restart the server", arg = false)
         boolean restart() default false;
 
-        @Help("The minion to restart. Restarts the master if not given.")
+        @Help(value = "Shutdown the server. ATTENTION: this will not restart the server.")
+        boolean shutdown() default false;
+
+        @Help("The minion to restart or shutdown. Manipulates the master if not given.")
         String minion();
 
         @Help(value = "Don't ask for confirmation when running potentially harmful actions.", arg = false)
@@ -82,6 +86,8 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             return pushLauncher(svc, zip);
         } else if (config.restart()) {
             return restartServer(config, svc);
+        } else if(config.shutdown()) {
+            return shutdownServer(config, svc);
         } else {
             return createNoOp();
         }
@@ -105,6 +111,35 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 NodeManagementResource nmr = ResourceProvider.getResource(svc, NodeManagementResource.class, getLocalContext());
                 nmr.restartNode(toRestart);
             }
+            return createSuccess();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to query user response", e);
+        }
+    }
+
+    private RenderableResult shutdownServer(RemoteMasterConfig config, RemoteService svc) {
+        try {
+            String toShutdown = config.minion();
+            if (toShutdown == null) {
+                BackendInfoResource bir = ResourceProvider.getResource(svc, BackendInfoResource.class, getLocalContext());
+                Map<String, MinionStatusDto> minions = bir.getNodeStatus();
+
+                var master = minions.entrySet().stream().filter(m -> m.getValue().config.master).findFirst();
+                if(master.isEmpty()) {
+                    throw new IllegalStateException("Cannot determine the master minion");
+                }
+
+                toShutdown = master.get().getKey();
+            }
+
+            if (!config.yes()) {
+                System.out.println("Confirm shutting down " + toShutdown + " using Enter, or abort using CTRL+C");
+                System.in.read();
+            }
+
+            NodeManagementResource nmr = ResourceProvider.getResource(svc, NodeManagementResource.class, getLocalContext());
+            nmr.shutdownNode(toShutdown);
+
             return createSuccess();
         } catch (IOException e) {
             throw new IllegalStateException("Failed to query user response", e);

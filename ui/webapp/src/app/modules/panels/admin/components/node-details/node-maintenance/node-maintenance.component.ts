@@ -17,6 +17,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
 
   private readonly repairing$ = new BehaviorSubject<boolean>(false);
   private readonly restarting$ = new BehaviorSubject<boolean>(false);
+  private readonly shuttingDown$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
 
   protected nodeName$ = new BehaviorSubject<string>(null);
@@ -30,6 +31,13 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
   );
 
   protected mappedRestart$ = this.actions.action([Actions.RESTART_NODE], this.restarting$, null, null, this.nodeName$);
+  protected mappedShutdown$ = this.actions.action(
+    [Actions.SHUTDOWN_NODE],
+    this.shuttingDown$,
+    null,
+    null,
+    this.nodeName$,
+  );
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
@@ -80,6 +88,23 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
           this.nodesAdmin
             .restartNode(this.nodeName$.value)
             .pipe(finalize(() => this.restarting$.next(false)))
+            .subscribe(() => {});
+        }
+      });
+  }
+
+  protected doShutdownNode() {
+    this.dialog
+      .confirm(
+        'Shutdown',
+        'Shutting down the node will make it unavailable until started manually. ATTENTION: The node cannot be remotely restarted after shutdown.',
+      )
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.shuttingDown$.next(true);
+          this.nodesAdmin
+            .shutdownNode(this.nodeName$.value)
+            .pipe(finalize(() => this.shuttingDown$.next(false)))
             .subscribe(() => {});
         }
       });

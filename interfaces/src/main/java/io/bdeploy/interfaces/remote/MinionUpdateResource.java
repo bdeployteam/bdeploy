@@ -2,6 +2,8 @@ package io.bdeploy.interfaces.remote;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -16,6 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/update")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RequiredPermission(permission = ScopedPermission.Permission.ADMIN)
 public interface MinionUpdateResource {
 
     /**
@@ -52,4 +55,11 @@ public interface MinionUpdateResource {
     @GET
     @Path("/restart")
     public void restart();
+
+    /**
+     * Shuts down the current server remotely.
+     */
+    @GET
+    @Path("/shutdown")
+    public void shutdown();
 }

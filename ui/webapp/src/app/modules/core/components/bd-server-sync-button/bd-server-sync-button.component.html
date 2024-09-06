@@ -1,6 +1,6 @@
 <app-bd-button
   text="Synchronize"
-  icon="history"
+  icon="sync"
   (click)="doSynchronize(server)"
   [loadingWhen$]="mappedSync$"
   [disabled]="(mappedSync$ | async) || (noPerm$ | async)"

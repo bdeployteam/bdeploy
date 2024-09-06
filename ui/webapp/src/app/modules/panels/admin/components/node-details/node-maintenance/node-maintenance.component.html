@@ -21,9 +21,18 @@
         text="Restart Node"
         icon="restart_alt"
         [collapsed]="false"
-        [disabled]="state.offline || state.config.master"
+        [disabled]="state.offline"
         (click)="doRestartNode()"
         [loadingWhen$]="mappedRestart$">
+      </app-bd-button>
+
+      <app-bd-button
+        text="Shutdown Node"
+        icon="power_settings_new"
+        [collapsed]="false"
+        [disabled]="state.offline"
+        (click)="doShutdownNode()"
+        [loadingWhen$]="mappedShutdown$">
       </app-bd-button>
     </div>
   </app-bd-dialog-content>

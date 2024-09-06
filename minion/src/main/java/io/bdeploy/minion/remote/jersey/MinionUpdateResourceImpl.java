@@ -61,7 +61,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
         // never-ending restart-server action which will notify the web-ui of pending restart.
         actions.run(Actions.RESTART_SERVER);
-        root.getRestartManager().performRestart(1_000);
+        root.getServerProcessManager().performRestart(1_000);
     }
 
     @Override
@@ -75,13 +75,19 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
         // never-ending restart-server action which will notify the web-ui of pending restart.
         actions.run(Actions.RESTART_SERVER);
-        root.getRestartManager().performRestart(1_000);
+        root.getServerProcessManager().performRestart(1_000);
     }
 
     @Override
     public void restart() {
         actions.run(Actions.RESTART_SERVER);
-        root.getRestartManager().performRestart(1_000);
+        root.getServerProcessManager().performRestart(1_000);
+    }
+
+    @Override
+    public void shutdown() {
+        actions.run(Actions.SHUTDOWN_SERVER);
+        root.getServerProcessManager().performShutdown(1_000);
     }
 
     @Override

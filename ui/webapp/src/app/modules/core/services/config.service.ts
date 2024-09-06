@@ -68,7 +68,6 @@ export class ConfigService {
     this.icons.addSvgIcon('instance-settings', this.sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
     this.icons.addSvgIcon('start-scheduled', this.sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
     this.icons.addSvgIcon('stop-scheduled', this.sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
-    this.icons.addSvgIcon('sync-all', this.sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg'));
     this.icons.addSvgIcon('auth0', this.sanitizer.bypassSecurityTrustResourceUrl('assets/auth0.svg'));
     this.icons.addSvgIcon('okta', this.sanitizer.bypassSecurityTrustResourceUrl('assets/okta.svg'));
 

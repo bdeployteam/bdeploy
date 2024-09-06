@@ -107,6 +107,14 @@ public interface MasterRootResource extends CommonUpdateResource {
     public void restartNode(@PathParam("name") String name);
 
     /**
+     * @param name the name of the node to shutdown.
+     */
+    @POST
+    @Path("/minions/{name}/shutdown")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void shutdownNode(@PathParam("name") String name);
+
+    /**
      * Request the master that is responsible for the given named Hive.
      * <p>
      * Use {@link CommonRootResource#addInstanceGroup(InstanceGroupConfiguration, String)} to create new instance groups.

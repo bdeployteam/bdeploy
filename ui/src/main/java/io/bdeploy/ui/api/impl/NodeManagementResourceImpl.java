@@ -106,6 +106,12 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
         ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).restartNode(name);
     }
 
+    @Override
+    public void shutdownNode(String name) {
+        throwIfCentral();
+        ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).shutdownNode(name);
+    }
+
     private void throwIfCentral() {
         if (minion.getMode() == MinionMode.CENTRAL) {
             throw new WebApplicationException("Operation not available in mode CENTRAL");
