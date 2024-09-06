@@ -13,8 +13,8 @@ class DataTableJsonTest {
     @Test
     void testSimpleTable() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, Function.identity());
     }
@@ -22,7 +22,7 @@ class DataTableJsonTest {
     @Test
     void testTableWithoutData() {
         String expected = ""//
-                + "[\r\n"//
+                + "[\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, Function.identity(), false);
     }
@@ -30,9 +30,9 @@ class DataTableJsonTest {
     @Test
     void testTableWithLongText() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\r\n"//
-                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col2\": \"second one is shorter\", \"Col3\": \"third\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
+                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col2\": \"second one is shorter\", \"Col3\": \"third\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongTextRow(table));
     }
@@ -40,9 +40,9 @@ class DataTableJsonTest {
     @Test
     void testTableWithSpannedText() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\r\n"//
-                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col3\": \"third\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
+                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col3\": \"third\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addSpannedTextRow(table));
     }
@@ -50,8 +50,8 @@ class DataTableJsonTest {
     @Test
     void testTableNoHeader() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.setHideHeadersHint(true));
     }
@@ -59,8 +59,8 @@ class DataTableJsonTest {
     @Test
     void testTableWithCaption() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.setCaption("Lorem ipsum dolor sit amet"));
     }
@@ -68,8 +68,8 @@ class DataTableJsonTest {
     @Test
     void testTableWithIndentation() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.setIndentHint(3));
     }
@@ -77,9 +77,9 @@ class DataTableJsonTest {
     @Test
     void testTableWithLineWrap() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\r\n"//
-                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col2\": \"second one is shorter\", \"Col3\": \"third\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
+                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col2\": \"second one is shorter\", \"Col3\": \"third\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongTextRow(table.setLineWrapHint(true)));
     }
@@ -87,11 +87,11 @@ class DataTableJsonTest {
     @Test
     void testTableWithHorizontalRulers() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\r\n"//
-                + "  { \"Col1\": \"val4\", \"Col2\": \"val5\", \"Col3\": \"val6\" },\r\n"//
-                + "  { \"Col1\": \"val7\", \"Col2\": \"val8\", \"Col3\": \"val9\" },\r\n"//
-                + "  { \"Col1\": \"AAA\", \"Col2\": \"BBB\", \"Col3\": \"CCC\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
+                + "  { \"Col1\": \"val4\", \"Col2\": \"val5\", \"Col3\": \"val6\" },\n"//
+                + "  { \"Col1\": \"val7\", \"Col2\": \"val8\", \"Col3\": \"val9\" },\n"//
+                + "  { \"Col1\": \"AAA\", \"Col2\": \"BBB\", \"Col3\": \"CCC\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> {
             table.addHorizontalRuler();
@@ -106,8 +106,8 @@ class DataTableJsonTest {
     @Test
     void testTableWithFooter() {
         String expected = ""//
-                + "[\r\n"//
-                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\r\n"//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.addFooter("What an interesting footer this is"));
     }

@@ -26,6 +26,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
@@ -182,10 +183,12 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         DataTable table = createDataTable();
         table.setCaption("Systems of " + config.instanceGroup() + " on " + remote.getUri());
 
-        table.column("ID", 15).column("Name", 20).column("Description", 40);
+        table.column(new DataTableColumn.Builder("ID").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
 
         if (central) {
-            table.column("Target Server", 20);
+            table.column(new DataTableColumn.Builder("Target Server").setMinWidth(10).build());
         }
 
         for (var system : sr.list()) {
@@ -271,8 +274,13 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         }
 
         DataTable resultTable = createDataTable();
-        resultTable.column("Instance Name", 30).column("Instance UUID", 15).column("Process Name", 30).column("Process UUID", 15)
-                .column("Status", 20).column("Last Sync", 20).column("Messages", 100);
+        resultTable.column(new DataTableColumn.Builder("Instance Name").setMinWidth(13).build());
+        resultTable.column(new DataTableColumn.Builder("Instance UUID").setMinWidth(13).build());
+        resultTable.column(new DataTableColumn.Builder("Process Name").setMinWidth(13).build());
+        resultTable.column(new DataTableColumn.Builder("Process UUID").setMinWidth(13).build());
+        resultTable.column(new DataTableColumn.Builder("Status").setMinWidth(7).build());
+        resultTable.column(new DataTableColumn.Builder("Last Sync").build());
+        resultTable.column(new DataTableColumn.Builder("Messages").build());
         resultTable.setCaption("Status of System " + systemConfig.id + " - " + systemConfig.name);
 
         Set<Entry<InstanceDto, InstanceOverallStatusDto>> entrySet = instancesAndOverallStates.entrySet();
@@ -502,7 +510,9 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         }
 
         DataTable resultTable = createDataTable();
-        resultTable.column("Target", 15).column("Type", 15).column("Message", 50);
+        resultTable.column(new DataTableColumn.Builder("Target").setMinWidth(10).build());
+        resultTable.column(new DataTableColumn.Builder("Type").setMinWidth(10).build());
+        resultTable.column(new DataTableColumn.Builder("Message").setMinWidth(5).build());
         for (OperationResult operationResult : bulkOperation.apply(ir.getBulkResource(), instanceIds).results) {
             resultTable.row().cell(operationResult.target()).cell(operationResult.type()).cell(operationResult.message()).build();
         }

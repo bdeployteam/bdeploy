@@ -16,6 +16,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.launcher.ClientPathHelper;
@@ -100,7 +101,8 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
         DataTable resultTable = createDataTable();
         resultTable.setCaption("Errors occurred during autostart");
-        resultTable.column("Application", 20).column("Message", 200);
+        resultTable.column(new DataTableColumn.Builder("Application").setMinWidth(15).build());
+        resultTable.column(new DataTableColumn.Builder("Message").setMinWidth(50).build());
 
         for (Entry<String, String> entry : errors.entrySet()) {
             resultTable.row().cell(entry.getKey()).cell(entry.getValue()).build();

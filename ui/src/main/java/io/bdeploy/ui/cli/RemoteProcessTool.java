@@ -231,18 +231,18 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         DataTable table = createDataTable();
         table.setCaption("Processes for Instance " + config.uuid() + " in Instance Group " + config.instanceGroup() + " on "
                 + svc.getUri());
-        table.column("Name", 35);
-        table.column("ID", 14);
-        table.column("Status", 20);
-        table.column(new DataTableColumn("Version", "Ver.*", 5));
-        table.column("Product Version", 20);
-        table.column("Start Type", 14);
-        table.column("Started At", 20);
-        table.column("OS User", 20);
-        table.column("PID", 6);
-        table.column(new DataTableColumn("ExitCode", "Exit", 4));
-        table.column("Startup Status", 5);
-        table.column("Liveness Status", 5);
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(20).build());
+        table.column(new DataTableColumn.Builder("ID").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Status").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("Ver.*").setName("Version").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Product Version").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Start Type").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Started At").setMinWidth(0).build());
+        table.column(new DataTableColumn.Builder("OS User").setMinWidth(0).build());
+        table.column(new DataTableColumn.Builder("PID").setMinWidth(0).build());
+        table.column(new DataTableColumn.Builder("Exit").setName("ExitCode").setMinWidth(4).build());
+        table.column(new DataTableColumn.Builder("Startup Status").setMinWidth(7).build());
+        table.column(new DataTableColumn.Builder("Liveness Status").setMinWidth(7).build());
 
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
         Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();

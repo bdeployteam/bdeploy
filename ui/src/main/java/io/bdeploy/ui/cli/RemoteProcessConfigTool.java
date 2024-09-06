@@ -9,6 +9,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.CollectionHelper;
@@ -113,8 +114,14 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         DataTable table = createDataTable();
 
         table.setCaption("Start Parameters of " + app.name + " (" + app.id + ")");
-        table.column("ID", 25).column("Name", 25).column("Value", 30).column("Type", 12).column("Custom", 6).column("Fixed", 5)
-                .column("Mandatory", 9).column("Default", 20);
+        table.column(new DataTableColumn.Builder("ID").setMinWidth(20).build());
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(15).build());
+        table.column(new DataTableColumn.Builder("Value").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Type").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("Custom").build());
+        table.column(new DataTableColumn.Builder("Fixed").build());
+        table.column(new DataTableColumn.Builder("Mandatory").build());
+        table.column(new DataTableColumn.Builder("Default").setMinWidth(17).build());
 
         for (var param : app.start.parameters) {
             var desc = dto.descriptor.startCommand.parameters.stream().filter(d -> d.id.equals(param.id)).findFirst()
@@ -345,7 +352,9 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             return createSuccess();
         } else {
             DataTable table = createDataTable().setCaption("Validation Messages");
-            table.column("App", 15).column("Param", 15).column("Message", 70);
+            table.column(new DataTableColumn.Builder("App").setMinWidth(13).build());
+            table.column(new DataTableColumn.Builder("Param").setMinWidth(13).build());
+            table.column(new DataTableColumn.Builder("Message").build());
 
             for (var msg : validation) {
                 table.row().cell(msg.appId).cell(msg.paramId).cell(msg.message).build();

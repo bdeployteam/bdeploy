@@ -23,6 +23,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
@@ -202,7 +203,8 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         DataTable table = createDataTable();
         table.setCaption("Found " + countFiles(matchingFiles) + " data files");
 
-        table.column("Path", 30).column("minion", 30);
+        table.column(new DataTableColumn.Builder("Path").build());
+        table.column(new DataTableColumn.Builder("minion").setMinWidth(6).build());
 
         for (var dirSnapshot : matchingFiles.entrySet()) {
             for (var entry : dirSnapshot.getValue()) {

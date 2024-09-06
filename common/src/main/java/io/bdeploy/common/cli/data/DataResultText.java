@@ -23,7 +23,7 @@ class DataResultText extends DataResultBase {
         if (getThrowable() != null) {
             table.setCaption(getMessage() != null ? getMessage() : "Error");
             table.setHideHeadersHint(true);
-            table.column(new DataTableColumn("Error", 120));
+            table.column(new DataTableColumn.Builder("Error").setMinWidth(100).build());
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                 try (PrintWriter pw = new PrintWriter(baos)) {
                     getThrowable().printStackTrace(pw);
@@ -39,8 +39,8 @@ class DataResultText extends DataResultBase {
                 out().println("ERROR: Cannot display error");
             }
         } else {
-            table.column(new DataTableColumn("Result Field", 25));
-            table.column(new DataTableColumn("Result Value", 95));
+            table.column(new DataTableColumn.Builder("Result Field").setMinWidth(25).build());
+            table.column(new DataTableColumn.Builder("Result Value").setMinWidth(50).build());
 
             if (getMessage() != null) {
                 table.row().cell("Message").cell(getMessage()).build();

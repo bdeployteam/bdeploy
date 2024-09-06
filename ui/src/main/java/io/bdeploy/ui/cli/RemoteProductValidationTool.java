@@ -9,6 +9,8 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidat
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
@@ -45,7 +47,10 @@ public class RemoteProductValidationTool extends RemoteServiceTool<RemoteProduct
             return createSuccess();
         }
 
-        var table = createDataTable().column("ID", 4).column("Severity", 8).column("Message", 110);
+        DataTable table = createDataTable();
+        table.column(new DataTableColumn.Builder("ID").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Severity").setMinWidth(8).build());
+        table.column(new DataTableColumn.Builder("Message").setMinWidth(20).build());
         for (int i = 0; i < result.issues.size(); ++i) {
             ProductValidationIssueApi issue = result.issues.get(i);
             table.row().cell(i).cell(issue.severity.name()).cell(issue.message).build();

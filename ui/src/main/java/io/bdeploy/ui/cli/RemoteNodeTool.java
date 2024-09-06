@@ -14,6 +14,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -123,7 +124,11 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
 
     private RenderableResult doListMinions(RemoteService r) {
         DataTable table = createDataTable();
-        table.column("Name", 20).column("OS", 20).column("URI", 50).column("Online", 6).column("Status", 20);
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("OS").setMinWidth(7).build());
+        table.column(new DataTableColumn.Builder("URI").build());
+        table.column(new DataTableColumn.Builder("Online").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("Status").setMinWidth(6).build());
 
         NodeManagementResource root = ResourceProvider.getResource(r, NodeManagementResource.class, getLocalContext());
 

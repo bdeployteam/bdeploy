@@ -11,6 +11,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -92,7 +93,10 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             LocalLoginData data = llm.read();
 
             DataTable table = createDataTable();
-            table.column("Name", 15).column("URI", 40).column("User", 20).column("Active", 6);
+            table.column(new DataTableColumn.Builder("Name").setMinWidth(10).build());
+            table.column(new DataTableColumn.Builder("URI").setMinWidth(20).build());
+            table.column(new DataTableColumn.Builder("User").setMinWidth(20).build());
+            table.column(new DataTableColumn.Builder("Active").setMinWidth(6).build());
             for (Map.Entry<String, LocalLoginServer> entry : data.servers.entrySet()) {
                 table.row().cell(entry.getKey()).cell(entry.getValue().url).cell(entry.getValue().user)
                         .cell((data.current != null && data.current.equals(entry.getKey())) ? "*" : "").build();

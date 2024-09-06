@@ -26,6 +26,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.ToolDefaultVerbose;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.FormatHelper;
 
@@ -67,7 +68,11 @@ public class DiscUsageTool extends ConfiguredCliTool<DiscUsageConfig> {
         DataTable result = createDataTable();
 
         result.setCaption("Disc Usage");
-        result.column("Manifest Name", 100).column("Tag", 20).column("Size", 15).column("# Obj", 10).column("# Ref", 5);
+        result.column(new DataTableColumn.Builder("Manifest Name").setMinWidth(15).build());
+        result.column(new DataTableColumn.Builder("Tag").setMinWidth(15).build());
+        result.column(new DataTableColumn.Builder("Size").setMinWidth(10).build());
+        result.column(new DataTableColumn.Builder("# Obj").setMinWidth(7).build());
+        result.column(new DataTableColumn.Builder("# Ref").setMinWidth(5).build());
         result.addFooter(
                 "Note that objects may be calculated multiple times. The actual disc usage sum may be much lower than the sum of manifest size.");
 

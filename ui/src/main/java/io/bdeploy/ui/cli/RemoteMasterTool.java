@@ -18,6 +18,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
@@ -151,7 +152,11 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
         DataTable table = createDataTable();
         table.setCaption("Minions on " + svc.getUri());
-        table.column("Name", 20).column("Status", 8).column("Start", 25).column("OS", 10).column("Version", 15);
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Status").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("Start").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("OS").setMinWidth(7).build());
+        table.column(new DataTableColumn.Builder("Version").setMinWidth(7).build());
 
         for (Map.Entry<String, MinionStatusDto> e : minions.entrySet()) {
             MinionStatusDto s = e.getValue();

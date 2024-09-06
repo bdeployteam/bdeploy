@@ -29,4 +29,40 @@ class DataTableCsv extends DataTableBase {
             }
         }
     }
+
+    @Override
+    public DataTable addHorizontalRuler() {
+        // Ignored
+        return this;
+    }
+
+    @Override
+    public DataTable setHideHeadersHint(boolean hide) {
+        // Ignored
+        return this;
+    }
+
+    @Override
+    public DataTable setLineWrapHint(boolean wrap) {
+        // Ignored
+        return this;
+    }
+
+    @Override
+    public DataTable setWordBreakHint(boolean allowBreak) {
+        // Ignored
+        return this;
+    }
+
+    @Override
+    public DataTable setIndentHint(int indent) {
+        // Ignored
+        return this;
+    }
+
+    @Override
+    public DataTable setMaxTableLengthHint(int maxTableLength) {
+        // Ignored
+        return this;
+    }
 }

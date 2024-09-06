@@ -2,11 +2,14 @@ package io.bdeploy.common.cli.data;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 import io.bdeploy.common.util.StringHelper;
 
@@ -24,33 +27,28 @@ class DataTableText extends DataTableBase {
     private static final char CONTENT_END = '┤';
     private static final char CONTENT_START = '├';
 
-    private enum HrMode {
+    private static final String ELLIPSIS = "...";
+    private static final int ELLIPSIS_LENGTH = ELLIPSIS.length();
 
-        TOP(TOP_START, TOP_END),
-        CONTENT(CONTENT_START, CONTENT_END),
-        BOTTOM(BOTTOM_START, BOTTOM_END);
+    private static final String TABLE_CELL_PADDING = " ";
+    private static final int TABLE_CELL_PADDING_WIDTH = TABLE_CELL_PADDING.length();
+    private static final int DOUBLE_TABLE_CELL_PADDING_WIDTH = 2 * TABLE_CELL_PADDING_WIDTH;
 
-        private final char start;
-        private final char stop;
+    private static final int MIN_MAX_TABLE_LENGTH = 80;
 
-        private HrMode(char start, char stop) {
-            this.start = start;
-            this.stop = stop;
-        }
-    }
-
-    private int indent;
-    private boolean hideHeaders;
-    private boolean lineWrap;
-    private boolean allowBreak;
+    private boolean hideHeaders = false;
+    private boolean lineWrap = false;
+    private boolean allowBreak = false;
+    private int indent = 0;
+    private int maxTableLength = -1;
 
     DataTableText(PrintStream output) {
         super(output);
     }
 
     @Override
-    public DataTable setIndentHint(int hint) {
-        this.indent = hint;
+    public DataTable addHorizontalRuler() {
+        row(Collections.singletonList(new HorizontalRulerCell(columns.size())));
         return this;
     }
 
@@ -73,110 +71,264 @@ class DataTableText extends DataTableBase {
     }
 
     @Override
-    public DataTable addHorizontalRuler() {
-        row(Collections.singletonList(new HrCell(columns.size())));
+    public DataTable setIndentHint(int indent) {
+        this.indent = indent;
+        return this;
+    }
+
+    @Override
+    public DataTable setMaxTableLengthHint(int maxTableLength) {
+        if (maxTableLength > 0 && maxTableLength < MIN_MAX_TABLE_LENGTH) {
+            maxTableLength = MIN_MAX_TABLE_LENGTH;
+        }
+        this.maxTableLength = maxTableLength;
         return this;
     }
 
     @Override
     public void doRender() {
-        List<String> buffer = new ArrayList<>();
+        // Calculate column widths
+        int[] columnWidths = calculateColumnWidths();
 
-        adjustColumnsWidth();
+        // We have the widths, now let's construct the lines!
+        List<String> lines = new ArrayList<>();
 
-        // caption
+        // Start of table
+        lines.add(createHorizontalLine(columnWidths, HrMode.TOP));
+
+        // Caption
         if (caption != null) {
-            buffer.add(hr(HrMode.TOP));
-            buffer.add(StringHelper.repeat(" ", indent) + content(caption, 0, columns.size()));
+            lines.add(content(columnWidths, caption, 0, columns.size()));
+            lines.add(createHorizontalLine(columnWidths, HrMode.CONTENT));
         }
 
-        buffer.add(hr(caption != null ? HrMode.CONTENT : HrMode.TOP));
-
-        // headers
+        // Table column headers
         if (!hideHeaders) {
             StringBuilder header = new StringBuilder();
-            header.append(StringHelper.repeat(" ", indent));
             for (int i = 0; i < columns.size(); ++i) {
-                header.append(content(columns.get(i).getLabel(), i, 1));
+                header.append(content(columnWidths, columns.get(i).getLabel(), i, 1));
             }
-            buffer.add(header.toString());
-            buffer.add(hr(HrMode.CONTENT));
+            lines.add(header.toString());
+            lines.add(createHorizontalLine(columnWidths, HrMode.CONTENT));
         }
 
-        // data
-        for (List<DataTableCell> raw : rows) {
-            if (raw.size() == 1 && raw.get(0) instanceof HrCell) {
-                buffer.add(hr(HrMode.CONTENT));
+        // Data
+        for (List<DataTableCell> row : rows) {
+            if (row.size() == 1 && row.get(0) instanceof HorizontalRulerCell) {
+                lines.add(createHorizontalLine(columnWidths, HrMode.CONTENT));
                 continue;
             }
 
-            List<List<DataTableCell>> expanded = Collections.singletonList(raw);
-
+            List<List<DataTableCell>> wrapped = Collections.singletonList(row);
             if (lineWrap) {
-                expanded = wrapRow(raw);
+                wrapped = wrapRow(columnWidths, row);
             }
 
-            for (List<DataTableCell> data : expanded) {
-                StringBuilder row = new StringBuilder();
-                row.append(StringHelper.repeat(" ", indent));
+            for (List<DataTableCell> wrappedRow : wrapped) {
+                StringBuilder sb = new StringBuilder();
                 int colIndex = 0;
-                for (int i = 0; i < data.size(); ++i) {
-                    row.append(content(data.get(i).getData(), colIndex, data.get(i).getSpan()));
-                    colIndex += data.get(i).getSpan();
+                for (int i = 0; i < wrappedRow.size(); ++i) {
+                    sb.append(content(columnWidths, wrappedRow.get(i).getData(), colIndex, wrappedRow.get(i).getSpan()));
+                    colIndex += wrappedRow.get(i).getSpan();
                 }
-                buffer.add(row.toString());
+                lines.add(sb.toString());
             }
         }
 
+        // Footers
         if (!footers.isEmpty()) {
-            buffer.add(hr(HrMode.CONTENT));
+            lines.add(createHorizontalLine(columnWidths, HrMode.CONTENT));
         }
         for (String footer : footers) {
-            buffer.add(content(footer, 0, columns.size()));
+            lines.add(content(columnWidths, footer, 0, columns.size()));
         }
 
-        buffer.add(hr(HrMode.BOTTOM));
-        processBuffer(buffer);
+        // End of table
+        lines.add(createHorizontalLine(columnWidths, HrMode.BOTTOM));
+
+        // Add indent
+        String indentString = StringHelper.repeat(" ", indent);
+        lines = lines.stream().map(line -> indentString + line).toList();
+
+        // Print to output
+        processLines(lines);
     }
 
-    private void adjustColumnsWidth() {
-        if (rows.isEmpty()) {
-            return;
+    /**
+     * Calculates the widths of the columns so that all text is fully displayed.
+     */
+    private int[] calculateColumnWidths() {
+        // Calculate base column widths
+        List<Column> cols = columns.stream().map(c -> new Column(c.getMinimumWidth(), c.getLabel().length())).toList();
+        if (hideHeaders) {
+            cols.forEach(col -> col.width = col.minWidth);
+        } else {
+            cols.forEach(col -> col.width = Math.max(col.minWidth, col.labelLength));
         }
-
-        // calculate column width
-        Map<Integer, Integer> colIdxToMaxCellLength = new HashMap<>();
         for (List<DataTableCell> row : rows) {
             int colIdx = 0;
             for (DataTableCell cell : row) {
-                for (int i = 0; i < cell.getSpan(); i++) {
-                    int cellLength = cell.getData().length() / cell.getSpan();
-                    int currentMax = colIdxToMaxCellLength.getOrDefault(colIdx, -1);
-                    colIdxToMaxCellLength.put(colIdx, Math.max(currentMax, cellLength));
-                    colIdx++;
+                int span = cell.getSpan();
+                int alreadyAvailableSpace = 0;
+                for (int i = 1; i < cell.getSpan(); i++) {
+                    alreadyAvailableSpace += 1 + DOUBLE_TABLE_CELL_PADDING_WIDTH + cols.get(colIdx + i).width;
                 }
+                Column col = cols.get(colIdx);
+                col.width = Math.max(col.width, cell.getData().length() - alreadyAvailableSpace);
+                colIdx += span;
             }
         }
 
-        // adjust column width
-        for (int i = 0; i < columns.size(); i++) {
-            DataTableColumn column = columns.get(i);
-            column.setMaxCellLength(colIdxToMaxCellLength.get(i));
+        // Calculated longest caption/footer
+        Set<Integer> peripheralWidths = new HashSet<>();
+        if (caption != null) {
+            peripheralWidths.add(caption.length());
         }
+        for (String footer : footers) {
+            peripheralWidths.add(footer.length());
+        }
+        int maxPeriperalWidth = peripheralWidths.stream().mapToInt(Integer::intValue).max().orElseGet(() -> 0);
+
+        // Enlarge last column to fit the peripheral width
+        int columnCount = columns.size();
+        int totalColumnsWidth = getTotalColumnsWidth(cols);
+        int necessaryEnlargement = maxPeriperalWidth - totalColumnsWidth;
+        if (necessaryEnlargement > 0) {
+            cols.get(columnCount - 1).width += necessaryEnlargement;
+        }
+
+        // If we are done -> return
+        if (maxTableLength < 0) {
+            return mapColsToWidth(cols);
+        }
+        int totalTableWidth = getTotalColumnsWidth(cols) + DOUBLE_TABLE_CELL_PADDING_WIDTH + 2;
+        int requiredShrinkage = totalTableWidth - maxTableLength;
+        if (requiredShrinkage <= 0) {
+            return mapColsToWidth(cols);
+        }
+
+        // If possible, undo as much of the enlargement as necessary and return
+        if (requiredShrinkage <= necessaryEnlargement) {
+            cols.get(columnCount - 1).width -= requiredShrinkage;
+            return mapColsToWidth(cols);
+        }
+
+        // Undo the enlargement and calculate the remaining required shrinkage
+        if (necessaryEnlargement > 0) {
+            cols.get(columnCount - 1).width -= necessaryEnlargement;
+            requiredShrinkage -= necessaryEnlargement;
+        }
+
+        // First we shrink them down to the higher one of their caps
+        for (Column col : cols) {
+            int cap = Math.max(col.labelLength, col.minWidth);
+            int removeableTillCap = col.width - cap;
+            if (requiredShrinkage <= removeableTillCap) {
+                col.width -= requiredShrinkage;
+                return mapColsToWidth(cols);
+            }
+            col.width -= removeableTillCap;
+            requiredShrinkage -= removeableTillCap;
+        }
+
+        // Then we shrink them down to the length of the ellipsis +1
+        int ellipsiscap = 1 + ELLIPSIS_LENGTH;
+        for (Column col : cols) {
+            if (col.minWidth >= ellipsiscap) {
+                continue;
+            }
+            int removeableTillCap = col.width - ellipsiscap;
+            if (requiredShrinkage <= removeableTillCap) {
+                col.width -= requiredShrinkage;
+                return mapColsToWidth(cols);
+            }
+            col.width -= removeableTillCap;
+            requiredShrinkage -= removeableTillCap;
+        }
+
+        // Next we shrink them down to a single character
+        for (Column col : cols) {
+            if (col.minWidth >= 1) {
+                continue;
+            }
+            int removeableTillCap = col.width - 1;
+            if (requiredShrinkage <= removeableTillCap) {
+                col.width -= requiredShrinkage;
+                return mapColsToWidth(cols);
+            }
+            col.width -= removeableTillCap;
+            requiredShrinkage -= removeableTillCap;
+        }
+
+        // Then we shrink them down to their minimum
+        for (Column col : cols) {
+            int cap = col.minWidth;
+            int removeableTillCap = col.width - cap;
+            if (requiredShrinkage <= removeableTillCap) {
+                col.width -= requiredShrinkage;
+                return mapColsToWidth(cols);
+            }
+            col.width -= removeableTillCap;
+            requiredShrinkage -= removeableTillCap;
+        }
+
+        // If we are still above the maximum allowed width, we allow it. We did what we could.
+        return mapColsToWidth(cols);
     }
 
-    private List<List<DataTableCell>> wrapRow(List<DataTableCell> raw) {
-        List<List<DataTableCell>> expandedRows = new ArrayList<>();
+    private static String createHorizontalLine(int[] columnWidths, HrMode mode) {
+        String paddingFiller = StringHelper.repeat(Character.toString(CELL_NONE), TABLE_CELL_PADDING_WIDTH);
+        StringBuilder builder = new StringBuilder();
+        builder.append(mode.start);
+        builder.append(paddingFiller);
+        for (int i = 0; i < columnWidths.length; i++) {
+            builder.append(StringHelper.repeat(Character.toString(CELL_NONE), columnWidths[i]));
+            builder.append(paddingFiller);
+            if (i < columnWidths.length - 1) {
+                builder.append(CELL_BOTH).append(paddingFiller);
+            } else {
+                builder.append(mode.stop);
+            }
+        }
+        return builder.toString();
+    }
+
+    private String content(int[] columnWidths, String text, int startColIndex, int span) {
+        text = text.replace("\t", "    ");
+
+        int endColIndex = startColIndex + span;
+        int width = getSumOfColumnWidths(columnWidths, startColIndex, endColIndex);
+
+        String lengthAdjustedText;
+        if (text.length() <= width) {
+            lengthAdjustedText = text + StringHelper.repeat(TABLE_CELL_PADDING, width - text.length());
+        } else if (width <= ELLIPSIS_LENGTH) {
+            lengthAdjustedText = text.substring(0, width);
+        } else {
+            lengthAdjustedText = text.substring(0, width - ELLIPSIS_LENGTH) + ELLIPSIS;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        if (startColIndex == 0) {
+            builder.append(CELL_SEPARATOR).append(TABLE_CELL_PADDING);
+        }
+        builder.append(lengthAdjustedText);
+        builder.append(TABLE_CELL_PADDING).append(CELL_SEPARATOR);
+        if (endColIndex < columns.size()) {
+            builder.append(TABLE_CELL_PADDING);
+        }
+        return builder.toString();
+    }
+
+    private List<List<DataTableCell>> wrapRow(int[] columnWidths, List<DataTableCell> row) {
+        List<List<DataTableCell>> wrappedRows = new ArrayList<>();
 
         Map<Integer, List<DataTableCell>> perColumn = new TreeMap<>();
         int colIndex = 0;
-        for (DataTableCell item : raw) {
-            List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + item.getSpan());
+        for (DataTableCell cell : row) {
+            int width = getSumOfColumnWidths(columnWidths, colIndex, colIndex + cell.getSpan());
 
-            // width of text per column and space for separators (3 * (num columns - 1))
-            int width = spanning.stream().map(DataTableColumn::getWidth).reduce(0, Integer::sum) + (3 * (spanning.size() - 1));
-
-            String remaining = item.getData();
+            String remaining = cell.getData();
             while (remaining.length() > width || remaining.contains("\n")) {
                 int newLine = remaining.indexOf('\n');
                 int index = newLine == -1 ? width : newLine;
@@ -195,19 +347,19 @@ class DataTableText extends DataTableBase {
                 }
 
                 perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>())
-                        .add(new DataTableCell(remaining.substring(0, index), item.getSpan()));
+                        .add(new DataTableCell(remaining.substring(0, index), cell.getSpan()));
 
                 remaining = remaining.substring(index).trim();
             }
 
-            perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>()).add(new DataTableCell(remaining, item.getSpan()));
-            colIndex += item.getSpan();
+            perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>()).add(new DataTableCell(remaining, cell.getSpan()));
+            colIndex += cell.getSpan();
         }
 
         // create all rows in the result.
         Integer rowCount = perColumn.values().stream().map(List::size).reduce(0, Integer::max);
         for (int r = 0; r < rowCount; ++r) {
-            expandedRows.add(new ArrayList<>());
+            wrappedRows.add(new ArrayList<>());
         }
 
         // make all columns same length
@@ -219,24 +371,45 @@ class DataTableText extends DataTableBase {
 
         perColumn.forEach((idx, items) -> {
             for (int i = 0; i < rowCount; ++i) {
-                expandedRows.get(i).add(items.get(i));
+                wrappedRows.get(i).add(items.get(i));
             }
         });
 
-        return expandedRows;
+        return wrappedRows;
     }
 
-    private void processBuffer(List<String> buffer) {
-        for (int i = 0; i < buffer.size(); ++i) {
-            String line = buffer.get(i);
+    /**
+     * Calculates and returns the total width of all columns including paddings and table column separator chars.
+     */
+    private static int getTotalColumnsWidth(List<Column> columns) {
+        return columns.stream().mapToInt(col -> col.width).sum() + (1 + DOUBLE_TABLE_CELL_PADDING_WIDTH) * (columns.size() - 1);
+    }
+
+    /**
+     * Calculates and returns the total width of all columns from startIndex to endIndex, including paddings and table column
+     * separator chars.
+     */
+    private static int getSumOfColumnWidths(int[] columnWidths, int startIndex, int endIndex) {
+        int[] subset = Arrays.copyOfRange(columnWidths, startIndex, endIndex);
+        return IntStream.of(subset).sum() + (1 + DOUBLE_TABLE_CELL_PADDING_WIDTH) * (subset.length - 1);
+    }
+
+    private static int[] mapColsToWidth(List<Column> cols) {
+        return cols.stream().mapToInt(col -> col.width).toArray();
+    }
+
+    private void processLines(List<String> lines) {
+        int lastIndex = lines.size() - 1;
+        for (int i = 0; i < lines.size(); ++i) {
+            String line = lines.get(i);
             String prev = StringHelper.repeat(" ", line.length());
             String next = StringHelper.repeat(" ", line.length());
 
             if (i > 0) {
-                prev = buffer.get(i - 1);
+                prev = lines.get(i - 1);
             }
-            if (i < (buffer.size() - 1)) {
-                next = buffer.get(i + 1);
+            if (i < lastIndex) {
+                next = lines.get(i + 1);
             }
 
             StringBuilder finalLine = new StringBuilder(line);
@@ -262,52 +435,37 @@ class DataTableText extends DataTableBase {
         }
     }
 
-    private String content(String text, int colIndex, int span) {
-        text = text.replace("\t", "    ");
+    private enum HrMode {
 
-        StringBuilder builder = new StringBuilder();
-        List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + span);
+        TOP(TOP_START, TOP_END),
+        CONTENT(CONTENT_START, CONTENT_END),
+        BOTTOM(BOTTOM_START, BOTTOM_END);
 
-        // width of text per column and space for separators (3 * (num columns - 1))
-        int width = spanning.stream().map(DataTableColumn::getWidth).reduce(0, Integer::sum) + (3 * (spanning.size() - 1));
+        private final char start;
+        private final char stop;
 
-        if (colIndex == 0) {
-            // first column, print opening
-            builder.append(CELL_SEPARATOR).append(' ');
+        private HrMode(char start, char stop) {
+            this.start = start;
+            this.stop = stop;
         }
-
-        builder.append(expand(text, width));
-
-        if (colIndex + span == (columns.size())) {
-            // spanning to last column, print end
-            builder.append(' ').append(CELL_SEPARATOR);
-        } else {
-            // more columns to come, print separator
-            builder.append(' ').append(CELL_SEPARATOR).append(' ');
-        }
-        return builder.toString();
     }
 
-    private String hr(HrMode mode) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(StringHelper.repeat(" ", indent)).append(mode.start).append(CELL_NONE);
-        for (int i = 0; i < columns.size(); ++i) {
-            DataTableColumn column = columns.get(i);
+    private static class HorizontalRulerCell extends DataTableCell {
 
-            builder.append(StringHelper.repeat(Character.toString(CELL_NONE), column.getWidth()));
-            if (i != (columns.size() - 1)) {
-                builder.append(CELL_NONE).append(CELL_BOTH).append(CELL_NONE);
-            } else {
-                builder.append(CELL_NONE).append(mode.stop);
-            }
+        private HorizontalRulerCell(int span) {
+            super("", span);
         }
-        return builder.toString();
     }
 
-    private static class HrCell extends DataTableCell {
+    private static class Column {
 
-        public HrCell(int span) {
-            super("-", span);
+        private final int minWidth;
+        private final int labelLength;
+        private int width;
+
+        private Column(int minWidth, int labelLength) {
+            this.minWidth = minWidth;
+            this.labelLength = labelLength;
         }
     }
 }

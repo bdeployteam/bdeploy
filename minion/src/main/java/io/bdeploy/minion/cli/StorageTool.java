@@ -14,6 +14,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
@@ -59,7 +60,8 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
             List<Path> original = r.getStorageLocations();
             if (config.list()) {
                 DataTable t = createDataTable();
-                t.column("Storage Path", 100).column("Free Space", 20);
+                t.column(new DataTableColumn.Builder("Storage Path").setMinWidth(50).build());
+                t.column(new DataTableColumn.Builder("Free Space").setMinWidth(20).build());
                 FileSystemSpaceService fsss = new FileSystemSpaceService();
                 r.getStorageLocations()
                         .forEach(l -> t.row().cell(l).cell(FormatHelper.formatFileSize(fsss.getFreeSpace(l))).build());
