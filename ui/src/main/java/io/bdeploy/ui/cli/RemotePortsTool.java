@@ -177,9 +177,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                             + " for configuration " + config.name);
                 }
 
-                VariableResolver resolver = createResolver(node, config);
-
                 if (desc.descriptor.startCommand != null) {
+                    VariableResolver resolver = createResolver(node, config);
                     for (var param : config.start.parameters) {
                         var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(param.id))
                                 .findFirst().orElse(null);
