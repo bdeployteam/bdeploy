@@ -56,6 +56,22 @@ public class ProcessControlConfiguration {
     @JsonAlias("lifenessProbe")
     public LivenessProbeDescriptor livenessProbe;
 
+    // ################################################# only for client applications #################################################
+
+    /**
+     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
+     * <p>
+     * Only listed directories will be provisioned to the client.
+     */
+    public String configDirs;
+
+    /**
+     * Whether the application should autostart on system boot
+     */
+    public boolean autostart;
+
+    // ################################################# only for legacy support #################################################
+
     /**
      * Compatibility module when we act as REST client so we send the original name of the livenessProbe.
      * <p>
@@ -71,18 +87,4 @@ public class ProcessControlConfiguration {
     public LivenessProbeDescriptor getLifenessProbe() {
         return livenessProbe;
     }
-
-    // ################################################# only for client applications #################################################
-
-    /**
-     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
-     * <p>
-     * Only listed directories will be provisioned to the client.
-     */
-    public String configDirs;
-
-    /**
-     * Whether the application should autostart on system boot
-     */
-    public boolean autostart;
 }
