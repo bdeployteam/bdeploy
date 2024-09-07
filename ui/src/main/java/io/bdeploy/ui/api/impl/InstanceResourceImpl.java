@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -69,6 +70,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
@@ -939,31 +941,28 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public Response downloadIcon(String instanceId, String applicationId) {
-        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
-        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application, null);
-        byte[] brandingIcon = appMf.readBrandingIcon(hive);
-        if (brandingIcon == null) {
-            return Response.serverError().status(Status.NOT_FOUND).build();
-        }
-        String iconFormat = PathHelper.getExtension(appMf.getDescriptor().branding.icon);
-
-        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        return ds.serveBytes(brandingIcon, "icon." + iconFormat);
+        return downloadImage(instanceId, applicationId, appMf -> appMf.readBrandingIcon(hive),//
+                descr -> descr.branding.icon, "icon");
     }
 
     @Override
     public Response downloadSplash(String instanceId, String applicationId) {
+        return downloadImage(instanceId, applicationId, appMf -> appMf.readBrandingSplashScreen(hive),//
+                descr -> descr.branding.splash.image, "splash");
+    }
+
+    private Response downloadImage(String instanceId, String applicationId, Function<ApplicationManifest, byte[]> imgExtractor,
+            Function<ApplicationDescriptor, String> formatExtractor, String identifier) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
         ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application, null);
-        byte[] brandingSplash = appMf.readBrandingSplashScreen(hive);
-        if (brandingSplash == null) {
+        byte[] img = imgExtractor.apply(appMf);
+        if (img == null) {
             return Response.serverError().status(Status.NOT_FOUND).build();
         }
-        String splashFormat = PathHelper.getExtension(appMf.getDescriptor().branding.splash.image);
+        String format = PathHelper.getExtension(formatExtractor.apply(appMf.getDescriptor()));
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        return ds.serveBytes(brandingSplash, "splash." + splashFormat);
+        return ds.serveBytes(img, identifier + "." + format);
     }
 
     @Override
