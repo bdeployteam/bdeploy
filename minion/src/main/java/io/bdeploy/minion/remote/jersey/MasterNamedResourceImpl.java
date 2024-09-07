@@ -663,9 +663,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             } else if (expectedTag != null) {
                 oldConfig = InstanceManifest.load(hive, instanceConfig.id, null);
                 if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
-                    throw new WebApplicationException(
-                            "Expected version is not the current one: expected=" + expectedTag + ", current="
-                                    + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
+                    throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
+                            + ", current=" + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
                 }
             }
 
@@ -771,8 +770,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             String attachmentMimeType) {
         MailSenderSettingsDto mailSenderSettingsDto = root.getSettings().mailSenderSettings;
 
-        InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress)
-                ? null
+        InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
                 : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
         InternetAddress receiverAddress = MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress);
 
@@ -936,8 +934,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void deleteVersion(String instanceId, String tag) {
         try (var handle = af.run(Actions.DELETE_INSTANCE_VERSION, name, instanceId, tag)) {
             Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
-            InstanceManifest.of(hive, key).getHistory(hive)
-                    .recordAction(Action.DELETE, context.getUserPrincipal().getName(), null);
+            InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.DELETE, context.getUserPrincipal().getName(),
+                    null);
             InstanceManifest.delete(hive, key);
 
             changes.remove(ObjectChangeType.INSTANCE, key, new ObjectScope(name, instanceId, tag), Map.of("partial", "true"));
@@ -999,8 +997,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public EntryChunk getEntryContent(String nodeName, RemoteDirectoryEntry entry, long offset, long limit) {
-        return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, context)
-                .getEntryContent(entry, offset, limit);
+        return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, context).getEntryContent(entry,
+                offset, limit);
     }
 
     @Override
@@ -1159,8 +1157,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 // Find node where the application is running
                 Optional<String> node = status.node2Applications.entrySet().stream()
                         .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
-                                && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED).map(Entry::getKey)
-                        .findFirst();
+                                && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
+                        .map(Entry::getKey).findFirst();
 
                 if (node.isEmpty()) {
                     continue; // ignore - not deployed.
@@ -1278,8 +1276,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public ProcessDetailDto getProcessDetailsFromNode(String instanceId, String appId, String node) {
         try {
-            return nodes.getNodeResourceIfOnlineOrThrow(node, NodeProcessResource.class, context)
-                    .getProcessDetails(instanceId, appId);
+            return nodes.getNodeResourceIfOnlineOrThrow(node, NodeProcessResource.class, context).getProcessDetails(instanceId,
+                    appId);
         } catch (Exception e) {
             throw new WebApplicationException("Cannot fetch process status from " + node + " for " + instanceId + ", " + appId,
                     e);
@@ -1299,8 +1297,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
         }
 
-        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
-                .writeToStdin(instanceId, applicationId, data);
+        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).writeToStdin(instanceId, applicationId,
+                data);
     }
 
     @Override

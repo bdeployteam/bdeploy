@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.jersey.JerseyServer;
-import io.bdeploy.minion.MinionServerProcessManager;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.MinionServerProcessManager;
 
 /**
  * A {@link MinionServerProcessManager} which knows how to shut down a {@link JerseyServer} before exiting the JVM.

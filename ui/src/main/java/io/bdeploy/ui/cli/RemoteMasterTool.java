@@ -28,7 +28,6 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.BackendInfoResource;
-import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.cli.RemoteMasterTool.RemoteMasterConfig;
@@ -86,7 +85,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             return pushLauncher(svc, zip);
         } else if (config.restart()) {
             return restartServer(config, svc);
-        } else if(config.shutdown()) {
+        } else if (config.shutdown()) {
             return shutdownServer(config, svc);
         } else {
             return createNoOp();
@@ -125,7 +124,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 Map<String, MinionStatusDto> minions = bir.getNodeStatus();
 
                 var master = minions.entrySet().stream().filter(m -> m.getValue().config.master).findFirst();
-                if(master.isEmpty()) {
+                if (master.isEmpty()) {
                     throw new IllegalStateException("Cannot determine the master minion");
                 }
 

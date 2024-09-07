@@ -58,7 +58,8 @@ public class NodeSynchronizer {
                 MasterNamedResource mnr = mrr.getNamedMaster(group.instanceGroupConfiguration.name);
                 if (!syncInstanceGroup(ir, mnr, group, nodeName)) {
                     allSynced = false;
-                    log.warn("Failed to synchronize instance group {} on node {}", group.instanceGroupConfiguration.name, nodeName);
+                    log.warn("Failed to synchronize instance group {} on node {}", group.instanceGroupConfiguration.name,
+                            nodeName);
                     break;
                 }
             }

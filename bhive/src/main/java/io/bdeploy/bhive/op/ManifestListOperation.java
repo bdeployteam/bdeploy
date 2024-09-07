@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.op;
 
-import java.util.Set;
 import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
