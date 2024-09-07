@@ -88,7 +88,7 @@ public class ReportingInputStream extends FilterInputStream {
         String transferRate = FormatHelper.formatTransferRate(bytesRead, elapsedTime);
         String fSizeRead = FormatHelper.formatFileSize(bytesRead);
         String fTotalSize = FormatHelper.formatFileSize(bytesTotal);
-        String fRemaining = FormatHelper.formatRemainingTime(remainingTimeMs).trim() + " remaining";
+        String fRemaining = FormatHelper.formatDurationBiggestOnly(remainingTimeMs).trim() + " remaining";
 
         activity.activity(String.format(ACTIVITY_TEMPLATE, activityName, transferRate, fSizeRead, fTotalSize, fRemaining));
         activity.worked(bytesToReport);

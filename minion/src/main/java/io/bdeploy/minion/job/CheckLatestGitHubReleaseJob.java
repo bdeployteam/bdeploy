@@ -56,7 +56,7 @@ public class CheckLatestGitHubReleaseJob implements Job {
             Date nextRun = scheduler.scheduleJob(job, trigger);
 
             log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), DEFAULT_CHECK_SCHEDULE,
-                    FormatHelper.format(nextRun));
+                    FormatHelper.formatDate(nextRun));
 
             // trigger job immediately
             scheduler.triggerJob(JOB_KEY);

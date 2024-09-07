@@ -65,7 +65,7 @@ public class CleanupDownloadDirJob implements Job {
             Trigger trigger = tBuilder.build();
             Date nextRun = scheduler.scheduleJob(job, trigger);
             log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), DEFAULT_CLEANUP_SCHEDULE,
-                    FormatHelper.format(nextRun));
+                    FormatHelper.formatDate(nextRun));
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule job", e);
         }

@@ -276,7 +276,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
             List<InstanceConfiguration> instances = msr.getInstancesControlledBy(config.instanceGroup(), mmd.hostName);
 
             table.row().cell(mmd.hostName).cell(mmd.uri).cell(mmd.description)
-                    .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never").cell(mmd.minions.values().size())
+                    .cell(mmd.lastSync != null ? FormatHelper.formatInstant(mmd.lastSync) : "never").cell(mmd.minions.values().size())
                     .cell(instances.size()).build();
         }
         return table;
@@ -339,7 +339,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
 
         for (var mmd : mmds) {
             var row = table.row().cell(group).cell(mmd.hostName)
-                    .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never");
+                    .cell(mmd.lastSync != null ? FormatHelper.formatInstant(mmd.lastSync) : "never");
 
             MinionDto master = null;
             Set<Version> versions = new TreeSet<>();

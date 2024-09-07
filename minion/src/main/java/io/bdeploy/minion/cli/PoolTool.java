@@ -117,7 +117,7 @@ public class PoolTool extends ConfiguredCliTool<PoolConfig> {
         String schedule = Optional.ofNullable(mr.getState().poolOrganizationSchedule)
                 .orElse(OrganizePoolJob.DEFAULT_REORG_SCHEDULE);
         String lastRun = mr.getState().poolOrganizationLastRun == 0 ? "N/A"
-                : FormatHelper.format(Instant.ofEpochMilli(mr.getState().poolOrganizationLastRun));
+                : FormatHelper.formatInstant(Instant.ofEpochMilli(mr.getState().poolOrganizationLastRun));
         result.addField("Cron Schedule", schedule);
         result.addField("Last Run", lastRun);
         return result;

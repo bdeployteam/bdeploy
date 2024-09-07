@@ -64,7 +64,7 @@ public class SyncLdapUserGroupsJob implements Job {
                 nextRun = scheduler.scheduleJob(job, trigger);
             }
             log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), cronSchedule,
-                    FormatHelper.format(nextRun));
+                    FormatHelper.formatDate(nextRun));
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule LDAP Synchronization Job", e);
         }

@@ -15,45 +15,51 @@ class FormatHelperTest {
     @Test
     void testFormatDuration() {
         String result1 = FormatHelper.formatDuration(-1);
-        assertEquals("59 min 59 sec 999 ms", result1);
+        assertEquals("-00 h 00 min 00 sec 001 ms", result1);
         String result2 = FormatHelper.formatDuration(0);
-        assertEquals("00 min 00 sec 000 ms", result2);
+        assertEquals("00 h 00 min 00 sec 000 ms", result2);
         String result3 = FormatHelper.formatDuration(1);
-        assertEquals("00 min 00 sec 001 ms", result3);
+        assertEquals("00 h 00 min 00 sec 001 ms", result3);
         String result4 = FormatHelper.formatDuration(2);
-        assertEquals("00 min 00 sec 002 ms", result4);
+        assertEquals("00 h 00 min 00 sec 002 ms", result4);
         String result5 = FormatHelper.formatDuration(Duration.ofSeconds(100).toMillis());
-        assertEquals("01 min 40 sec 000 ms", result5);
+        assertEquals("00 h 01 min 40 sec 000 ms", result5);
         String result6 = FormatHelper.formatDuration(Duration.ofSeconds(100).toMillis() + 333);
-        assertEquals("01 min 40 sec 333 ms", result6);
+        assertEquals("00 h 01 min 40 sec 333 ms", result6);
         String result7 = FormatHelper.formatDuration(Duration.ofMinutes(3).toMillis());
-        assertEquals("03 min 00 sec 000 ms", result7);
+        assertEquals("00 h 03 min 00 sec 000 ms", result7);
         String result8 = FormatHelper.formatDuration(Duration.ofHours(30).toMillis());
-        assertEquals("00 min 00 sec 000 ms", result8);
+        assertEquals("30 h 00 min 00 sec 000 ms", result8);
         String result9 = FormatHelper.formatDuration(Duration.ofHours(30).toMillis() + 500);
-        assertEquals("00 min 00 sec 500 ms", result9);
+        assertEquals("30 h 00 min 00 sec 500 ms", result9);
     }
 
     @Test
-    void testFormatRemainingTime() {
-        String result1 = FormatHelper.formatRemainingTime(-1);
-        assertEquals("0 secs", result1);
-        String result2 = FormatHelper.formatRemainingTime(0);
-        assertEquals("0 secs", result2);
-        String result3 = FormatHelper.formatRemainingTime(1);
-        assertEquals("0 secs", result3);
-        String result4 = FormatHelper.formatRemainingTime(2);
-        assertEquals("0 secs", result4);
-        String result5 = FormatHelper.formatRemainingTime(Duration.ofSeconds(100).toMillis());
-        assertEquals("1 min", result5);
-        String result6 = FormatHelper.formatRemainingTime(Duration.ofSeconds(100).toMillis() + 333);
-        assertEquals("1 min", result6);
-        String result7 = FormatHelper.formatRemainingTime(Duration.ofMinutes(3).toMillis());
-        assertEquals("3 mins", result7);
-        String result8 = FormatHelper.formatRemainingTime(Duration.ofHours(30).toMillis());
-        assertEquals("30 hours", result8);
-        String result9 = FormatHelper.formatRemainingTime(Duration.ofHours(30).toMillis() + 500);
-        assertEquals("30 hours", result9);
+    void testFormatDurationBiggestOnly() {
+        String result01 = FormatHelper.formatDurationBiggestOnly(Duration.ofMillis(-1).toMillis());
+        assertEquals("0 secs", result01);
+        String result02 = FormatHelper.formatDurationBiggestOnly(Duration.ofMillis(0).toMillis());
+        assertEquals("0 secs", result02);
+        String result03 = FormatHelper.formatDurationBiggestOnly(Duration.ofMillis(1).toMillis());
+        assertEquals("0 secs", result03);
+        String result04 = FormatHelper.formatDurationBiggestOnly(Duration.ofMillis(2).toMillis());
+        assertEquals("0 secs", result04);
+        String result05 = FormatHelper.formatDurationBiggestOnly(Duration.ofSeconds(1).toMillis());
+        assertEquals("1 sec", result05);
+        String result06 = FormatHelper.formatDurationBiggestOnly(Duration.ofSeconds(15).toMillis());
+        assertEquals("15 secs", result06);
+        String result07 = FormatHelper.formatDurationBiggestOnly(Duration.ofSeconds(59).toMillis());
+        assertEquals("59 secs", result07);
+        String result08 = FormatHelper.formatDurationBiggestOnly(Duration.ofMinutes(1).plusSeconds(40).plusMillis(33).toMillis());
+        assertEquals("1 min", result08);
+        String result09 = FormatHelper.formatDurationBiggestOnly(Duration.ofMinutes(3).toMillis());
+        assertEquals("3 mins", result09);
+        String result10 = FormatHelper.formatDurationBiggestOnly(Duration.ofHours(30).toMillis());
+        assertEquals("1 day", result10);
+        String result11 = FormatHelper.formatDurationBiggestOnly(Duration.ofHours(30).plusMillis(500).toMillis());
+        assertEquals("1 day", result11);
+        String result12 = FormatHelper.formatDurationBiggestOnly(Duration.ofDays(30).toMillis());
+        assertEquals("30 days", result12);
     }
 
     @Test
