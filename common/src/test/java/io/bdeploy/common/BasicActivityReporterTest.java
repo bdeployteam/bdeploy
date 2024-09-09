@@ -24,13 +24,13 @@ class BasicActivityReporterTest {
         stream.stopReporting();
     }
 
-    static Stream<ActivityReporter> basicTest() {
+    static Stream<ActivityReporter> testBasicBehavior() {
         return Stream.of(stream, new ActivityReporter.Null());
     }
 
     @ParameterizedTest
     @MethodSource
-    void basicTest(ActivityReporter reporter) {
+    void testBasicBehavior(ActivityReporter reporter) {
         try (Activity indeterminate = reporter.start("Indeterminate")) {
             indeterminate.worked(1);
 

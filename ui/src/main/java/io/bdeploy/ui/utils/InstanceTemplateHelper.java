@@ -36,7 +36,7 @@ public class InstanceTemplateHelper {
                 || ".*".equals(instance.productVersionRegex));
 
         // the list is ordered - the first matching product is also the best matching version of that product.
-        Optional<ProductDto> product = products.stream().filter(p -> {
+        return products.stream().filter(p -> {
             if (!p.product.equals(instance.productId)) {
                 return false;
             }
@@ -49,8 +49,6 @@ public class InstanceTemplateHelper {
             // check whether requested template is in this version, otherwise reject.
             return p.instanceTemplates.stream().anyMatch(t -> t.name.equals(instance.templateName));
         }).findFirst();
-
-        return product;
     }
 
 }

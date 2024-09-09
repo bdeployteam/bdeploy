@@ -305,9 +305,9 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         try (Activity prepare = getActivityReporter().start("Fetching server information from instance groups...",
                 groups.size())) {
             for (var group : groups) {
-                if (collectMinionsForGroup(config, msr, group, table, rowsByVersion))
+                if (collectMinionsForGroup(config, msr, group, table, rowsByVersion)) {
                     continue;
-
+                }
                 prepare.workAndCancelIfRequested(1);
             }
         }

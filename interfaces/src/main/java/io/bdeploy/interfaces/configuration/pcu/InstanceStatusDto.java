@@ -162,18 +162,15 @@ public class InstanceStatusDto {
         Map<String, ProcessStatusDto> statusMap = new HashMap<>();
 
         // Add all deployed applications of the active tag.
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            InstanceNodeStatusDto nodeDto = entry.getValue();
-            if (nodeDto.activeTag == null) {
-                continue;
+        for (InstanceNodeStatusDto nodeDto : node2Applications.values()) {
+            if (nodeDto.activeTag != null) {
+                ProcessListDto list = nodeDto.deployed.get(nodeDto.activeTag);
+                statusMap.putAll(list.deployed);
             }
-            ProcessListDto list = nodeDto.deployed.get(nodeDto.activeTag);
-            statusMap.putAll(list.deployed);
         }
 
-        // Now put all running applications. Overwrites previous state
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            InstanceNodeStatusDto nodeDto = entry.getValue();
+        // Now put all running applications. Overwrites previous state.
+        for (InstanceNodeStatusDto nodeDto : node2Applications.values()) {
             statusMap.putAll(nodeDto.runningOrScheduled);
         }
         return statusMap;

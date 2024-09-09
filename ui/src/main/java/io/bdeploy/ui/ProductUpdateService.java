@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -404,7 +405,7 @@ public class ProductUpdateService {
         return result;
     }
 
-    public List<ApplicationValidationDto> validate(InstanceUpdateDto updateDto, List<ApplicationManifest> applications,
+    public List<ApplicationValidationDto> validate(InstanceUpdateDto updateDto, Collection<ApplicationManifest> applications,
             SystemConfiguration system) {
         List<ApplicationValidationDto> result = new ArrayList<>();
         InstanceConfigurationDto instance = updateDto.config;
@@ -449,7 +450,7 @@ public class ProductUpdateService {
     }
 
     private static void validateFiles(List<ApplicationValidationDto> result, List<InstanceNodeConfigurationDto> nodes,
-            List<FileStatusDto> files) {
+            Collection<FileStatusDto> files) {
         if (files == null) {
             return;
         }
