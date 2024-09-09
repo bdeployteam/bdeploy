@@ -127,10 +127,10 @@ class ObjectManagerTest extends DbTestBase {
             Manifest.Key refKey = new Manifest.Key("ref", "1");
             mdb.addManifest(new Manifest.Builder(refKey).setRoot(tree).build(null), false);
 
-            ObjectId testTree = mgr.insertTree(
-                    new Tree.Builder().add(new Tree.Key("app", EntryType.MANIFEST), mgr.insertManifestReference(refKey))
-                            .add(new Tree.Key("missing", EntryType.BLOB), ObjectId.parse("1e0c3f6cd90bc02a0d398a977467047bd944ce04"))
-                            .add(new Tree.Key("apptree", EntryType.TREE), tree).build());
+            ObjectId testTree = mgr.insertTree(new Tree.Builder()
+                    .add(new Tree.Key("app", EntryType.MANIFEST), mgr.insertManifestReference(refKey))
+                    .add(new Tree.Key("missing", EntryType.BLOB), ObjectId.parse("1e0c3f6cd90bc02a0d398a977467047bd944ce04"))
+                    .add(new Tree.Key("apptree", EntryType.TREE), tree).build());
 
             TreeView snapshot = mgr.scan(testTree, Integer.MAX_VALUE, true);
 
