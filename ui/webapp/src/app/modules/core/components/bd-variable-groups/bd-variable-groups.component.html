@@ -109,7 +109,7 @@
                   *ngIf="group.isCustom"
                   text="Paste"
                   icon="content_paste_go"
-                  [disabled]="!clipboardVars?.length"
+                  [disabled]="!(clipboardVars$ | async).length"
                   (click)="doPaste()"
                   appClickStopPropagation
                 ></app-bd-button>
@@ -153,7 +153,7 @@
               </div>
 
               <!-- Single variable -->
-              <ng-container *ngFor="let p of sortPairs(group.pairs)">
+              <ng-container *ngFor="let p of group.pairs">
                 <div
                   [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
                   class="flex"

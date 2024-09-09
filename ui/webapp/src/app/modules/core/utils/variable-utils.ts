@@ -21,17 +21,17 @@ export function groupVariables(descriptors: VariableDescriptor[], values: Variab
   descriptors = descriptors || [];
   values = values || [];
   // group all variable descriptors and configurations together for simple iteration in the template.
-  const r: VariableGroup[] = [];
+  const groups: VariableGroup[] = [];
   for (const d of descriptors) {
     const grpName = d.groupName?.length ? d.groupName : UNGROUPED;
-    let grp = r.find((g) => g.name === grpName);
+    let grp = groups.find((g) => g.name === grpName);
     if (!grp) {
       grp = {
         name: grpName,
         pairs: [],
         isCustom: false,
       };
-      r.push(grp);
+      groups.push(grp);
     }
 
     const pair: VariablePair = {
@@ -48,7 +48,7 @@ export function groupVariables(descriptors: VariableDescriptor[], values: Variab
   }
 
   // sort groups by name, ungrouped variables come last.
-  r.sort((a, b) => {
+  groups.sort((a, b) => {
     if (a?.name === b?.name) {
       return 0;
     }
@@ -81,7 +81,22 @@ export function groupVariables(descriptors: VariableDescriptor[], values: Variab
   }
 
   // *always* add custom variables, even if none are there yet to allow adding some later. custom variables come even after ungrouped ones.
-  r.push(custom);
+  groups.push(custom);
 
-  return r;
+  groups.forEach((group) => sortPairs(group.pairs));
+
+  return groups;
+}
+
+function sortPairs(pairs: VariablePair[]): VariablePair[] {
+  return pairs.sort((a, b) => {
+    if (!!a?.descriptor?.name && !!b?.descriptor?.name) {
+      return a.descriptor.name.localeCompare(b.descriptor.name);
+    }
+
+    const ida = a.descriptor?.id ? a.descriptor.id : a.value.id;
+    const idb = b.descriptor?.id ? b.descriptor.id : b.value.id;
+
+    return ida.localeCompare(idb);
+  });
 }

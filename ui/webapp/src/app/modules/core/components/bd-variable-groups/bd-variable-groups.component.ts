@@ -1,5 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   inject,
@@ -43,8 +45,10 @@ interface ConfigVariable {
   selector: 'bd-variable-groups',
   templateUrl: './bd-variable-groups.component.html',
   styleUrl: './bd-variable-groups.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchable {
+  private readonly cd = inject(ChangeDetectorRef);
   private readonly snackbar = inject(MatSnackBar);
   private readonly searchService = inject(SearchService);
   private readonly bop = inject(BreakpointObserver);
@@ -65,7 +69,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   @Output() variableListChanged = new EventEmitter<VariableConfiguration[]>();
 
   private search: string;
-  protected clipboardVars: ConfigVariable[];
+  protected clipboardVars$ = new BehaviorSubject<ConfigVariable[]>([]);
   protected checked: ConfigVariable[] = [];
   protected isCustomGroupSelected = false;
 
@@ -99,6 +103,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
 
   public bdOnSearch(s: string) {
     this.search = !s?.length ? null : s;
+    this.cd.markForCheck();
   }
 
   protected doTrack(_: number, group: VariableGroup) {
@@ -133,7 +138,8 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   }
 
   protected doPaste() {
-    if (!this.clipboardVars?.length) {
+    const clipboardVars = this.clipboardVars$.value;
+    if (!clipboardVars.length) {
       this.snackbar.open('Unable to read from clipboard.', null, {
         duration: 1000,
       });
@@ -142,7 +148,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     const newVars: VariableConfiguration[] = [];
     const existingVars: VariableConfiguration[] = [];
     const varList = this.variableList ? this.variableList : [];
-    this.clipboardVars.forEach((configVar: ConfigVariable) => {
+    clipboardVars.forEach((configVar: ConfigVariable) => {
       const found = varList.some((iv) => iv.id === configVar.value.id);
       if (found) {
         existingVars.push(configVar.value);
@@ -150,7 +156,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
         newVars.push(configVar.value);
       }
     });
-    let message = `${this.clipboardVars.length} variables copied from clipboard. `;
+    let message = `${clipboardVars.length} variables copied from clipboard. `;
     if (newVars.length) {
       varList.push(...newVars);
       varList.sort((a, b) => a.id.localeCompare(b.id));
@@ -166,7 +172,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   }
 
   private readFromClipboard(data: string) {
-    this.clipboardVars = null;
+    this.clipboardVars$.next([]);
     if (!data) {
       return;
     }
@@ -177,7 +183,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
       if (!validNames || !validVariables) {
         console.error(`Invalid variables format.`);
       } else {
-        this.clipboardVars = variables;
+        this.clipboardVars$.next(variables);
       }
     } catch (e) {
       console.error('Unable to parse from clipboard', e);
@@ -328,18 +334,5 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
 
   protected doSetCustomEditorState(p: VariablePair, editor: CustomEditor) {
     p.editorEnabled = editor.allowDirectEdit;
-  }
-
-  protected sortPairs(pairs: VariablePair[]): VariablePair[] {
-    return pairs.sort((a, b) => {
-      if (!!a?.descriptor?.name && !!b?.descriptor?.name) {
-        return a.descriptor.name.localeCompare(b.descriptor.name);
-      }
-
-      const ida = a.descriptor?.id ? a.descriptor.id : a.value.id;
-      const idb = b.descriptor?.id ? b.descriptor.id : b.value.id;
-
-      return ida.localeCompare(idb);
-    });
   }
 }
