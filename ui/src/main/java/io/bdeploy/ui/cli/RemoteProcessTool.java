@@ -2,6 +2,7 @@ package io.bdeploy.ui.cli;
 
 import static io.bdeploy.common.util.StringHelper.isNullOrEmpty;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -330,7 +331,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(process.instanceTag + (process.instanceTag.equals(deploymentStates.activeTag) ? "" : "*")) //
                 .cell(instance == null ? "?" : instance.product.getTag()) //
                 .cell(cfg == null ? "?" : cfg.processControl.startType) //
-                .cell(handle == null ? "-" : FormatHelper.format(handle.startTime)) //
+                .cell(handle == null ? "-" : FormatHelper.formatInstant(Instant.ofEpochMilli(handle.startTime))) //
                 .cell(handle == null ? "-" : handle.user) //
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //
                 .cell(Integer.toString(process.exitCode)) //

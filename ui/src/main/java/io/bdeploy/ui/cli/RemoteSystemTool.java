@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -288,7 +289,8 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
                     .cell(null)//
                     .cell(null)//
                     .cell(overallStatusDto.status)//
-                    .cell(overallStatusDto.timestamp <= 0 ? "Never" : FormatHelper.format(overallStatusDto.timestamp))//
+                    .cell(overallStatusDto.timestamp <= 0 ? "Never"
+                            : FormatHelper.formatInstant(Instant.ofEpochMilli(overallStatusDto.timestamp)))//
                     .cell(String.join(" | ", overallStatusDto.messages))//
                     .build();
 

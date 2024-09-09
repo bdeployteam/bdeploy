@@ -129,7 +129,7 @@ public class MessageDialogs {
         }
         builder.append("\n");
 
-        builder.append("*** Date: \n").append(FormatHelper.format(new Date())).append("\n");
+        builder.append("*** Date: \n").append(FormatHelper.formatDate(new Date())).append("\n");
         builder.append("\n");
 
         builder.append("*** System properties: \n");
