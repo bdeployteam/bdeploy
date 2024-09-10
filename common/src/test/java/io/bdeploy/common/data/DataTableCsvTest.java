@@ -34,6 +34,15 @@ class DataTableCsvTest {
     }
 
     @Test
+    void testTableWithSpannedText() {
+        String expected = ""//
+                + "\"col1\",\"col2\",\"col3\"\r\n"//
+                + "\"val1\",\"val2\",\"val3\"\r\n"//
+                + "\"This first cell has a very long text indeed\",,\"third\"";
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addSpannedTextRow(table));
+    }
+
+    @Test
     void testTableNoHeader() {
         String expected = ""//
                 + "\"col1\",\"col2\",\"col3\"\r\n"//

@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableCell;
 import io.bdeploy.common.cli.data.DataTableColumn;
 
 class DataTableTestUtil extends DataTestUtil {
@@ -44,5 +45,9 @@ class DataTableTestUtil extends DataTestUtil {
     static DataTable addLongTextRow(DataTable table) {
         return table.row().cell("This first cell has a very long text indeed").cell("second one is shorter").cell("third")
                 .build();
+    }
+
+    static DataTable addSpannedTextRow(DataTable table) {
+        return table.row().cell(new DataTableCell("This first cell has a very long text indeed", 2)).cell("third").build();
     }
 }

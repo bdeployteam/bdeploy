@@ -38,6 +38,16 @@ class DataTableJsonTest {
     }
 
     @Test
+    void testTableWithSpannedText() {
+        String expected = ""//
+                + "[\r\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\r\n"//
+                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col3\": \"third\" }\r\n"//
+                + "]";
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addSpannedTextRow(table));
+    }
+
+    @Test
     void testTableNoHeader() {
         String expected = ""//
                 + "[\r\n"//

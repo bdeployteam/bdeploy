@@ -62,6 +62,25 @@ class DataTableTextTest {
     }
 
     @Test
+    void testTableWithSpannedText() {
+        String expectedShort = ""//
+                + "┌──────┬──────┬──────┐\n"//
+                + "│ col1 │ col2 │ col3 │\n"//
+                + "├──────┼──────┼──────┤\n"//
+                + "│ val1 │ val2 │ val3 │\n"//
+                + "│ This fir... │ t... │\n"//
+                + "└─────────────┴──────┘\n";
+        String expectedLong = ""//
+                + "┌───────────────────────────┬───────────────────────┬───────┐\n"//
+                + "│ col1                      │ col2                  │ col3  │\n"//
+                + "├───────────────────────────┼───────────────────────┼───────┤\n"//
+                + "│ val1                      │ val2                  │ val3  │\n"//
+                + "│ This first cell has a very long text indeed       │ third │\n"//
+                + "└───────────────────────────────────────────────────┴───────┘\n";
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> DataTableTestUtil.addSpannedTextRow(table));
+    }
+
+    @Test
     void testTableNoHeader() {
         String expectedShort = ""//
                 + "┌──────┬──────┬──────┐\n"//
