@@ -171,7 +171,7 @@ A **System** definition may be used by many **Instances**, but each **Instance**
 
 ### System Variables
 
-**System Variables** can be configured on **Systems**. Those variables can then be used using _link expressions_ on [Link Expressions](/user/instance/#link-expressions) (process parameters, endpoint configuration, instance variables, configuration files).
+**System Variables** can be configured on **Systems**. Those variables can then be referenced by other [Link Expressions](/user/instance/#link-expressions) (process parameters, endpoint configuration, instance variables, configuration files).
 
 ### System Templates
 
@@ -189,7 +189,7 @@ The **System Template Wizard** will request you to upload a [`system-template.ya
 ![System Template Wizard - Instance Configuration](/images/Doc_SystemTemplate_InstanceTemplates.png){width=480}
 :::
 
-The Wizard will now query each instance defined in the **System Template**. This allow users to skip instances, or configure intances in a way just "as if" they would apply the individual **Instance Templates** to a new, empty instance each.
+The Wizard will now query each instance defined in the **System Template**. This allows users to skip instances, or configure intances in a way just "as if" they would apply the individual **Instance Templates** to a new, empty instance each.
 
 :::{align=center}
 ![System Template Wizard - Result](/images/Doc_SystemTemplate_Done.png){width=480}

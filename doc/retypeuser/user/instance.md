@@ -143,13 +143,13 @@ Click the [ **Add** ] button in the **Custom Parameters** group to add a new **c
 
 #### Link Expressions
 
-Link expressions can be used on all process parameters (as well as for endpoint configuration, inside configuration files, etc.). The **BDeploy** UI provides content assis for link expressions once a parameter editor is switched to expression mode, which is done using the toggle in front of each parameter. Each parameter is _either_ a plain value or a link expression, depending on the toggle.
+Link expressions can be used on all process parameters (as well as for endpoint configuration, inside configuration files, etc.). The **BDeploy** UI provides content assist for link expressions once a parameter editor is switched to expression mode, which is done using the toggle in front of each parameter. Each parameter is _either_ a plain value or a link expression, depending on the toggle.
 
 :::{align=center}
 ![Content Asssist for Link Expressions](/images/Doc_InstVar_InParameter.png){width=480}
 :::
 
-The content assist will propose categories of [Variable Expansions](/power/variables/#variable-expansions) first, and, once the category is determined, will continue to provide more detailed assistence.
+The content assist will propose categories of [Variable Expansions](/power/variables/#variable-expansions) first, and, once the category is determined, will continue to provide more detailed assistance.
 
 See [Variable Expansions](/power/variables/#variable-expansions) for more details.
 
@@ -231,7 +231,7 @@ If there's a newer **product version** available (newer than the one that is con
 ![Update Notification](/images/Doc_InstanceProductUpdateAvail.png){width=480}
 :::
 
-Clicking on the notification opens the **Update Product** panel. The same panel can also be opened opened by clicking on the [ **Update Product Version** ] button in the **Instance Settings** panel.
+Clicking on the notification opens the **Update Product** panel. The same panel can also be opened by clicking on the [ **Update Product Version** ] button in the **Instance Settings** panel.
 
 :::{align=center}
 ![Change Current Product Version](/images/Doc_InstanceProductUpdate.png){width=480}

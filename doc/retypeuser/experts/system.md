@@ -19,7 +19,7 @@ In the _Settings_ area some global settings can be configured.
 ![BDeploy Settings](/images/Doc_Admin_Settings.png){width=480}
 :::
 
-_Gravatar_ support can be enabled here. If disabled, a generic icon is used for all useres. Otherwise, **BDeploy** shows the _Globally Recognized Avatar_ (or a substitute image) wherever a user icon is displayed in a dialog. Visit [gravatar.com](https://gravatar.com) for more information.
+_Gravatar_ support can be enabled here. If disabled, a generic icon is used for all users. Otherwise, **BDeploy** shows the _Globally Recognized Avatar_ (or a substitute image) wherever a user icon is displayed in a dialog. Visit [gravatar.com](https://gravatar.com) for more information.
 
 **BDeploy** supports both built-in and external authentication mechanims. The built-in user authentication can be disabled completely in the settings.
 
@@ -43,7 +43,7 @@ The Client ID and Client Secret are used to authenticate with the OpenID Connect
 
 ### Okta
 
-[Okta](https://www.okta.com/) is an OpenID Connect compliant authentication provider. **BDeploy** can be configured to authenticate users agains `Okta` using its own proprietary authentication flow in a popup. Same as `auth0`, `Okta` requires a configured tenant which has application type "Single Page Application" set.
+[Okta](https://www.okta.com/) is an OpenID Connect compliant authentication provider. **BDeploy** can be configured to authenticate users against `Okta` using its own proprietary authentication flow in a popup. Same as `auth0`, `Okta` requires a configured tenant which has application type "Single Page Application" set.
 
 ### LDAP Auth.
 
@@ -69,12 +69,12 @@ The following properties can be configured for each LDAP Server:
 
 Property | Description
 ---      | ---
-Server URL | The URL of the LDAP server. Both `ldaps://` (with a proper certificate on the server) and `ldap://` are supported. `ldaps://` should be preferred where possible. Self-signed certificates are currently not configurable inside **BDeploy** (although they can be configure on the operating system).
+Server URL | The URL of the LDAP server. Both `ldaps://` (with a proper certificate on the server) and `ldap://` are supported. `ldaps://` should be preferred where possible. Self-signed certificates are currently not configurable inside **BDeploy** (although they can be configured on the operating system).
 Description | Free text to describe the entry.
 User | The user which is used to query other users on the LDAP server (aka _bind user_).
 Password | The password for the _User_ which is used to query other users on the LDAP server.
 Account and Group Base | Root of the LDAP tree containing all user accounts (with group refs) to query. Typically in the form of `dc=domain,dc=com`.
-Account Pattern | A partial LDAP query expression. Multiple filters can be written one after another. The final LDAP query is built by prepending `(&`, and appending a filter which queries the configures _Account User Field_ for the given user. This means that a pattern `(field1=value1)(field2=value2)` will result in a query like `(&(field1=value1)(field2=value2)(sAMAccountName=<GIVEN USER>))`.
+Account Pattern | A partial LDAP query expression. Multiple filters can be written one after another. The final LDAP query is built by prepending `(&`, and appending a filter which queries the configured _Account User Field_ for the given user. This means that a pattern `(field1=value1)(field2=value2)` will result in a query like `(&(field1=value1)(field2=value2)(sAMAccountName=<GIVEN USER>))`.
 Account User Field | Specifies the field which must match the login name when querying for the user.
 Account Name Field | The field which should be used as source for the _Full Name_ of the user, which is used as a display name in [User Accounts](/experts/system/#user-accounts) management.
 Account E-Mail Field | The field which should be used as source for the users _E-Mail Address_. This is used for instance to query _Gravatar_ if _Gravatar_ support has been enabled in the [General Settings](/experts/system/#general).

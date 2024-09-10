@@ -13,7 +13,7 @@ Mode | Function
 --- | ---
 `STANDALONE` | A standalone **BDeploy** master which is responsible for itself, its nodes, and every application deployed thereon.
 `MANAGED` | A **BDeploy** master which is controlled by a `CENTRAL` **BDeploy** master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can **additionally** be controlled indirectly through the attached `CENTRAL` master
-`CENTRAL` | Allows a central **BDeploy** master to control and manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities. Its purpose ist _exclusively_ to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master.
+`CENTRAL` | Allows a central **BDeploy** master to control and manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities. Its purpose is _exclusively_ to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master.
 `NODE` | A **node** which can be attached to either a `STANDALONE` or `MANAGED` server as additional target location to run applications on.
 
 :::{align=center}
