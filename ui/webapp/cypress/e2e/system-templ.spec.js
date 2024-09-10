@@ -38,7 +38,7 @@ describe('System Template Tests', () => {
       });
 
       cy.get('[data-cy=step-import-missing-products]').within(() => {
-        cy.contains('1 product from the template is missing and needs to be imported').should('exist');
+        cy.contains('1 product from the template is missing and will be imported automatically').should('exist');
         cy.contains('io.bdeploy/chat-app/product:1.0.0').should('exist');
         cy.get('button[data-cy^=Next]').should('be.enabled').click();
       });

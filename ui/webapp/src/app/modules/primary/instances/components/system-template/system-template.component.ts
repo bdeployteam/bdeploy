@@ -198,8 +198,8 @@ export class SystemTemplateComponent implements OnInit {
     this.importProductsState = {
       message:
         toImport.length === 1
-          ? '1 product from the template is missing and needs to be imported'
-          : `${toImport.length} products from the template are missing and need to be imported`,
+          ? '1 product from the template is missing and will be imported automatically'
+          : `${toImport.length} products from the template are missing and will be imported automatically`,
       completed: false,
     };
   }
