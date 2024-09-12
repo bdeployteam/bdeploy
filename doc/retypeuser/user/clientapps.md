@@ -15,7 +15,7 @@ The page will offer the appropriate **Client Application** based on the operatin
 
 ## Launcher
 
-**Client Application** are started through a special **Launcher** that needs to be installed on all client devices. The launcher is responsible for keeping the application up-to-date and to pass the configured parameters to the application.
+**Client Application** is started through a special **Launcher** that needs to be installed on all client devices. The launcher is responsible for keeping the application up-to-date and to pass the configured parameters to the application.
 
 ## Installer
 
@@ -62,7 +62,7 @@ Additional configuration might be required depending on the installation locatio
 
 #### Authenticode Signature
 
-All Windows binaries of **BDeploy** are signed using a _SSI Schaefer IT Solutions GmbH_ code signing certificate. The installers are built and signed at release time. However, due to the very dynamic nature of applications in **BDeploy**, the installer needs to be branded _after_ being signed during the build (to make it know which server to contact, which application to install, etc.).
+All Windows binaries of **BDeploy** are signed using an _SSI Schaefer IT Solutions GmbH_ code signing certificate. The installers are built and signed at release time. However, due to the very dynamic nature of applications in **BDeploy**, the installer needs to be branded _after_ being signed during the build (to make it know which server to contact, which application to install, etc.).
 
 **BDeploy** uses a technique commonly called _Signature Stuffing_. This technique is widely used in various installation programs, as many have the same requirements. Unfortunately, this technique can also be abused by malicious code and is thus regarded as potential security risk, see [the official Microsoft report](https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2013-3900). Microsoft does _not_ enable the mitigation for this vulnerability by default, since this breaks signature validation on _many_ installation programs.
 
@@ -116,7 +116,7 @@ A shortcut can be saved that includes the customized parameters. Doing so allows
 
 ## Multi-User Installations
 
-Larger organizations typically do not want to deploy client applications on each client device manually. They prefer to install the client software on a central server and publish the software via _Citrix_ or similar technologies so that all users have access to one shared installation. This has the advantage that the administrators are in control of the installation and can centralize the update handling. **BDeploy** supports such an installation szenario.
+Larger organizations typically do not want to deploy client applications on each client device manually. They prefer to install the client software on a central server and publish the software via _Citrix_ or similar technologies so that all users have access to one shared installation. This has the advantage that the administrators are in control of the installation and can centralize the update handling. **BDeploy** supports such an installation scenario.
 
 There are two different locations that are important in the context of deploying applications in a multi-user environment:
 

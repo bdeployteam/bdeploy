@@ -92,7 +92,7 @@ The same binaries used to run a **BDeploy** server provide a set of _commands_ a
 
 **BHive** is the underlying storage used by **BDeploy**. **BDeploy** serves **BHives** for all minions (_master_ and _node_), and has additional **BHives** per **Instance Group** and **Software Repository** on the _master_.
 
-**BHive** itself is does not know about **BDeploy**, it is 'just' a dumb storage backend (which is responsible for de-duplicated, distributed, fail-tolerant (failure-recoverable) storage of file contents).
+**BHive** itself does not know about **BDeploy**, it is 'just' a dumb storage backend which is responsible for de-duplicated, distributed, fail-tolerant (failure-recoverable) storage of file contents.
 
 Much like Git, **BHive** only knows two commands that actually perform remote communication: `fetch` and `push`. All other commands are performing their work locally.
 
@@ -112,7 +112,7 @@ Much like Git, **BHive** only knows two commands that actually perform remote co
 
 | Command  | Description                                                                                     |
 | -------- | ----------------------------------------------------------------------------------------------- |
-| `export` | Reads a **Manifest** from the given **BHive** and writes it's content to a given target folder. |
+| `export` | Reads a **Manifest** from the given **BHive** and writes its content to a given target folder.  |
 | `import` | Import a given folder into a given **BHive** and associate the given **Manifest** key with it.  |
 
 ### Remote Server Interaction Commands

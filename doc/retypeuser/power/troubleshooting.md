@@ -9,7 +9,7 @@ icon: tools
 
 ## Verify and Reinstall
 
-If you suspect that the server or client application may be corrupted, you can initiate the verification process by clicking on the [ **Verify** ] button. This action will assess the integrity of the application files and provide you with feedback about the application state. The result will indicate how many files have been modified how many are missing, and how many remained unmodified. If the verification reveals that the application has indeed been corrupted, the recommended course of action is to reinstall the application to ensure its proper functionality. For that click on the [ **Reinstall** ] button.
+If you suspect that the server or client application may be corrupted, you can initiate the verification process by clicking on the [ **Verify** ] button. This action will assess the integrity of the application files and provide you with feedback about the application state. The result will indicate how many files have been modified, how many are missing, and how many remained unmodified. If the verification reveals that the application has indeed been corrupted, the recommended course of action is to reinstall the application to ensure its proper functionality. For that click on the [ **Reinstall** ] button.
 
 !!!info Note
 For server applications the [ **Reinstall** ] button will appear in a verification result dialog in case missing or modified files are detected.  

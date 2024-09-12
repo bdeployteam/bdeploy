@@ -19,7 +19,7 @@ For the active **Instance Version**, the **Process Control** of each **Process**
 
 ## Process Bulk Control
 
-In addition to the actions for individual processes, the [Instance Dashboard](/user/instance/#instance-dashboard) offers **bulk control** actions from its toolbar. The three instance control buttons exclusively affect processes with **start type** `INSTANCE`, while the three **Selected Processes** buttons affect all processes except for those with **start type** `MANUAL_CONFIRM`.
+In addition to the actions for individual processes, the [Instance Dashboard](/user/instance/#instance-dashboard) offers **bulk control** actions from its toolbar. The three instance control buttons exclusively affect all processes with **start type** `INSTANCE`, while the three **Selected Processes** buttons affect selected processes except for those with **start type** `MANUAL_CONFIRM`.
 
 :::{align=center}
 ![Bulk Process Control](/images/Doc_DashboardBulkProcessControl.png){width=480}
@@ -71,7 +71,7 @@ The **Start Type** of a **Process** can be configured in the **Process Configura
 
 It is a common requirement that certain **Processes** of an **Instance** should be automatically started whenever the **BDeploy** server itself is started. To accomplish that, the _Automatic Startup_ flag of the **Instance** must be set. This can be done in the [Instance Configuration](/user/instance/#instance-configuration). Additionally, the **start type** of the **Process** must set to `INSTANCE`. This can be done in the **parameter configuration** of the **Process**.
 
-**Processes** that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (e.g. dropping a database and/or deleting files) should be configured with the start type `MANUAL_CONFIRM`. Doing that results in an additional popup dialog that forces the user to enter the name of the **Process** before it is started. The idea is that the user takes an additional moment to ensure that they are really want to start the selected **Process**.
+**Processes** that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (e.g. dropping a database and/or deleting files) should be configured with the start type `MANUAL_CONFIRM`. Doing that results in an additional popup dialog that forces the user to enter the name of the **Process** before it is started. The idea is that the user takes an additional moment to ensure that they really want to start the selected **Process**.
 
 :::{align=center}
 ![Manual Confirmation on Startup](/images/Doc_DashboardProcessManualConfirm.png){width=480}
