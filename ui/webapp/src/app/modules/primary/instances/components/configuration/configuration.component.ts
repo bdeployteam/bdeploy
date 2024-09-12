@@ -136,19 +136,21 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
       ),
     );
     this.subscription.add(
-      combineLatest([this.edit.current$, this.edit.state$]).subscribe(([current, state]) => {
-        if (!current || !state) {
-          this.newerProductVerionsAvailable$.next(false);
-          return;
-        }
-        if (current.instanceConfiguration.product.tag !== state.config.config.product.tag) {
-          this.newerProductVerionsAvailable$.next(false);
-          return;
-        }
-        const product = current.instanceConfiguration.product;
-        const newerVersionOnManaged = current?.managedServer?.productUpdates?.newerVersionAvailable[product.name];
-        this.newerProductVerionsAvailable$.next(current.newerVersionAvailable || newerVersionOnManaged);
-      }),
+      combineLatest([this.edit.current$, this.edit.state$, this.edit.productUpdates$]).subscribe(
+        ([current, state, updates]) => {
+          if (!current || !state) {
+            this.newerProductVerionsAvailable$.next(false);
+            return;
+          }
+          if (current.instanceConfiguration.product.tag !== state.config.config.product.tag) {
+            this.newerProductVerionsAvailable$.next(false);
+            return;
+          }
+          const product = current.instanceConfiguration.product;
+          const newerVersionOnManaged = current?.managedServer?.productUpdates?.newerVersionAvailable[product.name];
+          this.newerProductVerionsAvailable$.next(updates.newerVersionAvailable || newerVersionOnManaged);
+        },
+      ),
     );
   }
 
@@ -215,8 +217,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     return cfg.name;
   }
 
-  protected goToProductImport() {
-    const repo = this.edit.current$.value?.newerVersionAvailableInRepository;
+  protected goToProductImport(repo: string) {
     const product = this.edit.current$.value?.instanceConfiguration.product.name;
     this.areas.navigateBoth(
       ['products', 'browser', this.groups.current$.value.name],

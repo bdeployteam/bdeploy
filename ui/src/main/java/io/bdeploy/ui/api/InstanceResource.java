@@ -28,6 +28,7 @@ import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.ProductUpdateDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -51,6 +52,10 @@ public interface InstanceResource {
 
     @GET
     public List<InstanceDto> list();
+
+    @GET
+    @Path("/{instance}/update-check")
+    public ProductUpdateDto getProductUpdates(@Scope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/versions")

@@ -164,6 +164,7 @@ export class InstanceEditService {
   private readonly issuesSubject$ = new Subject<ApplicationValidationDto[]>();
 
   public current$ = new BehaviorSubject<InstanceDto>(null);
+  public productUpdates$ = this.instances.productUpdates$;
   public hasSaveableChanges$ = new BehaviorSubject<boolean>(false);
   public hasCurrentProduct$ = new BehaviorSubject<boolean>(false);
 

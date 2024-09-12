@@ -60,51 +60,53 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
-      if (!states?.[this.node.nodeName]) {
-        this.nodeState$.next(null);
-        this.nodeStateItems$.next([]);
-        return;
-      }
-      const state = states[this.node.nodeName];
-      this.nodeState$.next(state);
+    this.subscription = combineLatest([this.instances.activeNodeStates$, this.instances.productUpdates$]).subscribe(
+      ([states, updates]) => {
+        if (!states?.[this.node.nodeName]) {
+          this.nodeState$.next(null);
+          this.nodeStateItems$.next([]);
+          return;
+        }
+        const state = states[this.node.nodeName];
+        this.nodeState$.next(state);
 
-      const updAvail = !!this.instances.current$.value?.newerVersionAvailable;
+        const updAvail = updates?.newerVersionAvailable;
 
-      const items: StateItem[] = [];
-      items.push({
-        name: this.node.nodeConfiguration.product.tag,
-        type: updAvail ? 'update' : 'product',
-        tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${
-          updAvail ? ' - Newer version available' : ''
-        }`,
-        click: this.auth.isCurrentScopeWrite()
-          ? () => {
-              this.areas.navigateBoth(
-                ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
-                ['panels', 'instances', 'settings', 'product'],
-              );
-            }
-          : null,
-      });
+        const items: StateItem[] = [];
+        items.push({
+          name: this.node.nodeConfiguration.product.tag,
+          type: updAvail ? 'update' : 'product',
+          tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${
+            updAvail ? ' - Newer version available' : ''
+          }`,
+          click: this.auth.isCurrentScopeWrite()
+            ? () => {
+                this.areas.navigateBoth(
+                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
+                  ['panels', 'instances', 'settings', 'product'],
+                );
+              }
+            : null,
+        });
 
-      items.push(this.getNodeStateItem(state));
+        items.push(this.getNodeStateItem(state));
 
-      const syncStatus = state.nodeSynchronizationStatus;
-      if (syncStatus === NodeSynchronizationStatus.SYNCHRONIZED || syncStatus === NodeSynchronizationStatus.UNKNOWN) {
-        items.push(this.processesItem);
-        items.push(this.portsItem);
-      }
+        const syncStatus = state.nodeSynchronizationStatus;
+        if (syncStatus === NodeSynchronizationStatus.SYNCHRONIZED || syncStatus === NodeSynchronizationStatus.UNKNOWN) {
+          items.push(this.processesItem);
+          items.push(this.portsItem);
+        }
 
-      this.nodeStateItems$.next(items);
+        this.nodeStateItems$.next(items);
 
-      const syncCollapse = [
-        NodeSynchronizationStatus.NOT_SYNCHRONIZED,
-        NodeSynchronizationStatus.SYNCHRONIZING,
-        NodeSynchronizationStatus.SYNCHRONIZATION_FAILED,
-      ].some((s) => s === syncStatus);
-      this.synchronizationCollapse$.next(syncCollapse);
-    });
+        const syncCollapse = [
+          NodeSynchronizationStatus.NOT_SYNCHRONIZED,
+          NodeSynchronizationStatus.SYNCHRONIZING,
+          NodeSynchronizationStatus.SYNCHRONIZATION_FAILED,
+        ].some((s) => s === syncStatus);
+        this.synchronizationCollapse$.next(syncCollapse);
+      },
+    );
 
     this.subscription.add(
       combineLatest([this.ports.activePortStates$, this.processes.processStates$]).subscribe(([ports, states]) => {

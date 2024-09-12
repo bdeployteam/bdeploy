@@ -1,8 +1,18 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone, inject } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, combineLatest, forkJoin, of } from 'rxjs';
-import { debounceTime, finalize, first, map, skip, skipWhile, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  forkJoin,
+  Observable,
+  of,
+  share,
+  ShareConfig,
+  Subscription,
+  switchMap,
+} from 'rxjs';
+import { debounceTime, filter, finalize, first, map, skip, skipWhile, tap } from 'rxjs/operators';
 import {
   CustomAttributesRecord,
   HistoryFilterDto,
@@ -19,6 +29,7 @@ import {
   ObjectChangeHint,
   ObjectChangeType,
   ObjectEvent,
+  ProductUpdateDto,
   RemoteDirectory,
   RemoteDirectoryEntry,
   StringEntryChunkDto,
@@ -33,6 +44,16 @@ import { ObjectChangesService } from '../../../core/services/object-changes.serv
 import { GroupsService } from '../../groups/services/groups.service';
 import { ProductsService } from '../../products/services/products.service';
 import { ServersService } from '../../servers/services/servers.service';
+
+const DEF_PROD_UPDATES: ProductUpdateDto = {
+  newerVersionAvailable: false,
+  newerVersionAvailableInRepository: null,
+};
+
+const DEF_SHARE_CONFIG: ShareConfig<ProductUpdateDto> = {
+  connector: () => new BehaviorSubject(DEF_PROD_UPDATES),
+  resetOnRefCountZero: false,
+};
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +70,8 @@ export class InstancesService {
   private readonly groups = inject(GroupsService);
   private readonly ngZone = inject(NgZone);
 
+  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+
   public listLoading$ = new BehaviorSubject<boolean>(true);
   public activeLoading$ = new BehaviorSubject<boolean>(false);
   public loading$ = combineLatest([this.listLoading$, this.activeLoading$]).pipe(map(([a, b]) => a || b));
@@ -58,6 +81,11 @@ export class InstancesService {
 
   /** the current instance version */
   public current$ = new BehaviorSubject<InstanceDto>(null);
+  public productUpdates$ = this.current$.pipe(
+    map((i) => i?.instanceConfiguration?.id),
+    switchMap((i) => (i ? this.loadProductUpdates(i).pipe(map((u) => u || DEF_PROD_UPDATES)) : of(DEF_PROD_UPDATES))),
+    share(DEF_SHARE_CONFIG),
+  );
 
   /** the *active* instance version */
   public active$ = new BehaviorSubject<InstanceDto>(null);
@@ -79,8 +107,6 @@ export class InstancesService {
   private subscription: Subscription;
   private readonly update$ = new BehaviorSubject<string>(null);
   public importURL$ = new BehaviorSubject<string>(null);
-
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
   constructor() {
     // clear out stuff whenever the group is re-set.
@@ -236,6 +262,12 @@ export class InstancesService {
     return this.httpReplayService.get<InstanceNodeConfigurationListDto>(
       `${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`,
     );
+  }
+
+  public loadProductUpdates(instance: string): Observable<ProductUpdateDto> {
+    return this.httpReplayService
+      .get<ProductUpdateDto>(`${this.apiPath(this.group)}/${instance}/update-check`)
+      .pipe(measure('Check for product updates'));
   }
 
   public updateBanner(banner: InstanceBannerRecord): Observable<unknown> {

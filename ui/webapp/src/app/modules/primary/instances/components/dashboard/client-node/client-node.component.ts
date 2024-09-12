@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
 import { ApplicationConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -43,33 +43,35 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
-    this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
-      // actually not needed, we just use the same info source as server nodes to have info appear at the same time.
-      if (!states) {
-        this.nodeStateItems$.next([]);
-        return;
-      }
+    this.subscription = combineLatest([this.instances.activeNodeStates$, this.instances.productUpdates$]).subscribe(
+      ([states, updates]) => {
+        // actually not needed, we just use the same info source as server nodes to have info appear at the same time.
+        if (!states) {
+          this.nodeStateItems$.next([]);
+          return;
+        }
 
-      const updAvail = !!this.instances.current$.value?.newerVersionAvailable;
-      const prodItem: StateItem = {
-        name: this.node.nodeConfiguration.product.tag,
-        type: updAvail ? 'update' : 'product',
-        tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${
-          updAvail ? ' - Newer version available' : ''
-        }`,
-        click:
-          updAvail && this.auth.isCurrentScopeWrite()
-            ? () => {
-                this.areas.navigateBoth(
-                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
-                  ['panels', 'instances', 'settings', 'product'],
-                );
-              }
-            : null,
-      };
+        const updAvail = updates?.newerVersionAvailable;
+        const prodItem: StateItem = {
+          name: this.node.nodeConfiguration.product.tag,
+          type: updAvail ? 'update' : 'product',
+          tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${
+            updAvail ? ' - Newer version available' : ''
+          }`,
+          click:
+            updAvail && this.auth.isCurrentScopeWrite()
+              ? () => {
+                  this.areas.navigateBoth(
+                    ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
+                    ['panels', 'instances', 'settings', 'product'],
+                  );
+                }
+              : null,
+        };
 
-      this.nodeStateItems$.next([prodItem]);
-    });
+        this.nodeStateItems$.next([prodItem]);
+      },
+    );
   }
 
   ngOnDestroy(): void {

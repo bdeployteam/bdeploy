@@ -31,17 +31,19 @@
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
     </ng-container>
-    <app-bd-button
-      *ngIf="
-        (edit.current$ | async)?.newerVersionAvailableInRepository &&
-        (edit.current$ | async)?.instanceConfiguration.product.tag === (edit.state$ | async)?.config.config.product.tag
-      "
-      text="Product Update Available For Import"
-      icon="drive_file_move"
-      [collapsed]="narrow$ | async"
-      color="accent"
-      (click)="goToProductImport()"
-    ></app-bd-button>
+    <ng-container *ngIf="edit.productUpdates$ | async as updates">
+      <app-bd-button
+        *ngIf="
+          updates?.newerVersionAvailableInRepository &&
+          (edit.current$ | async)?.instanceConfiguration.product.tag === (edit.state$ | async)?.config.config.product.tag
+        "
+        text="Product Update Available For Import"
+        icon="drive_file_move"
+        [collapsed]="narrow$ | async"
+        color="accent"
+        (click)="goToProductImport(updates.newerVersionAvailableInRepository)"
+      ></app-bd-button>
+    </ng-container>
     <app-bd-panel-button
       *ngIf="newerProductVerionsAvailable$ | async"
       text="Product Update Available"
@@ -214,7 +216,7 @@
               [toggle]="false"
               [route]="['panels', 'instances', 'settings', 'product']"
               [disabled]="!(auth.isCurrentScopeWrite$ | async)"
-              [color]="(edit.current$ | async)?.newerVersionAvailable || !(edit.hasCurrentProduct$ | async) ? 'accent' : null"
+              [color]="(edit.productUpdates$ | async)?.newerVersionAvailable || !(edit.hasCurrentProduct$ | async) ? 'accent' : null"
             ></app-bd-panel-button>
           </div>
         </app-bd-no-data>

@@ -19,8 +19,6 @@ public class InstanceDto {
     public Manifest.Key latestVersion;
     public Manifest.Key activeVersion;
 
-    public boolean newerVersionAvailable;
-    public String newerVersionAvailableInRepository;
     public ManagedMasterDto managedServer;
     public CustomAttributesRecord attributes;
     public InstanceBannerRecord banner;
@@ -29,7 +27,7 @@ public class InstanceDto {
     public ConfigDirDto configRoot;
 
     public static InstanceDto create(Manifest.Key instance, InstanceConfiguration instanceConfiguration,
-            Manifest.Key activeProduct, boolean newerVersionAvailable, String newerVersionAvailableInRepository,
+            Manifest.Key activeProduct,
             ManagedMasterDto managedServer, CustomAttributesRecord attributes, InstanceBannerRecord banner,
             Manifest.Key latestVersion, Manifest.Key activeVersion, InstanceOverallStateRecord overallState,
             ConfigDirDto configRoot) {
@@ -37,8 +35,6 @@ public class InstanceDto {
         dto.instance = instance;
         dto.instanceConfiguration = instanceConfiguration;
         dto.activeProduct = activeProduct;
-        dto.newerVersionAvailable = newerVersionAvailable;
-        dto.newerVersionAvailableInRepository = newerVersionAvailableInRepository;
         dto.managedServer = managedServer;
         dto.attributes = attributes;
         dto.banner = banner;

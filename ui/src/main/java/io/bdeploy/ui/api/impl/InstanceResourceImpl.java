@@ -140,6 +140,7 @@ import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
+import io.bdeploy.ui.dto.ProductUpdateDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
@@ -204,11 +205,16 @@ public class InstanceResourceImpl implements InstanceResource {
     public List<InstanceDto> list() {
         List<InstanceDto> result = new ArrayList<>();
 
-        Map<String, Comparator<String>> comparators = new TreeMap<>();
-
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
-        SortedSet<Key> scan = ProductManifest.scan(hive);
 
+        for (Key imKey : imKeys) {
+            result.add(getInstanceDto(imKey));
+        }
+        return result;
+    }
+
+    @Override
+    public ProductUpdateDto getProductUpdates(String instanceId) {
         InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
 
         // load all products from repos as required by the instance group to repo mapping.
@@ -223,16 +229,22 @@ public class InstanceResourceImpl implements InstanceResource {
             }
         }
 
-        for (Key imKey : imKeys) {
-            result.add(getInstanceDto(imKey, scan, comparators, productKeysPerRepo));
-        }
+        var im = readInstance(instanceId);
+        // comparator only computed once per product (name), regardless of tag.
+        Comparator<String> productVersionComparator = vss.getTagComparator(group, im.getConfiguration().product);
+
+        var result = new ProductUpdateDto();
+
+        SortedSet<Key> productsInGroup = ProductManifest.scan(hive);
+        result.newerVersionAvailable = isNewerVersionAvailable(productsInGroup, im.getConfiguration(), productVersionComparator);
+        result.newerVersionAvailableInRepository = getNewerVersionAvailableInRepository(igc, im.getConfiguration(), productsInGroup, productVersionComparator, productKeysPerRepo);
+
         return result;
     }
 
-    private String getNewerVersionAvailableInRepository(InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
+    private static String getNewerVersionAvailableInRepository(InstanceGroupConfiguration igc, InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
             Comparator<String> productVersionComparator, Map<String, SortedSet<Key>> productKeysPerRepo) {
         Key productKey = config.product;
-        InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
         if (igc.productToRepo == null || !igc.productToRepo.containsKey(productKey.getName())) {
             return null;
         }
@@ -394,15 +406,14 @@ public class InstanceResourceImpl implements InstanceResource {
         return target;
     }
 
-    private InstanceDto getInstanceDto(Manifest.Key imKey, SortedSet<Key> pmScan, Map<String, Comparator<String>> comparators,
-            Map<String, SortedSet<Key>> productKeysPerRepo) {
+    private InstanceDto getInstanceDto(Manifest.Key imKey) {
         InstanceManifest im = InstanceManifest.of(hive, imKey);
         InstanceConfiguration config = im.getConfiguration();
 
         Key activeVersion = null;
         Key activeProduct = null;
         try {
-            InstanceStateRecord state = getDeploymentStates(config.id);
+            InstanceStateRecord state = im.getState(hive).read();
 
             if (state.activeTag != null) {
                 try {
@@ -448,34 +459,14 @@ public class InstanceResourceImpl implements InstanceResource {
             readTree(configRoot, rootTv);
         }
 
-        // comparator only computed once per product (name), regardless of tag.
-        Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
-                k -> vss.getTagComparator(group, im.getConfiguration().product));
-
-        boolean newerVersionAvailable = isNewerVersionAvailable(pmScan, config, productVersionComparator);
-        String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, pmScan,
-                productVersionComparator, productKeysPerRepo);
-        return InstanceDto.create(imKey, config, activeProduct, newerVersionAvailable, newerVersionAvailableInRepository,
+        return InstanceDto.create(imKey, config, activeProduct,
                 managedMaster, attributes, banner, im.getManifest(), activeVersion, overallState, configRoot);
     }
 
     @Override
     public InstanceDto read(String instanceId) {
         InstanceManifest im = readInstance(instanceId);
-        SortedSet<Key> pmScan = ProductManifest.scan(hive);
-
-        // was the product imported from a repo?
-        InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
-        Map<String, SortedSet<Manifest.Key>> productKeysPerRepo = new TreeMap<>();
-        String repo = igc.productToRepo == null ? null : igc.productToRepo.get(im.getConfiguration().product.getName());
-        if (repo != null) {
-            BHive repoHive = reg.get(repo);
-            if (repoHive != null) {
-                productKeysPerRepo.put(repo, ProductManifest.scan(repoHive));
-            }
-        }
-
-        return getInstanceDto(im.getManifest(), pmScan, new TreeMap<>(), productKeysPerRepo);
+        return getInstanceDto(im.getManifest());
     }
 
     private InstanceManifest readInstance(String instanceId) {

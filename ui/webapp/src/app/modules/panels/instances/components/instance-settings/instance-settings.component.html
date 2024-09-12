@@ -104,7 +104,7 @@
         [route]="['product']"
         [relative]="true"
         [disabled]="!(auth.isCurrentScopeWrite$ | async)"
-        [color]="(edit.current$ | async)?.newerVersionAvailable || !(edit.hasCurrentProduct$ | async) ? 'accent' : null"
+        [color]="(edit.productUpdates$ | async)?.newerVersionAvailable || !(edit.hasCurrentProduct$ | async) ? 'accent' : null"
       ></app-bd-panel-button>
       <app-bd-button
         [loadingWhen$]="mappedDelete$"
