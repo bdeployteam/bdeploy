@@ -204,7 +204,7 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         table.setCaption("Found " + countFiles(matchingFiles) + " data files");
 
         table.column(new DataTableColumn.Builder("Path").build());
-        table.column(new DataTableColumn.Builder("minion").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("Minion").setMinWidth(6).build());
 
         for (var dirSnapshot : matchingFiles.entrySet()) {
             for (var entry : dirSnapshot.getValue()) {
