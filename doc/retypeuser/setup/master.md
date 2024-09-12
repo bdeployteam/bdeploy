@@ -90,3 +90,12 @@ The server is using a self-signed certificate by default. Thus you need to instr
 ## User
 
 Only authenticated users have access to the Web UI. The initial user has been created by the `init` command. Use this user to log in to the Web UI and create additional users (or provide external authentication mechanisms) from the [User Accounts](/experts/system/#user-accounts) administration page.
+
+## Sessions
+
+The Web UI uses timed sessions for authenticated users. Sessions follow these rules:
+
+* A user must be 'active' (i.e. visiting the **BDeploy** Web UI in some way) within a configurable timeframe, by default 24 hours. Otherwise, the session is timed out.
+* A session times out latest after a configurable session timeout, by default 7 days.
+* Active sessions are stored on disc every 5 minutes. Sessions are not guaranteed to be deemed active after a server restart, but will be in most cases. A forced server shutdown will not write currently active sessions (e.g. `kill -9`).
+* The `bdeploy config` command can be used to modify the timeout values.
