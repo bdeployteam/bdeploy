@@ -40,9 +40,6 @@ public class VariableDescriptor {
     @JsonPropertyDescription("The ID of the variable. This ID must be unique in its scope (application, instance, system).")
     public String id;
 
-    @JsonPropertyDescription("The ID of a variable template registered for the containing product. The therein defined variables will be inlined here. If template is given, no other attribute may be set.")
-    public String template;
-
     @JsonPropertyDescription("The human readable short name of the variable.")
     public String name;
 

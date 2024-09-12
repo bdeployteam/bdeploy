@@ -35,6 +35,10 @@ This chapter is intended for those who want to integrate their own **Product** t
 :::
 &emsp;Optional YAML file(s) which can be used to provide shared definitions for instance variables which are re-usable in [instance-template.yaml](#instance-templateyaml) files
 :::
+[instance-variable-definitions.yaml](#instance-variable-definitionsyaml)
+:::
+&emsp;Optional YAML file(s) which can be used to provide instance variable definitions for the product. Whenever instance uses the product, it will generate instance variables (if missing) based on those definitions.
+:::
 [system-template.yaml](#system-templateyaml)
 :::
 &emsp;Actually not part of any product itself. Freestanding description that can be used to create multiple instances of multiple products in one go
@@ -245,16 +249,16 @@ _Default:_
 _Mandatory:_ no
 
 _Description:_ An optional group name. The configuration UI may use this information to group parameters with the same `groupName` together.
+!!!warning Caution
+Although parameters in the UI are grouped together (and thus might change order), the order in which parameters appear on the final command line is exactly the order in which they are defined in the `app-info.yaml` file.
+!!!
 
 === **Attribute**: `suggestedValues`
 _Default:_
 
 _Mandatory:_ no
 
-_Description:_ An optional list of suggested values for paremters of type `STRING` (the default). The Web UI will present this list when editing the parameter value.
-!!!warning Caution
-Although parameters in the UI are grouped together (and thus might change order), the order in which parameters appear on the final command line is exactly the order in which they are defined in the `app-info.yaml` file.
-!!!
+_Description:_ An optional list of suggested values for parameters of type `STRING` (the default). The Web UI will present this list when editing the parameter value.
 
 === **Attribute**: `parameter`
 _Default:_
@@ -471,8 +475,10 @@ parameterTemplates:
   - 'my-templates/param-template.yaml' <9>
 instanceVariableTemplates:
   - 'my-templates/variable-template.yaml' <10>
+instanceVariableDefinitions:
+  - 'my-definitions/instance-variable-definitions.yaml' <11>
 
-versionFile: my-versions.yaml <11>
+versionFile: my-versions.yaml <12>
 ```
 
 1. A human readable name of the **Product** for display purposes in the Web UI.
@@ -484,8 +490,9 @@ versionFile: my-versions.yaml <11>
 7. A reference to an application template YAML file which defines an [`application-template.yaml`](#application-templateyaml).
 8. A reference to an instance template YAML file which defines an [`instance-template.yaml`](#instance-templateyaml).
 9. A reference to a parameter template YAML file which defines a [`parameter-template.yaml`](#parameter-templateyaml).
-10. A reference to a instance variable template YAML file which defines a [`instance-variable-template.yaml`](#instance-variable-templateyaml).
-11. The `product-version.yaml` which associates the **Application** IDs (used above) with actual paths to **Applications** on the file system.
+10. A reference to an instance variable template YAML file which defines an [`instance-variable-template.yaml`](#instance-variable-templateyaml).
+11. A reference to an instance variable definitions YAML file which defines an [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml)
+12. The `product-version.yaml` which associates the **Application** IDs (used above) with actual paths to **Applications** on the file system.
 
 ## product-version.yaml
 
@@ -524,12 +531,12 @@ This file defines a single **Application Template**. A [`product-info.yaml`](#pr
 ```yaml application-template.yaml
 id: server-with-sleep <1>
 application: server-app
-name: "Server With Sleep (Oracle)"
-processName: "Server With Sleep"
+name: "Server With Sleep (Oracle)" <2>
+processName: "Server With Sleep" <2>
 description: "Server application which sleeps before exiting"
-preferredProcessControlGroup: "First Group" <2>
+preferredProcessControlGroup: "First Group" <3>
 
-templateVariables: <3>
+templateVariables: <4>
   - id: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
@@ -538,14 +545,14 @@ templateVariables: <3>
     - '60'
     - '120'
 
-processControl: <4>
+processControl: <5>
   startType: MANUAL_CONFIRM
   keepAlive: false
   noOfRetries: 3
   gracePeriod: 30000
   attachStdin: true
 
-startParameters: <5>
+startParameters: <6>
 - id: param.sleep
   value: "{{T:sleep-timeout}}"
 ```
@@ -635,13 +642,19 @@ instanceVariableDefaults: <5>
   - id: var.id
     value: "A value other than above"
 
-processControlGroups: <6>
+instanceVariableValues: <6>
+  - id: def.id
+    value: "A value that will update instance variable created from def.id definition"
+  - id: other.def.id
+    value: "{{T:sleep-timeout}}"
+
+processControlGroups: <7>
   - name: "First Group"
     startType: "PARALLEL"
     startWait: "WAIT"
     stopType: "SEQUENTIAL"
 
-groups: <7>
+groups: <8>
 - name: "Server Apps"
   description: "All server applications"
 
@@ -649,22 +662,22 @@ groups: <7>
   - application: server-app
     name: "Server No Sleep"
     description: "Server application which immediately exits"
-  - template: server-with-sleep <8>
-    fixedVariables: <9>
+  - template: server-with-sleep <9>
+    fixedVariables: <10>
       - id: sleep-timeout
         value: 10
-  - application: server-app <10>
+  - application: server-app <11>
     name: "Server With Sleep"
     description: "Server application which sleeps before exiting"
     processControl:
       startType: MANUAL_CONFIRM
-    startParameters: <11>
+    startParameters: <12>
     - id: param.sleep
       value: "{{T:sleep-timeout}}"
-    applyTo: <12>
+    applyTo: <13>
     - LINUX
 - name: "Client Apps"
-  type: CLIENT <13>
+  type: CLIENT <14>
   description: "All client applications"
 
   applications:
@@ -677,16 +690,21 @@ groups: <7>
 3. [Instance Variables](/user/instance/#instance-variables) can be defined in an instance template. Those definitions will be applied to a new instance when this template is used. [Link Expressions](/user/instance/#link-expressions) can then be used to expand to the [Instance Variables](/user/instance/#instance-variables) values in parameters, configuration files, etc.
 4. [Instance Variables](/user/instance/#instance-variables) can also be defined in an [`instance-variable-template.yaml`](#instance-variable-templateyaml) file externally, and referenced via its ID.
 5. `instanceVariableDefaults` allows to override the value of a previous [Instance Variables](/user/instance/#instance-variables) definition in the same template. This is most useful when applying [`instance-variable-template.yaml`](#instance-variable-templateyaml) files using the `template` syntax in `instanceVariables`. The instance variable template can be shared more easily if instance templates have means of providing distinct values per instance template.
-6. **Process Control Groups** can be pre-configured for an instance template. If an application template later on wishes to be put into a certain **Process Control Group**, the group is created based on the template provided in the instance template. Note that the defaults for a **Process Control Group** in a template are slightly different from the implicit 'Default' **Process Control Group** in **BDeploy**. The defaults are: `startType`: `PARALLEL`, `startWait`: `WAIT`, `stopType`: `PARALLEL`.
-7. A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same physical node.
-8. **Instance Templates** can reference **Application Templates** by their `id`. The **Instance Templates** can further refine an **Application Template** by setting any of the valid application fields in addition to the template reference.
-9. When referencing an application template, it is possible to define _overrides_ for the template variables (`{{X:...}}`) used in the template. Use provided values will **not** be taken into account for this variable when applying the template, instead the _fixed_ value will be used.
-10. A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for **Application Tempaltes** - except for the `id` which is not required.
-11. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
-12. Using `applyTo`, an application can be restricted to be applied only to certain nodes, running a specified operating system. A list of supported operating systems can be specified. If this is not specified, the application is assumed to be capable of being applied to nodes running any of all supported operating systems.
-13. A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
+6. `instanceVariableValues` allows to override the value of an instance variable created from [instance-variable-definitions.yaml](#instance-variable-definitionsyaml)
+7. **Process Control Groups** can be pre-configured for an instance template. If an application template later on wishes to be put into a certain **Process Control Group**, the group is created based on the template provided in the instance template. Note that the defaults for a **Process Control Group** in a template are slightly different from the implicit 'Default' **Process Control Group** in **BDeploy**. The defaults are: `startType`: `PARALLEL`, `startWait`: `WAIT`, `stopType`: `PARALLEL`.
+8. A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same physical node.
+9. **Instance Templates** can reference **Application Templates** by their `id`. The **Instance Templates** can further refine an **Application Template** by setting any of the valid application fields in addition to the template reference.
+10. When referencing an application template, it is possible to define _overrides_ for the template variables (`{{X:...}}`) used in the template. Use provided values will **not** be taken into account for this variable when applying the template, instead the _fixed_ value will be used.
+11. A template group contains one or more applications to configure, where each application can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for **Application Templates** - except for the `id` which is not required.
+12. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+13. Using `applyTo`, an application can be restricted to be applied only to certain nodes, running a specified operating system. A list of supported operating systems can be specified. If this is not specified, the application is assumed to be capable of being applied to nodes running any of all supported operating systems.
+14. A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an [Empty Instance](/user/instance/#instance-templates).
+
+!!!warning Warning
+`instanceVariables` and `instanceVariableDefaults` have been deprecated (since 7.2.0) in favor of `instanceVariableValues` and [instance-variable-definitions.yaml](#instance-variable-definitionsyaml).
+!!!
 
 ### Supported `templateVariables` Attributes
 
@@ -716,11 +734,18 @@ Defined `templateVariables` can be used in each `instanceVariables` (and `instan
 | `id`      | The unique ID of a previously defined instance variable (either directly in the same template, or through an applied [`instance-variable-template.yaml`](#instance-variable-templateyaml)). |
 | `value`   | The value to use when applying this instance template.                                                                                                                                      |
 
+### Supported `instanceVariableValues` Attributes
+
+| Attribute | Description                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | The unique ID of an instance variable definition defined in [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml).                                                     |
+| `value`   | The value to use when applying this instance template.                                                                                                                                      |
+
 ### Supported `processControlGroups` Attributes
 
 | Attribute   | Description                                                                                                                                                                                                                                                   |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`      | The name of the [Process Control Group]([Process Control Groups](/user/instance/#process-control-groups)) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute. |
+| `name`      | The name of the [Process Control Groups](/user/instance/#process-control-groups) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute.                          |
 | `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                             |
 | `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                             |
 | `stopType`  | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                              |
@@ -782,6 +807,46 @@ instanceVariables: <2>
 To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](#product-infoyaml) so it is included at build time.
 !!!
 
+!!!warning Warning
+Deprecated in favor of [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml)
+!!!
+
+## instance-variable-definitions.yaml
+
+!!!info Note
+There is no actual requirement for the file to be named `instance-variable-definitions.yaml` as it is referenced from the `product-info.yaml` by relative path anyway. Multiple **Instance Variable Definitions** YAML files can exist and be referenced by `product-info.yaml`.
+!!!
+
+An `instance-variable-definitions.yaml` provides definitions for instance variables, based on which instance variables will be created. The definition values can be overriden using `instanceVariableValues` in an [`instance-template.yaml`](#instance-templateyaml).
+
+```yaml instance-variable-definitions.yaml
+
+definitions: <1>
+  - id: "my-instance-variable-definition"
+    name: 'My Instance Variable Definition'
+    longDescription: 'The description for instance variable definition'
+    type: 'STRING'
+    defaultValue: 'someDefaultValue'
+    groupName: 'Instance Variable Definitions Group'
+```
+
+1. File consists of a single list of `definitions` containing an arbitrary amount of instance variable definitions.
+
+### Supported `definitions` Attributes
+Instance variable definitions support a subset of [supported parameters attributes](/power/product/#supported-parameters-attributes)
+
+| Attribute          | Description                                                                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`               | The unique ID of the instance variable definition. Instance variable created from definition will have the same ID.                                                                                    |
+| `name`             | A human readable name of the instance variable used as label in the configuration UI.                                                                                                                  |
+| `longDescription`  | An optional human readable description of the instance variable, which is displayed in an info popover next to the instance variable in the Web UI.                                                    |
+| `type`             | Type of instance variable. This defines the type of input field used to edit the variable. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`.                     |
+| `defaultValue`     | A default value for the variable. The default value may contain variable references according to the [Variable Expansion](/power/variables/#variable-expansions) rules.                                |
+| `groupName`        | An optional group name. The configuration UI may use this information to group variables with the same group name together.                                                                            |
+| `fixed`            | Whether the instance variable is fixed. This means that the variable can **not** be changed by the user.                                                                                               |
+| `suggestedValues`  | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                                     |
+| `customEditor`     | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable.                                                                                 |
+
 ## system-template.yaml
 
 A (freestanding) `system-template.yaml` allows you to specify a broader scoped template than a (product-bound) `instance-template.yaml`. A `system-template.yaml` can reference multiple products, and **Instance Templates** therin to create systems containing of many instances from different products.
@@ -830,13 +895,16 @@ When applying a **System Template** from the CLI, all mappings need to be provid
 
 ### Supported `systemVariables` Attributes
 
-| Attribute      | Description                                                                                                                                                                 |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`           | The unique ID of the system variable to create.                                                                                                                             |
-| `value`        | The pre-assigned value of the variable.                                                                                                                                     |
-| `description`  | A human readable description explaining the purpose of each variable.                                                                                                       |
-| `type`         | Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. |
-| `customEditor` | Reserved, currently not supported.                                                                                                                                          |
+| Attribute         | Description                                                                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | The unique ID of the system variable to create.                                                                                                                                   |
+| `value`           | The pre-assigned value of the variable.                                                                                                                                           |
+| `description`     | A human readable description explaining the purpose of each variable.                                                                                                             |
+| `type`            | Type of system variable. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. |
+| `groupName`       | An optional group name. The configuration UI may use this information to group variables with the same group name together.                                                       |
+| `fixed`           | Whether the system variable is fixed. This means that the variable can **not** be changed by the user.                                                                            |
+| `suggestedValues` | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                |
+| `customEditor`    | Reserved, currently not supported.                                                                                                                                                |
 
 ### Supported `templateVariables` Attributes
 
@@ -866,7 +934,7 @@ Each element provides a description of an instance to be created from a specific
 
 The `product-validation.yaml` file contains references to all files that should be sent to the server when performing a product pre-validation. This validation can be used to verify that the product and all its applications contain valid **BDeploy** YAML.
 
-The content of this files is very straight forward:
+The content of this file is very straight forward:
 
 ```yaml product-validation.yaml
 product: product-info.yaml
@@ -959,7 +1027,7 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
   of buildProduct
 
   target.servers {
-    myServer { <7>
+    myServer { <8>
       useLogin = true
       instanceGroup = project.getProperty('instanceGroup')
     }
@@ -972,7 +1040,7 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 1. Applies the plugin **BDeploy** gradle plugin.
 2. Sets the project version. **Gradle** does not strictly require a version, and uses 'unspecified' as default. **BDeploy** requires _some_ sort of version, and setting it for the whole project is good practice.
 3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plainly use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
-4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files.
+4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product-info.yaml` used, as well as references to all `app-info.yaml` files.
 5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.  
    The `repositoryServer` will be queried for additionally specified `runtimeDependencies` at build time. Those dependencies will be downloaded and embedded into the final product.
 6. If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
@@ -1008,7 +1076,7 @@ startCommand:
 Finally, we need a [`product-info.yaml`](#product-infoyaml) describing the product itself. We'll put this file into a `bdeploy` subfolder. This is not required, it can reside anywhere in the project. You just need to adapt the path to it in the `build.gradle`.
 
 !!!info Note
-The reason why you want to put this file into a separate folder is because it allows to reference various other files by relative path. Those files (and folders) must the reside next to the [`product-info.yaml`](#product-infoyaml). Over time this can grow, and may clutter your source folders if you do not separate it.
+The reason why you want to put this file into a separate folder is because it allows to reference various other files by relative path. Those files (and folders) must reside next to the [`product-info.yaml`](#product-infoyaml). Over time this can grow, and may clutter your source folders if you do not separate it.
 !!!
 
 ```yaml bdeploy/product-info.yaml
