@@ -31,8 +31,10 @@ import io.bdeploy.common.RetryableScope;
  */
 public class PathHelper {
 
-    private static final int FILEOP_DELAY_MILLIS = 200;
-    private static final int FILEOP_RETRIES = 50;
+    /** Time to wait between each retry when an operation fails */
+    private static final int FILEOP_DELAY_MILLIS = 250;
+    /** The amout of times to retry a failed file operation. Times {@value #FILEOP_DELAY_MILLIS}(delay) this amounts to ~30 seconds */
+    private static final int FILEOP_RETRIES = 120;
     private static final ContentInfoUtil CIU = loadCIU();
 
     private PathHelper() {
