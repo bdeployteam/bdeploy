@@ -26,7 +26,7 @@ instanceVariableValues:
   - id: instance.variable.v1
     value: 'value-v1'
   - id: instance.variable.v2
-    value: 'value-v2'
+    value: '{{T:text-param}}'
 
 instanceVariableDefaults:
   - id: param.xshared

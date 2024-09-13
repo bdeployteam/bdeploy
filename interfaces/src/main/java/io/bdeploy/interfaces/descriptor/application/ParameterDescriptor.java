@@ -9,6 +9,9 @@ import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
  */
 public class ParameterDescriptor extends VariableDescriptor implements Comparable<ParameterDescriptor> {
 
+    @JsonPropertyDescription("The ID of a parameter template registered for the containing product. The therein defined parameters will be inlined here. If template is given, no other attribute may be set.")
+    public String template;
+
     @JsonPropertyDescription("The actual parameter as it should be put on the command line of a process, not including the value, e.g. '--myparam'")
     public String parameter;
 

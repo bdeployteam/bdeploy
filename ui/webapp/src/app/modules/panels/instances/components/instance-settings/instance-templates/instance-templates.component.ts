@@ -16,7 +16,6 @@ import {
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateVariable,
-  VariableConfiguration,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
@@ -213,21 +212,32 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         (p) => p.key.name === instance.product.name && p.key.tag === instance.product.tag,
       )?.instanceVariables;
       for (const v of this.template.instanceVariableValues) {
+        const status: StatusMessage[] = [];
         const existingVariable = instance.instanceVariables.find((iv) => iv.id === v.id);
-        const descriptor = descriptors?.find((d) => d.id === v.id);
         if (existingVariable) {
-          existingVariable.value = v.value;
-        } else if (descriptor) {
-          const newVariable: VariableConfiguration = {
-            id: descriptor.id,
-            value: v.value,
-            type: descriptor.type,
-            description: descriptor.longDescription,
-            customEditor: descriptor.customEditor,
-          };
-          instance.instanceVariables.push(newVariable);
+          existingVariable.value = createLinkedValue(
+            performTemplateVariableSubst(getPreRenderable(v.value), this.variables, status),
+          );
+          status.forEach((e) =>
+            this.messages.push({
+              group: 'Global',
+              node: 'Global',
+              appname: null,
+              template: null,
+              message: e,
+            }),
+          );
         } else {
-          console.warn(`Cannot set instance variable value for ${v.id}. Instance variable or descriptor not found.`);
+          this.messages.push({
+            group: 'Global',
+            node: 'Global',
+            appname: null,
+            template: null,
+            message: {
+              icon: 'error',
+              message: `Cannot set instance variable value for ${v.id}. Instance variable not found.`,
+            },
+          });
         }
       }
     }

@@ -143,6 +143,20 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-instance-variables', () => {
+      // check that instance variable values have been applied correctly
+      cy.contains('mat-expansion-panel', 'Instance Variable Definitions').within(() => {
+        cy.get('mat-panel-title').click();
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+
+        cy.get('app-bd-form-input[name="instance.variable.v1_val"]').within(() => {
+          cy.get('input[name="instance.variable.v1_val"]').should('have.value', 'value-v1');
+        });
+        cy.get('app-bd-form-input[name="instance.variable.v2_val"]').within(() => {
+          cy.get('input[name="instance.variable.v2_val"]').should('have.value', 'TestText');
+        });
+        cy.get('mat-panel-title').click();
+      });
+
       cy.contains('mat-expansion-panel', 'Custom Variables').within(() => {
         cy.get('mat-panel-title').click();
         cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
