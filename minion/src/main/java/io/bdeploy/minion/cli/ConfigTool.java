@@ -53,6 +53,9 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
         @Help("Changes the web session timeout, after which users need to re-login. Timeout is specified in hours.")
         int sessionTimeout() default -1;
 
+        @Help("Changes the web session 'active' timeout, after which a users need to re-login. The user must be active within this timeframe for their session to stay valid. Timeout is specified in hours.")
+        int sessionActiveTimeout() default -1;
+
         @Help("The target mode of the minion.")
         MinionMode mode();
 
@@ -139,6 +142,12 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
             if (newSessionTimeout != -1) {
                 r.modifyState(s -> s.webSessionTimeoutHours = newSessionTimeout);
                 result.addField("Session timeout (hours)", newSessionTimeout);
+            }
+
+            int newActiveSessionTimeout = config.sessionActiveTimeout();
+            if(newActiveSessionTimeout != -1) {
+                r.modifyState(s -> s.webSessionActiveTimeoutHours = newActiveSessionTimeout);
+                result.addField("Session active timeout (hours)", newActiveSessionTimeout);
             }
 
             String logDataDir = config.logData();
