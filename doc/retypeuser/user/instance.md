@@ -247,6 +247,10 @@ Changing the version can be done by clicking on the [ **Upgrade** ] or [ **Downg
 Changing the **product version** will never change the **Configuration Files** of the **Instance**. In case configuration file templates change from one product version to the other, an update hint will be shown. You can then manually update configuration files as needed, see chapter [Configuration Files](/user/instance/#configuration-files).
 !!!
 
+!!!info Note
+Changing the **product version** will generate missing instance variables based on product's [instance variable definitions](/power/product/#instance-variable-definitionsyaml). If previous version had some instance variable definitions which are not present in the new version, instance variables for those definitions will be removed, unless they overwrite a system variable.
+!!!
+
 ### Banner Message
 
 A banner message can be created for an **Instance**, which is displayed very clearly at the top of the overview dialog. You can choose from a series of predefined colors, so that depending on the urgency or content of the message a suitable color can be selected.
