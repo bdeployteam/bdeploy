@@ -27,7 +27,7 @@ export function mergeOrdererd<T>(a: T[], b: T[], key: (ele) => unknown): T[] {
     array.forEach((item, idx) => {
       // check if the item has already been added, if not, try to add
       if (!result.find((x) => key(x) === key(item))) {
-        // if item is not first item, find position of his left sibling in result array
+        // if item is not first item, find position of its left sibling in result array
         if (idx) {
           const resultIndex = result.indexOf(array[idx - 1]);
           // add item after left sibling position

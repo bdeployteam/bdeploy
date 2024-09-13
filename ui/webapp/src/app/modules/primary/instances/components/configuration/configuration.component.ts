@@ -168,7 +168,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
   protected onSave() {
     this.doSave().subscribe(() => {
-      // after save navigate back to the dashboard - this will take the user where he will likely want to continue
+      // after save navigate back to the dashboard - this will take the user where they will likely want to continue
       // anyway (install, activate, start processes, etc.)
       this.router.navigate([
         'instances',
