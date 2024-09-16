@@ -12,11 +12,11 @@ public class DataRenderingHelper {
     }
 
     public static String quoteCsv(String input) {
-        return "\"" + input.replace("\"", "\"\"") + "\"";
+        return '"' + input.replace("\"", "\"\"") + '"';
     }
 
     public static String quoteJson(String input) {
-        return "\"" + input.replace("\"", "\\\"").replace("\n", "\\n").replace("\\", "\\\\") + "\"";
+        return '"' + input.replace("\\", "\\\\").replace("\n", "\\n").replace("\"", "\\\"") + '"';
     }
 
     /**

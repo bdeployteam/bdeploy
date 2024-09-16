@@ -26,9 +26,9 @@ class DataRenderingHelperTest {
     void testJsonQuoting() {
         assertEquals("\"foo\"", DataRenderingHelper.quoteJson("foo"));
         assertEquals("\"foo bar\"", DataRenderingHelper.quoteJson("foo bar"));
-        assertEquals("\"new\\\\nline\"", DataRenderingHelper.quoteJson("new\nline"));
-        assertEquals("\"start \\\\\"quote\\\\\" end\"", DataRenderingHelper.quoteJson("start \"quote\" end"));
-        assertEquals("\"s \\\\\"\\\\\"doublequote\\\\\"\\\\\" e\"", DataRenderingHelper.quoteJson("s \"\"doublequote\"\" e"));
+        assertEquals("\"new\\nline\"", DataRenderingHelper.quoteJson("new\nline"));
+        assertEquals("\"start \\\"quote\\\" end\"", DataRenderingHelper.quoteJson("start \"quote\" end"));
+        assertEquals("\"start \\\"\\\"doublequote\\\"\\\" end\"", DataRenderingHelper.quoteJson("start \"\"doublequote\"\" end"));
     }
 
     @Test
