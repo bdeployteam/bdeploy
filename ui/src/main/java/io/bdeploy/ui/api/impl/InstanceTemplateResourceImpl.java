@@ -136,7 +136,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                     .filter(g -> g.group.equals(grp.name)).findFirst().orElseThrow(() -> new WebApplicationException(
                             "The template does not specify a mapping for group " + grp.name, Status.EXPECTATION_FAILED));
 
-            if (mapping == null) {
+            if (mapping.node == null) {
                 continue; // ignored
             }
 
@@ -278,16 +278,18 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
 
         Function<String, LinkedValueConfiguration> globalLookup = id -> {
-            for (var n : result) {
-                for (var a : n.nodeConfiguration.applications) {
-                    for (var p : a.start.parameters) {
+            LinkedValueConfiguration lv = null;
+            for (var g : tpl.groups) {
+                for (var a : g.applications) {
+                    for (var p : a.startParameters) {
                         if (p.id.equals(id)) {
-                            return p.value;
+                            String value = TemplateHelper.process(p.value, ttor, ttor::canResolve);
+                            lv = new LinkedValueConfiguration(value);
                         }
                     }
                 }
             }
-            return null;
+            return lv;
         };
 
         for (var tgroup : tpl.groups) {
@@ -465,16 +467,12 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             }
 
             var val = pd.defaultValue;
-            if (tp.isPresent()) {
-                if (tp.get().value != null && !tp.get().value.isBlank()) {
-                    var exp = TemplateHelper.process(tp.get().value, ttor, ttor::canResolve);
-                    val = new LinkedValueConfiguration(exp);
-                }
-            } else if (pd.global) {
-                var globalLv = globalLookup.apply(pd.id);
-                if (globalLv != null) {
-                    val = globalLv;
-                }
+            var globalLv = pd.global ? globalLookup.apply(pd.id) : null;
+            if (globalLv != null) {
+                val = globalLv;
+            } else if (tp.isPresent() && tp.get().value != null && !tp.get().value.isBlank()) {
+                var exp = TemplateHelper.process(tp.get().value, ttor, ttor::canResolve);
+                val = new LinkedValueConfiguration(exp);
             }
 
             var pc = new ParameterConfiguration();
