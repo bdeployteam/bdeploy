@@ -9,11 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import io.bdeploy.common.util.StringHelper;
 
 class DataTableText extends DataTableBase {
+
+    /** A border of {@value #SAFETY_BORDER_WIDTH} is required to stop the terminal from misbehaving. */
+    private static final int SAFETY_BORDER_WIDTH = 1;
+    private static final int MIN_MAX_TABLE_LENGTH = 80;
 
     private static final char CELL_NONE = '─';
     private static final char CELL_BOTTOM = '┬';
@@ -33,8 +38,6 @@ class DataTableText extends DataTableBase {
     private static final String TABLE_CELL_PADDING = " ";
     private static final int TABLE_CELL_PADDING_WIDTH = TABLE_CELL_PADDING.length();
     private static final int DOUBLE_TABLE_CELL_PADDING_WIDTH = 2 * TABLE_CELL_PADDING_WIDTH;
-
-    private static final int MIN_MAX_TABLE_LENGTH = 80;
 
     private boolean hideHeaders = false;
     private boolean lineWrap = false;
@@ -78,7 +81,7 @@ class DataTableText extends DataTableBase {
 
     @Override
     public DataTable setMaxTableLengthHint(int maxTableLength) {
-        if (maxTableLength > 0 && maxTableLength < MIN_MAX_TABLE_LENGTH) {
+        if (maxTableLength >= 0 && maxTableLength < MIN_MAX_TABLE_LENGTH) {
             maxTableLength = MIN_MAX_TABLE_LENGTH;
         }
         this.maxTableLength = maxTableLength;
@@ -148,7 +151,7 @@ class DataTableText extends DataTableBase {
 
         // Add indent
         String indentString = StringHelper.repeat(" ", indent);
-        lines = lines.stream().map(line -> indentString + line).toList();
+        lines = lines.stream().map(line -> indentString + line).collect(Collectors.toList());
 
         // Print to output
         processLines(lines);
@@ -159,7 +162,9 @@ class DataTableText extends DataTableBase {
      */
     private int[] calculateColumnWidths() {
         // Calculate base column widths
-        List<Column> cols = columns.stream().map(c -> new Column(c.getMinimumWidth(), c.getLabel().length())).toList();
+        List<Column> cols = columns.stream()
+                .map(c -> new Column(c.getMinimumWidth(), c.getLabel().length(), c.getScaleToContent()))
+                .collect(Collectors.toList());
         if (hideHeaders) {
             cols.forEach(col -> col.width = col.minWidth);
         } else {
@@ -202,7 +207,7 @@ class DataTableText extends DataTableBase {
             return mapColsToWidth(cols);
         }
         int totalTableWidth = getTotalColumnsWidth(cols) + DOUBLE_TABLE_CELL_PADDING_WIDTH + 2;
-        int requiredShrinkage = totalTableWidth - maxTableLength;
+        int requiredShrinkage = SAFETY_BORDER_WIDTH + indent + totalTableWidth - maxTableLength;
         if (requiredShrinkage <= 0) {
             return mapColsToWidth(cols);
         }
@@ -220,8 +225,12 @@ class DataTableText extends DataTableBase {
         }
 
         // First we shrink them down to the higher one of their caps
-        for (Column col : cols) {
+        List<Column> minWidthCols = cols.stream().filter(col -> !col.resizeToContent).collect(Collectors.toList()).reversed();
+        for (Column col : minWidthCols) {
             int cap = Math.max(col.labelLength, col.minWidth);
+            if (cap == 0) {
+                cap = 1;
+            }
             int removeableTillCap = col.width - cap;
             if (requiredShrinkage <= removeableTillCap) {
                 col.width -= requiredShrinkage;
@@ -233,7 +242,7 @@ class DataTableText extends DataTableBase {
 
         // Then we shrink them down to the length of the ellipsis +1
         int ellipsiscap = 1 + ELLIPSIS_LENGTH;
-        for (Column col : cols) {
+        for (Column col : minWidthCols) {
             if (col.minWidth >= ellipsiscap) {
                 continue;
             }
@@ -247,7 +256,7 @@ class DataTableText extends DataTableBase {
         }
 
         // Next we shrink them down to a single character
-        for (Column col : cols) {
+        for (Column col : minWidthCols) {
             if (col.minWidth >= 1) {
                 continue;
             }
@@ -261,7 +270,7 @@ class DataTableText extends DataTableBase {
         }
 
         // Then we shrink them down to their minimum
-        for (Column col : cols) {
+        for (Column col : minWidthCols) {
             int cap = col.minWidth;
             int removeableTillCap = col.width - cap;
             if (requiredShrinkage <= removeableTillCap) {
@@ -461,11 +470,13 @@ class DataTableText extends DataTableBase {
 
         private final int minWidth;
         private final int labelLength;
+        private final boolean resizeToContent;
         private int width;
 
-        private Column(int minWidth, int labelLength) {
+        private Column(int minWidth, int labelLength, boolean resizeToContent) {
             this.minWidth = minWidth;
             this.labelLength = labelLength;
+            this.resizeToContent = resizeToContent;
         }
     }
 }
