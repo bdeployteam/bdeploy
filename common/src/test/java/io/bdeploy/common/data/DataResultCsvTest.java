@@ -13,7 +13,7 @@ class DataResultCsvTest {
     @Test
     void testSimpleResult() {
         String expected = ""//
-                + "\"Result Field\",\"Result Value\"\r\n"//
+                + "\"Result Field\",\"Result Value\"\n"//
                 + "\"Message\",\"Example message\"";
         TEST_UTIL.test(expected, Function.identity());
     }
@@ -28,8 +28,8 @@ class DataResultCsvTest {
     @Test
     void testResultWithField() {
         String expected = ""//
-                + "\"Result Field\",\"Result Value\"\r\n"//
-                + "\"Message\",\"Example message\"\r\n"//
+                + "\"Result Field\",\"Result Value\"\n"//
+                + "\"Message\",\"Example message\"\n"//
                 + "\"fieldName\",\"fieldValue\"";
         TEST_UTIL.test(expected, result -> result.addField("fieldName", "fieldValue"));
     }
@@ -37,22 +37,20 @@ class DataResultCsvTest {
     @Test
     void testResultWithFields() {
         String expected = ""//
-                + "\"Result Field\",\"Result Value\"\r\n"//
-                + "\"Message\",\"Example message\"\r\n"//
-                + "\"key1\",\"value1\"\r\n"//
-                + "\"key2\",\"value2\"\r\n"//
+                + "\"Result Field\",\"Result Value\"\n"//
+                + "\"Message\",\"Example message\"\n"//
+                + "\"key1\",\"value1\"\n"//
+                + "\"key2\",\"value2\"\n"//
                 + "\"key3\",\"value3\"";
-        TEST_UTIL.test(expected, result -> result//
-                .addField("key1", "value1")//
-                .addField("key2", "value2")//
-                .addField("key3", "value3"));
+        TEST_UTIL.test(expected, result -> result
+                .addField("key1", "value1").addField("key2", "value2").addField("key3", "value3"));
     }
 
     @Test
     void testResultWithException() {
         String expected = ""//
-                + "\"Result Field\",\"Result Value\"\r\n"//
-                + "\"Message\",\"Example message\"\r\n"//
+                + "\"Result Field\",\"Result Value\"\n"//
+                + "\"Message\",\"Example message\"\n"//
                 + "\"Error\",\"Oh no!\"";
         TEST_UTIL.test(expected, result -> result.setException(DataResultTestUtil.createTestException()));
     }
@@ -60,8 +58,8 @@ class DataResultCsvTest {
     @Test
     void testResultWithNestedException() {
         String expected = ""//
-                + "\"Result Field\",\"Result Value\"\r\n"//
-                + "\"Message\",\"Example message\"\r\n"//
+                + "\"Result Field\",\"Result Value\"\n"//
+                + "\"Message\",\"Example message\"\n"//
                 + "\"Error\",\"Outer; Inner\"";
         TEST_UTIL.test(expected, result -> result.setException(DataResultTestUtil.createNestedTestException()));
     }
@@ -69,12 +67,10 @@ class DataResultCsvTest {
     @Test
     void testResultWithFieldsAndNestedException() {
         String expected = ""//
-                + "\"Result Field\",\"Result Value\"\r\n"//
-                + "\"Message\",\"Example message\"\r\n"//
+                + "\"Result Field\",\"Result Value\"\n"//
+                + "\"Message\",\"Example message\"\n"//
                 + "\"Error\",\"Outer; Inner\"";
         TEST_UTIL.test(expected, result -> result.setException(DataResultTestUtil.createNestedTestException())//
-                .addField("key1", "value1")//
-                .addField("key2", "value2")//
-                .addField("key3", "value3"));
+                .addField("key1", "value1").addField("key2", "value2").addField("key3", "value3"));
     }
 }

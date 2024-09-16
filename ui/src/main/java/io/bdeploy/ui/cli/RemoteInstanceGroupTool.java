@@ -98,8 +98,10 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         } else if (config.list()) {
             DataTable table = createDataTable();
             table.setCaption("Instance Groups on " + svc.getUri());
-            table.column("Name", 20).column("Title", 20).column(new DataTableColumn("instanceCount", "# Ins.", 6))
-                    .column("Description", 50);
+            table.column(new DataTableColumn.Builder("Name").setMinWidth(13).build());
+            table.column(new DataTableColumn.Builder("Title").setMinWidth(13).build());
+            table.column(new DataTableColumn.Builder("# Ins.").setName("instanceCount").setMinWidth(6).build());
+            table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
 
             List<InstanceGroupConfiguration> cfgList = client.list().stream().map(cfg -> cfg.instanceGroupConfiguration).toList();
             for (InstanceGroupConfiguration cfg : cfgList) {

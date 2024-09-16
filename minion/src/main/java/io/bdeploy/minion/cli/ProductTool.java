@@ -111,12 +111,14 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
         DataTable table = createDataTable();
         table.setCaption("Products in " + hive.getUri());
 
-        table.column("Name", 25).column("Key", 30).column("Version", 20);
-        table.column(new DataTableColumn("NoOfApplications", "# App.", 6));
-        table.column(new DataTableColumn("NoOfReferences", "# Ref.", 6));
-        table.column(new DataTableColumn("NoOfPlugins", "# Plug.", 7));
-        table.column(new DataTableColumn("NoOfInstanceTemplates", "# Ins.Templ.", 12));
-        table.column(new DataTableColumn("NoOfApplicationTemplates", "# App.Templ.", 12));
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Key").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Version").setMinWidth(7).build());
+        table.column(new DataTableColumn.Builder("# App.").setName("NoOfApplications").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("# Ref.").setName("NoOfReferences").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("# Plug.").setName("NoOfPlugins").setMinWidth(7).build());
+        table.column(new DataTableColumn.Builder("# Ins.Templ.").setName("NoOfInstanceTemplates").setMinWidth(12).build());
+        table.column(new DataTableColumn.Builder("# App.Templ.").setName("NoOfApplicationTemplates").setMinWidth(12).build());
 
         for (Key key : scan) {
             ProductManifest pmf = ProductManifest.of(hive, key);

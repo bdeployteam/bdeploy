@@ -29,6 +29,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
@@ -103,7 +104,8 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                     return createResultWithErrorMessage("No manifests found");
                 } else {
                     DataTable table = createDataTable();
-                    table.column("Key", 50).column("Root", 40);
+                    table.column(new DataTableColumn.Builder("Key").setMinWidth(30).build());
+                    table.column(new DataTableColumn.Builder("Root").setMinWidth(25).build());
                     mfs.entrySet().stream().filter(e -> matches(e.getKey(), config))
                             .forEach(e -> table.row().cell(e.getKey()).cell(e.getValue()).build());
                     return table;
@@ -124,7 +126,8 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                     return createResultWithErrorMessage("No manifests found");
                 } else {
                     DataTable table = createDataTable();
-                    table.column("Key", 50).column("Root", 40);
+                    table.column(new DataTableColumn.Builder("Key").setMinWidth(30).build());
+                    table.column(new DataTableColumn.Builder("Root").setMinWidth(25).build());
                     manifests.stream().filter(x -> matches(x, config)).forEach(e -> {
                         Manifest m = hive.execute(new ManifestLoadOperation().setManifest(e));
                         table.row().cell(e).cell(m.getRoot().toString()).build();

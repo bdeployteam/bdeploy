@@ -84,9 +84,16 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         DataTable table = createDataTable();
 
         table.setCaption("Ports of instance " + config.uuid() + " in instance group " + config.instanceGroup());
-        table.column("Node", 20).column(new DataTableColumn("ProcessId", "App. ID", 14)).column("Process", 30)
-                .column(new DataTableColumn("ProcessState", "P. State", 20)).column("Out of sync", 1).column("Description", 30)
-                .column("Port", 5).column("Type", 6).column("State", 6).column("Rating", 3);
+        table.column(new DataTableColumn.Builder("Node").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("App. ID").setName("ProcessId").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Process").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("P. State").setName("ProcessState").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Out of sync").setMinWidth(1).build());
+        table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
+        table.column(new DataTableColumn.Builder("Port").setMinWidth(4).build());
+        table.column(new DataTableColumn.Builder("Type").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("State").setMinWidth(6).build());
+        table.column(new DataTableColumn.Builder("Rating").setMinWidth(3).build());
 
         // find the active version of the instance.
         InstanceResource ir = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())

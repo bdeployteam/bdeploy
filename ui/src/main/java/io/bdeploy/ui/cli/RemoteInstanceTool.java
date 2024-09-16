@@ -421,12 +421,19 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         DataTable table = createDataTable();
         table.setCaption("Instances of " + config.instanceGroup() + " on " + remote.getUri());
 
-        table.column("ID", 15).column("Name", 20).column(new DataTableColumn("Version", "Ver.", 4)).column("Installed", 9)
-                .column("Active", 6).column("Purpose", 11).column("Product", 25).column("Product Version", 20)
-                .column("System", 20).column("Description", 40);
+        table.column(new DataTableColumn.Builder("ID").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Name").build());
+        table.column(new DataTableColumn.Builder("Ver.").setName("Version").setMinWidth(4).build());
+        table.column(new DataTableColumn.Builder("Installed").build());
+        table.column(new DataTableColumn.Builder("Active").build());
+        table.column(new DataTableColumn.Builder("Purpose").build());
+        table.column(new DataTableColumn.Builder("Product").setMinWidth(25).build());
+        table.column(new DataTableColumn.Builder("Product Version").setMinWidth(14).build());
+        table.column(new DataTableColumn.Builder("System").build());
+        table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
 
         if (central) {
-            table.column("Target Server", 20);
+            table.column(new DataTableColumn.Builder("Target Server").setMinWidth(20).build());
         }
 
         InstanceResource ir = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())

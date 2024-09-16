@@ -4,6 +4,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
@@ -52,7 +53,8 @@ public class RemoteRepoTool extends RemoteServiceTool<RepoConfig> {
         } else if (config.list()) {
             DataTable table = createDataTable();
             table.setCaption("Software Repositories on " + svc.getUri());
-            table.column("Name", 30).column("Description", 60);
+            table.column(new DataTableColumn.Builder("Name").setMinWidth(13).build());
+            table.column(new DataTableColumn.Builder("Description").setMinWidth(20).build());
             for (SoftwareRepositoryConfiguration cfg : client.list()) {
                 table.row().cell(cfg.name).cell(cfg.description).build();
             }

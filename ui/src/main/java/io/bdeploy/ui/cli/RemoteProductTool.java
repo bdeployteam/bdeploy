@@ -154,11 +154,13 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         table.setCaption("Products in " + source + " on " + remote.getUri());
         boolean allRepos = config.instanceGroup() == null && config.repository() == null;
         if (allRepos) {
-            table.column("Repository", 20);
+            table.column(new DataTableColumn.Builder("Repository").setMinWidth(10).build());
         }
-        table.column("Name", 25).column("Key", 30).column("Version", 20);
-        table.column(new DataTableColumn("NoOfInstanceTemplates", "# Ins.Templ.", 12));
-        table.column(new DataTableColumn("NoOfApplicationTemplates", "# App.Templ.", 12));
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Key").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Version").setMinWidth(7).build());
+        table.column(new DataTableColumn.Builder("# Ins.Templ.").setName("NoOfInstanceTemplates").setMinWidth(12).build());
+        table.column(new DataTableColumn.Builder("# App.Templ.").setName("NoOfApplicationTemplates").setMinWidth(12).build());
 
         Map<String, ProductResource> sources = getSources(remote, config);
         for (Map.Entry<String, ProductResource> src : sources.entrySet()) {

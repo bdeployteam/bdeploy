@@ -15,6 +15,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
@@ -65,7 +66,11 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
 
             DataTable table = createDataTable();
             table.setCaption("Plugins loaded on " + svc.getUri());
-            table.column("ID", 40).column("Name", 30).column("Version", 10).column("Loaded", 6).column("Global", 6);
+            table.column(new DataTableColumn.Builder("ID").setMinWidth(25).build());
+            table.column(new DataTableColumn.Builder("Name").setMinWidth(20).build());
+            table.column(new DataTableColumn.Builder("Version").setMinWidth(7).build());
+            table.column(new DataTableColumn.Builder("Loaded").setMinWidth(6).build());
+            table.column(new DataTableColumn.Builder("Global").setMinWidth(6).build());
 
             for (PluginInfoDto dto : loaded) {
                 table.row().cell(dto.id).cell(dto.name).cell(dto.version).cell("*").cell(dto.global ? "*" : "").build();

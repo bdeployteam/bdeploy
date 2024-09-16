@@ -6,6 +6,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
@@ -82,13 +83,17 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
             DataTable table = createDataTable();
             table.setCaption("User accounts on " + remote.getUri());
 
-            table.column("Username", 30).column("System", 10).column("Inact.", 6).column("E-Mail", 30)
-                    .column("Last Active Login", 20).column("Permissions", 60);
+            table.column(new DataTableColumn.Builder("Username").setMinWidth(15).build());
+            table.column(new DataTableColumn.Builder("System").setMinWidth(10).build());
+            table.column(new DataTableColumn.Builder("Inact.").setMinWidth(6).build());
+            table.column(new DataTableColumn.Builder("E-Mail").setMinWidth(10).build());
+            table.column(new DataTableColumn.Builder("Last Active Login").setMinWidth(5).build());
+            table.column(new DataTableColumn.Builder("Permissions").setMinWidth(20).build());
 
             for (UserInfo info : admin.getAllUser()) {
                 table.row().cell(info.name).cell(info.externalSystem).cell(info.inactive ? "*" : "").cell(info.email)
-                        .cell(FormatHelper.formatInstant(Instant.ofEpochMilli(info.lastActiveLogin))).cell(info.permissions.toString())
-                        .build();
+                        .cell(FormatHelper.formatInstant(Instant.ofEpochMilli(info.lastActiveLogin)))
+                        .cell(info.permissions.toString()).build();
             }
             return table;
         } else if (config.createToken() != null) {

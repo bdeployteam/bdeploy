@@ -4,6 +4,7 @@
 package io.bdeploy.common.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -23,6 +24,10 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.Log;
+
 import com.codahale.metrics.Timer;
 
 import io.bdeploy.common.ActivityReporter;
@@ -34,6 +39,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.metrics.Metrics;
@@ -102,7 +108,6 @@ public abstract class ToolBase {
 
     public void toolMain(String... args) throws Exception {
         RenderableResult result = null;
-
         PrintStream output = null;
         PrintStream reporterOutput = null;
         ActivityReporter.Stream streamReporter = null;
@@ -188,7 +193,8 @@ public abstract class ToolBase {
 
                     DataTable table = DataFormat.TEXT.createTable(System.out);
                     table.setIndentHint(5).setHideHeadersHint(true).setLineWrapHint(true);
-                    table.column("Tool", 30).column("Description", 60);
+                    table.column(new DataTableColumn.Builder("Tool").setMinWidth(25).build());
+                    table.column(new DataTableColumn.Builder("Description").setMinWidth(60).build());
 
                     group.getValue().stream().forEach(e -> {
                         List<String> names = namesOf(e.getValue());
@@ -406,7 +412,14 @@ public abstract class ToolBase {
         }
 
         protected DataTable createDataTable() {
-            return dataFormat.createTable(output);
+            int terminalSize;
+            try (Terminal terminal = TerminalBuilder.terminal()) {
+                terminalSize = terminal.getWidth();
+            } catch (IOException e) {
+                Log.warn("Failed to get terminal width.", e);
+                terminalSize = -1;
+            }
+            return dataFormat.createTable(output).setMaxTableLengthHint(terminalSize);
         }
 
         protected DataResult createSuccess() {
@@ -585,7 +598,9 @@ public abstract class ToolBase {
             Help help = getClass().getAnnotation(Help.class);
             table.setCaption(name + (help != null && help.value() != null ? (": " + help.value()) : ""));
             table.setLineWrapHint(true).setIndentHint(2);
-            table.column("Argument", 20).column("Description", 70).column("Default", 10);
+            table.column(new DataTableColumn.Builder("Argument").setMinWidth(20).build());
+            table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
+            table.column(new DataTableColumn.Builder("Default").setMinWidth(10).build());
 
             List<Class<? extends Annotation>> configsForHelp = getConfigsForHelp();
             for (int i = 0; i < configsForHelp.size(); ++i) {

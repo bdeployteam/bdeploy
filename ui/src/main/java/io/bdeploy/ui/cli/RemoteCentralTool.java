@@ -268,16 +268,19 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         DataTable table = createDataTable();
         table.setCaption("Managed servers for " + config.instanceGroup() + " on " + remote.getUri());
 
-        table.column("Name", 20).column("URI", 40).column("Description", 40).column("Last Sync", 20);
-        table.column(new DataTableColumn("NumberOfLocalMinions", "# Minions", 9));
-        table.column(new DataTableColumn("NumberOfInstances", "# Inst.", 7));
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("URI").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
+        table.column(new DataTableColumn.Builder("Last Sync").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("# Minions").setName("NumberOfLocalMinions").setMinWidth(9).build());
+        table.column(new DataTableColumn.Builder("# Inst.").setName("NumberOfInstances").setMinWidth(7).build());
 
         for (ManagedMasterDto mmd : mmds) {
             List<InstanceConfiguration> instances = msr.getInstancesControlledBy(config.instanceGroup(), mmd.hostName);
 
             table.row().cell(mmd.hostName).cell(mmd.uri).cell(mmd.description)
-                    .cell(mmd.lastSync != null ? FormatHelper.formatInstant(mmd.lastSync) : "never").cell(mmd.minions.values().size())
-                    .cell(instances.size()).build();
+                    .cell(mmd.lastSync != null ? FormatHelper.formatInstant(mmd.lastSync) : "never")
+                    .cell(mmd.minions.values().size()).cell(instances.size()).build();
         }
         return table;
     }
@@ -286,8 +289,11 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         DataTable table = createDataTable();
         table.setCaption("Server Version Report of " + remote.getUri());
 
-        table.column("Instance Group", 30).column("Name", 20).column("Last Sync", 20).column("Master Ver.", 10)
-                .column("# Divergent Nodes", 10);
+        table.column(new DataTableColumn.Builder("Instance Group").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Name").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Last Sync").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Master Ver.").setMinWidth(11).build());
+        table.column(new DataTableColumn.Builder("# Divergent Nodes").setMinWidth(17).build());
 
         List<String> groups;
         try (Activity fetchGroups = getActivityReporter().start("Fetching instance groups...")) {

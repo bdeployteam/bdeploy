@@ -5,6 +5,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -44,7 +45,8 @@ public class RemoteRepoSoftwareTool extends RemoteServiceTool<SoftwareConfig> {
         if (config.list()) {
             DataTable table = createDataTable();
             table.setCaption("Software in " + config.repo() + " on " + svc.getUri());
-            table.column("Key", 30).column("Version", 20);
+            table.column(new DataTableColumn.Builder("Key").setMinWidth(30).build());
+            table.column(new DataTableColumn.Builder("Version").setMinWidth(20).build());
             for (Key cfg : client.getSoftwareResource(config.repo()).list(false, true)) {
                 table.row().cell(cfg.getName()).cell(cfg.getTag()).build();
             }

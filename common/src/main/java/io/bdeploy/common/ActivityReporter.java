@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 
 /**
@@ -235,7 +236,8 @@ public interface ActivityReporter {
 
             if (verbose) {
                 DataTable table = DataFormat.TEXT.createTable(output);
-                table.column("Activity", 80).column("Duration", 15);
+                table.column(new DataTableColumn.Builder("Activity").setMinWidth(40).build());
+                table.column(new DataTableColumn.Builder("Duration").setMinWidth(15).build());
 
                 for (AsyncActivity act : allActivities) {
                     table.row().cell((act.isNested ? "  " : "") + act.activity).cell(act.duration() + " ms").build();

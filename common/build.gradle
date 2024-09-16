@@ -19,6 +19,7 @@ dependencies {
         'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2',
         'com.fasterxml.jackson.module:jackson-module-blackbird:2.17.2',
         'org.apache.commons:commons-compress:1.27.1',
+        'org.jline:jline-terminal:3.26.3',
     )
 
     // this dep is not allowed, as logging depends on common - circle. it works for gradle,

@@ -13,7 +13,7 @@ class DataTableCsvTest {
     @Test
     void testSimpleTable() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
                 + "\"val1\",\"val2\",\"val3\"";
         TEST_UTIL.modifyAndTest(expected, expected, Function.identity());
     }
@@ -28,7 +28,7 @@ class DataTableCsvTest {
     @Test
     void testTableWithLongText() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n" + "\"val1\",\"val2\",\"val3\"\r\n"
+                + "\"col1\",\"col2\",\"col3\"\n" + "\"val1\",\"val2\",\"val3\"\n"
                 + "\"This first cell has a very long text indeed\",\"second one is shorter\",\"third\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongTextRow(table));
     }
@@ -36,8 +36,8 @@ class DataTableCsvTest {
     @Test
     void testTableWithSpannedText() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
-                + "\"val1\",\"val2\",\"val3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
+                + "\"val1\",\"val2\",\"val3\"\n"//
                 + "\"This first cell has a very long text indeed\",,\"third\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addSpannedTextRow(table));
     }
@@ -45,7 +45,7 @@ class DataTableCsvTest {
     @Test
     void testTableNoHeader() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
                 + "\"val1\",\"val2\",\"val3\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.setHideHeadersHint(true));
     }
@@ -53,7 +53,7 @@ class DataTableCsvTest {
     @Test
     void testTableWithCaption() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
                 + "\"val1\",\"val2\",\"val3\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.setCaption("Lorem ipsum dolor sit amet"));
     }
@@ -61,7 +61,7 @@ class DataTableCsvTest {
     @Test
     void testTableWithIndentation() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
                 + "\"val1\",\"val2\",\"val3\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.setIndentHint(3));
     }
@@ -69,8 +69,8 @@ class DataTableCsvTest {
     @Test
     void testTableWithLineWrap() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
-                + "\"val1\",\"val2\",\"val3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
+                + "\"val1\",\"val2\",\"val3\"\n"//
                 + "\"This first cell has a very long text indeed\",\"second one is shorter\",\"third\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongTextRow(table.setLineWrapHint(true)));
     }
@@ -78,10 +78,10 @@ class DataTableCsvTest {
     @Test
     void testTableWithHorizontalRulers() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
-                + "\"val1\",\"val2\",\"val3\"\r\n"//
-                + "\"val4\",\"val5\",\"val6\"\r\n"//
-                + "\"val7\",\"val8\",\"val9\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
+                + "\"val1\",\"val2\",\"val3\"\n"//
+                + "\"val4\",\"val5\",\"val6\"\n"//
+                + "\"val7\",\"val8\",\"val9\"\n"//
                 + "\"AAA\",\"BBB\",\"CCC\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> {
             table.addHorizontalRuler();
@@ -96,7 +96,7 @@ class DataTableCsvTest {
     @Test
     void testTableWithFooter() {
         String expected = ""//
-                + "\"col1\",\"col2\",\"col3\"\r\n"//
+                + "\"col1\",\"col2\",\"col3\"\n"//
                 + "\"val1\",\"val2\",\"val3\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.addFooter("What an interesting footer this is"));
     }

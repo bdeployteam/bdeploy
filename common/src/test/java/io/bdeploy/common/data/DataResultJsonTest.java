@@ -13,8 +13,8 @@ class DataResultJsonTest {
     @Test
     void testSimpleResult() {
         String expected = ""//
-                + "{\r\n"//
-                + "  \"message\": \"Example message\"\r\n"//
+                + "{\n"//
+                + "  \"message\": \"Example message\"\n"//
                 + "}";
         TEST_UTIL.test(expected, Function.identity());
     }
@@ -22,7 +22,7 @@ class DataResultJsonTest {
     @Test
     void testResultWithoutMessage() {
         String expected = ""//
-                + "{\r\n"//
+                + "{\n"//
                 + "}";
         TEST_UTIL.test(expected, Function.identity(), false);
     }
@@ -30,9 +30,9 @@ class DataResultJsonTest {
     @Test
     void testResultWithField() {
         String expected = ""//
-                + "{\r\n"//
-                + "  \"message\": \"Example message\",\r\n"//
-                + "  \"Fieldname\": \"fieldValue\"\r\n"//
+                + "{\n"//
+                + "  \"message\": \"Example message\",\n"//
+                + "  \"Fieldname\": \"fieldValue\"\n"//
                 + "}";
         TEST_UTIL.test(expected, result -> result.addField("fieldName", "fieldValue"));
     }
@@ -40,11 +40,11 @@ class DataResultJsonTest {
     @Test
     void testResultWithFields() {
         String expected = ""//
-                + "{\r\n"//
-                + "  \"message\": \"Example message\",\r\n"//
-                + "  \"Key1\": \"value1\",\r\n"//
-                + "  \"Key2\": \"value2\",\r\n"//
-                + "  \"Key3\": \"value3\"\r\n"//
+                + "{\n"//
+                + "  \"message\": \"Example message\",\n"//
+                + "  \"Key1\": \"value1\",\n"//
+                + "  \"Key2\": \"value2\",\n"//
+                + "  \"Key3\": \"value3\"\n"//
                 + "}";
         TEST_UTIL.test(expected, result -> result//
                 .addField("key1", "value1")//
@@ -55,9 +55,9 @@ class DataResultJsonTest {
     @Test
     void testResultWithException() {
         String expected = ""//
-                + "{\r\n"//
-                + "  \"message\": \"Example message\",\r\n"//
-                + "  \"error\": \"Oh no!\"\r\n"//
+                + "{\n"//
+                + "  \"message\": \"Example message\",\n"//
+                + "  \"error\": \"Oh no!\"\n"//
                 + "}";
         TEST_UTIL.test(expected, result -> result.setException(DataResultTestUtil.createTestException()));
     }
@@ -65,9 +65,9 @@ class DataResultJsonTest {
     @Test
     void testResultWithNestedException() {
         String expected = ""//
-                + "{\r\n"//
-                + "  \"message\": \"Example message\",\r\n"//
-                + "  \"error\": \"Outer; Inner\"\r\n"//
+                + "{\n"//
+                + "  \"message\": \"Example message\",\n"//
+                + "  \"error\": \"Outer; Inner\"\n"//
                 + "}";
         TEST_UTIL.test(expected, result -> result.setException(DataResultTestUtil.createNestedTestException()));
     }
@@ -75,9 +75,9 @@ class DataResultJsonTest {
     @Test
     void testResultWithFieldsAndNestedException() {
         String expected = ""//
-                + "{\r\n"//
-                + "  \"message\": \"Example message\",\r\n"//
-                + "  \"error\": \"Outer; Inner\"\r\n"//
+                + "{\n"//
+                + "  \"message\": \"Example message\",\n"//
+                + "  \"error\": \"Outer; Inner\"\n"//
                 + "}";
         TEST_UTIL.test(expected, result -> result.setException(DataResultTestUtil.createNestedTestException())//
                 .addField("key1", "value1")//

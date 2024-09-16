@@ -25,7 +25,7 @@ public enum DataFormat {
             case JSON:
                 return new DataTableJson(target);
         }
-        throw new IllegalStateException("Unsupported DataFormat");
+        throw new IllegalStateException("Unsupported DataFormat: " + this.name());
     }
 
     public DataResult createResult(PrintStream target) {
@@ -37,6 +37,6 @@ public enum DataFormat {
             case JSON:
                 return new DataResultJson(target);
         }
-        throw new IllegalStateException("Unsupported DataFormat");
+        throw new IllegalStateException("Unsupported DataFormat: " + this.name());
     }
 }
