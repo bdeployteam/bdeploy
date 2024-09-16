@@ -208,9 +208,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
     // apply instance variable values if set.
     if (this.template.instanceVariableValues?.length) {
-      const descriptors = this.products.products$.value?.find(
-        (p) => p.key.name === instance.product.name && p.key.tag === instance.product.tag,
-      )?.instanceVariables;
       for (const v of this.template.instanceVariableValues) {
         const status: StatusMessage[] = [];
         const existingVariable = instance.instanceVariables.find((iv) => iv.id === v.id);
