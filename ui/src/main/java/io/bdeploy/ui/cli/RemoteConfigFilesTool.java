@@ -12,7 +12,7 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
-import io.bdeploy.common.cfg.NonExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
@@ -66,7 +66,7 @@ public class RemoteConfigFilesTool extends RemoteServiceTool<ConfigFilesConfig> 
         String export();
 
         @Help(value = "The path to export a file to")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String target();
     }
 

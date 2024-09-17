@@ -14,7 +14,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
-import io.bdeploy.common.cfg.NonExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -49,7 +49,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         boolean regenerate() default false;
 
         @Help("Regenerate and export a master access token to the given file.")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String exportToken();
 
         @Help(value = "When given reverts a previous regenerate operation and restores the previous certificate and configuration.",
@@ -71,11 +71,11 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         boolean yes() default false;
 
         @Help("Target file to export the current certificate and key to")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String export();
 
         @Help("Target file to export the current HTTPS certificate and key to.")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String exportHttps();
     }
 

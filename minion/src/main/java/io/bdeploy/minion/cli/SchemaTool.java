@@ -9,7 +9,7 @@ import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
-import io.bdeploy.common.cfg.NonExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
@@ -30,7 +30,7 @@ public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {
         Schema schema();
 
         @Help(value = "Path to non-existing file to generate the schema to.")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String generate();
 
         @Help("Path to existing file to validate")

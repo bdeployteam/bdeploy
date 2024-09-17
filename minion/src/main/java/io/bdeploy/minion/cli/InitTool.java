@@ -18,6 +18,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.Configuration.ValueMapping;
 import io.bdeploy.common.cfg.HostnameValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -53,7 +54,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("Root directory to initialize, must not exist.")
         @EnvironmentFallback("BDEPLOY_ROOT")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String root();
 
         @Help("Logging root directory. Will be created if it does not exist.")
@@ -72,10 +73,10 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("Write the access token to a token file instead of printing it on the console. This is only for automated testing.")
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String tokenFile();
 
-        @Help("Write the node identification file to the given location. This can be used to attach the node to a master.")
+        @Help("Write the node identification file to the given path. This can be used to attach the node to a master.")
         @Validator(NonExistingPathValidator.class)
         String nodeIdentFile();
 
