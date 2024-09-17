@@ -206,6 +206,13 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             }
         } catch (Exception e) {
             PathHelper.deleteRecursiveRetry(root);
+            if (config.mode() != MinionMode.NODE) {
+                if (config.tokenFile() != null) {
+                    PathHelper.deleteIfExistsRetry(Path.of(config.tokenFile()));
+                }
+            } else if (config.nodeIdentFile() != null) {
+                PathHelper.deleteIfExistsRetry(Path.of(config.nodeIdentFile()));
+            }
             throw new IllegalStateException("Cannot initialize minion root", e);
         }
 
