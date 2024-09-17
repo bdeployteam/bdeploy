@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
+
+name: Default Configuration
+description: "Creates an instance with a single chat app"
+
+templateVariables:
+  - id: app-name
+    name: "AppName"
+    defaultValue: "Default"
+    description: "Name for the chat application"
+
+groups:
+- name: "Chat App"
+  description: "All applications"
+
+  applications:
+  - application: chat-app
+    name: "The Chat App {{T:app-name}}"
+    description: "The single chat application"
