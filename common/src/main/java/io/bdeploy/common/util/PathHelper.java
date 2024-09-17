@@ -33,7 +33,11 @@ public class PathHelper {
 
     /** Time to wait between each retry when an operation fails */
     private static final int FILEOP_DELAY_MILLIS = 250;
-    /** The amout of times to retry a failed file operation. Times {@value #FILEOP_DELAY_MILLIS}(delay) this amounts to ~30 seconds */
+    /**
+     * The amount of times to retry a failed file operation.<br>
+     * {@value #FILEOP_RETRIES}(retries) times {@value #FILEOP_DELAY_MILLIS}(milliseconds) amounts to 30 seconds of retry
+     * attempts.
+     */
     private static final int FILEOP_RETRIES = 120;
     private static final ContentInfoUtil CIU = loadCIU();
 
