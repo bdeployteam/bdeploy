@@ -465,8 +465,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
          * those operations.
          *
          * @param op the operation to run
-         * @return a {@link Future} which can awaited, see
-         *         {@link FutureHelper#awaitAll(java.util.Collection)}.
+         * @return a {@link Future} which can awaited, see {@link FutureHelper#awaitAll(Iterable)}.
          */
         protected Future<?> submitFileOperation(Runnable op) {
             return fileOps.submit(op::run);
