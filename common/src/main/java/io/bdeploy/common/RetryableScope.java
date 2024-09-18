@@ -63,9 +63,9 @@ public class RetryableScope {
     }
 
     /**
-     * Perform the given action. Retry execution up to {@link #withMaxRetries(long)} trimes, with a delay of
-     * {@link #withDelay(long)} milliseconds between retries (given the exception and timeout handler has not been replaced
-     * using {@link #withExceptionHandler(Consumer)}).
+     * Perform the given action. Retry execution up to {@link #withMaxRetries(long)} times, with a delay of
+     * {@link #withDelay(long)} milliseconds between retries (given the exception and timeout handler has not been replaced using
+     * {@link #withExceptionHandler(Consumer)}).
      */
     public void run(RetryableRunnable action) {
         boolean madeIt = false;
