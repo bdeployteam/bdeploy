@@ -4,7 +4,6 @@
 package io.bdeploy.common.cli;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -23,10 +22,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.Log;
 
 import com.codahale.metrics.Timer;
 
@@ -172,18 +167,19 @@ public abstract class ToolBase {
                 int logo = 0;
                 System.out.println(LOGO[logo++]);
                 System.out.println(LOGO[logo++] + "BHive & BDeploy");
-                System.out.println(LOGO[logo++] + "──────────────────────────────────────────────────────────");
+                System.out.println(LOGO[logo++] + "─────────────────────────────────────────────────");
                 System.out.println(LOGO[logo++] + "Usage: $0 <options...> <tool> <args...>");
                 System.out.println(LOGO[logo++]);
                 System.out.println(LOGO[logo++] + "Options:");
                 System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting");
                 System.out.println(LOGO[logo++] + "  -v|-vv  Be verbose | Be very verbose");
-                System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f> - no effect on progress output");
-                System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file <f> - no");
-                System.out.println(LOGO[logo++] + "          effect on normal output");
+                System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f> - no effect on");
+                System.out.println(LOGO[logo++] + "          progress output");
+                System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file");
+                System.out.println(LOGO[logo++] + "          <f> - no effect on normal output");
                 System.out.println(LOGO[logo++] + "  --csv   Write data tables in CSV format");
                 System.out.println(LOGO[logo++] + "  --json  Write data tables in JSON format");
-                System.out.println(LOGO[logo++]);
+                System.out.println();
                 System.out.println("Tools:");
                 System.out.println();
                 Map<String, List<Entry<String, Class<? extends CliTool>>>> grouped = tools.entrySet().stream()
@@ -194,7 +190,7 @@ public abstract class ToolBase {
                     DataTable table = DataFormat.TEXT.createTable(System.out);
                     table.setIndentHint(5).setHideHeadersHint(true).setLineWrapHint(true);
                     table.column(new DataTableColumn.Builder("Tool").setMinWidth(25).build());
-                    table.column(new DataTableColumn.Builder("Description").setMinWidth(60).build());
+                    table.column(new DataTableColumn.Builder("Description").setMinWidth(30).build());
 
                     group.getValue().stream().forEach(e -> {
                         List<String> names = namesOf(e.getValue());
@@ -412,14 +408,7 @@ public abstract class ToolBase {
         }
 
         protected DataTable createDataTable() {
-            int terminalSize;
-            try (Terminal terminal = TerminalBuilder.terminal()) {
-                terminalSize = terminal.getWidth();
-            } catch (IOException e) {
-                Log.warn("Failed to get terminal width.", e);
-                terminalSize = -1;
-            }
-            return dataFormat.createTable(output).setMaxTableLengthHint(terminalSize);
+            return dataFormat.createTable(output);
         }
 
         protected DataResult createSuccess() {
@@ -598,9 +587,9 @@ public abstract class ToolBase {
             Help help = getClass().getAnnotation(Help.class);
             table.setCaption(name + (help != null && help.value() != null ? (": " + help.value()) : ""));
             table.setLineWrapHint(true).setIndentHint(2);
-            table.column(new DataTableColumn.Builder("Argument").setMinWidth(20).build());
+            table.column(new DataTableColumn.Builder("Argument").setScaleToContent(true).build());
             table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
-            table.column(new DataTableColumn.Builder("Default").setMinWidth(10).build());
+            table.column(new DataTableColumn.Builder("Default").setMinWidth(7).build());
 
             List<Class<? extends Annotation>> configsForHelp = getConfigsForHelp();
             for (int i = 0; i < configsForHelp.size(); ++i) {
