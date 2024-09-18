@@ -22,7 +22,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.Configuration.ValueMapping;
 import io.bdeploy.common.cfg.ExistingPathValidator;
-import io.bdeploy.common.cfg.NonExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
@@ -76,7 +76,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         String importFrom();
 
         @Help("Path to a non-existing ZIP file where to export a given instance configuration")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String exportTo();
 
         @Help(value = "ID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new ID is generated.")

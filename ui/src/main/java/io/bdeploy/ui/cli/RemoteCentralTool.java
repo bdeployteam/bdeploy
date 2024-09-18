@@ -23,7 +23,7 @@ import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
-import io.bdeploy.common.cfg.NonExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
@@ -59,7 +59,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         boolean managedIdent() default false;
 
         @Help("The target file to write managed or central identification information to")
-        @Validator(NonExistingPathValidator.class)
+        @Validator(NonExistingOrEmptyDirPathValidator.class)
         String output();
 
         @Help("Attach a managed server with the given server identification information (file) to the target CENTRAL server.")

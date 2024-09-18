@@ -9,7 +9,7 @@ import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
-import io.bdeploy.common.cfg.NonExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingOrEmptyDirPathValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -28,7 +28,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("The directory to initialize as BHive")
         @EnvironmentFallback("BHIVE")
-        @Validator({ NonExistingPathValidator.class, PathOwnershipValidator.class })
+        @Validator({ NonExistingOrEmptyDirPathValidator.class, PathOwnershipValidator.class })
         String hive();
     }
 
