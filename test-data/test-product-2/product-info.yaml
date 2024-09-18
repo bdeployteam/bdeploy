@@ -9,11 +9,11 @@ applications:
 configTemplates: config
 
 instanceTemplates:
-  - 'product-template.yaml'
-  - 'override-template.yaml'
+  - 'instance-template-default.yaml'
+  - 'instance-template-override.yaml'
 
 instanceVariableDefinitions:
-  - 'instance-variable-definitions.yaml'
+  - 'instance-variable-definition.yaml'
 
 applicationTemplates:
   - 'app-templates/server-with-sleep.yaml'
@@ -23,6 +23,6 @@ parameterTemplates:
   - 'param-templates/shared.yaml'
 
 instanceVariableTemplates:
-  - 'variable-template.yaml'
+  - 'instance-variable-template.yaml'
 
 versionFile: 'product-version.yaml'

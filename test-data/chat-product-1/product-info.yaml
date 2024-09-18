@@ -5,6 +5,6 @@ applications:
 - "chat-app"
 
 instanceTemplates:
-- "product-template.yaml"
+- "instance-template-default.yaml"
 
 versionFile: "product-version.yaml"
