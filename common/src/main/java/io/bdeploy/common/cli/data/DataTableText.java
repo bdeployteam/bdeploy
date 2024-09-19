@@ -225,7 +225,8 @@ class DataTableText extends DataTableBase {
         }
 
         // First we shrink them down to the higher one of their caps
-        List<Column> minWidthCols = cols.stream().filter(col -> !col.resizeToContent).collect(Collectors.toList()).reversed();
+        List<Column> minWidthCols = cols.stream().filter(col -> !col.resizeToContent).collect(Collectors.toList());
+        Collections.reverse(minWidthCols);
         for (Column col : minWidthCols) {
             int cap = Math.max(col.labelLength, col.minWidth);
             if (cap == 0) {
