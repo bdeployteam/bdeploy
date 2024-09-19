@@ -485,7 +485,7 @@ public class ProductUpdateService {
             String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
             TemplateHelper.process(content, resolver, str -> true, filePath);
         } catch (Exception e) {
-            result.add(new ApplicationValidationDto(filePath, null, e.getMessage() + " on node" + nodeName));
+            result.add(new ApplicationValidationDto(filePath, null, e.getMessage() + " on node " + nodeName));
         }
     }
 
