@@ -66,6 +66,7 @@ public class InstanceManifest {
      * The name of the node that is used to store client applications
      */
     public static final String CLIENT_NODE_NAME = "__ClientApplications";
+    public static final String CLIENT_NODE_LABEL = "Client Applications";
 
     private final InstanceConfiguration config;
     private final SortedMap<String, Manifest.Key> nodes = new TreeMap<>();

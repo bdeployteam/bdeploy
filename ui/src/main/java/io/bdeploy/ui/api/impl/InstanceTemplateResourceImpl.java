@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -22,6 +23,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VariableResolver;
@@ -122,8 +124,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         ProductDto product = InstanceTemplateHelper.findMatchingProductOrFail(instance, products);
 
         // 2. find and verify all group mappings and whether all variables are set for each required group.
-        Map<String, MinionStatusDto> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context)
-                .getNodes();
+        Set<String> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context)
+                .getNodes().keySet();
 
         FlattenedInstanceTemplateConfiguration tpl = product.instanceTemplates.stream()
                 .filter(t -> t.name.equals(instance.templateName)).findFirst()
@@ -133,14 +135,14 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         Map<String, String> groupToNode = new TreeMap<>();
         for (FlattenedInstanceTemplateGroupConfiguration grp : tpl.groups) {
             SystemTemplateInstanceTemplateGroupMapping mapping = instance.defaultMappings.stream()
-                    .filter(g -> g.group.equals(grp.name)).findFirst().orElseThrow(() -> new WebApplicationException(
-                            "The template does not specify a mapping for group " + grp.name, Status.EXPECTATION_FAILED));
+                    .filter(g -> g.group.equals(grp.name)).findFirst().orElse(null);
 
-            if (mapping.node == null) {
+            if (mapping == null || mapping.node == null) {
                 continue; // ignored
             }
 
-            if (nodes.get(mapping.node) == null) {
+            if (!nodes.contains(mapping.node) && !mapping.node.equals(InstanceManifest.CLIENT_NODE_NAME) && !mapping.node.equals(
+                    InstanceManifest.CLIENT_NODE_LABEL)) {
                 throw new WebApplicationException(
                         "Group " + grp.name + " is mapped to node " + mapping.node + " but that node cannot be found",
                         Status.EXPECTATION_FAILED);
@@ -150,19 +152,23 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
             // otherwise check variables.
             for (TemplateVariable tvar : grp.groupVariables) {
-                instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst()
-                        .orElseThrow(() -> new WebApplicationException(
-                                "Template Variable " + tvar.id + " not provided, required in group " + grp.name,
-                                Status.EXPECTATION_FAILED));
+                if (StringHelper.isNullOrBlank(tvar.defaultValue)) {
+                    instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst().orElseThrow(
+                            () -> new WebApplicationException(
+                                    "Template Variable " + tvar.id + " not provided, required in group " + grp.name,
+                                    Status.EXPECTATION_FAILED));
+                }
             }
         }
 
         // 3. setup tracking for variables, and verify all variables are set.
         for (TemplateVariable tvar : tpl.directlyUsedTemplateVars) {
-            instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst()
-                    .orElseThrow(() -> new WebApplicationException(
-                            "Template Variable " + tvar.id + " not provided, required directly in the instance template",
-                            Status.EXPECTATION_FAILED));
+            if (StringHelper.isNullOrBlank(tvar.defaultValue)) {
+                instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst().orElseThrow(
+                        () -> new WebApplicationException(
+                                "Template Variable " + tvar.id + " not provided, required directly in the instance template",
+                                Status.EXPECTATION_FAILED));
+            }
         }
 
         // 4. figure out target system if given.
@@ -297,7 +303,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             if (targetNode == null || targetNode.isBlank()) {
                 continue; // nope
             }
-            if ("Client Applications".equals(targetNode)) {
+            if (InstanceManifest.CLIENT_NODE_LABEL.equals(targetNode)) {
                 targetNode = InstanceManifest.CLIENT_NODE_NAME;
             }
 
@@ -307,11 +313,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                     .orElseGet(() -> {
                         var r = new InstanceNodeConfigurationDto(mappedToNode, new InstanceNodeConfiguration());
                         r.nodeConfiguration.copyRedundantFields(config);
-
                         r.nodeConfiguration.mergeVariables(config, system, null);
-
                         r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, ttor));
-
                         result.add(r);
                         return r;
                     });
@@ -332,9 +335,17 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             TrackingTemplateOverrideResolver ttor, BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
             Function<String, LinkedValueConfiguration> globalLookup) {
         // no process control groups on clients, but platform for application is not required to match the server.
+        ApplicationType groupType = group.type == null ? ApplicationType.SERVER : group.type;
         for (var reqApp : group.applications) {
             List<ApplicationManifest> matchingClients = apps.stream().filter(appFilter.apply(reqApp.application, null)).toList();
             for (var clientApp : matchingClients) {
+                ApplicationType appType = clientApp.getDescriptor().type;
+                if (groupType != appType) {
+                    throw new WebApplicationException(
+                            "Incompatible application type. Node has type " + group.type + " but application has type "
+                                    + appType, Status.EXPECTATION_FAILED);
+                }
+
                 node.nodeConfiguration.applications
                         .add(createApplicationFromTemplate(reqApp, clientApp, node, ttor, globalLookup));
             }
@@ -348,6 +359,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
             Function<String, LinkedValueConfiguration> globalLookup) {
         OperatingSystem targetOs = status.config.os;
+        ApplicationType groupType = group.type == null ? ApplicationType.SERVER : group.type;
 
         for (var reqApp : group.applications) {
             if (!reqApp.applyOn.isEmpty() && !reqApp.applyOn.contains(targetOs)) {
@@ -355,18 +367,24 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 continue;
             }
 
-            ApplicationConfiguration cfg = createApplicationFromTemplate(reqApp,
-                    apps.stream().filter(appFilter.apply(reqApp.application, targetOs)).findFirst()
-                            .orElseThrow(() -> new IllegalStateException("Cannot find application with ID " + reqApp.application
-                                    + " while creating application from template: " + reqApp.name)),
-                    node, ttor, globalLookup);
+            ApplicationManifest appManifest = apps.stream().filter(appFilter.apply(reqApp.application, targetOs)).findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Cannot find application with ID " + reqApp.application
+                            + " while creating application from template: " + reqApp.name));
+
+            ApplicationType appType = appManifest.getDescriptor().type;
+            if (groupType != appType) {
+                throw new WebApplicationException(
+                        "Incompatible application type. Node has type " + group.type + " but application has type "
+                                + appType, Status.EXPECTATION_FAILED);
+            }
+
+            ApplicationConfiguration cfg = createApplicationFromTemplate(reqApp, appManifest, node, ttor, globalLookup);
 
             Optional<ProcessControlGroupConfiguration> targetCg = node.nodeConfiguration.controlGroups.stream()
                     .filter(g -> g.name.equals(reqApp.preferredProcessControlGroup)).findAny();
+
             // if preferred group is not found, the application will drop in the default group later during saving.
-            if (targetCg.isPresent()) {
-                targetCg.get().processOrder.add(cfg.id);
-            }
+            targetCg.ifPresent(pcg -> pcg.processOrder.add(cfg.id));
 
             node.nodeConfiguration.applications.add(cfg);
         }

@@ -257,7 +257,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
         public String getNodeName() {
             if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
-                return "Client Applications";
+                return InstanceManifest.CLIENT_NODE_LABEL;
             }
             return nodeName;
         }
