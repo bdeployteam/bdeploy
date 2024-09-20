@@ -354,7 +354,6 @@ Additionally, each **Process Control Group** can be configured to wait for proce
 - `WAIT`: When starting a **Process** in the group, wait for its startup to be complete before continuing to the next **Process**. The startup of the process is considered complete once the **Startup Probe** becomes live. If no **Startup Probe** is configured, this mode is equal to `CONTINUE`.
 - `WAIT_UNTIL_STOPPED`: When starting a **Process** in the group, wait for it to finish before continuing to the next **Process**. A process is considered finished once its state is **STOPPED**.
 
-
 :::{align=center}
 ![Add Process Control Groups](/images/Doc_InstanceConfigAddProcessControlGroup.png){width=480}
 :::
