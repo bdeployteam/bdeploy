@@ -27,7 +27,7 @@ class DataTableTextTest {
                 + "├────────────────────────────────────────────────────┼───────────────────────────┼────────────┤\n"//
                 + "│ val1                                               │ val2                      │ val3       │\n"//
                 + "└────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
-        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(-1));
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(0));
     }
 
     @Test
@@ -42,7 +42,7 @@ class DataTableTextTest {
                 + "│ col1                                               │ col2                      │ col3       │\n"//
                 + "├────────────────────────────────────────────────────┴───────────────────────────┴────────────┤\n"//
                 + "└─────────────────────────────────────────────────────────────────────────────────────────────┘\n";
-        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(-1), false);
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(0), false);
     }
 
     @Test
@@ -62,7 +62,7 @@ class DataTableTextTest {
                 + "│ This first cell has a very long text indeed        │ second one is shorter     │ third      │\n"//
                 + "└────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
-                table -> DataTableTestUtil.addLongTextRow(table).setMaxTableLengthHint(-1));
+                table -> DataTableTestUtil.addLongTextRow(table).setMaxTableLengthHint(0));
     }
 
     @Test
@@ -82,7 +82,7 @@ class DataTableTextTest {
                 + "│ This first cell has a very long text indeed                                    │ third      │\n"//
                 + "└────────────────────────────────────────────────────────────────────────────────┴────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
-                table -> DataTableTestUtil.addSpannedTextRow(table).setMaxTableLengthHint(-1));
+                table -> DataTableTestUtil.addSpannedTextRow(table).setMaxTableLengthHint(0));
     }
 
     @Test
@@ -95,7 +95,7 @@ class DataTableTextTest {
                 + "┌────────────────────────────────────────────────────┬───────────────────────────┬────────────┐\n"//
                 + "│ val1                                               │ val2                      │ val3       │\n"//
                 + "└────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
-        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setHideHeadersHint(true).setMaxTableLengthHint(-1));
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setHideHeadersHint(true).setMaxTableLengthHint(0));
     }
 
     @Test
@@ -117,7 +117,7 @@ class DataTableTextTest {
                 + "│ val1                                               │ val2                      │ val3       │\n"//
                 + "└────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
-                table -> table.setCaption("Lorem ipsum dolor sit amet").setMaxTableLengthHint(-1));
+                table -> table.setCaption("Lorem ipsum dolor sit amet").setMaxTableLengthHint(0));
     }
 
     @Test
@@ -134,7 +134,7 @@ class DataTableTextTest {
                 + "   ├────────────────────────────────────────────────────┼───────────────────────────┼────────────┤\n"//
                 + "   │ val1                                               │ val2                      │ val3       │\n"//
                 + "   └────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
-        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setIndentHint(3).setMaxTableLengthHint(-1));
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setIndentHint(3).setMaxTableLengthHint(0));
     }
 
     @Test
@@ -154,7 +154,7 @@ class DataTableTextTest {
                 + "│ This first cell has a very long text indeed        │ second one is shorter     │ third      │\n"//
                 + "└────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
-                table -> DataTableTestUtil.addLongTextRow(table.setLineWrapHint(true).setMaxTableLengthHint(-1)));
+                table -> DataTableTestUtil.addLongTextRow(table.setLineWrapHint(true).setMaxTableLengthHint(0)));
     }
 
     @Test
@@ -184,7 +184,7 @@ class DataTableTextTest {
                 + "│ AAA                                                │ BBB                       │ CCC        │\n"//
                 + "└────────────────────────────────────────────────────┴───────────────────────────┴────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> {
-            table.setMaxTableLengthHint(-1);
+            table.setMaxTableLengthHint(0);
             table.addHorizontalRuler();
             table.row().cell("val4").cell("val5").cell("val6").build();
             table.row().cell("val7").cell("val8").cell("val9").build();
@@ -213,7 +213,7 @@ class DataTableTextTest {
                 + "│ What an interesting footer this is                                                          │\n"//
                 + "└─────────────────────────────────────────────────────────────────────────────────────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
-                table -> table.addFooter("What an interesting footer this is").setMaxTableLengthHint(-1));
+                table -> table.addFooter("What an interesting footer this is").setMaxTableLengthHint(0));
     }
 
     @Test
@@ -233,7 +233,7 @@ class DataTableTextTest {
                 + "└──────┴──────┴──────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(100));
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(80));
-        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(-1));
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong, table -> table.setMaxTableLengthHint(0));
     }
 
     @Test
@@ -291,7 +291,7 @@ class DataTableTextTest {
                 + "│ Footer 2                                                │\n"//
                 + "└─────────────────────────────────────────────────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort3, expectedLong,//
-                table -> table.setMaxTableLengthHint(-1).setCaption(caption).addFooter("Footer 1").addFooter("Footer 2"));
+                table -> table.setMaxTableLengthHint(0).setCaption(caption).addFooter("Footer 1").addFooter("Footer 2"));
 
         String expectedShort4 = ""//
                 + "┌─────────────────────────────────────────────────────────┐\n"//
@@ -344,7 +344,7 @@ class DataTableTextTest {
                 + "│ val1                                        │ val2                  │ val3                 │\n"//
                 + "│ This first cell has a very long text indeed │ second one is shorter │ third                │\n"//
                 + "└─────────────────────────────────────────────┴───────────────────────┴──────────────────────┘\n";
-        TEST_UTIL.test(table -> DataTableTestUtil.addLongTextRow(table.setMaxTableLengthHint(-1)), true, 10, 5, 20, expected4);
+        TEST_UTIL.test(table -> DataTableTestUtil.addLongTextRow(table.setMaxTableLengthHint(0)), true, 10, 5, 20, expected4);
 
         String expected5 = ""//
                 + "┌─────────────────────────────────────────────┬───────────────────────┬──────────────────────┐\n"//
@@ -353,7 +353,7 @@ class DataTableTextTest {
                 + "│ val1                                        │ val2                  │ val3                 │\n"//
                 + "│ This first cell has a very long text indeed │ second one is shorter │ third                │\n"//
                 + "└─────────────────────────────────────────────┴───────────────────────┴──────────────────────┘\n";
-        TEST_UTIL.test(table -> DataTableTestUtil.addLongTextRow(table.setMaxTableLengthHint(-1)), true, 10, 0, 20, expected5);
+        TEST_UTIL.test(table -> DataTableTestUtil.addLongTextRow(table.setMaxTableLengthHint(0)), true, 10, 0, 20, expected5);
 
         String expected6 = ""//
                 + "┌─────────────────────────────────────────────┬────────┬──────────────────────┐\n"//
@@ -362,7 +362,7 @@ class DataTableTextTest {
                 + "│ val1                                        │ val2   │ val3                 │\n"//
                 + "│ This first cell has a very long text indeed │ sec... │ third                │\n"//
                 + "└─────────────────────────────────────────────┴────────┴──────────────────────┘\n";
-        TEST_UTIL.test(table -> DataTableTestUtil.addLongTextRow(table.setMaxTableLengthHint(0)), true, 10, 0, 20, expected6);
+        TEST_UTIL.test(table -> DataTableTestUtil.addLongTextRow(table.setMaxTableLengthHint(1)), true, 10, 0, 20, expected6);
     }
 
     @Test
