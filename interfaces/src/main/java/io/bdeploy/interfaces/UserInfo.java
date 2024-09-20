@@ -88,9 +88,7 @@ public class UserInfo implements Comparable<UserInfo> {
      * Removes leading as well as trailing spaces and converts the name into lower case.
      */
     public static String normalizeName(String name) {
-        name = name.trim();
-        name = name.toLowerCase();
-        return name;
+        return name.trim().toLowerCase();
     }
 
     @Generated("Eclipse")
