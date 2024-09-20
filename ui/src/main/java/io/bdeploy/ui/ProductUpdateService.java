@@ -470,7 +470,7 @@ public class ProductUpdateService {
                             Set<String> configDirs = Arrays.stream(split).map(s -> s.substring(1)).collect(Collectors.toSet());
                             files.stream()//
                                     .filter(file -> configDirs.contains(Path.of(file.file).getParent().toString()))//
-                                    .forEach(file -> validateFile(result, resolver, "Client Applications", file));
+                                    .forEach(file -> validateFile(result, resolver, InstanceManifest.CLIENT_NODE_LABEL, file));
                         });
             } else {
                 files.forEach(file -> validateFile(result, resolver, nodeName, file));
