@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,19 +54,21 @@ public class AuditParameterExtractor {
         TO_STRING(Object::toString),
         COLLECTION_SIZE(x -> Integer.toString(((Collection<?>) x).size())),
         COLLECTION_PEEK(x -> {
-            List<String> items = new ArrayList<>();
+            List<String> items;
             if (x instanceof Collection) {
                 Collection<?> coll = ((Collection<?>) x);
-                coll.stream().limit(3).map(Object::toString).forEach(items::add);
+                items = coll.stream().limit(3).map(Object::toString).collect(Collectors.toList());
                 if (coll.size() > 3) {
                     items.add("...");
                 }
             } else if (x instanceof Map) {
                 Map<?, ?> m = ((Map<?, ?>) x);
-                m.entrySet().stream().limit(3).map(Object::toString).forEach(items::add);
+                items = m.entrySet().stream().limit(3).map(Object::toString).collect(Collectors.toList());
                 if (m.size() > 3) {
                     items.add("...");
                 }
+            } else {
+                items = new ArrayList<>();
             }
             return items.toString();
         });

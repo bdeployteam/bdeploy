@@ -106,15 +106,14 @@ public class ProductResourceImpl implements ProductResource {
 
     @Override
     public List<ProductDto> list(String name) {
-        List<ProductDto> result = new ArrayList<>();
-        SortedSet<Key> scan = ProductManifest.scan(hive);
-
         Predicate<ProductManifest> filter = p -> true;
         if (name != null && !name.isBlank()) {
             filter = p -> p.getKey().getName().equals(name);
         }
 
-        scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).forEach(p -> result.add(ProductDto.create(p)));
+        SortedSet<Key> scan = ProductManifest.scan(hive);
+        List<ProductDto> result = scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).map(ProductDto::create)
+                .collect(Collectors.toList());
         if (!result.isEmpty()) {
             Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
             result.sort((a, b) -> {
@@ -186,8 +185,8 @@ public class ProductResourceImpl implements ProductResource {
             if (installedTags.isEmpty()) {
                 // in this case, we take the latest, and need to still block this product version from removal.
                 // (instance was created, but never installed (yet)).
-                InstanceManifest newest = mfSet.stream()
-                        .sorted((a, b) -> Integer.compare(Integer.parseInt(b.getManifest().getTag()), Integer.parseInt(a.getManifest().getTag())))
+                InstanceManifest newest = mfSet.stream().sorted((a, b) -> Integer
+                        .compare(Integer.parseInt(b.getManifest().getTag()), Integer.parseInt(a.getManifest().getTag())))
                         .findFirst().get();
 
                 result.add(createUsage(newest));

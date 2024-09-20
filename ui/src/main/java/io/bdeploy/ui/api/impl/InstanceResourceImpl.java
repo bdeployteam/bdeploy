@@ -237,13 +237,15 @@ public class InstanceResourceImpl implements InstanceResource {
 
         SortedSet<Key> productsInGroup = ProductManifest.scan(hive);
         result.newerVersionAvailable = isNewerVersionAvailable(productsInGroup, im.getConfiguration(), productVersionComparator);
-        result.newerVersionAvailableInRepository = getNewerVersionAvailableInRepository(igc, im.getConfiguration(), productsInGroup, productVersionComparator, productKeysPerRepo);
+        result.newerVersionAvailableInRepository = getNewerVersionAvailableInRepository(igc, im.getConfiguration(),
+                productsInGroup, productVersionComparator, productKeysPerRepo);
 
         return result;
     }
 
-    private static String getNewerVersionAvailableInRepository(InstanceGroupConfiguration igc, InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
-            Comparator<String> productVersionComparator, Map<String, SortedSet<Key>> productKeysPerRepo) {
+    private static String getNewerVersionAvailableInRepository(InstanceGroupConfiguration igc, InstanceConfiguration config,
+            Set<Key> instanceGroupProductKeys, Comparator<String> productVersionComparator,
+            Map<String, SortedSet<Key>> productKeysPerRepo) {
         Key productKey = config.product;
         if (igc.productToRepo == null || !igc.productToRepo.containsKey(productKey.getName())) {
             return null;
@@ -459,8 +461,8 @@ public class InstanceResourceImpl implements InstanceResource {
             readTree(configRoot, rootTv);
         }
 
-        return InstanceDto.create(imKey, config, activeProduct,
-                managedMaster, attributes, banner, im.getManifest(), activeVersion, overallState, configRoot);
+        return InstanceDto.create(imKey, config, activeProduct, managedMaster, attributes, banner, im.getManifest(),
+                activeVersion, overallState, configRoot);
     }
 
     @Override
@@ -502,7 +504,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void delete(String instance) {
         // prevent delete if processes are running.
         InstanceManifest im = readInstance(instance);
-        List<InstanceVersionDto> versions = listVersions(instance);
+        listVersions(instance);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
 
         MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);

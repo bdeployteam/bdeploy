@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,19 +113,16 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             return result;
         }
 
-        // 1) read instances per key.
-        List<InstanceUpdateDto> updates = new ArrayList<>();
+        // 1) Read instances per key. Read all instance manifests, and all associated node manifests. Then mash them into an update DTO which has no config file changes.
         Map<String, Manifest.Key> instanceKeys = new TreeMap<>();
-
-        // read all instance manifests, and all associated node manifests. then mash them into an update DTO which has no config file changes.
-        instances.stream().map(i -> InstanceManifest.of(hive, i)).map(im -> {
+        List<InstanceUpdateDto> updates = instances.stream().map(i -> InstanceManifest.of(hive, i)).map(im -> {
             var icd = new InstanceConfigurationDto(im.getConfiguration(),
                     im.getInstanceNodeManifests().entrySet().stream().map(e -> new InstanceNodeConfigurationDto(e.getKey(),
                             InstanceNodeManifest.of(hive, e.getValue()).getConfiguration())).toList());
 
             instanceKeys.put(icd.config.id, im.getManifest());
             return new InstanceUpdateDto(icd, null);
-        }).forEach(updates::add);
+        }).collect(Collectors.toList());
 
         try (ActionHandle h = af.runMulti(Actions.UPDATE_PRODUCT_VERSION, group, instanceKeys.keySet())) {
             // 2) validate all are using the same product (name, not version) and that version restrictions match.

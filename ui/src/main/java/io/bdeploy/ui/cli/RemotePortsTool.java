@@ -1,6 +1,7 @@
 package io.bdeploy.ui.cli;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -172,44 +173,48 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
     private List<NodePort> collectPorts(InstanceNodeConfigurationListDto nodeConfigs) {
         var result = new ArrayList<NodePort>();
-
         for (InstanceNodeConfigurationDto node : nodeConfigs.nodeConfigDtos) {
-
             for (ApplicationConfiguration config : node.nodeConfiguration.applications) {
-
-                var desc = nodeConfigs.applications.stream().filter(a -> a.key.getName().equals(config.application.getName()))
-                        .findFirst().orElse(null);
-                if (desc == null) {
-                    throw new IllegalStateException("Cannot find application descriptor " + config.application.getName()
-                            + " for configuration " + config.name);
-                }
-
-                if (desc.descriptor.startCommand != null) {
-                    VariableResolver resolver = createResolver(node, config);
-                    for (var param : config.start.parameters) {
-                        var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(param.id))
-                                .findFirst().orElse(null);
-                        if (paramDesc != null
-                                && (paramDesc.type == VariableType.CLIENT_PORT || paramDesc.type == VariableType.SERVER_PORT)) {
-                            try {
-                                var val = param.value.value;
-                                if (param.value.linkExpression != null) {
-                                    val = TemplateHelper.process(param.value.linkExpression, resolver);
-                                }
-                                result.add(new NodePort(node.nodeName, config.name, config.id, paramDesc.type, paramDesc.name,
-                                        Integer.valueOf(val)));
-                            } catch (NumberFormatException e) {
-                                out().println("Illegal port value configured for " + param.id + " on application " + config.id);
-                            }
-                        }
-                    }
-                }
+                result.addAll(getPortsOfApp(nodeConfigs, node, config));
             }
         }
 
         // sort by port number.
         Collections.sort(result, Comparator.comparing(NodePort::getPort));
 
+        return result;
+    }
+
+    private Collection<NodePort> getPortsOfApp(InstanceNodeConfigurationListDto nodeConfigs, InstanceNodeConfigurationDto node,
+            ApplicationConfiguration config) {
+        var desc = nodeConfigs.applications.stream().filter(a -> a.key.getName().equals(config.application.getName())).findFirst()
+                .orElse(null);
+        if (desc == null) {
+            throw new IllegalStateException(
+                    "Cannot find application descriptor " + config.application.getName() + " for configuration " + config.name);
+        }
+
+        Collection<NodePort> result = new ArrayList<>();
+        if (desc.descriptor.startCommand != null) {
+            VariableResolver resolver = createResolver(node, config);
+            for (var param : config.start.parameters) {
+                var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(param.id)).findFirst()
+                        .orElse(null);
+                if (paramDesc != null
+                        && (paramDesc.type == VariableType.CLIENT_PORT || paramDesc.type == VariableType.SERVER_PORT)) {
+                    try {
+                        var val = param.value.value;
+                        if (param.value.linkExpression != null) {
+                            val = TemplateHelper.process(param.value.linkExpression, resolver);
+                        }
+                        result.add(new NodePort(node.nodeName, config.name, config.id, paramDesc.type, paramDesc.name,
+                                Integer.valueOf(val)));
+                    } catch (NumberFormatException e) {
+                        out().println("Illegal port value configured for " + param.id + " on application " + config.id);
+                    }
+                }
+            }
+        }
         return result;
     }
 
