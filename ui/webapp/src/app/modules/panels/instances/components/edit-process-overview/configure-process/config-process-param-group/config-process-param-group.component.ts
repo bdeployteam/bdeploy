@@ -368,7 +368,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     }
     try {
       const params: ParameterConfiguration[] = JSON.parse(data);
-      const validIds = params.every((iv) => !!iv.id);
+      const validIds = params?.every((iv) => !!iv.id);
       if (!validIds) {
         console.error(`Invalid parameters format`);
       } else {
