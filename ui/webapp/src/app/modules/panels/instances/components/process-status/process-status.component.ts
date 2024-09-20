@@ -424,19 +424,19 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       if (min > 0 || hours > 0 || days > 0) {
         s += min + (min === 1 ? ' minute' : ' minutes');
       }
-      let delay = 0;
+      let calculatedDelay = 0;
       if (days === 0 && hours === 0 && min === 0) {
         s = sec + (sec === 1 ? ' second' : ' seconds');
         // calculate reschedule for next second
-        delay = 1000 - (ms - Math.floor(ms / 1000) * 1000);
+        calculatedDelay = 1000 - (ms - Math.floor(ms / 1000) * 1000);
       } else {
         // calculate reschedule for next minute
-        delay = 60000 - (ms - Math.floor(ms / 60000) * 60000);
+        calculatedDelay = 60000 - (ms - Math.floor(ms / 60000) * 60000);
       }
 
       this.zone.run(() => {
         this.uptime$.next(s);
-        this.uptimeCalculateHandle = setTimeout(() => this.doCalculateUptimeString(detail), delay);
+        this.uptimeCalculateHandle = setTimeout(() => this.doCalculateUptimeString(detail), calculatedDelay);
       });
     } else {
       this.zone.run(() => {

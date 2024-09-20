@@ -12,7 +12,7 @@ import {
   Subscription,
   switchMap,
 } from 'rxjs';
-import { debounceTime, filter, finalize, first, map, skip, skipWhile, tap } from 'rxjs/operators';
+import { debounceTime, finalize, first, map, skip, skipWhile, tap } from 'rxjs/operators';
 import {
   CustomAttributesRecord,
   HistoryFilterDto,
@@ -249,11 +249,11 @@ export class InstancesService {
     );
   }
 
-  public loadHistory(filter: Partial<HistoryFilterDto>): Observable<HistoryResultDto> {
+  public loadHistory(filterDto: Partial<HistoryFilterDto>): Observable<HistoryResultDto> {
     return this.http
       .post<HistoryResultDto>(
         `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.id}/history`,
-        filter,
+        filterDto,
       )
       .pipe(measure('Current Instance History'));
   }

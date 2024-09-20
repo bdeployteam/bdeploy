@@ -174,9 +174,7 @@ export class ActionsService {
       itemObs,
     ]).pipe(
       skipWhile(([actions]) => !actions?.length),
-      map(([actions, groups, instances, items]) =>
-        actions.filter((a) => this.actionMatches(a, groups, instances, items)),
-      ),
+      map(([actions, grps, instances, items]) => actions.filter((a) => this.actionMatches(a, grps, instances, items))),
       map((a) => !!a?.length),
     );
 

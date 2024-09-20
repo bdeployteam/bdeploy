@@ -23,8 +23,8 @@ export function formatSize(size: number): string {
   return (i === 0 ? size : (size / Math.pow(1024, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
-export function randomString(length: number, alowNumbers?: boolean): string {
-  const chars = alowNumbers
+export function randomString(length: number, allowNumbers = false): string {
+  const chars = allowNumbers
     ? '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     : 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
