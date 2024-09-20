@@ -178,8 +178,8 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     }
     try {
       const variables: ConfigVariable[] = JSON.parse(data);
-      const validNames = variables.every((iv) => !!iv.name);
-      const validVariables = variables.every((iv) => !!iv.value && !!iv.value.id);
+      const validNames = variables?.every((iv) => !!iv.name);
+      const validVariables = variables?.every((iv) => !!iv.value && !!iv.value.id);
       if (!validNames || !validVariables) {
         console.error(`Invalid variables format.`);
       } else {
