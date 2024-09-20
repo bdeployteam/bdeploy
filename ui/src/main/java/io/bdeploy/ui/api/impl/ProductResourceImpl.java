@@ -187,7 +187,7 @@ public class ProductResourceImpl implements ProductResource {
                 // in this case, we take the latest, and need to still block this product version from removal.
                 // (instance was created, but never installed (yet)).
                 InstanceManifest newest = mfSet.stream()
-                        .sorted((a, b) -> Integer.parseInt(b.getManifest().getTag(), Integer.parseInt(a.getManifest().getTag())))
+                        .sorted((a, b) -> Integer.compare(Integer.parseInt(b.getManifest().getTag()), Integer.parseInt(a.getManifest().getTag())))
                         .findFirst().get();
 
                 result.add(createUsage(newest));
