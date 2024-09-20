@@ -256,7 +256,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
       // we can only revert to the default value if it is a plain value here - otherwise we would "snap" back
       // to link expression mode in case we're switching mode on number or boolean with an invalid value currently
       // in the input field.
-      if (this.defaultValue.value && !this.defaultValue.linkExpression) {
+      if (this.defaultValue?.value && !this.defaultValue?.linkExpression) {
         this.doRevert();
       } else {
         // in case the default value is a link expression, we must resort to the empty value.
