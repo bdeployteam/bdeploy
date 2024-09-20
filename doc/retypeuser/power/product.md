@@ -329,16 +329,16 @@ In this case you will want the user to be able to edit the value of `-Dmy.prop` 
 
 ```yaml
 startCommand:
-  launcherPath: '{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}'
+  launcherPath: "{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}"
   parameters:
-    - id: 'my.prop'
-      name: 'My Property'
-      parameter: '-Dmy.prop'
+    - id: "my.prop"
+      name: "My Property"
+      parameter: "-Dmy.prop"
       mandatory: true
-    - id: 'my.jar'
-      name: 'Application JAR'
-      parameter: '-jar'
-      defaultValue: 'application.jar'
+    - id: "my.jar"
+      name: "Application JAR"
+      parameter: "-jar"
+      defaultValue: "application.jar"
       valueAsSeparateArg: true
       mandatory: true
       fixed: true <1>
@@ -375,18 +375,18 @@ A condition expression (isolated) looks like this:
 
 ```yaml
 condition:
-  parameter: 'my.param.2'
+  parameter: "my.param.2"
   must: EQUAL
-  value: 'Value 1'
+  value: "Value 1"
 ```
 
 Or, in its newer form, the very same (but ultimately more powerful) using `expression` would look like this:
 
 ```yaml
 condition:
-  expression: '{{V:my.param.2}}'
+  expression: "{{V:my.param.2}}"
   must: EQUAL
-  value: 'Value 1'
+  value: "Value 1"
 ```
 
 The power comes from the ability to provide an arbitrary amount of [Variable Expansions](/power/variables/#variable-expansions) in the [Link Expressions](/user/instance/#link-expressions).
@@ -736,19 +736,19 @@ Defined `templateVariables` can be used in each `instanceVariables` (and `instan
 
 ### Supported `instanceVariableValues` Attributes
 
-| Attribute | Description                                                                                                                                                                                 |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`      | The unique ID of an instance variable definition defined in [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml).                                                     |
-| `value`   | The value to use when applying this instance template.                                                                                                                                      |
+| Attribute | Description                                                                                                                             |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | The unique ID of an instance variable definition defined in [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml). |
+| `value`   | The value to use when applying this instance template.                                                                                  |
 
 ### Supported `processControlGroups` Attributes
 
-| Attribute   | Description                                                                                                                                                                                                                                                   |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`      | The name of the [Process Control Groups](/user/instance/#process-control-groups) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute.                          |
-| `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                             |
-| `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                             |
-| `stopType`  | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                                              |
+| Attribute   | Description                                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`      | The name of the [Process Control Groups](/user/instance/#process-control-groups) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute. |
+| `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                    |
+| `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                    |
+| `stopType`  | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups).                                                                                                                                     |
 
 ### Supported `groups` Attributes
 
@@ -833,19 +833,20 @@ definitions: <1>
 1. File consists of a single list of `definitions` containing an arbitrary amount of instance variable definitions.
 
 ### Supported `definitions` Attributes
+
 Instance variable definitions support a subset of [supported parameters attributes](/power/product/#supported-parameters-attributes)
 
-| Attribute          | Description                                                                                                                                                                                            |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`               | The unique ID of the instance variable definition. Instance variable created from definition will have the same ID.                                                                                    |
-| `name`             | A human readable name of the instance variable used as label in the configuration UI.                                                                                                                  |
-| `longDescription`  | An optional human readable description of the instance variable, which is displayed in an info popover next to the instance variable in the Web UI.                                                    |
-| `type`             | Type of instance variable. This defines the type of input field used to edit the variable. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`.                     |
-| `defaultValue`     | A default value for the variable. The default value may contain variable references according to the [Variable Expansion](/power/variables/#variable-expansions) rules.                                |
-| `groupName`        | An optional group name. The configuration UI may use this information to group variables with the same group name together.                                                                            |
-| `fixed`            | Whether the instance variable is fixed. This means that the variable can **not** be changed by the user.                                                                                               |
-| `suggestedValues`  | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                                     |
-| `customEditor`     | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable.                                                                                 |
+| Attribute         | Description                                                                                                                                                                        |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | The unique ID of the instance variable definition. Instance variable created from definition will have the same ID.                                                                |
+| `name`            | A human readable name of the instance variable used as label in the configuration UI.                                                                                              |
+| `longDescription` | An optional human readable description of the instance variable, which is displayed in an info popover next to the instance variable in the Web UI.                                |
+| `type`            | Type of instance variable. This defines the type of input field used to edit the variable. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. |
+| `defaultValue`    | A default value for the variable. The default value may contain variable references according to the [Variable Expansion](/power/variables/#variable-expansions) rules.            |
+| `groupName`       | An optional group name. The configuration UI may use this information to group variables with the same group name together.                                                        |
+| `fixed`           | Whether the instance variable is fixed. This means that the variable can **not** be changed by the user.                                                                           |
+| `suggestedValues` | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                 |
+| `customEditor`    | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable.                                                             |
 
 ## system-template.yaml
 
@@ -1150,8 +1151,8 @@ This file is required and lists the [`product-build.yaml`](#product-buildyaml) f
 
 ```yaml products.yaml
 products:
-  'Product One': 'prod-1-build.yaml'
-  'Product Two': 'prod-2-build.yaml'
+  "Product One": "prod-1-build.yaml"
+  "Product Two": "prod-2-build.yaml"
 ```
 
 The path to the `products.yaml` has to be configured in the **Eclipse TEA** preferences.

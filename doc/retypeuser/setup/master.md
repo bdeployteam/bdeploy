@@ -95,7 +95,7 @@ Only authenticated users have access to the Web UI. The initial user has been cr
 
 The Web UI uses timed sessions for authenticated users. Sessions follow these rules:
 
-* A user must be 'active' (i.e. visiting the **BDeploy** Web UI in some way) within a configurable timeframe, by default 24 hours. Otherwise, the session is timed out.
-* A session times out latest after a configurable session timeout, by default 7 days.
-* Active sessions are stored on disc every 5 minutes. Sessions are not guaranteed to be deemed active after a server restart, but will be in most cases. A forced server shutdown will not write currently active sessions (e.g. `kill -9`).
-* The `bdeploy config` command can be used to modify the timeout values.
+- A user must be 'active' (i.e. visiting the **BDeploy** Web UI in some way) within a configurable timeframe, by default 24 hours. Otherwise, the session is timed out.
+- A session times out latest after a configurable session timeout, by default 7 days.
+- Active sessions are stored on disc every 5 minutes. Sessions are not guaranteed to be deemed active after a server restart, but will be in most cases. A forced server shutdown will not write currently active sessions (e.g. `kill -9`).
+- The `bdeploy config` command can be used to modify the timeout values.

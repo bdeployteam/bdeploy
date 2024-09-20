@@ -217,7 +217,7 @@ The [ **Assign Permission** ] opens a popup for adding a permission entry. Globa
 
 ### All Users Group
 
-There is a special **All Users Group** that cannot be deleted or deactivated, but its permissions can be edited. Every user, both present and future, is automatically enlisted in this group. You can make any **Instance Group/Software Repository** effectively public by assigning **READ** permission to **All Users Group** for **Instance Group/Software Repository** of your choice. 
+There is a special **All Users Group** that cannot be deleted or deactivated, but its permissions can be edited. Every user, both present and future, is automatically enlisted in this group. You can make any **Instance Group/Software Repository** effectively public by assigning **READ** permission to **All Users Group** for **Instance Group/Software Repository** of your choice.
 
 ## Manual Cleanup
 
@@ -231,7 +231,7 @@ All Nodes | Delete **Manifests** that are not known by the master.
 All Nodes | Keep two **BDeploy Launcher** versions, delete all older versions.
 All Nodes | Remove unused directories and files in the deployment (including pooled applications), download and temp directory.
 
-The dialog can be used to immediately trigger a cleanup and to reviewing of the actions performed _before_ doing so. 
+The dialog can be used to immediately trigger a cleanup and to reviewing of the actions performed _before_ doing so.
 
 :::{align=center}
 ![BDeploy Cleanup Page](/images/Doc_Cleanup.png){width=480}
@@ -250,6 +250,7 @@ The dialog automatically resets itself after a certain timeout. This is to preve
 !!!
 
 ## Hive Browser
+
 The **BHive** page from the **Administration** menu is an internal tool for administrative purposes. It allows access to the internals of the **BDeploy** storage.
 
 The table shows all available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.

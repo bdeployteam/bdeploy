@@ -24,7 +24,7 @@ As a consequence, a _security token_ is required for all CLI commands that commu
 | 2.1.5  | Yes       | Users can change their password.                                              |
 | 2.1.6  | Yes       | Password change requires old and new password.                                |
 | 2.1.7  | **No**    | New passwords checked against set of breached passwords.                      |
-| 2.1.8  | Yes       | Strength meter for password strength hint.                                     |
+| 2.1.8  | Yes       | Strength meter for password strength hint.                                    |
 | 2.1.9  | Yes       | There should be no specific requirement for password composition.             |
 | 2.1.10 | Yes       | No periodic credential rotation of password history requirements.             |
 | 2.1.11 | Yes       | Pasting passwords from password manager should work.                          |
