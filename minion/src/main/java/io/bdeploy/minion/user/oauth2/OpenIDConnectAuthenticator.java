@@ -288,7 +288,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
                 return false;
             }
         } catch (Exception e) {
-            log.warn("Failed to parse stored OIDC token for {}", user.name);
+            log.warn("Failed to parse stored OIDC token for {}", user.name, e);
             return false;
         }
 
@@ -299,7 +299,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         try {
             return JWTParser.parse(token);
         } catch (Exception e) {
-            log.warn("Cannot parse stored JWT");
+            log.warn("Cannot parse stored JWT", e);
             return null;
         }
     }

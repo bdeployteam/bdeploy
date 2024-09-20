@@ -822,7 +822,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             try {
                 PathHelper.moveRetry(bakCfg, cfg, StandardCopyOption.ATOMIC_MOVE);
             } catch (Exception e) {
-                log.error("Cannot automatically restore {} from {}", cfg, bakCfg);
+                log.error("Cannot automatically restore {} from {}", cfg, bakCfg, e);
             }
         }
 

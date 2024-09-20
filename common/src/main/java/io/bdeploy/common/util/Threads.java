@@ -79,7 +79,7 @@ public class Threads {
         try {
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            log.error("Cannot move {} to {}", source, target);
+            log.error("Cannot move {} to {}", source, target, e);
         }
     }
 

@@ -113,7 +113,9 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                             }
                             return sz;
                         } catch (NoSuchFileException e) {
-                            log.debug("To-be-removed object is no longer existing: {}", unreferenced);
+                            if (log.isDebugEnabled()) {
+                                log.debug("To-be-removed object is no longer existing: {}", unreferenced, e);
+                            }
                             return (long) 0;
                         }
                     }));

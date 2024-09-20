@@ -74,7 +74,7 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
                     ir.update(update, key.getTag());
                 } catch (Exception e) {
                     // in case a single instance can not be updated, issue a warning.
-                    log.warn("Cannot update system {} on instance {}: {}", newKey, config.id, e.toString());
+                    log.warn("Cannot update system {} on instance {}", newKey, config.id, e);
                 }
             }
         }

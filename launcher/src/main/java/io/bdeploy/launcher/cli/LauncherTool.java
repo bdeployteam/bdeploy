@@ -237,7 +237,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             // Update and launch
             doLaunch(auditor, splash);
         } catch (CancellationException ex) {
-            log.info("Launching has been canceled by the user.");
+            log.info("Launching has been canceled by the user.", ex);
             doExit(-1);
         } catch (SoftwareUpdateException ex) {
             log.error("Software update could not be installed.", ex);

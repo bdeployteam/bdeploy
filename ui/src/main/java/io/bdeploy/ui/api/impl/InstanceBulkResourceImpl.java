@@ -153,6 +153,9 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                     } catch (Exception ex) {
                         // this *might* be ok :)
                         log.info("Missing product {} while updating {}", productKey, e.config.config.id);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Exception", ex);
+                        }
                         return null;
                     }
                 });

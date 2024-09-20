@@ -445,6 +445,9 @@ public class InstanceResourceImpl implements InstanceResource {
                 managedMaster.auth = null; // make sure to clear auth.
             } catch (WebApplicationException e) {
                 log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", group, config.id, e);
+                }
             }
         }
 
@@ -705,6 +708,9 @@ public class InstanceResourceImpl implements InstanceResource {
                 current = ProductManifest.of(hive, state.config.config.product);
             } catch (Exception e) {
                 log.info("Missing source product on product update: {}", state.config.config.product);
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", e);
+                }
             }
 
             ProductManifest pm = current;
