@@ -46,8 +46,8 @@ function getChangeType(base: unknown, compare: unknown): DiffType {
 
 /** Given two complex objects and the DiffTypes of all the contained child objects, calculate a "outer" DiffType for the complex object */
 function getParentChangeType(base: unknown, compare: unknown, ...types: DiffType[]): DiffType {
-  const noBase = base === null || base === undefined;
-  const noCompare = compare === null || compare === undefined;
+  const noBase = base === null || base === undefined || (Array.isArray(base) && base.length === 0);
+  const noCompare = compare === null || compare === undefined || (Array.isArray(compare) && compare.length === 0);
   if (noBase && !noCompare) {
     return DiffType.NOT_IN_BASE;
   } else if (noCompare && !noBase) {

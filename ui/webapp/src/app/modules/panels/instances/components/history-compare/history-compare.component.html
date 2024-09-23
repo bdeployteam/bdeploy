@@ -89,6 +89,7 @@
                   [hasProcessControl]="nodePair.name !== clientNodeName"
                   diffSide="left"
                 ></app-history-process-config>
+                <div [hidden]="(appPair.base | customNodeFilter: searchTerm)" class="basis-1/2"></div>
                 <app-history-process-config
                   [hidden]="!(appPair.compare | customNodeFilter: searchTerm)"
                   class="basis-1/2"
