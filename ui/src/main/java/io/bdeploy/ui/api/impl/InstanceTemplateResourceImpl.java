@@ -124,8 +124,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         ProductDto product = InstanceTemplateHelper.findMatchingProductOrFail(instance, products);
 
         // 2. find and verify all group mappings and whether all variables are set for each required group.
-        Set<String> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context)
-                .getNodes().keySet();
+        Set<String> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes().keySet();
 
         FlattenedInstanceTemplateConfiguration tpl = product.instanceTemplates.stream()
                 .filter(t -> t.name.equals(instance.templateName)).findFirst()
@@ -141,8 +140,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 continue; // ignored
             }
 
-            if (!nodes.contains(mapping.node) && !mapping.node.equals(InstanceManifest.CLIENT_NODE_NAME) && !mapping.node.equals(
-                    InstanceManifest.CLIENT_NODE_LABEL)) {
+            if (!nodes.contains(mapping.node) && !mapping.node.equals(InstanceManifest.CLIENT_NODE_NAME)
+                    && !mapping.node.equals(InstanceManifest.CLIENT_NODE_LABEL)) {
                 throw new WebApplicationException(
                         "Group " + grp.name + " is mapped to node " + mapping.node + " but that node cannot be found",
                         Status.EXPECTATION_FAILED);
@@ -152,22 +151,22 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
             // otherwise check variables.
             for (TemplateVariable tvar : grp.groupVariables) {
-                if (StringHelper.isNullOrBlank(tvar.defaultValue)) {
-                    instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst().orElseThrow(
-                            () -> new WebApplicationException(
-                                    "Template Variable " + tvar.id + " not provided, required in group " + grp.name,
-                                    Status.EXPECTATION_FAILED));
+                if (StringHelper.isNullOrBlank(tvar.defaultValue)
+                        && instance.fixedVariables.stream().noneMatch(v -> v.id.equals(tvar.id))) {
+                    throw new WebApplicationException(
+                            "Template Variable " + tvar.id + " not provided, required in group " + grp.name,
+                            Status.EXPECTATION_FAILED);
                 }
             }
         }
 
         // 3. setup tracking for variables, and verify all variables are set.
         for (TemplateVariable tvar : tpl.directlyUsedTemplateVars) {
-            if (StringHelper.isNullOrBlank(tvar.defaultValue)) {
-                instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst().orElseThrow(
-                        () -> new WebApplicationException(
-                                "Template Variable " + tvar.id + " not provided, required directly in the instance template",
-                                Status.EXPECTATION_FAILED));
+            if (StringHelper.isNullOrBlank(tvar.defaultValue)
+                    && instance.fixedVariables.stream().noneMatch(v -> v.id.equals(tvar.id))) {
+                throw new WebApplicationException(
+                        "Template Variable " + tvar.id + " not provided, required directly in the instance template",
+                        Status.EXPECTATION_FAILED);
             }
         }
 
@@ -342,8 +341,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 ApplicationType appType = clientApp.getDescriptor().type;
                 if (groupType != appType) {
                     throw new WebApplicationException(
-                            "Incompatible application type. Node has type " + group.type + " but application has type "
-                                    + appType, Status.EXPECTATION_FAILED);
+                            "Incompatible application type. Node has type " + group.type + " but application has type " + appType,
+                            Status.EXPECTATION_FAILED);
                 }
 
                 node.nodeConfiguration.applications
@@ -374,8 +373,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             ApplicationType appType = appManifest.getDescriptor().type;
             if (groupType != appType) {
                 throw new WebApplicationException(
-                        "Incompatible application type. Node has type " + group.type + " but application has type "
-                                + appType, Status.EXPECTATION_FAILED);
+                        "Incompatible application type. Node has type " + group.type + " but application has type " + appType,
+                        Status.EXPECTATION_FAILED);
             }
 
             ApplicationConfiguration cfg = createApplicationFromTemplate(reqApp, appManifest, node, ttor, globalLookup);
