@@ -4,14 +4,20 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="detailsService.softwarePackage$ | async as software">
       <ng-container *ngIf="software?.type === 'Product'">
-        <div class="grid grid-cols-[70px_auto] gap-1">
-          <strong>ID:</strong>
-          <div>{{ asProduct(software).product }}</div>
-          <strong>Name:</strong>
+        <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
+          <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+          <div class="bd-secondary-text">ID:</div>
+          <div class="bd-secondary-text">
+            <app-bd-identifier [showCopyButton]="true" [id]="asProduct(software).product"></app-bd-identifier>
+          </div>
+          <mat-icon>badge</mat-icon>
+          <div>Name:</div>
           <div>{{ asProduct(software).name }}</div>
-          <strong>Version:</strong>
+          <mat-icon>apps</mat-icon>
+          <div>Version:</div>
           <div>{{ asProduct(software).key.tag }}</div>
-          <strong>Vendor:</strong>
+          <mat-icon>factory</mat-icon>
+          <div>Vendor:</div>
           <div>{{ asProduct(software).vendor }}</div>
         </div>
 
@@ -49,8 +55,16 @@
       </ng-container>
 
       <ng-container *ngIf="software?.type === 'External Software'">
-        <div><strong>ID:</strong>&nbsp;{{ software.key.name }}</div>
-        <div><strong>Version:</strong>&nbsp;{{ software.key.tag }}</div>
+        <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
+          <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+          <div class="bd-secondary-text">ID:</div>
+          <div class="bd-secondary-text">
+            <app-bd-identifier [showCopyButton]="true" [id]="software.key.name"></app-bd-identifier>
+          </div>
+          <mat-icon>apps</mat-icon>
+          <div>Version:</div>
+          <div>{{ software.key.tag }}</div>
+        </div>
       </ng-container>
 
       <app-bd-button
