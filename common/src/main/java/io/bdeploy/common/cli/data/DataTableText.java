@@ -43,7 +43,7 @@ class DataTableText extends DataTableBase {
     private boolean lineWrap = false;
     private boolean allowBreak = false;
     private int indent = 0;
-    private int maxTableLength = -1;
+    private int maxTableLength = 0;
 
     DataTableText(PrintStream output) {
         super(output);
@@ -81,7 +81,7 @@ class DataTableText extends DataTableBase {
 
     @Override
     public DataTable setMaxTableLengthHint(int maxTableLength) {
-        if (maxTableLength >= 0 && maxTableLength < MIN_MAX_TABLE_LENGTH) {
+        if (maxTableLength > 0 && maxTableLength < MIN_MAX_TABLE_LENGTH) {
             maxTableLength = MIN_MAX_TABLE_LENGTH;
         }
         this.maxTableLength = maxTableLength;
@@ -203,7 +203,7 @@ class DataTableText extends DataTableBase {
         }
 
         // If we are done -> return
-        if (maxTableLength < 0) {
+        if (maxTableLength <= 0) {
             return mapColsToWidth(cols);
         }
         int totalTableWidth = getTotalColumnsWidth(cols) + DOUBLE_TABLE_CELL_PADDING_WIDTH + 2;
