@@ -51,14 +51,11 @@ export class ClipboardService {
     const perm = 'clipboard-read' as PermissionName; // required due to TS bug.
     navigator.permissions.query({ name: perm }).then(
       (value: PermissionStatus) => {
-        if (value.state !== 'granted') {
-          // otherwise 'prompt' is open - not an error
-          if (value.state === 'denied') {
-            this._clipboard$.next({
-              data: null,
-              error: 'No permission to read from the clipboard.',
-            });
-          }
+        if (value.state === 'denied') {
+          this._clipboard$.next({
+            data: null,
+            error: 'No permission to read from the clipboard.',
+          });
         }
       },
       (reason) => {
@@ -70,7 +67,7 @@ export class ClipboardService {
       (data) => {
         this._clipboard$.next({ data, error: null });
       },
-      (e) => {
+      () => {
         this._clipboard$.next({ data: null, error: 'Unable to read from clipboard.' });
       },
     );

@@ -10,11 +10,11 @@ enum MarkerSeverity {
 
 export function errorMarker(message: string, match: monaco.editor.FindMatch): monaco.editor.IMarkerData {
   return {
+    severity: MarkerSeverity.Error,
     startLineNumber: match.range.startLineNumber,
     startColumn: match.range.startColumn,
     endLineNumber: match.range.endLineNumber,
     endColumn: match.range.endColumn,
     message,
-    severity: MarkerSeverity.Error,
   };
 }

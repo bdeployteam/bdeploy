@@ -81,9 +81,10 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
               idsAndNamesAndVersions.get(id)[1].push(dto.key.tag);
             });
 
-            this.prodList = Array.from(idsAndNamesAndVersions, ([key, value]) => {
-              return { id: key, name: value[0], versions: value[1] } as ProductRow;
-            });
+            this.prodList = Array.from(
+              idsAndNamesAndVersions,
+              ([key, value]) => <ProductRow>{ id: key, name: value[0], versions: value[1] },
+            );
             this.productNames = this.prodList.map((p) => p.name);
           }),
         );
