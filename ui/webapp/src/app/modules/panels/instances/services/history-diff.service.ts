@@ -9,6 +9,7 @@ import {
   ExecutableDescriptor,
   HttpEndpoint,
   InstanceConfiguration,
+  LinkedValueConfiguration,
   OperatingSystem,
   ParameterConfiguration,
   ParameterConfigurationTarget,
@@ -58,6 +59,13 @@ function getParentChangeType(base: unknown, compare: unknown, ...types: DiffType
   return types.every((e) => e === DiffType.UNCHANGED || e === undefined) ? DiffType.UNCHANGED : DiffType.CHANGED;
 }
 
+function getPreRenderableOrNull(lv: LinkedValueConfiguration): string {
+  if (lv === null || lv === undefined) {
+    return null;
+  }
+  return getPreRenderable(lv);
+}
+
 /** Maintains information about the difference in an object. The given value is the base value is set, otherwise the compare value. */
 export class Difference {
   /** The value to display to the user */
@@ -66,11 +74,7 @@ export class Difference {
   /** The type of difference to render */
   public type: DiffType;
 
-  constructor(
-    private readonly base: string | number | boolean,
-    private readonly compare: string | number | boolean,
-    valueOverride?: unknown,
-  ) {
+  constructor(base: string | number | boolean, compare: string | number | boolean, valueOverride?: unknown) {
     this.value = valueOverride || (base ?? compare);
     this.type = getChangeType(base, compare);
   }
@@ -162,8 +166,8 @@ export class ParameterDiff {
     if (descriptor?.type === VariableType.ENVIRONMENT) {
       this.values.push(
         new Difference(
-          `${descriptor.parameter}=${getPreRenderable(base?.value)}`,
-          `${descriptor.parameter}=${getPreRenderable(compare?.value)}`,
+          base?.value ? `${descriptor.parameter}=${getPreRenderable(base.value)}` : null,
+          compare?.value ? `${descriptor.parameter}=${getPreRenderable(compare?.value)}` : null,
         ),
       );
       this.type = getParentChangeType(base, compare, ...this.values.map((d) => d.type));
@@ -185,7 +189,7 @@ export class ParameterDiff {
         // DIFFERENT length, we cannot *directly* compare the values.
         for (const val of base.preRendered) {
           const masked = maskingValue ? val.replace(maskingValue, '*'.repeat(maskingValue.length)) : val;
-          this.values.push(new Difference(val, getPreRenderable(compare?.value), masked));
+          this.values.push(new Difference(val, getPreRenderableOrNull(compare?.value), masked));
         }
       } else {
         for (let i = 0; i < base.preRendered.length; ++i) {
@@ -246,17 +250,20 @@ export class HttpEndpointDiff {
 
   constructor(base: HttpEndpoint, compare: HttpEndpoint) {
     this.path = new Difference(base?.path, compare?.path);
-    this.port = new Difference(getPreRenderable(base?.port), getPreRenderable(compare?.port));
-    this.secure = new Difference(getPreRenderable(base?.secure), getPreRenderable(compare?.secure));
+    this.port = new Difference(getPreRenderableOrNull(base?.port), getPreRenderableOrNull(compare?.port));
+    this.secure = new Difference(getPreRenderableOrNull(base?.secure), getPreRenderableOrNull(compare?.secure));
     this.trustAll = new Difference(base?.trustAll, compare?.trustAll);
-    this.trustStore = new Difference(getPreRenderable(base?.trustStore), getPreRenderable(compare?.trustStore));
-    this.trustStorePass = new Difference(
-      getPreRenderable(base?.trustStorePass),
-      getPreRenderable(compare?.trustStorePass),
+    this.trustStore = new Difference(
+      getPreRenderableOrNull(base?.trustStore),
+      getPreRenderableOrNull(compare?.trustStore),
     );
-    this.authType = new Difference(getPreRenderable(base?.authType), getPreRenderable(compare?.authType));
-    this.authUser = new Difference(getPreRenderable(base?.authUser), getPreRenderable(compare?.authUser));
-    this.authPass = new Difference(getPreRenderable(base?.authPass), getPreRenderable(compare?.authPass));
+    this.trustStorePass = new Difference(
+      getPreRenderableOrNull(base?.trustStorePass),
+      getPreRenderableOrNull(compare?.trustStorePass),
+    );
+    this.authType = new Difference(getPreRenderableOrNull(base?.authType), getPreRenderableOrNull(compare?.authType));
+    this.authUser = new Difference(getPreRenderableOrNull(base?.authUser), getPreRenderableOrNull(compare?.authUser));
+    this.authPass = new Difference(getPreRenderableOrNull(base?.authPass), getPreRenderableOrNull(compare?.authPass));
 
     this.type = getParentChangeType(
       base,
@@ -368,8 +375,8 @@ export class VariableValueDiff {
     public compare: VariableConfiguration,
   ) {
     this.value = new Difference(
-      getPreRenderable(base?.value),
-      getPreRenderable(compare?.value),
+      getPreRenderableOrNull(base?.value),
+      getPreRenderableOrNull(compare?.value),
       base?.type === VariableType.PASSWORD || compare?.type === VariableType.PASSWORD
         ? '*'.repeat(getPreRenderable(base.value)?.length)
         : null,
