@@ -152,7 +152,12 @@ public class CleanupHelper {
         }
 
         // always prune to clean up things that are left over even if WE did nothing.
-        hive.execute(new PruneOperation());
+        // this targets mainly "rolling" manifests which are updated (created & deleted) in a rolling
+        // fashion like meta-manifests keeping track of things. Since those things are not created
+        // on a central, *and* central is the one with *a lot* of hives, we do this only on non-central.
+        if (minion.getMode() != MinionMode.CENTRAL || !group.actions.isEmpty()) {
+            hive.execute(new PruneOperation());
+        }
     }
 
     private void executeForMinion(CleanupGroup group) {
