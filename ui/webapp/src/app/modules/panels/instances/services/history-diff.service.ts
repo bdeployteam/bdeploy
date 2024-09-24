@@ -167,7 +167,7 @@ export class ParameterDiff {
       this.values.push(
         new Difference(
           base?.value ? `${descriptor.parameter}=${getPreRenderable(base.value)}` : null,
-          compare?.value ? `${descriptor.parameter}=${getPreRenderable(compare?.value)}` : null,
+          compare?.value ? `${descriptor.parameter}=${getPreRenderable(compare.value)}` : null,
         ),
       );
       this.type = getParentChangeType(base, compare, ...this.values.map((d) => d.type));
