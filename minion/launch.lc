@@ -1,7 +1,7 @@
+/** Base configuration for all minion configurations. Sets the logging to -v (verbose). */
 abstract java configuration minion-base {
 	project minion;
 	main-class io.bdeploy.minion.cli.MinionServerCli;
-
 	argument "-v";
 }
 
@@ -17,16 +17,14 @@ group configuration CentralMaster {
 	adopt member Central-Master;
 }
 
-/** Launches the central master with a managed master  + node  */
+/** Launches the central master with a managed master + node */
 group configuration CentralMasterNode {
 	adopt member Managed-Node regex ".*Started.*";
 	adopt member Managed-Master;
 	adopt member Central-Master;
 }
 
-/**
- * Initialize a new master root.
- */
+/** Initialize a new master root */
 java configuration Master-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/master";
@@ -41,9 +39,7 @@ java configuration Master-Init : minion-base {
 	argument "--pool=${workspace_loc}/runtime/master-pool";
 }
 
-/**
- * Initialize a new node root.
- */
+/** Initialize a new node root */
 java configuration Node-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/node";
@@ -55,9 +51,7 @@ java configuration Node-Init : minion-base {
 	argument "--mode=NODE";
 }
 
-/**
- * Initialize a new master root for a central server
- */
+/** Initialize a new master root for a central server */
 java configuration Central-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/central";
@@ -70,9 +64,7 @@ java configuration Central-Init : minion-base {
 	argument "--initPassword=adminadminadmin";
 }
 
-/**
- * Initialize a new master root for a managed server
- */
+/** Initialize a new master root for a managed server */
 java configuration Managed-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/managed";
@@ -86,9 +78,7 @@ java configuration Managed-Init : minion-base {
 	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
 }
 
-/**
- * Initialize a new managed node root.
- */
+/** Initialize a new managed node root */
 java configuration Managed-Node-Init : minion-base {
 	argument "init";
 	argument "--root=${workspace_loc}/runtime/managed-node";
@@ -100,9 +90,7 @@ java configuration Managed-Node-Init : minion-base {
 	argument "--mode=NODE";
 }
 
-/**
- * Registers the node with the master root.
- */
+/** Registers the node with the master root */
 java configuration Node-Register : minion-base {
 	argument "remote-node";
 	argument "--root=${workspace_loc}/runtime/master";
@@ -112,9 +100,7 @@ java configuration Node-Register : minion-base {
 	argument "--nodeIdentFile=${workspace_loc}/runtime/node-ident.txt";
 }
 
-/**
- * Removes the node from the master root.
- */
+/** Removes the node from the master root */
 java configuration Node-Remove : minion-base {
 	argument "remote-node";
 	argument "--remote=https://localhost:7701/api";
@@ -122,9 +108,7 @@ java configuration Node-Remove : minion-base {
 	argument "--remove=node";
 }
 
-/**
- * Registers the managed node with the managed root.
- */
+/** Registers the managed node with the managed root */
 java configuration Managed-Node-Register : minion-base {
 	argument "remote-node";
 	argument "--add=node";
@@ -133,9 +117,7 @@ java configuration Managed-Node-Register : minion-base {
 	argument "--nodeIdentFile=${workspace_loc}/runtime/node-ident-managed.txt";
 }
 
-/**
- * Removes the managed node from the managed root.
- */
+/** Removes the managed node from the managed root */
 java configuration Managed-Node-Remove : minion-base {
 	argument "remote-node";
 	argument "--remote=https://localhost:7706/api";
@@ -143,9 +125,7 @@ java configuration Managed-Node-Remove : minion-base {
 	argument "--remove=node";
 }
 
-/**
- * Run the node.
- */
+/** Runs the node */
 java configuration Node : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/node";
@@ -154,9 +134,7 @@ java configuration Node : minion-base {
 	memory max=256 MB;
 }
 
-/**
- * Run the managed node.
- */
+/** Runs the managed node */
 java configuration Managed-Node : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/managed-node";
@@ -164,16 +142,12 @@ java configuration Managed-Node : minion-base {
 	memory max=256 MB;
 }
 
-/**
- * Launches an interactive shell to type in some commands.
- */
+/** Launches an interactive shell to type in some commands */
 java configuration InteractiveShell : minion-base {
 	argument "shell";
 }
 
-/**
- * Runs the master on the previously initialized root.
- */
+/** Runs the master on the previously initialized root */
 java configuration Master : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/master";
@@ -202,7 +176,7 @@ java configuration Master-MigrateMode : minion-base {
 	argument "--mode=${string_prompt:Target Mode}";
 }
 
-/* Plugin related configurations */
+/** Plugin related configurations */
 java configuration Master-ListPlugins : minion-base {
 	argument "remote-plugin";
 	argument "--remote=https://localhost:7701/api";
@@ -217,9 +191,7 @@ java configuration Master-AddPlugin : minion-base {
 	argument "--add=${file_prompt:Plugin JAR}";
 }
 
-/**
- * Runs the master in central mode on the previously initialized root.
- */
+/** Runs the master in central mode on the previously initialized root */
 java configuration Central-Master : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/central";
@@ -230,9 +202,7 @@ java configuration Central-Master : minion-base {
 	memory max=256 MB;
 }
 
-/**
- * Runs the master in managed mode on the previously initialized root.
- */
+/** Runs the master in managed mode on the previously initialized root */
 java configuration Managed-Master : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/managed";
@@ -289,9 +259,7 @@ java configuration Uninstaller {
 	argument "--homeDir=${workspace_loc}/runtime/launcher";
 }
 
-/**
- * Add a new user to the master's user database
- */
+/** Adds a new user to the master's user database */
 java configuration Master-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
@@ -301,9 +269,7 @@ java configuration Master-AddUser : minion-base {
 	argument "--password=${password_prompt:Enter Password}";
 }
 
-/**
- * Add a new user to the central master's user database
- */
+/** Adds a new user to the central master's user database */
 java configuration Central-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
@@ -313,9 +279,7 @@ java configuration Central-AddUser : minion-base {
 	argument "--password=${password_prompt:Enter Password}";
 }
 
-/**
- * Add a new user to the managed master's user database
- */
+/** Adds a new user to the managed master's user database */
 java configuration Managed-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
