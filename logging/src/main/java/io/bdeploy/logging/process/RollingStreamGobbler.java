@@ -64,7 +64,9 @@ public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable
         try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             br.lines().forEach(l -> log(new SimpleMessage(l), Level.INFO));
         } catch (Exception e) {
-            log.debug("While redirecting process output:", e);
+            if (log.isDebugEnabled()) {
+                log.debug("While redirecting process output:", e);
+            }
         }
     }
 
@@ -102,7 +104,9 @@ public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable
             try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 br.lines().forEach(l -> log(new SimpleMessage("[STOP] " + l), Level.INFO));
             } catch (Exception e) {
-                log.debug("While redirecting process output:", e);
+                if (log.isDebugEnabled()) {
+                    log.debug("While redirecting process output:", e);
+                }
             }
         }, "StopGobbler [" + instance + "/" + app + "]");
         stopGobbler.start();

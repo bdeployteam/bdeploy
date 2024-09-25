@@ -173,7 +173,9 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         try {
             return pushAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
-            log.debug("Stream pushing not supported by target server", ex);
+            if (log.isDebugEnabled()) {
+                log.debug("Stream pushing not supported by target server", ex);
+            }
             return pushAsZip(rh, objects, manifests);
         }
     }

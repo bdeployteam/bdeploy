@@ -47,7 +47,9 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
 
             return ok;
         } catch (UnsupportedOperationException ex) {
-            log.debug("Checking directory ownership not possible", ex);
+            if (log.isDebugEnabled()) {
+                log.debug("Checking directory ownership not possible", ex);
+            }
             return true; // OK, we can't check on this filesystem as it does not know the concept of an 'owner'.
         } catch (IOException e) {
             log.warn("Cannot check directory ownership of {}", target, e);

@@ -114,7 +114,9 @@ public class CleanupHelper {
                     groups.add(new CleanupGroup("Node " + nodeName, nodeName, null, actions));
                 } catch (Exception e) {
                     log.warn("Cannot perform cleanup on minion {}", nodeName);
-                    log.debug("Error details", e);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error details", e);
+                    }
                     groups.add(new CleanupGroup("Not possible to clean offline minion " + nodeName, nodeName, null,
                             Collections.emptyList()));
                 }
@@ -166,7 +168,9 @@ public class CleanupHelper {
             nodes.getNodeResourceIfOnlineOrThrow(group.minion, NodeCleanupResource.class, securityContext).perform(group.actions);
         } catch (Exception e) {
             log.warn("Cannot perform cleanup on minion {}: {}", group.minion, e.toString());
-            log.debug("Error details", e);
+            if (log.isDebugEnabled()) {
+                log.debug("Error details", e);
+            }
         }
     }
 
