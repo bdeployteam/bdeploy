@@ -4,6 +4,7 @@ import { Permission } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
+import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
@@ -17,6 +18,7 @@ export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
   private readonly groups = inject(GroupsService);
   private readonly repositories = inject(RepositoriesService);
+  private readonly reports = inject(ReportsService);
 
   protected scopes$ = new BehaviorSubject<string[]>([null]);
   protected labels$ = new BehaviorSubject<string[]>(['Global']);
@@ -28,15 +30,25 @@ export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.groups.groups$, this.repositories.repositories$])
-      .pipe(skipWhile(([g]) => !g))
-      .subscribe(([groups, repositories]) => {
-        const groupNames = groups.map((g) => g.instanceGroupConfiguration.name);
-        const repositoryNames = repositories.map((r) => r.name);
-        const sortedNames = [...groupNames, ...repositoryNames].sort((a, b) => a.localeCompare(b));
+    this.subscription = combineLatest([this.groups.groups$, this.repositories.repositories$, this.reports.reports$])
+      .pipe(skipWhile(([g, r, re]) => !g || !r || !re))
+      .subscribe(([g, r, re]) => {
+        const groups = g
+          .map((g) => ({
+            label: `Group: ${g.instanceGroupConfiguration.name}`,
+            scope: g.instanceGroupConfiguration.name,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+        const repositories = r
+          .map((r) => ({ label: `Repository: ${r.name}`, scope: r.name }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+        const reports = re
+          .map((r) => ({ label: `Report: ${r.name}`, scope: r.type }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+        const sorted = [...groups, ...repositories, ...reports];
 
-        this.scopes$.next([null, ...sortedNames]);
-        this.labels$.next(['Global', ...sortedNames]);
+        this.scopes$.next([null, ...sorted.map((item) => item.scope)]);
+        this.labels$.next(['Global', ...sorted.map((item) => item.label)]);
         this.loading$.next(false);
       });
   }

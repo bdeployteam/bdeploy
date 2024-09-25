@@ -30,6 +30,7 @@ public class TextUIResources {
         tool.register(RemotePluginTool.class);
         tool.register(RemoteDataFilesTool.class);
         tool.register(RemoteProductValidationTool.class);
+        tool.register(RemoteReportTool.class);
     }
 
 }

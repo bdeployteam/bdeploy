@@ -6,6 +6,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
+import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
@@ -14,6 +15,7 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 })
 export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly repositories = inject(RepositoriesService);
+  private readonly reports = inject(ReportsService);
   private readonly groups = inject(GroupsService);
   private readonly areas = inject(NavAreasService);
 
@@ -32,8 +34,9 @@ export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialo
     combineLatest([
       this.groups.groups$.pipe(map((g) => g.map((x) => x.instanceGroupConfiguration.name))),
       this.repositories.repositories$.pipe(map((r) => r.map((y) => y.name))),
+      this.reports.reports$.pipe(map((re) => re.map((z) => z.type))),
     ])
-      .pipe(map(([g, r]) => [...g, ...r]))
+      .pipe(map(([g, r, re]) => [...g, ...r, ...re]))
       .subscribe((n) => {
         this.usedNames = n;
       });

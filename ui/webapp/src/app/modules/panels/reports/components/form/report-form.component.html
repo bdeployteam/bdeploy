@@ -1,0 +1,34 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Report Form" [panel]="true"> </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <form
+      *ngIf="(reports.current$ | async) as report"
+      class="flex flex-col gap-2.5"
+      #form="ngForm"
+      (ngSubmit)="generate()"
+    >
+      <div>Generate report: <strong>{{ report.name }}</strong></div>
+      <ng-container *ngFor="let param of report.parameters">
+        <app-report-form-input
+          [param]="param"
+          [report]="report"
+          [request]="request"
+          [changed$]="changed$"
+        ></app-report-form-input>
+      </ng-container>
+      <div
+        matTooltip="Either a mandatory field is missing or a given value is invalid"
+        [matTooltipDisabled]="!form.invalid"
+      >
+        <app-bd-button
+          type="submit"
+          text="Generate"
+          [collapsed]="false"
+          icon="assignment"
+          color="primary"
+          [disabled]="form.invalid"
+        ></app-bd-button>
+      </div></form
+  ></app-bd-dialog-content>
+</app-bd-dialog>

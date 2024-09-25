@@ -47,6 +47,13 @@
     [route]="['/repositories/browser']"
   ></app-main-nav-button>
 
+  <app-main-nav-button
+    icon="assignment"
+    text="Reports"
+    [collapsed]="!scope.expanded"
+    [route]="['/reports/browser']"
+  ></app-main-nav-button>
+
   <mat-divider class="local-divider"></mat-divider>
   <app-main-nav-button
     *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
