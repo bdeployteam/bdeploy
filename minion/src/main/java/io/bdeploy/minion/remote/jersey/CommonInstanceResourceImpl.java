@@ -6,6 +6,9 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -28,6 +31,7 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -35,6 +39,8 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
 public class CommonInstanceResourceImpl implements CommonInstanceResource {
+
+    private static final Logger log = LoggerFactory.getLogger(CommonInstanceResourceImpl.class);
 
     private final BHive hive;
 
@@ -110,31 +116,41 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
         InstanceManifest im = InstanceManifest.load(hive, wrapper.instanceId, activeTag);
 
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            // forward to master
-            RemoteService remote = mp.getControllingMaster(hive, im.getManifest());
-            return ResourceProvider.getResource(remote, CommonRootResource.class, context).getInstanceResource(wrapper.group)
-                    .forward(wrapper);
-        } else {
-            // forward to node
-            String nodeName = null;
-            for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
-                InstanceNodeManifest inm = InstanceNodeManifest.of(hive, entry.getValue());
-                Optional<ApplicationConfiguration> cfg = inm.getConfiguration().applications.stream()
-                        .filter(a -> a.id.equals(wrapper.applicationId)).findFirst();
+        try {
+            if (minion.getMode() == MinionMode.CENTRAL) {
+                // forward to master
+                RemoteService remote = mp.getControllingMaster(hive, im.getManifest());
+                return ResourceProvider.getResource(remote, CommonRootResource.class, context).getInstanceResource(wrapper.group)
+                        .forward(wrapper);
+            } else {
+                // forward to node
+                String nodeName = null;
+                for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
+                    InstanceNodeManifest inm = InstanceNodeManifest.of(hive, entry.getValue());
+                    Optional<ApplicationConfiguration> cfg = inm.getConfiguration().applications.stream()
+                            .filter(a -> a.id.equals(wrapper.applicationId)).findFirst();
 
-                if (cfg.isPresent()) {
-                    nodeName = entry.getKey();
+                    if (cfg.isPresent()) {
+                        nodeName = entry.getKey();
+                    }
                 }
+
+                if (nodeName == null) {
+                    throw new WebApplicationException(
+                            "Cannot find application " + wrapper.applicationId + " in instance " + wrapper.instanceId,
+                            Status.SERVICE_UNAVAILABLE);
+                }
+
+                return nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProxyResource.class, context).forward(wrapper);
+            }
+        } catch (ProcessingException pex) {
+            log.warn("Cannot forward request for {}/{}/{}/{}: {}", wrapper.group, wrapper.instanceId, wrapper.applicationId,
+                    wrapper.endpoint.id, pex.getCause().toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Exception:", pex);
             }
 
-            if (nodeName == null) {
-                throw new WebApplicationException(
-                        "Cannot find application " + wrapper.applicationId + " in instance " + wrapper.instanceId,
-                        Status.SERVICE_UNAVAILABLE);
-            }
-
-            return nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProxyResource.class, context).forward(wrapper);
+            throw new WebApplicationException(pex);
         }
     }
 
