@@ -523,12 +523,6 @@ public class InstanceResourceImpl implements InstanceResource {
         ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, readInstance(instanceId).getKey()),
                 MasterRootResource.class, context).getNamedMaster(group).deleteVersion(instanceId, tag);
 
-        // now delete also on the central...
-        Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            InstanceManifest.delete(hive, key);
-        }
-
         syncInstance(minion, rc, group, instanceId);
     }
 

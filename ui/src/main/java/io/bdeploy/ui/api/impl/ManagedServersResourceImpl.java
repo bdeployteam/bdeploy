@@ -447,16 +447,15 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             // 4. Fetch all instance, meta manifests and systems from the managed server and push them into the central BHive.
             SortedMap<Key, InstanceConfiguration> managedInstanceConfigs = managedCommonRoot.getInstanceResource(groupName)
-                    .listInstanceConfigurations(true);
-            List<String> managedInstanceIds = managedInstanceConfigs.values().stream().map(ic -> ic.id).toList();
+                    .listInstanceConfigurations(false);
             Set<Key> managedSystems = new TreeSet<>();
             Set<String> managedSystemIds = new TreeSet<>();
-            syncAddInstancesAndSystems(managedRemote, groupName, managedServerName, centralHive, managedInstanceIds,
-                    managedSystems, managedSystemIds);
+            syncAddInstancesAndSystems(managedRemote, groupName, managedServerName, centralHive,
+                    managedInstanceConfigs.values().stream().map(ic -> ic.id).toList(), managedSystems, managedSystemIds);
 
             // 5. Determine which of the instances and systems of the central server no longer exist on the managed server and delete them.
-            syncRemoveInstancesAndSystems(managedServerName, centralHive, managedInstanceIds, managedSystemIds, removedInstances,
-                    removedSystems);
+            syncRemoveInstancesAndSystems(managedServerName, centralHive, managedInstanceConfigs.keySet(), managedSystemIds,
+                    removedInstances, removedSystems);
 
             // 6. For all the fetched manifests, if they are instances, associate the server with it, and send out a change
             for (Manifest.Key instance : managedInstanceConfigs.keySet()) {
@@ -595,13 +594,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     private static void syncRemoveInstancesAndSystems(String managedServerName, BHive centralHive,
-            Collection<String> managedInstanceIds, Collection<String> managedSystemIds, Collection<Key> removedInstances,
+            Collection<Key> managedInstances, Collection<String> managedSystemIds, Collection<Key> removedInstances,
             Collection<Key> removedSystems) {
         // Remove local instances no longer available on the remote
-        SortedSet<Key> instancesOnCentral = InstanceManifest.scan(centralHive, true);
+        SortedSet<Key> instancesOnCentral = InstanceManifest.scan(centralHive, false);
         for (Key instanceKey : instancesOnCentral) {
-            InstanceManifest im = InstanceManifest.of(centralHive, instanceKey);
-            if (managedInstanceIds.contains(im.getConfiguration().id)) {
+            if (managedInstances.contains(instanceKey)) {
                 continue; // OK. instance exists.
             }
             if (!managedServerName.equals(new ControllingMaster(centralHive, instanceKey).read().getName())) {
@@ -609,8 +607,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             }
 
             // Not OK: instance no longer on server
-            Set<Key> allInstanceMfs = centralHive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
-            allInstanceMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
+            centralHive.execute(new ManifestDeleteOperation().setToDelete(instanceKey));
             removedInstances.add(instanceKey);
         }
 
