@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -415,8 +414,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasterDto managedMasterDto = managedMasters.read().getManagedMaster(managedServerName);
         InstanceGroupManifest centralIgm = new InstanceGroupManifest(centralHive);
 
-        List<InstanceManifest> removedInstances = new ArrayList<>();
-        List<SystemManifest> removedSystems = new ArrayList<>();
+        List<Key> removedInstances = new ArrayList<>();
+        List<Key> removedSystems = new ArrayList<>();
 
         // 1. Fetch information about updates, possibly required
         managedMasterDto.update = getUpdates(managedRemote);
@@ -453,35 +452,31 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 managedMasterRoot.getNamedMaster(groupName).updateOverallStatus();
             } catch (Exception e) {
                 log.info("Cannot update overall instance status before sync: {}", e.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", e);
+                }
             }
 
             // 4. Fetch all instance and meta manifests from the managed server
-            CommonRootResource managedCommonRootRes = ResourceProvider.getVersionedResource(managedRemote,
-                    CommonRootResource.class, context);
-            CommonInstanceResource managedCommonInstance = managedCommonRootRes.getInstanceResource(groupName);
+            CommonInstanceResource managedCommonInstance = managedCommonRoot.getInstanceResource(groupName);
             SortedMap<Key, InstanceConfiguration> managedInstanceConfigs = managedCommonInstance.listInstanceConfigurations(true);
             List<String> managedInstanceIds = managedInstanceConfigs.values().stream().map(ic -> ic.id).toList();
 
             FetchOperation fetchOp = new FetchOperation().setRemote(managedRemote).setHiveName(groupName);
             try (RemoteBHive rbh = RemoteBHive.forService(managedRemote, groupName, new ActivityReporter.Null())) {
-                Set<Manifest.Key> keysToFetch = new LinkedHashSet<>();
-
                 // TODO Maybe we can scope this down a little in the future
                 // Add all instance manifests to the fetch operation
-                rbh.getManifestInventory(managedInstanceIds.toArray(String[]::new)).forEach((k, v) -> keysToFetch.add(k));
+                rbh.getManifestInventory(managedInstanceIds.toArray(String[]::new)).keySet().forEach(fetchOp::addManifest);
 
                 // Add all the related meta manifests to the fetch operation
                 rbh.getManifestInventory(
-                        managedInstanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new))
-                        .forEach((k, v) -> keysToFetch.add(k));
-
-                // Set calculated keys to fetch operation
-                fetchOp.addManifest(keysToFetch);
+                        managedInstanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new)).keySet()
+                        .forEach(fetchOp::addManifest);
             }
 
             // 5. Fetch all systems from the managed server
-            Set<String> managedSystemIds = new TreeSet<>();
             Set<Key> managedSystems = new TreeSet<>();
+            Set<String> managedSystemIds = new TreeSet<>();
             try {
                 MasterSystemResource managedMasterSystem = ResourceProvider
                         .getVersionedResource(managedRemote, MasterRootResource.class, context).getNamedMaster(groupName)
@@ -494,6 +489,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 fetchOp.addManifest(managedSystems);
             } catch (Exception e) {
                 log.info("Cannot fetch systems from {}: {}", managedServerName, e.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", e);
+                }
             }
 
             centralHive.execute(fetchOp);
@@ -505,7 +503,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 if (managedInstanceIds.contains(im.getConfiguration().id)) {
                     continue; // OK. instance exists.
                 }
-
                 if (!managedServerName.equals(new ControllingMaster(centralHive, instanceKey).read().getName())) {
                     continue; // OK. other server.
                 }
@@ -514,7 +511,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 Set<Key> allInstanceMfs = centralHive
                         .execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
                 allInstanceMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
-                removedInstances.add(im);
+                removedInstances.add(instanceKey);
             }
 
             // 7 Remove local systems no longer available on the remote
@@ -524,7 +521,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 if (managedSystemIds.contains(sm.getConfiguration().id)) {
                     continue; // OK. system exists.
                 }
-
                 if (!managedServerName.equals(new ControllingMaster(centralHive, systemKey).read().getName())) {
                     continue; // OK. other server.
                 }
@@ -532,7 +528,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 // Not OK: system no longer on server
                 Set<Key> allSystemMfs = centralHive.execute(new ManifestListOperation().setManifestName(sm.getKey().getName())); // all versions
                 allSystemMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
-                removedSystems.add(sm);
+                removedSystems.add(systemKey);
             }
 
             // 8. For all fetched instance manifests: associate the server with them and send out a change
@@ -547,6 +543,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 } catch (Exception e) {
                     // This may be ignored
                     log.error("Cannot read instance overall state for {}: {}", instance, e.toString());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Exception", e);
+                    }
                 }
             }
 
@@ -603,11 +602,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         managedMasters.attach(managedMasterDto, true);
 
         // 14. Send out notifications after *everything* is done
-        for (var im : removedInstances) {
-            changes.remove(ObjectChangeType.INSTANCE, im.getKey(), new ObjectScope(groupName));
+        for (var instanceKey : removedInstances) {
+            changes.remove(ObjectChangeType.INSTANCE, instanceKey, new ObjectScope(groupName));
         }
-        for (var sm : removedSystems) {
-            changes.remove(ObjectChangeType.SYSTEM, sm.getKey(), new ObjectScope(groupName));
+        for (var systemKey : removedSystems) {
+            changes.remove(ObjectChangeType.SYSTEM, systemKey, new ObjectScope(groupName));
         }
 
         changes.change(ObjectChangeType.INSTANCE_GROUP, centralIgm.getKey(),
