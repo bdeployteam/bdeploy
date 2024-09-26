@@ -186,13 +186,13 @@ public class ProductResourceImpl implements ProductResource {
                 // in this case, we take the latest, and need to still block this product version from removal.
                 // (instance was created, but never installed (yet)).
                 InstanceManifest newest = mfSet.stream().sorted((a, b) -> Integer
-                        .compare(Integer.parseInt(b.getManifest().getTag()), Integer.parseInt(a.getManifest().getTag())))
+                        .compare(Integer.parseInt(b.getKey().getTag()), Integer.parseInt(a.getKey().getTag())))
                         .findFirst().get();
 
                 result.add(createUsage(newest));
             } else {
-                mfSet.stream().filter(mf -> installedTags.contains(mf.getManifest().getTag())).sorted((a, b) -> Long
-                        .compare(Long.parseLong(a.getManifest().getTag()), Long.parseLong(b.getManifest().getTag())))
+                mfSet.stream().filter(mf -> installedTags.contains(mf.getKey().getTag())).sorted((a, b) -> Long
+                        .compare(Long.parseLong(a.getKey().getTag()), Long.parseLong(b.getKey().getTag())))
                         .forEach(mf -> result.add(createUsage(mf)));
             }
         }
@@ -204,7 +204,7 @@ public class ProductResourceImpl implements ProductResource {
         dto.id = mf.getConfiguration().id;
         dto.name = mf.getConfiguration().name;
         dto.description = mf.getConfiguration().description;
-        dto.tag = mf.getManifest().getTag();
+        dto.tag = mf.getKey().getTag();
         return dto;
     }
 

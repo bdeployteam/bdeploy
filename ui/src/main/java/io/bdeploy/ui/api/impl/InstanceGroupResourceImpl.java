@@ -364,7 +364,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             }
 
             // Get a list of all node manifests - clients are stored in a special node
-            if (!active.equals(im.getManifest().getTag())) {
+            if (!active.equals(im.getKey().getTag())) {
                 // make sure we do have the active version.
                 im = InstanceManifest.load(hive, instanceId, active);
             }

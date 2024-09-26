@@ -119,7 +119,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
         try {
             if (minion.getMode() == MinionMode.CENTRAL) {
                 // forward to master
-                RemoteService remote = mp.getControllingMaster(hive, im.getManifest());
+                RemoteService remote = mp.getControllingMaster(hive, im.getKey());
                 return ResourceProvider.getResource(remote, CommonRootResource.class, context).getInstanceResource(wrapper.group)
                         .forward(wrapper);
             } else {

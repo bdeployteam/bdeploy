@@ -219,7 +219,7 @@ public class InstanceManifest {
      * @return the {@link io.bdeploy.bhive.model.Manifest.Key key} of the underlying
      *         {@link Manifest}.
      */
-    public Manifest.Key getManifest() {
+    public Manifest.Key getKey() {
         return key;
     }
 
@@ -314,7 +314,7 @@ public class InstanceManifest {
      *         and query history.
      */
     public InstanceManifestHistory getHistory(BHiveExecution bhive) {
-        return new InstanceManifestHistory(getManifest(), bhive);
+        return new InstanceManifestHistory(getKey(), bhive);
     }
 
     /**
@@ -324,7 +324,7 @@ public class InstanceManifest {
      *         state.
      */
     public InstanceState getState(BHiveExecution bhive) {
-        return new InstanceState(getManifest(), bhive);
+        return new InstanceState(getKey(), bhive);
     }
 
     /**
@@ -334,7 +334,7 @@ public class InstanceManifest {
      *         banner.
      */
     public InstanceBanner getBanner(BHiveExecution bhive) {
-        return new InstanceBanner(getManifest(), bhive);
+        return new InstanceBanner(getKey(), bhive);
     }
 
     /**
@@ -342,7 +342,7 @@ public class InstanceManifest {
      * @return the {@link InstanceOverallState} which can be used to read or update the overall instance state.
      */
     public InstanceOverallState getOverallState(BHiveExecution bhive) {
-        return new InstanceOverallState(getManifest(), bhive);
+        return new InstanceOverallState(getKey(), bhive);
     }
 
     /**
@@ -352,7 +352,7 @@ public class InstanceManifest {
      *         usage statistics.
      */
     public ClientUsage getClientUsage(BHiveExecution bhive) {
-        return new ClientUsage(getManifest(), bhive);
+        return new ClientUsage(getKey(), bhive);
     }
 
     public static class Builder {
@@ -418,7 +418,7 @@ public class InstanceManifest {
     }
 
     public CustomAttributes getAttributes(BHiveExecution hive) {
-        return new CustomAttributes(getManifest(), hive);
+        return new CustomAttributes(getKey(), hive);
     }
 
 }

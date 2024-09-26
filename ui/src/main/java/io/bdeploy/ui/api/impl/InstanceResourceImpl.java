@@ -420,7 +420,7 @@ public class InstanceResourceImpl implements InstanceResource {
             if (state.activeTag != null) {
                 try {
                     InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
-                    activeVersion = mf.getManifest();
+                    activeVersion = mf.getKey();
                     activeProduct = mf.getConfiguration().product;
                 } catch (Exception e) {
                     // ignore: product of active version not found
@@ -435,7 +435,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (minion.getMode() == MinionMode.CENTRAL) {
             try {
                 // nearly the same as ManagedServersResource, but we can speed up a few things as we read a lot already.
-                String selected = new ControllingMaster(hive, im.getManifest()).read().getName();
+                String selected = new ControllingMaster(hive, im.getKey()).read().getName();
                 if (selected == null) {
                     return null;
                 }
@@ -461,14 +461,14 @@ public class InstanceResourceImpl implements InstanceResource {
             readTree(configRoot, rootTv);
         }
 
-        return InstanceDto.create(imKey, config, activeProduct, managedMaster, attributes, banner, im.getManifest(),
+        return InstanceDto.create(imKey, config, activeProduct, managedMaster, attributes, banner, im.getKey(),
                 activeVersion, overallState, configRoot);
     }
 
     @Override
     public InstanceDto read(String instanceId) {
         InstanceManifest im = readInstance(instanceId);
-        return getInstanceDto(im.getManifest());
+        return getInstanceDto(im.getKey());
     }
 
     private InstanceManifest readInstance(String instanceId) {
@@ -488,9 +488,9 @@ public class InstanceResourceImpl implements InstanceResource {
     public void update(String instanceId, InstanceUpdateDto config, String managedServer, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instanceId, null);
 
-        if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
+        if (!oldConfig.getKey().getTag().equals(expectedTag)) {
             throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag + ", current="
-                    + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
+                    + oldConfig.getKey().getTag(), Status.BAD_REQUEST);
         }
 
         MasterRootResource root = getManagingRootResource(managedServer);
@@ -505,7 +505,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // prevent delete if processes are running.
         InstanceManifest im = readInstance(instance);
         listVersions(instance);
-        RemoteService master = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService master = mp.getControllingMaster(hive, im.getKey());
 
         MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
         root.getNamedMaster(group).delete(instance);
@@ -520,7 +520,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Version " + tag + " is still installed, cannot delete", Status.EXPECTATION_FAILED);
         }
 
-        ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, readInstance(instanceId).getManifest()),
+        ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, readInstance(instanceId).getKey()),
                 MasterRootResource.class, context).getNamedMaster(group).deleteVersion(instanceId, tag);
 
         // now delete also on the central...
@@ -561,15 +561,15 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Collect node information
         InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
-        String thisMaster = new ControllingMaster(hive, thisIm.getManifest()).read().getName();
+        String thisMaster = new ControllingMaster(hive, thisIm.getKey()).read().getName();
 
         // Insert configuration and create nodes where we have a configuration
         for (Key imKey : InstanceManifest.scan(hive, true)) {
-            if (!imKey.getName().equals(thisIm.getManifest().getName())) {
+            if (!imKey.getName().equals(thisIm.getKey().getName())) {
                 continue;
             }
 
-            imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
+            imKey = thisIm.getKey(); // go on with requested tag (versionTag)
             String imMaster = new ControllingMaster(hive, imKey).read().getName();
             if (thisMaster != null && !thisMaster.equals(imMaster)) {
                 continue;
@@ -591,7 +591,7 @@ public class InstanceResourceImpl implements InstanceResource {
                         return descriptor;
                     }).toList());
         } catch (Exception e) {
-            log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey);
+            log.warn("Cannot load product of instance version {}: {}", thisIm.getKey(), productKey);
             if (log.isDebugEnabled()) {
                 log.debug("Exception", e);
             }
@@ -625,7 +625,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
 
         // 1. push product to remote in case it is not yet there, and we have it.
         if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
@@ -645,7 +645,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // 2: tell master to deploy
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        master.getNamedMaster(group).install(instance.getManifest());
+        master.getNamedMaster(group).install(instance.getKey());
 
         syncInstance(minion, rc, group, instanceId);
 
@@ -653,7 +653,7 @@ public class InstanceResourceImpl implements InstanceResource {
             // done on the master directly as well.
             // TODO: replace with a bridge like ActionBridge
             // hint: no resource in "ui" package should ever fire these - should be all master.
-            changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+            changes.change(ObjectChangeType.INSTANCE, instance.getKey(),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -668,7 +668,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // 2: check for running or scheduled applications
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
         InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
@@ -681,12 +681,12 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         // 3: tell master to undeploy
-        master.getNamedMaster(group).uninstall(instance.getManifest());
+        master.getNamedMaster(group).uninstall(instance.getKey());
 
         syncInstance(minion, rc, group, instanceId);
 
         if (minion.getMode() == MinionMode.CENTRAL) {
-            changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+            changes.change(ObjectChangeType.INSTANCE, instance.getKey(),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -694,16 +694,16 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public void activate(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
 
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        master.getNamedMaster(group).activate(instance.getManifest());
+        master.getNamedMaster(group).activate(instance.getKey());
 
         syncInstance(minion, rc, group, instanceId);
 
         // TODO: see install - should be a bridge
         if (minion.getMode() == MinionMode.CENTRAL) {
-            changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+            changes.change(ObjectChangeType.INSTANCE, instance.getKey(),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -755,7 +755,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public ClickAndStartDescriptor getClickAndStartDescriptor(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
 
         if (minion.getMode() == MinionMode.CENTRAL) {
             // delegate to the actual master, so it will return a descriptor which has the
@@ -987,7 +987,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         if (minion.getMode() == MinionMode.CENTRAL) {
             // MUST delegate this 1:1 to managed
-            RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+            RemoteService svc = mp.getControllingMaster(hive, im.getKey());
 
             List<Key> keys = ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getInstanceResource(group)
                     .importInstance(fdmp, instanceId);
@@ -1018,7 +1018,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getOutputEntry(instanceId, tag, app);
     }
@@ -1031,7 +1031,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + entry.tag, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         EntryChunk chunk = root.getNamedMaster(group).getEntryContent(minion, entry, offset, limit);
         if (chunk == null) {
@@ -1057,7 +1057,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         root.getNamedMaster(group).updateDataEntries(instanceId, minion, updates);
     }
@@ -1074,7 +1074,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
         }
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
 
         for (RemoteDirectoryEntry entry : entries) {
@@ -1098,7 +1098,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + rq.getEntry().tag, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getEntryStream(rq.minion, rq.getEntry());
     }
@@ -1112,7 +1112,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + rq.entries.get(0).tag, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getEntriesZipSteam(rq.minion, rq.entries);
     }
@@ -1123,7 +1123,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getPortStates(minion, ports);
     }
@@ -1141,13 +1141,13 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         instanceBannerRecord.user = context.getUserPrincipal().getName();
         instanceBannerRecord.timestamp = System.currentTimeMillis();
         root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
         syncInstance(minion, rc, group, instanceId);
-        changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
+        changes.change(ObjectChangeType.INSTANCE, im.getKey(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.BANNER));
     }
 
@@ -1172,12 +1172,12 @@ public class InstanceResourceImpl implements InstanceResource {
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         root.getNamedMaster(group).updateAttributes(instanceId, attributes);
         syncInstance(minion, rc, group, instanceId);
 
-        changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
+        changes.change(ObjectChangeType.INSTANCE, im.getKey(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.ATTRIBUTES));
     }
 

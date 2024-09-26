@@ -261,7 +261,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     public ManagedMasterDto getServerForInstance(String instanceGroup, String instanceId, String instanceTag) {
         BHive hive = getInstanceGroupHive(instanceGroup);
         InstanceManifest im = InstanceManifest.load(hive, instanceId, instanceTag);
-        String selected = new ControllingMaster(hive, im.getManifest()).read().getName();
+        String selected = new ControllingMaster(hive, im.getKey()).read().getName();
         if (selected == null) {
             return null;
         }
@@ -597,7 +597,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // 12. send out notifications after *all* is done.
         for (var im : removedInstances) {
-            changes.remove(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName));
+            changes.remove(ObjectChangeType.INSTANCE, im.getKey(), new ObjectScope(groupName));
         }
         for (var sm : removedSystems) {
             changes.remove(ObjectChangeType.SYSTEM, sm.getKey(), new ObjectScope(groupName));

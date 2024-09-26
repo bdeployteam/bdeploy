@@ -107,7 +107,7 @@ public class InstanceHistoryManager {
 
     private List<HistoryEntryDto> loadHistory(InstanceManifest mf) {
         List<HistoryEntryDto> entries = new ArrayList<>();
-        String tag = mf.getManifest().getTag();
+        String tag = mf.getKey().getTag();
         for (InstanceManifestHistoryRecord rec : mf.getHistory(hive).getFullHistory()) {
             HistoryEntryType type = computeType(rec.action);
             HistoryEntryDto entry = new HistoryEntryDto(rec.timestamp, tag);
@@ -126,7 +126,7 @@ public class InstanceHistoryManager {
     }
 
     private MasterRuntimeHistoryDto loadRuntimeHistory(MasterProvider mp, String group, String instanceId) {
-        RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
+        RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getKey());
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
 

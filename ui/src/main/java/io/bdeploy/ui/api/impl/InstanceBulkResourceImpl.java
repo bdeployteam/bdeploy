@@ -120,7 +120,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                     im.getInstanceNodeManifests().entrySet().stream().map(e -> new InstanceNodeConfigurationDto(e.getKey(),
                             InstanceNodeManifest.of(hive, e.getValue()).getConfiguration())).toList());
 
-            instanceKeys.put(icd.config.id, im.getManifest());
+            instanceKeys.put(icd.config.id, im.getKey());
             return new InstanceUpdateDto(icd, null);
         }).collect(Collectors.toList());
 
@@ -240,7 +240,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                 var pr = ir.getProcessResource(i);
                 pr.startAll();
 
-                sync.put(im.getManifest(), im.getConfiguration().id);
+                sync.put(im.getKey(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Started"));
             } catch (Exception e) {
                 log.warn("Error while starting {}", i, e);
@@ -271,7 +271,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                 var pr = ir.getProcessResource(i);
                 pr.restartAll();
 
-                sync.put(im.getManifest(), im.getConfiguration().id);
+                sync.put(im.getKey(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Restarted"));
             } catch (Exception e) {
                 log.warn("Error while restarting {}", i, e);
@@ -302,7 +302,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                 var pr = ir.getProcessResource(i);
                 pr.stopAll();
 
-                sync.put(im.getManifest(), im.getConfiguration().id);
+                sync.put(im.getKey(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Stopped"));
             } catch (Exception e) {
                 log.warn("Error while starting {}", i, e);
@@ -329,12 +329,12 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
-            var master = mp.getControllingMaster(hive, im.getManifest());
+            var master = mp.getControllingMaster(hive, im.getKey());
             try {
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
                 root.getNamedMaster(group).delete(i);
 
-                sync.put(im.getManifest(), im.getConfiguration().id);
+                sync.put(im.getKey(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Deleted"));
             } catch (Exception e) {
                 log.warn("Error while deleting {}", i, e);
@@ -358,7 +358,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         instances.stream().forEach(i -> {
             var im = InstanceManifest.load(hive, i, null);
-            var master = mp.getControllingMaster(hive, im.getManifest());
+            var master = mp.getControllingMaster(hive, im.getKey());
             if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(im.getConfiguration().product)))) {
                 pushTargets.computeIfAbsent(master, k -> new TreeSet<>()).add(im.getConfiguration().product);
             }
@@ -389,18 +389,18 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             var im = InstanceManifest.load(hive, i, null);
             var state = im.getState(hive).read();
 
-            if (state.installedTags.contains(im.getManifest().getTag())) {
-                result.add(new OperationResult(i, OperationResultType.INFO, "Already installed: " + im.getManifest().getTag()));
+            if (state.installedTags.contains(im.getKey().getTag())) {
+                result.add(new OperationResult(i, OperationResultType.INFO, "Already installed: " + im.getKey().getTag()));
                 return;
             }
 
-            var master = mp.getControllingMaster(hive, im.getManifest());
+            var master = mp.getControllingMaster(hive, im.getKey());
             try {
                 // 2. perform install.
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-                root.getNamedMaster(group).install(im.getManifest());
+                root.getNamedMaster(group).install(im.getKey());
 
-                sync.put(im.getManifest(), im.getConfiguration().id); // only on success.
+                sync.put(im.getKey(), im.getConfiguration().id); // only on success.
                 result.add(new OperationResult(i, OperationResultType.INFO, "Installed"));
             } catch (Exception e) {
                 log.warn("Error while installing {}", i, e);
@@ -433,17 +433,17 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             var im = InstanceManifest.load(hive, i, null);
             var state = im.getState(hive).read();
 
-            if (state.activeTag != null && state.activeTag.equals(im.getManifest().getTag())) {
+            if (state.activeTag != null && state.activeTag.equals(im.getKey().getTag())) {
                 result.add(new OperationResult(i, OperationResultType.INFO, "Already active: " + state.activeTag));
                 return;
             }
 
-            var master = mp.getControllingMaster(hive, im.getManifest());
+            var master = mp.getControllingMaster(hive, im.getKey());
             try {
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-                root.getNamedMaster(group).activate(im.getManifest());
+                root.getNamedMaster(group).activate(im.getKey());
 
-                sync.put(im.getManifest(), im.getConfiguration().id); // only on success.
+                sync.put(im.getKey(), im.getConfiguration().id); // only on success.
                 result.add(new OperationResult(i, OperationResultType.INFO, "Activated"));
             } catch (Exception e) {
                 log.warn("Error while deleting {}", i, e);

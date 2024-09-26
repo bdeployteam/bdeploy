@@ -256,7 +256,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
 
             // inform about changes
-            changes.change(ObjectChangeType.INSTANCE, imf.getManifest(), new ObjectScope(this.name, imf.getConfiguration().id),
+            changes.change(ObjectChangeType.INSTANCE, imf.getKey(), new ObjectScope(this.name, imf.getConfiguration().id),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -419,7 +419,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             imf.getHistory(hive).recordAction(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
 
             // inform about changes
-            changes.change(ObjectChangeType.INSTANCE, imf.getManifest(), new ObjectScope(this.name, imf.getConfiguration().id),
+            changes.change(ObjectChangeType.INSTANCE, imf.getKey(), new ObjectScope(this.name, imf.getConfiguration().id),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -464,7 +464,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
 
             // inform about changes
-            changes.change(ObjectChangeType.INSTANCE, imf.getManifest(), new ObjectScope(this.name, imf.getConfiguration().id),
+            changes.change(ObjectChangeType.INSTANCE, imf.getKey(), new ObjectScope(this.name, imf.getConfiguration().id),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -662,9 +662,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 throw new WebApplicationException("Instance already exists: " + instanceConfig.id, Status.BAD_REQUEST);
             } else if (expectedTag != null) {
                 oldConfig = InstanceManifest.load(hive, instanceConfig.id, null);
-                if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
+                if (!oldConfig.getKey().getTag().equals(expectedTag)) {
                     throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
-                            + ", current=" + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
+                            + ", current=" + oldConfig.getKey().getTag(), Status.BAD_REQUEST);
                 }
             }
 
