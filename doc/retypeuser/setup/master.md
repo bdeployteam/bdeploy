@@ -53,6 +53,11 @@ It is possible to append --logData=\<path\> to the init command to set an extern
 See [Variable Expansions](/power/variables) for further details.
 !!!
 
+!!!warning Warning
+The root/data directory should be *outside* of the **BDeploy** installation. When updating **BDeploy** it replaces files
+in the installation folder, and you do *not* want to accidentally touch the root directory. Those are separate things.
+!!!
+
 The `init` command will create the initial administrator user from the `--initUser` and `--initPassword` parameters. This user has full administrative privileges. You can use the `bdeploy login` command to authorize all other CLI commands for your user.
 
 !!!warning Warning
