@@ -63,11 +63,9 @@ import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
-import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
-import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.actions.ActionBridge;
@@ -433,17 +431,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             // 2. Sync instance group data with managed server
             CommonRootResource managedCommonRoot = ResourceProvider.getVersionedResource(managedRemote, CommonRootResource.class,
                     context);
-            if (managedCommonRoot.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
-                throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
-            }
-
-            Manifest.Key igKey = centralIgm.getKey();
-            String attributesMetaName = centralIgm.getAttributes(centralHive).getMetaManifest().getMetaName();
-            Set<Key> metaManifests = centralHive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
-
-            PushOperation push = new PushOperation().addManifest(igKey).setRemote(managedRemote).setHiveName(groupName);
-            metaManifests.forEach(push::addManifest);
-            centralHive.execute(push);
+            syncInstanceGroup(managedRemote, managedCommonRoot, groupName, centralHive, centralIgm);
 
             // 3. On newer versions, trigger update of overall status
             try {
@@ -457,81 +445,20 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 }
             }
 
-            // 4. Fetch all instance and meta manifests from the managed server
-            CommonInstanceResource managedCommonInstance = managedCommonRoot.getInstanceResource(groupName);
-            SortedMap<Key, InstanceConfiguration> managedInstanceConfigs = managedCommonInstance.listInstanceConfigurations(true);
+            // 4. Fetch all instance, meta manifests and systems from the managed server and push them into the central BHive.
+            SortedMap<Key, InstanceConfiguration> managedInstanceConfigs = managedCommonRoot.getInstanceResource(groupName)
+                    .listInstanceConfigurations(true);
             List<String> managedInstanceIds = managedInstanceConfigs.values().stream().map(ic -> ic.id).toList();
-
-            FetchOperation fetchOp = new FetchOperation().setRemote(managedRemote).setHiveName(groupName);
-            try (RemoteBHive rbh = RemoteBHive.forService(managedRemote, groupName, new ActivityReporter.Null())) {
-                // TODO Maybe we can scope this down a little in the future
-                // Add all instance manifests to the fetch operation
-                rbh.getManifestInventory(managedInstanceIds.toArray(String[]::new)).keySet().forEach(fetchOp::addManifest);
-
-                // Add all the related meta manifests to the fetch operation
-                rbh.getManifestInventory(
-                        managedInstanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new)).keySet()
-                        .forEach(fetchOp::addManifest);
-            }
-
-            // 5. Fetch all systems from the managed server
             Set<Key> managedSystems = new TreeSet<>();
             Set<String> managedSystemIds = new TreeSet<>();
-            try {
-                MasterSystemResource managedMasterSystem = ResourceProvider
-                        .getVersionedResource(managedRemote, MasterRootResource.class, context).getNamedMaster(groupName)
-                        .getSystemResource();
+            syncAddInstancesAndSystems(managedRemote, groupName, managedServerName, centralHive, managedInstanceIds,
+                    managedSystems, managedSystemIds);
 
-                managedMasterSystem.list().forEach((k, v) -> {
-                    managedSystems.add(k);
-                    managedSystemIds.add(v.id);
-                });
-                fetchOp.addManifest(managedSystems);
-            } catch (Exception e) {
-                log.info("Cannot fetch systems from {}: {}", managedServerName, e.toString());
-                if (log.isDebugEnabled()) {
-                    log.debug("Exception", e);
-                }
-            }
+            // 5. Determine which of the instances and systems of the central server no longer exist on the managed server and delete them.
+            syncRemoveInstancesAndSystems(managedServerName, centralHive, managedInstanceIds, managedSystemIds, removedInstances,
+                    removedSystems);
 
-            centralHive.execute(fetchOp);
-
-            // 6. Remove local instances no longer available on the remote
-            SortedSet<Key> instancesOnCentral = InstanceManifest.scan(centralHive, true);
-            for (Key instanceKey : instancesOnCentral) {
-                InstanceManifest im = InstanceManifest.of(centralHive, instanceKey);
-                if (managedInstanceIds.contains(im.getConfiguration().id)) {
-                    continue; // OK. instance exists.
-                }
-                if (!managedServerName.equals(new ControllingMaster(centralHive, instanceKey).read().getName())) {
-                    continue; // OK. other server.
-                }
-
-                // Not OK: instance no longer on server
-                Set<Key> allInstanceMfs = centralHive
-                        .execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
-                allInstanceMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
-                removedInstances.add(instanceKey);
-            }
-
-            // 7 Remove local systems no longer available on the remote
-            SortedSet<Key> systemsOnCentral = SystemManifest.scan(centralHive);
-            for (Key systemKey : systemsOnCentral) {
-                SystemManifest sm = SystemManifest.of(centralHive, systemKey);
-                if (managedSystemIds.contains(sm.getConfiguration().id)) {
-                    continue; // OK. system exists.
-                }
-                if (!managedServerName.equals(new ControllingMaster(centralHive, systemKey).read().getName())) {
-                    continue; // OK. other server.
-                }
-
-                // Not OK: system no longer on server
-                Set<Key> allSystemMfs = centralHive.execute(new ManifestListOperation().setManifestName(sm.getKey().getName())); // all versions
-                allSystemMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
-                removedSystems.add(systemKey);
-            }
-
-            // 8. For all fetched instance manifests: associate the server with them and send out a change
+            // 6. For all the fetched manifests, if they are instances, associate the server with it, and send out a change
             for (Manifest.Key instance : managedInstanceConfigs.keySet()) {
                 new ControllingMaster(centralHive, instance).associate(managedServerName);
 
@@ -549,12 +476,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 }
             }
 
-            // 9. Repeat for all systems which should also be associated with a server
+            // 7. Repeat for all systems which should also be associated with a server
             for (Manifest.Key system : managedSystems) {
                 new ControllingMaster(centralHive, system).associate(managedServerName);
             }
 
-            // 10. Try to sync instance group properties
+            // 8. Try to sync instance group properties
             try {
                 MasterSettingsResource managedMasterSettings = ResourceProvider.getVersionedResource(managedRemote,
                         MasterSettingsResource.class, context);
@@ -566,13 +493,13 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             managedMasterDto.lastSync = Instant.now();
         }
 
-        // 11. Fetch minion information and store in the managed masters
+        // 9. Fetch minion information and store in the managed masters
         Map<String, MinionStatusDto> status = managedBackendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
         managedMasterDto.minions = new MinionConfiguration(config);
 
-        // 12. Check if managed server has newer products than central
+        // 10. Check if managed server has newer products than central
         MinionProductUpdatesDto productUpdatesDto = new MinionProductUpdatesDto();
         productUpdatesDto.newerVersionAvailable = new HashMap<>();
         SortedSet<Key> productsOnCentral = ProductManifest.scan(centralHive);
@@ -598,10 +525,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         managedMasterDto.productUpdates = productUpdatesDto;
 
-        // 13. Update current information in the hive
+        // 11. Update current information in the hive
         managedMasters.attach(managedMasterDto, true);
 
-        // 14. Send out notifications after *everything* is done
+        // 12. Send out notifications after *everything* is done
         for (var instanceKey : removedInstances) {
             changes.remove(ObjectChangeType.INSTANCE, instanceKey, new ObjectScope(groupName));
         }
@@ -615,6 +542,94 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         result.server = managedMasterDto;
 
         return result;
+    }
+
+    private static void syncInstanceGroup(RemoteService managedRemote, CommonRootResource managedCommonRoot, String groupName,
+            BHive centralHive, InstanceGroupManifest centralIgm) {
+        if (managedCommonRoot.getInstanceGroups().stream().noneMatch(igConfig -> groupName.equals(igConfig.name))) {
+            throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
+        }
+
+        String attributesMetaName = centralIgm.getAttributes(centralHive).getMetaManifest().getMetaName();
+        Set<Key> metaManifestKeys = centralHive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
+
+        PushOperation push = new PushOperation().setRemote(managedRemote).setHiveName(groupName).addManifest(centralIgm.getKey());
+        metaManifestKeys.forEach(push::addManifest);
+        centralHive.execute(push);
+    }
+
+    private void syncAddInstancesAndSystems(RemoteService managedRemote, String groupName, String managedServerName,
+            BHive centralHive, List<String> managedInstanceIds, Collection<Key> managedSystems,
+            Collection<String> managedSystemIds) {
+        // Create the fetch operation
+        FetchOperation fetchOp = new FetchOperation().setRemote(managedRemote).setHiveName(groupName);
+
+        // Add all instance and meta manifests of the managed server to the fetch operation
+        try (RemoteBHive rbh = RemoteBHive.forService(managedRemote, groupName, new ActivityReporter.Null())) {
+            // TODO Maybe we can scope this down a little in the future
+            // Add all instance manifests to the fetch operation
+            rbh.getManifestInventory(managedInstanceIds.toArray(String[]::new)).keySet().forEach(fetchOp::addManifest);
+
+            // Add all the related meta manifests to the fetch operation
+            rbh.getManifestInventory(managedInstanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new))
+                    .keySet().forEach(fetchOp::addManifest);
+        }
+
+        // Add all systems of the managed server to the fetch operation
+        try {
+            ResourceProvider.getVersionedResource(managedRemote, MasterRootResource.class, context).getNamedMaster(groupName)
+                    .getSystemResource().list().forEach((systemKey, systemConfig) -> {
+                        managedSystems.add(systemKey);
+                        managedSystemIds.add(systemConfig.id);
+                    });
+            fetchOp.addManifest(managedSystems);
+        } catch (Exception e) {
+            log.info("Cannot fetch systems from {}: {}", managedServerName, e.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Exception", e);
+            }
+        }
+
+        // Execute the fetch operation
+        centralHive.execute(fetchOp);
+    }
+
+    private static void syncRemoveInstancesAndSystems(String managedServerName, BHive centralHive,
+            Collection<String> managedInstanceIds, Collection<String> managedSystemIds, Collection<Key> removedInstances,
+            Collection<Key> removedSystems) {
+        // Remove local instances no longer available on the remote
+        SortedSet<Key> instancesOnCentral = InstanceManifest.scan(centralHive, true);
+        for (Key instanceKey : instancesOnCentral) {
+            InstanceManifest im = InstanceManifest.of(centralHive, instanceKey);
+            if (managedInstanceIds.contains(im.getConfiguration().id)) {
+                continue; // OK. instance exists.
+            }
+            if (!managedServerName.equals(new ControllingMaster(centralHive, instanceKey).read().getName())) {
+                continue; // OK. other server.
+            }
+
+            // Not OK: instance no longer on server
+            Set<Key> allInstanceMfs = centralHive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
+            allInstanceMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
+            removedInstances.add(instanceKey);
+        }
+
+        // Remove local systems no longer available on the remote
+        SortedSet<Key> systemsOnCentral = SystemManifest.scan(centralHive);
+        for (Key systemKey : systemsOnCentral) {
+            SystemManifest sm = SystemManifest.of(centralHive, systemKey);
+            if (managedSystemIds.contains(sm.getConfiguration().id)) {
+                continue; // OK. system exists.
+            }
+            if (!managedServerName.equals(new ControllingMaster(centralHive, systemKey).read().getName())) {
+                continue; // OK. other server.
+            }
+
+            // Not OK: system no longer on server
+            Set<Key> allSystemMfs = centralHive.execute(new ManifestListOperation().setManifestName(sm.getKey().getName())); // all versions
+            allSystemMfs.forEach(key -> centralHive.execute(new ManifestDeleteOperation().setToDelete(key)));
+            removedSystems.add(systemKey);
+        }
     }
 
     @Override
