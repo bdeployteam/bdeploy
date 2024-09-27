@@ -302,6 +302,45 @@ describe('Central/Managed Basic Test', function () {
     });
   });
 
+  it('Deletes instance version on managed', () => {
+    cy.visitManaged('/');
+    cy.enterInstanceHistory(groupName, instanceName2);
+
+    // Open panel
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Version 1: Created').should('exist').click();
+    });
+
+    // Delete instance version
+    cy.inMainNavFlyin('app-history-entry', () => {
+      cy.get(`app-bd-button[text="Delete"]`).click();
+      cy.contains('app-bd-dialog-message', `Delete Version`).within(() => {
+        cy.fillFormInput(undefined, 'I UNDERSTAND');
+        cy.contains('button', 'Yes').should('exist').and('be.enabled').click();
+      });
+    });
+
+    cy.inMainNavContent(() => {
+      // Check if the instance version is actually gone
+      cy.contains('tr', 'Version 1: Created').should('not.exist');
+      // Check if the other instance version is still here
+      cy.contains('tr', 'Version 2: Created').should('exist');
+    });
+  });
+
+  it('Checks deleted instance version on central', () => {
+    cy.visitCentral('/');
+    cy.enterInstanceHistory(groupName, instanceName2);
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Synchronize');
+      // Check if the instance version is actually gone
+      cy.contains('tr', 'Version 1: Created').should('not.exist');
+      // Check if the other instance version is still here
+      cy.contains('tr', 'Version 2: Created').should('exist');
+    });
+  });
+
   it('Deletes the group on central', () => {
     cy.visitCentral('/');
     cy.deleteGroup(groupName);

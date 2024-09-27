@@ -19,5 +19,11 @@ declare namespace Cypress {
      * @param instanceName the name of the instance to enter
      */
     enterInstance(groupName: string, instanceName: string);
+
+    /**
+     * @param groupName the name of the instance group hosting the instance
+     * @param instanceName the name of the instance
+     */
+    enterInstanceHistory(groupName: string, instanceName: string);
   }
 }

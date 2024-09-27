@@ -73,3 +73,12 @@ Cypress.Commands.add('enterInstance', function (groupName, instanceName) {
     cy.contains('mat-toolbar', `Dashboard`).should('exist');
   });
 });
+
+/**
+ * Command: enterInstanceHistory
+ */
+Cypress.Commands.add('enterInstanceHistory', function (groupName, instanceName) {
+  cy.enterInstance(groupName, instanceName);
+  cy.pressMainNavButton('Instance History');
+  cy.waitUntilContentLoaded();
+});
