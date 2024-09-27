@@ -461,8 +461,8 @@ public class InstanceResourceImpl implements InstanceResource {
             readTree(configRoot, rootTv);
         }
 
-        return InstanceDto.create(imKey, config, activeProduct, managedMaster, attributes, banner, im.getKey(),
-                activeVersion, overallState, configRoot);
+        return InstanceDto.create(imKey, config, activeProduct, managedMaster, attributes, banner, im.getKey(), activeVersion,
+                overallState, configRoot);
     }
 
     @Override
@@ -501,16 +501,11 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void delete(String instance) {
-        // prevent delete if processes are running.
-        InstanceManifest im = readInstance(instance);
-        listVersions(instance);
-        RemoteService master = mp.getControllingMaster(hive, im.getKey());
+    public void delete(String instanceId) {
+        ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, readInstance(instanceId).getKey()),
+                MasterRootResource.class, context).getNamedMaster(group).delete(instanceId);
 
-        MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-        root.getNamedMaster(group).delete(instance);
-
-        syncInstance(minion, rc, group, instance);
+        syncInstance(minion, rc, group, instanceId);
     }
 
     @Override
@@ -1141,8 +1136,7 @@ public class InstanceResourceImpl implements InstanceResource {
         instanceBannerRecord.timestamp = System.currentTimeMillis();
         root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
         syncInstance(minion, rc, group, instanceId);
-        changes.change(ObjectChangeType.INSTANCE, im.getKey(),
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.BANNER));
+        changes.change(ObjectChangeType.INSTANCE, im.getKey(), Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.BANNER));
     }
 
     @Override
