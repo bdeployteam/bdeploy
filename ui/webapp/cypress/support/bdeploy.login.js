@@ -57,8 +57,6 @@ Cypress.Commands.add('visitManaged', function (url) {
   });
 });
 
-// this allows, together with disabled chrome web security to cross-origin visit our different servers
-// without reloading all of cypress.
 Cypress.Commands.add('forceVisit', (url) => {
   console.log(`forceVisit ${url}`);
   cy.get('body').then((body$) => {
@@ -66,8 +64,7 @@ Cypress.Commands.add('forceVisit', (url) => {
     const appIframe = appWindow.parent.document.querySelector('iframe');
 
     // We return a promise here because we don't want to
-    // continue from this command until the new page is
-    // loaded.
+    // continue from this command until the new page is loaded.
     return new Promise((resolve) => {
       appIframe.onload = () => {
         resolve();

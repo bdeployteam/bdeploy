@@ -1,8 +1,5 @@
 //@ts-check
 
-/**
- * Command: createInstance
- */
 Cypress.Commands.add('createInstance', function (groupName, instanceName, productName, productVersion) {
   cy.waitUntilContentLoaded();
 
@@ -41,9 +38,6 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
   });
 });
 
-/**
- * Command: deleteInstance
- */
 Cypress.Commands.add('deleteInstance', function (groupName, instanceName) {
   cy.enterInstance(groupName, instanceName);
 
@@ -74,9 +68,6 @@ Cypress.Commands.add('enterInstance', function (groupName, instanceName) {
   });
 });
 
-/**
- * Command: enterInstanceHistory
- */
 Cypress.Commands.add('enterInstanceHistory', function (groupName, instanceName) {
   cy.enterInstance(groupName, instanceName);
   cy.pressMainNavButton('Instance History');

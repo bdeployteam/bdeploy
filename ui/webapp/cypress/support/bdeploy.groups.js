@@ -1,8 +1,5 @@
 //@ts-check
 
-/**
- * Command: createGroup
- */
 Cypress.Commands.add('createGroup', function (groupName) {
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('not.exist');
@@ -31,9 +28,6 @@ Cypress.Commands.add('createGroup', function (groupName) {
   });
 });
 
-/**
- * Command: deleteGroup
- */
 Cypress.Commands.add('deleteGroup', function (groupName) {
   cy.enterGroup(groupName);
 
@@ -56,9 +50,6 @@ Cypress.Commands.add('deleteGroup', function (groupName) {
   });
 });
 
-/**
- * Command: uploadProductIntoGroup
- */
 Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, screenshots = false) {
   cy.enterGroup(groupName);
 
@@ -90,9 +81,6 @@ Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, sc
   }
 });
 
-/**
- * Command: verifyProductVersion
- */
 Cypress.Commands.add('verifyProductVersion', function (groupName, productName, productVersion) {
   cy.enterGroup(groupName);
 
@@ -105,9 +93,6 @@ Cypress.Commands.add('verifyProductVersion', function (groupName, productName, p
   });
 });
 
-/**
- * Command: enterGroup
- */
 Cypress.Commands.add('enterGroup', function (groupName) {
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('exist').click();
@@ -115,9 +100,6 @@ Cypress.Commands.add('enterGroup', function (groupName) {
   });
 });
 
-/**
- * Command: attachManagedSide
- */
 Cypress.Commands.add('attachManagedSide', function (groupName) {
   // prepare MANAGED
   cy.screenshot('Doc_ManagedEmpty');
@@ -139,9 +121,6 @@ Cypress.Commands.add('attachManagedSide', function (groupName) {
   });
 });
 
-/**
- * Command: attachCentralSide
- */
 Cypress.Commands.add('attachCentralSide', function (groupName) {
   // prepare CENTRAL
   cy.enterGroup(groupName);

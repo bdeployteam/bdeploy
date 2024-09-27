@@ -130,7 +130,6 @@ Cypress.Commands.add('checkAndConfirmSnackbar', function (message) {
     });
 });
 
-// INTERNAL
 Cypress.Commands.add('downloadFromLinkHref', function (link) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
