@@ -565,7 +565,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // Add all instance and meta manifests of the managed server to the fetch operation
         try (RemoteBHive rbh = RemoteBHive.forService(managedRemote, groupName, new ActivityReporter.Null())) {
-            // TODO Maybe we can scope this down a little in the future
             // Add all instance manifests to the fetch operation
             rbh.getManifestInventory(managedInstanceIds.toArray(String[]::new)).keySet().forEach(fetchOp::addManifest);
 
