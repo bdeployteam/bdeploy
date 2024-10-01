@@ -127,10 +127,9 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
                 try (InputStream is = Files.newInputStream(actual)) {
                     is.transferTo(output);
                 } catch (IOException ioe) {
+                    log.warn("Could not fully write output: {}", ioe.toString());
                     if (log.isDebugEnabled()) {
-                        log.debug("Could not fully write output", ioe);
-                    } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.debug("Exception", ioe);
                     }
                 }
             }
@@ -171,10 +170,9 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
                         zos.closeEntry();
                     }
                 } catch (IOException ioe) {
+                    log.warn("Could not fully write output: {}", ioe.toString());
                     if (log.isDebugEnabled()) {
-                        log.debug("Could not fully write output", ioe);
-                    } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.debug("Exception", ioe);
                     }
                 }
             }

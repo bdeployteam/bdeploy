@@ -212,10 +212,9 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                 try (InputStream is = Files.newInputStream(targetFile)) {
                     is.transferTo(output);
                 } catch (IOException ioe) {
+                    log.warn("Could not fully write output: {}", ioe.toString());
                     if (log.isDebugEnabled()) {
-                        log.debug("Could not fully write output", ioe);
-                    } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.debug("Exception", ioe);
                     }
                 }
             }
