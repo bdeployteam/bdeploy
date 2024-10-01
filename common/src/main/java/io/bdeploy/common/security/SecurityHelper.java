@@ -491,7 +491,9 @@ public class SecurityHelper {
             try {
                 return getMapper().readValue(decode(pack), SignaturePack.class);
             } catch (IOException e) {
-                log.debug("Invalid token supplied", e);
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid token supplied", e);
+                }
                 throw new IllegalStateException("Security token invalid.");
             }
         }

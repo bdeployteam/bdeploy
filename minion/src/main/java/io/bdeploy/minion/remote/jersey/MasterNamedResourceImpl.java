@@ -383,9 +383,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     }
                 } catch (Exception e) {
                     // in case the old version disappeared (manual deletion, automatic migration,
-                    // ...) we do not
-                    // want to fail to activate the new version...
-                    log.debug("Cannot set old version to de-activated", e);
+                    // ...) we do not want to fail to activate the new version...
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cannot set old version to de-activated", e);
+                    }
                 }
             }
 

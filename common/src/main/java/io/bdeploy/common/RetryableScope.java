@@ -20,7 +20,9 @@ public class RetryableScope {
     private final AtomicLong iterationTimeoutMs = new AtomicLong(100);
 
     private Consumer<Exception> onException = e -> {
-        log.debug("Retriable scope received exception: ", e);
+        if (log.isDebugEnabled()) {
+            log.debug("Retriable scope received exception: ", e);
+        }
 
         try {
             Thread.sleep(iterationTimeoutMs.get());

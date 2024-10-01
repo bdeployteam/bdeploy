@@ -107,7 +107,9 @@ public class BHiveTransactions {
             try {
                 Files.write(mdbPath.resolve(TX_PID_FILE), Collections.singletonList(txValidationContent));
             } catch (IOException e) {
-                log.debug("Cannot write transaction validation information", e);
+                if (log.isDebugEnabled()) {
+                    log.debug("Cannot write transaction validation information", e);
+                }
             }
         }
 

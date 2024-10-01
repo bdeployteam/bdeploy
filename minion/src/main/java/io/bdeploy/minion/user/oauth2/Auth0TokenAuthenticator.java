@@ -112,7 +112,9 @@ public class Auth0TokenAuthenticator implements Authenticator {
             if (trace != null) {
                 trace.log("Cannot validate token: " + e.toString());
             }
-            log.debug("Exception while validating token", e);
+            if (log.isDebugEnabled()) {
+                log.debug("Exception while validating token", e);
+            }
             return null;
         }
     }
