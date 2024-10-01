@@ -259,7 +259,7 @@ public class ProductManifest {
             // tiny performance hit since two threads calculate this). in case two threads try to persist the
             // exact same thing, we simply ignore the failure.
             if (log.isDebugEnabled()) {
-                log.debug("Cannot store persistent cache for {}: {}", manifest, e.toString());
+                log.debug("Cannot store persistent cache for {}", manifest, e);
             }
         }
 

@@ -175,8 +175,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
             try {
                 folder.idle();
             } catch (FolderClosedException | IllegalStateException e) {
-                log.info("Idle handling failed because folder is closed. Retrying in {} | {}", IDLE_RETRY_TIME,
-                        getFolderAndUrlLogString());
+                log.info("Idle handling failed. Retrying in {} | {}", IDLE_RETRY_TIME, getFolderAndUrlLogString(), e);
                 Thread.sleep(IDLE_RETRY_TIME);
             }
         }

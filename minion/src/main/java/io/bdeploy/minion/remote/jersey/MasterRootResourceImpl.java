@@ -562,7 +562,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                         return;
                     }
                 } catch (Exception e) {
-                    log.warn("Cannot contact minion: {} - not updating.", nodeName);
+                    log.warn("Cannot contact minion: {} - not updating.", nodeName, e);
                     return;
                 }
 

@@ -36,7 +36,7 @@ public class VersionMismatchFilter implements ClientResponseFilter {
             try {
                 theirVersion = factory.getProxyClient(PublicRootResource.class).getVersion();
             } catch (NotFoundException nfe) {
-                log.warn("Server does not implement the version endpoint");
+                log.warn("Server does not implement the version endpoint", nfe);
                 return; // version endpoint not supported.
             } catch (Exception e) {
                 log.warn("Cannot check remote version on {}", factory, e);

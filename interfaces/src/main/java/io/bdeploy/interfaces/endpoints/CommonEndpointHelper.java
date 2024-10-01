@@ -104,7 +104,7 @@ public class CommonEndpointHelper {
         try {
             authType = HttpAuthenticationType.valueOf(endpoint.authType.getPreRenderable());
         } catch (Exception e) {
-            log.warn("Invalid authentication type on endpoint {}: {}", endpoint.id, endpoint.authType.getPreRenderable());
+            log.warn("Invalid authentication type on endpoint {}: {}", endpoint.id, endpoint.authType.getPreRenderable(), e);
             authType = HttpAuthenticationType.NONE;
         }
 

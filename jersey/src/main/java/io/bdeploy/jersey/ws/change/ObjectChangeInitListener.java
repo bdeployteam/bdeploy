@@ -54,7 +54,7 @@ final class ObjectChangeInitListener extends WebSocketAdapter {
             token = JerseyAuthenticationProvider.validateToken(init.token, authStore);
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.debug("Cannot parse authentication token: {}", e.toString());
+                log.debug("Cannot parse authentication token", e);
             }
         }
 
