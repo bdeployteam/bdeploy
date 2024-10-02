@@ -6,7 +6,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -128,7 +128,7 @@ public class MessageDialogs {
         }
         builder.append("\n");
 
-        builder.append("*** Date: \n").append(FormatHelper.formatDate(new Date())).append("\n");
+        builder.append("*** Date: \n").append(FormatHelper.formatTemporal(LocalDateTime.now())).append("\n");
         builder.append("\n");
 
         builder.append("*** System properties: \n");

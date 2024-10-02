@@ -1,9 +1,11 @@
 package io.bdeploy.minion.user;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Helper to collect tracing message.
@@ -12,7 +14,7 @@ public class AuthTrace {
 
     public static class Message {
 
-        private final transient SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+        private final static transient DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
         public long timestamp;
         public String text;
 
@@ -22,7 +24,8 @@ public class AuthTrace {
         }
 
         public String format() {
-            return sdf.format(new Date(timestamp)) + " " + text;
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), TimeZone.getDefault().toZoneId()).format(dtf) + ' '
+                    + text;
         }
     }
 

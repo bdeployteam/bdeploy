@@ -19,10 +19,11 @@ import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -68,8 +69,8 @@ public class BCX509Helper {
                 .addRDN(BCStyle.OU, "BDeploy") // Organizational Unit
                 .build();
 
-        final Date validFrom = new Date();
-        final Date validUntil = new Date(validFrom.getTime() + TimeUnit.DAYS.toMillis(17800));
+        final LocalDateTime validFrom = LocalDateTime.now();
+        final LocalDateTime validUntil = validFrom.plusDays(17800);
 
         KeyPairGenerator kpGen = KeyPairGenerator.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER_ID);
         kpGen.initialize(2048, RANDOM);
@@ -77,8 +78,8 @@ public class BCX509Helper {
 
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(root, // issuer authority
                 BigInteger.valueOf(RANDOM.nextInt()), // serial number of certificate
-                validFrom, // start of validity
-                validUntil, // end of certificate validity
+                Date.from(validFrom.atZone(ZoneId.systemDefault()).toInstant()), // start of validity
+                Date.from(validUntil.atZone(ZoneId.systemDefault()).toInstant()), // end of certificate validity
                 root, // subject name of certificate
                 kp.getPublic()); // public key of certificate
 
