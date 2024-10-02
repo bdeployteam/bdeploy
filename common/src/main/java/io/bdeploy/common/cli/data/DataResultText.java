@@ -9,6 +9,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Map;
 
+import io.bdeploy.common.util.StringHelper;
+
 class DataResultText extends DataResultBase {
 
     DataResultText(PrintStream output) {
@@ -25,11 +27,11 @@ class DataResultText extends DataResultBase {
             table.setHideHeadersHint(true);
             table.column(new DataTableColumn.Builder("Error").setMinWidth(100).build());
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                try (PrintWriter pw = new PrintWriter(baos)) {
+                try (PrintWriter pw = new PrintWriter(baos, false, StringHelper.DEFAULT_CHARSET)) {
                     getThrowable().printStackTrace(pw);
                 }
                 try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())))) {
+                        new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), StringHelper.DEFAULT_CHARSET))) {
                     String line = br.readLine();
                     do {
                         table.row().cell(line).build();

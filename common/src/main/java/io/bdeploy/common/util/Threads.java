@@ -93,7 +93,7 @@ public class Threads {
         Thread dumpThread = new Thread(() -> {
             Path outputName = targetDir.resolve(dumpName);
             cycleDumps(outputName);
-            try (PrintWriter pw = new PrintWriter(Files.newOutputStream(outputName))) {
+            try (PrintWriter pw = new PrintWriter(Files.newOutputStream(outputName), false, StringHelper.DEFAULT_CHARSET)) {
                 ThreadMXBean mxb = ManagementFactory.getThreadMXBean();
                 for (ThreadInfo i : mxb.dumpAllThreads(true, true)) {
                     pw.append(i.toString());
