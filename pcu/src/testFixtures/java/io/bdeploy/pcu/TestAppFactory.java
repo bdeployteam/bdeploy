@@ -121,7 +121,7 @@ public class TestAppFactory {
         cfg.startCommand.parameters.add(getParam("--jdk", "Parameter 2", "{{M:jdk}}"));
         cfg.startCommand.parameters.add(getEnv("XENV", "Env Desc", "X"));
 
-        if (port != 0) {
+        if (!client && port != 0) {
             HttpEndpoint fakeEndpoint = new HttpEndpoint();
             fakeEndpoint.id = "test";
             fakeEndpoint.path = "/api/test/with/path"; // must match HelloEndpoint
