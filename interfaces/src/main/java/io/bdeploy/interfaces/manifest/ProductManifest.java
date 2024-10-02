@@ -155,95 +155,12 @@ public class ProductManifest {
             cfgEntry = entries.get(configKey);
         }
 
-        List<ObjectId> plugins = new ArrayList<>();
-        Tree.Key pluginKey = new Tree.Key(ProductManifestBuilder.PLUGINS_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(pluginKey)) {
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(pluginKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.JAR_FILE_EXTENSION)) {
-                    plugins.add(b.getElementId());
-                }
-            }).build());
-        }
-
-        List<VariableDescriptor> instanceVariables = new ArrayList<>();
-        Tree.Key instanceVarsKey = new Tree.Key(ProductManifestBuilder.INSTANCE_VARIABLES_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(instanceVarsKey)) {
-            Set<VariableDescriptor> instanceVariableSet = new HashSet<>(); // temporary set for deduplication
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(instanceVarsKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
-                        instanceVariableSet
-                                .addAll(StorageHelper.fromYamlStream(is, InstanceVariableDefinitionDescriptor.class).definitions);
-                    } catch (Exception e) {
-                        log.warn("Cannot load instance variable definitions from {}, {}", manifest, b.getPathString(), e);
-                    }
-                }
-            }).build());
-            instanceVariables.addAll(instanceVariableSet);
-        }
-
-        List<InstanceTemplateDescriptor> templates = new ArrayList<>();
-        Tree.Key templateKey = new Tree.Key(ProductManifestBuilder.TEMPLATES_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(templateKey)) {
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(templateKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
-                        templates.add(StorageHelper.fromYamlStream(is, InstanceTemplateDescriptor.class));
-                    } catch (Exception e) {
-                        log.warn("Cannot load instance template from {}, {}", manifest, b.getPathString(), e);
-                    }
-                }
-            }).build());
-        }
-        templates.sort((a, b) -> a.name.compareTo(b.name));
-
-        List<ApplicationTemplateDescriptor> applicationTemplates = new ArrayList<>();
-        Tree.Key appTemplateKey = new Tree.Key(ProductManifestBuilder.APP_TEMPLATES_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(appTemplateKey)) {
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(appTemplateKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
-                        applicationTemplates.add(StorageHelper.fromYamlStream(is, ApplicationTemplateDescriptor.class));
-                    } catch (Exception e) {
-                        log.warn("Cannot load application template from {}, {}", manifest, b.getPathString(), e);
-                    }
-                }
-            }).build());
-        }
-
-        List<ParameterTemplateDescriptor> paramTemplates = new ArrayList<>();
-        Tree.Key paramTemplateKey = new Tree.Key(ProductManifestBuilder.PARAM_TEMPLATES_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(paramTemplateKey)) {
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(paramTemplateKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
-                        paramTemplates.add(StorageHelper.fromYamlStream(is, ParameterTemplateDescriptor.class));
-                    } catch (Exception e) {
-                        log.warn("Cannot load application template from {}, {}", manifest, b.getPathString(), e);
-                    }
-                }
-            }).build());
-        }
-
-        List<InstanceVariableTemplateDescriptor> varTemplates = new ArrayList<>();
-        Tree.Key varTemplateKey = new Tree.Key(ProductManifestBuilder.VARIABLE_TEMPLATES_ENTRY, Tree.EntryType.TREE);
-        if (entries.containsKey(varTemplateKey)) {
-            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(varTemplateKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
-                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
-                        varTemplates.add(StorageHelper.fromYamlStream(is, InstanceVariableTemplateDescriptor.class));
-                    } catch (Exception e) {
-                        log.warn("Cannot load instance variable template from {}, {}", manifest, b.getPathString(), e);
-                    }
-                }
-            }).build());
-        }
+        List<ObjectId> plugins = calculatePlugins(hive, entries);
+        List<VariableDescriptor> instanceVariables = calculateInstanceVariables(hive, entries, manifest);
+        List<InstanceTemplateDescriptor> templates = calculateTemplates(hive, entries, manifest);
+        List<ApplicationTemplateDescriptor> applicationTemplates = calculateApplicationTemplates(hive, entries, manifest);
+        List<ParameterTemplateDescriptor> paramTemplates = calculateParamTemplates(hive, entries, manifest);
+        List<InstanceVariableTemplateDescriptor> varTemplates = calculateVarTemplates(hive, entries, manifest);
 
         // lazy, DFS resolving of all templates.
         List<FlattenedApplicationTemplateConfiguration> resolvedAppTemplates = resolveApplicationTemplates(applicationTemplates);
@@ -265,6 +182,119 @@ public class ProductManifest {
 
         return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, resolvedInstanceTemplates,
                 resolvedAppTemplates, paramTemplates, instanceVariables);
+    }
+
+    private static List<ObjectId> calculatePlugins(BHive hive, Map<Tree.Key, ObjectId> entries) {
+        List<ObjectId> result = new ArrayList<>();
+        Tree.Key pluginKey = new Tree.Key(ProductManifestBuilder.PLUGINS_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(pluginKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(pluginKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.JAR_FILE_EXTENSION)) {
+                    result.add(b.getElementId());
+                }
+            }).build());
+        }
+        return result;
+    }
+
+    private static List<VariableDescriptor> calculateInstanceVariables(BHive hive, Map<Tree.Key, ObjectId> entries,
+            Manifest.Key manifest) {
+        List<VariableDescriptor> result = new ArrayList<>();
+        Tree.Key instanceVarsKey = new Tree.Key(ProductManifestBuilder.INSTANCE_VARIABLES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(instanceVarsKey)) {
+            Set<VariableDescriptor> instanceVariableSet = new HashSet<>(); // temporary set for deduplication
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(instanceVarsKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        instanceVariableSet
+                                .addAll(StorageHelper.fromYamlStream(is, InstanceVariableDefinitionDescriptor.class).definitions);
+                    } catch (Exception e) {
+                        log.warn("Cannot load instance variable definitions from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+            result.addAll(instanceVariableSet);
+        }
+        return result;
+    }
+
+    private static List<InstanceTemplateDescriptor> calculateTemplates(BHive hive, Map<Tree.Key, ObjectId> entries,
+            Manifest.Key manifest) {
+        List<InstanceTemplateDescriptor> result = new ArrayList<>();
+        Tree.Key templateKey = new Tree.Key(ProductManifestBuilder.TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(templateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(templateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        result.add(StorageHelper.fromYamlStream(is, InstanceTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load instance template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+        result.sort((a, b) -> a.name.compareTo(b.name));
+        return result;
+    }
+
+    private static List<ApplicationTemplateDescriptor> calculateApplicationTemplates(BHive hive, Map<Tree.Key, ObjectId> entries,
+            Manifest.Key manifest) {
+        List<ApplicationTemplateDescriptor> result = new ArrayList<>();
+        Tree.Key appTemplateKey = new Tree.Key(ProductManifestBuilder.APP_TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(appTemplateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(appTemplateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        result.add(StorageHelper.fromYamlStream(is, ApplicationTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load application template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+        return result;
+    }
+
+    private static List<ParameterTemplateDescriptor> calculateParamTemplates(BHive hive, Map<Tree.Key, ObjectId> entries,
+            Manifest.Key manifest) {
+        List<ParameterTemplateDescriptor> result = new ArrayList<>();
+        Tree.Key paramTemplateKey = new Tree.Key(ProductManifestBuilder.PARAM_TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(paramTemplateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(paramTemplateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        result.add(StorageHelper.fromYamlStream(is, ParameterTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load application template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+        return result;
+    }
+
+    private static List<InstanceVariableTemplateDescriptor> calculateVarTemplates(BHive hive, Map<Tree.Key, ObjectId> entries,
+            Manifest.Key manifest) {
+        List<InstanceVariableTemplateDescriptor> result = new ArrayList<>();
+        Tree.Key varTemplateKey = new Tree.Key(ProductManifestBuilder.VARIABLE_TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(varTemplateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(varTemplateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(ProductManifestBuilder.YAML_FILE_EXTENSION)) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        result.add(StorageHelper.fromYamlStream(is, InstanceVariableTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load instance variable template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+        return result;
     }
 
     private static List<FlattenedInstanceTemplateConfiguration> resolveInstanceTemplates(

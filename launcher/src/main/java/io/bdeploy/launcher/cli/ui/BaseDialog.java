@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -70,7 +69,7 @@ public class BaseDialog extends JFrame {
     public BaseDialog(Dimension dimension) {
         setSize(dimension);
         setLayout(new BorderLayout(10, 10));
-        setIconImages(Arrays.stream(WINDOW_IMAGES).map(BaseDialog::loadImage).collect(Collectors.toList()));
+        setIconImages(Arrays.stream(WINDOW_IMAGES).map(BaseDialog::loadImage).toList());
         addWindowListener(new WindowAdapter() {
 
             @Override

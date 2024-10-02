@@ -280,8 +280,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, List<ApplicationManifest> apps,
             TrackingTemplateOverrideResolver ttor, Map<String, MinionStatusDto> nodeStates, SystemConfiguration system,
             BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter) {
-        List<InstanceNodeConfigurationDto> result = new ArrayList<>();
-
         Function<String, LinkedValueConfiguration> globalLookup = id -> {
             LinkedValueConfiguration lv = null;
             for (var g : tpl.groups) {
@@ -297,6 +295,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             return lv;
         };
 
+        List<InstanceNodeConfigurationDto> result = new ArrayList<>();
         for (var tgroup : tpl.groups) {
             String targetNode = groupToNode.get(tgroup.name);
             if (targetNode == null || targetNode.isBlank()) {
