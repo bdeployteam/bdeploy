@@ -147,7 +147,9 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 result.addField("Logging directory", logDataDirPath);
             }
 
-            if (config.mode() != MinionMode.NODE) {
+            if (config.mode() == MinionMode.NODE) {
+                handleNode(config, mr);
+            } else {
                 try {
                     mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
                             Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
@@ -156,19 +158,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 }
 
                 result.addField("User Created", config.initUser());
-            } else {
-                MinionConfiguration mc = new MinionManifest(mr.getHive()).read();
-                MinionDto self = mc.getMinion(mr.getState().self);
-
-                NodeAttachDto nad = new NodeAttachDto();
-                nad.name = config.hostname();
-                nad.sourceMode = MinionMode.NODE;
-                nad.remote = self.remote;
-
-                Files.write(Paths.get(config.nodeIdentFile()), StorageHelper.toRawBytes(nad));
-
-                out().println("Node Identification written to " + config.nodeIdentFile());
-                out().println("Use this file through the BDeploy CLI or UI to attach the node to a master server.");
             }
 
             result.addField("Mode", config.mode().name());
@@ -258,4 +247,18 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         return pack;
     }
 
+    private void handleNode(InitConfig config, MinionRoot mr) throws IOException {
+        MinionConfiguration mc = new MinionManifest(mr.getHive()).read();
+        MinionDto self = mc.getMinion(mr.getState().self);
+
+        NodeAttachDto nad = new NodeAttachDto();
+        nad.name = config.hostname();
+        nad.sourceMode = MinionMode.NODE;
+        nad.remote = self.remote;
+
+        Files.write(Paths.get(config.nodeIdentFile()), StorageHelper.toRawBytes(nad));
+
+        out().println("Node Identification written to " + config.nodeIdentFile());
+        out().println("Use this file through the BDeploy CLI or UI to attach the node to a master server.");
+    }
 }

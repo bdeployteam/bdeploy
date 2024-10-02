@@ -81,43 +81,7 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
             String newHostname = config.hostname();
             int newPort = config.port();
-            boolean newHostnameSet = newHostname != null;
-            boolean newPortSet = newPort != -1;
-
-            if (newHostnameSet || newPortSet) {
-                MinionManifest mm = new MinionManifest(r.getHive());
-                MinionConfiguration cfg = mm.read();
-
-                MinionDto minion = cfg.getMinion(r.getState().self);
-                if (minion == null) {
-                    throw new IllegalStateException("Cannot find my own remote configuration in minion manifest");
-                }
-                RemoteService oldRemote = minion.remote;
-
-                String hostname = newHostnameSet ? newHostname : oldRemote.getUri().getHost();
-                int port = newPortSet ? newPort : oldRemote.getUri().getPort();
-
-                minion.remote = new RemoteService(UriBuilder.fromUri(oldRemote.getUri()).host(hostname).port(port).build(),
-                        oldRemote.getAuthPack());
-
-                if (!config.skipConnectionCheck()) {
-                    // make sure the new setting works.
-                    ConnectivityChecker.checkOrThrow(minion.remote);
-                }
-
-                mm.update(cfg);
-                r.modifyState(s -> {
-                    s.officialName = hostname;
-                    s.port = port;
-                });
-
-                if (newHostnameSet) {
-                    result.addField("Hostname", hostname);
-                }
-                if (newPortSet) {
-                    result.addField("Port", port);
-                }
-            }
+            handleHostnameAndPort(r, newHostname, newPort, config.skipConnectionCheck(), result);
 
             MinionMode newMode = config.mode();
             if (newMode != null) {
@@ -145,7 +109,7 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
             }
 
             int newActiveSessionTimeout = config.sessionActiveTimeout();
-            if(newActiveSessionTimeout != -1) {
+            if (newActiveSessionTimeout != -1) {
                 r.modifyState(s -> s.webSessionActiveTimeoutHours = newActiveSessionTimeout);
                 result.addField("Session active timeout (hours)", newActiveSessionTimeout);
             }
@@ -159,5 +123,45 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
         }
 
         return result;
+    }
+
+    private static void handleHostnameAndPort(MinionRoot r, String newHostname, int newPort, boolean skipConnectionCheck,
+            DataResult result) {
+        boolean newHostnameSet = newHostname != null;
+        boolean newPortSet = newPort != -1;
+        if (newHostnameSet || newPortSet) {
+            MinionManifest mm = new MinionManifest(r.getHive());
+            MinionConfiguration cfg = mm.read();
+
+            MinionDto minion = cfg.getMinion(r.getState().self);
+            if (minion == null) {
+                throw new IllegalStateException("Cannot find my own remote configuration in minion manifest");
+            }
+            RemoteService oldRemote = minion.remote;
+
+            String hostname = newHostnameSet ? newHostname : oldRemote.getUri().getHost();
+            int port = newPortSet ? newPort : oldRemote.getUri().getPort();
+
+            minion.remote = new RemoteService(UriBuilder.fromUri(oldRemote.getUri()).host(hostname).port(port).build(),
+                    oldRemote.getAuthPack());
+
+            if (!skipConnectionCheck) {
+                // make sure the new setting works.
+                ConnectivityChecker.checkOrThrow(minion.remote);
+            }
+
+            mm.update(cfg);
+            r.modifyState(s -> {
+                s.officialName = hostname;
+                s.port = port;
+            });
+
+            if (newHostnameSet) {
+                result.addField("Hostname", hostname);
+            }
+            if (newPortSet) {
+                result.addField("Port", port);
+            }
+        }
     }
 }
