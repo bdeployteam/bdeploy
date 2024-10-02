@@ -84,7 +84,7 @@ public class FlattenedInstanceTemplateConfiguration {
                 } else {
                     // of the given replacements, insert those whose id is not yet present in the variable list.
                     ImmutableList.copyOf(replacements).reverse().stream()
-                            .filter(p -> vars.stream().filter(x -> x.id != null && x.id.equals(p.id)).findFirst().isEmpty())
+                            .filter(p -> vars.stream().noneMatch(x -> x.id != null && x.id.equals(p.id)))
                             .forEach(r -> vars.add(index, new TemplateableVariableConfiguration(r)));
                 }
             }
