@@ -35,7 +35,10 @@ import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplate
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideResolver;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
+import io.bdeploy.interfaces.descriptor.application.EndpointsDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
@@ -74,9 +77,18 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             if (applicationDescriptor.startCommand != null) {
                 validateCommand(issues, app, applicationDescriptor.startCommand, config.parameterTemplates);
             }
-
             if (applicationDescriptor.stopCommand != null) {
                 validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates);
+            }
+            if (applicationDescriptor.type == ApplicationType.CLIENT) {
+                EndpointsDescriptor endpointsDescr = applicationDescriptor.endpoints;
+                if (endpointsDescr != null) {
+                    List<HttpEndpoint> httpEndpoints = endpointsDescr.http;
+                    if (httpEndpoints != null && !httpEndpoints.isEmpty()) {
+                        issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                                app + " is a client application but has endpoints configured"));
+                    }
+                }
             }
         }
 
