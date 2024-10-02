@@ -331,7 +331,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(process.instanceTag + (process.instanceTag.equals(deploymentStates.activeTag) ? "" : "*")) //
                 .cell(instance == null ? "?" : instance.product.getTag()) //
                 .cell(cfg == null ? "?" : cfg.processControl.startType) //
-                .cell(handle == null ? "-" : FormatHelper.formatInstant(Instant.ofEpochMilli(handle.startTime))) //
+                .cell(handle == null ? "-" : FormatHelper.formatTemporal(Instant.ofEpochMilli(handle.startTime))) //
                 .cell(handle == null ? "-" : handle.user) //
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //
                 .cell(Integer.toString(process.exitCode)) //

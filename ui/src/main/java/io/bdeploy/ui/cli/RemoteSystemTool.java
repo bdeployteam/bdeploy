@@ -298,7 +298,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
                     .cell(null)//
                     .cell(overallStatusDto.status)//
                     .cell(overallStatusDto.timestamp <= 0 ? "Never"
-                            : FormatHelper.formatInstant(Instant.ofEpochMilli(overallStatusDto.timestamp)))//
+                            : FormatHelper.formatTemporal(Instant.ofEpochMilli(overallStatusDto.timestamp)))//
                     .cell(String.join(" | ", overallStatusDto.messages))//
                     .build();
 

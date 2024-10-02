@@ -92,7 +92,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
 
             for (UserInfo info : admin.getAllUser()) {
                 table.row().cell(info.name).cell(info.externalSystem).cell(info.inactive ? "*" : "").cell(info.email)
-                        .cell(FormatHelper.formatInstant(Instant.ofEpochMilli(info.lastActiveLogin)))
+                        .cell(FormatHelper.formatTemporal(Instant.ofEpochMilli(info.lastActiveLogin)))
                         .cell(info.permissions.toString()).build();
             }
             return table;

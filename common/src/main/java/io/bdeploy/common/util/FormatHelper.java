@@ -2,10 +2,10 @@ package io.bdeploy.common.util;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.Locale;
 
@@ -29,13 +29,13 @@ public class FormatHelper {
      * Formats the given {@link Date} into a human readable {@link String}.
      */
     public static String formatDate(Date date) {
-        return formatInstant(date.toInstant());
+        return formatTemporal(date.toInstant());
     }
 
     /**
-     * Formats the given {@link Instant} into a human readable {@link String}.
+     * Formats the given {@link Temporal} into a human readable {@link String}.
      */
-    public static String formatInstant(Instant temporal) {
+    public static String formatTemporal(Temporal temporal) {
         return FORMATTER.format(temporal);
     }
 

@@ -160,7 +160,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
         for (Map.Entry<String, MinionStatusDto> e : minions.entrySet()) {
             MinionStatusDto s = e.getValue();
-            String startTime = s.startup != null ? FormatHelper.formatInstant(s.startup) : "-";
+            String startTime = s.startup != null ? FormatHelper.formatTemporal(s.startup) : "-";
             String status = s.offline ? "OFFLINE" : "ONLINE";
             MinionDto config = s.config;
             table.row().cell(e.getKey()).cell(status).cell(startTime).cell(config.os).cell(config.version).build();
