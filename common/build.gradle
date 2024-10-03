@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api (
         'commons-codec:commons-codec:1.17.1',
-        'com.google.guava:guava:33.3.0-jre',
+        'com.google.guava:guava:33.3.1-jre',
         'io.dropwizard.metrics:metrics-core:4.2.27',
         'org.slf4j:slf4j-api:2.0.16',
         'com.j256.simplemagic:simplemagic:1.17',
@@ -14,12 +14,12 @@ dependencies {
     )
 
     implementation (
-        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.2',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.17.2',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2',
-        'com.fasterxml.jackson.module:jackson-module-blackbird:2.17.2',
+        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.0',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.18.0',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.0',
+        'com.fasterxml.jackson.module:jackson-module-blackbird:2.18.0',
         'org.apache.commons:commons-compress:1.27.1',
-        'org.jline:jline-terminal:3.26.3',
+        'org.jline:jline-terminal:3.27.0',
     )
 
     // this dep is not allowed, as logging depends on common - circle. it works for gradle,
