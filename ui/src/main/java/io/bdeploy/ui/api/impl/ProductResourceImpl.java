@@ -185,14 +185,14 @@ public class ProductResourceImpl implements ProductResource {
             if (installedTags.isEmpty()) {
                 // in this case, we take the latest, and need to still block this product version from removal.
                 // (instance was created, but never installed (yet)).
-                InstanceManifest newest = mfSet.stream().sorted((a, b) -> Integer
-                        .compare(Integer.parseInt(b.getKey().getTag()), Integer.parseInt(a.getKey().getTag())))
-                        .findFirst().get();
+                InstanceManifest newest = mfSet.stream().sorted(
+                        (a, b) -> Integer.compare(Integer.parseInt(b.getKey().getTag()), Integer.parseInt(a.getKey().getTag())))
+                        .findFirst().orElseThrow();
 
                 result.add(createUsage(newest));
             } else {
-                mfSet.stream().filter(mf -> installedTags.contains(mf.getKey().getTag())).sorted((a, b) -> Long
-                        .compare(Long.parseLong(a.getKey().getTag()), Long.parseLong(b.getKey().getTag())))
+                mfSet.stream().filter(mf -> installedTags.contains(mf.getKey().getTag()))
+                        .sorted((a, b) -> Long.compare(Long.parseLong(a.getKey().getTag()), Long.parseLong(b.getKey().getTag())))
                         .forEach(mf -> result.add(createUsage(mf)));
             }
         }
