@@ -44,7 +44,6 @@ import io.bdeploy.minion.MinionRoot;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Cookie;
@@ -105,13 +104,10 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
 
         try {
             byte[] body = wrapper.base64body == null ? null : Base64.decodeBase64(wrapper.base64body);
-            WebTarget target = CommonEndpointHelper.initClient(processedEndpoint, wrapper.subPath);
 
-            for (Map.Entry<String, List<String>> entry : wrapper.queryParameters.entrySet()) {
-                target = target.queryParam(entry.getKey(), entry.getValue().toArray());
-            }
-
-            Invocation.Builder request = target.request();
+            Invocation.Builder request = CommonEndpointHelper.createRequestBuilder(processedEndpoint, wrapper.subPath,
+                    Collections.emptyMap(),
+                    wrapper.queryParameters.entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue())));
 
             // Always replace the "host" header with "localhost". the request is *always* made on the local
             // machine. Avoid forwarding the original host (e.g. the hostname of the original BDeploy server).

@@ -21,7 +21,10 @@ export type AppEndpointFields =
   | 'cfg.ep.trustStorePass'
   | 'cfg.ep.authType'
   | 'cfg.ep.authUser'
-  | 'cfg.ep.authPass';
+  | 'cfg.ep.authPass'
+  | 'cfg.ep.tokenUrl'
+  | 'cfg.ep.clientId'
+  | 'cfg.ep.clientSecret';
 
 export type InstFields =
   | 'inst.name'

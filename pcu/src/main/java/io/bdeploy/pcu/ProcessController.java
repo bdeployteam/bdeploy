@@ -9,7 +9,9 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +50,7 @@ import io.bdeploy.interfaces.descriptor.application.LivenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
 import io.bdeploy.logging.process.RollingStreamGobbler;
-import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.Response;
 
 /**
@@ -834,14 +836,15 @@ public class ProcessController {
                 return true; // regard not-enabled probe as success, otherwise probing will always fail.
             }
 
-            WebTarget client = CommonEndpointHelper.initClient(processed, null);
-
+            Map<String, Object> properties = new HashMap<>();
             if (timeout > 0) {
-                client.property(ClientProperties.CONNECT_TIMEOUT, timeout * 1000);
-                client.property(ClientProperties.READ_TIMEOUT, timeout * 1000);
+                long actualTimeout = timeout * 1000;
+                properties.put(ClientProperties.CONNECT_TIMEOUT, actualTimeout);
+                properties.put(ClientProperties.READ_TIMEOUT, actualTimeout);
             }
 
-            Response rs = client.request().get();
+            Builder builder = CommonEndpointHelper.createRequestBuilder(processed, null, properties, Collections.emptyMap());
+            Response rs = builder.get();
             String resp = rs.hasEntity() ? rs.readEntity(String.class) : "Empty Response";
             int status = rs.getStatus();
 
