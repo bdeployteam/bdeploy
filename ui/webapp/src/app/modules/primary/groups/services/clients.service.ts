@@ -38,7 +38,7 @@ export class ClientsService {
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public launcher$ = new BehaviorSubject<LauncherDto>(null);
-  public apps$ = new BehaviorSubject<ClientApp[]>(null);
+  public apps$ = new BehaviorSubject<ClientApp[]>([]);
 
   private readonly update$ = new BehaviorSubject<string>(null);
   private loadCall: Subscription;
@@ -69,7 +69,7 @@ export class ClientsService {
       .get<InstanceAllClientsDto>(`${this.apiGroupPath(group)}/all-clients`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Load all Clients'),
+        measure('Load all client apps and endpoints'),
       )
       .subscribe((result) => {
         this.launcher$.next(result.launchers);
