@@ -110,26 +110,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
             MinionState state = mr.getState();
 
             if (config.https() != null) {
-                Path cert = Paths.get(config.https());
-                if (!Files.isRegularFile(cert)) {
-                    helpAndFail("New HTTPS certificate " + cert + " does not exist!");
-                }
-
-                boolean created = false;
-                if (state.keystoreHttpsPath == null || !PathHelper.exists(state.keystoreHttpsPath)) {
-                    mr.initHttpKeys();
-                    created = true;
-                    state = mr.getState();
-                }
-
-                try {
-                    doUpdateCertificate(mr, state.keystoreHttpsPath, state.keystorePass, cert);
-                } catch (RuntimeException e) {
-                    if (created) {
-                        Files.delete(state.keystoreHttpsPath);
-                    }
-                    throw e;
-                }
+                checkHttps(mr, state, config.https());
             }
 
             if (config.regenerate()) {
@@ -182,6 +163,29 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
             return createSuccess();
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot update certificate", e);
+        }
+    }
+
+    private void checkHttps(MinionRoot mr, MinionState state, String https) throws IOException, GeneralSecurityException {
+        Path cert = Paths.get(https);
+        if (!Files.isRegularFile(cert)) {
+            helpAndFail("New HTTPS certificate " + cert + " does not exist!");
+        }
+
+        boolean created = false;
+        if (state.keystoreHttpsPath == null || !PathHelper.exists(state.keystoreHttpsPath)) {
+            mr.initHttpKeys();
+            created = true;
+            state = mr.getState();
+        }
+
+        try {
+            doUpdateCertificate(mr, state.keystoreHttpsPath, state.keystorePass, cert);
+        } catch (RuntimeException e) {
+            if (created) {
+                Files.delete(state.keystoreHttpsPath);
+            }
+            throw e;
         }
     }
 

@@ -248,52 +248,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
                     Status.EXPECTATION_FAILED);
         }
 
-        // update the target server to the same BDeploy version as we have running. we do this before conversion,
-        // so the server is responsible for updating individual nodes as well.
-        // NOTE: we do not need to push launchers, as they will not be required on nodes.
-        List<Manifest.Key> targets = getSystemManifest(SoftwareUpdateResource.BDEPLOY_MF_NAME).stream()
-                .map(ScopedManifestKey::getKey).toList();
-
-        // not possible to update if we do not have any update locally present to push.
-        if (!targets.isEmpty() && VersionHelper.compare(info.version, VersionHelper.getVersion()) != 0) {
-            log.info("Performing update to align BDeploy version ({} != {})", info.version, VersionHelper.getVersion());
-
-            // Push them to the default hive of the target server
-            PushOperation push = new PushOperation();
-            targets.forEach(push::addManifest);
-
-            // Updates are stored in the local default hive
-            BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
-            defaultHive.execute(push.setRemote(minion));
-
-            // do it.
-            UpdateHelper.update(minion, targets, true, context);
-
-            // after the update, the server takes a second until it *begins* to perform a restart.
-            waitASecond();
-
-            // force a new RemoteService instance on next call
-            JerseyClientFactory.invalidateCached(minion);
-
-            // now wait for the server to be back up, max 100 seconds.
-            try {
-                BackendInfoResource newbir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
-                RetryableScope.create().withMaxRetries(100).withDelay(1_000).run(() -> {
-                    BackendInfoDto newinfo = newbir.getVersion();
-
-                    if (VersionHelper.compare(newinfo.version, VersionHelper.getVersion()) == 0) {
-                        return; // we made it.
-                    }
-
-                    throw new IllegalStateException("Target Server did not update to version " + VersionHelper.getVersion()
-                            + ", still has " + newinfo.version);
-                });
-                bir = newbir; // server is there, use the new resource.
-            } catch (Exception e) {
-                throw new WebApplicationException("Cannot await update of target server(s) before migration.", e,
-                        Status.EXPECTATION_FAILED);
-            }
-        }
+        BackendInfoResource newBir = updatedIfNeeded(minion, info);
+        bir = newBir != null ? newBir : bir;
 
         boolean awaitedNodes = false;
         Map<String, MinionStatusDto> allNodes = null;
@@ -354,6 +310,57 @@ public class MasterRootResourceImpl implements MasterRootResource {
         result.originalName = oldMasterName;
         result.allNodes = allNodes;
         return result;
+    }
+
+    private BackendInfoResource updatedIfNeeded(RemoteService minion, BackendInfoDto info) {
+        // update the target server to the same BDeploy version as we have running. we do this before conversion,
+        // so the server is responsible for updating individual nodes as well.
+        // NOTE: we do not need to push launchers, as they will not be required on nodes.
+        List<Manifest.Key> targets = getSystemManifest(SoftwareUpdateResource.BDEPLOY_MF_NAME).stream()
+                .map(ScopedManifestKey::getKey).toList();
+
+        // not possible to update if we do not have any update locally present to push.
+        if (targets.isEmpty() || VersionHelper.compare(info.version, VersionHelper.getVersion()) == 0) {
+            return null;
+        }
+
+        log.info("Performing update to align BDeploy version ({} != {})", info.version, VersionHelper.getVersion());
+
+        // Push them to the default hive of the target server
+        PushOperation push = new PushOperation();
+        targets.forEach(push::addManifest);
+
+        // Updates are stored in the local default hive
+        BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+        defaultHive.execute(push.setRemote(minion));
+
+        // do it.
+        UpdateHelper.update(minion, targets, true, context);
+
+        // after the update, the server takes a second until it *begins* to perform a restart.
+        waitASecond();
+
+        // force a new RemoteService instance on next call
+        JerseyClientFactory.invalidateCached(minion);
+
+        // now wait for the server to be back up, max 100 seconds.
+        try {
+            BackendInfoResource newbir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
+            RetryableScope.create().withMaxRetries(100).withDelay(1_000).run(() -> {
+                BackendInfoDto newinfo = newbir.getVersion();
+
+                if (VersionHelper.compare(newinfo.version, VersionHelper.getVersion()) == 0) {
+                    return; // we made it.
+                }
+
+                throw new IllegalStateException("Target Server did not update to version " + VersionHelper.getVersion()
+                        + ", still has " + newinfo.version);
+            });
+            return newbir; // server is there, use the new resource.
+        } catch (Exception e) {
+            throw new WebApplicationException("Cannot await update of target server(s) before migration.", e,
+                    Status.EXPECTATION_FAILED);
+        }
     }
 
     private static void waitASecond() {
