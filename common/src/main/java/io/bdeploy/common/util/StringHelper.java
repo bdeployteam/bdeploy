@@ -1,9 +1,14 @@
 package io.bdeploy.common.util;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Helper for {@link java.lang.String}
  */
 public class StringHelper {
+
+    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     private StringHelper() {
     }
@@ -65,7 +70,7 @@ public class StringHelper {
         if (count == 1) {
             return string;
         }
-        byte[] value = string.getBytes();
+        byte[] value = string.getBytes(DEFAULT_CHARSET);
         final int len = value.length;
         if (len == 0 || count == 0) {
             return "";

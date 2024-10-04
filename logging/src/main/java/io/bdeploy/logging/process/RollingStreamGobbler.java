@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.NoThrowAutoCloseable;
+import io.bdeploy.common.util.StringHelper;
 
 /**
  * Processes output of a process and handles logging it to a rolling output file.
@@ -61,7 +62,8 @@ public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable
         // been closed on another thread.
 
         log(new FormattedMessage(" --- Starting output capture for {}/{}, PID: {}", instance, app, process.pid()), Level.WARN);
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StringHelper.DEFAULT_CHARSET))) {
             br.lines().forEach(l -> log(new SimpleMessage(l), Level.INFO));
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -101,7 +103,8 @@ public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable
 
     public NoThrowAutoCloseable attachStopProcess(Process process) {
         Thread stopGobbler = new Thread(() -> {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StringHelper.DEFAULT_CHARSET))) {
                 br.lines().forEach(l -> log(new SimpleMessage("[STOP] " + l), Level.INFO));
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
