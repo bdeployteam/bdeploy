@@ -446,7 +446,7 @@ public class InstanceResourceImpl implements InstanceResource {
             } catch (WebApplicationException e) {
                 log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
                 if (log.isDebugEnabled()) {
-                    log.debug("Exception", group, config.id, e);
+                    log.debug("Exception", e);
                 }
             }
         }
@@ -1254,5 +1254,4 @@ public class InstanceResourceImpl implements InstanceResource {
     public InstanceBulkResource getBulkResource() {
         return rc.initResource(new InstanceBulkResourceImpl(hive, group));
     }
-
 }

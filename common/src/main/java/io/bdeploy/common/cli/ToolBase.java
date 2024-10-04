@@ -164,53 +164,9 @@ public abstract class ToolBase {
             streamReporter.setVerboseSummary(vv);
 
             if (args.length <= toolArgNum || tools.get(args[toolArgNum]) == null) {
-                int logo = 0;
-                System.out.println(LOGO[logo++]);
-                System.out.println(LOGO[logo++] + "BHive & BDeploy");
-                System.out.println(LOGO[logo++] + "─────────────────────────────────────────────────");
-                System.out.println(LOGO[logo++] + "Usage: $0 <options...> <tool> <args...>");
-                System.out.println(LOGO[logo++]);
-                System.out.println(LOGO[logo++] + "Options:");
-                System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting");
-                System.out.println(LOGO[logo++] + "  -v|-vv  Be verbose | Be very verbose");
-                System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f> - no effect on");
-                System.out.println(LOGO[logo++] + "          progress output");
-                System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file");
-                System.out.println(LOGO[logo++] + "          <f> - no effect on normal output");
-                System.out.println(LOGO[logo++] + "  --csv   Write data tables in CSV format");
-                System.out.println(LOGO[logo++] + "  --json  Write data tables in JSON format");
-                System.out.println();
-                System.out.println("Tools:");
-                System.out.println();
-                Map<String, List<Entry<String, Class<? extends CliTool>>>> grouped = tools.entrySet().stream()
-                        .collect(Collectors.groupingBy(e -> getToolCategory(e.getValue()), TreeMap::new, Collectors.toList()));
-                grouped.entrySet().stream().forEach(group -> {
-                    System.out.println("  " + group.getKey() + ":");
-
-                    DataTable table = DataFormat.TEXT.createTable(System.out);
-                    table.setIndentHint(5).setHideHeadersHint(true).setLineWrapHint(true);
-                    table.column(new DataTableColumn.Builder("Tool").setMinWidth(25).build());
-                    table.column(new DataTableColumn.Builder("Description").setMinWidth(30).build());
-
-                    group.getValue().stream().forEach(e -> {
-                        List<String> names = namesOf(e.getValue());
-                        if (names.get(0).equals(e.getKey())) {
-                            Help h = e.getValue().getAnnotation(Help.class);
-                            table.row().cell(e.getKey()).cell(h.value() != null ? h.value() : "").build();
-                        } else {
-                            table.row().cell(e.getKey()).cell("DEPRECATED - alias for '" + names.get(0) + "'").build();
-                        }
-                    });
-                    table.render();
-
-                    System.out.println();
-                });
-
-                if (failWithException || testMode) {
-                    throw new IllegalArgumentException("Wrong number of arguments");
-                } else {
-                    System.exit(ExitCode.ERROR.getCode());
-                }
+                printErrorAndExit();
+                // this return statement is technically not required, because we never return from printErrorAndExit()
+                return;
             }
 
             ActivityReporter reporter = vv ? streamReporter : new ActivityReporter.Null();
@@ -286,6 +242,56 @@ public abstract class ToolBase {
             System.exit(ExitCode.OK.getCode());
         } else {
             System.exit(result.getExitCode().getCode());
+        }
+    }
+
+    private void printErrorAndExit() {
+        int logo = 0;
+        System.out.println(LOGO[logo++]);
+        System.out.println(LOGO[logo++] + "BHive & BDeploy");
+        System.out.println(LOGO[logo++] + "─────────────────────────────────────────────────");
+        System.out.println(LOGO[logo++] + "Usage: $0 <options...> <tool> <args...>");
+        System.out.println(LOGO[logo++]);
+        System.out.println(LOGO[logo++] + "Options:");
+        System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting");
+        System.out.println(LOGO[logo++] + "  -v|-vv  Be verbose | Be very verbose");
+        System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f> - no effect on");
+        System.out.println(LOGO[logo++] + "          progress output");
+        System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file");
+        System.out.println(LOGO[logo++] + "          <f> - no effect on normal output");
+        System.out.println(LOGO[logo++] + "  --csv   Write data tables in CSV format");
+        System.out.println(LOGO[logo++] + "  --json  Write data tables in JSON format");
+        System.out.println();
+        System.out.println("Tools:");
+        System.out.println();
+        Map<String, List<Entry<String, Class<? extends CliTool>>>> grouped = tools.entrySet().stream()
+                .collect(Collectors.groupingBy(e -> getToolCategory(e.getValue()), TreeMap::new, Collectors.toList()));
+        grouped.entrySet().stream().forEach(group -> {
+            System.out.println("  " + group.getKey() + ":");
+
+            DataTable table = DataFormat.TEXT.createTable(System.out);
+            table.setIndentHint(5).setHideHeadersHint(true).setLineWrapHint(true);
+            table.column(new DataTableColumn.Builder("Tool").setMinWidth(25).build());
+            table.column(new DataTableColumn.Builder("Description").setMinWidth(30).build());
+
+            group.getValue().stream().forEach(e -> {
+                List<String> names = namesOf(e.getValue());
+                if (names.get(0).equals(e.getKey())) {
+                    Help h = e.getValue().getAnnotation(Help.class);
+                    table.row().cell(e.getKey()).cell(h.value() != null ? h.value() : "").build();
+                } else {
+                    table.row().cell(e.getKey()).cell("DEPRECATED - alias for '" + names.get(0) + "'").build();
+                }
+            });
+            table.render();
+
+            System.out.println();
+        });
+
+        if (failWithException || testMode) {
+            throw new IllegalArgumentException("Wrong number of arguments");
+        } else {
+            System.exit(ExitCode.ERROR.getCode());
         }
     }
 
