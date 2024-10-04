@@ -65,7 +65,7 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
             } else {
                 DataResult result = createEmptyResult();
                 result.addField("Schedule", mr.getState().cleanupSchedule);
-                result.addField("Last Run", FormatHelper.formatInstant(Instant.ofEpochMilli(mr.getState().cleanupLastRun)));
+                result.addField("Last Run", FormatHelper.formatTemporal(Instant.ofEpochMilli(mr.getState().cleanupLastRun)));
                 return result;
             }
         }

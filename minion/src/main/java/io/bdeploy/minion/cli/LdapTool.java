@@ -83,7 +83,7 @@ public class LdapTool extends ConfiguredCliTool<LdapConfig> {
         DataResult result = createEmptyResult();
         String schedule = Optional.ofNullable(mr.getState().ldapSyncSchedule).orElse(SyncLdapUserGroupsJob.DEFAULT_SYNC_SCHEDULE);
         String lastRun = mr.getState().ldapSyncLastRun == 0 ? "N/A"
-                : FormatHelper.formatInstant(Instant.ofEpochMilli(mr.getState().ldapSyncLastRun));
+                : FormatHelper.formatTemporal(Instant.ofEpochMilli(mr.getState().ldapSyncLastRun));
         result.addField("Cron Schedule", schedule);
         result.addField("Last Run", lastRun);
         return result;
