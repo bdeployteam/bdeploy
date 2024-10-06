@@ -14,7 +14,7 @@ public class AuthTrace {
 
     public static class Message {
 
-        private final static transient DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+        private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
         public long timestamp;
         public String text;
 
