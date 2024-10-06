@@ -63,8 +63,8 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
       this.cfgFiles
         .load(file)
         .pipe(finalize(() => this.loading$.next(false)))
-        .subscribe((c) => {
-          this.content = Base64.decode(c);
+        .subscribe((str) => {
+          this.content = Base64.decode(str);
           this.originalContent = this.content;
         });
 
@@ -74,7 +74,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
         s?.find((systemConfigDto) => systemConfigDto.key.name === i.config.config.system?.name)?.config,
         null,
         a,
-      ).filter((c) => !c.value.startsWith('{{DELAYED')); // DELAYED variables should not be used in config files
+      ).filter((contentCompletion) => !contentCompletion.value.startsWith('{{DELAYED')); // DELAYED variables should not be used in config files
 
       this.system = s?.find((system) => system.key.name === c?.instanceConfiguration?.system?.name)?.config;
 
