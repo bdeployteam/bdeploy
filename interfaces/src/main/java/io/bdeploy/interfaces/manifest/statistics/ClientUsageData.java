@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ClientUsageData {
 
     @JsonIgnore
-    private final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC);
 
     // day -> applicationId -> hostname -> count
     private final SortedMap<String, SortedMap<String, SortedMap<String, Integer>>> clientUsage = new TreeMap<>();
@@ -28,7 +28,7 @@ public class ClientUsageData {
         }
     }
 
-    private String getToday() {
+    private static String getToday() {
         return LocalDateTime.now().format(dtf);
     }
 }
