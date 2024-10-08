@@ -3,17 +3,15 @@ plugins {
   id 'java-library'
   id 'maven-publish'
   id 'signing'
-  id 'com.github.johnrengelman.shadow' version '8.1.1'
+  id 'com.gradleup.shadow' version '8.3.2'
   id "io.swagger.core.v3.swagger-gradle-plugin" version "2.2.25"
 }
 
 dependencies {
-    implementation(
+    api(
         project(":common"),
         project(":jersey"),
         project(":bhive"),
-    )
-    api(
         'io.swagger.core.v3:swagger-annotations:2.2.25',
     )
     swaggerDeps(
@@ -33,6 +31,21 @@ build.dependsOn resolve
 shadowJar {
 	archiveClassifier = ''
     archiveBaseName = 'bdeploy-api'
+
+    // make sure we have our own versions of most important/conflicting things
+    relocate('com.fasterxml.jackson', 'io.bdeploy.shadow.jackson')
+    relocate('com.google', 'io.bdeploy.shadow.google')
+    relocate('org.glassfish', 'io.bdeploy.shadow.glassfish')
+    relocate('com.ning', 'io.bdeploy.shadow.ning')
+    relocate('org.apache', 'io.bdeploy.shadow.apache')
+    relocate('org.jvnet', 'io.bdeploy.shadow.jvnet')
+
+    minimize() {
+        exclude(project(":jersey"))
+        exclude(project(":bhive"))
+    }
+
+    mergeServiceFiles()
 }
 
 resolve {
