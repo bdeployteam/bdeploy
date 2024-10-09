@@ -1,5 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
+import static io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter.CODE_VERSION_MISMATCH;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,6 +65,7 @@ import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
@@ -446,26 +449,52 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             }
 
             // 4. Fetch all instance, meta manifests and systems from the managed server and push them into the central BHive.
-            SortedMap<Key, InstanceConfiguration> managedInstanceConfigs = managedCommonRoot.getInstanceResource(groupName)
-                    .listInstanceConfigurations(false);
+            CommonInstanceResource instanceResource = managedCommonRoot.getInstanceResource(groupName);
+            Set<Manifest.Key> instanceKeys;
+            try {
+                // preferred for >7.2.0: only fetch the keys, skip all the configuration contents.
+                instanceKeys = instanceResource.listInstanceKeys(false);
+            } catch (WebApplicationException ex) {
+                if (ex.getResponse().getStatus() != CODE_VERSION_MISMATCH) {
+                    throw ex;
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Falling back to fetching complete configuration from {} in {}", managedServerName, groupName);
+                }
+
+                // fallback: in case the key only method is not yet available on the managed server.
+                instanceKeys = instanceResource.listInstanceConfigurations(false).keySet();
+            }
             Set<Key> managedSystems = new TreeSet<>();
             Set<String> managedSystemIds = new TreeSet<>();
             syncAddInstancesAndSystems(managedRemote, groupName, managedServerName, centralHive,
-                    managedInstanceConfigs.values().stream().map(ic -> ic.id).toList(), managedSystems, managedSystemIds);
+                    instanceKeys.stream().map(InstanceManifest::getIdFromKey).toList(), managedSystems, managedSystemIds);
 
             // 5. Determine which of the instances and systems of the central server no longer exist on the managed server and delete them.
-            syncRemoveInstancesAndSystems(managedServerName, centralHive, managedInstanceConfigs.keySet(), managedSystemIds,
+            syncRemoveInstancesAndSystems(managedServerName, centralHive, instanceKeys, managedSystemIds,
                     removedInstances, removedSystems);
 
+            // from here on we only want the LATEST key for each instance. The map contains the name of the key for uniqueness along with
+            // the key which has the highest numeric tag.
+            Map<String, Manifest.Key> latestByName = new TreeMap<>();
+            for (Manifest.Key instanceKey : instanceKeys) {
+                latestByName.merge(instanceKey.getName(), instanceKey, (existingKey, newKey) -> {
+                    int existingTag = Integer.parseInt(existingKey.getTag());
+                    int newTag = Integer.parseInt(newKey.getTag());
+                    return newTag > existingTag ? newKey : existingKey;
+                });
+            }
+
             // 6. For all the fetched manifests, if they are instances, associate the server with it, and send out a change
-            for (Manifest.Key instance : managedInstanceConfigs.keySet()) {
+            for (Manifest.Key instance : latestByName.values()) {
                 new ControllingMaster(centralHive, instance).associate(managedServerName);
 
                 try {
                     // Additionally also read the last known instance overall state and return it...
                     InstanceManifest im = InstanceManifest.of(centralHive, instance);
-                    result.states
-                            .add(new InstanceOverallStatusDto(im.getConfiguration().id, im.getOverallState(centralHive).read()));
+                    result.states.add(new InstanceOverallStatusDto(InstanceManifest.getIdFromKey(instance),
+                            im.getOverallState(centralHive).read()));
                 } catch (Exception e) {
                     // This may be ignored
                     log.error("Cannot read instance overall state for {}: {}", instance, e.toString());
@@ -517,9 +546,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             boolean allCentralVersionsAreOlder = productsOnCentral.stream().filter(key -> key.getName().equals(productName))
                     .map(Key::getTag).allMatch(tag -> productVersionComparator.compare(tag, productTag) == -1);
-            if (allCentralVersionsAreOlder) {
-                productUpdatesDto.newerVersionAvailable.put(productName, true);
-            }
+
+            productUpdatesDto.newerVersionAvailable.put(productName, allCentralVersionsAreOlder);
         }
 
         managedMasterDto.productUpdates = productUpdatesDto;

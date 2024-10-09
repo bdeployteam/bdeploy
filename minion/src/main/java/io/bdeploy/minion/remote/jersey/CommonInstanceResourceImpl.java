@@ -75,6 +75,11 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
         return result;
     }
 
+    @Override
+    public SortedSet<Key> listInstanceKeys(boolean latestOnly) {
+        return InstanceManifest.scan(hive, latestOnly);
+    }
+
     private InstanceStateRecord getInstanceState(String instance) {
         InstanceManifest im = InstanceManifest.load(hive, instance, null);
         return im.getState(hive).read();

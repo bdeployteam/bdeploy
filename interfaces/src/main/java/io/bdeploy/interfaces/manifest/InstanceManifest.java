@@ -81,6 +81,12 @@ public class InstanceManifest {
         return id + ROOT_SUFFIX;
     }
 
+    public static String getIdFromKey(Manifest.Key key) {
+        // return only the part before the first slash if there is one, or the whole string otherwise.
+        String name = key.getName();
+        return name.contains("/") ? name.substring(0, name.indexOf("/")) : name;
+    }
+
     /**
      * Loads the manifest for the given instance from the given hive.
      *

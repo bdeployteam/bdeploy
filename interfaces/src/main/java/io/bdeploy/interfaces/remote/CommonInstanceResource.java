@@ -1,6 +1,7 @@
 package io.bdeploy.interfaces.remote;
 
 import java.util.SortedMap;
+import java.util.SortedSet;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
@@ -25,6 +26,11 @@ public interface CommonInstanceResource {
     @GET
     @Path("/instances")
     public SortedMap<Manifest.Key, InstanceConfiguration> listInstanceConfigurations(@QueryParam("latest") boolean latestOnly);
+
+    /** Returns a list of instances - keys only. */
+    @GET
+    @Path("/instance-keys")
+    public SortedSet<Manifest.Key> listInstanceKeys(@QueryParam("latest") boolean latestOnly);
 
     /**
      * @param instanceId the instance to query
