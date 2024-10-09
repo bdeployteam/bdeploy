@@ -1138,10 +1138,16 @@ public class ProcessController {
         if (startupTask != null) {
             startupTask.cancel(true);
             startupTask = null;
+            lastProbeResults.put(ProcessProbeType.STARTUP,
+                    new ProcessProbeResultDto(ProcessProbeType.STARTUP, 0, "Startup probe cancelled.",
+                            System.currentTimeMillis()));
         }
         if (aliveTask != null) {
             aliveTask.cancel(true);
             aliveTask = null;
+            lastProbeResults.put(ProcessProbeType.LIVENESS,
+                    new ProcessProbeResultDto(ProcessProbeType.LIVENESS, 0, "Liveness probe cancelled.",
+                            System.currentTimeMillis()));
         }
     }
 
