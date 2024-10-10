@@ -54,6 +54,17 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'reports',
+    loadChildren: () => import('./modules/primary/reports/reports.module').then((x) => x.ReportsModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'panels/reports',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/reports/reports.module').then((x) => x.ReportsModule),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'instances',
     loadChildren: () => import('./modules/primary/instances/instances.module').then((x) => x.InstancesModule),
     canActivate: [AuthGuard, ScopedReadGuard],

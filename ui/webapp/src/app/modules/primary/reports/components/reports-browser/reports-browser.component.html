@@ -1,0 +1,24 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Reports">
+    <div class="flex-auto"></div>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="isCardView"
+      tooltip="below"
+    ></app-bd-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [columns]="columns.defaultReportColumns"
+      [records]="reports.reports$| async"
+      [recordRoute]="getRecordRoute"
+      [searchable]="true"
+      [grid]="isCardView"
+    >
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

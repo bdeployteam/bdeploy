@@ -51,6 +51,10 @@ export class ProductsService {
     return this.http.post(`${this.apiPath(this.group)}/copy`, null, { params }).pipe(measure('Import Product'));
   }
 
+  public loadProductsOf(group: string): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(`${this.apiPath(group)}/list`);
+  }
+
   private load(group: string) {
     if (!group) {
       this.group = null;

@@ -1,0 +1,11 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Report" [panel]="true"> </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-table
+      *ngIf="columns"
+      [records]="(reports.generatedReport$ | async).rows"
+      [columns]="columns"
+    ></app-bd-data-table>
+  </app-bd-dialog-content>
+</app-bd-dialog>
