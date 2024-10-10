@@ -48,7 +48,7 @@ public enum DataFormat {
     }
 
     private static int getTerminalSize() {
-        try (Terminal terminal = TerminalBuilder.terminal()) {
+        try (Terminal terminal = TerminalBuilder.builder().dumb(true).build()) {
             return terminal.getWidth();
         } catch (IOException e) {
             Log.warn("Failed to get terminal width.", e);
