@@ -9,6 +9,7 @@
       (ngSubmit)="generate()"
     >
       <div>Generate report: <strong>{{ report.name }}</strong></div>
+      <div>You can provide additional filters below. If no filters are set, all records will be displayed.</div>
       <ng-container *ngFor="let param of report.parameters">
         <app-report-form-input
           [param]="param"
@@ -27,7 +28,8 @@
           [collapsed]="false"
           icon="assignment"
           color="primary"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || (loading$ | async)"
+          [loadingWhen$]="loading$"
         ></app-bd-button>
       </div></form
   ></app-bd-dialog-content>

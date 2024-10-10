@@ -68,10 +68,12 @@ describe('Report UI Tests', () => {
 
     cy.inMainNavFlyin('app-report-form', () => {
       cy.get('button[data-cy=Generate]').click();
+    });
 
+    cy.inMainNavContent(() => {
       cy.contains('tr', instanceA).should('exist');
       cy.contains('tr', instanceB).should('exist');
-      cy.contains('tr', instanceC).should('exist');
+      cy.contains('tr', instanceC).should('exist').click();
     });
     cy.screenshot('Doc_Report_Generated');
   });
@@ -86,13 +88,20 @@ describe('Report UI Tests', () => {
     });
 
     cy.inMainNavFlyin('app-report-form', () => {
+      cy.intercept({
+        method: 'GET',
+        url: '/api/report/productsInUse/parameter-options/products?instanceGroup=DemoGroupB',
+      }).as('productParameterOptions');
       cy.fillFormSelect('instanceGroup', groupB);
+      cy.wait('@productParameterOptions');
       cy.fillFormSelect('product', 'Demo Chat App');
       cy.fillFormInput('productVersion', '1.0.0');
       cy.fillFormSelect('purpose', 'TEST');
 
       cy.get('button[data-cy=Generate]').click();
+    });
 
+    cy.inMainNavContent(() => {
       cy.contains('tr', instanceB).should('exist');
       cy.contains('tr', instanceA).should('not.exist');
       cy.contains('tr', instanceC).should('not.exist');

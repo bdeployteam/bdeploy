@@ -55,5 +55,11 @@ export class UserGroupsBrowserComponent {
     ];
   };
 
-  protected grouping: BdDataGroupingDefinition<UserGroupInfo>[] = [];
+  protected grouping: BdDataGroupingDefinition<UserGroupInfo>[] = [
+    {
+      name: 'Global Permission',
+      group: (r) => getGlobalPermission(r.permissions),
+      associatedColumn: this.colPermLevel.id,
+    },
+  ];
 }

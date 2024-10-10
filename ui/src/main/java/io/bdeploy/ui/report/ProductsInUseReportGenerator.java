@@ -2,12 +2,15 @@ package io.bdeploy.ui.report;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
@@ -20,7 +23,6 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.InstanceDto;
-import io.bdeploy.ui.dto.InstanceUsageDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.utils.ProductVersionMatchHelper;
@@ -39,7 +41,7 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
     public ReportResponseDto generateReport(ReportRequestDto request) {
         String productKey = request.params.get(ProductsInUseReportDescriptor.PRODUCT_PARAM_KEY);
         String productVersion = request.params.get(ProductsInUseReportDescriptor.PRODUCT_VERSION_PARAM_KEY);
-        boolean regex = Boolean.valueOf(request.params.getOrDefault(ProductsInUseReportDescriptor.REGEX_PARAM_KEY, "false"));
+        boolean regex = Boolean.parseBoolean(request.params.getOrDefault(ProductsInUseReportDescriptor.REGEX_PARAM_KEY, "false"));
         InstancePurpose purpose = request.params.get(ProductsInUseReportDescriptor.INSTANCE_PURPOSE_PARAM_KEY) == null ? null
                 : InstancePurpose.valueOf(request.params.get(ProductsInUseReportDescriptor.INSTANCE_PURPOSE_PARAM_KEY));
 
@@ -50,45 +52,57 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
             ProductResource pr = igr.getProductResource(group.name);
             InstanceResource ir = igr.getInstanceResource(group.name);
             List<SystemConfigurationDto> systems = igr.getSystemResource(group.name).list();
-            List<InstanceDto> instances = igr.getInstanceResource(group.name).list();
 
-            for (ProductDto product : pr.list(productKey)) {
-                if (!ProductVersionMatchHelper.matchesVersion(product, productVersion, regex)) {
+            Map<Manifest.Key, ProductDto> keyToProduct = pr.list(null).stream().collect(Collectors.toMap(p -> p.key, p -> p));
+
+            for (InstanceDto instance : ir.list()) {
+                InstanceConfiguration instanceConfiguration = instance.instanceConfiguration;
+                if (productKey != null && !productKey.isBlank() && !productKey.equals(instanceConfiguration.product.getName())) {
                     continue;
                 }
-
-                for (InstanceUsageDto instanceUsageDto : pr.getProductUsedIn(product.key.getName(), product.key.getTag())) {
-                    InstanceConfiguration instanceVersion = ir.readVersion(instanceUsageDto.id, instanceUsageDto.tag);
-                    InstanceDto instance = instances.stream().filter(i -> i.instanceConfiguration.id.equals(instanceUsageDto.id))
-                            .findAny().orElseThrow();
-                    if (purpose != null && purpose != instanceVersion.purpose) {
-                        continue;
-                    }
-                    Map<String, String> row = new HashMap<>();
-                    row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_NAME_COLUMN.key, group.name);
-                    row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_DESCRIPTION_COLUMN.key, group.description);
-                    row.put(ProductsInUseReportDescriptor.INSTANCE_UUID_COLUMN.key, instanceUsageDto.id);
-                    row.put(ProductsInUseReportDescriptor.INSTANCE_NAME_COLUMN.key, instanceUsageDto.name);
-                    row.put(ProductsInUseReportDescriptor.INSTANCE_VERSION_COLUMN.key, instanceUsageDto.tag);
-                    row.put(ProductsInUseReportDescriptor.PRODUCT_COLUMN.key, product.key.getName());
-                    row.put(ProductsInUseReportDescriptor.PRODUCT_VERSION_COLUMN.key, product.key.getTag());
-                    row.put(ProductsInUseReportDescriptor.ACTIVE_VERSION_COLUMN.key,
-                            instance.activeVersion == null ? null : instance.activeVersion.toString());
-                    row.put(ProductsInUseReportDescriptor.PURPOSE_COLUMN.key, instanceVersion.purpose.name());
-                    if (instanceVersion.system != null) {
-                        row.put(ProductsInUseReportDescriptor.SYSTEM_COLUMN.key, systems.stream()
-                                .filter(s -> s.key.equals(instanceVersion.system)).findAny().orElseThrow().config.name);
-                    }
-                    if (instance.managedServer != null) {
-                        row.put(ProductsInUseReportDescriptor.MANAGED_SERVER_COLUMN.key, instance.managedServer.hostName);
-                        String lastComm = Stream.of(instance.managedServer.lastMessageReceived, instance.managedServer.lastSync)
-                                .filter(v -> v != null).max(Instant::compareTo).map(v -> v.toString()).orElse(null);
-                        row.put(ProductsInUseReportDescriptor.LAST_COMMUNICATION_COLUMN.key, lastComm);
-                    }
-                    resp.rows.add(row);
+                ProductDto activeProduct = keyToProduct.get(instance.activeProduct);
+                ProductDto currentProduct = keyToProduct.get(instanceConfiguration.product);
+                boolean activeProductVersionMatch = activeProduct != null
+                        && ProductVersionMatchHelper.matchesVersion(activeProduct, productVersion, regex);
+                boolean currentProductVersionMatch = ProductVersionMatchHelper.matchesVersion(currentProduct, productVersion,
+                        regex);
+                if (!activeProductVersionMatch && !currentProductVersionMatch) {
+                    continue;
                 }
+                if (purpose != null && purpose != instance.instanceConfiguration.purpose) {
+                    continue;
+                }
+                Map<String, String> row = new HashMap<>();
+                row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_NAME_COLUMN.key, group.name);
+                row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_DESCRIPTION_COLUMN.key, group.description);
+
+                row.put(ProductsInUseReportDescriptor.INSTANCE_UUID_COLUMN.key, instanceConfiguration.id);
+                row.put(ProductsInUseReportDescriptor.INSTANCE_NAME_COLUMN.key, instanceConfiguration.name);
+                row.put(ProductsInUseReportDescriptor.PURPOSE_COLUMN.key, instanceConfiguration.purpose.name());
+
+                row.put(ProductsInUseReportDescriptor.PRODUCT_COLUMN.key, currentProduct.name);
+                row.put(ProductsInUseReportDescriptor.PRODUCT_ID_COLUMN.key, currentProduct.product);
+                row.put(ProductsInUseReportDescriptor.PRODUCT_VERSION_COLUMN.key, currentProduct.key.getTag());
+                if (activeProduct != null) {
+                    row.put(ProductsInUseReportDescriptor.ACTIVE_VERSION_COLUMN.key, activeProduct.key.getTag());
+                }
+
+                if (instanceConfiguration.system != null) {
+                    row.put(ProductsInUseReportDescriptor.SYSTEM_COLUMN.key, systems.stream()
+                            .filter(s -> s.key.equals(instanceConfiguration.system)).findAny().orElseThrow().config.name);
+                }
+                if (instance.managedServer != null) {
+                    row.put(ProductsInUseReportDescriptor.MANAGED_SERVER_COLUMN.key, instance.managedServer.hostName);
+
+                    // (last sync & last message: take date that is more recent)
+                    String lastComm = Stream.of(instance.managedServer.lastMessageReceived, instance.managedServer.lastSync)
+                            .filter(v -> v != null).max(Instant::compareTo).map(Instant::toString).orElse(null);
+                    row.put(ProductsInUseReportDescriptor.LAST_COMMUNICATION_COLUMN.key, lastComm);
+                }
+                resp.rows.add(row);
             }
         }
+        resp.generatedAt = new Date();
         return resp;
     }
 

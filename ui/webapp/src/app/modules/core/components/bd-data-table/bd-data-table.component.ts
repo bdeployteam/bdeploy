@@ -97,6 +97,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** An ID which is to be used for the table. This can be used to identify containers in drag-drop events. */
   @Input() id = 'bd-data-table';
 
+  /** Maximum amount of rows that will be displayed to the user (for performance reasons) */
+  @Input() maxRows = MAX_ROWS_PER_GROUP;
+
   /**
    * The columns to display
    */
@@ -467,8 +470,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
     // last step is to transform the raw input data into Node<T> which is then further processed
     // by the transformer callback of treeControl.
-    this.hasMoreData = sortedData.length > MAX_ROWS_PER_GROUP;
-    return sortedData.slice(0, MAX_ROWS_PER_GROUP).map((i) => ({
+    this.hasMoreData = sortedData.length > this.maxRows;
+    return sortedData.slice(0, this.maxRows).map((i) => ({
       nodeId: idCols?.length ? idCols.map((c) => c.data(i)).join('_') : this.nodeCnt++,
       item: i,
       groupOrFirstColumn: this._columns[0].data(i),

@@ -1,6 +1,6 @@
-<ng-container [ngSwitch]="param.type">
+<ng-container [ngSwitch]="param.inputType">
   <app-bd-form-input
-    *ngSwitchCase="ReportParameterType.STRING"
+    *ngSwitchCase="ReportParameterInputType.INPUT"
     [label]="param.label"
     [name]="param.key"
     [attr.name]="param.key"
@@ -8,24 +8,11 @@
     matTooltipPosition="above"
     [(ngModel)]="request.params[param.key]"
     (ngModelChange)="onModelChange($event)"
-    [required]="param.required"
     errorDisplay="immediate"
-  ></app-bd-form-input>
-  <app-bd-form-input
-    *ngSwitchCase="ReportParameterType.NUMBER"
-    [label]="param.label"
-    [name]="param.key"
-    [attr.name]="param.key"
-    type="numeric"
-    [matTooltip]="param.description"
-    matTooltipPosition="above"
-    [(ngModel)]="request.params[param.key]"
-    (ngModelChange)="onModelChange($event)"
-    [required]="param.required"
-    errorDisplay="immediate"
+    [suggested]="values"
   ></app-bd-form-input>
   <app-bd-form-toggle
-    *ngSwitchCase="ReportParameterType.BOOLEAN"
+    *ngSwitchCase="ReportParameterInputType.CHECKBOX"
     [label]="param.label"
     [name]="param.key"
     [attr.name]="param.key"
@@ -33,12 +20,12 @@
     matTooltipPosition="above"
     [(ngModel)]="request.params[param.key]"
     (ngModelChange)="onModelChange($event)"
-    [required]="param.required"
     errorDisplay="immediate"
   >
   </app-bd-form-toggle>
   <app-bd-form-select
-    *ngSwitchDefault
+    *ngSwitchCase="ReportParameterInputType.SELECT"
+    [allowNone]="true"
     [label]="param.label"
     [name]="param.key"
     [attr.name]="param.key"
@@ -46,9 +33,9 @@
     matTooltipPosition="above"
     [(ngModel)]="request.params[param.key]"
     (ngModelChange)="onModelChange($event)"
-    [required]="param.required"
     errorDisplay="immediate"
     [labels]="labels"
     [values]="values"
   ></app-bd-form-select>
+  <div *ngSwitchDefault>{{param.inputType}} IS NOT SUPPORTED</div>
 </ng-container>

@@ -19,6 +19,11 @@ public class ReportColumnDescriptor {
     public String key;
 
     /**
+     * whether this column should be displayed in the main table (Web UI)
+     */
+    public boolean main;
+
+    /**
      * minWidth for CLI table
      */
     public int minWidth;
@@ -30,9 +35,11 @@ public class ReportColumnDescriptor {
 
     @JsonCreator
     public ReportColumnDescriptor(@JsonProperty("name") String name, @JsonProperty("key") String key,
-            @JsonProperty("minWidth") int minWidth, @JsonProperty("scaleToContent") boolean scaleToContent) {
+            @JsonProperty("main") boolean main, @JsonProperty("minWidth") int minWidth,
+            @JsonProperty("scaleToContent") boolean scaleToContent) {
         this.name = name;
         this.key = key;
+        this.main = main;
         this.minWidth = minWidth;
         this.scaleToContent = scaleToContent;
     }

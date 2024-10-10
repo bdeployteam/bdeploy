@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
 import { setRouteId } from '../../core/utils/routeId-generator';
 import { ReportFormComponent } from './components/form/report-form.component';
-import { ReportComponent } from './components/report/report.component';
+import { ReportRowDetailsComponent } from './components/row-details/report-row-details.component';
 
 const REPORTS_ROUTES: Route[] = [
   {
@@ -10,9 +10,8 @@ const REPORTS_ROUTES: Route[] = [
     component: ReportFormComponent,
   },
   {
-    path: ':report/view',
-    component: ReportComponent,
-    data: { max: true },
+    path: 'row-details',
+    component: ReportRowDetailsComponent,
   },
 ];
 

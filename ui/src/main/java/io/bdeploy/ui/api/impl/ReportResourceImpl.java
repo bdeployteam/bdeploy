@@ -12,6 +12,7 @@ import io.bdeploy.interfaces.report.ReportResponseDto;
 import io.bdeploy.interfaces.report.ReportType;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.ReportParameterOptionResource;
 import io.bdeploy.ui.api.ReportResource;
 import io.bdeploy.ui.report.ProductsInUseReportGenerator;
 import io.bdeploy.ui.report.ReportGenerator;
@@ -37,13 +38,17 @@ public class ReportResourceImpl implements ReportResource {
     @Inject
     private AuthService auth;
 
+    @Inject
+    private BHiveRegistry registry;
+
     @Override
     public List<ReportDescriptor> list() {
         return List.of((ReportDescriptor) new ProductsInUseReportDescriptor()).stream()
-                .filter(report -> isAuthorized(new ScopedPermission(report.type.name(), Permission.CLIENT))).toList();
+                .filter(report -> isAuthorized(report.type.name())).toList();
     }
 
-    private boolean isAuthorized(ScopedPermission requiredPermission) {
+    private boolean isAuthorized(String report) {
+        ScopedPermission requiredPermission = new ScopedPermission(report, Permission.READ);
         SecurityContext ctx = crq.getSecurityContext();
         if (!(ctx instanceof JerseySecurityContext)) {
             return false;
@@ -56,32 +61,21 @@ public class ReportResourceImpl implements ReportResource {
 
     @Override
     public ReportResponseDto generateReport(String report, ReportRequestDto request) {
-        if (!isAuthorized(new ScopedPermission(report, Permission.CLIENT))) {
-            return new ReportResponseDto();
-        }
         ReportType type = ReportType.valueOf(report);
-        checkRequiredParameters(type, request);
         ReportGenerator svc = getReportService(type);
         return svc.generateReport(request);
     }
 
     private ReportGenerator getReportService(ReportType type) {
-        switch (type) {
-            case productsInUse:
-                return new ProductsInUseReportGenerator(rc.getResource(BHiveRegistry.class),
-                        rc.getResource(InstanceGroupResourceImpl.class));
-            default:
-                throw new WebApplicationException("Unknown report " + type, Status.NOT_FOUND);
+        if (type == ReportType.productsInUse) {
+            return new ProductsInUseReportGenerator(registry, rc.getResource(InstanceGroupResourceImpl.class));
         }
+        throw new WebApplicationException("Unknown report " + type, Status.NOT_FOUND);
     }
 
-    private void checkRequiredParameters(ReportType type, ReportRequestDto request) {
-        ReportDescriptor desc = list().stream().filter(d -> d.type.equals(type)).findFirst().orElseThrow();
-        List<String> missingRequiredParams = desc.parameters.stream().filter(param -> param.required).map(param -> param.key)
-                .filter(paramKey -> request.params.get(paramKey) == null).toList();
-        if (!missingRequiredParams.isEmpty()) {
-            throw new WebApplicationException("Missing required parameters " + missingRequiredParams, Status.BAD_REQUEST);
-        }
+    @Override
+    public ReportParameterOptionResource getReportParameterOptionResource(String report) {
+        return rc.initResource(new ReportParameterOptionResourceImpl(ReportType.valueOf(report)));
     }
 
 }

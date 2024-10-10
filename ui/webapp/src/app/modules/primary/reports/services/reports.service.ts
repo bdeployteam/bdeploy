@@ -1,7 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, tap } from 'rxjs';
-import { ReportDescriptor, ReportRequestDto, ReportResponseDto } from 'src/app/models/gen.dtos';
+import {
+  ReportDescriptor,
+  ReportParameterOptionDto,
+  ReportRequestDto,
+  ReportResponseDto,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 
@@ -24,18 +29,40 @@ export class ReportsService {
   /** Last requested report data */
   public generatedReport$ = new BehaviorSubject<ReportResponseDto>(null);
 
+  /** Selected row of generated report */
+  public selectedRow$ = new BehaviorSubject<{ [index: string]: string }>(null);
+
   constructor() {
     this.http.get<ReportDescriptor[]>(this.apiPath).subscribe((reports) => this.reports$.next(reports));
-    combineLatest([this.nav.panelRoute$, this.reports$]).subscribe(([panelRoute, reports]) => {
-      const reportType = panelRoute?.params?.['report'];
-      if (!reportType || !reports) {
-        this.current$.next(null);
-      }
-      const desc = reports.find((r) => r.type === reportType);
-      if (this.current$.value !== desc) {
-        this.current$.next(desc);
-      }
-    });
+    combineLatest([this.nav.reportContext$, this.nav.panelRoute$, this.reports$]).subscribe(
+      ([reportContext, panelRoute, reports]) => {
+        const reportType = panelRoute?.params?.['report'] || reportContext;
+        if (!reportType || !reports) {
+          this.current$.next(null);
+        }
+        const desc = reports.find((r) => r.type === reportType);
+        if (this.current$.value !== desc) {
+          this.current$.next(desc);
+        }
+      },
+    );
+  }
+
+  public getParameterOptions(
+    parameterOptionsPath: string,
+    dependsOn: string[],
+    requestParams: { [index: string]: string },
+  ): Observable<ReportParameterOptionDto[]> {
+    let params = new HttpParams();
+    dependsOn
+      .filter((dep) => requestParams[dep] !== null && requestParams[dep] !== undefined)
+      .forEach((dep) => (params = params.set(dep, requestParams[dep])));
+    return this.http.get<ReportParameterOptionDto[]>(
+      `${this.apiPath}/${this.current$.value.type}/parameter-options/${parameterOptionsPath}`,
+      {
+        params,
+      },
+    );
   }
 
   public generateReport(request: ReportRequestDto): Observable<ReportResponseDto> {

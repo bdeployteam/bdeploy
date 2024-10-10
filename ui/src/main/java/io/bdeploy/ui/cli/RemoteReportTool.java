@@ -1,7 +1,7 @@
 package io.bdeploy.ui.cli;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -16,7 +16,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.report.ReportColumnDescriptor;
 import io.bdeploy.interfaces.report.ReportDescriptor;
 import io.bdeploy.interfaces.report.ReportParameterDescriptor;
-import io.bdeploy.interfaces.report.ReportParameterType;
+import io.bdeploy.interfaces.report.ReportParameterInputType;
 import io.bdeploy.interfaces.report.ReportRequestDto;
 import io.bdeploy.interfaces.report.ReportResponseDto;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -62,30 +62,25 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
 
     private RenderableResult doHelpParam(RemoteReportConfig config, ReportResource rr) {
         helpAndFailIfMissing(config.report(), "--report missing");
-        ReportDescriptor desc = rr.list().stream().filter(d -> d.type.name().equals(config.report())).findFirst().orElse(null);
-        if (desc == null) {
-            helpAndFail("ERROR: report of type " + config.report() + " is not found");
-        }
+        ReportDescriptor desc = rr.list().stream().filter(d -> d.type.name().equals(config.report())).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ERROR: report of type " + config.report() + " is not found"));
+
         DataTable table = createDataTable();
         table.setCaption("Parameters for report: " + desc.name);
         table.setLineWrapHint(true).setIndentHint(2);
         table.column(new DataTableColumn.Builder("Argument").setScaleToContent(true).build());
-        table.column(new DataTableColumn.Builder("Required").setScaleToContent(true).build());
         table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
-        table.column(new DataTableColumn.Builder("Depends On").setScaleToContent(true).build());
         for (ReportParameterDescriptor param : desc.parameters) {
-            table.row().cell(param.key + (param.type == ReportParameterType.BOOLEAN ? "" : "=ARG")).cell(param.required)
-                    .cell(param.description).cell(param.dependsOn).build();
+            table.row().cell(param.key + (param.inputType == ReportParameterInputType.CHECKBOX ? "" : "=ARG"))
+                    .cell(param.description).build();
 
         }
         return table;
     }
 
     private RenderableResult doViewReport(RemoteReportConfig config, ReportResource rr) {
-        ReportDescriptor desc = rr.list().stream().filter(d -> d.type.name().equals(config.report())).findFirst().orElse(null);
-        if (desc == null) {
-            helpAndFail("ERROR: report of type " + config.report() + " is not found");
-        }
+        ReportDescriptor desc = rr.list().stream().filter(d -> d.type.name().equals(config.report())).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ERROR: report of type " + config.report() + " is not found"));
 
         ReportRequestDto req = new ReportRequestDto();
         req.params = parseParams(config, desc);
@@ -93,6 +88,8 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
         ReportResponseDto resp = rr.generateReport(config.report(), req);
 
         DataTable table = createDataTable();
+        table.setCaption("Report \"" + desc.name + "\" - generated at: "
+                + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(resp.generatedAt));
         for (ReportColumnDescriptor column : desc.columns) {
             table.column(new DataTableColumn.Builder(column.name).setMinWidth(column.minWidth)
                     .setScaleToContent(column.scaleToContent).build());
@@ -119,13 +116,6 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
                 }
             }
         }
-        List<String> required = desc.parameters.stream().filter(p -> p.required).map(p -> p.key)
-                .filter(paramKey -> !params.containsKey(paramKey)).toList();
-
-        if (!required.isEmpty()) {
-            helpAndFail("Report " + desc.name + " is missing required parameters: " + required);
-        }
-
         return params;
     }
 

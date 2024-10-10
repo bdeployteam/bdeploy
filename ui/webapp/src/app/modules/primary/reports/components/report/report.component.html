@@ -1,0 +1,32 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [header]="header">
+    <div class="flex-auto"></div>
+    <app-bd-button
+      text="Export"
+      [collapsed]="false"
+      color="primary"
+      icon="csv"
+      (click)="exportCsv()"
+      [disabled]="!generated?.rows"
+    >
+    </app-bd-button>
+    <app-bd-data-grouping
+      (groupingChange)="grouping = $event"
+      [definitions]="definitions"
+      [records]="generated?.rows"
+      [presetKey]="report?.type + 'Report'"
+    ></app-bd-data-grouping>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div class="ml-2">Generated at <strong>{{ generated?.generatedAt | date: 'dd.MM.yyyy HH:mm:ss' }}</strong></div>
+    <app-bd-data-table
+      #dataDisplay
+      [records]="generated?.rows"
+      [grouping]="grouping"
+      [columns]="columns"
+      [maxRows]="10000"
+      (recordClick)="showRowDetails($event)"
+    ></app-bd-data-table>
+  </app-bd-dialog-content>
+</app-bd-dialog>
