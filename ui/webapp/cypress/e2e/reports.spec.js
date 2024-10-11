@@ -36,14 +36,35 @@ describe('Report UI Tests', () => {
     cy.createInstance(groupB, instanceC, 'Demo Product', '2.0.0');
   });
 
+  it('Checks that report permission exists', () => {
+    cy.visit('/');
+    cy.get('button[data-cy=Administration]').click();
+    cy.contains('a', 'User Accounts').click();
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'admin').should('exist').click();
+    });
+    cy.inMainNavFlyin('app-user-admin-detail', () => {
+      cy.get('button[data-cy^="Assign Permission"]').click();
+    });
+    cy.inMainNavFlyin('assign-permission', () => {
+      cy.fillFormSelect('scope', 'Report: Products In Use');
+      cy.fillFormSelect('permission', 'READ');
+    });
+    cy.screenshot('Doc_Report_Assign_Permission');
+  });
+
   it('Tests Products In Use report', () => {
     cy.visit('/');
     cy.pressMainNavButton('Reports');
     cy.waitUntilContentLoaded();
 
+    cy.screenshot('Doc_Report_Browser');
+
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Products In Use').should('exist').click();
     });
+
+    cy.screenshot('Doc_Report_Form');
 
     cy.inMainNavFlyin('app-report-form', () => {
       cy.get('button[data-cy=Generate]').click();
@@ -52,6 +73,7 @@ describe('Report UI Tests', () => {
       cy.contains('tr', instanceB).should('exist');
       cy.contains('tr', instanceC).should('exist');
     });
+    cy.screenshot('Doc_Report_Generated');
   });
 
   it('Tests Products In Use report with parameters', () => {
