@@ -20,7 +20,7 @@ You will need the following information to be able to call an Endpoint of a remo
 A typical proxy call using the public API would look like this, when using **cURL**:
 
 ```bash
-curl -k -L -H "Accept: **/**" \
+curl -k -L -H "Accept: */*" \
     -H "X-BDeploy-Authorization: Bearer <X>" \ <1>
     "https://server/api/public/v1/common/proxy/myEndpoint?BDeploy_group=MyGroup&BDeploy_instance=xxxx-111-xxxx&BDeploy_application=yyyy-111-yyyy" <2> <3> <4> <5> <6>
 ```
