@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
+import { map } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
@@ -101,6 +102,17 @@ export class ClientApplicationsComponent implements OnInit {
 
   protected isCardView: boolean;
   protected presetKeyValue = 'clientApplications';
+
+  protected readonly filteredApps$ = this.clients.apps$.pipe(
+    map((apps) =>
+      apps.filter((app) => {
+        if (app.endpoint) {
+          return app.endpoint.endpointEnabledPreresolved;
+        }
+        return true;
+      }),
+    ),
+  );
 
   ngOnInit(): void {
     this.currentOs = (() => {

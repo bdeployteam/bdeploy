@@ -38,9 +38,24 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpAuthenticationType;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Invocation;
@@ -262,4 +277,21 @@ public class CommonEndpointHelper {
         return new LinkedValueConfiguration(p.apply(value.getPreRenderable()));
     }
 
+    public static CompositeResolver createEndpoindResolver(InstanceNodeManifest inm, ApplicationConfiguration app,
+            DeploymentPathProvider dpp) {
+        CompositeResolver resolver = new CompositeResolver();
+        if (dpp != null) {
+            resolver.add(new DeploymentPathResolver(dpp));
+        }
+        resolver.add(new InstanceAndSystemVariableResolver(inm.getConfiguration()));
+        resolver.add(new ConditionalExpressionResolver(resolver));
+        resolver.add(new ApplicationVariableResolver(app));
+        resolver.add(new ApplicationParameterValueResolver(app.id, inm.getConfiguration()));
+        resolver.add(new ParameterValueResolver(new ApplicationParameterProvider(inm.getConfiguration())));
+        resolver.add(new OsVariableResolver());
+        resolver.add(new EscapeJsonCharactersResolver(resolver));
+        resolver.add(new EscapeXmlCharactersResolver(resolver));
+        resolver.add(new EscapeYamlCharactersResolver(resolver));
+        return resolver;
+    }
 }

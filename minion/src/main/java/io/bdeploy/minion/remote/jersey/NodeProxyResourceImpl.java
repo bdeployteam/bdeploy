@@ -27,19 +27,8 @@ import io.bdeploy.interfaces.remote.NodeProxyResource;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper.ProxiedRequestCookie;
 import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
-import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
-import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
-import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
-import io.bdeploy.interfaces.variables.DeploymentPathResolver;
-import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
-import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
-import io.bdeploy.interfaces.variables.OsVariableResolver;
-import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.minion.MinionRoot;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
@@ -84,19 +73,8 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
         ApplicationConfiguration app = inm.getConfiguration().applications.stream()
                 .filter(a -> a.id.equals(wrapper.applicationId)).findFirst().orElseThrow();
 
-        CompositeResolver list = new CompositeResolver();
-        list.add(new InstanceAndSystemVariableResolver(inm.getConfiguration()));
-        list.add(new ConditionalExpressionResolver(list));
-        list.add(new DeploymentPathResolver(dpp));
-        list.add(new ApplicationVariableResolver(app));
-        list.add(new ApplicationParameterValueResolver(app.id, inm.getConfiguration()));
-        list.add(new ParameterValueResolver(new ApplicationParameterProvider(inm.getConfiguration())));
-        list.add(new OsVariableResolver());
-        list.add(new EscapeJsonCharactersResolver(list));
-        list.add(new EscapeXmlCharactersResolver(list));
-        list.add(new EscapeYamlCharactersResolver(list));
-
-        HttpEndpoint processedEndpoint = CommonEndpointHelper.processEndpoint(list, wrapper.endpoint);
+        CompositeResolver resolver = CommonEndpointHelper.createEndpoindResolver(inm, app, dpp);
+        HttpEndpoint processedEndpoint = CommonEndpointHelper.processEndpoint(resolver, wrapper.endpoint);
 
         if (processedEndpoint == null) {
             return wrap(Response.status(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Endpoint not enabled").build());

@@ -19,4 +19,6 @@ public class UiEndpointDto {
     /** The operating system supported by the application */
     public HttpEndpoint endpoint;
 
+    /** The pre-resolved value of {@link HttpEndpoint#enabled} */
+    public boolean endpointEnabledPreresolved;
 }

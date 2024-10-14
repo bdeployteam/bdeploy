@@ -35,6 +35,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
@@ -45,6 +46,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
+import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -53,6 +55,7 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.FormDataHelper;
@@ -425,6 +428,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             // Add all configured client applications
             InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, nodeEntry.getValue());
             for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
+                CompositeResolver resolver = CommonEndpointHelper.createEndpoindResolver(instanceNode, appConfig, null);
+
                 for (HttpEndpoint configuredEp : appConfig.endpoints.http) {
                     if (configuredEp.type != HttpEndpointType.UI) {
                         continue;
@@ -434,6 +439,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                     uiEp.id = appConfig.id;
                     uiEp.appName = appConfig.name;
                     uiEp.endpoint = configuredEp;
+                    uiEp.endpointEnabledPreresolved = Boolean
+                            .valueOf(TemplateHelper.process(configuredEp.enabled.getPreRenderable(), resolver));
                     allInstEps.endpoints.add(uiEp);
                 }
             }
