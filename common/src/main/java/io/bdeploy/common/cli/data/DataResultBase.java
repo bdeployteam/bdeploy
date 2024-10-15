@@ -48,7 +48,7 @@ abstract class DataResultBase implements DataResult {
 
     @Override
     public DataResult addField(String name, Object value) {
-        fields.put(name, value.toString());
+        fields.put(name, value == null ? "" : value.toString());
         return this;
     }
 
