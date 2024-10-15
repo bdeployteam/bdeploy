@@ -22,7 +22,8 @@ public class HttpEndpoint {
         @JsonEnumDefaultValue
         NONE,
         BASIC,
-        DIGEST
+        DIGEST,
+        OIDC
     }
 
     @JsonPropertyDescription("The unique ID of the endpoint. This ID is later used to reference this endpoint when proxying.")
@@ -99,4 +100,15 @@ public class HttpEndpoint {
     @JsonPropertyDescription("Specific to 'UI' type endpoints, defines whether the UI on this endpoint can be used using BDeploys proxying feature (i.e. embed the target UI in BDeploy even accross network boundaries).")
     public boolean proxying = false;
 
+    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonPropertyDescription("The URL of the token for Open ID Connect Authentication.")
+    public LinkedValueConfiguration tokenUrl = new LinkedValueConfiguration(null);
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonPropertyDescription("The ID of the client for Open ID Connect Authentication.")
+    public LinkedValueConfiguration clientId = new LinkedValueConfiguration(null);
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonPropertyDescription("The secret of the client for Open ID Connect Authentication.")
+    public LinkedValueConfiguration clientSecret = new LinkedValueConfiguration(null);
 }

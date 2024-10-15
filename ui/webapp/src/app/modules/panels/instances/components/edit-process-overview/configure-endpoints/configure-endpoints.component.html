@@ -71,7 +71,7 @@
                   ></app-bd-value-editor>
                 </app-config-desc-element>
 
-                <app-config-desc-element card="cfg.ep.authUser">
+                <app-config-desc-element card="cfg.ep.authUser" *ngIf="authTypes[i] !== 'OIDC'">
                   <app-bd-value-editor
                     [name]="'epUser' + i"
                     label="User"
@@ -88,7 +88,7 @@
                   ></app-bd-value-editor>
                 </app-config-desc-element>
 
-                <app-config-desc-element card="cfg.ep.authPass">
+                <app-config-desc-element card="cfg.ep.authPass" *ngIf="authTypes[i] !== 'OIDC'">
                   <app-bd-value-editor
                     [name]="'epPass' + i"
                     label="Password"
@@ -102,6 +102,57 @@
                     [system]="system"
                     [disabled]="endpointDisabledStatus.get(endpoint).disabled || authTypes[i] === 'NONE'"
                     [required]="authTypes[i] !== 'NONE'"
+                  ></app-bd-value-editor>
+                </app-config-desc-element>
+
+                <app-config-desc-element card="cfg.ep.tokenUrl" *ngIf="authTypes[i] === 'OIDC'">
+                  <app-bd-value-editor
+                    [name]="'epTokenUrl' + i"
+                    label="Token URL"
+                    [(ngModel)]="endpoint.tokenUrl"
+                    [required]="true"
+                    [completionPrefixes]="completionPrefixes"
+                    [completions]="completions"
+                    [type]="TYPE_STRING"
+                    [process]="process"
+                    [instance]="instance"
+                    [system]="system"
+                    [disabled]="endpointDisabledStatus.get(endpoint).disabled "
+                    [required]="true"
+                  ></app-bd-value-editor>
+                </app-config-desc-element>
+
+                <app-config-desc-element card="cfg.ep.clientId" *ngIf="authTypes[i] === 'OIDC'">
+                  <app-bd-value-editor
+                    [name]="'epClientId' + i"
+                    label="Client ID"
+                    [(ngModel)]="endpoint.clientId"
+                    [required]="true"
+                    [completionPrefixes]="completionPrefixes"
+                    [completions]="completions"
+                    [type]="TYPE_STRING"
+                    [process]="process"
+                    [instance]="instance"
+                    [system]="system"
+                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                    [required]="true"
+                  ></app-bd-value-editor>
+                </app-config-desc-element>
+
+                <app-config-desc-element card="cfg.ep.clientSecret" *ngIf="authTypes[i] === 'OIDC'">
+                  <app-bd-value-editor
+                    [name]="'epClientSecret' + i"
+                    label="Client Secret"
+                    [(ngModel)]="endpoint.clientSecret"
+                    [required]="true"
+                    [completionPrefixes]="completionPrefixes"
+                    [completions]="completions"
+                    [type]="TYPE_PASSWORD"
+                    [process]="process"
+                    [instance]="instance"
+                    [system]="system"
+                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                    [required]="true"
                   ></app-bd-value-editor>
                 </app-config-desc-element>
 

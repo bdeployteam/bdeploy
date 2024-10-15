@@ -1,12 +1,17 @@
 package io.bdeploy.interfaces.endpoints;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.List;
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -16,6 +21,20 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
+
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
@@ -24,7 +43,10 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpAuthenticationType;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
 
 public class CommonEndpointHelper {
 
@@ -68,15 +90,19 @@ public class CommonEndpointHelper {
         }
     }
 
-    public static WebTarget initClient(HttpEndpoint endpoint, String subPath) throws GeneralSecurityException {
+    public static Invocation.Builder createRequestBuilder(HttpEndpoint endpoint, String subPath, Map<String, Object> properties,
+            Map<String, List<String>> queryParameters) throws GeneralSecurityException {
         ClientBuilder client = ClientBuilder.newBuilder();
 
+        SSLContext sslContext = null;
+        HostnameVerifier hv = null;
         if (Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE && endpoint.trustAll) {
-            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            sslContext = SSLContext.getInstance("TLS");
 
-            sslcontext.init(null, new TrustManager[] { new TrustAllServersTrustManager() }, new java.security.SecureRandom());
+            sslContext.init(null, new TrustManager[] { new TrustAllServersTrustManager() }, new java.security.SecureRandom());
 
-            client.sslContext(sslcontext).hostnameVerifier((s1, s2) -> true);
+            hv = (s1, s2) -> true;
+            client.sslContext(sslContext).hostnameVerifier(hv);
         } else if (Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE
                 && endpoint.trustStore.getPreRenderable() != null && !endpoint.trustStore.getPreRenderable().isEmpty()) {
             Path ksPath = Paths.get(endpoint.trustStore.getPreRenderable());
@@ -92,7 +118,7 @@ public class CommonEndpointHelper {
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(ks);
 
-                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, tmf.getTrustManagers(), null);
                 client.sslContext(sslContext);
             } catch (GeneralSecurityException | IOException e) {
@@ -108,16 +134,83 @@ public class CommonEndpointHelper {
             authType = HttpAuthenticationType.NONE;
         }
 
-        if (authType == HttpAuthenticationType.BASIC) {
-            client.register(
-                    HttpAuthenticationFeature.basic(endpoint.authUser.getPreRenderable(), endpoint.authPass.getPreRenderable()));
-        } else if (authType == HttpAuthenticationType.DIGEST) {
-            client.register(
-                    HttpAuthenticationFeature.digest(endpoint.authUser.getPreRenderable(), endpoint.authPass.getPreRenderable()));
+        switch (authType) {
+            case OIDC: // Nothing to do -> token will be added to header at a later point
+            case NONE:
+                break;
+            case BASIC:
+                client.register(HttpAuthenticationFeature.basic(endpoint.authUser.getPreRenderable(),
+                        endpoint.authPass.getPreRenderable()));
+                break;
+            case DIGEST:
+                client.register(HttpAuthenticationFeature.digest(endpoint.authUser.getPreRenderable(),
+                        endpoint.authPass.getPreRenderable()));
+                break;
+            default:
+                log.error("Unknown authentication type: " + authType);
+                break;
         }
 
         // client is always used locally, so we use localhost as hostname to avoid contacting somebody else unintentionally.
-        return client.build().target(initUri(endpoint, "localhost", subPath));
+        WebTarget target = client.build().target(initUri(endpoint, "localhost", subPath));
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            target = target.property(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<String, List<String>> entry : queryParameters.entrySet()) {
+            target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+        }
+
+        Builder builder = target.request();
+        if (authType == HttpAuthenticationType.OIDC) {
+            String tokenUrl = endpoint.tokenUrl.getPreRenderable();
+            String clientId = endpoint.clientId.getPreRenderable();
+            String clientSecret = endpoint.clientSecret.getPreRenderable();
+            try {
+                OIDCTokenResponse tokenResponse = performOIDCTokenRequest(tokenUrl, clientId, clientSecret, sslContext, hv);
+                builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getOIDCTokens().getBearerAccessToken());
+            } catch (ParseException | URISyntaxException e) {
+                log.warn("Failed to parse endpoint data.", e);
+            } catch (IOException e) {
+                log.error("Failed to send HTTP request.", e);
+            }
+        }
+        return builder;
+    }
+
+    private static OIDCTokenResponse performOIDCTokenRequest(String tokenUrl, String clientId, String clientSecret,
+            SSLContext sslContext, HostnameVerifier hv) throws ParseException, IOException, URISyntaxException {
+        // Configured credentials which allow BDeploy to connect to the OIDC endpoint
+        ClientID clientID = new ClientID(clientId);
+        Secret secret = new Secret(clientSecret);
+        ClientAuthentication clientAuth = new ClientSecretBasic(clientID, secret);
+
+        // Configured scope and URL for the OIDC endpoint
+        Scope scope = new Scope("openid", "email", "profile", "offline_access");
+        URI tokenEndpoint = new URI(tokenUrl);
+
+        // Request which combines all this. The response is expected to be an OIDC response, not just plain OAuth2
+        TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, new ClientCredentialsGrant(), scope);
+
+        HTTPRequest httpRequest = request.toHTTPRequest();
+        if (sslContext != null) {
+            httpRequest.setSSLSocketFactory(sslContext.getSocketFactory());
+        }
+        if (hv != null) {
+            httpRequest.setHostnameVerifier(hv);
+        }
+        TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpRequest.send());
+
+        if (!tokenResponse.indicatesSuccess()) {
+            // We got an error response...
+            TokenErrorResponse errorResponse = tokenResponse.toErrorResponse();
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to authenticate against {}: {}: {}", tokenUrl, errorResponse.getErrorObject().getCode(),
+                        errorResponse.getErrorObject().getDescription());
+            }
+            return null;
+        }
+
+        return (OIDCTokenResponse) tokenResponse.toSuccessResponse();
     }
 
     /**
@@ -154,6 +247,9 @@ public class CommonEndpointHelper {
         processed.authType = process(rawEndpoint.authType, p);
         processed.authUser = process(rawEndpoint.authUser, p);
         processed.authPass = process(rawEndpoint.authPass, p);
+        processed.tokenUrl = process(rawEndpoint.tokenUrl, p);
+        processed.clientId = process(rawEndpoint.clientId, p);
+        processed.clientSecret = process(rawEndpoint.clientSecret, p);
         processed.proxying = rawEndpoint.proxying;
 
         return processed;
