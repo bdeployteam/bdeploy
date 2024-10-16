@@ -23,7 +23,7 @@ public class DataTableRowBuilder {
         if (data instanceof DataTableCell) {
             cells.add((DataTableCell) data);
         } else {
-            cells.add(new DataTableCell(data != null ? data.toString() : ""));
+            cells.add(new DataTableCell(data));
         }
         return this;
     }
