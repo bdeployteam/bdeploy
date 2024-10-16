@@ -150,7 +150,9 @@ export class SystemTemplateComponent implements OnInit {
 
     this.template = s.detail as SystemTemplateDto;
 
-    return `Loaded '${this.template.template.name}', will create ${this.template.template.instances?.length} instances.`;
+    const templateDescriptor = this.template.template;
+    const instanceCount = templateDescriptor.instances?.length;
+    return `Loaded '${templateDescriptor.name}', will create ${instanceCount} instance${instanceCount != 1 ? 's' : ''}.`;
   };
 
   @ViewChild(MatStepper) private readonly stepper: MatStepper;
