@@ -66,23 +66,53 @@ class DataTableTextTest {
     }
 
     @Test
-    void testTableWithSpannedText() {
+    void testTableWithShortSpannedText() {
         String expectedShort = ""//
-                + "┌──────────────────────────────────────┬──────┬───────┐\n"//
-                + "│ col1                                 │ col2 │ col3  │\n"//
-                + "├──────────────────────────────────────┼──────┼───────┤\n"//
-                + "│ val1                                 │ val2 │ val3  │\n"//
-                + "│ This first cell has a very long text indeed │ third │\n"//
-                + "└─────────────────────────────────────────────┴───────┘\n";
+                + "┌───────┬───────┬───────┐\n"//
+                + "│ col1  │ col2  │ col3  │\n"//
+                + "├───────┼───────┼───────┤\n"//
+                + "│ val1  │ val2  │ val3  │\n"//
+                + "│ cell1 │ cell2 │ cell3 │\n"//
+                + "│ cell4         │ cell5 │\n"//
+                + "│ cell6 │ cell7         │\n"//
+                + "│ cell8                 │\n"//
+                + "└───────────────────────┘\n";
         String expectedLong = ""//
                 + "┌────────────────────────────────────────────────────┬───────────────────────────┬────────────┐\n"//
                 + "│ col1                                               │ col2                      │ col3       │\n"//
                 + "├────────────────────────────────────────────────────┼───────────────────────────┼────────────┤\n"//
                 + "│ val1                                               │ val2                      │ val3       │\n"//
-                + "│ This first cell has a very long text indeed                                    │ third      │\n"//
-                + "└────────────────────────────────────────────────────────────────────────────────┴────────────┘\n";
+                + "│ cell1                                              │ cell2                     │ cell3      │\n"//
+                + "│ cell4                                                                          │ cell5      │\n"//
+                + "│ cell6                                              │ cell7                                  │\n"//
+                + "│ cell8                                                                                       │\n"//
+                + "└─────────────────────────────────────────────────────────────────────────────────────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
-                table -> DataTableTestUtil.addSpannedTextRow(table).setMaxTableLengthHint(0));
+                table -> DataTableTestUtil.addShortSpannedTextRows(table).setMaxTableLengthHint(0));
+    }
+
+    @Test
+    void testTableWithLongSpannedText() {
+        String expectedShort = ""//
+                + "┌────────────────────────────────┬────────────────────────────────┬───────┐\n"//
+                + "│ col1                           │ col2                           │ col3  │\n"//
+                + "├────────────────────────────────┼────────────────────────────────┼───────┤\n"//
+                + "│ val1                           │ val2                           │ val3  │\n"//
+                + "│ the first cell has a really long text                           │ cell1 │\n"//
+                + "│ cell2                          │ the second cell has a really long text │\n"//
+                + "│ this cell is so long it covers the whole table wohoooooOOOOOOooooow     │\n"//
+                + "└─────────────────────────────────────────────────────────────────────────┘\n";
+        String expectedLong = ""//
+                + "┌────────────────────────────────────────────────────┬───────────────────────────┬────────────┐\n"//
+                + "│ col1                                               │ col2                      │ col3       │\n"//
+                + "├────────────────────────────────────────────────────┼───────────────────────────┼────────────┤\n"//
+                + "│ val1                                               │ val2                      │ val3       │\n"//
+                + "│ the first cell has a really long text                                          │ cell1      │\n"//
+                + "│ cell2                                              │ the second cell has a really long text │\n"//
+                + "│ this cell is so long it covers the whole table wohoooooOOOOOOooooow                         │\n"//
+                + "└─────────────────────────────────────────────────────────────────────────────────────────────┘\n";//
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
+                table -> DataTableTestUtil.addLongSpannedTextRows(table).setMaxTableLengthHint(0));
     }
 
     @Test

@@ -38,13 +38,28 @@ class DataTableJsonTest {
     }
 
     @Test
-    void testTableWithSpannedText() {
+    void testTableWithShortSpannedText() {
         String expected = ""//
                 + "[\n"//
                 + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
-                + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col3\": \"third\" }\n"//
+                + "  { \"Col1\": \"cell1\", \"Col2\": \"cell2\", \"Col3\": \"cell3\" },\n"//
+                + "  { \"Col1\": \"cell4\", \"Col3\": \"cell5\" },\n"//
+                + "  { \"Col1\": \"cell6\", \"Col2\": \"cell7\" },\n"//
+                + "  { \"Col1\": \"cell8\" }\n"//
                 + "]";
-        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addSpannedTextRow(table));
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortSpannedTextRows(table));
+    }
+
+    @Test
+    void testTableWithLongSpannedText() {
+        String expected = ""//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
+                + "  { \"Col1\": \"the first cell has a really long text\", \"Col3\": \"cell1\" },\n"//
+                + "  { \"Col1\": \"cell2\", \"Col2\": \"the second cell has a really long text\" },\n"//
+                + "  { \"Col1\": \"this cell is so long it covers the whole table wohoooooOOOOOOooooow\" }\n"//
+                + "]";
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongSpannedTextRows(table));
     }
 
     @Test
