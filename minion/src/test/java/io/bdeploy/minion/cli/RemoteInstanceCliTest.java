@@ -180,8 +180,8 @@ class RemoteInstanceCliTest {
         /* let's delete instance */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--delete", "--yes");
-        assertEquals("Success", result.get(0).get("message"));
-        assertEquals("aaa-bbb-ccc", result.get(0).get("Deleted"));
+        assertEquals("aaa-bbb-ccc", result.get(0).get("Instance"));
+        assertEquals("Deleted", result.get(0).get("Result"));
 
         /*
          * list will return nothing, since instance is deleted

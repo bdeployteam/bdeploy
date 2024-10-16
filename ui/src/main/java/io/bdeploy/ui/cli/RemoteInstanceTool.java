@@ -7,9 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -57,6 +60,7 @@ import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateRefe
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.utils.BrowserHelper;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status.Family;
 
@@ -71,16 +75,16 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help("Path to a ZIP file containing an export produced with this command")
+        @Help("Path to a ZIP file containing an export produced with this command. Requires exactly 1 uuid to be set.")
         @Validator(ExistingPathValidator.class)
         String importFrom();
 
-        @Help("Path to a non-existing ZIP file where to export a given instance configuration")
+        @Help("Path to a non-existing ZIP file where to export a given instance configuration. Requires exactly 1 uuid to be set.")
         @Validator(NonExistingOrEmptyDirPathValidator.class)
         String exportTo();
 
-        @Help(value = "ID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new ID is generated.")
-        String uuid();
+        @Help(value = "IDs of the instances to manipulate.")
+        String[] uuid();
 
         @Help(value = "Version of the existing instance. When exporting must exist.")
         String version();
@@ -88,7 +92,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("Product version to update to")
         String updateTo();
 
-        @Help(value = "List instance versions on the remote. By default will list active versions. If no active version is found for instance, will display its latest installed version. If no installed version is found for instance, will display its latest version",
+        @Help(value = "List instance versions on the remote. By default will list active versions. If no active version is found for instance, will display its latest installed version. If no installed version is found for instance, will display its latest version. If UUIDs are given, will only display the corresponding instances. Unknown UUIDs will be ignored.",
               arg = false)
         boolean list() default false;
 
@@ -136,7 +140,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("The version of the product to set for the created instance")
         String productVersion();
 
-        @Help(value = "Delete the given instance. This CANNOT BE UNDONE.", arg = false)
+        @Help(value = "Delete the given instances. This CANNOT BE UNDONE.", arg = false)
         boolean delete() default false;
 
         @Help(value = "Use this flag to avoid confirmation prompt when deleting instance.", arg = false)
@@ -247,6 +251,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private DataResult doCreate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+
         helpAndFailIfMissing(config.purpose(), "Missing --purpose");
         helpAndFailIfMissing(config.product(), "Missing --product");
         helpAndFailIfMissing(config.productVersion(), "Missing --productVersion");
@@ -269,7 +278,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
 
         InstanceConfiguration cfg = new InstanceConfiguration();
-        cfg.id = config.uuid() == null ? UuidHelper.randomId() : config.uuid();
+        cfg.id = config.uuid() == null ? UuidHelper.randomId() : uuid[0];
         cfg.autoUninstall = true;
         cfg.autoStart = false;
         cfg.description = config.description();
@@ -310,6 +319,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private DataResult doImport(InstanceResource ir, InstanceConfig config) {
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+
         Path input = Paths.get(config.importFrom());
         if (!Files.isRegularFile(input)) {
             helpAndFail("--importFrom is not a regular file");
@@ -317,7 +331,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         try (InputStream is = Files.newInputStream(input);
                 FormDataMultiPart fdmp = FormDataHelper.createMultiPartForStream("file", is)) {
-            List<Key> keys = ir.importInstance(fdmp, config.uuid());
+            List<Key> keys = ir.importInstance(fdmp, uuid[0]);
             return createSuccess().addField("Created", keys);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot upload instance", e);
@@ -332,7 +346,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             helpAndFail("Target file already exists: " + target);
         }
 
-        Response resp = ir.exportInstance(config.uuid(), config.version());
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+        Response resp = ir.exportInstance(uuid[0], config.version());
 
         if (resp.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             throw new IllegalStateException(
@@ -349,57 +367,56 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         return createSuccess().addField("Export File", config.exportTo());
     }
 
-    private DataResult doUpdateProduct(RemoteService remote, InstanceResource ir, InstanceConfig config) {
-        String target = config.updateTo();
-        String instance = config.uuid();
-
-        List<InstanceVersionDto> v = ir.listVersions(instance);
-        Integer max = v.stream().map(d -> Integer.valueOf(d.key.getTag())).sorted(Collections.reverseOrder()).findFirst()
-                .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + instance));
-        String currentTag = max.toString();
+    private RenderableResult doUpdateProduct(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        DataTable result = createDataTable();
+        result.column(new DataTableColumn.Builder("Instance").setMinWidth(10).build());
+        result.column(new DataTableColumn.Builder("Process").setMinWidth(10).build());
+        result.column(new DataTableColumn.Builder("Type").setMinWidth(10).build());
+        result.column(new DataTableColumn.Builder("Message").setMinWidth(5).build());
 
         BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
-        ManagedMasterDto server = null;
-        if (bir.getVersion().mode == MinionMode.CENTRAL) {
-            ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
+        boolean notCentral = bir.getVersion().mode != MinionMode.CENTRAL;
 
-            server = msr.getServerForInstance(config.instanceGroup(), instance, currentTag);
-        }
+        for (String instance : new HashSet<>(Arrays.asList(config.uuid()))) {
+            String target = config.updateTo();
 
-        DataResult result = createSuccess();
-        InstanceConfiguration cfg = ir.readVersion(instance, currentTag);
-        InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
-                ir.getNodeConfigurations(instance, currentTag).nodeConfigDtos);
-        InstanceUpdateDto update = new InstanceUpdateDto(dto, null);
+            List<InstanceVersionDto> v = ir.listVersions(instance);
+            Integer max = v.stream().map(d -> Integer.valueOf(d.key.getTag())).sorted(Collections.reverseOrder()).findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + instance));
+            String currentTag = max.toString();
 
-        // perform actual product update
-        update = ir.updateProductVersion(instance, target, update);
+            ManagedMasterDto server = notCentral ? null
+                    : ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext())
+                            .getServerForInstance(config.instanceGroup(), instance, currentTag);
 
-        // perform validation of update
-        List<ApplicationValidationDto> issues = ir.validate(instance, update);
+            InstanceConfiguration cfg = ir.readVersion(instance, currentTag);
+            InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
+                    ir.getNodeConfigurations(instance, currentTag).nodeConfigDtos);
+            InstanceUpdateDto update = new InstanceUpdateDto(dto, null);
 
-        if (issues.isEmpty()) {
-            ir.update(instance, update, server != null ? server.hostName : null, currentTag);
+            // perform actual product update
+            update = ir.updateProductVersion(instance, target, update);
 
-            if (update.validation != null && !update.validation.isEmpty()) {
-                result.addField("Update Warnings", "There have been update warnings.");
+            // perform validation of update
+            List<ApplicationValidationDto> issues = ir.validate(instance, update);
 
-                update.validation.forEach(val -> {
+            if (issues.isEmpty()) {
+                ir.update(instance, update, server != null ? server.hostName : null, currentTag);
+
+                if (update.validation != null && !update.validation.isEmpty()) {
+                    update.validation.forEach(val -> {
+                        String pid = val.paramId == null ? "" : (" - " + val.paramId);
+                        result.row().cell(instance).cell(val.appId == null ? "" : (val.appId + pid)).cell("WARN")
+                                .cell(val.message).build();
+                    });
+                }
+            } else {
+                issues.forEach(val -> {
                     String pid = val.paramId == null ? "" : (" - " + val.paramId);
-                    result.addField(" - " + (val.appId == null ? "Global" : (val.appId + pid)), val.message);
+                    result.row().cell(instance).cell(val.appId == null ? "" : (val.appId + pid)).cell("ERROR").cell(val.message)
+                            .build();
                 });
             }
-
-            result.addField("Updated To", target);
-        } else {
-            result.setMessage("Validation Issues");
-
-            issues.forEach(val -> {
-                String pid = val.paramId == null ? "" : (" - " + val.paramId);
-                result.addField(" - " + (val.appId == null ? "Global" : (val.appId + pid)), val.message);
-            });
-
-            result.addField("Update Aborted", "Cannot perform update due to validation issues");
         }
 
         return result;
@@ -438,8 +455,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         InstanceResource ir = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(config.instanceGroup());
+
+        String[] uuid = config.uuid();
+        boolean uuidSet = uuid != null && uuid.length > 0;
+        Set<String> uuids = uuidSet ? new HashSet<>(Arrays.asList(uuid)) : null;
         for (var instance : ir.list()) {
-            if (config.uuid() != null && !config.uuid().isBlank() && !instance.instanceConfiguration.id.equals(config.uuid())) {
+            if (uuidSet && !uuids.contains(instance.instanceConfiguration.id)) {
                 continue;
             }
 
@@ -551,19 +572,31 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
     }
 
-    private DataResult doDelete(InstanceConfig config, InstanceResource ir) {
-        if (config.yes() || confirmDelete(config, ir)) {
-            ir.delete(config.uuid());
-            return createSuccess().addField("Deleted", config.uuid());
-        } else {
-            return createResultWithErrorMessage("Aborted, no confirmation");
+    private RenderableResult doDelete(InstanceConfig config, InstanceResource ir) {
+        DataTable result = createDataTable();
+        result.setCaption("Success");
+        result.column(new DataTableColumn.Builder("Instance").build());
+        result.column(new DataTableColumn.Builder("Result").build());
+        boolean skipConfirmation = config.yes();
+        for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
+            if (skipConfirmation || confirmDelete(uuid, ir)) {
+                try {
+                    ir.delete(uuid);
+                    result.row().cell(uuid).cell("Deleted").build();
+                } catch (NotFoundException ex) {
+                    result.row().cell(uuid).cell("Not deleted - instance does not exist").build();
+                }
+            } else {
+                result.row().cell(uuid).cell("Not deleted - no confirmation").build();
+            }
         }
+        return result;
     }
 
-    private static boolean confirmDelete(InstanceConfig config, InstanceResource ir) {
-        String instanceName = ir.read(config.uuid()).instanceConfiguration.name;
-        String confirmation = System.console().readLine("Delete instance %1$s (%2$s)? This CANNOT be undone. (Y/N)? ",
-                config.uuid(), instanceName);
+    private static boolean confirmDelete(String uuid, InstanceResource ir) {
+        String instanceName = ir.read(uuid).instanceConfiguration.name;
+        String confirmation = System.console().readLine("Delete instance %1$s (%2$s)? This CANNOT be undone. (Y/N)? ", uuid,
+                instanceName);
         return "Y".equalsIgnoreCase(confirmation);
     }
 }
