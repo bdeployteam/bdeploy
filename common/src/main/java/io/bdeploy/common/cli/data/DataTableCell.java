@@ -7,7 +7,7 @@ package io.bdeploy.common.cli.data;
 public class DataTableCell {
 
     private final String data;
-    private final int span;
+    private int span;
 
     public DataTableCell(Object data) {
         this(data, 1);
@@ -24,5 +24,9 @@ public class DataTableCell {
 
     public int getSpan() {
         return span;
+    }
+
+    void setSpan(int span) {
+        this.span = span;
     }
 }

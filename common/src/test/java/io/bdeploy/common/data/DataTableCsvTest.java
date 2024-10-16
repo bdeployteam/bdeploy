@@ -43,6 +43,7 @@ class DataTableCsvTest {
                 + "\"cell6\",\"cell7\"\n"//
                 + "\"cell8\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortSpannedTextRows(table));
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortInfiniteSpannedTextRows(table));
     }
 
     @Test
@@ -54,6 +55,7 @@ class DataTableCsvTest {
                 + "\"cell2\",\"the second cell has a really long text\"\n"//
                 + "\"this cell is so long it covers the whole table wohoooooOOOOOOooooow\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongSpannedTextRows(table));
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongInfiniteSpannedTextRows(table));
     }
 
     @Test

@@ -51,7 +51,7 @@ class DataTableText extends DataTableBase {
 
     @Override
     public DataTable addHorizontalRuler() {
-        row(Collections.singletonList(new HorizontalRulerCell(columns.size())));
+        row(Collections.singletonList(new HorizontalRulerCell()));
         return this;
     }
 
@@ -462,8 +462,8 @@ class DataTableText extends DataTableBase {
 
     private static class HorizontalRulerCell extends DataTableCell {
 
-        private HorizontalRulerCell(int span) {
-            super("", span);
+        private HorizontalRulerCell() {
+            super(null, -1);
         }
     }
 

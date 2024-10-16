@@ -92,6 +92,42 @@ class DataTableTestUtil extends DataTestUtil {
         return table;
     }
 
+    static DataTable addShortInfiniteSpannedTextRows(DataTable table) {
+        table.row()//
+                .cell(new DataTableCell("cell1", 1))//
+                .cell(new DataTableCell("cell2", 1))//
+                .cell(new DataTableCell("cell3", -1))//
+                .build();
+        table.row()//
+                .cell(new DataTableCell("cell4", 2))//
+                .cell(new DataTableCell("cell5", -1))//
+                .build();
+        table.row()//
+                .cell(new DataTableCell("cell6", 1))//
+                .cell(new DataTableCell("cell7", -1))//
+                .build();
+        table.row()//
+                .cell(new DataTableCell("cell8", -1))//
+                .build();
+        return table;
+    }
+
+    static DataTable addLongInfiniteSpannedTextRows(DataTable table) {
+        table.row()//
+                .cell(new DataTableCell("the first cell has a really long text", 2))//
+                .cell(new DataTableCell("cell1", -1))//
+                .build();
+        table.row()//
+                .cell(new DataTableCell("cell2", 1))//
+                .cell(new DataTableCell("the second cell has a really long text", -1))//
+                .build();
+        table.row()//
+                .cell(new DataTableCell("this cell is so long it covers the whole table wohoooooOOOOOOooooow", -1))//
+                .build();
+        return table;
+
+    }
+
     static DataTable addLongSpannedTextRows(DataTable table) {
         table.row()//
                 .cell(new DataTableCell("the first cell has a really long text", 2))//
