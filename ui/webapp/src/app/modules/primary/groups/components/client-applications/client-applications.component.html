@@ -6,7 +6,7 @@
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
       [defaultGrouping]="!isCardView ? defaultGrouping : [defaultGrouping[1]]"
-      [records]="clients.apps$ | async"
+      [records]="filteredApps$ | async"
       [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
     <app-bd-button
@@ -21,7 +21,7 @@
     <app-bd-data-display
       #dataTable
       [columns]="columns"
-      [records]="clients.apps$ | async"
+      [records]="filteredApps$ | async"
       [searchable]="true"
       [recordRoute]="getRecordRoute"
       [presetKey]="presetKeyValue"

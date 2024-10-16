@@ -445,7 +445,7 @@ describe('Instance Process Config Tests', () => {
 
     cy.screenshot('Doc_InstanceConfig_EndpointsConfig');
 
-    cy.contains('div', 'myVersion - public/version').should('exist');
+    cy.contains('div', 'myVersion - enabled - public/version').should('exist');
   });
 
   it('Tests Client Config Whitelist', () => {
