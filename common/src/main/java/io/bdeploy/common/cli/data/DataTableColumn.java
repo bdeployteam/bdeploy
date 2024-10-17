@@ -56,7 +56,7 @@ public class DataTableColumn {
         private boolean scaleToContent = DEFAULT_SCALE_TO_CONTENT;
 
         /**
-         * @param label The human readable lable of the {@link DataTableColumn}.
+         * @param label The human readable label of the {@link DataTableColumn}.
          */
         public Builder(String label) {
             this.label = label;
