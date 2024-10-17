@@ -247,6 +247,23 @@ class DataTableTextTest {
     }
 
     @Test
+    void testNullValues() {
+        String expected = ""//
+                + "┌───────┬───────┬──────────────────────┐\n"//
+                + "│ col1  │       │                      │\n"//
+                + "├───────┼───────┼──────────────────────┤\n"//
+                + "│ val1  │ val2  │ val3                 │\n"//
+                + "│ val4  │       │ val5                 │\n"//
+                + "│       │       │                      │\n"//
+                + "│ val6  │ val7  │ val8                 │\n"//
+                + "├───────┴───────┴──────────────────────┤\n"//
+                + "│ foo1                                 │\n"//
+                + "│ foo2                                 │\n"//
+                + "└──────────────────────────────────────┘\n";
+        TEST_UTIL.testNullValues(expected);
+    }
+
+    @Test
     void testTableWithMaxTableLengthSimple() {
         String expectedLong = ""//
                 + "┌────────────────────────────────────────────────────┬───────────────────────────┬────────────┐\n"//

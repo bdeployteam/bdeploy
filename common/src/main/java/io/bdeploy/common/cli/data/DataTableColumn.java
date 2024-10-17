@@ -59,7 +59,7 @@ public class DataTableColumn {
          * @param label The human readable label of the {@link DataTableColumn}.
          */
         public Builder(String label) {
-            this.label = label;
+            this.label = label != null ? label : "";
         }
 
         /**
