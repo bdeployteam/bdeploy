@@ -62,14 +62,14 @@ class RemoteInstanceCliTest {
 
         /* update purpose to DEVELOPMENT to create a second instance version */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--update=" + id, "--purpose=DEVELOPMENT");
+                "--update", "--uuid=" + id, "--purpose=DEVELOPMENT");
 
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("DEVELOPMENT", result.get(0).get("NewPurpose"));
 
         /* update purpose to PRODUCTIVE to create a third instance version */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--update=" + id, "--purpose=PRODUCTIVE");
+                "--update", "--uuid=" + id, "--purpose=PRODUCTIVE");
 
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("PRODUCTIVE", result.get(0).get("NewPurpose"));
@@ -180,8 +180,8 @@ class RemoteInstanceCliTest {
         /* let's delete instance */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--delete", "--yes");
-        assertEquals("Success", result.get(0).get("message"));
-        assertEquals("aaa-bbb-ccc", result.get(0).get("Deleted"));
+        assertEquals("aaa-bbb-ccc", result.get(0).get("Instance"));
+        assertEquals("Deleted", result.get(0).get("Result"));
 
         /*
          * list will return nothing, since instance is deleted
