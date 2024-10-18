@@ -17,7 +17,7 @@ public class MinionDto {
     public boolean master;
 
     /**
-     * The operating system of the OS
+     * The operating system of the minion
      */
     public OperatingSystem os;
 
