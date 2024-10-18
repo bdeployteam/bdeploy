@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +17,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -70,10 +73,11 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help(value = "ID of the system. Used when updating existing system configuration.")
-        String uuid();
+        @Help(value = "IDs of one or more systems")
+        String[] uuid();
 
-        @Help(value = "List systems on the remote", arg = false)
+        @Help(value = "Lists systems on the remote. If UUIDs are given, will only display the corresponding systems. Unknown UUIDs will be ignored.",
+              arg = false)
         boolean list() default false;
 
         @Help(value = "Show information about a system", arg = false)
@@ -145,28 +149,32 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         if (config.list()) {
             return doShowList(remote, sr, config);
-        } else if (config.info()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doShowInfo(sr, config);
-        } else if (config.status()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doShowStatus(igr, sr, config);
-        } else if (config.start()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doStart(igr, sr, config);
-        } else if (config.stop()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doStop(igr, sr, config);
-        } else if (config.restart()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doRestart(igr, sr, config);
-        } else if (config.create()) {
+        }
+        if (config.create()) {
             return doCreate(remote, sr, config);
-        } else if (config.update()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
+        }
+
+        helpAndFailIfMissing(config.uuid(), "--uuid missing");
+
+        if (config.info()) {
+            return doShowInfo(sr, config);
+        }
+        if (config.status()) {
+            return doShowStatus(igr, sr, config);
+        }
+        if (config.start()) {
+            return doStart(igr, sr, config);
+        }
+        if (config.restart()) {
+            return doRestart(igr, sr, config);
+        }
+        if (config.stop()) {
+            return doStop(igr, sr, config);
+        }
+        if (config.update()) {
             return doUpdate(sr, config);
-        } else if (config.delete()) {
-            helpAndFailIfMissing(config.uuid(), "--uuid missing");
+        }
+        if (config.delete()) {
             return doDelete(sr, config);
         }
 
@@ -191,8 +199,11 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             table.column(new DataTableColumn.Builder("Target Server").setMinWidth(10).build());
         }
 
+        String[] uuid = config.uuid();
+        boolean uuidSet = uuid != null && uuid.length > 0;
+        Set<String> uuids = uuidSet ? new HashSet<>(Arrays.asList(uuid)) : null;
         for (var system : sr.list()) {
-            if (config.uuid() != null && !config.uuid().isBlank() && !system.config.id.equals(config.uuid())) {
+            if (uuidSet && !uuids.contains(system.config.id)) {
                 continue;
             }
 
@@ -210,11 +221,16 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private RenderableResult doShowInfo(SystemResource sr, SystemConfig config) {
-        String uuid = config.uuid();
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+        String systemUuid = uuid[0];
+
         for (var system : sr.list()) {
             var cfg = system.config;
 
-            if (!cfg.id.equals(uuid)) {
+            if (!cfg.id.equals(systemUuid)) {
                 continue;
             }
 
@@ -234,7 +250,12 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private RenderableResult doShowStatus(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
-        String systemUuid = config.uuid();
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+        String systemUuid = uuid[0];
+
         Optional<SystemConfigurationDto> selectedSystemOpt = sr.list().stream()
                 .filter(systemDto -> systemUuid.equals(systemDto.config.id)).findFirst();
         if (selectedSystemOpt.isEmpty()) {
@@ -431,6 +452,12 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private DataResult doUpdate(SystemResource sr, SystemConfig config) {
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+        String systemUuid = uuid[0];
+
         if (config.name() == null && config.description() == null && config.setVariable() == null
                 && config.removeVariable() == null) {
             helpAndFail("ERROR: Missing --name, --description, --setKey or --removeKey");
@@ -440,7 +467,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             helpAndFail("ERROR: Got --setKey but missing --setVariable");
         }
 
-        Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.uuid())).findAny();
+        Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(systemUuid)).findAny();
         if (sys.isEmpty()) {
             throw new IllegalArgumentException("Cannot find system with ID " + config.uuid());
         }
@@ -481,41 +508,51 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private RenderableResult doDelete(SystemResource sr, SystemConfig config) {
-        sr.delete(config.uuid());
+        for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
+            sr.delete(uuid);
+        }
         return createSuccess();
     }
 
     private RenderableResult performBulkOperation(InstanceGroupResource igr, SystemResource sr, SystemConfig config,
             BiFunction<InstanceBulkResource, List<String>, BulkOperationResultDto> bulkOperation) {
-        String systemUuid = config.uuid();
-        Optional<SystemConfigurationDto> selectedSystemOpt = sr.list().stream()
-                .filter(systemDto -> systemUuid.equals(systemDto.config.id)).findFirst();
-        if (selectedSystemOpt.isEmpty()) {
-            return createResultWithErrorMessage("Given UUID does not belong to any known system.");
-        }
-
-        SystemConfigurationDto systemConfigDto = selectedSystemOpt.get();
-        Manifest.Key systemKey = systemConfigDto.key;
-
-        InstanceResource ir = igr.getInstanceResource(config.instanceGroup());
-
-        List<String> instanceIds = ir.list().stream()//
-                .filter(instanceDto -> systemKey.equals(instanceDto.instanceConfiguration.system))//
-                .map(dto -> dto.instanceConfiguration.id)//
-                .toList();
-
-        List<OperationResult> bulkOperationResults = bulkOperation.apply(ir.getBulkResource(), instanceIds).results;
-        if (bulkOperationResults.isEmpty()) {
-            return createSuccess();
-        }
-
         DataTable resultTable = createDataTable();
-        resultTable.column(new DataTableColumn.Builder("Target").setMinWidth(10).build());
+        resultTable.column(new DataTableColumn.Builder("System").setMinWidth(10).build());
+        resultTable.column(new DataTableColumn.Builder("Instance").setMinWidth(10).build());
         resultTable.column(new DataTableColumn.Builder("Type").setMinWidth(10).build());
         resultTable.column(new DataTableColumn.Builder("Message").setMinWidth(5).build());
-        for (OperationResult operationResult : bulkOperation.apply(ir.getBulkResource(), instanceIds).results) {
-            resultTable.row().cell(operationResult.target()).cell(operationResult.type()).cell(operationResult.message()).build();
+
+        Map<String, SystemConfigurationDto> systems = sr.list().stream()
+                .collect(Collectors.toMap(dto -> dto.config.id, Function.identity()));
+
+        InstanceResource ir = igr.getInstanceResource(config.instanceGroup());
+        InstanceBulkResource ibr = ir.getBulkResource();
+
+        for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
+            if (!systems.containsKey(uuid)) {
+                resultTable.row().cell(uuid).cell(null).cell("ERROR")
+                        .cell("UUID " + uuid + " does not belong to any known system.").build();
+                continue;
+            }
+
+            Manifest.Key systemKey = systems.get(uuid).key;
+            List<String> instanceIds = ir.list().stream()//
+                    .filter(instanceDto -> systemKey.equals(instanceDto.instanceConfiguration.system))//
+                    .map(dto -> dto.instanceConfiguration.id)//
+                    .toList();
+
+            List<OperationResult> bulkOperationResults = bulkOperation.apply(ibr, instanceIds).results;
+
+            if (bulkOperationResults.isEmpty()) {
+                resultTable.row().cell(uuid).cell(null).cell("INFO").cell("Success").build();
+            } else {
+                for (OperationResult operationResult : bulkOperationResults) {
+                    resultTable.row().cell(uuid).cell(operationResult.target()).cell(operationResult.type())
+                            .cell(operationResult.message()).build();
+                }
+            }
         }
+
         return resultTable;
     }
 }
