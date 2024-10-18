@@ -411,6 +411,11 @@ public class ProductUpdateService {
         InstanceConfigurationDto instance = updateDto.config;
         List<InstanceNodeConfigurationDto> nodes = instance.nodeDtos;
 
+        for (var node : nodes) {
+            // update variables in case we modified them in the instance config.
+            node.nodeConfiguration.mergeVariables(instance.config, system, null);
+        }
+
         // Validate configuration files
         validateFiles(result, nodes, updateDto.files);
 
@@ -434,9 +439,6 @@ public class ProductUpdateService {
                     result.add(new ApplicationValidationDto(conflictUid, null,
                             "The process name " + process.name + " is not unique."));
                 }
-
-                // update variables in case we modified them in the instance config.
-                node.nodeConfiguration.mergeVariables(instance.config, system, null);
 
                 VariableResolver res = createResolver(node, process);
 
