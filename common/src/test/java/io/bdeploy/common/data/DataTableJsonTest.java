@@ -48,6 +48,7 @@ class DataTableJsonTest {
                 + "  { \"Col1\": \"cell8\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortSpannedTextRows(table));
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortInfiniteSpannedTextRows(table));
     }
 
     @Test
@@ -60,6 +61,7 @@ class DataTableJsonTest {
                 + "  { \"Col1\": \"this cell is so long it covers the whole table wohoooooOOOOOOooooow\" }\n"//
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongSpannedTextRows(table));
+        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongInfiniteSpannedTextRows(table));
     }
 
     @Test

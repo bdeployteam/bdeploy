@@ -89,6 +89,8 @@ class DataTableTextTest {
                 + "└─────────────────────────────────────────────────────────────────────────────────────────────┘\n";
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
                 table -> DataTableTestUtil.addShortSpannedTextRows(table).setMaxTableLengthHint(0));
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
+                table -> DataTableTestUtil.addShortInfiniteSpannedTextRows(table).setMaxTableLengthHint(0));
     }
 
     @Test
@@ -113,6 +115,8 @@ class DataTableTextTest {
                 + "└─────────────────────────────────────────────────────────────────────────────────────────────┘\n";//
         TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
                 table -> DataTableTestUtil.addLongSpannedTextRows(table).setMaxTableLengthHint(0));
+        TEST_UTIL.modifyAndTest(expectedShort, expectedLong,
+                table -> DataTableTestUtil.addLongInfiniteSpannedTextRows(table).setMaxTableLengthHint(0));
     }
 
     @Test

@@ -30,12 +30,33 @@ abstract class DataTableBase implements DataTable {
      * Renders the table to the predefined {@link #output}.
      */
     @Override
-    public void render() {
+    public final void render() {
         int columnCount = columns.size();
         for (int i = 0; i < rows.size(); i++) {
-            if (rows.get(i).stream().map(DataTableCell::getSpan).reduce(0, Integer::sum) != columnCount) {
-                throw new IllegalStateException(
-                        "Number of cells in row " + (i + 1) + " does not match the column count of " + columnCount);
+            List<DataTableCell> cells = rows.get(i);
+            int sum = 0;
+            boolean infiniteSpanCellFound = false;
+            for (DataTableCell cell : cells) {
+                if (infiniteSpanCellFound) {
+                    throw new IllegalStateException("No cells may be added after a cell with an infinite span.");
+                }
+                int span = cell.getSpan();
+                if (span >= 1) {
+                    sum += span;
+                } else {
+                    cell.setSpan(columnCount - sum);
+                    sum++;
+                    infiniteSpanCellFound = true;
+                }
+            }
+            if (infiniteSpanCellFound) {
+                if (sum > columnCount) {
+                    throw new IllegalStateException("There are more cells in row " + (i + 1) + " than there are columns.");
+                }
+            } else if (sum > columnCount) {
+                throw new IllegalStateException("There are more cells in row " + (i + 1) + " than there are columns.");
+            } else if (sum < columnCount) {
+                throw new IllegalStateException("There are less cells in row " + (i + 1) + " than there are columns.");
             }
         }
         doRender();
