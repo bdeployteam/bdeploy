@@ -1,6 +1,7 @@
 package io.bdeploy.common.data;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.text.DateFormat;
 import java.util.Collection;
@@ -34,6 +35,8 @@ class DataRenderingHelperTest {
     @Test
     void testNameCalculation() {
         for (Locale l : DateFormat.getAvailableLocales()) {
+            assertThrowsExactly(NullPointerException.class, () -> DataRenderingHelper.calculateName(null));
+
             Set<String> testStrings1 = getTestStrings(l, "");
             testStrings1.addAll(getTestStrings(l, " "));
             testStrings1.addAll(getTestStrings(l, "  "));

@@ -408,7 +408,7 @@ class DataTableTextTest {
         String result;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
-            DataTable table = DataFormat.TEXT.createTable(ps);
+            DataTable table = TEST_UTIL.dataFormat.createTable(ps);
             table.setMaxTableLengthHint(80);
             table.column(new DataTableColumn.Builder("col1").setMinWidth(10).setScaleToContent(true).build());
             table.column(new DataTableColumn.Builder("col2").setMinWidth(5).build());
