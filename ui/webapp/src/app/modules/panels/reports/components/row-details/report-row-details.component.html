@@ -1,0 +1,19 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Details" [panel]="true"> </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div *ngIf="(reports.selectedRow$ | async) as row" class="p-5 grid grid-cols-[120px_auto] gap-2.5 items-center">
+      <ng-container *ngFor="let column of mainColumns$ | async">
+        <div>{{ column.name }}:</div>
+        <div>{{ row[column.key] }}</div>
+      </ng-container>
+    </div>
+    <mat-divider></mat-divider>
+    <div *ngIf="(reports.selectedRow$ | async) as row" class="p-5 grid grid-cols-[120px_auto] gap-2.5 items-center">
+      <ng-container *ngFor="let column of hiddenColumns$ | async">
+        <div>{{ column.name }}:</div>
+        <div>{{ row[column.key] }}</div>
+      </ng-container>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

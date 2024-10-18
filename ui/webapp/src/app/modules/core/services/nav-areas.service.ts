@@ -23,6 +23,7 @@ export class NavAreasService {
   public groupContext$ = new BehaviorSubject<string>(null);
   public instanceContext$ = new BehaviorSubject<string>(null);
   public repositoryContext$ = new BehaviorSubject<string>(null);
+  public reportContext$ = new BehaviorSubject<string>(null);
 
   /** should ONLY be used by DirtyDialogGuard. */
   public forcePanelClose$ = new BehaviorSubject<boolean>(false);
@@ -101,6 +102,7 @@ export class NavAreasService {
         const group = primarySnapshot.paramMap.get('group');
         if (this.groupContext$.value !== group) {
           this.repositoryContext$.next(null);
+          this.reportContext$.next(null);
           this.groupContext$.next(group);
           this.instanceContext$.next(null);
         }
@@ -111,6 +113,14 @@ export class NavAreasService {
         const repository = primarySnapshot.paramMap.get('repository');
         if (this.repositoryContext$.value !== repository) {
           this.repositoryContext$.next(repository);
+          this.reportContext$.next(null);
+          this.groupContext$.next(null);
+          this.instanceContext$.next(null);
+        }
+        const report = primarySnapshot.paramMap.get('report');
+        if (this.reportContext$.value !== report) {
+          this.repositoryContext$.next(null);
+          this.reportContext$.next(report);
           this.groupContext$.next(null);
           this.instanceContext$.next(null);
         }

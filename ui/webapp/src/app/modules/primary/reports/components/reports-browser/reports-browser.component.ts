@@ -13,7 +13,8 @@ export class ReportsBrowserComponent {
 
   protected isCardView = false;
 
-  protected getRecordRoute = (r: ReportDescriptor) => {
-    return ['', { outlets: { panel: ['panels', 'reports', r.type, 'form'] } }];
-  };
+  protected getRecordRoute = (r: ReportDescriptor) => [
+    '',
+    { outlets: { panel: ['panels', 'reports', r.type, 'form'] } },
+  ];
 }

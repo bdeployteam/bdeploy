@@ -4,7 +4,9 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewEncapsulation,
@@ -24,7 +26,7 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMatcher {
+export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMatcher, OnChanges {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
   protected readonly elementRef = inject(ElementRef);
 
@@ -77,6 +79,12 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
       this.ngControl.valueAccessor = this;
     }
     this.updateFilter();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.suggested) {
+      this.updateFilter();
+    }
   }
 
   onBlur() {

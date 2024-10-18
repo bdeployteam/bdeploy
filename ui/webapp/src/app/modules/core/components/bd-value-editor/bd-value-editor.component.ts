@@ -274,7 +274,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     this.fireChange(this.internalValue);
   }
 
-  /* tempalte */ doChangeBooleanValue() {
+  /* template */ doChangeBooleanValue() {
     this.doChangeValue(this.booleanValue ? 'true' : 'false');
   }
 

@@ -34,16 +34,16 @@ export class AssignPermissionComponent implements OnInit, OnDestroy {
       .pipe(skipWhile(([g, r, re]) => !g || !r || !re))
       .subscribe(([g, r, re]) => {
         const groups = g
-          .map((g) => ({
-            label: `Group: ${g.instanceGroupConfiguration.name}`,
-            scope: g.instanceGroupConfiguration.name,
+          .map((i) => ({
+            label: `Group: ${i.instanceGroupConfiguration.name}`,
+            scope: i.instanceGroupConfiguration.name,
           }))
           .sort((a, b) => a.label.localeCompare(b.label));
         const repositories = r
-          .map((r) => ({ label: `Repository: ${r.name}`, scope: r.name }))
+          .map((i) => ({ label: `Repository: ${i.name}`, scope: i.name }))
           .sort((a, b) => a.label.localeCompare(b.label));
         const reports = re
-          .map((r) => ({ label: `Report: ${r.name}`, scope: r.type }))
+          .map((i) => ({ label: `Report: ${i.name}`, scope: i.type }))
           .sort((a, b) => a.label.localeCompare(b.label));
         const sorted = [...groups, ...repositories, ...reports];
 

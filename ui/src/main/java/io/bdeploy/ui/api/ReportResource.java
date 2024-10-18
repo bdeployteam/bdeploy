@@ -2,6 +2,8 @@ package io.bdeploy.ui.api;
 
 import java.util.List;
 
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.report.ReportDescriptor;
 import io.bdeploy.interfaces.report.ReportRequestDto;
 import io.bdeploy.interfaces.report.ReportResponseDto;
@@ -24,6 +26,11 @@ public interface ReportResource {
 
     @POST
     @Path("/{report}")
+    @RequiredPermission(permission = Permission.READ, scope = "report")
     public ReportResponseDto generateReport(@Scope @PathParam("report") String report, ReportRequestDto request);
+
+    @Path("/{report}/parameter-options")
+    @RequiredPermission(permission = Permission.READ, scope = "report")
+    public ReportParameterOptionResource getReportParameterOptionResource(@Scope @PathParam("report") String report);
 
 }

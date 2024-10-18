@@ -1,6 +1,7 @@
 import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, HostBinding, inject } from '@angular/core';
 import { encodeFilePath } from 'src/app/modules/panels/instances/utils/data-file-utils';
+import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { ActionsService } from '../../services/actions.service';
@@ -41,6 +42,7 @@ export class MainNavMenuComponent {
   protected readonly authService = inject(AuthenticationService);
   protected readonly areas = inject(NavAreasService);
   protected readonly actions = inject(ActionsService);
+  protected readonly reports = inject(ReportsService);
 
   protected masterNode = encodeFilePath({ minion: 'master', path: '' });
 

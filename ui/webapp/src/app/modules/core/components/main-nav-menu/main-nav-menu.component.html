@@ -48,6 +48,7 @@
   ></app-main-nav-button>
 
   <app-main-nav-button
+    *ngIf="(reports.reports$ | async).length"
     icon="assignment"
     text="Reports"
     [collapsed]="!scope.expanded"

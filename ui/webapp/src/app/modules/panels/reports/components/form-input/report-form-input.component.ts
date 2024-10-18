@@ -1,30 +1,27 @@
-import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, filter, Subscription, switchMap, tap } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, debounceTime, filter, Subscription, switchMap, tap } from 'rxjs';
 import {
-  InstancePurpose,
   ReportDescriptor,
   ReportParameterDescriptor,
-  ReportParameterType,
+  ReportParameterInputType,
   ReportRequestDto,
 } from 'src/app/models/gen.dtos';
-import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
-import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 
 export interface ReportInputChange {
   key: string;
-  value: any;
+  value: string;
 }
 
 @Component({
   selector: 'app-report-form-input',
   templateUrl: './report-form-input.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
-  private readonly groups = inject(GroupsService);
-  private readonly products = inject(ProductsService);
+  private cd = inject(ChangeDetectorRef);
   protected readonly reports = inject(ReportsService);
-  protected readonly ReportParameterType = ReportParameterType;
+  protected readonly ReportParameterInputType = ReportParameterInputType;
 
   @Input()
   protected param: ReportParameterDescriptor;
@@ -33,50 +30,58 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
   @Input()
   protected request: ReportRequestDto;
   @Input()
-  private changed$: BehaviorSubject<ReportInputChange>;
+  changed$: BehaviorSubject<ReportInputChange>;
 
-  protected values = [];
-  protected labels: string[];
+  protected values: string[] = [];
+  protected labels: string[] = [];
 
-  private subscription: Subscription;
+  private subscriptions: Subscription[] = [];
 
   ngOnInit(): void {
-    if (this.param.type === ReportParameterType.INSTANCE_PURPOSE) {
-      this.values = [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
+    if (!this.param.parameterOptionsPath) {
+      return;
     }
-    if (this.param.type === ReportParameterType.INSTANCE_GROUP) {
-      this.subscription = this.groups.groups$.subscribe((gs) => {
-        this.values = gs.map((g) => g.instanceGroupConfiguration.name);
-      });
+    this.subscriptions.push(
+      this.reports
+        .getParameterOptions(this.param.parameterOptionsPath, this.param.dependsOn, this.request.params)
+        .subscribe((ps) => {
+          this.values = ps.map((p) => p.value);
+          this.labels = ps.map((p) => p.label);
+        }),
+    );
+    if (!this.param.dependsOn) {
+      return;
     }
-    if (
-      this.param.type === ReportParameterType.PRODUCT_KEY &&
-      this.report.parameters.find((p) => p.key === this.param.dependsOn).type === ReportParameterType.INSTANCE_GROUP
-    ) {
-      this.subscription = this.changed$
+    this.subscriptions.push(
+      this.changed$
         .pipe(
-          filter((ch) => ch && ch.key === this.param.dependsOn),
+          filter((ch) => ch && this.param.dependsOn.indexOf(ch.key) !== -1),
           tap(() => {
             this.values = [];
             this.labels = [];
-            this.request.params[this.param.key] = null;
+            if (this.param.inputType === ReportParameterInputType.SELECT) {
+              this.request.params[this.param.key] = null;
+              this.onModelChange(null);
+            }
           }),
-          filter((ch) => !!ch.value),
-          switchMap((ch) => this.products.loadProductsOf(ch.value)),
+          debounceTime(100),
+          switchMap(() =>
+            this.reports.getParameterOptions(
+              this.param.parameterOptionsPath,
+              this.param.dependsOn,
+              this.request.params,
+            ),
+          ),
         )
         .subscribe((ps) => {
-          ps.forEach((p) => {
-            if (this.values.indexOf(p.key.name) === -1) {
-              this.values.push(p.key.name);
-              this.labels.push(p.name);
-            }
-          });
-        });
-    }
+          this.values = ps.map((p) => p.value);
+          this.labels = ps.map((p) => p.label);
+        }),
+    );
   }
 
   ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   protected onModelChange(event: string) {
