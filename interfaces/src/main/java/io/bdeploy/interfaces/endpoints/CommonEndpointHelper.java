@@ -162,7 +162,7 @@ public class CommonEndpointHelper {
                         endpoint.authPass.getPreRenderable()));
                 break;
             default:
-                log.error("Unknown authentication type: " + authType);
+                log.error("Unknown authentication type: {}", authType);
                 break;
         }
 
@@ -182,7 +182,9 @@ public class CommonEndpointHelper {
             String clientSecret = endpoint.clientSecret.getPreRenderable();
             try {
                 OIDCTokenResponse tokenResponse = performOIDCTokenRequest(tokenUrl, clientId, clientSecret, sslContext, hv);
-                builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getOIDCTokens().getBearerAccessToken());
+                if (tokenResponse != null) {
+                    builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getOIDCTokens().getBearerAccessToken());
+                }
             } catch (ParseException | URISyntaxException e) {
                 log.warn("Failed to parse endpoint data.", e);
             } catch (IOException e) {
@@ -218,10 +220,8 @@ public class CommonEndpointHelper {
         if (!tokenResponse.indicatesSuccess()) {
             // We got an error response...
             TokenErrorResponse errorResponse = tokenResponse.toErrorResponse();
-            if (log.isDebugEnabled()) {
-                log.debug("Failed to authenticate against {}: {}: {}", tokenUrl, errorResponse.getErrorObject().getCode(),
-                        errorResponse.getErrorObject().getDescription());
-            }
+            log.info("Failed to authenticate against {}: {}: {}", tokenUrl, errorResponse.getErrorObject().getCode(),
+                    errorResponse.getErrorObject().getDescription());
             return null;
         }
 

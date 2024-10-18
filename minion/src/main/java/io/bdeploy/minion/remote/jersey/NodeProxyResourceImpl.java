@@ -84,8 +84,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
             byte[] body = wrapper.base64body == null ? null : Base64.decodeBase64(wrapper.base64body);
 
             Invocation.Builder request = CommonEndpointHelper.createRequestBuilder(processedEndpoint, wrapper.subPath,
-                    Collections.emptyMap(),
-                    wrapper.queryParameters.entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue())));
+                    Collections.emptyMap(), wrapper.queryParameters);
 
             // Always replace the "host" header with "localhost". the request is *always* made on the local
             // machine. Avoid forwarding the original host (e.g. the hostname of the original BDeploy server).
