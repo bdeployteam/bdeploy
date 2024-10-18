@@ -56,16 +56,6 @@ public interface InstanceGroupResource {
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
     public void update(@Scope @PathParam("group") String group, InstanceGroupConfiguration config);
 
-    @POST
-    @Path("/{group}/user-permissions")
-    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public void updateUserPermissions(@Scope @PathParam("group") String group, UserPermissionUpdateDto[] permissions);
-
-    @POST
-    @Path("/{group}/user-group-permissions")
-    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public void updateUserGroupPermissions(@Scope @PathParam("group") String group, UserGroupPermissionUpdateDto[] permissions);
-
     @DELETE
     @Path("/{group}")
     @RequiredPermission(permission = Permission.ADMIN)
@@ -80,6 +70,16 @@ public interface InstanceGroupResource {
     @Path("/{group}/user-groups")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
     public SortedSet<UserGroupInfo> getAllUserGroup(@Scope @PathParam("group") String group);
+
+    @POST
+    @Path("/{group}/user-permissions")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
+    public void updateUserPermissions(@Scope @PathParam("group") String group, UserPermissionUpdateDto[] permissions);
+
+    @POST
+    @Path("/{group}/user-group-permissions")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
+    public void updateUserGroupPermissions(@Scope @PathParam("group") String group, UserGroupPermissionUpdateDto[] permissions);
 
     @POST
     @Path("/{group}/image")

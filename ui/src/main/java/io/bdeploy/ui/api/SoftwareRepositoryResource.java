@@ -42,7 +42,7 @@ public interface SoftwareRepositoryResource {
 
     @POST
     @Path("/{repo}")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN, scope = "repo")
     public void update(@Scope @PathParam("repo") String repo, SoftwareRepositoryConfiguration config);
 
     @DELETE
@@ -59,22 +59,22 @@ public interface SoftwareRepositoryResource {
 
     @GET
     @Path("/{repo}/users")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN, scope = "repo")
     public SortedSet<UserInfo> getAllUser(@Scope @PathParam("repo") String repo);
 
     @GET
     @Path("/{repo}/user-groups")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN, scope = "repo")
     public SortedSet<UserGroupInfo> getUserGroups(@Scope @PathParam("repo") String repo);
 
     @POST
     @Path("/{repo}/user-permissions")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN, scope = "repo")
     public void updateUserPermissions(@Scope @PathParam("repo") String repo, UserPermissionUpdateDto[] permissions);
 
     @POST
     @Path("/{repo}/user-group-permissions")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN, scope = "repo")
     public void updateUserGroupPermissions(@Scope @PathParam("repo") String repo, UserGroupPermissionUpdateDto[] permissions);
 
     @POST
