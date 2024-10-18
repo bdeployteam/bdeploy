@@ -41,6 +41,29 @@ class DataTableTestUtil extends DataTestUtil {
         assertEachLine(expected, result);
     }
 
+    void testNullValues(String expected) {
+        String result;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PrintStream ps = new PrintStream(baos, true, CHARSET)) {
+            DataTable table = dataFormat.createTable(ps);
+            table.setCaption(null);
+            table.column(new DataTableColumn.Builder("col1").build());
+            table.column(new DataTableColumn.Builder(null).build());
+            table.column(new DataTableColumn.Builder(null).setMinWidth(20).build());
+            table.row().cell("val1").cell("val2").cell("val3").build();
+            table.row().cell("val4").cell(null).cell("val5").build();
+            table.row().cell(null).cell(null).cell(null).build();
+            table.row().cell("val6").cell("val7").cell("val8").build();
+            table.addFooter(null);
+            table.addFooter("foo1");
+            table.addFooter(null);
+            table.addFooter("foo2");
+            table.render();
+            result = baos.toString(CHARSET);
+        }
+        assertEachLine(expected, result);
+    }
+
     static DataTable addLongTextRow(DataTable table) {
         return table.row().cell("This first cell has a very long text indeed").cell("second one is shorter").cell("third")
                 .build();

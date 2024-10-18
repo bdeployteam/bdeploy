@@ -114,4 +114,15 @@ class DataTableCsvTest {
                 + "\"val1\",\"val2\",\"val3\"";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.addFooter("What an interesting footer this is"));
     }
+
+    @Test
+    void testNullValues() {
+        String expected = ""//
+                + "\"col1\",\"\",\"\"\r\n"//
+                + "\"val1\",\"val2\",\"val3\"\n"//
+                + "\"val4\",\"\",\"val5\"\n"//
+                + "\"\",\"\",\"\"\n"//
+                + "\"val6\",\"val7\",\"val8\"";
+        TEST_UTIL.testNullValues(expected);
+    }
 }

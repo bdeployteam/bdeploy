@@ -77,7 +77,9 @@ abstract class DataTableBase implements DataTable {
 
     @Override
     public DataTable addFooter(String footer) {
-        footers.add(footer);
+        if (footer != null) {
+            footers.add(footer);
+        }
         return this;
     }
 

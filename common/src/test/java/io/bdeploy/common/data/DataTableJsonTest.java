@@ -126,4 +126,16 @@ class DataTableJsonTest {
                 + "]";
         TEST_UTIL.modifyAndTest(expected, expected, table -> table.addFooter("What an interesting footer this is"));
     }
+
+    @Test
+    void testNullValues() {
+        String expected = ""//
+                + "[\n"//
+                + "  { \"Col1\": \"val1\", \"\": \"val2\", \"\": \"val3\" },\n"//
+                + "  { \"Col1\": \"val4\", \"\": \"\", \"\": \"val5\" },\n"//
+                + "  { \"Col1\": \"\", \"\": \"\", \"\": \"\" },\n"//
+                + "  { \"Col1\": \"val6\", \"\": \"val7\", \"\": \"val8\" }\n"//
+                + "]";
+        TEST_UTIL.testNullValues(expected);
+    }
 }

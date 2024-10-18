@@ -39,6 +39,8 @@ public interface DataTable extends RenderableResult {
     public DataTable addHorizontalRuler();
 
     /**
+     * Adds a footer to the table. Footers that are <code>null</code> may be ignored.
+     *
      * @param footer A footer, e.g. a hint for a column label. The footer may be ignored depending on the output format.
      */
     public DataTable addFooter(String footer);
