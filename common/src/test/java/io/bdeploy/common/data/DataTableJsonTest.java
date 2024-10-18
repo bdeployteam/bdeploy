@@ -134,7 +134,10 @@ class DataTableJsonTest {
                 + "  { \"Col1\": \"val1\", \"\": \"val2\", \"\": \"val3\" },\n"//
                 + "  { \"Col1\": \"val4\", \"\": \"\", \"\": \"val5\" },\n"//
                 + "  { \"Col1\": \"\", \"\": \"\", \"\": \"\" },\n"//
-                + "  { \"Col1\": \"val6\", \"\": \"val7\", \"\": \"val8\" }\n"//
+                + "  { \"Col1\": \"val6\", \"\": \"val7\", \"\": \"val8\" },\n"//
+                + "  { \"Col1\": \"\", \"\": \"\" },\n"//
+                + "  { \"Col1\": \"loooooooOOOOOOOooooooong text\", \"\": \"\" },\n"//
+                + "  { \"Col1\": \"\", \"\": \"short text\" }\n"//
                 + "]";
         TEST_UTIL.testNullValues(expected);
     }

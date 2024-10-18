@@ -122,7 +122,10 @@ class DataTableCsvTest {
                 + "\"val1\",\"val2\",\"val3\"\n"//
                 + "\"val4\",\"\",\"val5\"\n"//
                 + "\"\",\"\",\"\"\n"//
-                + "\"val6\",\"val7\",\"val8\"";
+                + "\"val6\",\"val7\",\"val8\"\n"//
+                + "\"\",,\"\"\n"//
+                + "\"loooooooOOOOOOOooooooong text\",,\"\"\n"//
+                + "\"\",,\"short text\"";
         TEST_UTIL.testNullValues(expected);
     }
 }

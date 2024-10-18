@@ -54,6 +54,9 @@ class DataTableTestUtil extends DataTestUtil {
             table.row().cell("val4").cell(null).cell("val5").build();
             table.row().cell(null).cell(null).cell(null).build();
             table.row().cell("val6").cell("val7").cell("val8").build();
+            table.row().cell(new DataTableCell(null, 2)).cell(null).build();
+            table.row().cell(new DataTableCell("loooooooOOOOOOOooooooong text", 2)).cell(null).build();
+            table.row().cell(new DataTableCell(null, 2)).cell("short text").build();
             table.addFooter(null);
             table.addFooter("foo1");
             table.addFooter(null);

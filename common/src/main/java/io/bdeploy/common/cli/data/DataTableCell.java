@@ -9,12 +9,12 @@ public class DataTableCell {
     private final String data;
     private final int span;
 
-    public DataTableCell(String data) {
+    public DataTableCell(Object data) {
         this(data, 1);
     }
 
-    public DataTableCell(String data, int span) {
-        this.data = data;
+    public DataTableCell(Object data, int span) {
+        this.data = data != null ? data.toString() : "";
         this.span = span;
     }
 
