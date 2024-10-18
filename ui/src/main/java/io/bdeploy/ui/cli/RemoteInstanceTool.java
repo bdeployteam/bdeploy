@@ -35,6 +35,7 @@ import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.StreamHelper;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -115,8 +116,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Validator(ExistingPathValidator.class)
         String template();
 
-        @Help("Update the instance with the given ID")
-        String update();
+        @Help("Update the given instances")
+        boolean update() default false;
 
         @Help("The name to set for the updated instance")
         String name();
@@ -171,7 +172,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             } else {
                 return doCreate(remote, ir, config);
             }
-        } else if (config.update() != null) {
+        } else if (config.update()) {
             return doUpdate(remote, ir, config);
         }
 
@@ -201,51 +202,69 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             throw new IllegalArgumentException("Please use --updateTo instead of --update to change the product version");
         }
 
-        if (config.name() == null && config.purpose() == null && config.description() == null && config.system() == null) {
-            helpAndFail("ERROR: Missing --name, --description, --system or --purpose");
-        }
+        String name = config.name();
+        String description = config.description();
+        InstancePurpose purpose = config.purpose();
+        String system = config.system();
 
-        List<InstanceVersionDto> v = ir.listVersions(config.update());
-        Integer max = v.stream().map(d -> Integer.valueOf(d.key.getTag())).sorted(Collections.reverseOrder()).findFirst()
-                .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + config.update()));
-        String currentTag = max.toString();
+        boolean setName = !StringHelper.isNullOrBlank(name);
+        boolean setDescription = !StringHelper.isNullOrBlank(description);
+        boolean setPurpose = purpose != null;
+        boolean setSystem = !StringHelper.isNullOrBlank(system);
 
-        BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
-        ManagedMasterDto server = null;
-        if (bir.getVersion().mode == MinionMode.CENTRAL) {
-            ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
-
-            server = msr.getServerForInstance(config.instanceGroup(), config.update(), currentTag);
+        if (!setName && !setDescription && !setPurpose && !setSystem) {
+            helpAndFail("ERROR: Missing --name, --description, --purpose or --system");
         }
 
         DataResult result = createSuccess();
-        InstanceConfiguration cfg = ir.readVersion(config.update(), currentTag);
+        if (setName) {
+            result.addField("New Name", name);
+        }
+        if (setDescription) {
+            result.addField("New Description", description);
+        }
+        if (setPurpose) {
+            result.addField("New Purpose", purpose);
+        }
+        Manifest.Key sysKey = null;
+        if (setSystem) {
+            sysKey = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
+                    .getSystemResource(config.instanceGroup()).list().stream().filter(s -> s.config.id.equals(system)).findAny()
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find specified system on server: " + system)).key;
+            result.addField("New System", system);
+        }
 
-        if (config.name() != null && !config.name().isBlank()) {
-            cfg.name = config.name();
-            result.addField("New Name", config.name());
-        }
-        if (config.description() != null && !config.description().isBlank()) {
-            cfg.description = config.description();
-            result.addField("New Description", config.description());
-        }
-        if (config.purpose() != null) {
-            cfg.purpose = config.purpose();
-            result.addField("New Purpose", config.purpose());
-        }
-        if (config.system() != null) {
-            SystemResource sr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
-                    .getSystemResource(config.instanceGroup());
-            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.system())).findAny();
-            if (sys.isEmpty()) {
-                throw new IllegalArgumentException("Cannot find specified system on server: " + config.system());
+        BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
+        boolean notCentral = bir.getVersion().mode != MinionMode.CENTRAL;
+
+        for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
+            List<InstanceVersionDto> versions = ir.listVersions(uuid);
+            Integer max = versions.stream().map(versionDto -> Integer.valueOf(versionDto.key.getTag()))
+                    .sorted(Collections.reverseOrder()).findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + uuid));
+            String currentTag = max.toString();
+
+            InstanceConfiguration cfg = ir.readVersion(uuid, currentTag);
+            if (setName) {
+                cfg.name = config.name();
+            }
+            if (setDescription) {
+                cfg.description = config.description();
+            }
+            if (setPurpose) {
+                cfg.purpose = config.purpose();
+            }
+            if (setSystem) {
+                cfg.system = sysKey;
             }
 
-            cfg.system = sys.get().key;
+            ManagedMasterDto server = notCentral ? null
+                    : ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext())
+                            .getServerForInstance(config.instanceGroup(), uuid, currentTag);
+            InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
+                    ir.getNodeConfigurations(uuid, currentTag).nodeConfigDtos);
+            ir.update(uuid, new InstanceUpdateDto(dto, null), server != null ? server.hostName : null, currentTag);
         }
-        InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
-                ir.getNodeConfigurations(config.update(), currentTag).nodeConfigDtos);
-        ir.update(config.update(), new InstanceUpdateDto(dto, null), server != null ? server.hostName : null, currentTag);
 
         return result;
     }
