@@ -166,6 +166,10 @@ public class FlattenedApplicationTemplateConfiguration {
         this.preferredProcessControlGroup = resolveStringValue(this.preferredProcessControlGroup,
                 parent.preferredProcessControlGroup);
 
+        if (applyOn == null || applyOn.isEmpty()) {
+            applyOn = parent.applyOn;
+        }
+
         // merge process control partial object as map
         for (var entry : parent.processControl.entrySet()) {
             if (!this.processControl.containsKey(entry.getKey())) {
