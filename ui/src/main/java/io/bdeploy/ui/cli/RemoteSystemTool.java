@@ -61,6 +61,7 @@ import io.bdeploy.ui.dto.SystemTemplateDto;
 import io.bdeploy.ui.dto.SystemTemplateRequestDto;
 import io.bdeploy.ui.dto.SystemTemplateRequestDto.SystemTemplateGroupMapping;
 import io.bdeploy.ui.utils.InstanceTemplateHelper;
+import jakarta.ws.rs.NotFoundException;
 
 @Help("List, create and update system configurations")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -508,10 +509,23 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
     }
 
     private RenderableResult doDelete(SystemResource sr, SystemConfig config) {
+        DataTable result = createDataTable();
+        result.setCaption("Success");
+        result.column(new DataTableColumn.Builder("System").build());
+        result.column(new DataTableColumn.Builder("Result").build());
         for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
-            sr.delete(uuid);
+            DataTableRowBuilder rowBuilder = result.row().cell(uuid);
+            try {
+                sr.delete(uuid);
+                rowBuilder.cell("Deleted");
+            } catch (NotFoundException e) {
+                rowBuilder.cell("Not deleted - system does not exist");
+            } catch (Exception e) {
+                rowBuilder.cell("Not deleted - " + e.getMessage());
+            }
+            rowBuilder.build();
         }
-        return createSuccess();
+        return result;
     }
 
     private RenderableResult performBulkOperation(InstanceGroupResource igr, SystemResource sr, SystemConfig config,

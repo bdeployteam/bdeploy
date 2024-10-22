@@ -598,16 +598,20 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         result.column(new DataTableColumn.Builder("Result").build());
         boolean skipConfirmation = config.yes();
         for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
-            if (skipConfirmation || confirmDelete(uuid, ir)) {
-                try {
+            DataTableRowBuilder rowBuilder = result.row().cell(uuid);
+            try {
+                if (skipConfirmation || confirmDelete(uuid, ir)) {
                     ir.delete(uuid);
-                    result.row().cell(uuid).cell("Deleted").build();
-                } catch (NotFoundException ex) {
-                    result.row().cell(uuid).cell("Not deleted - instance does not exist").build();
+                    rowBuilder.cell("Deleted");
+                } else {
+                    rowBuilder.cell("Not deleted - no confirmation");
                 }
-            } else {
-                result.row().cell(uuid).cell("Not deleted - no confirmation").build();
+            } catch (NotFoundException e) {
+                rowBuilder.cell("Not deleted - instance does not exist");
+            } catch (Exception e) {
+                rowBuilder.cell("Not deleted - " + e.getMessage());
             }
+            rowBuilder.build();
         }
         return result;
     }
