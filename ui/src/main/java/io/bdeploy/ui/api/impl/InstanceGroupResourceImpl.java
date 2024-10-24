@@ -443,7 +443,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                         String res = TemplateHelper.process(configuredEp.enabled.getPreRenderable(), resolver);
                         uiEp.endpointEnabledPreresolved = res == null || (!res.isEmpty() && !"false".equalsIgnoreCase(res));
                     } catch (Exception e) {
-                        uiEp.endpointEnabledPreresolved = true;
+                        uiEp.endpointEnabledPreresolved = false;
                         log.debug("Cannot resolve link expression to determine whether endpoint is enabled", e);
                     }
                     allInstEps.endpoints.add(uiEp);
