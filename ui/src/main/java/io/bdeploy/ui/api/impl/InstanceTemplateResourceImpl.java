@@ -395,7 +395,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         ApplicationDescriptor appDesc = am.getDescriptor();
 
         cfg.id = UuidHelper.randomId();
-        cfg.name = TemplateHelper.process(reqApp.name, ttor, ttor::canResolve);
+        cfg.name = reqApp.name == null ? am.getDescriptor().name : TemplateHelper.process(reqApp.name, ttor, ttor::canResolve);
         cfg.application = am.getKey();
         cfg.pooling = appDesc.pooling;
         cfg.processControl = new ProcessControlConfiguration();

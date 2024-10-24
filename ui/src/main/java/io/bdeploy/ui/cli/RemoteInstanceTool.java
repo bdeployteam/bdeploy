@@ -270,11 +270,6 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private DataResult doCreate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
-        String[] uuid = config.uuid();
-        if (uuid.length != 1) {
-            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
-        }
-
         helpAndFailIfMissing(config.purpose(), "Missing --purpose");
         helpAndFailIfMissing(config.product(), "Missing --product");
         helpAndFailIfMissing(config.productVersion(), "Missing --productVersion");
@@ -297,7 +292,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
 
         InstanceConfiguration cfg = new InstanceConfiguration();
-        cfg.id = config.uuid() == null ? UuidHelper.randomId() : uuid[0];
+        cfg.id = UuidHelper.randomId();
         cfg.autoUninstall = true;
         cfg.autoStart = false;
         cfg.description = config.description();
