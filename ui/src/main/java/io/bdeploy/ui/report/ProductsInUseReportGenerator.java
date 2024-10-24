@@ -79,10 +79,13 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
                 row.put(ProductsInUseReportDescriptor.INSTANCE_UUID_COLUMN.key, instanceConfiguration.id);
                 row.put(ProductsInUseReportDescriptor.INSTANCE_NAME_COLUMN.key, instanceConfiguration.name);
                 row.put(ProductsInUseReportDescriptor.PURPOSE_COLUMN.key, instanceConfiguration.purpose.name());
+                
+                if (currentProduct != null) {
+                    row.put(ProductsInUseReportDescriptor.PRODUCT_COLUMN.key, currentProduct.name);
+                    row.put(ProductsInUseReportDescriptor.PRODUCT_ID_COLUMN.key, currentProduct.product);
+                    row.put(ProductsInUseReportDescriptor.PRODUCT_VERSION_COLUMN.key, currentProduct.key.getTag());
+                }
 
-                row.put(ProductsInUseReportDescriptor.PRODUCT_COLUMN.key, currentProduct.name);
-                row.put(ProductsInUseReportDescriptor.PRODUCT_ID_COLUMN.key, currentProduct.product);
-                row.put(ProductsInUseReportDescriptor.PRODUCT_VERSION_COLUMN.key, currentProduct.key.getTag());
                 if (activeProduct != null) {
                     row.put(ProductsInUseReportDescriptor.ACTIVE_VERSION_COLUMN.key, activeProduct.key.getTag());
                 }
