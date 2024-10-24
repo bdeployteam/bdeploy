@@ -439,8 +439,13 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                     uiEp.id = appConfig.id;
                     uiEp.appName = appConfig.name;
                     uiEp.endpoint = configuredEp;
-                    uiEp.endpointEnabledPreresolved = Boolean
-                            .valueOf(TemplateHelper.process(configuredEp.enabled.getPreRenderable(), resolver));
+                    try {
+                        String res = TemplateHelper.process(configuredEp.enabled.getPreRenderable(), resolver);
+                        uiEp.endpointEnabledPreresolved = res == null || (!res.isEmpty() && !"false".equalsIgnoreCase(res));
+                    } catch (Exception e) {
+                        uiEp.endpointEnabledPreresolved = true;
+                        log.debug("Cannot resolve link expression to determine whether endpoint is enabled", e);
+                    }
                     allInstEps.endpoints.add(uiEp);
                 }
             }
