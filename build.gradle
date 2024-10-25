@@ -11,16 +11,15 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 buildscript {
     repositories {
         maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-        maven {
             url 'https://repository.mulesoft.org/nexus/content/repositories/public/'
         }
         mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath 'com.adarshr:gradle-test-logger-plugin:4.0.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
+        classpath 'org.kordamp.gradle:enforcer-gradle-plugin:0.14.0'
     }
 }
 
@@ -93,7 +92,8 @@ configure(actualSubprojects) {
     apply plugin: 'jacoco'
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'eclipse'
-    apply plugin: "net.ossindex.audit"
+    apply plugin: 'net.ossindex.audit'
+    apply plugin: 'org.kordamp.gradle.project-enforcer'
 
     compileJava.options.encoding = 'UTF-8'
     compileTestJava.options.encoding = 'UTF-8'
@@ -103,7 +103,7 @@ configure(actualSubprojects) {
         // enabled by default in gradle 7.0 - breaks executing anything from eclipse, but not from the CLI
         modularity.inferModulePath = false
     }
-	
+
 	eclipse {
 		classpath {
 			downloadSources = true
