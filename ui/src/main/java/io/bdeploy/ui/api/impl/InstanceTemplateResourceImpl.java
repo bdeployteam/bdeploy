@@ -250,6 +250,12 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         InstanceUpdateDto iud = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, nodes), cfgFiles);
 
         try {
+            if (!ttor.getRequestedVariables().isEmpty()) {
+                log.warn("Unresolved variables while creating instance {}: {}", cfg.name, ttor.getRequestedVariables());
+                return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
+                        "Failed to resolve required template variables: " + ttor.getRequestedVariables());
+            }
+
             List<ApplicationValidationDto> validation = pus.validate(iud, apps, system, Collections.emptyList());
             if (!validation.isEmpty()) {
                 validation.forEach(v -> log.warn("Validation problem in instance: {}, app: {}, param: {}: {}", cfg.name, v.appId,
