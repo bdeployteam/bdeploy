@@ -110,11 +110,12 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private static List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
+        var instanceVariableDescriptors = desc.instanceVariableDefinitions.stream().flatMap(ds -> ds.definitions.stream())
+                .toList();
         return desc.instanceTemplates.stream().map(t -> {
             try {
-                var issues = validateFlatInstanceTemplate(
-                        new FlattenedInstanceTemplateConfiguration(t, desc.instanceVariableTemplates, desc.applicationTemplates),
-                        desc);
+                var issues = validateFlatInstanceTemplate(new FlattenedInstanceTemplateConfiguration(t,
+                        desc.instanceVariableTemplates, desc.applicationTemplates, instanceVariableDescriptors), desc);
 
                 issues.addAll(validateTemplateVariablesOnInstance(t, desc));
 
@@ -151,6 +152,18 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
         for (var v : t.instanceVariables) {
             visitSingleInstanceVariable(v, desc, res, t.instanceVariableDefaults);
+        }
+
+        var definitions = desc.instanceVariableDefinitions.stream().flatMap(d -> d.definitions.stream()).toList();
+        for (var ivv : t.instanceVariableValues) {
+            var def = definitions.stream().filter(ivd -> ivd.id.equals(ivv.id)).findFirst();
+            if (def.isPresent()) {
+                TemplateHelper.process(ivv.value.getPreRenderable(), res, res::canResolve);
+            } else {
+                result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Missing definition for used instance variable value " + ivv.id + " in instance template " + t.name));
+            }
+
         }
 
         for (var group : t.groups) {

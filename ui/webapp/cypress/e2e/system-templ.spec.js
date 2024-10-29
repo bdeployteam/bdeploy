@@ -233,10 +233,10 @@ describe('System Template Tests', () => {
       cy.contains('mat-panel-description', '2/2 variables shown').should('exist');
       cy.get('mat-panel-title').click();
       cy.get('app-bd-form-input[name="instance.variable.v1_val"]').within(() => {
-        cy.get('input[name="instance.variable.v1_val"]').should('have.value', 'defaultDefinedV1');
+        cy.get('input[name="instance.variable.v1_val"]').should('have.value', 'value-v1');
       });
       cy.get('app-bd-form-input[name="instance.variable.v2_val"]').within(() => {
-        cy.get('input[name="instance.variable.v2_val"]').should('have.value', 'defaultDefinedV2');
+        cy.get('input[name="instance.variable.v2_val"]').should('have.value', 'demo');
       });
       cy.get('mat-panel-title').click();
     });

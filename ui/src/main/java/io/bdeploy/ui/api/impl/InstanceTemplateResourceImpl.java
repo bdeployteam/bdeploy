@@ -549,10 +549,18 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             result.add(v);
         }
 
+        var instanceVariableValues = Optional.ofNullable(tpl.instanceVariableValues).orElseGet(Collections::emptyList);
         for (var pv : pmf.getInstanceVariables()) {
-            if (result.stream().noneMatch(v -> v.id.equals(pv.id))) {
-                result.add(new VariableConfiguration(pv));
+            if (result.stream().anyMatch(v -> v.id.equals(pv.id))) {
+                continue;
             }
+            var instanceVariable = new VariableConfiguration(pv);
+            var ivv = instanceVariableValues.stream().filter(i -> i.id.equals(instanceVariable.id)).findFirst().orElse(null);
+            if (ivv != null) {
+                instanceVariable.value = new LinkedValueConfiguration(
+                        TemplateHelper.process(ivv.value.getPreRenderable(), ttor, ttor::canResolve));
+            }
+            result.add(instanceVariable);
         }
 
         return result;

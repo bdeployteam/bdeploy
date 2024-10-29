@@ -21,6 +21,7 @@ import io.bdeploy.interfaces.descriptor.template.InstanceTemplateControlGroup;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 
 /**
  * Represents a flattened and cacheable version of an {@link InstanceTemplateDescriptor}.
@@ -43,11 +44,11 @@ public class FlattenedInstanceTemplateConfiguration {
     }
 
     public FlattenedInstanceTemplateConfiguration(InstanceTemplateDescriptor original,
-            List<InstanceVariableTemplateDescriptor> varTpl, List<ApplicationTemplateDescriptor> appTpl) {
+            List<InstanceVariableTemplateDescriptor> varTpl, List<ApplicationTemplateDescriptor> appTpl,
+            List<VariableDescriptor> instanceVariableDescriptors) {
         this.name = original.name;
         this.description = original.description;
         this.processControlGroups = original.processControlGroups;
-        this.instanceVariableValues = original.instanceVariableValues;
         this.groups = original.groups.stream()
                 .map(g -> new FlattenedInstanceTemplateGroupConfiguration(g, appTpl, original.templateVariables)).filter(g -> {
                     if (g.applications.isEmpty()) {
@@ -58,14 +59,15 @@ public class FlattenedInstanceTemplateConfiguration {
                 }).toList();
 
         resolveInstanceVariablesAndTemplateVariables(varTpl, original.instanceVariables, original.instanceVariableDefaults,
-                original.templateVariables);
+                original.templateVariables, instanceVariableDescriptors, original.instanceVariableValues);
     }
 
     private void resolveInstanceVariablesAndTemplateVariables(List<InstanceVariableTemplateDescriptor> templates,
-            List<TemplateableVariableConfiguration> original,
-            List<TemplateableVariableDefaultConfiguration> instanceVariableDefaults, List<TemplateVariable> templateVars) {
+            List<TemplateableVariableConfiguration> instanceVariables,
+            List<TemplateableVariableDefaultConfiguration> instanceVariableDefaults, List<TemplateVariable> templateVars,
+            List<VariableDescriptor> instanceVariableDescriptors, List<InstanceVariableConfiguration> instanceVariableValues) {
         TemplateableVariableConfiguration toReplace = null;
-        List<TemplateableVariableConfiguration> vars = new ArrayList<>(original);
+        List<TemplateableVariableConfiguration> vars = new ArrayList<>(instanceVariables);
         do {
             // find element which has a 'template' attribute set
             toReplace = vars.stream().filter(v -> v.template != null).findFirst().orElse(null);
@@ -116,6 +118,21 @@ public class FlattenedInstanceTemplateConfiguration {
                 TemplateHelper.process(app.description, res, res::canResolve);
                 for (var param : app.startParameters) {
                     TemplateHelper.process(param.value, res, res::canResolve);
+                }
+            }
+        }
+
+        // we allow template variables to be used in instanceVariableValues overrides
+        this.instanceVariableValues = new ArrayList<>();
+        if (instanceVariableValues != null && instanceVariableDescriptors != null) {
+            for (var ivv : instanceVariableValues) {
+                var ivd = instanceVariableDescriptors.stream().filter(d -> d.id.equals(ivv.id)).findFirst();
+                if (ivd.isEmpty()) {
+                    log.warn("Corresponding instance variable descriptor not found. Skipping instance variable value: {}",
+                            ivv.id);
+                } else {
+                    TemplateHelper.process(ivv.value.getPreRenderable(), res, res::canResolve);
+                    this.instanceVariableValues.add(ivv);
                 }
             }
         }
