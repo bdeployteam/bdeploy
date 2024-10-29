@@ -406,7 +406,7 @@ public class ProductUpdateService {
     }
 
     public List<ApplicationValidationDto> validate(InstanceUpdateDto updateDto, Collection<ApplicationManifest> applications,
-            SystemConfiguration system) {
+            SystemConfiguration system, Collection<FileStatusDto> existingConfigFiles) {
         List<ApplicationValidationDto> result = new ArrayList<>();
         InstanceConfigurationDto instance = updateDto.config;
         List<InstanceNodeConfigurationDto> nodes = instance.nodeDtos;
@@ -418,6 +418,14 @@ public class ProductUpdateService {
 
         // Validate configuration files
         validateFiles(result, nodes, updateDto.files);
+
+        if (existingConfigFiles != null && !existingConfigFiles.isEmpty()) {
+            Collection<FileStatusDto> existingUnchanged = updateDto.files == null
+                    ? existingConfigFiles
+                    : existingConfigFiles.stream().filter(f -> !isFileChanged(updateDto.files, f.file)).toList();
+
+            validateFiles(result, nodes, existingUnchanged);
+        }
 
         // Validate applications and processes
         Map<String, String> processNames = new TreeMap<>();
@@ -451,13 +459,17 @@ public class ProductUpdateService {
         return result;
     }
 
+    private boolean isFileChanged(List<FileStatusDto> fileStatuses, String fileName) {
+        return fileStatuses.stream().anyMatch(fileStatus -> fileStatus.file.equals(fileName));
+    }
+
     private static void validateFiles(List<ApplicationValidationDto> result, List<InstanceNodeConfigurationDto> nodes,
             Collection<FileStatusDto> files) {
         if (files == null) {
             return;
         }
-        files.removeIf(file -> file.type == FileStatusType.DELETE);
-        if (files.isEmpty()) {
+        List<FileStatusDto> toCheck = files.stream().filter(file -> file.type != FileStatusType.DELETE).toList();
+        if (toCheck.isEmpty()) {
             return;
         }
         for (var node : nodes) {
@@ -470,12 +482,12 @@ public class ProductUpdateService {
                         .forEach(dirsString -> {
                             String[] split = ProcessControlConfiguration.CONFIG_DIRS_SPLIT_PATTERN.split(dirsString);
                             Set<String> configDirs = Arrays.stream(split).map(s -> s.substring(1)).collect(Collectors.toSet());
-                            files.stream()//
+                            toCheck.stream()//
                                     .filter(file -> configDirs.contains(Path.of(file.file).getParent().toString()))//
                                     .forEach(file -> validateFile(result, resolver, InstanceManifest.CLIENT_NODE_LABEL, file));
                         });
             } else {
-                files.forEach(file -> validateFile(result, resolver, nodeName, file));
+                toCheck.forEach(file -> validateFile(result, resolver, nodeName, file));
             }
         }
     }

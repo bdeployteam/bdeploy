@@ -198,7 +198,9 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                         var system = update.config.config.system != null ? systems.get(update.config.config.system) : null;
                         var upd = pus.update(update, targetProd, currentProds.get(sourceTag), targetApps,
                                 currentApps.get(sourceTag), system);
-                        var issues = pus.validate(upd, targetApps, system);
+                        var existing = InstanceResourceImpl.getUpdatesFromTree(hive, "", new ArrayList<>(),
+                                update.config.config.configTree);
+                        var issues = pus.validate(upd, targetApps, system, existing);
 
                         if (!issues.isEmpty()) {
                             result.add(new OperationResult(upd.config.config.id, OperationResultType.WARNING,

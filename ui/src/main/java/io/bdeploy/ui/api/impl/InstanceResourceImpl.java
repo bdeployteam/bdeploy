@@ -731,6 +731,10 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public List<ApplicationValidationDto> validate(String instanceId, InstanceUpdateDto state) {
         ProductManifest pm = ProductManifest.of(hive, state.config.config.product);
+        if (pm == null) {
+            throw new WebApplicationException("Cannot load product " + state.config.config.product, Status.EXPECTATION_FAILED);
+        }
+
         List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
 
         SystemConfiguration system = null;
@@ -738,7 +742,10 @@ public class InstanceResourceImpl implements InstanceResource {
             system = SystemManifest.of(hive, state.config.config.system).getConfiguration();
         }
 
-        return pus.validate(state, am, system);
+        List<FileStatusDto> existing = InstanceResourceImpl.getUpdatesFromTree(hive, "", new ArrayList<>(),
+                state.config.config.configTree);
+
+        return pus.validate(state, am, system, existing);
     }
 
     @Override

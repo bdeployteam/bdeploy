@@ -250,7 +250,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         InstanceUpdateDto iud = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, nodes), cfgFiles);
 
         try {
-            List<ApplicationValidationDto> validation = pus.validate(iud, apps, system);
+            List<ApplicationValidationDto> validation = pus.validate(iud, apps, system, Collections.emptyList());
             if (!validation.isEmpty()) {
                 validation.forEach(v -> log.warn("Validation problem in instance: {}, app: {}, param: {}: {}", cfg.name, v.appId,
                         v.paramId, v.message));
