@@ -73,9 +73,13 @@ public interface AuthResource {
 
     /**
      * Terminates the current session and logs the use off.
+     * <p>
+     * This needs to be {@link Unsecured} to be able to log users off in case the
+     * authentication provider is offline.
      */
     @POST
     @Path("/session/logout")
+    @Unsecured
     public Response logout(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
 
     /**
