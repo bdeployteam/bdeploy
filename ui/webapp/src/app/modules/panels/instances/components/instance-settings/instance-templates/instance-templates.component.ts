@@ -319,8 +319,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             template: this.tplMessages,
             actions: [ACTION_CANCEL, ACTION_OK],
           });
-        } else {
-          this.tb.closePanel();
         }
 
         applyResult.subscribe((r) => {
@@ -329,6 +327,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           } else {
             this.instanceEdit.discard();
           }
+          this.tb.closePanel();
         });
       });
   }
