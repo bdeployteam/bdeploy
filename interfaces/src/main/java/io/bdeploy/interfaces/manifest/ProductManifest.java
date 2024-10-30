@@ -165,7 +165,7 @@ public class ProductManifest {
         // lazy, DFS resolving of all templates.
         List<FlattenedApplicationTemplateConfiguration> resolvedAppTemplates = resolveApplicationTemplates(applicationTemplates);
         List<FlattenedInstanceTemplateConfiguration> resolvedInstanceTemplates = resolveInstanceTemplates(templates,
-                applicationTemplates, varTemplates);
+                applicationTemplates, varTemplates, instanceVariables);
 
         // store persistent information.
         try {
@@ -299,10 +299,10 @@ public class ProductManifest {
 
     private static List<FlattenedInstanceTemplateConfiguration> resolveInstanceTemplates(
             List<InstanceTemplateDescriptor> instTemplates, List<ApplicationTemplateDescriptor> applicationTemplates,
-            List<InstanceVariableTemplateDescriptor> varTemplates) {
+            List<InstanceVariableTemplateDescriptor> varTemplates, List<VariableDescriptor> instanceVariables) {
         return instTemplates.stream().map(t -> {
             try {
-                return new FlattenedInstanceTemplateConfiguration(t, varTemplates, applicationTemplates);
+                return new FlattenedInstanceTemplateConfiguration(t, varTemplates, applicationTemplates, instanceVariables);
             } catch (Exception e) {
                 log.warn("Cannot resolve instance template {}: {}", t.name, e.toString());
                 if (log.isDebugEnabled()) {
