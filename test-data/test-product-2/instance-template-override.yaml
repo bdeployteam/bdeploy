@@ -1,30 +1,36 @@
 # yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
 
 name: Test Overrides
-description: "Test template variable overrides"
+description: 'Test template variable overrides'
+
+templateVariables:
+  - uid: template-var
+    name: 'Numeric Variable'
+    description: 'The amount of time the server application should sleep'
+    defaultValue: '20'
 
 instanceVariables:
   - id: param.global
-    value: "global-value"
+    value: 'global-value'
     description: "The global parameter's global value"
-    type: "STRING"
+    type: 'STRING'
   - template: shared.vars
 
 groups:
-- name: "No Override"
-  description: "Server application should query"
+  - name: 'No Override'
+    description: 'Server application should query'
 
-  applications:
-  - template: server-with-template
+    applications:
+      - template: server-with-template
 
-- name: "With Override"
-  description: "Server application should query"
+  - name: 'With Override'
+    description: 'Server application should query'
 
-  applications:
-  - template: server-with-template
-    fixedVariables:
-      - id: template-var
-        value: 10
-    startParameters:
-    - uid: param.text
-      value: "{{T:template-var:+10}}"
+    applications:
+      - template: server-with-template
+        fixedVariables:
+          - id: template-var
+            value: 10
+        startParameters:
+          - uid: param.text
+            value: '{{T:template-var:+10}}'
