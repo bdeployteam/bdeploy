@@ -1,9 +1,9 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, inject, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
-import { Subscription, debounceTime, skipWhile } from 'rxjs';
+import { debounceTime, skipWhile, Subscription } from 'rxjs';
 import { ApplicationDto, ApplicationStartType, ConfigDirDto } from 'src/app/models/gen.dtos';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -101,7 +101,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
     if (dir.children?.length) {
       return dir.children.flatMap((c) => this.buildFlatAllowedValues(c, [...path, c.name]));
     } else {
-      return [path.join('/')];
+      return path.map((_, i) => path.slice(0, i + 1).join('/')).filter((v) => !!v);
     }
   }
 
