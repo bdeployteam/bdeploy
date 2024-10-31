@@ -478,12 +478,16 @@ public class ProductUpdateService {
             if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
                 node.nodeConfiguration.applications.stream()//
                         .map(app -> app.processControl.configDirs)//
-                        .filter(Objects::nonNull)//
+                        .filter(d -> d != null && !d.isEmpty())//
                         .forEach(dirsString -> {
                             String[] split = ProcessControlConfiguration.CONFIG_DIRS_SPLIT_PATTERN.split(dirsString);
-                            Set<String> configDirs = Arrays.stream(split).map(s -> s.substring(1)).collect(Collectors.toSet());
+                            Set<String> configDirs = Arrays.stream(split).map(s -> s.startsWith("/") ? s.substring(1) : s)
+                                    .collect(Collectors.toSet());
                             toCheck.stream()//
-                                    .filter(file -> configDirs.contains(Path.of(file.file).getParent().toString()))//
+                                    .filter(file -> {
+                                        var p = Path.of(file.file).getParent();
+                                        return configDirs.contains(p != null ? p.toString() : "");
+                                    })//
                                     .forEach(file -> validateFile(result, resolver, InstanceManifest.CLIENT_NODE_LABEL, file));
                         });
             } else {
