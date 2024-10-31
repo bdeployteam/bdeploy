@@ -179,7 +179,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         helpAndFailIfMissing(config.uuid(), "--uuid missing");
 
         if (config.open()) {
-            return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + config.uuid())//
+            String[] uuid = config.uuid();
+            if (uuid.length != 1) {
+                return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+            }
+            return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + uuid[0])//
                     ? createResultWithSuccessMessage("Successfully opened the dashboard")//
                     : createResultWithErrorMessage("Failed to open the dashboard");
         }
