@@ -247,7 +247,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             return result;
         }
         return createResultWithErrorMessage(
-                "Instance group " + config.instanceGroup() + " does not contain a system with the id " + uuid);
+                "Instance group " + config.instanceGroup() + " does not contain a system with the id " + systemUuid);
     }
 
     private RenderableResult doShowStatus(InstanceGroupResource igr, SystemResource sr, SystemConfig config) {
