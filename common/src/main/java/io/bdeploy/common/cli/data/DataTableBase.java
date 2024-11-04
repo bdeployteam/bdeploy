@@ -31,6 +31,9 @@ abstract class DataTableBase implements DataTable {
      */
     @Override
     public final void render() {
+        if (columns.isEmpty()) {
+            throw new IllegalStateException("No columns found. Ensure the table contains at least one column.");
+        }
         int columnCount = columns.size();
         for (int i = 0; i < rows.size(); i++) {
             List<DataTableCell> cells = rows.get(i);

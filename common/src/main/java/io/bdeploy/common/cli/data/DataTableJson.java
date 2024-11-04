@@ -25,17 +25,17 @@ class DataTableJson extends DataTableBase {
                 output.print(DataRenderingHelper.quoteJson(col.getName()) + ": "
                         + DataRenderingHelper.quoteJson(row.get(y).getData()));
 
-                if (y == (row.size() - 1)) {
-                    if (i == (rows.size() - 1)) {
-                        output.println(" }");
-                    } else {
-                        output.println(" },");
-                    }
-                } else {
+                if (y < (row.size() - 1)) {
                     output.print(", ");
                 }
 
                 colIndex += row.get(y).getSpan();
+            }
+
+            if (i == (rows.size() - 1)) {
+                output.println(" }");
+            } else {
+                output.println(" },");
             }
         }
 
