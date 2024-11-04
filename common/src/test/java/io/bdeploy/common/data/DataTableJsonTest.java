@@ -130,6 +130,11 @@ class DataTableJsonTest {
     }
 
     @Test
+    void testTableWithoutColumns() {
+        TEST_UTIL.testTableWithoutColumns();
+    }
+
+    @Test
     void testNullValues() {
         String expected = ""//
                 + "[\n"//

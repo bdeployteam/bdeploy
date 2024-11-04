@@ -1,8 +1,5 @@
 package io.bdeploy.common.data;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -254,6 +251,11 @@ class DataTableTextTest {
     }
 
     @Test
+    void testTableWithoutColumns() {
+        TEST_UTIL.testTableWithoutColumns();
+    }
+
+    @Test
     void testNullValues() {
         String expected = ""//
                 + "┌───────────────────────┬───────┬──────────────────────┐\n"//
@@ -446,17 +448,5 @@ class DataTableTextTest {
             result = baos.toString(DataTableTestUtil.CHARSET);
         }
         DataTableTestUtil.assertEachLine(expected, result);
-    }
-
-    @Test
-    void testTableWithoutColumns() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
-            DataTable table = TEST_UTIL.dataFormat.createTable(ps);
-            table.setMaxTableLengthHint(80);
-            table.row().build();
-            IllegalStateException ex = assertThrows(IllegalStateException.class, table::render);
-            assertEquals(ex.getMessage(), "No columns found. Ensure the table contains at least one column.");
-        }
     }
 }

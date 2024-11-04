@@ -118,6 +118,11 @@ class DataTableCsvTest {
     }
 
     @Test
+    void testTableWithoutColumns() {
+        TEST_UTIL.testTableWithoutColumns();
+    }
+
+    @Test
     void testNullValues() {
         String expected = ""//
                 + "\"col1\",\"\",\"\"\r\n"//

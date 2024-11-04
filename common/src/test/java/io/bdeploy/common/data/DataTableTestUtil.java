@@ -1,5 +1,7 @@
 package io.bdeploy.common.data;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.function.Function;
@@ -39,6 +41,26 @@ class DataTableTestUtil extends DataTestUtil {
             result = baos.toString(CHARSET);
         }
         assertEachLine(expected, result);
+    }
+
+    void testTableWithoutColumns() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+            DataTable table = dataFormat.createTable(ps);
+            assertThrows(RuntimeException.class, table::render);
+        }
+        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+            DataTable table = dataFormat.createTable(ps);
+            table.row().build();
+            assertThrows(RuntimeException.class, table::render);
+        }
+        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+            DataTable table = dataFormat.createTable(ps);
+            table.row().build();
+            table.row().build();
+            table.row().build();
+            assertThrows(RuntimeException.class, table::render);
+        }
     }
 
     void testNullValues(String expected) {
