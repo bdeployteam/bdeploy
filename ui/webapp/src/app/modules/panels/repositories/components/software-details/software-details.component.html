@@ -3,7 +3,7 @@
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="detailsService.softwarePackage$ | async as software">
-      <ng-container *ngIf="software?.type === 'Product'">
+      <ng-container *ngIf="software?.type === SwPkgType.PRODUCT">
         <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
           <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
           <div class="bd-secondary-text">ID:</div>
@@ -54,7 +54,7 @@
         </app-bd-expand-button>
       </ng-container>
 
-      <ng-container *ngIf="software?.type === 'External Software'">
+      <ng-container *ngIf="software?.type === SwPkgType.EXTERNAL_SOFTWARE">
         <div class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
           <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
           <div class="bd-secondary-text">ID:</div>

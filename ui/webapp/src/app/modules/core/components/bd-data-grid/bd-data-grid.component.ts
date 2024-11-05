@@ -12,7 +12,7 @@ import {
   inject,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
@@ -97,6 +97,21 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   @Input() checked: T[] = [];
 
   /**
+   * A callback which can allow/prevent a check state change to the target state.
+   */
+  @Input() checkChangeAllowed: (record: T, target: boolean) => Observable<boolean>;
+
+  /**
+   * A callback which can forbid a check state change.
+   */
+  @Input() checkChangeForbidden: (record: T) => boolean = () => false;
+
+  /**
+   * If given, disables check selection in case the value is true.
+   */
+  @Input() checkedFrozenWhen$: BehaviorSubject<boolean>;
+
+  /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
   @Input() recordRoute: (r: T) => unknown[];
@@ -146,11 +161,22 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
 
     if (!this.checkMode) return;
 
+    if (this.checkedFrozenWhen$ && this.checkedFrozenWhen$.value) return;
+
+    if (this.checkChangeForbidden && this.checkChangeForbidden(event)) return;
+
     const isChecked = this.checked.some((record) => record === event);
 
-    const next = isChecked ? this.checked.filter((record) => record !== event) : [...this.checked, event];
-
-    this.checkedChange.emit(next);
+    let confirm = of(true);
+    if (this.checkChangeAllowed) {
+      confirm = this.checkChangeAllowed(event, !isChecked);
+    }
+    confirm.subscribe((ok) => {
+      if (ok) {
+        const next = isChecked ? this.checked.filter((record) => record !== event) : [...this.checked, event];
+        this.checkedChange.emit(next);
+      }
+    });
   }
 
   protected isSelected(record: T): boolean {

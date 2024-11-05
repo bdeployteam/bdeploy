@@ -10,6 +10,7 @@ import { AddRepositoryComponent } from './components/add-repository/add-reposito
 import { EditComponent } from './components/settings/edit/edit.component';
 import { PermissionsComponent } from './components/settings/permissions/permissions.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { SoftwareDetailsBulkComponent } from './components/software-details-bulk/software-details-bulk.component';
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 
@@ -50,6 +51,10 @@ const REPOSITORIES_ROUTES: Route[] = [
     path: 'details/:key/:tag/browse/:type',
     component: BdBHiveBrowserComponent,
     data: { max: true },
+  },
+  {
+    path: 'bulk-manip',
+    component: SoftwareDetailsBulkComponent,
   },
 ];
 

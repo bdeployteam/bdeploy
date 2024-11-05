@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, debounceTime, filter, Subscription, switchMap, tap } from 'rxjs';
 import {
   ReportDescriptor,
@@ -19,7 +19,6 @@ export interface ReportInputChange {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
-  private cd = inject(ChangeDetectorRef);
   protected readonly reports = inject(ReportsService);
   protected readonly ReportParameterInputType = ReportParameterInputType;
 

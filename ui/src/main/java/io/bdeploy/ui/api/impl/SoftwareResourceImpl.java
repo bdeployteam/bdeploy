@@ -50,6 +50,7 @@ import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.SoftwareBulkResource;
 import io.bdeploy.ui.api.SoftwareResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -122,8 +123,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             Manifest.Key key = new Manifest.Key(name, tag);
             Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
             if (existing.size() != 1) {
-                log.warn("Cannot uniquely identify {} to delete", key);
-                return;
+                throw new WebApplicationException("Cannot identify " + key + " to delete", Status.BAD_REQUEST);
             }
 
             hive.execute(new ManifestDeleteOperation().setToDelete(key));
@@ -261,6 +261,11 @@ public class SoftwareResourceImpl implements SoftwareResource {
         } catch (IOException e) {
             throw new WebApplicationException("Failed to import file: " + e.getMessage(), e, Status.BAD_REQUEST);
         }
+    }
+
+    @Override
+    public SoftwareBulkResource getBulkResource() {
+        return rc.initResource(new SoftwareBulkResourceImpl(hive, repository));
     }
 
     private void doImport(UploadInfoDto dto, Path targetFile) throws IOException {

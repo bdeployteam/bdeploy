@@ -167,6 +167,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   @Input() checkChangeAllowed: (row: T, target: boolean) => Observable<boolean>;
 
   /**
+   * A callback which can forbid a check state change.
    * checkChangeAllowed is invoked on checkbox click and is currently used to prompt user confirmation for selection
    * checkChangeForbidden is invoked during generateModel phase and should be used when we want to exclude certain records (and subsequently groups with header) from selection
    */

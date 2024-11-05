@@ -193,6 +193,84 @@ describe('Software Repository Tests', () => {
     });
   });
 
+  it('Tests bulk delete', () => {
+    cy.visit('/');
+    cy.pressMainNavButton('Software Repositories');
+
+    // repo has only linux and windows external software packages
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Test-Repo').should('exist').click();
+      cy.contains('tr', 'external/software/linux').should('exist');
+      cy.contains('tr', 'external/software/two').should('not.exist');
+      cy.contains('tr', 'external/software/windows').should('exist');
+      cy.contains('tr', 'io.bdeploy/demo/product').should('not.exist');
+
+      cy.pressToolbarButton('Upload Software');
+    });
+
+    // upload external software two and demo product
+    cy.inMainNavFlyin('app-software-upload', () => {
+      cy.fillFileDrop('external-software-2-raw-direct.zip');
+      cy.contains('app-bd-file-upload-raw', 'Success: external-software-2-raw-direct.zip')
+        .should('exist')
+        .within(() => {
+          cy.contains('Generic').should('exist');
+          cy.fillFormInput('name', 'external/software/two');
+          cy.fillFormInput('tag', '2.0.1');
+          cy.fillFormToggle('allOs');
+        });
+      cy.get('button[data-cy^="Import"]').should('be.enabled').click();
+
+      cy.fillFileDrop('test-product-1-direct.zip');
+      cy.contains('app-bd-file-upload-raw', 'Success: test-product-1-direct.zip').should('exist');
+    });
+
+    // repo has 3 software packages and 1 product now
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'external/software/linux').should('exist');
+      cy.contains('tr', 'external/software/two').should('exist');
+      cy.contains('tr', 'external/software/windows').should('exist');
+      cy.contains('tr', 'io.bdeploy/demo/product').should('exist');
+    });
+
+    // delete 2 software packages and 1 product
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Bulk Manipulation');
+
+      cy.contains('tr', 'external/software/linux').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'external/software/two').find('input[type=checkbox]').check({ force: true });
+      cy.contains('tr', 'io.bdeploy/demo/product').find('input[type=checkbox]').check({ force: true });
+    });
+
+    cy.inMainNavFlyin('app-software-details-bulk', () => {
+      cy.contains('div', 'software packages/products selected.').find('strong:contains("3")').should('exist');
+
+      cy.get('button[data-cy^=Delete]').should('be.enabled').click();
+
+      cy.contains('app-bd-notification-card', 'Delete').within(() => {
+        cy.fillFormInput('confirm', 'I UNDERSTAND');
+        cy.get('button[data-cy=Yes]').click();
+      });
+    });
+
+    cy.get('app-bd-bulk-operation-result-confirmation-prompt')
+      .should('exist')
+      .within(() => {
+        cy.contains('app-bd-notification-card', 'Result').within(() => {
+          cy.get('span:contains("Deleted")').should('have.length', 3);
+          cy.get('button[data-cy=Close]').click();
+        });
+      });
+
+    // only 1 software package remains
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'external/software/linux').should('not.exist');
+      cy.contains('tr', 'external/software/two').should('not.exist');
+      cy.contains('tr', 'external/software/windows').should('exist');
+      cy.contains('tr', 'io.bdeploy/demo/product').should('not.exist');
+    });
+  });
+
   it('Cleans up', () => {
     cy.visit('/');
     cy.pressMainNavButton('Software Repositories');

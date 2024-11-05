@@ -15,7 +15,9 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import {
   ProdDtoWithType,
   RepositoryService,
+  SwDtoWithType,
   SwPkgCompound,
+  SwPkgType,
 } from 'src/app/modules/primary/repositories/services/repository.service';
 import { SoftwareDetailsService } from '../../services/software-details.service';
 
@@ -88,6 +90,7 @@ export class SoftwareDetailsComponent implements OnInit {
   protected readonly areas = inject(NavAreasService);
   protected readonly auth = inject(AuthenticationService);
   protected readonly actions = inject(ActionsService);
+  protected readonly SwPkgType = SwPkgType;
 
   protected readonly labelColumns: BdDataColumn<LabelRecord>[] = //
     [labelKeyColumn, labelValueColumn];
@@ -107,15 +110,8 @@ export class SoftwareDetailsComponent implements OnInit {
   protected mappedDelete$ = this.actions.action([Actions.DELETE_SOFTWARE], this.deleting$, null, null, this.p$);
   protected loading$ = combineLatest([this.mappedDelete$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
 
-  isRequiredByProduct$ = combineLatest([this.detailsService.softwarePackage$, this.repository.products$]).pipe(
-    map(([software, products]) => {
-      const references = products.reduce((acc, product) => acc.concat(product.references), []);
-      const isExternalSoftware = software?.type === 'External Software';
-      return (
-        isExternalSoftware &&
-        references.some((reference) => software.key.name === reference.name && software.key.tag === reference.tag)
-      );
-    }),
+  protected isRequiredByProduct$ = this.detailsService.softwarePackage$.pipe(
+    map((software) => software.type === SwPkgType.EXTERNAL_SOFTWARE && (software as SwDtoWithType).requiredByProduct),
   );
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
@@ -125,7 +121,7 @@ export class SoftwareDetailsComponent implements OnInit {
   }
 
   protected asProduct(sw: SwPkgCompound): ProdDtoWithType {
-    if (sw.type === 'Product') {
+    if (sw.type === SwPkgType.PRODUCT) {
       return sw as ProdDtoWithType;
     }
     throw new Error('Ooops');
