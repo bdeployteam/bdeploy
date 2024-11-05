@@ -459,7 +459,7 @@ public class ProductUpdateService {
         return result;
     }
 
-    private boolean isFileChanged(List<FileStatusDto> fileStatuses, String fileName) {
+    private static boolean isFileChanged(List<FileStatusDto> fileStatuses, String fileName) {
         return fileStatuses.stream().anyMatch(fileStatus -> fileStatus.file.equals(fileName));
     }
 
