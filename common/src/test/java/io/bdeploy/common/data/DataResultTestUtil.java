@@ -28,7 +28,6 @@ class DataResultTestUtil extends DataTestUtil {
             modifications.apply(testResult).render();
             result = baos.toString(CHARSET);
         }
-        System.out.print(result);
         assertEachLine(expected, result);
     }
 
