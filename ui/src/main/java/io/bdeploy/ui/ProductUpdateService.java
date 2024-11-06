@@ -419,13 +419,14 @@ public class ProductUpdateService {
         // Validate configuration files
         validateFiles(result, nodes, updateDto.files);
 
-        if (existingConfigFiles != null && !existingConfigFiles.isEmpty()) {
-            Collection<FileStatusDto> existingUnchanged = updateDto.files == null
-                    ? existingConfigFiles
-                    : existingConfigFiles.stream().filter(f -> !isFileChanged(updateDto.files, f.file)).toList();
-
-            validateFiles(result, nodes, existingUnchanged);
-        }
+        // TODO: this reverts CT_BDEPLOY-342. Un-revert after we made changes to whitelisting/blacklisting config files!
+        //        if (existingConfigFiles != null && !existingConfigFiles.isEmpty()) {
+        //            Collection<FileStatusDto> existingUnchanged = updateDto.files == null
+        //                    ? existingConfigFiles
+        //                    : existingConfigFiles.stream().filter(f -> !isFileChanged(updateDto.files, f.file)).toList();
+        //
+        //            validateFiles(result, nodes, existingUnchanged);
+        //        }
 
         // Validate applications and processes
         Map<String, String> processNames = new TreeMap<>();
