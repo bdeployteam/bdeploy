@@ -46,7 +46,7 @@ import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateGroupConfiguration;
-import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideResolver;
+import io.bdeploy.interfaces.configuration.template.TemplateVariableResolver;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
@@ -55,6 +55,7 @@ import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescri
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
 import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -65,6 +66,7 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.FixedParameterListValueResolver;
+import io.bdeploy.interfaces.variables.Variables;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.api.InstanceTemplateResource;
 import io.bdeploy.ui.api.ManagedServersResource;
@@ -180,10 +182,9 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             }
         }
 
-        TrackingTemplateOverrideResolver ttor = new TrackingTemplateOverrideResolver(instance.fixedVariables);
-
         // 5. finally create the instance on the target.
-        var result = createInstanceFromTemplateRequest(remote, systemKey.orElse(null), instance, product.key, groupToNode, ttor,
+        var result = createInstanceFromTemplateRequest(remote, systemKey.orElse(null), instance, product.key, groupToNode, null,
+                instance.fixedVariables,
                 purpose);
 
         if (result.status != InstanceTemplateReferenceStatus.ERROR) {
@@ -197,36 +198,39 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
     InstanceTemplateReferenceResultDto createInstanceFromTemplateRequest(RemoteService remote, Manifest.Key systemKey,
             InstanceTemplateReferenceDescriptor inst, Manifest.Key productKey, Map<String, String> groupToNode,
-            TrackingTemplateOverrideResolver ttor, InstancePurpose purpose) {
-        String expandedName = TemplateHelper.process(inst.name, ttor, ttor::canResolve);
+            TemplateVariableResolver parentTvr, List<TemplateVariableFixedValueOverride> overrides, InstancePurpose purpose) {
         ProductManifest pmf = ProductManifest.of(hive, productKey);
 
         Optional<FlattenedInstanceTemplateConfiguration> instTemplate = pmf.getInstanceTemplates().stream()
                 .filter(t -> t.name.equals(inst.templateName)).findAny();
 
         if (instTemplate.isEmpty()) {
-            return new InstanceTemplateReferenceResultDto(expandedName, InstanceTemplateReferenceStatus.ERROR,
+            return new InstanceTemplateReferenceResultDto(inst.name, InstanceTemplateReferenceStatus.ERROR,
                     "Cannot find instance template " + inst.templateName);
         }
 
+        TemplateVariableResolver tvr = new TemplateVariableResolver(instTemplate.get().directlyUsedTemplateVars, overrides,
+                parentTvr);
+
+        String expandedName = TemplateHelper.process(inst.name, tvr, Variables.TEMPLATE.shouldResolve());
         var nodeStates = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
 
         InstanceConfiguration cfg = new InstanceConfiguration();
         cfg.id = UuidHelper.randomId();
         cfg.name = expandedName;
-        cfg.description = TemplateHelper.process(inst.description, ttor, ttor::canResolve);
+        cfg.description = TemplateHelper.process(inst.description, tvr, Variables.TEMPLATE.shouldResolve());
         cfg.product = productKey;
         cfg.productFilterRegex = inst.productVersionRegex;
         cfg.system = systemKey;
         // cfg.configTree = pmf.getConfigTemplateTreeId(); // not allowed.
         cfg.purpose = purpose;
-        cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), ttor, pmf);
+        cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), tvr, pmf);
 
         SystemConfiguration system = systemKey != null ? SystemManifest.of(hive, systemKey).getConfiguration() : null;
         List<ApplicationManifest> apps = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
         List<InstanceNodeConfigurationDto> nodes;
         try {
-            nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), groupToNode, apps, ttor, nodeStates, system,
+            nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), groupToNode, apps, tvr, nodeStates, system,
                     (n, o) -> a -> {
                         if (o != null) {
                             // need to check OS as well.
@@ -250,12 +254,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         InstanceUpdateDto iud = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, nodes), cfgFiles);
 
         try {
-            if (!ttor.getRequestedVariables().isEmpty()) {
-                log.warn("Unresolved variables while creating instance {}: {}", cfg.name, ttor.getRequestedVariables());
-                return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
-                        "Failed to resolve required template variables: " + ttor.getRequestedVariables());
-            }
-
             List<ApplicationValidationDto> validation = pus.validate(iud, apps, system, Collections.emptyList());
             if (!validation.isEmpty()) {
                 validation.forEach(v -> log.warn("Validation problem in instance: {}, app: {}, param: {}: {}", cfg.name, v.appId,
@@ -284,7 +282,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
     private static List<InstanceNodeConfigurationDto> createInstanceNodesFromTemplate(InstanceConfiguration config,
             FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, List<ApplicationManifest> apps,
-            TrackingTemplateOverrideResolver ttor, Map<String, MinionStatusDto> nodeStates, SystemConfiguration system,
+            TemplateVariableResolver tvr, Map<String, MinionStatusDto> nodeStates, SystemConfiguration system,
             BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter) {
         Function<String, LinkedValueConfiguration> globalLookup = id -> {
             LinkedValueConfiguration lv = null;
@@ -292,7 +290,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 for (var a : g.applications) {
                     for (var p : a.startParameters) {
                         if (p.id.equals(id)) {
-                            String value = TemplateHelper.process(p.value, ttor, ttor::canResolve);
+                            String value = TemplateHelper.process(p.value, tvr, Variables.TEMPLATE.shouldResolve());
                             lv = new LinkedValueConfiguration(value);
                         }
                     }
@@ -318,15 +316,15 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                         var r = new InstanceNodeConfigurationDto(mappedToNode, new InstanceNodeConfiguration());
                         r.nodeConfiguration.copyRedundantFields(config);
                         r.nodeConfiguration.mergeVariables(config, system, null);
-                        r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, ttor));
+                        r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, tvr));
                         result.add(r);
                         return r;
                     });
 
             if (tgroup.type == ApplicationType.CLIENT) {
-                createApplicationsForClientGroup(node, tgroup, apps, ttor, appFilter, globalLookup);
+                createApplicationsForClientGroup(node, tgroup, apps, tvr, appFilter, globalLookup);
             } else {
-                createApplicationsForServerGroup(node, tgroup, apps, ttor, nodeStates.get(node.nodeName), appFilter,
+                createApplicationsForServerGroup(node, tgroup, apps, tvr, nodeStates.get(node.nodeName), appFilter,
                         globalLookup);
             }
         }
@@ -335,8 +333,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static void createApplicationsForClientGroup(InstanceNodeConfigurationDto node,
-            FlattenedInstanceTemplateGroupConfiguration group, List<ApplicationManifest> apps,
-            TrackingTemplateOverrideResolver ttor, BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
+            FlattenedInstanceTemplateGroupConfiguration group, List<ApplicationManifest> apps, TemplateVariableResolver tvr,
+            BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
             Function<String, LinkedValueConfiguration> globalLookup) {
         // no process control groups on clients, but platform for application is not required to match the server.
         ApplicationType groupType = group.type == null ? ApplicationType.SERVER : group.type;
@@ -350,16 +348,16 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                             Status.EXPECTATION_FAILED);
                 }
 
-                node.nodeConfiguration.applications
-                        .add(createApplicationFromTemplate(reqApp, clientApp, node, ttor, globalLookup));
+                node.nodeConfiguration.applications.add(
+                        createApplicationFromTemplate(reqApp, clientApp, node, tvr, globalLookup));
             }
         }
 
     }
 
     private static void createApplicationsForServerGroup(InstanceNodeConfigurationDto node,
-            FlattenedInstanceTemplateGroupConfiguration group, List<ApplicationManifest> apps,
-            TrackingTemplateOverrideResolver ttor, MinionStatusDto status,
+            FlattenedInstanceTemplateGroupConfiguration group, List<ApplicationManifest> apps, TemplateVariableResolver tvr,
+            MinionStatusDto status,
             BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
             Function<String, LinkedValueConfiguration> globalLookup) {
         OperatingSystem targetOs = status.config.os;
@@ -382,7 +380,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                         Status.EXPECTATION_FAILED);
             }
 
-            ApplicationConfiguration cfg = createApplicationFromTemplate(reqApp, appManifest, node, ttor, globalLookup);
+            ApplicationConfiguration cfg = createApplicationFromTemplate(reqApp, appManifest, node, tvr, globalLookup);
 
             Optional<ProcessControlGroupConfiguration> targetCg = node.nodeConfiguration.controlGroups.stream()
                     .filter(g -> g.name.equals(reqApp.preferredProcessControlGroup)).findAny();
@@ -395,13 +393,15 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static ApplicationConfiguration createApplicationFromTemplate(FlattenedApplicationTemplateConfiguration reqApp,
-            ApplicationManifest am, InstanceNodeConfigurationDto node, TrackingTemplateOverrideResolver ttor,
+            ApplicationManifest am, InstanceNodeConfigurationDto node, TemplateVariableResolver tvr,
             Function<String, LinkedValueConfiguration> globalLookup) {
         ApplicationConfiguration cfg = new ApplicationConfiguration();
         ApplicationDescriptor appDesc = am.getDescriptor();
 
         cfg.id = UuidHelper.randomId();
-        cfg.name = reqApp.name == null ? am.getDescriptor().name : TemplateHelper.process(reqApp.name, ttor, ttor::canResolve);
+        cfg.name = reqApp.name == null
+                ? am.getDescriptor().name
+                : TemplateHelper.process(reqApp.name, tvr, Variables.TEMPLATE.shouldResolve());
         cfg.application = am.getKey();
         cfg.pooling = appDesc.pooling;
         cfg.processControl = new ProcessControlConfiguration();
@@ -415,10 +415,10 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         var resolver = ProductUpdateService.createResolver(node, cfg);
 
         if (appDesc.startCommand != null) {
-            cfg.start = createCommand(appDesc.startCommand, reqApp.startParameters, appDesc, ttor, resolver, globalLookup);
+            cfg.start = createCommand(appDesc.startCommand, reqApp.startParameters, appDesc, tvr, resolver, globalLookup);
         }
         if (appDesc.stopCommand != null) {
-            cfg.stop = createCommand(appDesc.stopCommand, Collections.emptyList(), appDesc, ttor, resolver, globalLookup);
+            cfg.stop = createCommand(appDesc.stopCommand, Collections.emptyList(), appDesc, tvr, resolver, globalLookup);
         }
 
         return cfg;
@@ -474,12 +474,12 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static CommandConfiguration createCommand(ExecutableDescriptor command, List<TemplateParameter> tplParameters,
-            ApplicationDescriptor ad, TrackingTemplateOverrideResolver ttor, VariableResolver resolver,
+            ApplicationDescriptor ad, TemplateVariableResolver tvr, VariableResolver resolver,
             Function<String, LinkedValueConfiguration> globalLookup) {
         CommandConfiguration result = new CommandConfiguration();
         List<ParameterConfiguration> allParams = new ArrayList<>();
 
-        result.executable = TemplateHelper.process(command.launcherPath, ttor, ttor::canResolve);
+        result.executable = TemplateHelper.process(command.launcherPath, tvr, Variables.TEMPLATE.shouldResolve());
 
         for (var pd : command.parameters) {
             Optional<TemplateParameter> tp = tplParameters.stream().filter(t -> t.id.equals(pd.id)).findAny();
@@ -493,7 +493,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             if (globalLv != null) {
                 val = globalLv;
             } else if (tp.isPresent() && tp.get().value != null && !tp.get().value.isBlank()) {
-                var exp = TemplateHelper.process(tp.get().value, ttor, ttor::canResolve);
+                var exp = TemplateHelper.process(tp.get().value, tvr, Variables.TEMPLATE.shouldResolve());
                 val = new LinkedValueConfiguration(exp);
             }
 
@@ -523,12 +523,12 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static List<ProcessControlGroupConfiguration> createControlGroupsFromTemplate(
-            FlattenedInstanceTemplateConfiguration tpl, TrackingTemplateOverrideResolver ttor) {
+            FlattenedInstanceTemplateConfiguration tpl, TemplateVariableResolver tvr) {
         List<ProcessControlGroupConfiguration> pcgcs = new ArrayList<>();
 
         for (var g : tpl.processControlGroups) {
             var pcg = new ProcessControlGroupConfiguration();
-            pcg.name = TemplateHelper.process(g.name, ttor, ttor::canResolve);
+            pcg.name = TemplateHelper.process(g.name, tvr, Variables.TEMPLATE.shouldResolve());
             pcg.startType = g.startType;
             pcg.startWait = g.startWait;
             pcg.stopType = g.stopType;
@@ -540,12 +540,13 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static List<VariableConfiguration> createInstanceVariablesFromTemplate(FlattenedInstanceTemplateConfiguration tpl,
-            TrackingTemplateOverrideResolver ttor, ProductManifest pmf) {
+            TemplateVariableResolver tvr, ProductManifest pmf) {
 
         List<VariableConfiguration> result = new ArrayList<>();
 
         for (var v : tpl.instanceVariables) {
-            v.value = new LinkedValueConfiguration(TemplateHelper.process(v.value.getPreRenderable(), ttor, ttor::canResolve));
+            v.value = new LinkedValueConfiguration(
+                    TemplateHelper.process(v.value.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
             result.add(v);
         }
 
@@ -558,7 +559,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             var ivv = instanceVariableValues.stream().filter(i -> i.id.equals(instanceVariable.id)).findFirst().orElse(null);
             if (ivv != null) {
                 instanceVariable.value = new LinkedValueConfiguration(
-                        TemplateHelper.process(ivv.value.getPreRenderable(), ttor, ttor::canResolve));
+                        TemplateHelper.process(ivv.value.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
             }
             result.add(instanceVariable);
         }
