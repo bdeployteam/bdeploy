@@ -16,7 +16,7 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
-import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideResolver;
+import io.bdeploy.interfaces.configuration.template.TemplateVariableResolver;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
@@ -26,6 +26,7 @@ import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.variables.Variables;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
@@ -216,10 +217,10 @@ public class SystemResourceImpl implements SystemResource {
         List<TemplateVariableFixedValueOverride> overrides = request.templateVariableValues.entrySet().stream()
                 .map(e -> new TemplateVariableFixedValueOverride(e.getKey(), e.getValue())).toList();
 
-        TrackingTemplateOverrideResolver ttor = new TrackingTemplateOverrideResolver(overrides);
+        TemplateVariableResolver tvr = new TemplateVariableResolver(request.template.templateVariables, overrides, null);
 
         // 1. create system & system variables.
-        var key = createSystemFromTemplateRequest(request, ttor);
+        var key = createSystemFromTemplateRequest(request, tvr);
 
         // we'll use the same remote as the system, so we can fetch it from there.
         RemoteService remote = mp.getControllingMaster(hive, key);
@@ -229,7 +230,7 @@ public class SystemResourceImpl implements SystemResource {
 
         // 2. create each instance.
         for (var inst : request.template.instances) {
-            String instName = TemplateHelper.process(inst.name, ttor, ttor::canResolve);
+            String instName = TemplateHelper.process(inst.name, tvr, Variables.TEMPLATE.shouldResolve());
             var mappings = request.groupMappings.stream().filter(m -> m.instanceName.equals(instName)).findFirst();
             if (mappings.isEmpty()) {
                 result.results.add(new InstanceTemplateReferenceResultDto(instName, InstanceTemplateReferenceStatus.ERROR,
@@ -246,10 +247,8 @@ public class SystemResourceImpl implements SystemResource {
             List<TemplateVariableFixedValueOverride> perInstanceValues = mappings.get().templateVariableValues.entrySet().stream()
                     .map(e -> new TemplateVariableFixedValueOverride(e.getKey(), e.getValue())).toList();
 
-            TrackingTemplateOverrideResolver ittor = new TrackingTemplateOverrideResolver(perInstanceValues, ttor);
-
             result.results.add(itr.createInstanceFromTemplateRequest(remote, key, inst, mappings.get().productKey,
-                    mappings.get().groupToNode, ittor, request.purpose));
+                    mappings.get().groupToNode, tvr, perInstanceValues, request.purpose));
         }
 
         // 3. sync after we created everything.
@@ -258,8 +257,7 @@ public class SystemResourceImpl implements SystemResource {
         return result;
     }
 
-    private Manifest.Key createSystemFromTemplateRequest(SystemTemplateRequestDto request,
-            TrackingTemplateOverrideResolver ttor) {
+    private Manifest.Key createSystemFromTemplateRequest(SystemTemplateRequestDto request, TemplateVariableResolver tvr) {
         for (SystemConfigurationDto existing : list()) {
             if (existing.config.name.equals(request.name)) {
                 throw new WebApplicationException("System with name " + request.name + " already exists", Status.CONFLICT);
@@ -270,14 +268,14 @@ public class SystemResourceImpl implements SystemResource {
         scd.config = new SystemConfiguration();
         scd.minion = request.minion;
         scd.config.id = UuidHelper.randomId();
-        scd.config.name = TemplateHelper.process(request.name, ttor, ttor::canResolve);
-        scd.config.description = TemplateHelper.process(request.template.description, ttor, ttor::canResolve);
+        scd.config.name = TemplateHelper.process(request.name, tvr, Variables.TEMPLATE.shouldResolve());
+        scd.config.description = TemplateHelper.process(request.template.description, tvr, Variables.TEMPLATE.shouldResolve());
 
         if (request.template.systemVariables != null && !request.template.systemVariables.isEmpty()) {
             for (var v : request.template.systemVariables) {
                 // expand template variables inline for each system variable.
                 v.defaultValue = new LinkedValueConfiguration(
-                        TemplateHelper.process(v.defaultValue.getPreRenderable(), ttor, ttor::canResolve));
+                        TemplateHelper.process(v.defaultValue.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
                 scd.config.systemVariableDefinitions.add(v);
                 scd.config.systemVariables.add(new VariableConfiguration(v));
             }

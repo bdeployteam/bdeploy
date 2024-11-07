@@ -1,6 +1,7 @@
 package io.bdeploy.interfaces.variables;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.util.ShouldResolve;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
@@ -113,5 +114,9 @@ public enum Variables {
 
     public boolean isArithmeticAllowed() {
         return this.arithmeticAllowed;
+    }
+
+    public ShouldResolve shouldResolve() {
+        return (s) -> s.startsWith(prefix);
     }
 }
