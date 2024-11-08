@@ -30,7 +30,7 @@ export class UserBulkService {
     // clear selection when the primary route changes
     this.areas.primaryRoute$.subscribe(() => this.selection$.next([]));
 
-    // find matching selected instances if possible once instances change.
+    // find matching selected users if possible once users change.
     this.auth.users$.subscribe((users) => {
       const newSelection: UserInfo[] = [];
       this.selection$.value.forEach((u) => {

@@ -16,6 +16,14 @@
       [(toggle)]="isCardView"
       tooltip="below"
     ></app-bd-button>
+    <app-bd-panel-button
+      #bulkMode
+      icon="library_add_check"
+      text="Bulk Manipulation"
+      [route]="['panels', 'repositories', 'bulk-manip']"
+      tooltip="below"
+      [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
+    ></app-bd-panel-button>
 
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -45,6 +53,11 @@
       [searchable]="true"
       [presetKey]="presetKeyValue"
       [grid]="isCardView"
+      [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+      [checked]="bulk.selection$ | async"
+      (checkedChange)="bulk.selection$.next($event)"
+      [checkedFrozenWhen$]="bulk.frozen$"
+      [checkChangeForbidden]="checkChangeForbidden"
     >
       <app-bd-no-data>
         <p>No products or external software packages have been uploaded yet.</p>

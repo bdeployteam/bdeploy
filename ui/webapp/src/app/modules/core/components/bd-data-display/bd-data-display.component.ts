@@ -1,6 +1,6 @@
 import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef, ViewChild, inject } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, bdDataDefaultSearch, bdDataDefaultSort } from 'src/app/models/data';
 import { CardViewService } from '../../services/card-view.service';
 import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
@@ -91,6 +91,18 @@ export class BdDataDisplayComponent<T> {
    * Elements which should be checked.
    */
   @Input() checked: T[] = [];
+
+  /**
+   * A callback which can allow/prevent a check state change to the target state.
+   *
+   * This is not supported for multi-select/deselect on group nodes.
+   */
+  @Input() checkChangeAllowed: (row: T, target: boolean) => Observable<boolean>;
+
+  /**
+   * A callback which can forbid a check state change.
+   */
+  @Input() checkChangeForbidden: (record: T) => boolean = () => false;
 
   /**
    * If given, disables *all* checkboxes in check mode (including the header checkboxes) in case the value is true.

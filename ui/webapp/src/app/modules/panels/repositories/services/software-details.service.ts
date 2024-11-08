@@ -7,7 +7,11 @@ import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { RepositoryService, SwPkgCompound } from 'src/app/modules/primary/repositories/services/repository.service';
+import {
+  RepositoryService,
+  SwPkgCompound,
+  SwPkgType,
+} from 'src/app/modules/primary/repositories/services/repository.service';
 import { LabelRecord } from '../../products/services/product-details.service';
 
 /**
@@ -101,9 +105,9 @@ export class SoftwareDetailsService implements OnDestroy {
   }
 
   private getApiPath4Type() {
-    if (this.softwarePackage$.value?.type === 'Product') {
+    if (this.softwarePackage$.value?.type === SwPkgType.PRODUCT) {
       return this.productApiPath();
-    } else if (this.softwarePackage$.value?.type === 'External Software') {
+    } else if (this.softwarePackage$.value?.type === SwPkgType.EXTERNAL_SOFTWARE) {
       return this.softwareApiPath();
     }
   }

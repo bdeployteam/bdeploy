@@ -1,5 +1,6 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
+import { PlatformModule } from '@angular/cdk/platform';
 import { CdkScrollableModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
@@ -44,6 +45,7 @@ import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdBHiveBrowserComponent } from './components/bd-bhive-browser/bd-bhive-browser.component';
 import { BdManifestDeleteActionComponent } from './components/bd-bhive-browser/bd-manifest-delete-action/bd-manifest-delete-action.component';
 import { BdBreadcrumbsComponent } from './components/bd-breadcrumbs/bd-breadcrumbs.component';
+import { BdBulkOperationResultConfirmationPromptComponent } from './components/bd-bulk-operation-result-confirmation-prompt/bd-bulk-operation-result-confirmation-prompt.component';
 import { BdBulkOperationResultComponent } from './components/bd-bulk-operation-result/bd-bulk-operation-result.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
@@ -126,7 +128,6 @@ import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
 import { ServerConnectionUrlSyntaxValidator } from './validators/server-connection-url-syntax-validator.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
-import { PlatformModule } from '@angular/cdk/platform';
 
 function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -215,6 +216,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdIdentifierComponent,
     BdIdentifierCellComponent,
     BdBulkOperationResultComponent,
+    BdBulkOperationResultConfirmationPromptComponent,
     BdBreadcrumbsComponent,
     BdManifestDeleteActionComponent,
     BdBHiveBrowserComponent,
@@ -342,6 +344,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdIdentifierCellComponent,
     BdIdentifierComponent,
     BdBulkOperationResultComponent,
+    BdBulkOperationResultConfirmationPromptComponent,
     BdBreadcrumbsComponent,
     BdManifestDeleteActionComponent,
     BdBHiveBrowserComponent,

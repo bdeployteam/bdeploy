@@ -9,15 +9,21 @@ import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { RepositoriesService } from './repositories.service';
 
 export interface ProdDtoWithType extends ProductDto {
-  type: string;
+  type: SwPkgType;
 }
 
 export interface SwDtoWithType {
-  type: string;
+  type: SwPkgType;
   key: ManifestKey;
+  requiredByProduct: boolean;
 }
 
 export type SwPkgCompound = ProdDtoWithType | SwDtoWithType;
+
+export enum SwPkgType {
+  PRODUCT = 'Product',
+  EXTERNAL_SOFTWARE = 'External Software',
+}
 
 @Injectable({
   providedIn: 'root',
@@ -44,17 +50,16 @@ export class RepositoryService {
   public softwarePackages$ = new BehaviorSubject<ManifestKey[]>([]);
   public softwarePackagesLoading$ = new BehaviorSubject<boolean>(true);
 
-  public data$: Observable<SwPkgCompound[]> = combineLatest([
-    this.products$.pipe(map((products) => products.map((product) => ({ type: 'Product', ...product })))),
-    this.softwarePackages$.pipe(
-      map((softwarePackages) =>
-        softwarePackages.map((manifestKey) => ({
-          type: 'External Software',
-          key: manifestKey,
-        })),
-      ),
-    ),
-  ]).pipe(map(([products, softwarePackages]) => [...products, ...softwarePackages]));
+  public data$: Observable<SwPkgCompound[]> = combineLatest([this.products$, this.softwarePackages$]).pipe(
+    map(([products, softwarePackages]) => [
+      ...products.map((product) => ({ type: SwPkgType.PRODUCT, ...product })),
+      ...softwarePackages.map((manifestKey) => ({
+        type: SwPkgType.EXTERNAL_SOFTWARE,
+        key: manifestKey,
+        requiredByProduct: this.isRequiredByProduct(manifestKey, products),
+      })),
+    ]),
+  );
 
   public loading$: Observable<boolean> = combineLatest([this.productsLoading$, this.softwarePackagesLoading$]).pipe(
     map(([pl, el]) => pl || el),
@@ -140,5 +145,10 @@ export class RepositoryService {
         }),
       );
     }
+  }
+
+  private isRequiredByProduct(key: ManifestKey, products: ProductDto[]): boolean {
+    const references = products.reduce((acc, product) => acc.concat(product.references), []);
+    return references.some((reference) => key.name === reference.name && key.tag === reference.tag);
   }
 }

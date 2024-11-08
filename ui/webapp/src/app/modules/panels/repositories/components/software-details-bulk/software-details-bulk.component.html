@@ -1,0 +1,17 @@
+<app-bd-dialog [loadingWhen$]="repository.loading$">
+  <app-bd-dialog-toolbar header="Bulk Software Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="flex flex-col gap-2.5" *ngIf="bulk.selection$ | async as selections">
+      <div><strong>{{ selections.length }}</strong> software packages/products selected.</div>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selections.length || (mappedDelete$ | async)"
+        [loadingWhen$]="mappedDelete$"
+        text="Delete Selected"
+        icon="delete"
+        (click)="onDelete()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
-import { ProdDtoWithType, SwPkgCompound } from './repository.service';
+import { ProdDtoWithType, SwPkgCompound, SwPkgType } from './repository.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +37,7 @@ export class RepositoryColumnsService {
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => (r.type === 'Product' ? r.name : r.key.name),
+    data: (r) => (r.type === SwPkgType.PRODUCT ? r.name : r.key.name),
   };
 
   private readonly cardDescription: BdDataColumn<ProdDtoWithType> = {
@@ -45,7 +45,7 @@ export class RepositoryColumnsService {
     name: 'Description',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => (r.type === 'Product' ? r.key.name + ' ' : '') + r.key.tag,
+    data: (r) => (r.type === SwPkgType.PRODUCT ? r.key.name + ' ' : '') + r.key.tag,
   };
 
   private readonly cardLogo: BdDataColumn<ProdDtoWithType> = {

@@ -25,7 +25,7 @@ export class ProductBulkService {
     // clear selection when the primary route changes
     this.areas.primaryRoute$.subscribe(() => this.selection$.next([]));
 
-    // find matching selected instances if possible once instances change.
+    // find matching selected products if possible once products change.
     this.products.products$.subscribe((prods) => {
       const newSelection: ProductDto[] = [];
       this.selection$.value.forEach((sel) => {

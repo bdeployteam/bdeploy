@@ -3,10 +3,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BulkOperationResultDto } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-product-bulk-operation-result',
-  templateUrl: './product-bulk-operation-result.component.html',
+  selector: 'app-bd-bulk-operation-result-confirmation-prompt',
+  templateUrl: './bd-bulk-operation-result-confirmation-prompt.component.html',
 })
-export class ProductBulkOperationResultComponent {
+export class BdBulkOperationResultConfirmationPromptComponent {
   private readonly dialogRef = inject(MatDialogRef<BulkOperationResultDto>);
   protected readonly bulkOpResult: BulkOperationResultDto = inject(MAT_DIALOG_DATA);
 

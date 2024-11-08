@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { CoreModule } from '../../core/core.module';
-import { ProductBulkOperationResultComponent } from './components/product-bulk-operation-result/product-bulk-operation-result.component';
 import { ProductBulkComponent } from './components/product-bulk/product-bulk.component';
 import { ProductDetailsComponent } from './components/product-details/product-details.component';
 import { ManagedTransferComponent } from './components/product-sync/managed-transfer/managed-transfer.component';
@@ -21,7 +20,6 @@ import { ProductsRoutingModule } from './products-routing.module';
     SelectManagedServerComponent,
     ManagedTransferComponent,
     ProductBulkComponent,
-    ProductBulkOperationResultComponent,
     ProductTransferRepoComponent,
   ],
   imports: [CommonModule, CoreModule, ProductsRoutingModule, MatStepperModule, MatProgressSpinnerModule],

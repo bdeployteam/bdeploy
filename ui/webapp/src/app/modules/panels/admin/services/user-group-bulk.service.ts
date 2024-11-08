@@ -30,7 +30,7 @@ export class UserGroupBulkService {
     // clear selection when the primary route changes
     this.areas.primaryRoute$.subscribe(() => this.selection$.next([]));
 
-    // find matching selected instances if possible once instances change.
+    // find matching selected user groups if possible once user groups change.
     this.auth.userGroups$.subscribe((groups) => {
       const newSelection: UserGroupInfo[] = [];
       this.selection$.value.forEach((g) => {

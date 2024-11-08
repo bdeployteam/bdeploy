@@ -8,6 +8,7 @@ import { PermissionsComponent } from './components/settings/permissions/permissi
 import { SettingsComponent } from './components/settings/settings.component';
 import { UserGroupPermissionsComponent } from './components/settings/user-group-permissions/user-group-permissions.component';
 import { UserPermissionsComponent } from './components/settings/user-permissions/user-permissions.component';
+import { SoftwareDetailsBulkComponent } from './components/software-details-bulk/software-details-bulk.component';
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { RepositoriesRoutingModule } from './repositories-routing.module';
@@ -22,6 +23,7 @@ import { RepositoriesRoutingModule } from './repositories-routing.module';
     UserGroupPermissionsComponent,
     SoftwareUploadComponent,
     SoftwareDetailsComponent,
+    SoftwareDetailsBulkComponent,
   ],
   imports: [CommonModule, CoreModule, RepositoriesRoutingModule, MatTabsModule],
 })

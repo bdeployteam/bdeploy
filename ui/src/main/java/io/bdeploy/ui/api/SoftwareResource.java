@@ -53,4 +53,8 @@ public interface SoftwareResource {
     @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
     public UploadInfoDto importRawContent(UploadInfoDto dto);
 
+    @Path("/bulk")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "softwareRepository")
+    public SoftwareBulkResource getBulkResource();
+
 }
