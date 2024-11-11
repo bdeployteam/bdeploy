@@ -39,6 +39,11 @@ public class DirectoryLockOperation extends DirectoryModificationOperation {
         boolean infoWritten = false;
         for (int i = 0; i < RETRIES; ++i) {
             try {
+                // ATTENTION: it seems that this code will not fully atomically create the file *with* content.
+                // The file is created atomically, but its content is written in a separate operation. Thus there
+                // is potential for a race condition, since empty lock files are considered invalid by a registered
+                // lock validator. Thus there is a time period (10 seconds) where an empty lock file will be considered
+                // valid below in the #isLockFileValid.
                 Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW, StandardOpenOption.SYNC)
                         .toFile().deleteOnExit();
                 return;
@@ -69,6 +74,18 @@ public class DirectoryLockOperation extends DirectoryModificationOperation {
         // No content validator. Assuming the lock is still valid
         if (lockContentValidator == null) {
             return true;
+        }
+
+        // Check if the mod time of the file is fresh. All files younger than ten seconds are considered valid, as it
+        // may be the case that the lock file content is not even yet visible to use despite the other party already
+        // writing it to the file.
+        try {
+            if (System.currentTimeMillis() - Files.getLastModifiedTime(lockFile).toMillis() < 10_000) {
+                log.debug("Lock file younger than 10 seconds - regarding as valid: {}", lockFile);
+                return true;
+            }
+        } catch (IOException e) {
+            log.warn("Cannot check lock file modification time: {}", lockFile, e);
         }
 
         // Read the lock file to check if the content is still valid
