@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -15,7 +15,7 @@ export interface SeriesElement {
   templateUrl: './metrics-overview.component.html',
   styleUrls: ['./metrics-overview.component.css'],
 })
-export class MetricsOverviewComponent implements OnInit, OnDestroy {
+export class MetricsOverviewComponent implements OnInit {
   private readonly metrics = inject(MetricsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -66,14 +66,9 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
           this.allMetrics.set(group, item);
         }
         this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
-        this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
-        this.doSelect(this.tabIndex);
+        const tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
+        this.doSelect(isNaN(tabIndex) ? 0 : tabIndex);
       });
-  }
-
-  ngOnDestroy(): void {
-    // this is required to clear off query parameters if we leave this primary page.
-    this.router.navigate([], { queryParams: {} });
   }
 
   private getTimers(group: MetricGroup): string[] {
@@ -85,7 +80,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
   }
 
   protected doSelect(tabIndex: number) {
-    this.router.navigate([], { queryParams: { tabIndex: tabIndex } });
+    this.router.navigate([], { queryParams: { tabIndex } });
     this.tabIndex = tabIndex;
     this.tabIndex ? this.select(this.keys$.value[this.tabIndex]) : this.selectServer();
   }
