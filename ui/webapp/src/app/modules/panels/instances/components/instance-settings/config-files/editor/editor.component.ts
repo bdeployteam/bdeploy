@@ -43,6 +43,19 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
 
   private subscription: Subscription;
 
+  protected markUnresolvedExpansion = (match: monaco.editor.FindMatch): monaco.editor.IMarkerData => {
+    const exp = match.matches[0];
+
+    if (exp.includes('DELAYED:')) {
+      return errorMarker('DELAYED variables are not allowed in config files', match);
+    }
+
+    const lv = createLinkedValue(exp);
+    const preview = getRenderPreview(lv, null, this.instance, this.system); // null for ApplicationConfiguration
+
+    return !preview.includes('{{') ? null : errorMarker('Failed to resolve', match);
+  };
+
   ngOnInit() {
     this.subscription = combineLatest([
       this.cfgFiles.files$,
@@ -87,19 +100,6 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
-  }
-
-  protected markUnresolvedExpansion(match: monaco.editor.FindMatch): monaco.editor.IMarkerData {
-    const exp = match.matches[0];
-
-    if (exp.includes('DELAYED:')) {
-      return errorMarker('DELAYED variables are not allowed in config files', match);
-    }
-
-    const lv = createLinkedValue(exp);
-    const preview = getRenderPreview(lv, null, this.instance, this.system); // null for ApplicationConfiguration
-
-    return !preview.includes('{{') ? null : errorMarker('Failed to resolve', match);
   }
 
   public isDirty(): boolean {
