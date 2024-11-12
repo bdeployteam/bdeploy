@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -11,7 +11,7 @@ import { SettingsService } from '../../../../core/services/settings.service';
   templateUrl: './settings-general.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class SettingsGeneralComponent implements OnInit, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -25,10 +25,6 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
   ngOnInit() {
     this.areas.registerDirtyable(this, 'admin');
     this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
-  }
-
-  ngOnDestroy(): void {
-    this.router.navigate([], { queryParams: {} });
   }
 
   public isDirty(): boolean {
