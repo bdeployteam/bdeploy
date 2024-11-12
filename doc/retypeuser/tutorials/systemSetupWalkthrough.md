@@ -75,7 +75,7 @@ We must create an instance group on the central server in order to be able to co
 bdeploy remote-group --create=<GROUP_NAME>
 ```
 
-If you lack the permission to create an instance group, find an administrator of that server that can create the group and assign permissions to you.
+If you lack the permission to create an instance group, find an administrator of that server that can create the group and/or assign permissions to you.
 
 ## Connecting the Servers
 
@@ -176,10 +176,10 @@ bdeploy remote-system --instanceGroup=<GROUP_NAME> --update --uuid=<SYSTEM_ID> -
 Next, we apply the individual instance templates, each with its response files.
 
 ```
-bdeploy remote-instance --create=<INSTANCE_NAME> --template=<PATH_TO_RESPONSE_FILE>.yaml --instanceGroup=<GROUP_NAME> --purpose=<PRODUCTIVE|TEST|DEVELOPMENT> --system=<SYSTEM_ID> --server=MANAGED_SERVER_NAME
+bdeploy remote-instance --create=<INSTANCE_NAME> --template=<PATH_TO_RESPONSE_FILE>.yaml --instanceGroup=<GROUP_NAME> --purpose=<PRODUCTIVE|TEST|DEVELOPMENT> --system=<SYSTEM_ID> --server=<MANAGED_SERVER_NAME>
 ```
 
-# Install, Activate, Start
+## Install, Activate, Start
 
 Figure out the ID of the system you just created in case you don't have it at hand anymore:
 
