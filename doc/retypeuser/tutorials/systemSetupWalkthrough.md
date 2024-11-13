@@ -7,13 +7,15 @@ icon: command-palette
 
 ## Preconditions
 
-This tutorial assumes that you are on a machine which can reach the central, managed and node server simultaneously. It also assumes that the central server is already set up and has a **Software Repository** which contains the `Product` that you want to deploy.
+* You must know the common [Terms](../intro/terms.md) of **BDeploy**.
+  * Having read the documentation about [Instances](../user/instance.md) is also adviceable.
+* You must be on a machine which can reach the central, managed and node server simultaneously. It is also assumed that the central server is already set up and has a **Software Repository** which contains the `Product` that you want to deploy.
 
 ## Creating and starting the Servers
 
 1.  Download **BDeploy** from [GitHub](https://github.com/bdeployteam/bdeploy).
     1. Navigate to the [Version](https://github.com/bdeployteam/bdeploy/releases) that you want.
-    2. Find the zip files called `bdeploy-<OPERATING_SYSTEM>-<VERSION_NUMBER>.zip` and download the one that is appropriate for your operating system.
+    2. Find the zip files called `bdeploy-<OPERATING_SYSTEM>-<BDEPLOY_VERSION_NUMBER>.zip` and download the one that is appropriate for your operating system.
 2.  Unzip the zip file.
 3.  Open the unzipped folder and navigate to the subfolder `bin`. It contains a file called `bdeploy.bat` on Windows, and `bdeploy` on Linux. Execute this file via a CLI as shown below to initialize the servers:
 
@@ -135,7 +137,7 @@ bdeploy remote-system --create --name=<SYSTEM_NAME> --createFrom=<PATH_TO_SYSTEM
 
 See [instance-template.yaml](../power/product#instance-templateyaml) for an example instance template.
 
-In order to use an instance template via the CLI you must have a so-called "response file" which contains all values required to apply the instance template without the need to query things from the user, as the CLI cannot do that. The response file has the exact same syntax as the section responsible for an individual instance template inside a system template.
+In order to use an instance template via the CLI you must have a so-called "response file" which contains all values required to apply the instance template without the need to query things from the user, as the CLI cannot do that. The response file has the exact same syntax as the [`instances` section of a system template](/power/product/#supported-instance-attributes).
 
 This is an example of such a response file:
 
@@ -163,7 +165,7 @@ First we want to create an empty system. The following command can be used for t
 Note that the return value of this operation will contain the `SYSTEM_ID` (which is not the same thing as the `SYSTEM_NAME`), which will be required in the next step.
 
 ```
-bdeploy remote-system --instanceGroup=<GROUP_NAME> --create --name=<SYSTEM_NAME> --server=localhost
+bdeploy remote-system --instanceGroup=<GROUP_NAME> --create --name=<SYSTEM_NAME> --server=<MANAGED_SERVER_NAME>
 ```
 
 Now we have to setup the system variable mentioned in the above response file. Depending on the instance templates and response files you are using you might have to set up way more than one variable - or none at all.<br>
@@ -181,6 +183,8 @@ bdeploy remote-instance --create=<INSTANCE_NAME> --template=<PATH_TO_RESPONSE_FI
 
 ## Install, Activate, Start
 
+> Check out the page on [Deployment](../user/deployment.md) for details on this topic.
+
 Figure out the ID of the system you just created in case you don't have it at hand anymore:
 
 ```
@@ -193,14 +197,14 @@ Figure out all instances in the instance group belonging to that system. In the 
 bdeploy remote-instance --list --instanceGroup=<GROUP_NAME>
 ```
 
-For each of the instances, install & activate them. The `--uuid` receives the value from the "ID" column of the previous command. `--version` receives the version you want to install, which is most likely the highest version number ("Ver." column in output of previous command) for this instance.
+For each of the instances, install & activate them. The `--uuid` receives the value from the "ID" column of the previous command. `--version` receives the instance version you want to install, which is most likely the highest version number ("Ver." column in output of previous command) for this instance.
 
 ```
-bdeploy remote-deployment --instanceGroup=<GROUP_NAME> --install --uuid=<INSTANCE_ID> --version=<VERSION_NUMBER>
+bdeploy remote-deployment --instanceGroup=<GROUP_NAME> --install --uuid=<INSTANCE_ID> --version=<INSTANCE_VERSION_NUMBER>
 ```
 
 ```
-bdeploy remote-deployment --instanceGroup=<GROUP_NAME> --activate --uuid=<INSTANCE_ID> --version=<VERSION_NUMBER>
+bdeploy remote-deployment --instanceGroup=<GROUP_NAME> --activate --uuid=<INSTANCE_ID> --version=<INSTANCE_VERSION_NUMBER>
 ```
 
 Finally, start the instance - this will start all processes of the given instance which are set to be started automatically. Again - do this for all instances created.
