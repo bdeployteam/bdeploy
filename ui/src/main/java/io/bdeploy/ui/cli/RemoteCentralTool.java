@@ -238,7 +238,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         if (!config.offline()) {
             msr.tryAutoAttach(config.instanceGroup(), mmd);
 
-            return createResultWithSuccessMessage("Managed Server has been automatically attached.")
+            return createResultWithSuccessMessage("Managed Server has been attached")
                     .addField("Instance Group", config.instanceGroup()).addField("Managed Server", mmd.hostName);
         } else {
             helpAndFailIfMissing(config.output(), "Missing --output");
