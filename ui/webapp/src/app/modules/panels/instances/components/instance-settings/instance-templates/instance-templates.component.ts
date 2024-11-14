@@ -16,6 +16,7 @@ import {
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateVariable,
+  TemplateVariableType,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
@@ -519,6 +520,9 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         if (this.requiredVariables.length) {
           for (const v of this.requiredVariables) {
             this.variables[v.id] = v.defaultValue;
+            if (v.defaultValue === null && v.type === TemplateVariableType.BOOLEAN) {
+              this.variables[v.id] = 'false';
+            }
           }
           this.validateHasAllVariables();
         } else {

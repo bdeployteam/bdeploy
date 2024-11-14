@@ -9,7 +9,8 @@ templateVariables:
   - uid: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
-    defaultValue: "60"
+    type: NUMERIC
+    defaultValue: 60
 
 startParameters:
 - uid: param.sleep

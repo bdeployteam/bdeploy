@@ -543,6 +543,7 @@ templateVariables: <5>
   - id: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
+    type: NUMERIC
     defaultValue: 60
     suggestedValues:
     - '60'
@@ -587,13 +588,14 @@ fixedVariables: <2>
 
 ### Supported `templateVariables` Attributes
 
-| Attribute         | Description                                                                                                                                         |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`              | The unique ID of the template variable. If multiple applications (or instances) define the same variable ID, it is queried from the user only once. |
-| `name`            | The user visible name of the variable, used when querying user input while applying the template.                                                   |
-| `description`     | Further detailed description of the template variable, explaining to the user the purpose of the variable.                                          |
-| `defaultValue`    | An optional default value which is pre-filled when querying the user for template variable values.                                                  |
-| `suggestedValues` | A list of values which will be suggested to the user once they begin providing a value for this variable.                                           |
+| Attribute         | Description                                                                                                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | The unique ID of the template variable. If multiple applications (or instances) define the same variable ID, it is queried from the user only once.               |
+| `name`            | The user visible name of the variable, used when querying user input while applying the template.                                                                 |
+| `description`     | Further detailed description of the template variable, explaining to the user the purpose of the variable.                                                        |
+| `type`            | Type of template variable. This defines the type of input field used to edit the variable. Available are `STRING` (default), `NUMERIC`, `BOOLEAN` and `PASSWORD`. |
+| `defaultValue`    | An optional default value which is pre-filled when querying the user for template variable values.                                                                |
+| `suggestedValues` | A list of values which will be suggested to the user once they begin providing a value for this variable.                                                         |
 
 !!!info Note
 Defined `templateVariables` can be used in the `name` of the application template, as well as in each `startParameter`s `value` attribute.
@@ -908,7 +910,7 @@ When applying a **System Template** from the CLI, all mappings need to be provid
 | `id`              | The unique ID of the system variable to create.                                                                                                                                   |
 | `value`           | The pre-assigned value of the variable.                                                                                                                                           |
 | `description`     | A human readable description explaining the purpose of each variable.                                                                                                             |
-| `type`            | Type of system variable. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. |
+| `type`            | Type of system variable. This defines the type of input field used to edit the variable. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`.  |
 | `groupName`       | An optional group name. The configuration UI may use this information to group variables with the same group name together.                                                       |
 | `fixed`           | Whether the system variable is fixed. This means that the variable can **not** be changed by the user.                                                                            |
 | `suggestedValues` | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                |

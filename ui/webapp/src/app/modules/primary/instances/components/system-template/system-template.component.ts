@@ -26,6 +26,7 @@ import {
   SystemTemplateRequestDto,
   SystemTemplateResultDto,
   TemplateVariable,
+  TemplateVariableType,
 } from './../../../../../models/gen.dtos';
 import { GroupsService } from './../../../groups/services/groups.service';
 
@@ -298,6 +299,9 @@ export class SystemTemplateComponent implements OnInit {
     if (this.requiredSystemVariables.length) {
       for (const v of this.requiredSystemVariables) {
         this.systemVariables[v.id] = v.defaultValue;
+        if (v.defaultValue === null && v.type === TemplateVariableType.BOOLEAN) {
+          this.systemVariables[v.id] = 'false';
+        }
       }
     }
 
@@ -416,6 +420,9 @@ export class SystemTemplateComponent implements OnInit {
       for (const v of tpl.requiredVariables) {
         if (tpl.variables[v.id] === undefined) {
           tpl.variables[v.id] = v.defaultValue;
+          if (v.defaultValue === null && v.type === TemplateVariableType.BOOLEAN) {
+            tpl.variables[v.id] = 'false';
+          }
         }
       }
     }

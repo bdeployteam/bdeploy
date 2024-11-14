@@ -145,6 +145,7 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-instance-variables', () => {
       // check that instance variable values have been applied correctly
       cy.contains('mat-expansion-panel', 'Instance Variable Definitions').within(() => {
+        cy.contains('mat-panel-description', '2/2 variables shown').should('exist');
         cy.get('mat-panel-title').click();
         cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
@@ -157,13 +158,35 @@ describe('Instance Settings Tests', () => {
         cy.get('mat-panel-title').click();
       });
 
+      cy.contains('mat-expansion-panel', 'Product Description Variables').within(() => {
+        cy.contains('mat-panel-description', '3/3 variables shown').should('exist');
+        cy.get('mat-panel-title').click();
+        cy.get('app-bd-form-input[name="product.instance.variable1_val"]').within(() => {
+          cy.get('input[name="product.instance.variable1_val"]').should('have.value', '2.0.0');
+        });
+        cy.get('app-bd-form-input[name="product.instance.variable2_val"]').within(() => {
+          cy.get('input[name="product.instance.variable2_val"]').should('have.value', 'admin');
+        });
+        cy.get('app-bd-form-toggle[name="product.instance.licensed_bool"]').within(() => {
+          cy.get('input[type="checkbox"]').should('not.be.checked');
+        });
+        cy.get('mat-panel-title').click();
+      });
+
       cy.contains('mat-expansion-panel', 'Custom Variables').within(() => {
+        cy.contains('mat-panel-description', '3/3 variables shown').should('exist');
         cy.get('mat-panel-title').click();
         cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
+        cy.get('app-bd-form-input[name="param.global_val"]').within(() => {
+          cy.get('input[name="param.global_val"]').should('have.value', 'TestText');
+        });
         cy.get('app-bd-form-input[name="param.xshared_val"]').within(() => {
           cy.get('input[name="param.xshared_val"]').should('have.value', '5');
           cy.contains('mat-icon', 'edit').click({ force: true });
+        });
+        cy.get('app-bd-form-input[name="param.shared.exp_link"]').within(() => {
+          cy.get('input[name="param.shared.exp_link"]').should('have.value', '{{X:param.xshared}}');
         });
       });
 

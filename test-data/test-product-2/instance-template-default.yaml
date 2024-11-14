@@ -13,7 +13,12 @@ templateVariables:
   - uid: sleep-timeout
     name: 'Sleep Timeout'
     description: 'The amount of time the server application should sleep'
-    defaultValue: '60'
+    type: 'NUMERIC'
+    defaultValue: 60
+  - uid: licensed-param
+    name: 'Product License'
+    description: 'Is product licensed?'
+    type: 'BOOLEAN'
 
 instanceVariables:
   - id: param.global
@@ -27,6 +32,8 @@ instanceVariableValues:
     value: 'value-v1'
   - id: instance.variable.v2
     value: '{{T:text-param}}'
+  - id: product.instance.licensed
+    value: '{{T:licensed-param}}'
 
 instanceVariableDefaults:
   - id: param.xshared
