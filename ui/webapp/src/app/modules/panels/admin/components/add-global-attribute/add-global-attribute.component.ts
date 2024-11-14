@@ -8,8 +8,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'add-global-attribute',
+  selector: 'app-add-global-attribute',
   templateUrl: './add-global-attribute.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -135,7 +135,7 @@ describe('Admin UI Tests (Settings)', () => {
       cy.contains('.mat-mdc-tab', 'LDAP Auth.').click();
       cy.pressToolbarButton('New Server');
     });
-    cy.inMainNavFlyin('add-ldap-server', () => {
+    cy.inMainNavFlyin('app-add-ldap-server', () => {
       cy.fillFormInput('server', 'ldap://ldap.test.server');
       cy.fillFormInput('description', 'Test Server');
       cy.fillFormInput('user', 'user');
@@ -145,7 +145,7 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.screenshot('Doc_Admin_Ldap_Server_Config');
 
-    cy.inMainNavFlyin('add-ldap-server', () => {
+    cy.inMainNavFlyin('app-add-ldap-server', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
@@ -161,7 +161,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Test Server').find('button[data-cy^="Check connection"]').click();
     });
-    cy.inMainNavFlyin('check-ldap-server', () => {
+    cy.inMainNavFlyin('app-check-ldap-server', () => {
       cy.wait('@ldapCheck').then((intercept) => {
         expect(intercept.response.statusCode).to.equal(200);
         expect(intercept.response.body).to.contain('connection failed');
@@ -184,7 +184,7 @@ describe('Admin UI Tests (Settings)', () => {
       cy.pressToolbarButton('New Attribute');
     });
 
-    cy.inMainNavFlyin('add-global-attribute', () => {
+    cy.inMainNavFlyin('app-add-global-attribute', () => {
       cy.fillFormInput('name', 'Attr1');
       cy.fillFormInput('description', 'Test Attribute');
       cy.get('button[data-cy="Save"]').should('be.enabled').click();

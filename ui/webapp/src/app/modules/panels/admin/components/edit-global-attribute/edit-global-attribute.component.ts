@@ -10,8 +10,7 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'edit-global-attribute',
+  selector: 'app-edit-global-attribute',
   templateUrl: './edit-global-attribute.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

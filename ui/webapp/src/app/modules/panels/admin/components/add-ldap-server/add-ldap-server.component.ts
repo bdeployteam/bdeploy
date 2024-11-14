@@ -9,8 +9,7 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { randomString } from 'src/app/modules/core/utils/object.utils';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'add-ldap-server',
+  selector: 'app-add-ldap-server',
   templateUrl: './add-ldap-server.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -6,7 +6,6 @@ import { BdDataColumn } from 'src/app/models/data';
 import { ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { PermissionColumnsService } from 'src/app/modules/core/services/permission-columns.service';
-import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 interface UserGroupPermission extends ScopedPermission {
   userGroup: string;
@@ -25,8 +24,7 @@ const colUserGroupName: BdDataColumn<UserGroupPermission> = {
 export class SettingsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly permissionColumnsService = inject(PermissionColumnsService);
-  protected readonly authService = inject(AuthenticationService);
-  protected readonly settings = inject(SettingsService);
+  private readonly authService = inject(AuthenticationService);
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected user: UserInfo;

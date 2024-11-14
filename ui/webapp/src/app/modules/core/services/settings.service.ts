@@ -6,7 +6,6 @@ import { finalize, first, skipWhile, switchMap, tap } from 'rxjs/operators';
 import { MailReceiverSettingsDto, MailSenderSettingsDto, SettingsConfiguration } from 'src/app/models/gen.dtos';
 import { measure } from '../utils/performance.utils';
 import { ConfigService } from './config.service';
-import { NavAreasService } from './nav-areas.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +13,6 @@ import { NavAreasService } from './nav-areas.service';
 export class SettingsService {
   private readonly config = inject(ConfigService);
   private readonly http = inject(HttpClient);
-  private readonly areas = inject(NavAreasService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public settings$ = new BehaviorSubject<SettingsConfiguration>(null);
@@ -24,12 +22,6 @@ export class SettingsService {
 
   constructor() {
     this.load();
-
-    this.areas.adminRoute$.subscribe((r) => {
-      if (!r) {
-        this.discard();
-      }
-    });
   }
 
   private load() {

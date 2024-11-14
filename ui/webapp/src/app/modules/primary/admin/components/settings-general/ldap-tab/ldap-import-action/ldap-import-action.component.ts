@@ -4,8 +4,7 @@ import { Actions, LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'ldap-import-action',
+  selector: 'app-ldap-import-action',
   templateUrl: './ldap-import-action.component.html',
 })
 export class LdapImportActionComponent implements OnInit {
