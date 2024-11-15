@@ -161,9 +161,9 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
 
     if (!this.checkMode) return;
 
-    if (this.checkedFrozenWhen$ && this.checkedFrozenWhen$.value) return;
+    if (this.checkedFrozenWhen$?.value) return;
 
-    if (this.checkChangeForbidden && this.checkChangeForbidden(event)) return;
+    if (this.checkChangeForbidden?.(event)) return;
 
     const isChecked = this.checked.some((record) => record === event);
 

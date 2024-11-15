@@ -26,7 +26,7 @@ class DirectoryLockTest {
     @Test
     void testLockOperations(BHive hive, @TempDir Path tmp) {
         hive.setLockContentSupplier(() -> "1");
-        hive.setLockContentValidator((c) -> c.equals("1"));
+        hive.setLockContentValidator(c -> c.equals("1"));
 
         AtomicLong sem = new AtomicLong(0);
 

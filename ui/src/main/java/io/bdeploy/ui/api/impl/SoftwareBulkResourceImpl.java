@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -23,6 +26,8 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
 public class SoftwareBulkResourceImpl implements SoftwareBulkResource {
+
+    private static final Logger log = LoggerFactory.getLogger(SoftwareBulkResourceImpl.class);
 
     @Inject
     private RequestScopedParallelOperationsService rspos;
@@ -59,6 +64,7 @@ public class SoftwareBulkResourceImpl implements SoftwareBulkResource {
                 deleted.put(key, key.toString());
             } catch (Exception e) {
                 result.add(new OperationResult(key.toString(), OperationResultType.ERROR, e.getMessage()));
+                log.error("Failed to delete software repository " + key, e);
             }
         }).toList();
 
@@ -68,5 +74,4 @@ public class SoftwareBulkResourceImpl implements SoftwareBulkResource {
 
         return result;
     }
-
 }
