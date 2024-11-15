@@ -69,7 +69,7 @@ public class DirectoryLockOperation extends DirectoryModificationOperation {
                 + ". Please check manually if another process is still running and delete the lock file manually.");
     }
 
-    /** Validates whether the given lock file is still valid */
+    /** Validates whether or not the given lock file is still valid */
     static boolean isLockFileValid(Path lockFile, Predicate<String> lockContentValidator) {
         // No content validator. Assuming the lock is still valid
         if (lockContentValidator == null) {
@@ -91,8 +91,7 @@ public class DirectoryLockOperation extends DirectoryModificationOperation {
         // Read the lock file to check if the content is still valid
         try {
             List<String> lines = Files.readAllLines(lockFile);
-            // If we have a validator, all empty locks are invalid as well.
-            if (lines.isEmpty() || StringHelper.isNullOrEmpty(lines.get(0)) || !lockContentValidator.test(lines.get(0))) {
+            if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0)) && !lockContentValidator.test(lines.get(0))) {
                 log.warn("Stale lock file detected, forcefully resolving...");
                 PathHelper.deleteIfExistsRetry(lockFile);
                 return false;
