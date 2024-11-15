@@ -132,7 +132,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         InstancePurpose purpose();
 
-        @Help("The name of the managed server if the instance is created on a target CENTRAL server.")
+        @Help("The name of the managed server, only used on CENTRAL. When creating instances, this is the target server. When listing instances, it serves as a filter.")
         String server();
 
         @Help("The name of the product to set for the created instance")
@@ -453,8 +453,19 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
 
+        String[] uuid = config.uuid();
+        boolean uuidSet = uuid != null && uuid.length > 0;
+        String server = config.server();
+        boolean serverSet = !StringHelper.isNullOrBlank(server);
+
+        String caption = config.all() ? "All" : config.installed() ? "Installed" : config.active() ? "Active" : "Overview of";
+        caption += " instances of " + config.instanceGroup() + " on " + remote.getUri();
+        if (serverSet) {
+            caption += " for managed server " + server;
+        }
+
         DataTable table = createDataTable();
-        table.setCaption("Instances of " + config.instanceGroup() + " on " + remote.getUri());
+        table.setCaption(caption);
 
         table.column(new DataTableColumn.Builder("ID").setMinWidth(13).build());
         table.column(new DataTableColumn.Builder("Name").build());
@@ -474,10 +485,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         InstanceResource ir = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(config.instanceGroup());
 
-        String[] uuid = config.uuid();
-        boolean uuidSet = uuid != null && uuid.length > 0;
         Set<String> uuids = uuidSet ? new HashSet<>(Arrays.asList(uuid)) : null;
         for (var instance : ir.list()) {
+            if (central && serverSet && !server.equals(instance.managedServer.hostName)) {
+                continue;
+            }
+
             if (uuidSet && !uuids.contains(instance.instanceConfiguration.id)) {
                 continue;
             }
@@ -500,10 +513,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                         .cell(vCfg.description);
 
                 if (central) {
-                    ManagedMasterDto server = msr.getServerForInstance(config.instanceGroup(), instance.instanceConfiguration.id,
-                            version.key.getTag());
-
-                    row.cell(server.hostName);
+                    row.cell(msr.getServerForInstance(config.instanceGroup(), instance.instanceConfiguration.id,
+                            version.key.getTag()).hostName);
                 }
 
                 row.build();
