@@ -208,7 +208,10 @@ public class InstanceResourceImpl implements InstanceResource {
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
 
         for (Key imKey : imKeys) {
-            result.add(getInstanceDto(imKey));
+            var idto = getInstanceDto(imKey);
+            if (idto != null) {
+                result.add(idto);
+            }
         }
         return result;
     }
