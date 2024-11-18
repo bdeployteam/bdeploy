@@ -8,6 +8,7 @@
 
 [Unit]
 Description=BDeploy [Master|Node]
+After=network-online.target
 
 [Service]
 User=APPLICATION_USER
