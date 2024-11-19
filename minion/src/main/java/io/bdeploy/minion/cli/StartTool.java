@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.slf4j.Logger;
@@ -85,6 +87,12 @@ import jakarta.inject.Singleton;
 public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(StartTool.class);
+
+    /** Lock files should contain the writing PID. In case the process no longer exists, the lock file is invalid. */
+    private static final Supplier<String> LOCK_CONTENT = () -> Long.toString(ProcessHandle.current().pid());
+
+    /** Validator will check whether the writing PID of the lock file is still there. */
+    private static final Predicate<String> LOCK_VALIDATOR = pid -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
 
     public @interface MasterConfig {
 
@@ -267,6 +275,11 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {
         BHiveRegistry r = new BHiveRegistry(reporter);
+
+        r.addBHiveAdditionListener(h -> {
+            h.setLockContentSupplier(LOCK_CONTENT);
+            h.setLockContentValidator(LOCK_VALIDATOR);
+        });
 
         root.setupServerTasks(root.getMode(), r);
 

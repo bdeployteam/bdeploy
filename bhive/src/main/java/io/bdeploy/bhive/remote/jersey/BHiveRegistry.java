@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.glassfish.hk2.utilities.Binder;
@@ -44,11 +45,17 @@ public class BHiveRegistry implements AutoCloseable {
         public void spawn(String hiveName, Collection<Manifest.Key> keys);
     }
 
+    /** A listener notified whenever a new BHive is registered to the registry. Can be used for additional setup steps */
+    public interface BHiveAdditionListener extends Consumer<BHive> {
+
+    }
+
     private final Set<Path> locations = new TreeSet<>();
     private final Map<String, BHive> hives = new TreeMap<>();
     private final ActivityReporter reporter;
     private final List<MultiManifestSpawnListener> listeners = new ArrayList<>();
     private final Map<String, ManifestSpawnListener> internalListeners = new TreeMap<>();
+    private final List<BHiveAdditionListener> bhiveListeners = new ArrayList<>();
 
     /**
      * @param reporter the {@link ActivityReporter} used for all {@link BHive} discovered by the registry
@@ -76,6 +83,14 @@ public class BHiveRegistry implements AutoCloseable {
         listeners.remove(listener);
     }
 
+    public void addBHiveAdditionListener(BHiveAdditionListener listener) {
+        bhiveListeners.add(listener);
+    }
+
+    public void removeBHiveAdditionListener(BHiveAdditionListener listener) {
+        bhiveListeners.remove(listener);
+    }
+
     /**
      * @return the {@link ActivityReporter} to be used for {@link BHive}s.
      */
@@ -90,6 +105,8 @@ public class BHiveRegistry implements AutoCloseable {
      * destroyed.
      */
     public void register(String name, BHive hive) {
+        bhiveListeners.forEach(l -> l.accept(hive));
+
         hives.put(name, hive);
 
         // redirecting listener
