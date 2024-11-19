@@ -1,14 +1,7 @@
 <ng-template #varTemplate>
   <div>Please provide required values for the selected template.</div>
   <ng-container *ngFor="let v of selectedTemplate.templateVariables">
-    <app-bd-form-input
-      [attr.name]="v.name"
-      [(ngModel)]="response[v.id]"
-      [label]="v.name"
-      [matTooltip]="v.description"
-      [suggested]="v.suggestedValues"
-      required
-    ></app-bd-form-input>
+    <app-bd-form-template-variable [templateVariable]="v" [(ngModel)]="response[v.id]"></app-bd-form-template-variable>
   </ng-container>
 </ng-template>
 
@@ -39,12 +32,7 @@
       <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
     </div>
     <ng-template #currentInstanceIsNotSynchronized>
-      <app-bd-notification-card
-        icon="sync"
-        [type]="'warning'"
-        [dismissable]="false"
-        header="Server Not Synchronized"
-      >
+      <app-bd-notification-card icon="sync" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
         <div class="text-justify">
           The managed server responsible for the selected node is not synchronized. Please synchronize the server to
           continue editing.

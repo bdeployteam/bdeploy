@@ -53,6 +53,7 @@ describe('System Template Tests', () => {
       cy.get('[data-cy=step-system-variables]').within(() => {
         cy.fillFormInput('The Node Number', '2');
         cy.fillFormInput('The Node Base Name', 'master');
+        cy.fillFormInput('System Password', 'systemPassword');
 
         cy.get('button[data-cy^=Next]').should('be.enabled').click();
       });
@@ -66,8 +67,9 @@ describe('System Template Tests', () => {
           cy.fillFormSelect('Server Apps', 'Apply to master');
           cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
 
-          cy.fillFormInput('Sleep Timeout', '10');
           cy.fillFormInput('Text Value', 'demo');
+          cy.fillFormInput('Sleep Timeout', '10');
+          cy.fillFormToggle('Product License');
         });
 
         cy.get('button[data-cy^=Next]').should('be.enabled').click();
@@ -134,10 +136,10 @@ describe('System Template Tests', () => {
           .within(() => {
             cy.get('input[name="system.variable.numeric_val"]').should('have.value', '1020');
           });
-        cy.get('app-bd-form-input[name="system.variable.string_val"]')
+        cy.get('app-bd-form-input[name="system.variable.password_val"]')
           .should('exist')
           .within(() => {
-            cy.get('input[name="system.variable.string_val"]').should('have.value', 'defaultDefinedV1');
+            cy.get('input[name="system.variable.password_val"]').should('have.value', 'systemPassword');
           });
         cy.get('mat-panel-title').click();
       });
@@ -202,6 +204,9 @@ describe('System Template Tests', () => {
       cy.get('app-bd-form-input[name="param.xshared_val"]').within(() => {
         cy.get('input[name="param.xshared_val"]').should('have.value', '10');
       });
+      cy.get('app-bd-form-input[name="param.shared.exp_link"]').within(() => {
+        cy.get('input[name="param.shared.exp_link"]').should('have.value', '{{X:param.xshared}}');
+      });
       cy.get('mat-panel-title').click();
     });
 
@@ -220,11 +225,14 @@ describe('System Template Tests', () => {
     cy.contains('mat-expansion-panel', 'Product Description Variables').within(() => {
       cy.contains('mat-panel-description', '3/3 variables shown').should('exist');
       cy.get('mat-panel-title').click();
-      cy.get('app-bd-form-input[name="product.instance.variable3_val"]').within(() => {
-        cy.get('input[name="product.instance.variable3_val"]').should('have.value', 'teenagers');
+      cy.get('app-bd-form-input[name="product.instance.variable1_val"]').within(() => {
+        cy.get('input[name="product.instance.variable1_val"]').should('have.value', '2.0.0');
       });
       cy.get('app-bd-form-input[name="product.instance.variable2_val"]').within(() => {
         cy.get('input[name="product.instance.variable2_val"]').should('have.value', 'admin');
+      });
+      cy.get('app-bd-form-toggle[name="product.instance.licensed_bool"]').within(() => {
+        cy.get('input[type="checkbox"]').should('be.checked');
       });
       cy.get('mat-panel-title').click();
     });

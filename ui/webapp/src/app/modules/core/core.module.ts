@@ -85,6 +85,7 @@ import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-uploa
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
 import { BdFormSelectComponentOptionComponent } from './components/bd-form-select-component-option/bd-form-select-component-option.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
+import { BdFormTemplateVariableComponent } from './components/bd-form-template-variable/bd-form-template-variable.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
 import { BdIdentifierCellComponent } from './components/bd-identifier-cell/bd-identifier-cell.component';
 import { BdIdentifierComponent } from './components/bd-identifier/bd-identifier.component';
@@ -174,6 +175,7 @@ function loadAppConfig(cfgService: ConfigService) {
     ServerConnectionUrlSyntaxValidator,
     BdFormToggleComponent,
     BdFormSelectComponent,
+    BdFormTemplateVariableComponent,
     BdDataComponentCellComponent,
     BdFileDropComponent,
     BdFileUploadComponent,
@@ -319,6 +321,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdFormInputComponent,
     BdFormToggleComponent,
     BdFormSelectComponent,
+    BdFormTemplateVariableComponent,
     BdFileDropComponent,
     BdFileUploadComponent,
     BdFileUploadRawComponent,

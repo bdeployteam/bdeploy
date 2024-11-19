@@ -64,17 +64,12 @@
           <mat-step label="Assign Variable Values" [completed]="firstStepCompleted && secondStepCompleted">
             <div class="instance-templates-top-space">
               <ng-container *ngFor="let v of requiredVariables">
-                <app-bd-form-input
+                <app-bd-form-template-variable
                   *ngIf="firstStepCompleted && secondStepCompleted"
+                  [templateVariable]="v"
                   [(ngModel)]="variables[v.id]"
-                  [attr.name]="v.name"
-                  [label]="v.name"
-                  [matTooltip]="v.description"
-                  matTooltipPosition="above"
-                  [suggested]="v.suggestedValues"
-                  required
                   (ngModelChange)="validateHasAllVariables()"
-                ></app-bd-form-input>
+                ></app-bd-form-template-variable>
               </ng-container>
               <ng-container *ngIf="!requiredVariables.length">
                 <div class="bd-description-text pb-5">No template variables.</div>

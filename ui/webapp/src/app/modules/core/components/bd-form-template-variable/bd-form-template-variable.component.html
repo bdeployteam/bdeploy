@@ -1,0 +1,23 @@
+<app-bd-form-toggle
+  *ngIf="templateVariable.type === TemplateVariableType.BOOLEAN"
+  [(ngModel)]="value"
+  [attr.name]="templateVariable.name"
+  [label]="templateVariable.name"
+  [matTooltip]="templateVariable.description"
+  matTooltipPosition="above"
+  required
+  errorDisplay="immediate"
+></app-bd-form-toggle>
+<app-bd-form-input
+  *ngIf="templateVariable.type !== TemplateVariableType.BOOLEAN"
+  [(ngModel)]="value"
+  [type]="type"
+  [attr.name]="templateVariable.name"
+  [label]="templateVariable.name"
+  [matTooltip]="templateVariable.description"
+  matTooltipPosition="above"
+  [suggested]="templateVariable.suggestedValues"
+  required
+  errorDisplay="immediate"
+  [passwordShowable]="templateVariable.type === TemplateVariableType.PASSWORD"
+></app-bd-form-input>

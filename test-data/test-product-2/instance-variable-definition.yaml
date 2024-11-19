@@ -26,11 +26,11 @@ definitions:
     type: 'STRING'
     defaultValue: 'admin'
     groupName: 'Product Description Variables'
-  - id: product.instance.variable3
-    name: 'Product Audience'
-    longDescription: 'Product audience'
-    type: 'STRING'
-    defaultValue: 'teenagers'
+  - id: product.instance.licensed
+    name: 'Product License'
+    longDescription: 'Is product licensed'
+    type: 'BOOLEAN'
+    defaultValue: false
     groupName: 'Product Description Variables'
   - id: product.instance.ungrouped.variable1
     name: 'Product Created At'

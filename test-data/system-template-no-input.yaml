@@ -46,6 +46,8 @@ instances:
         value: 'XX'
       - id: 'sleep-timeout'
         value: 10
+      - id: 'licensed-param'
+        value: true
     defaultMappings:
       - group: 'Server Apps'
         node: 'master'

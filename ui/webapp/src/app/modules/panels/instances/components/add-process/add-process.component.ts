@@ -11,6 +11,7 @@ import {
   InstanceNodeConfigurationDto,
   MinionDto,
   OperatingSystem,
+  TemplateVariableType,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ClipboardData, ClipboardService } from 'src/app/modules/core/services/clipboard.service';
@@ -212,6 +213,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       this.response = {};
       for (const v of row.template.templateVariables) {
         this.response[v.id] = v.defaultValue;
+        if (v.defaultValue === null && v.type === TemplateVariableType.BOOLEAN) {
+          this.response[v.id] = 'false';
+        }
       }
       this.selectedTemplate = row.template;
 

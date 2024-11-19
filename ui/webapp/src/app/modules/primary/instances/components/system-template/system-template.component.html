@@ -135,17 +135,11 @@
         <mat-step label="System Template Variables" [completed]="isAllSystemVariablesSet">
           <div [attr.data-cy]="'step-system-variables'" class="flex flex-col gap-2.5 p-2.5">
             <ng-container *ngFor="let v of requiredSystemVariables">
-              <app-bd-form-input
+              <app-bd-form-template-variable
+                [templateVariable]="v"
                 [(ngModel)]="systemVariables[v.id]"
-                [attr.name]="v.name"
-                [label]="v.name"
-                [matTooltip]="v.description"
-                matTooltipPosition="above"
-                [suggested]="v.suggestedValues"
-                required
                 (ngModelChange)="validateHasAllSystemVariables()"
-                errorDisplay="immediate"
-              ></app-bd-form-input>
+              ></app-bd-form-template-variable>
             </ng-container>
             <ng-container *ngIf="!requiredSystemVariables.length">
               <div class="bd-description-text pb-5">No system template variables.</div>
@@ -197,17 +191,11 @@
                   <div class="grow-[2] flex flex-col gap-2.5 p-2.5">
                     <ng-container *ngIf="tpl.isApplyInstance; else: noApply">
                       <ng-container *ngFor="let v of tpl.requiredVariables">
-                        <app-bd-form-input
+                        <app-bd-form-template-variable
+                          [templateVariable]="v"
                           [(ngModel)]="tpl.variables[v.id]"
-                          [attr.name]="v.name"
-                          [label]="v.name"
-                          [matTooltip]="v.description"
-                          matTooltipPosition="above"
-                          [suggested]="v.suggestedValues"
-                          required
                           (ngModelChange)="validateHasAllVariables(tpl)"
-                          errorDisplay="immediate"
-                        ></app-bd-form-input>
+                        ></app-bd-form-template-variable>
                       </ng-container>
                       <ng-container *ngIf="!tpl.requiredVariables.length">
                         <div class="bd-description-text py-4">No template variables.</div>

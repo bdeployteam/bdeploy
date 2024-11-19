@@ -26,4 +26,7 @@ public class TemplateVariable {
     @JsonPropertyDescription("A list of values suggested by the variable input field in the UI.")
     public List<String> suggestedValues;
 
+    @JsonPropertyDescription("The type of the template variable. The template variable value is validated against the type, and proper type-specific editors are provided to users. The default value is STRING.")
+    public TemplateVariableType type = TemplateVariableType.STRING;
+
 }
