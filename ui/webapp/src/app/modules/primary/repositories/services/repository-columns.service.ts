@@ -7,8 +7,8 @@ import { ProdDtoWithType, SwPkgCompound, SwPkgType } from './repository.service'
 })
 export class RepositoryColumnsService {
   private readonly nameColumn: BdDataColumn<SwPkgCompound> = {
-    id: 'name',
-    name: 'Name',
+    id: 'key',
+    name: 'Key',
     data: (r) => r.key.name,
     isId: true,
   };
