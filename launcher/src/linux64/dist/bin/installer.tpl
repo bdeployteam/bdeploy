@@ -255,6 +255,20 @@ if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
     fi
 fi
 
-# STEP 6: Launch directly.
-echo "Launching ${BDEPLOY_APP_NAME}"
-${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy"
+# STEP 6: Launch
+unatt=false
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --unattended) unatt=true ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+if [[ "$unatt" != true ]]; then
+	echo "Launching ${BDEPLOY_APP_NAME}"
+	${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy"
+else
+	echo "Updating ${BDEPLOY_APP_NAME} in unattended mode"
+	${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy" "--updateOnly" "--unattended"
+fi
