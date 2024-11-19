@@ -117,6 +117,6 @@ public enum Variables {
     }
 
     public ShouldResolve shouldResolve() {
-        return (s) -> s.startsWith(prefix);
+        return s -> s.startsWith(prefix);
     }
 }

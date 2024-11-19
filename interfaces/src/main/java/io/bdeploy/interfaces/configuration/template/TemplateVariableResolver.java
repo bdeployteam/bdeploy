@@ -54,11 +54,11 @@ public class TemplateVariableResolver extends PrefixResolver {
     }
 
     private String doResolveDefaultRecursive(String variable) {
-        Optional<TemplateVariable> var = templateVars.stream().filter(v -> v.id.equals(variable)).findFirst();
-        if (var.isPresent()) {
-            return var.get().defaultValue;
+        Optional<TemplateVariable> templateVar = templateVars.stream().filter(v -> v.id.equals(variable)).findFirst();
+        if (templateVar.isPresent()) {
+            return templateVar.get().defaultValue;
         }
-        
+
         if (parent != null) {
             return parent.doResolveDefaultRecursive(variable);
         }
