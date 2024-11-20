@@ -196,6 +196,7 @@ Figure out all instances in the instance group belonging to that system. In the 
 ```
 bdeploy remote-instance --list --instanceGroup=<GROUP_NAME>
 ```
+Note for the above command: If you are executing this command on the central server you can add --server=<NAME_OF_MANAGED_SERVER> to limit the output to this the given managed server.
 
 For each of the instances, install & activate them. The `--uuid` receives the value from the "ID" column of the previous command. `--version` receives the instance version you want to install, which is most likely the highest version number ("Ver." column in output of previous command) for this instance.
 
