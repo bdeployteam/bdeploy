@@ -420,7 +420,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     }
                 }
 
-                doInstall(hive, reporter, splash, auditor);
+                doInstall(hive, reporter, splash, auditor, serverVersion);
             }
 
             // Launch the application
@@ -655,7 +655,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         doExit(UpdateHelper.CODE_RESTART);
     }
 
-    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor) {
+    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor,
+            Version serverVersion) {
         // Update splash with the fetched branding information.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding == null) {
@@ -672,32 +673,43 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if necessary.
         doExecuteLocked(hive, reporter, () -> {
-            installApplication(hive, splash, reporter, clientAppCfg, auditor);
+            installApplication(hive, splash, reporter, clientAppCfg, auditor, serverVersion);
             return null;
         });
     }
 
     /** Installs the application with all requirements if necessary. */
     private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
-            ClientApplicationConfiguration clientAppCfg, Auditor auditor) {
+            ClientApplicationConfiguration clientAppCfg, Auditor auditor, Version serverVersion) {
         // Update scripts
         OperatingSystem os = OsHelper.getRunningOs();
         updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
         updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association", fileAssocScriptsDir);
 
-        // Check if the application directory is already present
+        // Check if the application has any missing artifacts
+        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
         Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
         if (missing.isEmpty()) {
-            log.info("Application is already installed. Nothing to install/update.");
+            log.info("Application has no missing artifacts.");
+            if (readOnlyHomeDir) {
+                log.info("Cannot update server version because home directory is read-only.");
+            } else {
+                ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
+                ClientSoftwareConfiguration config = manifest.readNewest(appCfg.id, false);
+                if (config != null) {
+                    config.metadata.serverVersion = serverVersion.toString();
+                    manifest.update(config.clickAndStart.applicationId, config);
+                    log.info("Updated server version to {}", config.metadata.serverVersion);
+                }
+            }
             return;
         }
-        log.info("Application needs to be installed/updated: {}", missing);
+
+        log.info("Application has missing artifacts: {}", missing);
 
         // Throw an exception if we do not have write permissions in the directory
-        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
-        String appName = appCfg.name;
         if (readOnlyHomeDir) {
-            throw new SoftwareUpdateException(appName, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
+            throw new SoftwareUpdateException(appCfg.name, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
         }
 
         // Fetch the application and all the requirements
@@ -767,7 +779,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
         newConfig.clickAndStart = clickAndStart;
-        newConfig.metadata = ClientApplicationDto.create(clickAndStart, clientAppCfg);
+        newConfig.metadata = ClientApplicationDto.create(clickAndStart, clientAppCfg, serverVersion);
         newConfig.clientAppCfg = clientAppCfg;
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);

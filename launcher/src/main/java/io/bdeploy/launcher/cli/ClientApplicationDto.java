@@ -1,6 +1,7 @@
 package io.bdeploy.launcher.cli;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.Version;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
@@ -73,7 +74,8 @@ public class ClientApplicationDto {
     /**
      * Creates a new instance using the given configuration
      */
-    public static ClientApplicationDto create(ClickAndStartDescriptor desc, ClientApplicationConfiguration cfg) {
+    public static ClientApplicationDto create(ClickAndStartDescriptor desc, ClientApplicationConfiguration cfg,
+            Version serverVersion) {
         ClientApplicationDto dto = new ClientApplicationDto();
 
         dto.instanceGroupTitle = cfg.instanceGroupTitle;
@@ -97,7 +99,7 @@ public class ClientApplicationDto {
         dto.appName = appConfig.name;
         dto.autostart = appConfig.processControl.autostart;
 
-        dto.serverVersion = LauncherTool.getServerVersion(desc).toString();
+        dto.serverVersion = serverVersion.toString();
 
         return dto;
     }
