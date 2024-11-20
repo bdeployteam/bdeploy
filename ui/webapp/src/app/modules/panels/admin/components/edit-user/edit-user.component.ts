@@ -10,8 +10,7 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'edit-user',
+  selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

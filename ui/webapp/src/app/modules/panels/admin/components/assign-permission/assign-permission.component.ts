@@ -8,8 +8,7 @@ import { ReportsService } from 'src/app/modules/primary/reports/services/reports
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'assign-permission',
+  selector: 'app-user-assign-permission',
   templateUrl: './assign-permission.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

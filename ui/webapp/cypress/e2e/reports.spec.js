@@ -46,7 +46,7 @@ describe('Report UI Tests', () => {
     cy.inMainNavFlyin('app-user-admin-detail', () => {
       cy.get('button[data-cy^="Assign Permission"]').click();
     });
-    cy.inMainNavFlyin('assign-permission', () => {
+    cy.inMainNavFlyin('app-user-assign-permission', () => {
       cy.fillFormSelect('scope', 'Report: Products In Use');
       cy.fillFormSelect('permission', 'READ');
     });

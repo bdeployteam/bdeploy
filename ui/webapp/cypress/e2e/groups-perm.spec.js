@@ -51,7 +51,7 @@ describe('Groups Tests (Permissions)', () => {
     ['read', 'write'].forEach((perm) => {
       cy.pressToolbarButton('Create User');
       cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
-      cy.inMainNavFlyin('add-user', () => {
+      cy.inMainNavFlyin('app-add-user', () => {
         cy.fillFormInput('name', perm);
         cy.fillFormInput('fullName', `${perm} User`);
         cy.fillFormInput('email', 'example@example.org');
@@ -72,7 +72,7 @@ describe('Groups Tests (Permissions)', () => {
       });
 
       cy.waitForApi(() => {
-        cy.inMainNavFlyin('assign-permission', () => {
+        cy.inMainNavFlyin('app-user-assign-permission', () => {
           cy.fillFormSelect('permission', perm.toUpperCase());
           cy.get('button[data-cy="Save"]').should('be.enabled').click();
         });
