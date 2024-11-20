@@ -64,7 +64,9 @@ public abstract class LocalScriptHelper {
         if (scriptIsActive) {
             Files.deleteIfExists(fullScriptPath);
         }
-        Files.writeString(fullScriptPath, scriptContent, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
+        if (!Files.exists(fullScriptPath)) {
+            Files.writeString(fullScriptPath, scriptContent, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
+        }
         setExecutable(fullScriptPath);
 
         afterUpdateHook(clientCfg, fullScriptPath);
