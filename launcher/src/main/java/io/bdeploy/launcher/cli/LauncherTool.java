@@ -407,7 +407,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Continuing launch in online mode...");
                 serverVersion = getServerVersion(clickAndStart);
 
-                doSelfUpdate(hive, reporter, serverVersion);
+                doSelfUpdate(hive, reporter, serverVersion); // This call does NOT return if a launcher update is deemed necessary!
 
                 if (serverVersion.compareTo(VersionHelper.parse("4.3.0")) >= 0) {
                     // The source server could have been migrated/converted to node. in this case, display a message.
@@ -510,7 +510,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Updates the launcher if there is a new version available. */
+    /**
+     * Updates the launcher if there is a new version available. Note that this method <b>does not return</b> if a launcher update
+     * is deemed necessary.
+     */
     private void doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
         if (VersionHelper.isRunningUndefined()) {
             log.warn("Skipping self update. The local running version is not defined.");
@@ -565,7 +568,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return versions.firstEntry();
     }
 
-    /** Checks for updates and installs them if required. */
+    /**
+     * Checks for updates and installs them if required. Note that this method <b>does not return</b> if a launcher update is
+     * deemed necessary.
+     */
     private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter, Map.Entry<Version, Key> requiredLauncher) {
         Version latestVersion = requiredLauncher.getKey();
         if (latestVersion.compareTo(runningVersion) <= 0) {
