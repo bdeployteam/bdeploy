@@ -6,8 +6,7 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'check-ldap-server',
+  selector: 'app-check-ldap-server',
   templateUrl: './check-ldap-server.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

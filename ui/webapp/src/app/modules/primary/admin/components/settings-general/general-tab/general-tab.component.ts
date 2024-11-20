@@ -6,5 +6,5 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './general-tab.component.html',
 })
 export class GeneralTabComponent {
-  public readonly settings = inject(SettingsService);
+  protected readonly settings = inject(SettingsService);
 }

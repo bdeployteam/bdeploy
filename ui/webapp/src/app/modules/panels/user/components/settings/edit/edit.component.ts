@@ -9,7 +9,6 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
@@ -19,7 +18,6 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly auth = inject(AuthenticationService);
   private readonly areas = inject(NavAreasService);
-  protected readonly settings = inject(SettingsService);
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected mail$ = new BehaviorSubject<string>(null);

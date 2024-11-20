@@ -2,9 +2,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnInit, inject } from '@angular/core';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
-import { ConfigService } from '../../services/config.service';
 import { SearchService } from '../../services/search.service';
-import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-main-nav-top',
@@ -14,9 +12,7 @@ import { SettingsService } from '../../services/settings.service';
 export class MainNavTopComponent implements OnInit {
   private readonly media = inject(BreakpointObserver);
   private readonly authService = inject(AuthenticationService);
-  protected readonly cfgService = inject(ConfigService);
   protected readonly search = inject(SearchService);
-  protected readonly settings = inject(SettingsService);
 
   protected logoSize = 64;
   protected user: UserInfo;
