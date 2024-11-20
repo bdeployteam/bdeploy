@@ -95,7 +95,16 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
             }
             events.create(ObjectChangeType.SYSTEM, key, new ObjectScope(hiveName));
         } else {
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
+            Manifest mf;
+            try {
+                mf = hive.execute(new ManifestLoadOperation().setManifest(key));
+            } catch (Exception e) {
+                // in case it no longer exists, we do not need to notify.
+                if (log.isDebugEnabled()) {
+                    log.debug("Manifest removed before notified: {}", key, e);
+                }
+                return;
+            }
             if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
                 // it is a product!
                 if (log.isDebugEnabled()) {

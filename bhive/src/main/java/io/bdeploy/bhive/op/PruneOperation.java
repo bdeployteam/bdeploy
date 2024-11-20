@@ -49,20 +49,21 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             // off until the root is unlocked again, so:
             //  1) No NEW marker databases will be created and no concurrent prune operations will run.
             //  2) Existing transactions will be allowed to continue using their existing marker databases.
-            //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
-            execute(new DirectoryLockOperation().setDirectory(getMarkerRoot()));
+            //  3) Upon completion, existing transactions will block removal of the markers until the root is unlocked.
+            DirectoryLockOperation.LockHandle lck = execute(new DirectoryLockOperation().setDirectory(getMarkerRoot()));
 
-            // need to cleanup all marker databases that are left over...
-            long stale = getTransactions().cleanStaleTransactions();
-            if (stale > 0) {
-                log.warn("{} stale transactions cleaned", stale);
-            }
-
-            // make sure there is no outdated information
-            getManifestDatabase().invalidateCaches();
-
-            SortedSet<ObjectId> all;
             try {
+                // need to cleanup all marker databases that are left over...
+                long stale = getTransactions().cleanStaleTransactions();
+                if (stale > 0) {
+                    log.warn("{} stale transactions cleaned", stale);
+                }
+
+                // make sure there is no outdated information
+                getManifestDatabase().invalidateCaches();
+
+                SortedSet<ObjectId> all;
+
                 // read existing manifests also inside the lock, so we are sure that the existing
                 // manifests and objects are in a consistent state.
                 Set<Manifest.Key> manifests = execute(new ManifestListOperation());
@@ -130,7 +131,7 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                 // Unlocking the root will allow:
                 //  1) Ongoing operations to continue clearing their markers
                 //  2) Other operations locking the root (e.g. another prune operation).
-                execute(new DirectoryReleaseOperation().setDirectory(getMarkerRoot()));
+                lck.unlock();
             }
 
             return result;

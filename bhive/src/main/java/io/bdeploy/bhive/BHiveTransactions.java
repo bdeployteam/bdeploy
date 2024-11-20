@@ -20,6 +20,7 @@ import io.bdeploy.bhive.op.DirectoryAwaitOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.UuidHelper;
 
 /**
@@ -142,7 +143,14 @@ public class BHiveTransactions {
                 return; // nothing to clean.
             }
 
-            PathHelper.deleteRecursiveRetry(mdb);
+            // any exception in here will simply disappear into nirvana, as we're calling
+            // in here from a try-with-resources. In case no other exception happens, this
+            // will simply be ignored - so at least log it.
+            try {
+                PathHelper.deleteRecursiveRetry(mdb);
+            } catch (Exception e) {
+                log.warn("Cannot remove transaction {}", txid, e);
+            }
         };
     }
 
@@ -153,31 +161,41 @@ public class BHiveTransactions {
      */
     public long cleanStaleTransactions() {
         LongAdder amount = new LongAdder();
-        try {
-            Files.list(markerRoot).forEach(p -> {
-                if (Files.isDirectory(p) && PathHelper.exists(p.resolve(TX_PID_FILE))) {
-                    // TX PID exists, validate.
-                    if (hive.getLockContentValidator() == null) {
-                        return; // cannot validate if transaction is still valid - should *never* happen.
-                    }
-
-                    try {
-                        List<String> lines = Files.readAllLines(p.resolve(TX_PID_FILE));
-                        if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))
-                                && !hive.getLockContentValidator().test(lines.get(0))) {
-                            log.warn("Stale transaction detected, removing {}", p.getFileName());
-                            PathHelper.deleteRecursiveRetry(p);
-                            amount.increment();
+        try (var dir = Files.list(markerRoot)) {
+            dir.forEach(p -> {
+                int retries = 0;
+                do {
+                    if (Files.isDirectory(p) && PathHelper.exists(p.resolve(TX_PID_FILE))) {
+                        // TX PID exists, validate.
+                        if (hive.getLockContentValidator() == null) {
+                            return; // cannot validate if transaction is still valid - should *never* happen.
                         }
-                    } catch (IOException e) {
-                        log.warn("Problem determining stale transactions", e);
+
+                        try {
+                            List<String> lines = Files.readAllLines(p.resolve(TX_PID_FILE));
+                            if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0)) && !hive.getLockContentValidator()
+                                    .test(lines.get(0))) {
+                                log.warn("Stale transaction detected, removing {}", p.getFileName());
+                                PathHelper.deleteRecursiveRetry(p);
+                                amount.increment();
+                            }
+                        } catch (IOException e) {
+                            log.warn("Problem determining whether transaction is stale: {}", p.getFileName(), e);
+                        }
+                    } else if (Files.isDirectory(p)) {
+                        // TX PID does NOT exist, this is either a *very* old or completely outdated transaction, or
+                        // there is a race with whoever wants to create the TX PID file.
+                        if (retries++ <= 300) {
+                            Threads.sleep(10);
+                            continue; // try again.
+                        }
+
+                        log.warn("Stale transaction detected, removing {} after {} retries", p.getFileName(), retries);
+                        PathHelper.deleteRecursiveRetry(p);
+                        amount.increment();
                     }
-                } else if (Files.isDirectory(p)) {
-                    // TX PID does NOT exist, this is a *very* old or completely outdated transaction.
-                    log.warn("Stale transaction detected, removing {}", p.getFileName());
-                    PathHelper.deleteRecursiveRetry(p);
-                    amount.increment();
-                }
+                    break;
+                } while (true);
             });
         } catch (IOException e) {
             log.warn("Cannot list potentially stale transaction databases", e);

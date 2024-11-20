@@ -23,6 +23,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.Threads;
 
 /**
  * A simple key-value data store. For each object that is added to the database a {@linkplain ObjectId ObjectId} is calculated
@@ -202,6 +203,11 @@ public class ObjectDatabase extends LockableDatabase {
         try (InputStream is = getStream(id)) {
             ObjectId newId = ObjectId.createFromStreamNoCopy(is);
             return newId.equals(id);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot check object {}", id, e);
+            }
+            return false; // no longer valid - potentially removed by prune, etc.
         }
     }
 
@@ -280,20 +286,13 @@ public class ObjectDatabase extends LockableDatabase {
                     if (log.isDebugEnabled()) {
                         log.debug("Path to walk not found", e);
                     }
+                    return;
                 } catch (IOException e) {
                     throw new IllegalStateException("Cannot walk objects", e);
                 }
 
                 // Delay the loop a little
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Walking object interrupted");
-                    }
-                    Thread.currentThread().interrupt();
-                    return;
-                }
+                Threads.sleep(50);
             } while (true);
         }
     }

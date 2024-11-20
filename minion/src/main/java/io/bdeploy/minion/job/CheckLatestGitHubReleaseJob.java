@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.quartz.CronScheduleBuilder;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -32,6 +33,7 @@ import jakarta.ws.rs.core.MediaType;
 /**
  * A job that checks the latest BDeploy release version on GitHub
  */
+@DisallowConcurrentExecution
 public class CheckLatestGitHubReleaseJob implements Job {
 
     public static final JobKey JOB_KEY = new JobKey("CheckLatestGitHubReleaseJob", "Master");

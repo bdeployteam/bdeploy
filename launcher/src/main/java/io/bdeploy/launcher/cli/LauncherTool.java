@@ -40,7 +40,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.DirectoryLockOperation;
-import io.bdeploy.bhive.op.DirectoryReleaseOperation;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
@@ -991,9 +990,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * the permissions to modify the home directory. If that happens, the operation is executed immediately.
      */
     private <T> T doExecuteLocked(BHive hive, LauncherSplashReporter reporter, Callable<T> runnable) {
+        DirectoryLockOperation.LockHandle lockHandle = null;
         if (!readOnlyHomeDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                hive.execute(new DirectoryLockOperation().setDirectory(homeDir)); // This could wait for other launchers.
+                lockHandle = hive.execute(
+                        new DirectoryLockOperation().setDirectory(homeDir)); // This could wait for other launchers.
             }
         }
         log.debug("Entered locked execution mode");
@@ -1005,8 +1006,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to execute locked operation", ex);
         } finally {
             log.debug("Leaving locked execution mode");
-            if (!readOnlyHomeDir) {
-                hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
+            if (!readOnlyHomeDir && lockHandle != null) {
+                lockHandle.unlock();
             }
         }
     }

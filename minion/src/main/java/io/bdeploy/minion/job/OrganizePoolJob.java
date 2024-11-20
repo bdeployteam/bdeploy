@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.quartz.CronScheduleBuilder;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -29,6 +30,7 @@ import io.bdeploy.minion.MinionRoot;
 /**
  * A job that periodically imports users and groups from LDAP servers
  */
+@DisallowConcurrentExecution
 public class OrganizePoolJob implements Job {
 
     public static final JobKey JOB_KEY = new JobKey("PoolReorgJob", "Master");
@@ -71,7 +73,8 @@ public class OrganizePoolJob implements Job {
     private static Trigger createCronTrigger(JobDetail job, String cronSchedule) {
         try {
             return TriggerBuilder.newTrigger().forJob(job).withIdentity(TRIGGER_KEY).usingJobData(SCHEDULE, cronSchedule)
-                    .withSchedule(CronScheduleBuilder.cronScheduleNonvalidatedExpression(cronSchedule)).build();
+                    .withSchedule(CronScheduleBuilder.cronScheduleNonvalidatedExpression(cronSchedule)
+                            .withMisfireHandlingInstructionDoNothing()).build();
         } catch (ParseException e) {
             log.error("Invalid cron schedule: {} using default instead", cronSchedule, e);
             return TriggerBuilder.newTrigger().forJob(job).withIdentity(TRIGGER_KEY)
@@ -81,8 +84,6 @@ public class OrganizePoolJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        log.info("Pool re-organization job started");
-
         MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
         if (mr == null) {
             throw new IllegalStateException("No minion root set");

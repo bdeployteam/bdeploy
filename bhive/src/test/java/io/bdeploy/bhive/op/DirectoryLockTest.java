@@ -25,32 +25,25 @@ class DirectoryLockTest {
 
     @Test
     void testLockOperations(BHive hive, @TempDir Path tmp) {
-        hive.setLockContentSupplier(() -> "1");
-        hive.setLockContentValidator(c -> c.equals("1"));
+        hive.setLockContentSupplier(() -> "12345678");
+        hive.setLockContentValidator(c -> c.equals("12345678"));
 
         AtomicLong sem = new AtomicLong(0);
 
         Runnable r = () -> {
-            hive.execute(new DirectoryLockOperation().setDirectory(tmp));
+            var lck = hive.execute(new DirectoryLockOperation().setDirectory(tmp));
             long l = sem.incrementAndGet();
             if (l != 1) {
                 throw new IllegalStateException("More than one thread got the lock");
             }
-            log.info("Got the lock!");
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
-            }
-            log.info("Releasing the lock!");
             sem.decrementAndGet();
-            hive.execute(new DirectoryReleaseOperation().setDirectory(tmp));
+            lck.unlock();
         };
 
-        ExecutorService x = Executors.newFixedThreadPool(8);
+        ExecutorService x = Executors.newFixedThreadPool(16);
         List<Future<?>> f = new ArrayList<>();
 
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 10000; ++i) {
             f.add(x.submit(r));
         }
 

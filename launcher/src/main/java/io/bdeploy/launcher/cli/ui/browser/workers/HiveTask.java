@@ -3,14 +3,13 @@ package io.bdeploy.launcher.cli.ui.browser.workers;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.op.DirectoryLockOperation;
-import io.bdeploy.bhive.op.DirectoryReleaseOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.ExceptionHelper;
@@ -43,14 +42,14 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
             builder.append(hiveDir.toString()).append("\n");
             try (BHive hive = new BHive(hiveDir.toUri(),
                     auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hiveDir), getActivityReporter())) {
+                setProgress(i++);
+                var lck = hive.execute(new DirectoryLockOperation().setDirectory(homeDir));
                 try {
-                    setProgress(i++);
-                    hive.execute(new DirectoryLockOperation().setDirectory(homeDir));
                     doExecute(hive);
                 } catch (Exception ex) {
                     builder.append("Failed: " + ExceptionHelper.mapExceptionCausesToReason(ex));
                 } finally {
-                    hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
+                    lck.unlock();
                 }
             }
             builder.append("\n");

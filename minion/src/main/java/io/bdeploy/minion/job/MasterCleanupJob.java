@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.quartz.CronScheduleBuilder;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -43,6 +44,7 @@ import io.bdeploy.ui.cleanup.CleanupHelper;
 /**
  * A job that cleans artifacts that are not referenced any more.
  */
+@DisallowConcurrentExecution
 public class MasterCleanupJob implements Job {
 
     public static final JobKey JOB_KEY = new JobKey("Cleanup", "Master");

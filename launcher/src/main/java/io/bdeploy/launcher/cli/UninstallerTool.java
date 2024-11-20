@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.op.DirectoryLockOperation;
-import io.bdeploy.bhive.op.DirectoryReleaseOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -105,9 +104,8 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     /** Uninstall the given application and removes all not required artifacts */
     private void doUninstall(BHive hive, String appId) {
+        var lck = hive.execute(new DirectoryLockOperation().setDirectory(homeDir));
         try {
-            hive.execute(new DirectoryLockOperation().setDirectory(homeDir));
-
             log.info("Removing application {}", appId);
 
             // Delegate removal to the delegated application
@@ -152,7 +150,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             // Trigger cleanup to remove from hive and from pool
             new ClientCleanup(hive, lpp).run();
         } finally {
-            hive.execute(new DirectoryReleaseOperation().setDirectory(homeDir));
+            lck.unlock();
         }
     }
 

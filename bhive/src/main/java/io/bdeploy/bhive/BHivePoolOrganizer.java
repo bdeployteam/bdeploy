@@ -1,6 +1,7 @@
 package io.bdeploy.bhive;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,8 +73,6 @@ public class BHivePoolOrganizer {
         Map<String, BHive> hivesById = new TreeMap<>();
         bhives.forEach(h -> hivesById.put(h.getUri().toString(), h));
 
-        log.info("Begin re-organization of {} hives using {}", bhives.size(), pool);
-
         try (ActionHandle org = as.start(new Action(Actions.REORGANIZE_POOL, null, null, pool.toString()),
                 ActionExecution.fromSystem())) {
             // very low level as we are the only ones allowed to *write* to the pool
@@ -104,10 +103,9 @@ public class BHivePoolOrganizer {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("Reading all referenced objects");
+                log.debug("Moving with threshold {}", usageThreshold);
             }
 
-            log.info("Moving with threshold {}", usageThreshold);
             LongAdder count = new LongAdder();
             Map<String, List<ObjectId>> toRemove = new TreeMap<>();
 
@@ -144,7 +142,9 @@ public class BHivePoolOrganizer {
                 removeFromHives(hivesById, count.sum(), toRemove);
             }
 
-            log.info("Checked or moved {} referenced objects to the pool", count.sum());
+            if (log.isDebugEnabled()) {
+                log.debug("Checked or moved {} referenced objects to the pool", count.sum());
+            }
 
             // cleanup of pool. look at all objects in pool - if it does not exist in the orefdb -> remove
             // pruning the pool is way easier than pruning a bhive! we do not need to care about concurrency.
@@ -170,8 +170,6 @@ public class BHivePoolOrganizer {
             // delete the temporary reference counter db.
             PathHelper.deleteRecursiveRetry(refDbRoot);
         }
-
-        log.info("Finished re-organization.");
     }
 
     private static void removeFromHives(Map<String, BHive> hivesById, long current, Map<String, List<ObjectId>> toRemove) {
@@ -204,6 +202,12 @@ public class BHivePoolOrganizer {
                     // uh oh. this *should* never happen as we found a valid matching file in the origin.
                     throw new IllegalStateException("Cannot move " + id + " to pool, calculated " + calculated);
                 }
+            } catch (NoSuchFileException nsfe) {
+                // this is "ok". if the source hive removed the object
+                if (log.isDebugEnabled()) {
+                    log.debug("Cannot move {} to pool, source hive removed it", id, nsfe);
+                }
+                continue;
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot move " + id, e);
             }
@@ -219,8 +223,10 @@ public class BHivePoolOrganizer {
             return;
         }
 
-        // if we got here no hive had a valid source for the object -> bad!
-        throw new IllegalStateException("No origin BHive was able to supply a valid object for " + id);
+        // "OK". The object was removed from all potential sources so we could not get a hold of it.
+        // This means that a prune job concurrently discovered that it is no longer required. This in
+        // turn means that it is OK to not insert the object in the pool.
+        log.info("Ignoring missing source object while moving to pool: {}", id);
     }
 
     /**
@@ -243,6 +249,7 @@ public class BHivePoolOrganizer {
             log.info("Re-organizing pool {} using {} BHives and threshold {}", entry.getKey(), entry.getValue().size(),
                     usageThreshold);
             new BHivePoolOrganizer(entry.getKey(), usageThreshold, as).reorganize(entry.getValue());
+            log.info("Finished re-organizing pool {}", entry.getKey());
         }
     }
 

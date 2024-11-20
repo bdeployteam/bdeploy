@@ -92,7 +92,14 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     private static final Supplier<String> LOCK_CONTENT = () -> Long.toString(ProcessHandle.current().pid());
 
     /** Validator will check whether the writing PID of the lock file is still there. */
-    private static final Predicate<String> LOCK_VALIDATOR = pid -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
+    private static final Predicate<String> LOCK_VALIDATOR = pid -> {
+        var stored = Long.parseLong(pid);
+        var handle = ProcessHandle.of(stored);
+        if (log.isDebugEnabled()) {
+            log.debug("PID {} is still running: {} (our PID: {})", stored, handle.isPresent(), ProcessHandle.current().pid());
+        }
+        return handle.isPresent();
+    };
 
     public @interface MasterConfig {
 

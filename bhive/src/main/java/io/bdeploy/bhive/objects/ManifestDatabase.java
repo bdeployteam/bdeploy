@@ -189,6 +189,9 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
                 Files.write(pathForKey, StorageHelper.toRawBytes(manifest), StandardOpenOption.SYNC, StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING);
             } else {
+                if (!PathHelper.exists(tmp)) {
+                    PathHelper.mkdirs(tmp);
+                }
                 Path tmpFile = Files.createTempFile(tmp, "mf-", ".tmp");
                 try {
                     Files.write(tmpFile, StorageHelper.toRawBytes(manifest), StandardOpenOption.SYNC, StandardOpenOption.CREATE,

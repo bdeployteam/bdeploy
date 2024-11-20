@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.quartz.CronScheduleBuilder;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -32,6 +33,7 @@ import io.bdeploy.minion.MinionRoot;
 /**
  * A job that cleans top-level files and directories that are older than one hour.
  */
+@DisallowConcurrentExecution
 public class CleanupDownloadDirJob implements Job {
 
     public static final JobKey JOB_KEY = new JobKey("CleanupDownloadDirJob", "Master");

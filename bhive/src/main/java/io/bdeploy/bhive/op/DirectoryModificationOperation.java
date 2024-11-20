@@ -6,26 +6,25 @@ import java.nio.file.Path;
 
 import io.bdeploy.bhive.BHive;
 
-public abstract class DirectoryModificationOperation extends BHive.Operation<Void> {
+public abstract class DirectoryModificationOperation<T> extends BHive.Operation<T> {
 
     protected static final int RETRIES = 100_000;
     protected static final int SLEEP_MILLIS = 10;
     protected Path directory;
 
     @Override
-    public Void call() throws Exception {
+    public T call() throws Exception {
         assertNotNull(directory, "No directory to lock.");
-        doCall(directory.resolve(".lock"));
-        return null;
+        return doCall(directory.resolve(".lock"));
     }
 
     /**
      * Sets the directory that should be locked.
      */
-    public DirectoryModificationOperation setDirectory(Path directory) {
+    public DirectoryModificationOperation<T> setDirectory(Path directory) {
         this.directory = directory;
         return this;
     }
 
-    protected abstract void doCall(Path lockFile);
+    protected abstract T doCall(Path lockFile);
 }

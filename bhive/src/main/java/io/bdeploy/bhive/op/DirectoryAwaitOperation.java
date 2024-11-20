@@ -11,13 +11,13 @@ import io.bdeploy.common.util.Threads;
  * @see DirectoryLockOperation
  * @see DirectoryReleaseOperation
  */
-public class DirectoryAwaitOperation extends DirectoryModificationOperation {
+public class DirectoryAwaitOperation extends DirectoryModificationOperation<Void> {
 
     @Override
-    public void doCall(Path lockFile) {
+    public Void doCall(Path lockFile) {
         for (int i = 0; i < RETRIES; ++i) {
             if (!PathHelper.exists(lockFile) || !DirectoryLockOperation.isLockFileValid(lockFile, getLockContentValidator())) {
-                return;
+                return null;
             }
             if (!Threads.sleep(SLEEP_MILLIS)) {
                 break;
