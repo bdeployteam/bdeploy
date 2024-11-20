@@ -511,13 +511,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Updates the launcher if there is a new version available. */
-    private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
+    private void doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
         if (VersionHelper.isRunningUndefined()) {
             log.warn("Skipping self update. The local running version is not defined.");
-            return null;
+            return;
         }
         log.info("Checking for launcher updates...");
-        return doExecuteLocked(hive, reporter, () -> {
+        doExecuteLocked(hive, reporter, () -> {
             long start = System.currentTimeMillis();
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
             log.info("Took {}ms to calculate the latest launcher version.", System.currentTimeMillis() - start);
