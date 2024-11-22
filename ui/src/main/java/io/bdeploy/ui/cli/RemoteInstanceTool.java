@@ -323,6 +323,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             InstanceTemplateReferenceDescriptor desc = StorageHelper.fromYamlStream(is,
                     InstanceTemplateReferenceDescriptor.class);
 
+            // verify that instance template has at least on template group mapping.
+            if (desc.defaultMappings == null || desc.defaultMappings.isEmpty()) {
+                throw new IllegalArgumentException("Instance " + desc.name + " does not map to any nodes.");
+            }
+
             InstanceTemplateReferenceResultDto result = ir.getTemplateResource().createFromTemplate(desc, config.purpose(),
                     config.server(), config.system());
 
