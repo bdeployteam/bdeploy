@@ -7,6 +7,10 @@ icon: git-branch
 
 **Nodes** are optional and only required in the case that the application that you want to deploy should run on different servers but be managed from a certain master. By default a master is itself a node as well where applications can be deployed to.
 
+!!!info Note
+Please note that nodes are not available on `CENTRAL` servers as they do not support this feature.
+!!!
+
 ## Initialization
 
 **Nodes** must be initialized on the corresponding machines (or on the same machine using non-default ports; the default port is 7701).
