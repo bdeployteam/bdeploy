@@ -407,7 +407,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Continuing launch in online mode...");
                 serverVersion = getServerVersion(clickAndStart);
 
-                doSelfUpdate(hive, reporter, serverVersion);
+                doSelfUpdate(hive, reporter, serverVersion); // This call does NOT return if a launcher update is deemed necessary!
 
                 if (serverVersion.compareTo(VersionHelper.parse("4.3.0")) >= 0) {
                     // The source server could have been migrated/converted to node. in this case, display a message.
@@ -420,7 +420,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     }
                 }
 
-                doInstall(hive, reporter, splash, auditor);
+                doInstall(hive, reporter, splash, auditor, serverVersion);
             }
 
             // Launch the application
@@ -510,14 +510,17 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Updates the launcher if there is a new version available. */
-    private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
+    /**
+     * Updates the launcher if there is a new version available. Note that this method <b>does not return</b> if a launcher update
+     * is deemed necessary.
+     */
+    private void doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
         if (VersionHelper.isRunningUndefined()) {
             log.warn("Skipping self update. The local running version is not defined.");
-            return null;
+            return;
         }
         log.info("Checking for launcher updates...");
-        return doExecuteLocked(hive, reporter, () -> {
+        doExecuteLocked(hive, reporter, () -> {
             long start = System.currentTimeMillis();
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
             log.info("Took {}ms to calculate the latest launcher version.", System.currentTimeMillis() - start);
@@ -565,7 +568,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         return versions.firstEntry();
     }
 
-    /** Checks for updates and installs them if required. */
+    /**
+     * Checks for updates and installs them if required. Note that this method <b>does not return</b> if a launcher update is
+     * deemed necessary.
+     */
     private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter, Map.Entry<Version, Key> requiredLauncher) {
         Version latestVersion = requiredLauncher.getKey();
         if (latestVersion.compareTo(runningVersion) <= 0) {
@@ -649,7 +655,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         doExit(UpdateHelper.CODE_RESTART);
     }
 
-    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor) {
+    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor,
+            Version serverVersion) {
         // Update splash with the fetched branding information.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding == null) {
@@ -666,32 +673,43 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if necessary.
         doExecuteLocked(hive, reporter, () -> {
-            installApplication(hive, splash, reporter, clientAppCfg, auditor);
+            installApplication(hive, splash, reporter, clientAppCfg, auditor, serverVersion);
             return null;
         });
     }
 
     /** Installs the application with all requirements if necessary. */
     private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
-            ClientApplicationConfiguration clientAppCfg, Auditor auditor) {
+            ClientApplicationConfiguration clientAppCfg, Auditor auditor, Version serverVersion) {
         // Update scripts
         OperatingSystem os = OsHelper.getRunningOs();
         updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
         updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association", fileAssocScriptsDir);
 
-        // Check if the application directory is already present
+        // Check if the application has any missing artifacts
+        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
         Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
         if (missing.isEmpty()) {
-            log.info("Application is already installed. Nothing to install/update.");
+            log.info("Application has no missing artifacts.");
+            if (readOnlyHomeDir) {
+                log.info("Cannot update server version because home directory is read-only.");
+            } else {
+                ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
+                ClientSoftwareConfiguration config = manifest.readNewest(appCfg.id, false);
+                if (config != null) {
+                    config.metadata.serverVersion = serverVersion.toString();
+                    manifest.update(config.clickAndStart.applicationId, config);
+                    log.info("Updated server version to {}", config.metadata.serverVersion);
+                }
+            }
             return;
         }
-        log.info("Application needs to be installed/updated: {}", missing);
+
+        log.info("Application has missing artifacts: {}", missing);
 
         // Throw an exception if we do not have write permissions in the directory
-        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
-        String appName = appCfg.name;
         if (readOnlyHomeDir) {
-            throw new SoftwareUpdateException(appName, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
+            throw new SoftwareUpdateException(appCfg.name, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
         }
 
         // Fetch the application and all the requirements
@@ -761,7 +779,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
         newConfig.clickAndStart = clickAndStart;
-        newConfig.metadata = ClientApplicationDto.create(clickAndStart, clientAppCfg);
+        newConfig.metadata = ClientApplicationDto.create(clickAndStart, clientAppCfg, serverVersion);
         newConfig.clientAppCfg = clientAppCfg;
         newConfig.requiredSoftware.addAll(applications);
         manifest.update(clickAndStart.applicationId, newConfig);

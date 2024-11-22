@@ -21,6 +21,7 @@ import io.bdeploy.launcher.LauncherPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
+import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
 /**
@@ -71,7 +72,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
 
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration csc = manifest.readNewest(clickAndStart.applicationId, false);
-        csc.metadata = ClientApplicationDto.create(clickAndStart, cac);
+        csc.metadata = ClientApplicationDto.create(clickAndStart, cac, LauncherTool.getServerVersion(clickAndStart));
         csc.clientAppCfg = cac;
         manifest.update(clickAndStart.applicationId, csc);
     }
