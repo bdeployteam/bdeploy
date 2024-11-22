@@ -7,8 +7,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'add-user',
+  selector: 'app-add-user',
   templateUrl: './add-user.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -18,7 +18,7 @@ describe('Admin UI Tests (Accounts ASVS)', () => {
       cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
     });
 
-    cy.inMainNavFlyin('add-user', () => {
+    cy.inMainNavFlyin('app-add-user', () => {
       cy.fillFormInput('name', 'test');
       cy.fillFormInput('fullName', 'Test User');
       cy.fillFormInput('email', 'example@example.org');

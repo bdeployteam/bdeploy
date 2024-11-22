@@ -45,7 +45,7 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
     });
 
-    cy.inMainNavFlyin('add-user', () => {
+    cy.inMainNavFlyin('app-add-user', () => {
       cy.fillFormInput('name', 'test');
       cy.fillFormInput('fullName', 'Test User');
       cy.fillFormInput('email', 'example@example.org');
@@ -55,7 +55,7 @@ describe('Admin UI Tests (Accounts)', () => {
 
     cy.screenshot('Doc_Admin_User_Accounts_Add');
 
-    cy.inMainNavFlyin('add-user', () => {
+    cy.inMainNavFlyin('app-add-user', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
@@ -118,7 +118,7 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.get('button[data-cy^="Assign Permission"]').click();
     });
 
-    cy.inMainNavFlyin('assign-permission', () => {
+    cy.inMainNavFlyin('app-user-assign-permission', () => {
       cy.fillFormSelect('permission', 'READ');
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
@@ -144,13 +144,13 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.get('button[data-cy^="Assign Permission"]').click();
     });
 
-    cy.inMainNavFlyin('assign-permission', () => {
+    cy.inMainNavFlyin('app-user-assign-permission', () => {
       cy.fillFormSelect('permission', 'ADMIN');
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Permissions_Add');
 
-    cy.inMainNavFlyin('assign-permission', () => {
+    cy.inMainNavFlyin('app-user-assign-permission', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
@@ -170,7 +170,7 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.get('button[data-cy^="Edit"]').click();
     });
 
-    cy.inMainNavFlyin('edit-user', () => {
+    cy.inMainNavFlyin('app-edit-user', () => {
       cy.fillFormInput('fullName', 'Different User');
       cy.fillFormInput('email', 'new@example.org');
       cy.get('button[data-cy="Apply"]').should('be.enabled').click();

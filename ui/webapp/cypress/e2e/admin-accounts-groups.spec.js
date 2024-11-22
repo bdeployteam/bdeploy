@@ -36,7 +36,7 @@ describe('Admin UI Tests (User Groups)', () => {
       cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
     });
 
-    cy.inMainNavFlyin('add-user', () => {
+    cy.inMainNavFlyin('app-add-user', () => {
       cy.fillFormInput('name', userName);
       cy.fillFormInput('fullName', 'Test User');
       cy.fillFormInput('email', `${userName}@example.org`);
@@ -58,14 +58,14 @@ describe('Admin UI Tests (User Groups)', () => {
       cy.intercept({ method: 'PUT', url: '/api/auth/admin/user-groups' }).as('createUserGroup');
     });
 
-    cy.inMainNavFlyin('add-user-group', () => {
+    cy.inMainNavFlyin('app-add-user-group', () => {
       cy.fillFormInput('name', userGroupName);
       cy.fillFormInput('description', 'Test User Group');
     });
 
     cy.screenshot('Doc_Admin_User_Groups_Add');
 
-    cy.inMainNavFlyin('add-user-group', () => {
+    cy.inMainNavFlyin('app-add-user-group', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
@@ -90,13 +90,13 @@ describe('Admin UI Tests (User Groups)', () => {
       cy.get('button[data-cy^="Assign Permission"]').click();
     });
 
-    cy.inMainNavFlyin('assign-user-group-permission', () => {
+    cy.inMainNavFlyin('app-assign-user-group-permission', () => {
       cy.fillFormSelect('permission', 'ADMIN');
     });
 
     cy.screenshot('Doc_Admin_User_Groups_Permissions_Add');
 
-    cy.inMainNavFlyin('assign-user-group-permission', () => {
+    cy.inMainNavFlyin('app-assign-user-group-permission', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
       cy.waitUntilContentLoaded();
     });
