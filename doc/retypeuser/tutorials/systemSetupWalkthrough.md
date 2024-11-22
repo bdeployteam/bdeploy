@@ -81,9 +81,9 @@ If you lack the permission to create an instance group, find an administrator of
 
 ## Connecting the Servers
 
-### Connecting the managed and the node server
+### Connecting the node to the managed server
 
-Connect the node to the managed server. You need to locate the file that was created during init of the node (`--nodeIdentFile` argument of init). Execute this command on the managed server:
+In order to connect the node to the managed server you need to locate the file that was created during init of the node (`--nodeIdentFile` argument of init). Execute this command on the node server:
 
 ```
 bdeploy remote-node --useLogin=managed --add=<NODE_NAME> --nodeIdentFile=<PATH_TO_NODE_TOKEN>
@@ -95,7 +95,7 @@ You can use this command to look at all currently connected nodes of the managed
 bdeploy remote-node --useLogin=managed --list
 ```
 
-### Connecting the central and the managed server
+### Connecting the managed to the central server
 
 1. Create a `managed-ident.txt`:
 
