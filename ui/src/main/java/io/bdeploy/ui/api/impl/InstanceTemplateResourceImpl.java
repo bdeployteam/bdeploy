@@ -116,9 +116,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         if (instance.fixedVariables == null) {
             instance.fixedVariables = Collections.emptyList();
         }
-        if (instance.defaultMappings == null) {
-            instance.defaultMappings = Collections.emptyList();
-        }
 
         // 1. find and verify product.
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
@@ -184,8 +181,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         // 5. finally create the instance on the target.
         var result = createInstanceFromTemplateRequest(remote, systemKey.orElse(null), instance, product.key, groupToNode, null,
-                instance.fixedVariables,
-                purpose);
+                instance.fixedVariables, purpose);
 
         if (result.status != InstanceTemplateReferenceStatus.ERROR) {
             // sync in case of central and success... :)
@@ -324,8 +320,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             if (tgroup.type == ApplicationType.CLIENT) {
                 createApplicationsForClientGroup(node, tgroup, apps, tvr, appFilter, globalLookup);
             } else {
-                createApplicationsForServerGroup(node, tgroup, apps, tvr, nodeStates.get(node.nodeName), appFilter,
-                        globalLookup);
+                createApplicationsForServerGroup(node, tgroup, apps, tvr, nodeStates.get(node.nodeName), appFilter, globalLookup);
             }
         }
 
@@ -348,8 +343,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                             Status.EXPECTATION_FAILED);
                 }
 
-                node.nodeConfiguration.applications.add(
-                        createApplicationFromTemplate(reqApp, clientApp, node, tvr, globalLookup));
+                node.nodeConfiguration.applications
+                        .add(createApplicationFromTemplate(reqApp, clientApp, node, tvr, globalLookup));
             }
         }
 
@@ -357,8 +352,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
     private static void createApplicationsForServerGroup(InstanceNodeConfigurationDto node,
             FlattenedInstanceTemplateGroupConfiguration group, List<ApplicationManifest> apps, TemplateVariableResolver tvr,
-            MinionStatusDto status,
-            BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
+            MinionStatusDto status, BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter,
             Function<String, LinkedValueConfiguration> globalLookup) {
         OperatingSystem targetOs = status.config.os;
         ApplicationType groupType = group.type == null ? ApplicationType.SERVER : group.type;
@@ -399,8 +393,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         ApplicationDescriptor appDesc = am.getDescriptor();
 
         cfg.id = UuidHelper.randomId();
-        cfg.name = reqApp.name == null
-                ? am.getDescriptor().name
+        cfg.name = reqApp.name == null ? am.getDescriptor().name
                 : TemplateHelper.process(reqApp.name, tvr, Variables.TEMPLATE.shouldResolve());
         cfg.application = am.getKey();
         cfg.pooling = appDesc.pooling;
