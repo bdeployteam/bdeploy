@@ -125,12 +125,27 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("The description to set for the created/updated instance")
         String description();
 
-        @Help("The system ID to set for the created/updated instance")
-        String system();
-
         @Help("The purpose to set for the created/updated instance")
         @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         InstancePurpose purpose();
+
+        @Help("The system ID to set for the created/updated instance")
+        String system();
+
+        @Help(value = "Enable 'Automatic Startup' for the instance", arg = false) //
+        boolean enableAutoStart() default false;
+
+        @Help(value = "Disable 'Automatic Startup' for the instance", arg = false) //
+        boolean disableAutoStart() default false;
+
+        @Help(value = "Enable 'Automatic Uninstallation' for the instance", arg = false) //
+        boolean enableAutoUninstall() default false;
+
+        @Help(value = "Disable 'Automatic Uninstallation' for the instance", arg = false) //
+        boolean disableAutoUninstall() default false;
+
+        @Help("The new value for the product version regular expression. Only product versions matching this expression will be presented when updating the product version.")
+        String productVersionRegex();
 
         @Help("The name of the managed server, only used on CENTRAL. When creating instances, this is the target server. When listing instances, it serves as a filter.")
         String server();
@@ -173,11 +188,13 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             } else {
                 return doCreate(remote, ir, config);
             }
-        } else if (config.update()) {
-            return doUpdate(remote, ir, config);
         }
 
-        if (config.open()) {
+        helpAndFailIfMissing(config.uuid(), "--uuid missing");
+
+        if (config.update()) {
+            return doUpdate(remote, ir, config);
+        } else if (config.open()) {
             String uuid = parseUuid(config.uuid());
             if (uuid == null) {
                 return BrowserHelper.openUrl(remote, "/#/instances/browser/" + config.instanceGroup())//
@@ -188,11 +205,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                         ? createResultWithSuccessMessage("Successfully opened the instance dashboard")//
                         : createResultWithErrorMessage("Failed to open the instance dashboard");
             }
-        }
-
-        helpAndFailIfMissing(config.uuid(), "--uuid missing");
-
-        if (config.exportTo() != null) {
+         } else if (config.exportTo() != null) {
             return doExport(ir, config);
         } else if (config.importFrom() != null) {
             return doImport(ir, config);
@@ -224,15 +237,27 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         String description = config.description();
         InstancePurpose purpose = config.purpose();
         String system = config.system();
+        Boolean autoStartup = config.disableAutoStart() ? Boolean.FALSE : config.enableAutoStart() ? Boolean.TRUE : null;
+        Boolean autoUninstall = config.disableAutoUninstall()
+                ? Boolean.FALSE
+                : config.enableAutoUninstall() ? Boolean.TRUE : null;
+        String productRegEx = config.productVersionRegex();
 
         boolean setName = !StringHelper.isNullOrBlank(name);
         boolean setDescription = !StringHelper.isNullOrBlank(description);
         boolean setPurpose = purpose != null;
         boolean setSystem = !StringHelper.isNullOrBlank(system);
+        boolean setAutoStartup = autoStartup != null;
+        boolean setAutoUninstall = autoUninstall != null;
+        boolean setProductRegEx = !StringHelper.isNullOrBlank(productRegEx);
 
-        if (!setName && !setDescription && !setPurpose && !setSystem) {
-            helpAndFail("ERROR: Missing --name, --description, --purpose or --system");
+        if (!setName && !setDescription && !setPurpose && !setSystem && !setAutoStartup && !setAutoUninstall
+                && !setProductRegEx) {
+            helpAndFail(
+                    "ERROR: Missing --name, --description, --purpose, --system, any of the --enable/--disable flags or --productVersionRegex");
         }
+
+        Manifest.Key sysKey = null;
 
         DataResult result = createSuccess();
         if (setName) {
@@ -244,12 +269,20 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         if (setPurpose) {
             result.addField("New Purpose", purpose);
         }
-        Manifest.Key sysKey = null;
         if (setSystem) {
             sysKey = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
                     .getSystemResource(config.instanceGroup()).list().stream().filter(s -> s.config.id.equals(system)).findAny()
                     .orElseThrow(() -> new IllegalArgumentException("Cannot find specified system on server: " + system)).key;
             result.addField("New System", system);
+        }
+        if (setAutoStartup) {
+            result.addField("New value for automatic startup", autoStartup);
+        }
+        if (setAutoUninstall) {
+            result.addField("New value for automatic uninstallation", autoUninstall);
+        }
+        if (setProductRegEx) {
+            result.addField("New product version regular expression", productRegEx);
         }
 
         BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
@@ -264,16 +297,25 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
             InstanceConfiguration cfg = ir.readVersion(uuid, currentTag);
             if (setName) {
-                cfg.name = config.name();
+                cfg.name = name;
             }
             if (setDescription) {
-                cfg.description = config.description();
+                cfg.description = description;
             }
             if (setPurpose) {
-                cfg.purpose = config.purpose();
+                cfg.purpose = purpose;
             }
             if (setSystem) {
                 cfg.system = sysKey;
+            }
+            if (setAutoStartup) {
+                cfg.autoStart = autoStartup;
+            }
+            if (setAutoUninstall) {
+                cfg.autoUninstall = autoUninstall;
+            }
+            if (setProductRegEx) {
+                cfg.productFilterRegex = productRegEx;
             }
 
             ManagedMasterDto server = notCentral ? null
@@ -312,8 +354,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         InstanceConfiguration cfg = new InstanceConfiguration();
         cfg.id = UuidHelper.randomId();
-        cfg.autoUninstall = true;
-        cfg.autoStart = false;
+        cfg.autoUninstall = !config.disableAutoUninstall(); // default = true (true unless disabled)
+        cfg.autoStart = config.enableAutoStart(); // default = false (false unless enabled)
         cfg.description = config.description();
         cfg.name = config.name();
         cfg.product = new Manifest.Key(config.product(), config.productVersion());
