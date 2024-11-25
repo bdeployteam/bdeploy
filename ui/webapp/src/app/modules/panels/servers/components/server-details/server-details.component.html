@@ -64,13 +64,14 @@
           (click)="doUpdateInstall(server)"
         ></app-bd-button>
       </ng-container>
-      <app-bd-expand-button text="Nodes" icon="dns">
-        <app-bd-data-display [records]="minions" [columns]="columns">
-          <app-bd-no-data>
-            <strong>This version is not used in any instance.</strong>
-          </app-bd-no-data>
-        </app-bd-data-display>
-      </app-bd-expand-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [toggle]="false"
+        icon="dns"
+        text="Nodes"
+        [relative]="true"
+        [route]="['nodes']"
+      ></app-bd-panel-button>
       <app-bd-server-sync-button [collapsed]="false" [server]="server"></app-bd-server-sync-button>
       <app-bd-panel-button
         text="Edit Server Details..."

@@ -1,0 +1,11 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar [header]="server?.hostName + ' nodes'" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display [records]="minions" [columns]="columns">
+      <app-bd-no-data>
+        <strong>This server does not have any nodes</strong>
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -9,12 +9,19 @@ import { LinkCentralComponent } from './components/link-central/link-central.com
 import { LinkManagedComponent } from './components/link-managed/link-managed.component';
 import { ServerDetailsComponent } from './components/server-details/server-details.component';
 import { ServerEditComponent } from './components/server-details/server-edit/server-edit.component';
+import { ServerNodesComponent } from './components/server-nodes/server-nodes.component';
 
 const SERVERS_ROUTES: Route[] = [
   {
     path: 'details/:server',
     component: ServerDetailsComponent,
     canActivate: [ScopedAdminGuard],
+  },
+  {
+    path: 'details/:server/nodes',
+    component: ServerNodesComponent,
+    canActivate: [ScopedAdminGuard],
+    data: { max: true },
   },
   {
     path: 'details/:server/edit',
