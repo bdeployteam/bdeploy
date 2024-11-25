@@ -51,7 +51,7 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
         @Help("The node remote authentication token as file")
         String nodeTokenFile();
 
-        @Help("A node identification file which can be used instead of the --add, --node and --nodeToken* parameters")
+        @Help("A node identification file which can be used instead of the --add, --node and --nodeToken parameters")
         String nodeIdentFile();
 
         @Help(value = "When given, list all known nodes.", arg = false)
