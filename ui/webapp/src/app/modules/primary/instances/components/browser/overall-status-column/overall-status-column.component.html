@@ -22,6 +22,14 @@
       matTooltipShowDelay="500"
       >warning</mat-icon
     >
+    <mat-icon
+      *ngIf="status.status === 'INDETERMINATE'"
+      class="bd-orange-text material-symbols-filled"
+      [matTooltip]="status.messages?.join('\n')"
+      matTooltipClass="tooltip-with-newline"
+      matTooltipShowDelay="500"
+    >hourglass_empty
+    </mat-icon>
     <span
       class="local-timestamp"
       matTooltip="The time when the overall status was updated last."
