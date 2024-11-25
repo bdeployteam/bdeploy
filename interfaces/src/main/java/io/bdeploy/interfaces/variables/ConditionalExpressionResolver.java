@@ -21,7 +21,7 @@ public class ConditionalExpressionResolver extends PrefixResolver {
     @Override
     protected String doResolve(String variable) {
         // format is "<expression>?<value-if-true>:<value-if-false>"
-        // expample: "X:instance-var?yay:oh-nooo"
+        // example: "X:instance-var?yay:oh-nooo"
         Matcher matcher = EXPR_PATTERN.matcher(variable);
 
         if (matcher.matches()) {
