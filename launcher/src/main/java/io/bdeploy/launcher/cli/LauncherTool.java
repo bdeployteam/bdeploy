@@ -962,6 +962,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
                     .redirectOutput(Redirect.INHERIT);
 
+            switch (clientCfg.appDesc.processControl.workingDirectory) {
+                case AUTOMATIC:
+                    if (clientCfg.appDesc.processControl.startScriptName == null) {
+                        b.directory(appDir.toFile());
+                    }
+                    break;
+                case SET:
+                    b.directory(appDir.toFile());
+                    break;
+                case DONT_SET:
+                    break; // don't do anything
+            }
+
             if (pc.startEnv != null) {
                 b.environment().putAll(pc.startEnv);
             }
