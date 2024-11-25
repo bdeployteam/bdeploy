@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":bhive" external.linked.project.path="$MODULE_DIR$/../../../bhive" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="io.bdeploy" external.system.module.version="7.4.0-SNAPSHOT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../bhive">
+      <excludeFolder url="file://$MODULE_DIR$/../../../bhive/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../bhive/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../bhive/out" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
