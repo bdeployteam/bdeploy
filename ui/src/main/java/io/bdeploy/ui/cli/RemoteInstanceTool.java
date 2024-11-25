@@ -147,7 +147,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help(value = "Use this flag to avoid confirmation prompt when deleting instance.", arg = false)
         boolean yes() default false;
 
-        @Help(value = "Use this flag to open the dashboard of the current instance in the web UI.", arg = false)
+        @Help(value = "Use this flag to open the dashboard of the instance group in the web UI. If an instance uuid is given, it instead opens the dashboard of the specified instance.",
+              arg = false)
         boolean open() default false;
     }
 
@@ -176,17 +177,20 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             return doUpdate(remote, ir, config);
         }
 
-        helpAndFailIfMissing(config.uuid(), "--uuid missing");
-
         if (config.open()) {
-            String[] uuid = config.uuid();
-            if (uuid.length != 1) {
-                return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+            String uuid = parseUuid(config.uuid());
+            if (uuid == null) {
+                return BrowserHelper.openUrl(remote, "/#/instances/browser/" + config.instanceGroup())//
+                        ? createResultWithSuccessMessage("Successfully opened the instance group dashboard")//
+                        : createResultWithErrorMessage("Failed to open the instance group dashboard");
+            } else {
+                return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + uuid)//
+                        ? createResultWithSuccessMessage("Successfully opened the instance dashboard")//
+                        : createResultWithErrorMessage("Failed to open the instance dashboard");
             }
-            return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + uuid[0])//
-                    ? createResultWithSuccessMessage("Successfully opened the dashboard")//
-                    : createResultWithErrorMessage("Failed to open the dashboard");
         }
+
+        helpAndFailIfMissing(config.uuid(), "--uuid missing");
 
         if (config.exportTo() != null) {
             return doExport(ir, config);
@@ -199,6 +203,16 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         } else {
             return createNoOp();
         }
+    }
+
+    private static String parseUuid(String[] uuidArray) {
+        if (uuidArray == null) {
+            return null;
+        }
+        if (uuidArray.length > 1) {
+            throw new IllegalArgumentException("At most 1 uuid may be provided for --open.");
+        }
+        return uuidArray[0];
     }
 
     private DataResult doUpdate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
