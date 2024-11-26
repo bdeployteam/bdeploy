@@ -253,6 +253,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
         return masters.getManagedMasters().values().stream().map(e -> {
             e.auth = null;
+            // also clear auth of all nodes.
+            e.minions.values().forEach((k, v) -> v.remote = new RemoteService(v.remote.getUri()));
             return e;
         }).toList();
     }
@@ -274,6 +276,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // clear token - don't transfer over the wire if not required.
         dto.auth = null;
+        dto.minions.values().forEach((k, v) -> v.remote = new RemoteService(v.remote.getUri()));
         return dto;
     }
 

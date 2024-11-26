@@ -446,6 +446,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
                 managedMaster = masters.getManagedMaster(selected);
                 managedMaster.auth = null; // make sure to clear auth.
+                managedMaster.minions.values().forEach((k, v) -> v.remote = new RemoteService(v.remote.getUri()));
             } catch (WebApplicationException e) {
                 log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
                 if (log.isDebugEnabled()) {
