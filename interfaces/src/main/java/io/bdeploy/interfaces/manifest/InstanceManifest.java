@@ -299,6 +299,7 @@ public class InstanceManifest {
     public static Set<String> quickGuessIds(BHiveExecution hive) {
         return hive.execute(new BHive.Operation<Set<String>>() {
 
+            @Override
             public Set<String> call() {
                 try (Stream<Path> walk = Files.walk(getManifestDatabase().getRoot(), 1)) {
                     return walk.filter(Files::isDirectory).map(Path::getFileName).map(Path::toString)
@@ -389,7 +390,7 @@ public class InstanceManifest {
         }
 
         private Manifest.Key doInsertLocked(BHive hive) {
-            RuntimeAssert.assertNotNull(config.name, "Missing description");
+            RuntimeAssert.assertNotNull(config.name, "Missing name");
             RuntimeAssert.assertNotNull(config.id, "Missing id");
             RuntimeAssert.assertNotNull(config.product, "Missing product");
 

@@ -189,5 +189,31 @@ class RemoteInstanceCliTest {
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all");
         assertEquals(0, result.size());
+
+        /*
+         * let's create instance with name unitTestInstance
+         */
+        result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--create", "--name=unitTestInstance", "--purpose=DEVELOPMENT", "--product=customer/product",
+                "--productVersion=1.0.0.1234");
+        String createdInstanceId = result.get(0).get("InstanceId");
+
+        result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--list", "--all");
+        assertEquals(1, result.size());
+        assertEquals(createdInstanceId, result.get(0).get("Id"));
+        assertEquals("unitTestInstance", result.get(0).get("Name"));
+        assertEquals("1", result.get(0).get("Version"));
+        assertEquals("DEVELOPMENT", result.get(0).get("Purpose"));
+
+        /* let's delete instance */
+        result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + createdInstanceId, "--delete", "--yes");
+
+        result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--list", "--all");
+        assertEquals(0, result.size());
+
     }
+
 }
