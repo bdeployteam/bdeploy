@@ -109,8 +109,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("List only a certain amount of versions per instance. Specify zero for no limit.")
         int limit() default 5;
 
-        @Help("Create an instance with the given name")
-        String create();
+        @Help(value = "Create an instance", arg = false)
+        boolean create() default false;
 
         @Help("When creating the instance, use the provided template YAML")
         @Validator(ExistingPathValidator.class)
@@ -119,7 +119,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("Update the given instances")
         boolean update() default false;
 
-        @Help("The name to set for the updated instance")
+        @Help("The name to set for the created/updated instance")
         String name();
 
         @Help("The description to set for the created/updated instance")
@@ -167,7 +167,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         InstanceResource ir = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(config.instanceGroup());
 
-        if (config.create() != null) {
+        if (config.create()) {
             if (config.template() != null) {
                 return doCreateFromTemplate(remote, ir, config);
             } else {
@@ -288,6 +288,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private DataResult doCreate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        helpAndFailIfMissing(config.name(), "Missing --name");
         helpAndFailIfMissing(config.purpose(), "Missing --purpose");
         helpAndFailIfMissing(config.product(), "Missing --product");
         helpAndFailIfMissing(config.productVersion(), "Missing --productVersion");
@@ -314,7 +315,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         cfg.autoUninstall = true;
         cfg.autoStart = false;
         cfg.description = config.description();
-        cfg.name = config.create();
+        cfg.name = config.name();
         cfg.product = new Manifest.Key(config.product(), config.productVersion());
         cfg.purpose = config.purpose();
         cfg.system = system;
@@ -340,6 +341,10 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             // verify that instance template has at least on template group mapping.
             if (desc.defaultMappings == null || desc.defaultMappings.isEmpty()) {
                 throw new IllegalArgumentException("Instance " + desc.name + " does not map to any nodes.");
+            }
+
+            if (config.name() != null && !config.name().isBlank()) {
+                desc.name = config.name();
             }
 
             InstanceTemplateReferenceResultDto result = ir.getTemplateResource().createFromTemplate(desc, config.purpose(),
