@@ -1380,6 +1380,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                 List<String> stoppedApps = new ArrayList<>();
                 List<String> runningApps = new ArrayList<>();
+                List<String> transitioningApps = new ArrayList<>();
 
                 OverallStatus overallStatus = OverallStatus.RUNNING;
                 List<String> overallStatusMessages = new ArrayList<>();
@@ -1411,23 +1412,56 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                         // instance application, check status
                         ProcessStatusDto status = statusOnNode.getStatus(app.id);
-                        if (status.processState.isStopped()) {
-                            stoppedApps.add(app.name);
-                        } else {
-                            runningApps.add(app.name);
+                        switch (status.processState) {
+                            case RUNNING:
+                            case RUNNING_UNSTABLE:
+                                runningApps.add(app.name);
+                                break;
+                            case STOPPED:
+                            case CRASHED_PERMANENTLY:
+                                stoppedApps.add(app.name);
+                                break;
+                            case RUNNING_STOP_PLANNED:
+                            case RUNNING_NOT_STARTED:
+                            case CRASHED_WAITING:
+                            case RUNNING_NOT_ALIVE:
+                            case STOPPED_START_PLANNED:
+                                transitioningApps.add(app.name);
+                                break;
                         }
                     }
                 }
 
-                if (stoppedApps.isEmpty() && runningApps.isEmpty()) {
-                    // this means that ther are no instance type applications on the instance.
+                // logic for state determination:
+                // * RUNNING: all applications of type `INSTANCE` are running.
+                // * STOPPED: all applications of type `INSTANCE` are stopped.
+                // * WARNING: one or more applications of type `INSTANCE` are stopped.
+                // * INDETERMINATE: one or more applications of type `INSTANCE` are starting or stopping.
+                boolean hasStoppedApps = !stoppedApps.isEmpty();
+                boolean hasRunningApps = !runningApps.isEmpty();
+                boolean hasTransitioningApps = !transitioningApps.isEmpty();
+
+                if (!hasStoppedApps && !hasRunningApps && !hasTransitioningApps) {
+                    // this means that there are no instance type applications on the instance.
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.STOPPED;
                     }
-                } else if (stoppedApps.isEmpty() || runningApps.isEmpty()) {
-                    // valid - either all stopped or all running.
+                } else if (hasRunningApps && !hasStoppedApps && !hasTransitioningApps) {
+                    // valid - nothing stopped, nothing transitioning -> running.
                     if (overallStatus != OverallStatus.WARNING) {
-                        overallStatus = runningApps.isEmpty() ? OverallStatus.STOPPED : OverallStatus.RUNNING;
+                        overallStatus = OverallStatus.RUNNING;
+                    }
+                } else if (hasStoppedApps && !hasRunningApps && !hasTransitioningApps) {
+                    // valid - all stopped, nothing running, nothing transitioning -> stopped
+                    if (overallStatus != OverallStatus.WARNING) {
+                        overallStatus = OverallStatus.STOPPED;
+                    }
+                } else if (hasTransitioningApps) {
+                    // some apps are transitioning -> indeterminate
+                    if (overallStatus != OverallStatus.WARNING) {
+                        overallStatus = OverallStatus.INDETERMINATE;
+                        overallStatusMessages.add(
+                                transitioningApps.size() + " instance type applications are in indeterminate state.");
                     }
                 } else {
                     // not ok, some apps started, some stopped - that will be a warning.

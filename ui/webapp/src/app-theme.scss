@@ -120,6 +120,7 @@ $mdc-typography-config: mat.m2-define-typography-config(
     --bd-warn: #{mat.m2-get-color-from-palette($warn)};
     --bd-warn-darker: #{mat.m2-get-color-from-palette($warn, 900)};
     --bd-main-bar: #{mat.m2-get-color-from-palette($maintb)};
+    --bd-orange: darkorange;
 
     --bd-text: #{mat.m2-get-color-from-palette($fg, "text")};
     --bd-text-secondary: #{mat.m2-get-color-from-palette($fg, "secondary-text")};

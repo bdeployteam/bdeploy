@@ -32,6 +32,16 @@ public class ProcessControlDescriptor {
         INSTANCE
     }
 
+    /** How to deal with working directories for applications when launching. */
+    public enum ApplicationDirectoryMode {
+        /** Determine automatically whether to set the working directory based on whether a startScriptName is set */
+        @JsonEnumDefaultValue AUTOMATIC,
+        /** Never set the working directory */
+        DONT_SET,
+        /** Always set the working directory */
+        SET
+    }
+
     @JsonPropertyDescription("The supported start types for the application. 'INSTANCE' processes are automatically started when an instance is (auto-)started. 'MANUAL_CONFIRM' processes require an additional user confirmation before being started.")
     public List<ApplicationStartType> supportedStartTypes = new ArrayList<>();
 
@@ -64,6 +74,9 @@ public class ProcessControlDescriptor {
 
     @JsonPropertyDescription("The name of the script of the application in the PATH environment variable.")
     public String startScriptName;
+
+    @JsonPropertyDescription("Whether the working directory should be set to an application specific directory.")
+    public ApplicationDirectoryMode workingDirectory = ApplicationDirectoryMode.AUTOMATIC;
 
     @JsonPropertyDescription("The file extension that the file association will be bound to.")
     public String fileAssocExtension;
