@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -34,7 +35,8 @@ public class AutostartTool extends ConfiguredCliTool<AutostartConfig> {
 
     public @interface AutostartConfig {
 
-        @Help("Directory where the launcher stores the hive as well as all applications.")
+        @Help("Directory where the launcher stores the hive as well as all applications.") //
+        @EnvironmentFallback("BDEPLOY_INTERNAL_HOMEDIR")
         String homeDir();
 
         @Help(value = "Write log output to stdout instead of the log file.", arg = false)
