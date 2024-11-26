@@ -159,6 +159,7 @@ const INSTANCES_ROUTES: Route[] = [
     path: 'process/:process/ports',
     component: ProcessPortsComponent,
     canActivate: [ScopedReadGuard],
+    data: { max: true },
   },
   {
     path: 'process/:process/natives',
