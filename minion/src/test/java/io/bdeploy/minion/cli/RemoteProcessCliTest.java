@@ -83,18 +83,16 @@ class RemoteProcessCliTest {
         });
         assertEquals("specify either only --application or only --controlGroupName", ex.getMessage());
 
-        /* --join can only go with --start and --application */
-        ex = assertThrows(IllegalArgumentException.class, () -> {
-            tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+        /* --join can go with --start/--stop and --application */
+        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                     "--uuid=" + id, "--stop", "--join", "--application=app");
-        });
-        assertEquals("--join is only possible when starting a single application", ex.getMessage());
 
+        /* needs to be a single application */
         ex = assertThrows(IllegalArgumentException.class, () -> {
             tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                     "--uuid=" + id, "--start", "--join");
         });
-        assertEquals("--join is only possible when starting a single application", ex.getMessage());
+        assertEquals("--join is only possible when starting/stopping a single application", ex.getMessage());
 
         /* list all processes */
         result = tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",

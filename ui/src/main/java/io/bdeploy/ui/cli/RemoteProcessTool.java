@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
@@ -30,6 +31,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessProbeResultDto.ProcessProbeType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -64,7 +66,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help(value = "Wait till termination of a single started process", arg = false)
+        @Help(value = "Wait for the process depending on its type. If the process is MANUAL or MANUAL_CONFIRM, wait until it terminated. If the process is type INSTANCE, wait until it reaches the RUNNING or STOPPED state, depending on the given command. Only valid if starting/stopping a single process.",
+              arg = false)
         boolean join() default false;
 
         @Help(value = "List processes on the remote", arg = false)
@@ -97,8 +100,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             helpAndFail("You can enable only one flag at a time: --start, --stop or --list");
         }
 
-        if (config.join() && (!config.start() || isNullOrEmpty(config.application()))) {
-            helpAndFail("--join is only possible when starting a single application");
+        if (config.join() && (!(config.start() || config.stop()) || isNullOrEmpty(config.application()))) {
+            helpAndFail("--join is only possible when starting/stopping a single application");
         }
 
         boolean hasControlGroupName = !isNullOrEmpty(config.controlGroupName());
@@ -171,8 +174,17 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             } else {
                 ir.getProcessResource(instanceId).startProcesses(getAppIds(config, ir));
                 if (config.join()) {
-                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().processStates
-                            .get(config.application()).processState);
+                    Optional<ApplicationConfiguration> cfg = loadAppConfig(config, instanceId, ir);
+                    if (cfg.isEmpty()) {
+                        return createResultWithErrorMessage("Cannot load configuration for application " + config.application());
+                    }
+
+                    var targetStates =
+                            cfg.get().processControl.startType == ProcessControlDescriptor.ApplicationStartType.INSTANCE ? Set.of(
+                                    ProcessState.RUNNING) : Set.of(ProcessState.STOPPED, ProcessState.CRASHED_PERMANENTLY);
+
+                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().processStates.get(
+                            config.application()).processState, targetStates);
                 }
             }
         } else if (config.stop()) {
@@ -180,9 +192,26 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 ir.getProcessResource(instanceId).stopAll();
             } else {
                 ir.getProcessResource(instanceId).stopProcesses(getAppIds(config, ir));
+                if (config.join()) {
+                    Optional<ApplicationConfiguration> cfg = loadAppConfig(config, instanceId, ir);
+                    if (cfg.isEmpty()) {
+                        return createResultWithErrorMessage("Cannot load configuration for application " + config.application());
+                    }
+
+                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().processStates.get(
+                            config.application()).processState, Set.of(ProcessState.STOPPED, ProcessState.CRASHED_PERMANENTLY));
+                }
             }
         }
         return createSuccess();
+    }
+
+    private static Optional<ApplicationConfiguration> loadAppConfig(RemoteProcessConfig config, String instanceId,
+            InstanceResource ir) {
+        var tag = ir.getDeploymentStates(config.uuid()).activeTag;
+        var processEntry = ir.getProcessResource(instanceId).getStatus().processStates.get(config.application());
+        var nodes = Optional.of(ir.getNodeConfigurations(config.uuid(), tag));
+        return findAppConfig(processEntry, nodes.orElse(null));
     }
 
     private static List<String> getAppIds(RemoteProcessConfig config, InstanceResource ir) {
@@ -195,8 +224,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return getOrderedProcessEntries(config, ir, activeTag).stream().map(processEntry -> processEntry.appId).toList();
     }
 
-    private static void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
-        while (!stateSupplier.get().isStopped()) {
+    private static void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier, Set<ProcessState> targets) {
+        while (!targets.contains(stateSupplier.get())) {
             Threads.sleep(pollIntervalMs);
         }
     }
