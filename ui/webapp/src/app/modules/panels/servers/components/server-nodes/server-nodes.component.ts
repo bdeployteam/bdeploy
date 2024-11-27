@@ -6,6 +6,7 @@ import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-d
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../services/server-details.service';
+import { ServerNodeNameCellComponent } from './server-node-name-cell/server-node-name-cell.component';
 
 export interface MinionRow {
   name: string;
@@ -18,6 +19,7 @@ const detailNameCol: BdDataColumn<MinionRow> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
+  component: ServerNodeNameCellComponent,
 };
 
 const detailMasterCol: BdDataColumn<MinionRow> = {
