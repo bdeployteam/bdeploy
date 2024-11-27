@@ -34,17 +34,5 @@
         [loadingWhen$]="removing$"
       ></app-bd-button>
     </div>
-    <app-bd-notification-card
-      icon="history"
-      *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-      [type]="'warning'"
-      [dismissable]="false"
-      header="Server Not Synchronized"
-    >
-      <div class="text-justify">
-        The managed server responsible for the current instance is not synchronized. Please synchronize the server to
-        continue editing.
-      </div>
-    </app-bd-notification-card>
   </app-bd-dialog-content>
 </app-bd-dialog>

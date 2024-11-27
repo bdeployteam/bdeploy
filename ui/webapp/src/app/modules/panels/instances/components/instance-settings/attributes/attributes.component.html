@@ -16,18 +16,6 @@
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <app-bd-notification-card
-        *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-        icon="history"
-        [type]="'warning'"
-        [dismissable]="false"
-        header="Server Not Synchronized"
-      >
-        <div class="text-justify">
-          The managed server responsible for this instance is not synchronized, details are unavailable. Please
-          synchronize the server to enable editing.
-        </div>
-      </app-bd-notification-card>
       <app-bd-data-display [columns]="columns" [records]="records">
         <app-bd-no-data>
           <div>No attribute values</div>

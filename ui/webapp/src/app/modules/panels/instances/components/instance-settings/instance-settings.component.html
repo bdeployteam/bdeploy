@@ -2,6 +2,18 @@
   <app-bd-dialog-toolbar header="Instance Settings" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
+    <app-bd-notification-card
+      icon="history"
+      *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
+      [type]="'warning'"
+      [dismissable]="false"
+      header="Server Not Synchronized"
+    >
+      <div class="text-justify">
+        The managed server responsible for the current instance is not synchronized. Please synchronize the server to
+        continue editing.
+      </div>
+    </app-bd-notification-card>
     <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
       <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
       <div class="bd-secondary-text">Instance ID:</div>
@@ -12,6 +24,7 @@
         ></app-bd-identifier>
       </div>
     </div>
+
     <div class="flex flex-col gap-2.5">
       <app-bd-panel-button
         text="Base Configuration..."

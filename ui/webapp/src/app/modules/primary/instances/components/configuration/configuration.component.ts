@@ -166,6 +166,10 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     return this.edit.hasSaveableChanges$.value;
   }
 
+  public canSave(): boolean {
+    return this.servers.isCurrentInstanceSynchronized$.value;
+  }
+
   protected onSave() {
     this.doSave().subscribe(() => {
       // after save navigate back to the dashboard - this will take the user where they will likely want to continue
