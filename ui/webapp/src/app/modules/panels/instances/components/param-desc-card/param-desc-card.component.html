@@ -31,7 +31,7 @@
         >
       </ng-template>
     </div>
-    <ng-container *ngIf="!!descriptor.condition?.parameter">
+    <ng-container *ngIf="!!descriptor.condition?.parameter || !!descriptor.condition?.expression">
       <strong><div>Condition:</div></strong>
       <div class="local-break">
         <ng-container *ngIf="descriptor.condition.parameter"
