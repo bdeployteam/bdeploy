@@ -51,6 +51,7 @@
       [collapsed]="narrow$ | async"
       color="accent"
       [route]="['panels', 'instances', 'settings', 'product']"
+      [disabled]="!(servers.isCurrentInstanceSynchronized$ | async)"
     ></app-bd-panel-button>
     <app-bd-panel-button
       *ngIf="edit.current$ | async as instance"

@@ -9,6 +9,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
   selector: 'app-instance-settings',
@@ -21,6 +22,7 @@ export class InstanceSettingsComponent {
   private readonly actions = inject(ActionsService);
   protected readonly auth = inject(AuthenticationService);
   protected readonly edit = inject(InstanceEditService);
+  protected readonly servers = inject(ServersService);
 
   private readonly deleting$ = new BehaviorSubject<boolean>(false);
   protected mappedDelete$ = this.actions.action([Actions.DELETE_INSTANCE], this.deleting$);
