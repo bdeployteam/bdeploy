@@ -283,10 +283,11 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {
         BHiveRegistry r = new BHiveRegistry(reporter);
 
-        r.addBHiveAdditionListener(h -> {
-            h.setLockContentSupplier(LOCK_CONTENT);
-            h.setLockContentValidator(LOCK_VALIDATOR);
-        });
+        // TODO: CT_BDEPLOY-422
+        //        r.addBHiveAdditionListener(h -> {
+        //            h.setLockContentSupplier(LOCK_CONTENT);
+        //            h.setLockContentValidator(LOCK_VALIDATOR);
+        //        });
 
         root.setupServerTasks(root.getMode(), r);
 
