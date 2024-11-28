@@ -240,6 +240,25 @@ startCommand:
         parameter: "jvm-debug-port-non-suspend"
         must: BE_EMPTY
 
+    - id: "testparam.1"
+      name: "Workspace Path"
+      parameter: "-Dosgi.instance.area"
+      defaultValue: "P:DATA/workspace"
+      mandatory: true
+      type: STRING
+      groupName: "Test Group 1"
+      longDescription: "Long Desc 1"
+      condition:
+        expression: "{{V:testparam.2}}"
+        must: BE_EMPTY
+    - id: "testparam.2"
+      name: "Workspace Path"
+      parameter: "-Dosgi.instance.area"
+      defaultValue: "/some/path"
+      type: STRING
+      groupName: "Test Group 2"
+      longDescription: "Long Desc 2"
+
 endpoints:
     http:
         - id: 'myVersion - enabled'
