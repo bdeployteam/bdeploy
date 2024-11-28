@@ -2,6 +2,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   OnDestroy,
   OnInit,
@@ -11,12 +12,11 @@ import {
   ViewChild,
   ViewChildren,
   ViewEncapsulation,
-  inject,
 } from '@angular/core';
 import { NgControl, NgForm } from '@angular/forms';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, map, skipWhile } from 'rxjs/operators';
 import {
   ApplicationConfiguration,
@@ -40,7 +40,7 @@ import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-po
 import { ClipboardService } from 'src/app/modules/core/services/clipboard.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
+import { createLinkedValue, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -444,6 +444,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
       p.value = null;
     }
+
+    this.doUpdateConditionals(p);
+
     this.updatePreview$.next(true);
 
     // rebuild completions if parameters changed.
@@ -565,10 +568,6 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     }
   }
 
-  protected getDefaultAsString(val: LinkedValueConfiguration) {
-    return getPreRenderable(val);
-  }
-
   protected doChangeParam(p: ParameterPair, val: LinkedValueConfiguration) {
     p.value.value = val;
     this.doPreRender(p);
@@ -592,7 +591,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         }
       }
       for (const pair of grp.pairs) {
-        if (pair.descriptor?.condition?.parameter === id) {
+        if (pair.descriptor?.condition?.parameter === id || pair.descriptor?.condition?.expression?.includes(id)) {
           // the parameter is conditional on the changed parameter.
           this.edit.meetsConditionOnCurrent(pair.descriptor).subscribe((ok) => {
             const mustBeAdded = ok && !pair.value && pair.descriptor?.mandatory;
