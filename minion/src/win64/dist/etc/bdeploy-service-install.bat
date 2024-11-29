@@ -56,7 +56,7 @@ goto done
 :usage
 @echo Failed to create service. One or more mandatory parameters are missing
 @echo.
-@echo Usage: bdeploy-service-install.bat ^<--master^|--node^> ^<Path-to-bdeploy-bat^> ^<Path-where-to-store-files^> 
+@echo Usage: bdeploy-service-install.bat ^<--master^|--node^> ^<Path-to-bdeploy-bat^> ^<Path-to-root^> 
 exit /B 1
 
 :restricted 

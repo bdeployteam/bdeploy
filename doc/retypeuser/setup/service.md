@@ -24,11 +24,11 @@ The `bdeploy-win64-X.Y.Z.zip` package contains a batch script to create a new Wi
 
 The script must be called with administrative privileges and it expects the following arguments:
 
-|                             |                                                                                                             |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| --master \| --node          | Start a master or node (only controls the name of the service).                                             |
-| <\path\to\minion\batch.bat> | Absolute path to the bdeploy batch file. Sample: C:\BDeploy\server\bin\bdeploy.bat                          |
-| <\path\to\store\files>      | Absolute path to the data directory. Make sure to not include a trailing backslash. Sample: C:\BDeploy\data |
+|                             |                                                                                                                                                                                       |
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --master \| --node          | Start a master or node (only controls the name of the service).                                                                                                                       |
+| <\path\to\minion\batch.bat> | Absolute path to the bdeploy batch file inside of a full BDeploy installation. Sample: C:\BDeploy\server\bin\bdeploy.bat                                                              |
+| <\path\to\root>             | Absolute path to the root directory. Make sure to not include a trailing backslash. Sample: C:\BDeploy\data. Note that this is the same directory you specified as `--root` on `init` |
 
 !!!warning Warning
 By default the service runs as _Local System_ but you can and should change that afterwards by using the _services.msc_ application. Configure the desired account in the _Log On_ tab of the services management console. We **strongly** recommend to use a non-privileged user to run the **BDeploy** service.
