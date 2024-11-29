@@ -43,6 +43,19 @@ Generally `server.log` will contain exceptions and stack traces for issues that 
 issue to the BDeploy Team, please make sure to attach both `audit.log` and `server.log` to facilitate troubleshooting on
 our side.
 
+## Issues with the Windows Service
+
+In case you are having troubles with the windows service installation, e.g. the service does not start, verify:
+
+* ... that the installation follows the example above. The binaries in one directory, e.g. C:\BDeploy\bdeploy-win64, and
+  the root/data in a different directory, e.g. C:\BDeploy\root.
+* ... that you specified the full path to the `bdeploy.bat` and the root directory to the service installation bat,
+  e.g. `bdeploy-service-install.bat --master C:\BDeploy\bdeploy-win64\bin\bdeploy.bat C:\BDeploy\root` - using the
+  example paths from above.
+
+You can use the `bdeploy-service-uninstall.bat --master` command to remove the existing service registration, and redo
+the registration with the above command in case you have doubts.
+
 ## Connection to `MANAGED`
 
 Sometimes it is hard to wrap your head around how the network between `CENTRAL` and `MANAGED` servers works. Connecting
