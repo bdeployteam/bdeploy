@@ -8,8 +8,9 @@ import { RepositoryColumnsService } from '../../services/repository-columns.serv
 import { RepositoryService, SwDtoWithType, SwPkgCompound, SwPkgType } from '../../services/repository.service';
 
 @Component({
-  selector: 'app-repository',
-  templateUrl: './repository.component.html',
+    selector: 'app-repository',
+    templateUrl: './repository.component.html',
+    standalone: false
 })
 export class RepositoryComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);

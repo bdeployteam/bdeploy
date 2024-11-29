@@ -4,8 +4,9 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 export const TRIM_VALIDATION = 'trim';
 
 @Directive({
-  selector: '[appTrimmed]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: TrimmedValidator, multi: true }],
+    selector: '[appTrimmed]',
+    providers: [{ provide: NG_VALIDATORS, useExisting: TrimmedValidator, multi: true }],
+    standalone: false
 })
 export class TrimmedValidator implements Validator {
   public validate(control: AbstractControl): ValidationErrors {

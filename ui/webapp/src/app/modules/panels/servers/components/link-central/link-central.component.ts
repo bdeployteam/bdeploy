@@ -9,9 +9,10 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
 
 @Component({
-  selector: 'app-link-central',
-  templateUrl: './link-central.component.html',
-  styleUrls: ['./link-central.component.css'],
+    selector: 'app-link-central',
+    templateUrl: './link-central.component.html',
+    styleUrls: ['./link-central.component.css'],
+    standalone: false
 })
 export class LinkCentralComponent implements OnInit, OnDestroy {
   private readonly servers = inject(ServersService);

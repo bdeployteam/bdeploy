@@ -26,8 +26,9 @@ import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
 @Component({
-  selector: 'app-bd-data-grid',
-  templateUrl: './bd-data-grid.component.html',
+    selector: 'app-bd-data-grid',
+    templateUrl: './bd-data-grid.component.html',
+    standalone: false
 })
 export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
   private readonly searchService = inject(SearchService);

@@ -3,10 +3,11 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
-  selector: 'app-bd-data-sorting',
-  templateUrl: './bd-data-sorting.component.html',
-  styleUrls: ['./bd-data-sorting.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-bd-data-sorting',
+    templateUrl: './bd-data-sorting.component.html',
+    styleUrls: ['./bd-data-sorting.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class BdDataSortingComponent<T> {
   /**

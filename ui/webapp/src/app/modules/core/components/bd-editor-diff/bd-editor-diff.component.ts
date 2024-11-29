@@ -3,8 +3,9 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
-  selector: 'app-bd-editor-diff',
-  templateUrl: './bd-editor-diff.component.html',
+    selector: 'app-bd-editor-diff',
+    templateUrl: './bd-editor-diff.component.html',
+    standalone: false
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);

@@ -13,8 +13,9 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { GroupUsersService } from '../../../services/group-users.service';
 
 @Component({
-  selector: 'app-instance-group-user-group-permissions',
-  templateUrl: './user-group-permissions.component.html',
+    selector: 'app-instance-group-user-group-permissions',
+    templateUrl: './user-group-permissions.component.html',
+    standalone: false
 })
 export class UserGroupPermissionsComponent {
   private readonly groupCols = inject(UserGroupsColumnsService);

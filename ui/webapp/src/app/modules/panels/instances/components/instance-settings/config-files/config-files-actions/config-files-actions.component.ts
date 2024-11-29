@@ -13,8 +13,9 @@ import { ConfigFile, ConfigFileStatusType, ConfigFilesService } from '../../../.
 import { ConfigFilesComponent } from '../config-files.component';
 
 @Component({
-  selector: 'app-config-files-actions',
-  templateUrl: './config-files-actions.component.html',
+    selector: 'app-config-files-actions',
+    templateUrl: './config-files-actions.component.html',
+    standalone: false
 })
 export class ConfigFilesActionsComponent implements OnInit {
   private readonly cfgFiles = inject(ConfigFilesService);

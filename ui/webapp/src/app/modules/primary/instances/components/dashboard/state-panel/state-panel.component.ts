@@ -17,9 +17,10 @@ export interface StateItemToDisplay {
   click?: () => void;
 }
 @Component({
-  selector: 'app-node-state-panel',
-  templateUrl: './state-panel.component.html',
-  styleUrls: ['./state-panel.component.css'],
+    selector: 'app-node-state-panel',
+    templateUrl: './state-panel.component.html',
+    styleUrls: ['./state-panel.component.css'],
+    standalone: false
 })
 export class NodeStatePanelComponent implements OnChanges {
   @Input() items: StateItem[];

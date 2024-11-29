@@ -13,8 +13,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { RepositoryUsersService } from '../../../services/repository-users.service';
 
 @Component({
-  selector: 'app-software-repository-user-group-permissions',
-  templateUrl: './user-group-permissions.component.html',
+    selector: 'app-software-repository-user-group-permissions',
+    templateUrl: './user-group-permissions.component.html',
+    standalone: false
 })
 export class UserGroupPermissionsComponent {
   private readonly groupCols = inject(UserGroupsColumnsService);

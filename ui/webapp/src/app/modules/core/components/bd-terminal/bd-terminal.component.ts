@@ -27,9 +27,10 @@ const CNL: string = CSI + 'E'; // Cursor Next Line (col=0)
 const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
 
 @Component({
-  selector: 'app-bd-terminal',
-  templateUrl: './bd-terminal.component.html',
-  styleUrls: ['./bd-terminal.component.css'],
+    selector: 'app-bd-terminal',
+    templateUrl: './bd-terminal.component.html',
+    styleUrls: ['./bd-terminal.component.css'],
+    standalone: false
 })
 export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly searchService = inject(SearchService);

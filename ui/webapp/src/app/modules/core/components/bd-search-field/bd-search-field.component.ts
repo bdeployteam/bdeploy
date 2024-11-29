@@ -13,9 +13,10 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-bd-search-field',
-  templateUrl: './bd-search-field.component.html',
-  styleUrls: ['./bd-search-field.component.css'],
+    selector: 'app-bd-search-field',
+    templateUrl: './bd-search-field.component.html',
+    styleUrls: ['./bd-search-field.component.css'],
+    standalone: false
 })
 export class BdSearchFieldComponent implements OnInit, OnDestroy {
   @Input() disabled = false;

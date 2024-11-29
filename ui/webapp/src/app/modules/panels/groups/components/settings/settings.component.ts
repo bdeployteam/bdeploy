@@ -11,8 +11,9 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { GroupDetailsService } from '../../services/group-details.service';
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    standalone: false
 })
 export class SettingsComponent {
   private readonly actions = inject(ActionsService);

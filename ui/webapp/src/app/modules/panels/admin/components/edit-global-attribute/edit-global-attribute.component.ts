@@ -10,9 +10,10 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
-  selector: 'app-edit-global-attribute',
-  templateUrl: './edit-global-attribute.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-edit-global-attribute',
+    templateUrl: './edit-global-attribute.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EditGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly settings = inject(SettingsService);

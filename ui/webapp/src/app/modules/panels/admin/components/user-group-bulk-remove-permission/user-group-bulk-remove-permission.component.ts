@@ -9,9 +9,10 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { UserGroupBulkService } from '../../services/user-group-bulk.service';
 
 @Component({
-  selector: 'app-user-group-bulk-remove-permission',
-  templateUrl: './user-group-bulk-remove-permission.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-user-group-bulk-remove-permission',
+    templateUrl: './user-group-bulk-remove-permission.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class UserGroupBulkRemovePermissionComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);

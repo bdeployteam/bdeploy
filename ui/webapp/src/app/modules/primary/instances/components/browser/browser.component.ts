@@ -19,8 +19,9 @@ import { BdDataDisplayComponent } from './../../../../core/components/bd-data-di
 import { OverallStatusColumnComponent } from './overall-status-column/overall-status-column.component';
 
 @Component({
-  selector: 'app-instances-browser',
-  templateUrl: './browser.component.html',
+    selector: 'app-instances-browser',
+    templateUrl: './browser.component.html',
+    standalone: false
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   private readonly config = inject(ConfigService);

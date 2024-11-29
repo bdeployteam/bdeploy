@@ -8,8 +8,9 @@ import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logg
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
-  selector: 'app-log-file-viewer',
-  templateUrl: './log-file-viewer.component.html',
+    selector: 'app-log-file-viewer',
+    templateUrl: './log-file-viewer.component.html',
+    standalone: false
 })
 export class LogFileViewerComponent implements OnInit, OnDestroy {
   private readonly loggingAdmin = inject(LoggingAdminService);

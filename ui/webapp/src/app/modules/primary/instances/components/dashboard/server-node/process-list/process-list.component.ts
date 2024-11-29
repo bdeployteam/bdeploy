@@ -23,8 +23,9 @@ interface PinnedParameter {
 
 export const CONTROL_GROUP_COL_ID = 'ctrlGroup';
 @Component({
-  selector: 'app-node-process-list',
-  templateUrl: './process-list.component.html',
+    selector: 'app-node-process-list',
+    templateUrl: './process-list.component.html',
+    standalone: false
 })
 export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly appCols = inject(ProcessesColumnsService);

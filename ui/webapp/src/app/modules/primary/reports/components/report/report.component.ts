@@ -8,8 +8,9 @@ import { DownloadService } from 'src/app/modules/core/services/download.service'
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 
 @Component({
-  selector: 'app-report',
-  templateUrl: './report.component.html',
+    selector: 'app-report',
+    templateUrl: './report.component.html',
+    standalone: false
 })
 export class ReportComponent implements OnInit, OnDestroy {
   private readonly download = inject(DownloadService);

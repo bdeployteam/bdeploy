@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-bd-notification-card',
-  templateUrl: './bd-notification-card.component.html',
-  styleUrls: ['./bd-notification-card.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-notification-card',
+    templateUrl: './bd-notification-card.component.html',
+    styleUrls: ['./bd-notification-card.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdNotificationCardComponent {
   @Input() header: string;

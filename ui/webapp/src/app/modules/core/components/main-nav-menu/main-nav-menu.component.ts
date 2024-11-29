@@ -10,32 +10,33 @@ import { ConfigService } from '../../services/config.service';
 import { NavAreasService } from '../../services/nav-areas.service';
 
 @Component({
-  selector: 'app-main-nav-menu',
-  templateUrl: './main-nav-menu.component.html',
-  styleUrls: ['./main-nav-menu.component.css', './main-nav-menu-hamburger.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    delayedFadeIn,
-    delayedFadeOut,
-    scaleWidthFromZero,
-    scaleWidthToZero,
-    trigger('menuOpenClose', [
-      state('closed', style({ width: '64px' })),
-      state('open', style({ width: '220px' })),
-      transition('open => closed', [
-        group([animate('0.2s ease', style({ width: '64px' })), query('@*', [animateChild()])]),
-      ]),
-      transition('closed => open', [
-        group([animate('0.2s ease', style({ width: '220px' })), query('@*', [animateChild()])]),
-      ]),
-    ]),
-    trigger('headerOpenClose', [
-      state('closed', style({ width: '104px' })),
-      state('open', style({ width: '192px' })),
-      transition('open => closed', [animate('0.2s ease')]),
-      transition('closed => open', [animate('0.2s ease')]),
-    ]),
-  ],
+    selector: 'app-main-nav-menu',
+    templateUrl: './main-nav-menu.component.html',
+    styleUrls: ['./main-nav-menu.component.css', './main-nav-menu-hamburger.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        delayedFadeIn,
+        delayedFadeOut,
+        scaleWidthFromZero,
+        scaleWidthToZero,
+        trigger('menuOpenClose', [
+            state('closed', style({ width: '64px' })),
+            state('open', style({ width: '220px' })),
+            transition('open => closed', [
+                group([animate('0.2s ease', style({ width: '64px' })), query('@*', [animateChild()])]),
+            ]),
+            transition('closed => open', [
+                group([animate('0.2s ease', style({ width: '220px' })), query('@*', [animateChild()])]),
+            ]),
+        ]),
+        trigger('headerOpenClose', [
+            state('closed', style({ width: '104px' })),
+            state('open', style({ width: '192px' })),
+            transition('open => closed', [animate('0.2s ease')]),
+            transition('closed => open', [animate('0.2s ease')]),
+        ]),
+    ],
+    standalone: false
 })
 export class MainNavMenuComponent {
   protected readonly cfgService = inject(ConfigService);

@@ -14,9 +14,10 @@ import { UserBulkService } from 'src/app/modules/panels/admin/services/user-bulk
 import { AuthAdminService } from '../../services/auth-admin.service';
 
 @Component({
-  selector: 'app-users-browser',
-  templateUrl: './users-browser.component.html',
-  styleUrls: ['./users-browser.component.css'],
+    selector: 'app-users-browser',
+    templateUrl: './users-browser.component.html',
+    styleUrls: ['./users-browser.component.css'],
+    standalone: false
 })
 export class UsersBrowserComponent {
   private readonly userColumns = inject(UsersColumnsService);

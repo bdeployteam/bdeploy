@@ -10,9 +10,10 @@ import { ALL_USERS_GROUP_ID } from 'src/app/modules/core/utils/user-group.utils'
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-user-group-admin-detail',
-  templateUrl: './user-group-admin-detail.component.html',
-  styleUrls: ['./user-group-admin-detail.component.css'],
+    selector: 'app-user-group-admin-detail',
+    templateUrl: './user-group-admin-detail.component.html',
+    styleUrls: ['./user-group-admin-detail.component.css'],
+    standalone: false
 })
 export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

@@ -44,10 +44,11 @@ const colAppName: BdDataColumn<AppRow> = {
 };
 
 @Component({
-  selector: 'app-add-process',
-  templateUrl: './add-process.component.html',
-  styleUrls: ['./add-process.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-add-process',
+    templateUrl: './add-process.component.html',
+    styleUrls: ['./add-process.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
   private readonly edit = inject(ProcessEditService);

@@ -6,8 +6,9 @@ import { FilesBulkService } from 'src/app/modules/primary/instances/services/fil
 import { FilePath, FilesService } from 'src/app/modules/primary/instances/services/files.service';
 
 @Component({
-  selector: 'app-files-bulk-manipulation',
-  templateUrl: './files-bulk-manipulation.component.html',
+    selector: 'app-files-bulk-manipulation',
+    templateUrl: './files-bulk-manipulation.component.html',
+    standalone: false
 })
 export class FilesBulkManipulationComponent implements OnDestroy {
   private readonly areas = inject(NavAreasService);

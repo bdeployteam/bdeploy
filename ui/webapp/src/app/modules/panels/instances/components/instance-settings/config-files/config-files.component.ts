@@ -13,8 +13,9 @@ import { ConfigFilesColumnsService } from '../../../services/config-files-column
 import { ConfigFile, ConfigFilesService } from '../../../services/config-files.service';
 
 @Component({
-  selector: 'app-config-files',
-  templateUrl: './config-files.component.html',
+    selector: 'app-config-files',
+    templateUrl: './config-files.component.html',
+    standalone: false
 })
 export class ConfigFilesComponent implements OnInit, OnDestroy {
   protected readonly cfgFiles = inject(ConfigFilesService);

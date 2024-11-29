@@ -20,8 +20,9 @@ interface ProductRow {
 }
 
 @Component({
-  selector: 'app-add-instance',
-  templateUrl: './add-instance.component.html',
+    selector: 'app-add-instance',
+    templateUrl: './add-instance.component.html',
+    standalone: false
 })
 export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly groups = inject(GroupsService);

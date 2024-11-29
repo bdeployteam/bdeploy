@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-color-select',
-  templateUrl: './color-select.component.html',
-  styleUrls: ['./color-select.component.css'],
+    selector: 'app-color-select',
+    templateUrl: './color-select.component.html',
+    styleUrls: ['./color-select.component.css'],
+    standalone: false
 })
 export class ColorSelectComponent {
   @Input() name: string;

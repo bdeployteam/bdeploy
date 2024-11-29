@@ -18,10 +18,11 @@ import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
-  selector: 'app-bd-server-sync-button',
-  templateUrl: './bd-server-sync-button.component.html',
-  styleUrls: ['./bd-server-sync-button.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-server-sync-button',
+    templateUrl: './bd-server-sync-button.component.html',
+    styleUrls: ['./bd-server-sync-button.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   @Input() server: ManagedMasterDto;

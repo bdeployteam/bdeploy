@@ -4,8 +4,9 @@ import { tap } from 'rxjs/operators';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
-  selector: 'app-mail-sending-tab',
-  templateUrl: './mail-sending-tab.component.html',
+    selector: 'app-mail-sending-tab',
+    templateUrl: './mail-sending-tab.component.html',
+    standalone: false
 })
 export class MailSendingTabComponent {
   protected readonly settings = inject(SettingsService);

@@ -26,8 +26,9 @@ interface PathIdName {
 type BHivePathSegment = PathIdName;
 
 @Component({
-  selector: 'app-bd-bhive-browser',
-  templateUrl: './bd-bhive-browser.component.html',
+    selector: 'app-bd-bhive-browser',
+    templateUrl: './bd-bhive-browser.component.html',
+    standalone: false
 })
 export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

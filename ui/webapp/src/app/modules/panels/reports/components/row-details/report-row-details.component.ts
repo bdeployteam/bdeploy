@@ -3,8 +3,9 @@ import { map } from 'rxjs';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 
 @Component({
-  selector: 'app-report-row-details',
-  templateUrl: './report-row-details.component.html',
+    selector: 'app-report-row-details',
+    templateUrl: './report-row-details.component.html',
+    standalone: false
 })
 export class ReportRowDetailsComponent {
   protected readonly reports = inject(ReportsService);

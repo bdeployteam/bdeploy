@@ -3,8 +3,9 @@ import { ApplicationConfiguration, OperatingSystem } from 'src/app/models/gen.dt
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 
 @Component({
-  selector: 'app-process-name-and-os',
-  templateUrl: './process-name-and-os.component.html',
+    selector: 'app-process-name-and-os',
+    templateUrl: './process-name-and-os.component.html',
+    standalone: false
 })
 export class ProcessNameAndOsComponent implements OnInit {
   @Input() record: ApplicationConfiguration;

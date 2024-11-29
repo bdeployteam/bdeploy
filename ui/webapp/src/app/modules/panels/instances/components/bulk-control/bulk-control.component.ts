@@ -10,8 +10,9 @@ import { ProcessesService } from 'src/app/modules/primary/instances/services/pro
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
-  selector: 'app-bulk-control',
-  templateUrl: './bulk-control.component.html',
+    selector: 'app-bulk-control',
+    templateUrl: './bulk-control.component.html',
+    standalone: false
 })
 export class BulkControlComponent implements OnInit {
   private readonly processes = inject(ProcessesService);

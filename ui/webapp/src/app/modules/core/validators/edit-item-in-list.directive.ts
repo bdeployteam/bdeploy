@@ -9,14 +9,15 @@ const ID = 'edit-item-in-list';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appEditItemInListValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: EditItemInListValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appEditItemInListValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: EditItemInListValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class EditItemInListValidatorDirective implements Validator {
   @Input() allowedValues: string[];

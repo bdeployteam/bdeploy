@@ -42,10 +42,11 @@ interface ConfigVariable {
 }
 
 @Component({
-  selector: 'bd-variable-groups',
-  templateUrl: './bd-variable-groups.component.html',
-  styleUrl: './bd-variable-groups.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'bd-variable-groups',
+    templateUrl: './bd-variable-groups.component.html',
+    styleUrl: './bd-variable-groups.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly cd = inject(ChangeDetectorRef);

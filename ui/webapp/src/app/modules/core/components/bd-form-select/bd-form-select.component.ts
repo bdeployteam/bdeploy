@@ -4,10 +4,11 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
 
 @Component({
-  selector: 'app-bd-form-select',
-  templateUrl: './bd-form-select.component.html',
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-form-select',
+    templateUrl: './bd-form-select.component.html',
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

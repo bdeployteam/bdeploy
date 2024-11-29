@@ -4,9 +4,10 @@ import { BdTerminalComponent } from 'src/app/modules/core/components/bd-terminal
 import { AuthAdminService } from '../../../../primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-auth-test',
-  templateUrl: './auth-test.component.html',
-  styleUrls: ['./auth-test.component.css'],
+    selector: 'app-auth-test',
+    templateUrl: './auth-test.component.html',
+    styleUrls: ['./auth-test.component.css'],
+    standalone: false
 })
 export class AuthTestComponent {
   private readonly auth = inject(AuthAdminService);

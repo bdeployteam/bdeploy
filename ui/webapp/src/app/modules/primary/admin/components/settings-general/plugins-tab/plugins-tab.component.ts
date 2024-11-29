@@ -8,8 +8,9 @@ import { PluginDeleteActionComponent } from './plugin-delete-action/plugin-delet
 import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-action.component';
 
 @Component({
-  selector: 'app-plugins-tab',
-  templateUrl: './plugins-tab.component.html',
+    selector: 'app-plugins-tab',
+    templateUrl: './plugins-tab.component.html',
+    standalone: false
 })
 export class PluginsTabComponent {
   protected readonly plugins = inject(PluginAdminService);

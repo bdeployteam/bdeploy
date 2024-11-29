@@ -2,8 +2,9 @@ import { Component, HostBinding, Input, OnChanges, OnInit } from '@angular/core'
 import { ApplicationConfiguration, ApplicationStartType } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-process-starttype-icon',
-  templateUrl: './process-starttype-icon.component.html',
+    selector: 'app-process-starttype-icon',
+    templateUrl: './process-starttype-icon.component.html',
+    standalone: false
 })
 export class ProcessStarttypeIconComponent implements OnInit, OnChanges {
   @Input() record: ApplicationConfiguration;

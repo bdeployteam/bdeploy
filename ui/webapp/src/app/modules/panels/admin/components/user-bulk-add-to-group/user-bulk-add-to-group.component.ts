@@ -8,8 +8,9 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
 import { UserBulkService } from '../../services/user-bulk.service';
 
 @Component({
-  selector: 'app-user-bulk-add-to-group',
-  templateUrl: './user-bulk-add-to-group.component.html',
+    selector: 'app-user-bulk-add-to-group',
+    templateUrl: './user-bulk-add-to-group.component.html',
+    standalone: false
 })
 export class UserBulkAddToGroupComponent {
   private readonly authAdmin = inject(AuthAdminService);

@@ -9,8 +9,9 @@ import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
 
 @Component({
-  selector: 'app-bhive-details',
-  templateUrl: './bhive-details.component.html',
+    selector: 'app-bhive-details',
+    templateUrl: './bhive-details.component.html',
+    standalone: false
 })
 export class BhiveDetailsComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

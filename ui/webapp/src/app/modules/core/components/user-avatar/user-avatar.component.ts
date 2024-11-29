@@ -8,8 +8,9 @@ export interface StyleDef {
 }
 
 @Component({
-  selector: 'app-user-avatar',
-  templateUrl: './user-avatar.component.html',
+    selector: 'app-user-avatar',
+    templateUrl: './user-avatar.component.html',
+    standalone: false
 })
 export class UserAvatarComponent implements OnInit {
   protected readonly settings = inject(SettingsService);

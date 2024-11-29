@@ -17,8 +17,9 @@ import { HistoryDetailsService } from '../../services/history-details.service';
 import { histKey, histKeyDecode } from '../../utils/history-key.utils';
 
 @Component({
-  selector: 'app-history-entry',
-  templateUrl: './history-entry.component.html',
+    selector: 'app-history-entry',
+    templateUrl: './history-entry.component.html',
+    standalone: false
 })
 export class HistoryEntryComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

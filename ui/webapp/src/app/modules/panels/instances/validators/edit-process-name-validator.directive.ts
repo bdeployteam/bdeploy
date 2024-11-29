@@ -11,14 +11,15 @@ const ID = 'edit-process-name';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appEditProcessNameValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: EditProcessNameValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appEditProcessNameValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: EditProcessNameValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class EditProcessNameValidatorDirective implements Validator {
   private readonly edit = inject(InstanceEditService);

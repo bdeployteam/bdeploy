@@ -56,9 +56,10 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
 };
 
 @Component({
-  selector: 'app-instance-templates',
-  templateUrl: './instance-templates.component.html',
-  styleUrls: ['./instance-templates.component.css'],
+    selector: 'app-instance-templates',
+    templateUrl: './instance-templates.component.html',
+    styleUrls: ['./instance-templates.component.css'],
+    standalone: false
 })
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private readonly products = inject(ProductsService);

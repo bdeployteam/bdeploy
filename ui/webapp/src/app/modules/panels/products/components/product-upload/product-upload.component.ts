@@ -2,8 +2,9 @@ import { Component, inject } from '@angular/core';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 
 @Component({
-  selector: 'app-product-upload',
-  templateUrl: './product-upload.component.html',
+    selector: 'app-product-upload',
+    templateUrl: './product-upload.component.html',
+    standalone: false
 })
 export class ProductUploadComponent {
   protected readonly products = inject(ProductsService);

@@ -5,9 +5,10 @@ import { AuthenticationService } from '../../services/authentication.service';
 import { SearchService } from '../../services/search.service';
 
 @Component({
-  selector: 'app-main-nav-top',
-  templateUrl: './main-nav-top.component.html',
-  styleUrls: ['./main-nav-top.component.css'],
+    selector: 'app-main-nav-top',
+    templateUrl: './main-nav-top.component.html',
+    styleUrls: ['./main-nav-top.component.css'],
+    standalone: false
 })
 export class MainNavTopComponent implements OnInit {
   private readonly media = inject(BreakpointObserver);

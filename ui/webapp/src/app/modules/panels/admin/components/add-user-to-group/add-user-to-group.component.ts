@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { UserInfo } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-add-user-to-group',
-  templateUrl: './add-user-to-group.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-add-user-to-group',
+    templateUrl: './add-user-to-group.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AddUserToGroupComponent {
   @Input() suggestedUsers: UserInfo[];

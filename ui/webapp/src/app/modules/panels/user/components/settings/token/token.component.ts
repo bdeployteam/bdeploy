@@ -6,9 +6,10 @@ import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 
 @Component({
-  selector: 'app-token',
-  templateUrl: './token.component.html',
-  styleUrls: ['./token.component.css'],
+    selector: 'app-token',
+    templateUrl: './token.component.html',
+    styleUrls: ['./token.component.css'],
+    standalone: false
 })
 export class TokenComponent implements OnInit {
   private readonly authService = inject(AuthenticationService);

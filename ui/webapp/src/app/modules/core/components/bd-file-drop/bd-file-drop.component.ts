@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Ou
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
-  selector: 'app-bd-file-drop',
-  templateUrl: './bd-file-drop.component.html',
-  styleUrls: ['./bd-file-drop.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-file-drop',
+    templateUrl: './bd-file-drop.component.html',
+    styleUrls: ['./bd-file-drop.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFileDropComponent {
   /** Whether the control is disabled. */

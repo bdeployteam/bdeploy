@@ -14,8 +14,9 @@ import { LdapEditActionComponent } from './ldap-edit-action/ldap-edit-action.com
 import { LdapImportActionComponent } from './ldap-import-action/ldap-import-action.component';
 
 @Component({
-  selector: 'app-ldap-tab',
-  templateUrl: './ldap-tab.component.html',
+    selector: 'app-ldap-tab',
+    templateUrl: './ldap-tab.component.html',
+    standalone: false
 })
 export class LdapTabComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

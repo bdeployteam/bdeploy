@@ -9,8 +9,9 @@ interface ImportFile {
 }
 
 @Component({
-  selector: 'app-import-instance',
-  templateUrl: './import-instance.component.html',
+    selector: 'app-import-instance',
+    templateUrl: './import-instance.component.html',
+    standalone: false
 })
 export class ImportInstanceComponent {
   protected readonly instances = inject(InstancesService);

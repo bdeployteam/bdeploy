@@ -10,14 +10,15 @@ const ID = 'cfg-file-name';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appCfgFileNameValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: CfgFileNameValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appCfgFileNameValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: CfgFileNameValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class CfgFileNameValidatorDirective implements Validator {
   private readonly cfgFiles = inject(ConfigFilesService);

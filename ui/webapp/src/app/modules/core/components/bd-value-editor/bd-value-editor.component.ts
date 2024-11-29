@@ -30,11 +30,12 @@ import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
 import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
 
 @Component({
-  selector: 'app-bd-value-editor',
-  templateUrl: './bd-value-editor.component.html',
-  styleUrls: ['./bd-value-editor.component.css'],
-  viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-value-editor',
+    templateUrl: './bd-value-editor.component.html',
+    styleUrls: ['./bd-value-editor.component.css'],
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdValueEditorComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

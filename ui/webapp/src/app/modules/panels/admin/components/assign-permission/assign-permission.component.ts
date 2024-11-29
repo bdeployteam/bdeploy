@@ -8,9 +8,10 @@ import { ReportsService } from 'src/app/modules/primary/reports/services/reports
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
-  selector: 'app-user-assign-permission',
-  templateUrl: './assign-permission.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-user-assign-permission',
+    templateUrl: './assign-permission.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AssignPermissionComponent implements OnInit, OnDestroy {
   private readonly authAdmin = inject(AuthAdminService);

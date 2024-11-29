@@ -11,8 +11,9 @@ import { MinionRecord, NodesAdminService } from 'src/app/modules/primary/admin/s
 import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Component({
-  selector: 'app-node-update',
-  templateUrl: './node-update.component.html',
+    selector: 'app-node-update',
+    templateUrl: './node-update.component.html',
+    standalone: false
 })
 export class NodeUpdateComponent implements OnDestroy {
   private readonly cfg = inject(ConfigService);

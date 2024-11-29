@@ -7,8 +7,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { ProcessEditService } from '../../services/process-edit.service';
 
 @Component({
-  selector: 'app-edit-process-overview',
-  templateUrl: './edit-process-overview.component.html',
+    selector: 'app-edit-process-overview',
+    templateUrl: './edit-process-overview.component.html',
+    standalone: false
 })
 export class EditProcessOverviewComponent {
   private readonly areas = inject(NavAreasService);

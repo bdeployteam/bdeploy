@@ -10,9 +10,10 @@ import { ApplicationPair, ConfigPair, NodePair } from '../../utils/diff-utils';
 import { InstanceConfigCache } from '../../utils/instance-utils';
 
 @Component({
-  selector: 'app-history-compare',
-  templateUrl: './history-compare.component.html',
-  styleUrls: ['./history-compare.component.css'],
+    selector: 'app-history-compare',
+    templateUrl: './history-compare.component.html',
+    styleUrls: ['./history-compare.component.css'],
+    standalone: false
 })
 export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly areas = inject(NavAreasService);

@@ -3,7 +3,8 @@ import { NgControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 
 @Directive({
-  selector: '[appRevalidateOn]',
+    selector: '[appRevalidateOn]',
+    standalone: false
 })
 export class RevalidateOnDirective implements OnInit, OnDestroy {
   @Input() appRevalidateOn: Observable<unknown>;

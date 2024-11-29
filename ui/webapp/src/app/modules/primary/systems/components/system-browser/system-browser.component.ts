@@ -7,8 +7,9 @@ import { SystemsColumnsService } from '../../services/systems-columns.service';
 import { SystemsService } from '../../services/systems.service';
 
 @Component({
-  selector: 'app-system-browser',
-  templateUrl: './system-browser.component.html',
+    selector: 'app-system-browser',
+    templateUrl: './system-browser.component.html',
+    standalone: false
 })
 export class SystemBrowserComponent implements OnInit {
   private readonly columns = inject(SystemsColumnsService);

@@ -15,7 +15,7 @@ dependencies {
         project(":interfaces"),
         project(":schema"),
         'net.jsign:jsign-core:6.0',
-        'com.vaadin:open:8.5.0.3',
+        'com.vaadin:open:8.5.0.4',
     )
     commonTestDeps(testFixtures(project(":jersey")))
 }

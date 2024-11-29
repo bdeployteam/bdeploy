@@ -9,14 +9,15 @@ const ID = 'edit-allowed-values';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appAllowedValuesValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: AllowedValuesValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appAllowedValuesValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: AllowedValuesValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class AllowedValuesValidatorDirective implements Validator {
   @Input() appAllowedValuesValidator: string[];

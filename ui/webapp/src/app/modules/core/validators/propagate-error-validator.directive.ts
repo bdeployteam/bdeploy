@@ -9,14 +9,15 @@ const ID = 'propagate-error-input';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appPropagateErrorValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: PropagateErrorValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appPropagateErrorValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: PropagateErrorValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class PropagateErrorValidatorDirective implements Validator {
   @Input('appPropagateErrorValidator') error: string;

@@ -22,8 +22,9 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-  selector: 'app-endpoint-detail',
-  templateUrl: './endpoint-detail.component.html',
+    selector: 'app-endpoint-detail',
+    templateUrl: './endpoint-detail.component.html',
+    standalone: false
 })
 export class EndpointDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);

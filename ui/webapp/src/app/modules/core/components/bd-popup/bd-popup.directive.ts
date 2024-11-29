@@ -111,8 +111,9 @@ const RIGHT_BELOW: ConnectedPosition = {
 };
 
 @Directive({
-  selector: '[appBdPopup]',
-  exportAs: 'appBdPopup',
+    selector: '[appBdPopup]',
+    exportAs: 'appBdPopup',
+    standalone: false
 })
 export class BdPopupDirective implements OnDestroy {
   private readonly host = inject(ElementRef);

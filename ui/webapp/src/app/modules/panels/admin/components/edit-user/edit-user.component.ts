@@ -10,9 +10,10 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-edit-user',
-  templateUrl: './edit-user.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-edit-user',
+    templateUrl: './edit-user.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog, OnDestroy {
   private readonly authAdmin = inject(AuthAdminService);

@@ -4,9 +4,10 @@ import { ClientUsagePerApp, ClientsUsageService } from '../../../services/client
 const PERC_PER_DAY = 100 / 29;
 
 @Component({
-  selector: 'app-client-usage-graph',
-  templateUrl: './usage-graph.component.html',
-  styleUrls: ['./usage-graph.component.css'],
+    selector: 'app-client-usage-graph',
+    templateUrl: './usage-graph.component.html',
+    styleUrls: ['./usage-graph.component.css'],
+    standalone: false
 })
 export class ClientUsageGraphComponent implements OnChanges {
   private readonly clients = inject(ClientsUsageService);

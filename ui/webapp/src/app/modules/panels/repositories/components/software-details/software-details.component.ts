@@ -79,10 +79,11 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
 };
 
 @Component({
-  selector: 'app-software-details',
-  templateUrl: './software-details.component.html',
-  styleUrls: ['./software-details.component.css'],
-  providers: [SoftwareDetailsService],
+    selector: 'app-software-details',
+    templateUrl: './software-details.component.html',
+    styleUrls: ['./software-details.component.css'],
+    providers: [SoftwareDetailsService],
+    standalone: false
 })
 export class SoftwareDetailsComponent implements OnInit {
   protected readonly repository = inject(RepositoryService);

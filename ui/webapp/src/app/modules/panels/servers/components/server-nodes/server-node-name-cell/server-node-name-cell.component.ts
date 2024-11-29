@@ -3,8 +3,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MinionRow } from '../server-nodes.component';
 
 @Component({
-  selector: 'app-server-node-name-cell',
-  templateUrl: './server-node-name-cell.component.html',
+    selector: 'app-server-node-name-cell',
+    templateUrl: './server-node-name-cell.component.html',
+    standalone: false
 })
 export class ServerNodeNameCellComponent {
   private readonly snackbar = inject(MatSnackBar);

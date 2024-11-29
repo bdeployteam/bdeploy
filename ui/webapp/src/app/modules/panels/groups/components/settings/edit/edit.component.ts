@@ -15,8 +15,9 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { GroupDetailsService } from '../../../services/group-details.service';
 
 @Component({
-  selector: 'app-edit',
-  templateUrl: './edit.component.html',
+    selector: 'app-edit',
+    templateUrl: './edit.component.html',
+    standalone: false
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly http = inject(HttpClient);

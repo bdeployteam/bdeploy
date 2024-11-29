@@ -14,9 +14,10 @@ export interface ReportInputChange {
 }
 
 @Component({
-  selector: 'app-report-form-input',
-  templateUrl: './report-form-input.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-report-form-input',
+    templateUrl: './report-form-input.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
   protected readonly reports = inject(ReportsService);

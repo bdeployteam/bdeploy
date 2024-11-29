@@ -9,8 +9,9 @@ class WordInfo {
 }
 
 @Directive({
-  selector: 'input[appBdContentAssist]',
-  exportAs: 'appBdContentAssist',
+    selector: 'input[appBdContentAssist]',
+    exportAs: 'appBdContentAssist',
+    standalone: false
 })
 export class BdContentAssistDirective implements OnInit {
   private readonly elementRef = inject(ElementRef);

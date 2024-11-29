@@ -9,8 +9,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { SoftwareDetailsBulkService } from '../../services/software-details-bulk.service';
 
 @Component({
-  selector: 'app-software-details-bulk',
-  templateUrl: './software-details-bulk.component.html',
+    selector: 'app-software-details-bulk',
+    templateUrl: './software-details-bulk.component.html',
+    standalone: false
 })
 export class SoftwareDetailsBulkComponent {
   private readonly confirm = inject(ConfirmationService);

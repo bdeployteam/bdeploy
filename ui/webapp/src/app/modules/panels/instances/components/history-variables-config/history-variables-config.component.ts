@@ -4,9 +4,10 @@ import { InstanceConfiguration } from 'src/app/models/gen.dtos';
 import { DiffType, HistoryDiffService, VariablesDiff } from '../../services/history-diff.service';
 
 @Component({
-  selector: 'app-history-variables-config',
-  templateUrl: './history-variables-config.component.html',
-  styleUrls: ['./history-variables-config.component.css'],
+    selector: 'app-history-variables-config',
+    templateUrl: './history-variables-config.component.html',
+    styleUrls: ['./history-variables-config.component.css'],
+    standalone: false
 })
 export class HistoryVariablesConfigComponent implements OnInit {
   private readonly diffService = inject(HistoryDiffService);

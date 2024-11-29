@@ -12,11 +12,12 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
-  selector: 'app-bd-form-toggle',
-  templateUrl: './bd-form-toggle.component.html',
-  styleUrls: ['./bd-form-toggle.component.css'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-form-toggle',
+    templateUrl: './bd-form-toggle.component.html',
+    styleUrls: ['./bd-form-toggle.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFormToggleComponent implements ControlValueAccessor {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

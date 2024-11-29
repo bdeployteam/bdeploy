@@ -11,8 +11,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-  selector: 'app-add-system',
-  templateUrl: './add-system.component.html',
+    selector: 'app-add-system',
+    templateUrl: './add-system.component.html',
+    standalone: false
 })
 export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

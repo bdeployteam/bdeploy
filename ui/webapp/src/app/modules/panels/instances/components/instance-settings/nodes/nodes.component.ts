@@ -24,8 +24,9 @@ const colNodeName: BdDataColumn<NodeRow> = {
 };
 
 @Component({
-  selector: 'app-nodes',
-  templateUrl: './nodes.component.html',
+    selector: 'app-nodes',
+    templateUrl: './nodes.component.html',
+    standalone: false
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

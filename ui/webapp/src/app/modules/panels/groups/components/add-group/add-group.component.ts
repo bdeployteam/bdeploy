@@ -11,8 +11,9 @@ import { ReportsService } from 'src/app/modules/primary/reports/services/reports
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
-  selector: 'app-add-group',
-  templateUrl: './add-group.component.html',
+    selector: 'app-add-group',
+    templateUrl: './add-group.component.html',
+    standalone: false
 })
 export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly groups = inject(GroupsService);

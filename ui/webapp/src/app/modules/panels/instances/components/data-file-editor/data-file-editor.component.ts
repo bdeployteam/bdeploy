@@ -11,8 +11,9 @@ import { FilesService } from 'src/app/modules/primary/instances/services/files.s
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
 @Component({
-  selector: 'app-data-file-editor',
-  templateUrl: './data-file-editor.component.html',
+    selector: 'app-data-file-editor',
+    templateUrl: './data-file-editor.component.html',
+    standalone: false
 })
 export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

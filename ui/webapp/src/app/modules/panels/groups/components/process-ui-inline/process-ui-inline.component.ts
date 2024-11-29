@@ -10,9 +10,10 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-  selector: 'app-process-ui-inline',
-  templateUrl: './process-ui-inline.component.html',
-  styleUrls: ['./process-ui-inline.component.css'],
+    selector: 'app-process-ui-inline',
+    templateUrl: './process-ui-inline.component.html',
+    styleUrls: ['./process-ui-inline.component.css'],
+    standalone: false
 })
 export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   private readonly clients = inject(ClientsService);

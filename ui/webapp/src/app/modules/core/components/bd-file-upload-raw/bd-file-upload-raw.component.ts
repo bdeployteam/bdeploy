@@ -12,9 +12,10 @@ import {
 } from '../../services/upload.service';
 
 @Component({
-  selector: 'app-bd-file-upload-raw',
-  templateUrl: './bd-file-upload-raw.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-file-upload-raw',
+    templateUrl: './bd-file-upload-raw.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFileUploadRawComponent implements OnInit {
   @Input() file: File;

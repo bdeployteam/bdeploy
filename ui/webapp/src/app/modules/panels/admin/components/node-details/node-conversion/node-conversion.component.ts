@@ -5,9 +5,10 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
 import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 
 @Component({
-  selector: 'app-node-conversion',
-  templateUrl: './node-conversion.component.html',
-  styleUrls: ['./node-conversion.component.css'],
+    selector: 'app-node-conversion',
+    templateUrl: './node-conversion.component.html',
+    styleUrls: ['./node-conversion.component.css'],
+    standalone: false
 })
 export class NodeConversionComponent implements OnInit {
   private readonly cfg = inject(ConfigService);

@@ -11,9 +11,10 @@ import { UserGroupBulkService } from 'src/app/modules/panels/admin/services/user
 import { AuthAdminService } from '../../services/auth-admin.service';
 
 @Component({
-  selector: 'app-user-groups-browser',
-  templateUrl: './user-groups-browser.component.html',
-  styleUrls: ['./user-groups-browser.component.css'],
+    selector: 'app-user-groups-browser',
+    templateUrl: './user-groups-browser.component.html',
+    styleUrls: ['./user-groups-browser.component.css'],
+    standalone: false
 })
 export class UserGroupsBrowserComponent {
   private readonly groupCols = inject(UserGroupsColumnsService);

@@ -10,9 +10,10 @@ import { PermissionColumnsService } from 'src/app/modules/core/services/permissi
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-user-admin-detail',
-  templateUrl: './user-admin-detail.component.html',
-  styleUrls: ['./user-admin-detail.component.css'],
+    selector: 'app-user-admin-detail',
+    templateUrl: './user-admin-detail.component.html',
+    styleUrls: ['./user-admin-detail.component.css'],
+    standalone: false
 })
 export class UserAdminDetailComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

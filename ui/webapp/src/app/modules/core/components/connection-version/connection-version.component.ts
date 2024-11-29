@@ -11,10 +11,11 @@ export interface VersionMismatch {
 export const VERSION_DATA = new InjectionToken<VersionMismatch>('VERSION_DATA');
 
 @Component({
-  selector: 'app-connection-version',
-  templateUrl: './connection-version.component.html',
-  styleUrls: ['./connection-version.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-connection-version',
+    templateUrl: './connection-version.component.html',
+    styleUrls: ['./connection-version.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ConnectionVersionComponent {
   protected newVersion: string;

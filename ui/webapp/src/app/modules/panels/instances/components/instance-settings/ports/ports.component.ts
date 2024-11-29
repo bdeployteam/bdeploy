@@ -38,8 +38,9 @@ const colPort: BdDataColumn<PortParam> = {
 };
 
 @Component({
-  selector: 'app-ports',
-  templateUrl: './ports.component.html',
+    selector: 'app-ports',
+    templateUrl: './ports.component.html',
+    standalone: false
 })
 export class PortsComponent implements OnInit {
   private readonly dl = inject(DownloadService);

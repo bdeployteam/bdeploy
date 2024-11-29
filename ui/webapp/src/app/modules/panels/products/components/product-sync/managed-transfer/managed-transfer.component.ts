@@ -9,8 +9,9 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
-  selector: 'app-managed-transfer',
-  templateUrl: './managed-transfer.component.html',
+    selector: 'app-managed-transfer',
+    templateUrl: './managed-transfer.component.html',
+    standalone: false
 })
 export class ManagedTransferComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

@@ -5,8 +5,9 @@ import { NodeApplicationPort, PortsService } from 'src/app/modules/primary/insta
 import { ProcessDetailsService } from '../../services/process-details.service';
 
 @Component({
-  selector: 'app-process-ports',
-  templateUrl: './process-ports.component.html',
+    selector: 'app-process-ports',
+    templateUrl: './process-ports.component.html',
+    standalone: false
 })
 export class ProcessPortsComponent implements OnInit, OnDestroy {
   private readonly ports = inject(PortsService);

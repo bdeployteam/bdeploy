@@ -18,9 +18,10 @@ import { ProcessesService } from '../../../services/processes.service';
 import { StateItem, StateType } from '../state-panel/state-panel.component';
 
 @Component({
-  selector: 'app-instance-server-node',
-  templateUrl: './server-node.component.html',
-  styleUrls: ['./server-node.component.css'],
+    selector: 'app-instance-server-node',
+    templateUrl: './server-node.component.html',
+    styleUrls: ['./server-node.component.css'],
+    standalone: false
 })
 export class ServerNodeComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

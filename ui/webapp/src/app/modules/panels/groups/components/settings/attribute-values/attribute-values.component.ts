@@ -18,8 +18,9 @@ interface AttributeRow {
 }
 
 @Component({
-  selector: 'app-attribute-values',
-  templateUrl: './attribute-values.component.html',
+    selector: 'app-attribute-values',
+    templateUrl: './attribute-values.component.html',
+    standalone: false
 })
 export class AttributeValuesComponent implements OnInit {
   private readonly groups = inject(GroupsService);

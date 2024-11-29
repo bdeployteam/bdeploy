@@ -5,8 +5,9 @@ import { AuthenticationService } from '../../../services/authentication.service'
 import { BdBHiveBrowserComponent } from '../bd-bhive-browser.component';
 
 @Component({
-  selector: 'app-bd-manifest-delete-action',
-  templateUrl: './bd-manifest-delete-action.component.html',
+    selector: 'app-bd-manifest-delete-action',
+    templateUrl: './bd-manifest-delete-action.component.html',
+    standalone: false
 })
 export class BdManifestDeleteActionComponent {
   private readonly hives = inject(HiveService);

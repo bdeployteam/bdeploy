@@ -7,9 +7,9 @@ dependencies {
         project(":common"),
         project(":jersey"),
         project(":interfaces"),
-        'com.github.victools:jsonschema-generator:4.36.0',
-        'com.github.victools:jsonschema-module-jackson:4.36.0',
-        'com.networknt:json-schema-validator:1.5.2'
+        'com.github.victools:jsonschema-generator:4.37.0',
+        'com.github.victools:jsonschema-module-jackson:4.37.0',
+        'com.networknt:json-schema-validator:1.5.4'
     )
     commonTestDeps(testFixtures(project(":jersey")))
 }

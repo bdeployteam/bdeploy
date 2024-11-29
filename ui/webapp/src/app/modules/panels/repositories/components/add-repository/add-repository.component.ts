@@ -10,8 +10,9 @@ import { ReportsService } from 'src/app/modules/primary/reports/services/reports
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
-  selector: 'app-add-repository',
-  templateUrl: './add-repository.component.html',
+    selector: 'app-add-repository',
+    templateUrl: './add-repository.component.html',
+    standalone: false
 })
 export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly repositories = inject(RepositoriesService);

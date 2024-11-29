@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-bd-confirmation',
-  templateUrl: './bd-confirmation.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-confirmation',
+    templateUrl: './bd-confirmation.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdConfirmationComponent {
   private readonly dialogRef = inject(MatDialogRef<BdConfirmationComponent>);

@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-bd-image-upload',
-  templateUrl: './bd-image-upload.component.html',
-  styleUrls: ['./bd-image-upload.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-image-upload',
+    templateUrl: './bd-image-upload.component.html',
+    styleUrls: ['./bd-image-upload.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdImageUploadComponent implements OnInit {
   private readonly sanitizer = inject(DomSanitizer);

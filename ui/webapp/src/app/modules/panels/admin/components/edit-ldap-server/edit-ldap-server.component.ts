@@ -10,9 +10,10 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
-  selector: 'app-edit-ldap-server',
-  templateUrl: './edit-ldap-server.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-edit-ldap-server',
+    templateUrl: './edit-ldap-server.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly settings = inject(SettingsService);

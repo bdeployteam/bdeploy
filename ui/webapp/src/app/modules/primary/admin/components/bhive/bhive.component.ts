@@ -39,8 +39,9 @@ const colPerm: BdDataColumn<HiveInfoDto> = {
 };
 
 @Component({
-  selector: 'app-bhive',
-  templateUrl: './bhive.component.html',
+    selector: 'app-bhive',
+    templateUrl: './bhive.component.html',
+    standalone: false
 })
 export class BHiveComponent implements OnInit {
   protected readonly hives = inject(HiveService);

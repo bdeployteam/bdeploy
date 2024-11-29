@@ -15,10 +15,11 @@ import { BehaviorSubject, Observable, fromEvent } from 'rxjs';
 export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inherit';
 
 @Component({
-  selector: 'app-bd-button',
-  templateUrl: './bd-button.component.html',
-  styleUrls: ['./bd-button.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-button',
+    templateUrl: './bd-button.component.html',
+    styleUrls: ['./bd-button.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdButtonComponent implements AfterViewInit {
   private readonly _elementRef = inject(ElementRef);

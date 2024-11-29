@@ -6,9 +6,10 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 const STATUS_TIMEOUT = 1000 * 60 * 15;
 
 @Component({
-  selector: 'app-overall-status-column',
-  templateUrl: './overall-status-column.component.html',
-  styleUrls: ['./overall-status-column.component.css'],
+    selector: 'app-overall-status-column',
+    templateUrl: './overall-status-column.component.html',
+    styleUrls: ['./overall-status-column.component.css'],
+    standalone: false
 })
 export class OverallStatusColumnComponent {
   private readonly cfg = inject(ConfigService);

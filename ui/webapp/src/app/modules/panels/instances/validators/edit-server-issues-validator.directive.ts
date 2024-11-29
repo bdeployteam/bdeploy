@@ -13,14 +13,15 @@ const ID = 'edit-server-issue';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appServerIssuesValidator]',
-  providers: [
-    {
-      provide: NG_ASYNC_VALIDATORS,
-      useExisting: EditServerIssuesValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appServerIssuesValidator]',
+    providers: [
+        {
+            provide: NG_ASYNC_VALIDATORS,
+            useExisting: EditServerIssuesValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class EditServerIssuesValidatorDirective implements AsyncValidator {
   private readonly edit = inject(ProcessEditService);

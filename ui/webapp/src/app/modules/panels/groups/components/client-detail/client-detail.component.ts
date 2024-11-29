@@ -8,9 +8,10 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 
 @Component({
-  selector: 'app-client-detail',
-  templateUrl: './client-detail.component.html',
-  styleUrls: ['./client-detail.component.css'],
+    selector: 'app-client-detail',
+    templateUrl: './client-detail.component.html',
+    styleUrls: ['./client-detail.component.css'],
+    standalone: false
 })
 export class ClientDetailComponent implements OnInit, OnDestroy {
   protected readonly areas = inject(NavAreasService);

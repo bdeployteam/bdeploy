@@ -8,8 +8,9 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logging-admin.service';
 
 @Component({
-  selector: 'app-log-config-editor',
-  templateUrl: './log-config-editor.component.html',
+    selector: 'app-log-config-editor',
+    templateUrl: './log-config-editor.component.html',
+    standalone: false
 })
 export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
   private readonly loggingAdmin = inject(LoggingAdminService);

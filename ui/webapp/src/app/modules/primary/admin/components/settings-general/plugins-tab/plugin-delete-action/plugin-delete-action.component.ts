@@ -4,8 +4,9 @@ import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugi
 import { SettingsGeneralComponent } from '../../settings-general.component';
 
 @Component({
-  selector: 'app-plugin-delete-action',
-  templateUrl: './plugin-delete-action.component.html',
+    selector: 'app-plugin-delete-action',
+    templateUrl: './plugin-delete-action.component.html',
+    standalone: false
 })
 export class PluginDeleteActionComponent {
   private readonly parent = inject(forwardRef(() => SettingsGeneralComponent));

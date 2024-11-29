@@ -8,8 +8,9 @@ import { LogColumnsService } from 'src/app/modules/primary/admin/services/log-co
 import { HiveLoggingService } from '../../../services/hive-logging.service';
 
 @Component({
-  selector: 'app-bhive-log-browser',
-  templateUrl: './bhive-log-browser.component.html',
+    selector: 'app-bhive-log-browser',
+    templateUrl: './bhive-log-browser.component.html',
+    standalone: false
 })
 export class BhiveLogBrowserComponent implements OnInit {
   private readonly cols = inject(LogColumnsService);

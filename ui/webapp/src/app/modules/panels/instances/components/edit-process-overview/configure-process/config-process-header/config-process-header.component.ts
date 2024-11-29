@@ -16,9 +16,10 @@ export class DirTreeNode {
 }
 
 @Component({
-  selector: 'app-config-process-header',
-  templateUrl: './config-process-header.component.html',
-  styleUrls: ['./config-process-header.component.css'],
+    selector: 'app-config-process-header',
+    templateUrl: './config-process-header.component.html',
+    styleUrls: ['./config-process-header.component.css'],
+    standalone: false
 })
 export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly instances = inject(InstancesService);

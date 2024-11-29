@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
-  selector: 'app-rating-status-column',
-  templateUrl: './rating-status-column.component.html',
-  styleUrls: ['./rating-status-column.component.css'],
+    selector: 'app-rating-status-column',
+    templateUrl: './rating-status-column.component.html',
+    styleUrls: ['./rating-status-column.component.css'],
+    standalone: false
 })
 export class RatingStatusColumnComponent<T> {
   @Input() record: T;

@@ -10,9 +10,10 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-edit-user-group',
-  templateUrl: './edit-user-group.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-edit-user-group',
+    templateUrl: './edit-user-group.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableDialog, OnDestroy {
   private readonly authAdmin = inject(AuthAdminService);

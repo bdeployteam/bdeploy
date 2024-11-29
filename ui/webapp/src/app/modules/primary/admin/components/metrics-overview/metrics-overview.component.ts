@@ -11,9 +11,10 @@ export interface SeriesElement {
 }
 
 @Component({
-  selector: 'app-metrics-overview',
-  templateUrl: './metrics-overview.component.html',
-  styleUrls: ['./metrics-overview.component.css'],
+    selector: 'app-metrics-overview',
+    templateUrl: './metrics-overview.component.html',
+    styleUrls: ['./metrics-overview.component.css'],
+    standalone: false
 })
 export class MetricsOverviewComponent implements OnInit {
   private readonly metrics = inject(MetricsService);

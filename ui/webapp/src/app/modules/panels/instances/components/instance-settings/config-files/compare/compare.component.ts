@@ -11,8 +11,9 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ConfigFilesService } from '../../../../services/config-files.service';
 
 @Component({
-  selector: 'app-compare',
-  templateUrl: './compare.component.html',
+    selector: 'app-compare',
+    templateUrl: './compare.component.html',
+    standalone: false
 })
 export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly edit = inject(InstanceEditService);

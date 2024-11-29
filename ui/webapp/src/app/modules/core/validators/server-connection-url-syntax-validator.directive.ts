@@ -4,8 +4,9 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 export const URL_VALIDATION = 'errorMsg';
 
 @Directive({
-  selector: '[appServerConnectionUrlSyntaxValid]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: ServerConnectionUrlSyntaxValidator, multi: true }],
+    selector: '[appServerConnectionUrlSyntaxValid]',
+    providers: [{ provide: NG_VALIDATORS, useExisting: ServerConnectionUrlSyntaxValidator, multi: true }],
+    standalone: false
 })
 export class ServerConnectionUrlSyntaxValidator implements Validator {
   private readonly regex = new RegExp(/^(\S+:\/\/\S+:\d+($|\/\S+))?$/);

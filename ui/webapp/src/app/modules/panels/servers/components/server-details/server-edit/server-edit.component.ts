@@ -13,9 +13,10 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { ServerDetailsService } from '../../../services/server-details.service';
 
 @Component({
-  selector: 'app-server-edit',
-  templateUrl: './server-edit.component.html',
-  providers: [ServerDetailsService],
+    selector: 'app-server-edit',
+    templateUrl: './server-edit.component.html',
+    providers: [ServerDetailsService],
+    standalone: false
 })
 export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly servers = inject(ServersService);

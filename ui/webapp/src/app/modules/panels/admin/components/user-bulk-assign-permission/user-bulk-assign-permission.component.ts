@@ -9,9 +9,10 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { UserBulkService } from '../../services/user-bulk.service';
 
 @Component({
-  selector: 'app-user-bulk-assign-permission',
-  templateUrl: './user-bulk-assign-permission.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-user-bulk-assign-permission',
+    templateUrl: './user-bulk-assign-permission.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class UserBulkAssignPermissionComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);

@@ -6,9 +6,10 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-check-ldap-server',
-  templateUrl: './check-ldap-server.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-check-ldap-server',
+    templateUrl: './check-ldap-server.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class CheckLdapServerComponent implements OnInit, OnDestroy {
   private readonly settings = inject(SettingsService);

@@ -28,8 +28,9 @@ interface HttpEndpointDisabledStatus {
 }
 
 @Component({
-  selector: 'app-configure-endpoints',
-  templateUrl: './configure-endpoints.component.html',
+    selector: 'app-configure-endpoints',
+    templateUrl: './configure-endpoints.component.html',
+    standalone: false
 })
 export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnDestroy, AfterViewInit {
   private readonly systems = inject(SystemsService);

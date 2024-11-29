@@ -3,8 +3,9 @@ import { BdDataColumn } from 'src/app/models/data';
 import { formatSize } from '../../utils/object.utils';
 
 @Component({
-  selector: 'app-bd-data-size-cell',
-  templateUrl: './bd-data-size-cell.component.html',
+    selector: 'app-bd-data-size-cell',
+    templateUrl: './bd-data-size-cell.component.html',
+    standalone: false
 })
 export class BdDataSizeCellComponent<T> implements OnInit {
   @Input() record: T;

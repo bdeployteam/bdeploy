@@ -10,8 +10,9 @@ import { ProductVersionDetailsCellComponent } from '../../product-version-detail
 import { UpdateActionComponent } from './update-action/update-action.component';
 
 @Component({
-  selector: 'app-product-update',
-  templateUrl: './product-update.component.html',
+    selector: 'app-product-update',
+    templateUrl: './product-update.component.html',
+    standalone: false
 })
 export class ProductUpdateComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);

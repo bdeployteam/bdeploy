@@ -10,9 +10,10 @@ interface LinkableScope {
 }
 
 @Component({
-  selector: 'app-bd-current-scope',
-  templateUrl: './bd-current-scope.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-current-scope',
+    templateUrl: './bd-current-scope.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdCurrentScopeComponent {
   private readonly groups = inject(GroupsService);

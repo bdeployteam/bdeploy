@@ -11,8 +11,9 @@ import { HistoryService } from '../../services/history.service';
 import { InstancesService } from '../../services/instances.service';
 
 @Component({
-  selector: 'app-history',
-  templateUrl: './history.component.html',
+    selector: 'app-history',
+    templateUrl: './history.component.html',
+    standalone: false
 })
 export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
   private readonly cfg = inject(ConfigService);

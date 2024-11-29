@@ -40,9 +40,10 @@ const colVarDesc: BdDataColumn<LinkVariable> = {
 };
 
 @Component({
-  selector: 'app-bd-expression-picker',
-  templateUrl: './bd-expression-picker.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-expression-picker',
+    templateUrl: './bd-expression-picker.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdExpressionPickerComponent implements OnChanges {
   @Input() process: ApplicationConfiguration;

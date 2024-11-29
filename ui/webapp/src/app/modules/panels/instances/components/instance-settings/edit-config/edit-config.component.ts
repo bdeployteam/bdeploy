@@ -13,8 +13,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-  selector: 'app-edit-config',
-  templateUrl: './edit-config.component.html',
+    selector: 'app-edit-config',
+    templateUrl: './edit-config.component.html',
+    standalone: false
 })
 export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly areas = inject(NavAreasService);

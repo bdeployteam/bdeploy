@@ -45,9 +45,10 @@ const colNextRunTime: BdDataColumn<JobDto> = {
 };
 
 @Component({
-  selector: 'app-manual-jobs',
-  templateUrl: './manual-jobs.component.html',
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-manual-jobs',
+    templateUrl: './manual-jobs.component.html',
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class ManualJobsComponent implements OnInit, OnDestroy {
   private readonly colRun: BdDataColumn<JobDto> = {

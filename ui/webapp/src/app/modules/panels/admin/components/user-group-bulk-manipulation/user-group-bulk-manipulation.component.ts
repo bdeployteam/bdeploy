@@ -7,8 +7,9 @@ import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { UserGroupBulkService } from '../../services/user-group-bulk.service';
 
 @Component({
-  selector: 'app-user-group-bulk-manipulation',
-  templateUrl: './user-group-bulk-manipulation.component.html',
+    selector: 'app-user-group-bulk-manipulation',
+    templateUrl: './user-group-bulk-manipulation.component.html',
+    standalone: false
 })
 export class UserGroupBulkManipulationComponent {
   protected readonly actions = inject(ActionsService);

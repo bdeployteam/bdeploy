@@ -17,8 +17,9 @@ import { ThemeService } from '../../services/theme.service';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 
 @Component({
-  selector: 'app-bd-editor',
-  templateUrl: './bd-editor.component.html',
+    selector: 'app-bd-editor',
+    templateUrl: './bd-editor.component.html',
+    standalone: false
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private readonly themeService = inject(ThemeService);

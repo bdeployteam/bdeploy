@@ -23,10 +23,11 @@ import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils
 import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
 
 @Component({
-  selector: 'app-bd-custom-editor',
-  templateUrl: './bd-custom-editor.component.html',
-  styleUrls: ['./bd-custom-editor.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-custom-editor',
+    templateUrl: './bd-custom-editor.component.html',
+    styleUrls: ['./bd-custom-editor.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewInit {
   private readonly plugins = inject(PluginService);

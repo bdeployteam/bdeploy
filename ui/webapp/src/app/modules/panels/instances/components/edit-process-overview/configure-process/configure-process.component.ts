@@ -9,8 +9,9 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ProcessEditService } from '../../../services/process-edit.service';
 
 @Component({
-  selector: 'app-configure-process',
-  templateUrl: './configure-process.component.html',
+    selector: 'app-configure-process',
+    templateUrl: './configure-process.component.html',
+    standalone: false
 })
 export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly instanceEdit = inject(InstanceEditService);

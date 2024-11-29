@@ -8,8 +8,9 @@ import { LogColumnsService } from '../../services/log-columns.service';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 
 @Component({
-  selector: 'app-log-files-browser',
-  templateUrl: './log-files-browser.component.html',
+    selector: 'app-log-files-browser',
+    templateUrl: './log-files-browser.component.html',
+    standalone: false
 })
 export class LogFilesBrowserComponent implements OnInit {
   private readonly cols = inject(LogColumnsService);

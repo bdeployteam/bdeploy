@@ -15,9 +15,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
 import { BdButtonColorMode } from '../bd-button/bd-button.component';
 
 @Component({
-  selector: 'app-bd-panel-button',
-  templateUrl: './bd-panel-button.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-panel-button',
+    templateUrl: './bd-panel-button.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   private readonly areas = inject(NavAreasService);

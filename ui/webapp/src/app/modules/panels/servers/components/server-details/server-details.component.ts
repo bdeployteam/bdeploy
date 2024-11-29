@@ -12,9 +12,10 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { ServerDetailsService } from '../../services/server-details.service';
 
 @Component({
-  selector: 'app-server-details',
-  templateUrl: './server-details.component.html',
-  providers: [ServerDetailsService],
+    selector: 'app-server-details',
+    templateUrl: './server-details.component.html',
+    providers: [ServerDetailsService],
+    standalone: false
 })
 export class ServerDetailsComponent implements OnInit {
   private readonly actions = inject(ActionsService);

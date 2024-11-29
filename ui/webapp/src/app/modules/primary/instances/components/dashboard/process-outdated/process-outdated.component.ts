@@ -5,9 +5,10 @@ import { InstancesService } from '../../../services/instances.service';
 import { ProcessesService } from '../../../services/processes.service';
 
 @Component({
-  selector: 'app-process-outdated',
-  templateUrl: './process-outdated.component.html',
-  styleUrls: ['./process-outdated.component.css'],
+    selector: 'app-process-outdated',
+    templateUrl: './process-outdated.component.html',
+    styleUrls: ['./process-outdated.component.css'],
+    standalone: false
 })
 export class ProcessOutdatedComponent implements OnInit {
   private readonly processes = inject(ProcessesService);

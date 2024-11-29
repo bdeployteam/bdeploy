@@ -12,8 +12,9 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { GroupDetailsService } from '../../../services/group-details.service';
 
 @Component({
-  selector: 'app-attribute-definitions',
-  templateUrl: './attribute-definitions.component.html',
+    selector: 'app-attribute-definitions',
+    templateUrl: './attribute-definitions.component.html',
+    standalone: false
 })
 export class AttributeDefinitionsComponent {
   protected readonly groups = inject(GroupsService);

@@ -77,11 +77,12 @@ const MAX_ROWS_PER_GROUP = 500;
  *  * Filtering (Searching, BdSearchable) with automatic SearchService registration
  */
 @Component({
-  selector: 'app-bd-data-table',
-  templateUrl: './bd-data-table.component.html',
-  styleUrls: ['./bd-data-table.component.css'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-data-table',
+    templateUrl: './bd-data-table.component.html',
+    styleUrls: ['./bd-data-table.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
   private readonly searchService = inject(SearchService);

@@ -23,10 +23,11 @@ enum PresetType {
 }
 
 @Component({
-  selector: 'app-bd-data-grouping',
-  templateUrl: './bd-data-grouping.component.html',
-  styleUrls: ['./bd-data-grouping.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-bd-data-grouping',
+    templateUrl: './bd-data-grouping.component.html',
+    styleUrls: ['./bd-data-grouping.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   private readonly snackBar = inject(MatSnackBar);

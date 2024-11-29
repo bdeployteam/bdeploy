@@ -10,9 +10,10 @@ import {
 import { fromEvent } from 'rxjs';
 
 @Component({
-  selector: 'app-bd-micro-icon-button',
-  templateUrl: './bd-micro-icon-button.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-micro-icon-button',
+    templateUrl: './bd-micro-icon-button.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdMicroIconButtonComponent implements AfterViewInit {
   private readonly _elementRef = inject(ElementRef);

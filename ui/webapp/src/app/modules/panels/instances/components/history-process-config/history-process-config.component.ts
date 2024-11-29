@@ -4,9 +4,10 @@ import { ApplicationConfiguration, ApplicationDescriptor } from 'src/app/models/
 import { ApplicationConfigurationDiff, DiffType, HistoryDiffService } from '../../services/history-diff.service';
 
 @Component({
-  selector: 'app-history-process-config',
-  templateUrl: './history-process-config.component.html',
-  styleUrls: ['./history-process-config.component.css'],
+    selector: 'app-history-process-config',
+    templateUrl: './history-process-config.component.html',
+    styleUrls: ['./history-process-config.component.css'],
+    standalone: false
 })
 export class HistoryProcessConfigComponent implements OnInit {
   private readonly diffService = inject(HistoryDiffService);

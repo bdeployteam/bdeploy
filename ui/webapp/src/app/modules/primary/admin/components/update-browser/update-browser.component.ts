@@ -29,8 +29,9 @@ const colLauncher: BdDataColumn<SoftwareVersion> = {
 };
 
 @Component({
-  selector: 'app-update-browser',
-  templateUrl: './update-browser.component.html',
+    selector: 'app-update-browser',
+    templateUrl: './update-browser.component.html',
+    standalone: false
 })
 export class UpdateBrowserComponent implements OnInit {
   protected readonly software = inject(SoftwareUpdateService);

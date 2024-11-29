@@ -8,8 +8,9 @@ export interface ColorDef {
 }
 
 @Component({
-  selector: 'app-color-select-group',
-  templateUrl: './color-select-group.component.html',
+    selector: 'app-color-select-group',
+    templateUrl: './color-select-group.component.html',
+    standalone: false
 })
 export class ColorSelectGroupComponent {
   @Output() colorChanged = new EventEmitter<ColorDef>();

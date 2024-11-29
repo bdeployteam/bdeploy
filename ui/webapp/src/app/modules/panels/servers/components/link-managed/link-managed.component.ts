@@ -9,9 +9,10 @@ import { AttachType, ServersService } from 'src/app/modules/primary/servers/serv
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
 
 @Component({
-  selector: 'app-link-managed',
-  templateUrl: './link-managed.component.html',
-  styleUrls: ['./link-managed.component.css'],
+    selector: 'app-link-managed',
+    templateUrl: './link-managed.component.html',
+    styleUrls: ['./link-managed.component.css'],
+    standalone: false
 })
 export class LinkManagedComponent {
   private readonly servers = inject(ServersService);

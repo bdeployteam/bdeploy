@@ -30,9 +30,10 @@ import { ProcessesColumnsService } from '../../services/processes-columns.servic
 import { CONTROL_GROUP_COL_ID } from './server-node/process-list/process-list.component';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.css'],
+    standalone: false
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly media = inject(BreakpointObserver);

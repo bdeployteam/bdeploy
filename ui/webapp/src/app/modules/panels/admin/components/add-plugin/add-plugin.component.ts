@@ -4,8 +4,9 @@ import { UploadStatus } from 'src/app/modules/core/services/upload.service';
 import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugin-admin.service';
 
 @Component({
-  selector: 'app-add-plugin',
-  templateUrl: './add-plugin.component.html',
+    selector: 'app-add-plugin',
+    templateUrl: './add-plugin.component.html',
+    standalone: false
 })
 export class AddPluginComponent {
   protected readonly plugins = inject(PluginAdminService);

@@ -18,8 +18,9 @@ const colUserGroupName: BdDataColumn<UserGroupPermission> = {
 };
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    standalone: false
 })
 export class SettingsComponent implements OnInit {
   private readonly router = inject(Router);

@@ -29,9 +29,10 @@ import { ProcessesColumnsService } from '../../../services/processes-columns.ser
 import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-name-and-os.component';
 
 @Component({
-  selector: 'app-config-node',
-  templateUrl: './config-node.component.html',
-  styleUrls: ['./config-node.component.css'],
+    selector: 'app-config-node',
+    templateUrl: './config-node.component.html',
+    styleUrls: ['./config-node.component.css'],
+    standalone: false
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly edit = inject(InstanceEditService);

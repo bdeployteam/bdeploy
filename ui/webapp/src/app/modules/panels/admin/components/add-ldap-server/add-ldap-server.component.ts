@@ -9,9 +9,10 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { randomString } from 'src/app/modules/core/utils/object.utils';
 
 @Component({
-  selector: 'app-add-ldap-server',
-  templateUrl: './add-ldap-server.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-add-ldap-server',
+    templateUrl: './add-ldap-server.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly settings = inject(SettingsService);

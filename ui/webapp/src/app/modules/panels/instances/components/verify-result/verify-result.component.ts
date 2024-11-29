@@ -4,8 +4,9 @@ import { Subject } from 'rxjs';
 import { VerifyOperationResultDto } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-verify-result',
-  templateUrl: './verify-result.component.html',
+    selector: 'app-verify-result',
+    templateUrl: './verify-result.component.html',
+    standalone: false
 })
 export class VerifyResultComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<VerifyResultComponent>);

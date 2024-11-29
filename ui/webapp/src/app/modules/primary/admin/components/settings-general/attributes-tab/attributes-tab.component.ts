@@ -8,8 +8,9 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { AttributeEditActionComponent } from './attribute-edit-action/attribute-edit-action.component';
 
 @Component({
-  selector: 'app-attributes-tab',
-  templateUrl: './attributes-tab.component.html',
+    selector: 'app-attributes-tab',
+    templateUrl: './attributes-tab.component.html',
+    standalone: false
 })
 export class AttributesTabComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

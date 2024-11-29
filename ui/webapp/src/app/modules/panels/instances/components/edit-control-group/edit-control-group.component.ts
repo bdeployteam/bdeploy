@@ -18,8 +18,9 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
-  selector: 'app-edit-control-group',
-  templateUrl: './edit-control-group.component.html',
+    selector: 'app-edit-control-group',
+    templateUrl: './edit-control-group.component.html',
+    standalone: false
 })
 export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit {
   private readonly areas = inject(NavAreasService);

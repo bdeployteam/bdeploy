@@ -15,9 +15,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
 import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.component';
 
 @Component({
-  selector: 'app-bd-dialog-toolbar',
-  templateUrl: './bd-dialog-toolbar.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-dialog-toolbar',
+    templateUrl: './bd-dialog-toolbar.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
   private readonly title = inject(Title);

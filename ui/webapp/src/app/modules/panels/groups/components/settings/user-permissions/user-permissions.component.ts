@@ -19,8 +19,9 @@ import { BdDataPermissionLevelCellComponent } from '../../../../../core/componen
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
 
 @Component({
-  selector: 'app-instance-group-user-permissions',
-  templateUrl: './user-permissions.component.html',
+    selector: 'app-instance-group-user-permissions',
+    templateUrl: './user-permissions.component.html',
+    standalone: false
 })
 export class UserPermissionsComponent {
   protected readonly groups = inject(GroupsService);

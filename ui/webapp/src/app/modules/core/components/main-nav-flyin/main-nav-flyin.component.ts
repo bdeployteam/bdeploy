@@ -5,25 +5,26 @@ import { routerAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
 
 @Component({
-  selector: 'app-main-nav-flyin',
-  templateUrl: './main-nav-flyin.component.html',
-  styleUrls: ['./main-nav-flyin.component.css'],
-  animations: [
-    routerAnimation,
-    trigger('openClose', [
-      state('open', style({ transform: 'translateX(0%)' })),
-      state('closed', style({ transform: 'translateX(100%)' })),
-      transition('open <=> closed', animate('0.2s ease')),
-    ]),
-    trigger('flyInWidth', [
-      state('normal', style({ width: '350px' })),
-      state('max-lg', style({ width: 'calc(100% - 174px)' })),
-      state('max-lg-menu', style({ width: 'calc(100% - 174px)' })),
-      state('max-sm', style({ width: 'calc(100% - 74px)' })),
-      state('max-sm-menu', style({ width: 'calc(100% - 220px)' })),
-      transition('* => *', animate('0.2s ease')),
-    ]),
-  ],
+    selector: 'app-main-nav-flyin',
+    templateUrl: './main-nav-flyin.component.html',
+    styleUrls: ['./main-nav-flyin.component.css'],
+    animations: [
+        routerAnimation,
+        trigger('openClose', [
+            state('open', style({ transform: 'translateX(0%)' })),
+            state('closed', style({ transform: 'translateX(100%)' })),
+            transition('open <=> closed', animate('0.2s ease')),
+        ]),
+        trigger('flyInWidth', [
+            state('normal', style({ width: '350px' })),
+            state('max-lg', style({ width: 'calc(100% - 174px)' })),
+            state('max-lg-menu', style({ width: 'calc(100% - 174px)' })),
+            state('max-sm', style({ width: 'calc(100% - 74px)' })),
+            state('max-sm-menu', style({ width: 'calc(100% - 220px)' })),
+            transition('* => *', animate('0.2s ease')),
+        ]),
+    ],
+    standalone: false
 })
 export class MainNavFlyinComponent implements OnInit {
   private readonly areas = inject(NavAreasService);

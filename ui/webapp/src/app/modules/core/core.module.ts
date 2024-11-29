@@ -5,7 +5,7 @@ import { CdkScrollableModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
+import { ErrorHandler, NgModule, inject, provideAppInitializer } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -229,12 +229,10 @@ function loadAppConfig(cfgService: ConfigService) {
     provideHttpClient(withInterceptorsFromDi()),
     httpInterceptorProviders,
     /* make sure that ConfigService and HistoryService are initialize always on startup */
-    {
-      provide: APP_INITIALIZER,
-      useFactory: loadAppConfig,
-      deps: [ConfigService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+        const initializerFn = (loadAppConfig)(inject(ConfigService));
+        return initializerFn();
+      }),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],
   imports: [

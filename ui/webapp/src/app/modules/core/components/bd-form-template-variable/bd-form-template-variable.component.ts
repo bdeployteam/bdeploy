@@ -3,10 +3,11 @@ import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { TemplateVariable, TemplateVariableType } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-bd-form-template-variable',
-  templateUrl: './bd-form-template-variable.component.html',
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-form-template-variable',
+    templateUrl: './bd-form-template-variable.component.html',
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFormTemplateVariableComponent implements ControlValueAccessor {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

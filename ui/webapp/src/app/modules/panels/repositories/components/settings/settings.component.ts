@@ -9,8 +9,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { RepositoryDetailsService } from '../../services/repository-details.service';
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    standalone: false
 })
 export class SettingsComponent {
   private readonly router = inject(Router);

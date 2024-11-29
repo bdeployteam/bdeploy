@@ -7,8 +7,9 @@ import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 
 @Component({
-  selector: 'app-bd-data-display',
-  templateUrl: './bd-data-display.component.html',
+    selector: 'app-bd-data-display',
+    templateUrl: './bd-data-display.component.html',
+    standalone: false
 })
 export class BdDataDisplayComponent<T> {
   private readonly cardViewService = inject(CardViewService);

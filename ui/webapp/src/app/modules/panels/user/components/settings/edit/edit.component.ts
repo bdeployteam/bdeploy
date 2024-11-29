@@ -12,8 +12,9 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
-  selector: 'app-edit',
-  templateUrl: './edit.component.html',
+    selector: 'app-edit',
+    templateUrl: './edit.component.html',
+    standalone: false
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly auth = inject(AuthenticationService);

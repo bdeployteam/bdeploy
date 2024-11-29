@@ -7,8 +7,9 @@ import { ConfirmationService } from 'src/app/modules/core/services/confirmation.
 import { ProductBulkService } from '../../services/product-bulk.service';
 
 @Component({
-  selector: 'app-product-bulk',
-  templateUrl: './product-bulk.component.html',
+    selector: 'app-product-bulk',
+    templateUrl: './product-bulk.component.html',
+    standalone: false
 })
 export class ProductBulkComponent {
   private readonly confirm = inject(ConfirmationService);

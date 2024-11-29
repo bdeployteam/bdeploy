@@ -7,10 +7,11 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { InstanceEditService } from '../../../../services/instance-edit.service';
 
 @Component({
-  selector: 'app-control-group',
-  templateUrl: './control-group.component.html',
-  styleUrls: ['./control-group.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-control-group',
+    templateUrl: './control-group.component.html',
+    styleUrls: ['./control-group.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class ControlGroupComponent implements OnInit, OnDestroy {
   private readonly edit = inject(InstanceEditService);

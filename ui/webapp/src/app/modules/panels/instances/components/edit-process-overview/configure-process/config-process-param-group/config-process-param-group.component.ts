@@ -66,10 +66,11 @@ interface ParameterGroup {
 }
 
 @Component({
-  selector: 'app-config-process-param-group',
-  templateUrl: './config-process-param-group.component.html',
-  styleUrls: ['./config-process-param-group.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-config-process-param-group',
+    templateUrl: './config-process-param-group.component.html',
+    styleUrls: ['./config-process-param-group.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly bop = inject(BreakpointObserver);

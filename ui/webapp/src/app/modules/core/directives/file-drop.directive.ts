@@ -5,7 +5,8 @@ import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
  * Then emit them to the parent component. It will also emit a custom event when files are hovered on the drop zone area.
  */
 @Directive({
-  selector: '[appFileDrop]',
+    selector: '[appFileDrop]',
+    standalone: false
 })
 export class FileDropDirective {
   @Output() filesDropped = new EventEmitter<FileList>();

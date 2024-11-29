@@ -54,8 +54,9 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
 };
 
 @Component({
-  selector: 'app-client-applications',
-  templateUrl: './client-applications.component.html',
+    selector: 'app-client-applications',
+    templateUrl: './client-applications.component.html',
+    standalone: false
 })
 export class ClientApplicationsComponent implements OnInit {
   private readonly dd = inject(DeviceDetectorService);

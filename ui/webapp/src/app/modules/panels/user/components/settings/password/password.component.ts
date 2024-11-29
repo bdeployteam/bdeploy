@@ -6,8 +6,9 @@ import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dia
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 
 @Component({
-  selector: 'app-password',
-  templateUrl: './password.component.html',
+    selector: 'app-password',
+    templateUrl: './password.component.html',
+    standalone: false
 })
 export class PasswordComponent {
   private readonly auth = inject(AuthenticationService);

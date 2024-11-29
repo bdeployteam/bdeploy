@@ -17,8 +17,9 @@ import { ConfigFilesService } from '../../../../services/config-files.service';
 import { errorMarker } from '../../../../utils/monaco-editor-utils';
 
 @Component({
-  selector: 'app-editor',
-  templateUrl: './editor.component.html',
+    selector: 'app-editor',
+    templateUrl: './editor.component.html',
+    standalone: false
 })
 export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

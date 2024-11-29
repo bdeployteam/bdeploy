@@ -5,9 +5,10 @@ import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ProcessesService } from '../../../services/processes.service';
 
 @Component({
-  selector: 'app-process-status-icon',
-  templateUrl: './process-status-icon.component.html',
-  styleUrls: ['./process-status-icon.component.css'],
+    selector: 'app-process-status-icon',
+    templateUrl: './process-status-icon.component.html',
+    styleUrls: ['./process-status-icon.component.css'],
+    standalone: false
 })
 export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
   private readonly processes = inject(ProcessesService);

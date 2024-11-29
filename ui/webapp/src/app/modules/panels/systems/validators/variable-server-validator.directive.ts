@@ -11,14 +11,15 @@ const ID = 'variable-support-server';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appVariableServerValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: VariableServerValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appVariableServerValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: VariableServerValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class VariableServerValidatorDirective implements Validator {
   validate(control: AbstractControl): ValidationErrors | null {

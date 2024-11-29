@@ -4,9 +4,10 @@ import { HistoryEntryDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { InstanceStateService } from '../../services/instance-state.service';
 
 @Component({
-  selector: 'app-history-state-column',
-  templateUrl: './history-state-column.component.html',
-  styleUrls: ['./history-state-column.component.css'],
+    selector: 'app-history-state-column',
+    templateUrl: './history-state-column.component.html',
+    styleUrls: ['./history-state-column.component.css'],
+    standalone: false
 })
 export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy {
   private readonly state = inject(InstanceStateService);

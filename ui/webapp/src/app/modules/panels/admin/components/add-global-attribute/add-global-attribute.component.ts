@@ -8,9 +8,10 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
-  selector: 'app-add-global-attribute',
-  templateUrl: './add-global-attribute.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-add-global-attribute',
+    templateUrl: './add-global-attribute.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AddGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly settings = inject(SettingsService);

@@ -22,9 +22,10 @@ interface MarkedEvent {
 }
 
 @Component({
-  selector: 'app-node-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css'],
+    selector: 'app-node-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.css'],
+    standalone: false
 })
 export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   private readonly instances = inject(InstancesService);

@@ -101,10 +101,11 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
 };
 
 @Component({
-  selector: 'app-product-details',
-  templateUrl: './product-details.component.html',
-  styleUrls: ['./product-details.component.css'],
-  providers: [ProductDetailsService],
+    selector: 'app-product-details',
+    templateUrl: './product-details.component.html',
+    styleUrls: ['./product-details.component.css'],
+    providers: [ProductDetailsService],
+    standalone: false
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);

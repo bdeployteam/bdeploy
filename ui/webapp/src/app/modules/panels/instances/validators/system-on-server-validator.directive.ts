@@ -11,14 +11,15 @@ const ID = 'system-on-server';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appSystemOnServerValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: SystemOnServerValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appSystemOnServerValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: SystemOnServerValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class SystemOnServerValidatorDirective implements Validator {
   private readonly systems = inject(SystemsService);

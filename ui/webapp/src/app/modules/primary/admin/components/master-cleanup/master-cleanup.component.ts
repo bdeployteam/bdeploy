@@ -23,9 +23,10 @@ const colDesc: BdDataColumn<CleanupAction> = {
 };
 
 @Component({
-  selector: 'app-master-cleanup',
-  templateUrl: './master-cleanup.component.html',
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-master-cleanup',
+    templateUrl: './master-cleanup.component.html',
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class MasterCleanupComponent {
   protected readonly cleanup = inject(CleanupService);

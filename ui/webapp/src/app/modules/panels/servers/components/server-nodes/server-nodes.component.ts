@@ -45,9 +45,10 @@ const detailOsCol: BdDataColumn<MinionRow> = {
 };
 
 @Component({
-  selector: 'app-server-nodes',
-  templateUrl: './server-nodes.component.html',
-  providers: [ServerDetailsService],
+    selector: 'app-server-nodes',
+    templateUrl: './server-nodes.component.html',
+    providers: [ServerDetailsService],
+    standalone: false
 })
 export class ServerNodesComponent implements OnInit {
   private readonly servers = inject(ServersService);

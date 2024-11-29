@@ -9,14 +9,15 @@ const ID = 'edit-unique-value';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appEditUniqueValueValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: EditUniqueValueValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appEditUniqueValueValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: EditUniqueValueValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class EditUniqueValueValidatorDirective implements Validator {
   @Input() disallowedValues: string[];

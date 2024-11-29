@@ -7,9 +7,10 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { SettingsService } from '../../../../core/services/settings.service';
 
 @Component({
-  selector: 'app-settings-general',
-  templateUrl: './settings-general.component.html',
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-settings-general',
+    templateUrl: './settings-general.component.html',
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

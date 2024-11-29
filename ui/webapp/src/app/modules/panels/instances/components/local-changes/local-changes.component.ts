@@ -36,8 +36,9 @@ const redoColumn: BdDataColumn<InstanceEditRow> = {
 };
 
 @Component({
-  selector: 'app-local-changes',
-  templateUrl: './local-changes.component.html',
+    selector: 'app-local-changes',
+    templateUrl: './local-changes.component.html',
+    standalone: false
 })
 export class LocalChangesComponent implements OnInit, OnDestroy {
   protected readonly edit = inject(InstanceEditService);

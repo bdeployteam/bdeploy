@@ -9,9 +9,10 @@ import { ServersService } from './../../../../primary/servers/services/servers.s
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
-  selector: 'app-process-console',
-  templateUrl: './process-console.component.html',
-  styleUrls: ['./process-console.component.css'],
+    selector: 'app-process-console',
+    templateUrl: './process-console.component.html',
+    styleUrls: ['./process-console.component.css'],
+    standalone: false
 })
 export class ProcessConsoleComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthenticationService);

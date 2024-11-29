@@ -21,9 +21,10 @@ import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceEditService } from '../../services/instance-edit.service';
 
 @Component({
-  selector: 'app-configuration',
-  templateUrl: './configuration.component.html',
-  styleUrls: ['./configuration.component.css'],
+    selector: 'app-configuration',
+    templateUrl: './configuration.component.html',
+    styleUrls: ['./configuration.component.css'],
+    standalone: false
 })
 export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly media = inject(BreakpointObserver);

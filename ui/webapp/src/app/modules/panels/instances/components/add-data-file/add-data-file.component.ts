@@ -9,9 +9,10 @@ import { FilesService } from 'src/app/modules/primary/instances/services/files.s
 import { decodeFilePath } from '../../utils/data-file-utils';
 
 @Component({
-  selector: 'app-add-data-file',
-  templateUrl: './add-data-file.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-add-data-file',
+    templateUrl: './add-data-file.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

@@ -10,8 +10,9 @@ import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
 @Component({
-  selector: 'app-node-details',
-  templateUrl: './node-details.component.html',
+    selector: 'app-node-details',
+    templateUrl: './node-details.component.html',
+    standalone: false
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
   private readonly nodeAdmin = inject(NodesAdminService);

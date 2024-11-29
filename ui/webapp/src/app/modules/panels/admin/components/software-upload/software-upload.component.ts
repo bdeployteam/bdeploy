@@ -2,8 +2,9 @@ import { Component, inject } from '@angular/core';
 import { SoftwareUpdateService } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Component({
-  selector: 'app-software-upload',
-  templateUrl: './software-upload.component.html',
+    selector: 'app-software-upload',
+    templateUrl: './software-upload.component.html',
+    standalone: false
 })
 export class SoftwareUploadComponent {
   protected readonly software = inject(SoftwareUpdateService);

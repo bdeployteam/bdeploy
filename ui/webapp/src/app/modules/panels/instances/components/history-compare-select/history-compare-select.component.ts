@@ -7,8 +7,9 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { HistoryDetailsService } from '../../services/history-details.service';
 
 @Component({
-  selector: 'app-history-compare-select',
-  templateUrl: './history-compare-select.component.html',
+    selector: 'app-history-compare-select',
+    templateUrl: './history-compare-select.component.html',
+    standalone: false
 })
 export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

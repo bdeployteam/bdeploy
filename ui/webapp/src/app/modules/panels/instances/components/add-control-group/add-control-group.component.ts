@@ -25,8 +25,9 @@ const GROUP_TEMPLATE = {
 };
 
 @Component({
-  selector: 'app-add-control-group',
-  templateUrl: './add-control-group.component.html',
+    selector: 'app-add-control-group',
+    templateUrl: './add-control-group.component.html',
+    standalone: false
 })
 export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly areas = inject(NavAreasService);

@@ -10,8 +10,9 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
-  selector: 'app-file-viewer',
-  templateUrl: './file-viewer.component.html',
+    selector: 'app-file-viewer',
+    templateUrl: './file-viewer.component.html',
+    standalone: false
 })
 export class FileViewerComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

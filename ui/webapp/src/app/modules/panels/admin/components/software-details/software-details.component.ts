@@ -11,8 +11,9 @@ import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Component({
-  selector: 'app-software-details',
-  templateUrl: './software-details.component.html',
+    selector: 'app-software-details',
+    templateUrl: './software-details.component.html',
+    standalone: false
 })
 export class SoftwareDetailsComponent implements OnInit, OnDestroy {
   private readonly software = inject(SoftwareUpdateService);

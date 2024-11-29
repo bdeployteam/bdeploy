@@ -40,8 +40,9 @@ export type InstFields =
 export type AllFields = AppBaseFields | AppProcessCtrlFields | AppCommandFields | AppEndpointFields | InstFields;
 
 @Component({
-  selector: 'app-config-desc-cards',
-  templateUrl: './config-desc-cards.component.html',
+    selector: 'app-config-desc-cards',
+    templateUrl: './config-desc-cards.component.html',
+    standalone: false
 })
 export class ConfigDescCardsComponent {
   @Input() field: AllFields;

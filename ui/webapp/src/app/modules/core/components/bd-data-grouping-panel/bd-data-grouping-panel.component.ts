@@ -14,10 +14,11 @@ import {
  * and subsequently checkboxes to select/de-seelect certain group values.
  */
 @Component({
-  selector: 'app-bd-data-grouping-panel',
-  templateUrl: './bd-data-grouping-panel.component.html',
-  styleUrls: ['./bd-data-grouping-panel.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-bd-data-grouping-panel',
+    templateUrl: './bd-data-grouping-panel.component.html',
+    styleUrls: ['./bd-data-grouping-panel.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDestroy {
   /** The available grouping definitions */

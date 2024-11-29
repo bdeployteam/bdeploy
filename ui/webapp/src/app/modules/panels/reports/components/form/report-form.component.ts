@@ -6,8 +6,9 @@ import { ReportsService } from 'src/app/modules/primary/reports/services/reports
 import { ReportInputChange } from '../form-input/report-form-input.component';
 
 @Component({
-  selector: 'app-report-form',
-  templateUrl: './report-form.component.html',
+    selector: 'app-report-form',
+    templateUrl: './report-form.component.html',
+    standalone: false
 })
 export class ReportFormComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);

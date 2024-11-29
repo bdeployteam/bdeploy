@@ -4,9 +4,10 @@ import { TooltipPosition } from '@angular/material/tooltip';
 import { PopupPosition } from '../bd-popup/bd-popup.directive';
 
 @Component({
-  selector: 'app-bd-button-popup',
-  templateUrl: './bd-button-popup.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-button-popup',
+    templateUrl: './bd-button-popup.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdButtonPopupComponent {
   @Input() text: string;

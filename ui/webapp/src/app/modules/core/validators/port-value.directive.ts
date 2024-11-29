@@ -4,14 +4,15 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 export const PORT_VALIDATION = 'port-value';
 
 @Directive({
-  selector: '[appPortValueValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: PortValueValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appPortValueValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: PortValueValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class PortValueValidatorDirective implements Validator {
   @Input() appPortValueValidator: boolean;

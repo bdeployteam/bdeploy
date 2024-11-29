@@ -11,8 +11,9 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
 import { SystemsEditService } from '../../services/systems-edit.service';
 
 @Component({
-  selector: 'app-system-details',
-  templateUrl: './system-details.component.html',
+    selector: 'app-system-details',
+    templateUrl: './system-details.component.html',
+    standalone: false
 })
 export class SystemDetailsComponent implements OnInit, OnDestroy {
   private readonly systems = inject(SystemsService);

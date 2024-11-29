@@ -2,9 +2,10 @@ import { Component, Input, OnInit, TemplateRef } from '@angular/core';
 import { DiffType, Difference } from '../../services/history-diff.service';
 
 @Component({
-  selector: 'app-history-diff-field',
-  templateUrl: './history-diff-field.component.html',
-  styleUrls: ['./history-diff-field.component.css'],
+    selector: 'app-history-diff-field',
+    templateUrl: './history-diff-field.component.html',
+    styleUrls: ['./history-diff-field.component.css'],
+    standalone: false
 })
 export class HistoryDiffFieldComponent implements OnInit {
   @Input() diff: Difference;

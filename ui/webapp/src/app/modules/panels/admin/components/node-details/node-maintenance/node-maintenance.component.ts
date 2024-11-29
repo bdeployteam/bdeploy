@@ -7,8 +7,9 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
 @Component({
-  selector: 'app-node-maintenance',
-  templateUrl: './node-maintenance.component.html',
+    selector: 'app-node-maintenance',
+    templateUrl: './node-maintenance.component.html',
+    standalone: false
 })
 export class NodeMaintenanceComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

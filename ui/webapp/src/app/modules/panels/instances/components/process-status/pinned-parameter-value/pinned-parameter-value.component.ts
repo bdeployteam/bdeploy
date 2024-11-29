@@ -5,9 +5,10 @@ import { NodeApplicationPort, PortsService } from 'src/app/modules/primary/insta
 import { PinnedParameter } from '../process-status.component';
 
 @Component({
-  selector: 'app-pinned-parameter-value',
-  templateUrl: './pinned-parameter-value.component.html',
-  styleUrls: ['./pinned-parameter-value.component.css'],
+    selector: 'app-pinned-parameter-value',
+    templateUrl: './pinned-parameter-value.component.html',
+    styleUrls: ['./pinned-parameter-value.component.css'],
+    standalone: false
 })
 export class PinnedParameterValueComponent implements OnInit, OnChanges {
   private readonly ports = inject(PortsService);

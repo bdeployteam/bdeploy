@@ -13,8 +13,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { ColorDef, ColorSelectGroupComponent } from './color-select-group/color-select-group.component';
 
 @Component({
-  selector: 'app-banner',
-  templateUrl: './banner.component.html',
+    selector: 'app-banner',
+    templateUrl: './banner.component.html',
+    standalone: false
 })
 export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly auth = inject(AuthenticationService);

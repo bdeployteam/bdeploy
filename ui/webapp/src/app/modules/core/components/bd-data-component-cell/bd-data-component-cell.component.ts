@@ -13,8 +13,9 @@ import {
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
-  selector: 'app-bd-data-component-cell',
-  templateUrl: './bd-data-component-cell.component.html',
+    selector: 'app-bd-data-component-cell',
+    templateUrl: './bd-data-component-cell.component.html',
+    standalone: false
 })
 export class BdDataComponentCellComponent<T, X> implements OnInit, OnChanges, OnDestroy {
   private readonly vc = inject(ViewContainerRef);

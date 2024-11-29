@@ -24,8 +24,9 @@ const colNodeName: BdDataColumn<NodeRow> = {
 };
 
 @Component({
-  selector: 'app-move-process',
-  templateUrl: './move-process.component.html',
+    selector: 'app-move-process',
+    templateUrl: './move-process.component.html',
+    standalone: false
 })
 export class MoveProcessComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

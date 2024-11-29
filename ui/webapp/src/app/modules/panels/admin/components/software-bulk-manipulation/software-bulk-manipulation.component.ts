@@ -9,8 +9,9 @@ import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/
 import { SoftwareVersionBulkService } from '../../services/software-version-bulk.service';
 
 @Component({
-  selector: 'app-software-bulk-manipulation',
-  templateUrl: './software-bulk-manipulation.component.html',
+    selector: 'app-software-bulk-manipulation',
+    templateUrl: './software-bulk-manipulation.component.html',
+    standalone: false
 })
 export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);

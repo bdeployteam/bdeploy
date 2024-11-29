@@ -16,14 +16,15 @@ const ID = 'link-expression-input';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appLinkExpressionInputValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: LinkExpressionInputValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appLinkExpressionInputValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: LinkExpressionInputValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class LinkExpressionInputValidatorDirective implements Validator {
   @Input('appLinkExpressionInputValidator') isLink: boolean;

@@ -94,9 +94,10 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
 };
 
 @Component({
-  selector: 'app-bd-dialog-message',
-  templateUrl: './bd-dialog-message.component.html',
-  animations: [delayedFadeIn],
+    selector: 'app-bd-dialog-message',
+    templateUrl: './bd-dialog-message.component.html',
+    animations: [delayedFadeIn],
+    standalone: false
 })
 export class BdDialogMessageComponent implements OnInit, OnDestroy {
   public message$ = new BehaviorSubject<BdDialogMessage<unknown>>(null);

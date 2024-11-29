@@ -5,8 +5,9 @@ import { ServersColumnsService } from 'src/app/modules/primary/servers/services/
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
-  selector: 'app-select-managed-server',
-  templateUrl: './select-managed-server.component.html',
+    selector: 'app-select-managed-server',
+    templateUrl: './select-managed-server.component.html',
+    standalone: false
 })
 export class SelectManagedServerComponent {
   private readonly areas = inject(NavAreasService);

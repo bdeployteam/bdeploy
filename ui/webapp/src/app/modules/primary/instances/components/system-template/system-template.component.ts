@@ -96,10 +96,11 @@ const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto> = {
 };
 
 @Component({
-  selector: 'app-system-template',
-  templateUrl: './system-template.component.html',
-  styleUrls: ['./system-template.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-system-template',
+    templateUrl: './system-template.component.html',
+    styleUrls: ['./system-template.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SystemTemplateComponent implements OnInit {
   protected readonly cfg = inject(ConfigService);

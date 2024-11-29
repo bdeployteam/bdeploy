@@ -11,8 +11,9 @@ import { GroupsColumnsService } from '../../services/groups-columns.service';
 import { GroupsService } from '../../services/groups.service';
 
 @Component({
-  selector: 'app-groups-browser',
-  templateUrl: './groups-browser.component.html',
+    selector: 'app-groups-browser',
+    templateUrl: './groups-browser.component.html',
+    standalone: false
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
   private readonly cardViewService = inject(CardViewService);

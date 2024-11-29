@@ -4,8 +4,9 @@ import { ReportsColumnsService } from '../../services/reports-columns.service';
 import { ReportsService } from '../../services/reports.service';
 
 @Component({
-  selector: 'app-reports-browser',
-  templateUrl: './reports-browser.component.html',
+    selector: 'app-reports-browser',
+    templateUrl: './reports-browser.component.html',
+    standalone: false
 })
 export class ReportsBrowserComponent {
   protected readonly reports = inject(ReportsService);

@@ -20,9 +20,10 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-  selector: 'app-instance-variables',
-  templateUrl: './instance-variables.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-instance-variables',
+    templateUrl: './instance-variables.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly systems = inject(SystemsService);

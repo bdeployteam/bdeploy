@@ -4,9 +4,10 @@ import { InstanceDto } from 'src/app/models/gen.dtos';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 
 @Component({
-  selector: 'app-instance-product-version',
-  templateUrl: './instance-product-version.component.html',
-  styleUrls: ['./instance-product-version.component.css'],
+    selector: 'app-instance-product-version',
+    templateUrl: './instance-product-version.component.html',
+    styleUrls: ['./instance-product-version.component.css'],
+    standalone: false
 })
 export class InstanceProductVersionComponent {
   private readonly products = inject(ProductsService);

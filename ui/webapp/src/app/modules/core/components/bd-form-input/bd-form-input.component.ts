@@ -20,11 +20,12 @@ import { bdValidationMessage } from '../../validators/messages';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 
 @Component({
-  selector: 'app-bd-form-input',
-  templateUrl: './bd-form-input.component.html',
-  styleUrls: ['./bd-form-input.component.css'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-form-input',
+    templateUrl: './bd-form-input.component.html',
+    styleUrls: ['./bd-form-input.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMatcher, OnChanges {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

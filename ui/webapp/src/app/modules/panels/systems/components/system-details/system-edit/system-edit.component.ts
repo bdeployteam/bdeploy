@@ -10,8 +10,9 @@ import { isDirty } from '../../../../../core/utils/dirty.utils';
 import { SystemsEditService } from '../../../services/systems-edit.service';
 
 @Component({
-  selector: 'app-system-edit',
-  templateUrl: './system-edit.component.html',
+    selector: 'app-system-edit',
+    templateUrl: './system-edit.component.html',
+    standalone: false
 })
 export class SystemEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly edit = inject(SystemsEditService);

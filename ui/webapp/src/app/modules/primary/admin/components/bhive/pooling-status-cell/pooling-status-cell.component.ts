@@ -3,9 +3,10 @@ import { BdDataColumn } from 'src/app/models/data';
 import { HiveInfoDto } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-pooling-status-cell',
-  templateUrl: './pooling-status-cell.component.html',
-  styleUrl: './pooling-status-cell.component.css',
+    selector: 'app-pooling-status-cell',
+    templateUrl: './pooling-status-cell.component.html',
+    styleUrl: './pooling-status-cell.component.css',
+    standalone: false
 })
 export class PoolingStatusCellComponent {
   @Input() record: HiveInfoDto;

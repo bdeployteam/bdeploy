@@ -71,9 +71,10 @@ const colAvatar: BdDataColumn<FilePath> = {
 };
 
 @Component({
-  selector: 'app-files-display',
-  templateUrl: './files-display.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-files-display',
+    templateUrl: './files-display.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly instances = inject(InstancesService);

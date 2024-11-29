@@ -34,9 +34,10 @@ const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
 };
 
 @Component({
-  selector: 'app-add-node',
-  templateUrl: './add-node.component.html',
-  styleUrls: ['./add-node.component.css'],
+    selector: 'app-add-node',
+    templateUrl: './add-node.component.html',
+    styleUrls: ['./add-node.component.css'],
+    standalone: false
 })
 export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

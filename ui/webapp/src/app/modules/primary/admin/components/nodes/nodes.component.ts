@@ -43,8 +43,9 @@ const nodeColOs: BdDataColumn<MinionRecord> = {
 };
 
 @Component({
-  selector: 'app-nodes',
-  templateUrl: './nodes.component.html',
+    selector: 'app-nodes',
+    templateUrl: './nodes.component.html',
+    standalone: false
 })
 export class NodesComponent {
   protected readonly nodesAdmin = inject(NodesAdminService);

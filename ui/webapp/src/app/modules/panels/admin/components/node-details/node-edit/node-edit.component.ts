@@ -14,9 +14,10 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
 import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 
 @Component({
-  selector: 'app-node-edit',
-  templateUrl: './node-edit.component.html',
-  styleUrls: ['./node-edit.component.css'],
+    selector: 'app-node-edit',
+    templateUrl: './node-edit.component.html',
+    styleUrls: ['./node-edit.component.css'],
+    standalone: false
 })
 export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

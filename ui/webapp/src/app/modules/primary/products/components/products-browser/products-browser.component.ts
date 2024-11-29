@@ -11,8 +11,9 @@ import { ProductsColumnsService } from '../../services/products-columns.service'
 import { ProductsService } from '../../services/products.service';
 
 @Component({
-  selector: 'app-products-browser',
-  templateUrl: './products-browser.component.html',
+    selector: 'app-products-browser',
+    templateUrl: './products-browser.component.html',
+    standalone: false
 })
 export class ProductsBrowserComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);

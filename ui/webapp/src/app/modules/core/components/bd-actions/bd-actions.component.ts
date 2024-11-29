@@ -6,9 +6,10 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { ActionsService } from '../../services/actions.service';
 
 @Component({
-  selector: 'app-bd-actions',
-  templateUrl: './bd-actions.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-actions',
+    templateUrl: './bd-actions.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdActionsComponent {
   private readonly instances = inject(InstancesService);

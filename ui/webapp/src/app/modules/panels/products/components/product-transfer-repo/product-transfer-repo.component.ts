@@ -13,8 +13,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
 
 @Component({
-  selector: 'app-product-transfer-repo',
-  templateUrl: './product-transfer-repo.component.html',
+    selector: 'app-product-transfer-repo',
+    templateUrl: './product-transfer-repo.component.html',
+    standalone: false
 })
 export class ProductTransferRepoComponent implements OnInit {
   private readonly repositories = inject(RepositoriesService);

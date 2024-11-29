@@ -19,8 +19,9 @@ import { UsersColumnsService } from '../../../../../core/services/users-columns.
 import { RepositoryUsersService } from '../../../services/repository-users.service';
 
 @Component({
-  selector: 'app-software-repository-user-permissions',
-  templateUrl: './user-permissions.component.html',
+    selector: 'app-software-repository-user-permissions',
+    templateUrl: './user-permissions.component.html',
+    standalone: false
 })
 export class UserPermissionsComponent {
   public readonly repos = inject(RepositoriesService);

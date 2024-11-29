@@ -7,9 +7,10 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  selector: 'app-add-user-group',
-  templateUrl: './add-user-group.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-add-user-group',
+    templateUrl: './add-user-group.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AddUserGroupComponent implements OnInit, OnDestroy {
   private readonly authAdmin = inject(AuthAdminService);

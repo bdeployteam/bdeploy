@@ -18,9 +18,10 @@ import { VariableConfiguration } from './../../../../../../models/gen.dtos';
 const MAGIC_ABORT = 'abort_save';
 
 @Component({
-  selector: 'app-system-variables',
-  templateUrl: './system-variables.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-system-variables',
+    templateUrl: './system-variables.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

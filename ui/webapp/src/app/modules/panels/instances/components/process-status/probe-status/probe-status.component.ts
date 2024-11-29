@@ -4,9 +4,10 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-probe-status',
-  templateUrl: './probe-status.component.html',
-  styleUrls: ['./probe-status.component.css'],
+    selector: 'app-probe-status',
+    templateUrl: './probe-status.component.html',
+    styleUrls: ['./probe-status.component.css'],
+    standalone: false
 })
 export class ProbeStatusComponent implements OnInit, OnChanges, OnDestroy {
   private readonly bop = inject(BreakpointObserver);

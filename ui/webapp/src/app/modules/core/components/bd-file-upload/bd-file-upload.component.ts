@@ -4,9 +4,10 @@ import { ManifestKey } from 'src/app/models/gen.dtos';
 import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
 
 @Component({
-  selector: 'app-bd-file-upload',
-  templateUrl: './bd-file-upload.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-bd-file-upload',
+    templateUrl: './bd-file-upload.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BdFileUploadComponent implements OnInit {
   @Input() file: File;

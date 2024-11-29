@@ -9,9 +9,10 @@ import { ObjectChangesService } from '../../services/object-changes.service';
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
-  selector: 'app-main-nav',
-  templateUrl: './main-nav.component.html',
-  styleUrls: ['./main-nav.component.css'],
+    selector: 'app-main-nav',
+    templateUrl: './main-nav.component.html',
+    styleUrls: ['./main-nav.component.css'],
+    standalone: false
 })
 export class MainNavComponent implements OnInit {
   private readonly authService = inject(AuthenticationService);

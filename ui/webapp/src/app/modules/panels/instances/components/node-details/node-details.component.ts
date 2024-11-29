@@ -6,8 +6,9 @@ import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
 @Component({
-  selector: 'app-node-details',
-  templateUrl: './node-details.component.html',
+    selector: 'app-node-details',
+    templateUrl: './node-details.component.html',
+    standalone: false
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

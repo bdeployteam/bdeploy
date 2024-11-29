@@ -5,8 +5,9 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ApplicationPair, ConfigPair, NodePair } from '../../../utils/diff-utils';
 
 @Component({
-  selector: 'app-local-diff',
-  templateUrl: './local-diff.component.html',
+    selector: 'app-local-diff',
+    templateUrl: './local-diff.component.html',
+    standalone: false
 })
 export class LocalDiffComponent implements OnInit, OnDestroy {
   protected readonly edit = inject(InstanceEditService);

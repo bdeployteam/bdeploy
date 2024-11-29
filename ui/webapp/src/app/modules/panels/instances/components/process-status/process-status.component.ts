@@ -62,10 +62,11 @@ interface ProcessUiEndpoint extends HttpEndpoint {
 }
 
 @Component({
-  selector: 'app-process-status',
-  templateUrl: './process-status.component.html',
-  styleUrls: ['./process-status.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-process-status',
+    templateUrl: './process-status.component.html',
+    styleUrls: ['./process-status.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class ProcessStatusComponent implements OnInit, OnDestroy {
   private readonly cfg = inject(ConfigService);

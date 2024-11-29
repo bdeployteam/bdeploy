@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Version } from 'src/app/models/gen.dtos';
 
 @Pipe({
-  name: 'formatVersionShort',
+    name: 'formatVersionShort',
+    standalone: false
 })
 export class VersionShortPipe implements PipeTransform {
   transform(value: Version): string {

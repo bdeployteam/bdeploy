@@ -10,9 +10,10 @@ export class ContentCompletion {
 }
 
 @Component({
-  selector: 'app-bd-content-assist-menu',
-  templateUrl: './bd-content-assist-menu.component.html',
-  styleUrls: ['./bd-content-assist-menu.component.css'],
+    selector: 'app-bd-content-assist-menu',
+    templateUrl: './bd-content-assist-menu.component.html',
+    styleUrls: ['./bd-content-assist-menu.component.css'],
+    standalone: false
 })
 export class BdContentAssistMenuComponent {
   private readonly overlay = inject(Overlay);

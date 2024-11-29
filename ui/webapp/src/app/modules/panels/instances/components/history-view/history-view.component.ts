@@ -9,9 +9,10 @@ import { HistoryDetailsService } from '../../services/history-details.service';
 import { InstanceConfigCache } from '../../utils/instance-utils';
 
 @Component({
-  selector: 'app-history-view',
-  templateUrl: './history-view.component.html',
-  styleUrls: ['./history-view.component.css'],
+    selector: 'app-history-view',
+    templateUrl: './history-view.component.html',
+    styleUrls: ['./history-view.component.css'],
+    standalone: false
 })
 export class HistoryViewComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly areas = inject(NavAreasService);

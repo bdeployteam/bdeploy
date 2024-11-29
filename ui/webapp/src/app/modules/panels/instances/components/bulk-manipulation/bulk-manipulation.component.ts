@@ -15,8 +15,9 @@ import { InstanceBulkService } from '../../services/instance-bulk.service';
 import { ACTION_APPLY } from './../../../../core/components/bd-dialog-message/bd-dialog-message.component';
 
 @Component({
-  selector: 'app-bulk-manipulation',
-  templateUrl: './bulk-manipulation.component.html',
+    selector: 'app-bulk-manipulation',
+    templateUrl: './bulk-manipulation.component.html',
+    standalone: false
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
   protected readonly bulk = inject(InstanceBulkService);

@@ -6,8 +6,9 @@ import { RepositoriesColumnsService } from '../../services/repositories-columns.
 import { RepositoriesService } from '../../services/repositories.service';
 
 @Component({
-  selector: 'app-repositories-browser',
-  templateUrl: './repositories-browser.component.html',
+    selector: 'app-repositories-browser',
+    templateUrl: './repositories-browser.component.html',
+    standalone: false
 })
 export class RepositoriesBrowserComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);

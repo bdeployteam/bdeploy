@@ -11,8 +11,9 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { RepositoryDetailsService } from '../../../services/repository-details.service';
 
 @Component({
-  selector: 'app-edit',
-  templateUrl: './edit.component.html',
+    selector: 'app-edit',
+    templateUrl: './edit.component.html',
+    standalone: false
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

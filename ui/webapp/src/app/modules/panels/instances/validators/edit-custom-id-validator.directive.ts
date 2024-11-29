@@ -9,14 +9,15 @@ const ID = 'edit-custom-id';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
-  selector: '[appEditCustomIdValidator]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: EditCustomIdValidatorDirective,
-      multi: true,
-    },
-  ],
+    selector: '[appEditCustomIdValidator]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: EditCustomIdValidatorDirective,
+            multi: true,
+        },
+    ],
+    standalone: false
 })
 export class EditCustomIdValidatorDirective implements Validator {
   private readonly idRegExp = new RegExp(/^[A-Za-z][A-Za-z0-9_\\-\\.]*$/);

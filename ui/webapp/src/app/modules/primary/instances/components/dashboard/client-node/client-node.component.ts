@@ -10,9 +10,10 @@ import { ProcessesColumnsService } from '../../../services/processes-columns.ser
 import { StateItem } from '../state-panel/state-panel.component';
 
 @Component({
-  selector: 'app-instance-client-node',
-  templateUrl: './client-node.component.html',
-  styleUrls: ['./client-node.component.css'],
+    selector: 'app-instance-client-node',
+    templateUrl: './client-node.component.html',
+    styleUrls: ['./client-node.component.css'],
+    standalone: false
 })
 export class ClientNodeComponent implements OnInit, OnDestroy {
   private readonly appCols = inject(ProcessesColumnsService);

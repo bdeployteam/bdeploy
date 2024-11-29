@@ -3,9 +3,10 @@ import { VariableType } from 'src/app/models/gen.dtos';
 import { PortParam } from '../../../../services/ports-edit.service';
 
 @Component({
-  selector: 'app-port-type-cell',
-  templateUrl: './port-type-cell.component.html',
-  styleUrls: ['./port-type-cell.component.css'],
+    selector: 'app-port-type-cell',
+    templateUrl: './port-type-cell.component.html',
+    styleUrls: ['./port-type-cell.component.css'],
+    standalone: false
 })
 export class PortTypeCellComponent implements OnInit {
   @Input() record: PortParam;

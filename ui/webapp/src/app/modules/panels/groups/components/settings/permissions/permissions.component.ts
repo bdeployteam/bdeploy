@@ -3,8 +3,9 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { GroupUsersService } from '../../../services/group-users.service';
 
 @Component({
-  selector: 'app-instance-group-permissions',
-  templateUrl: './permissions.component.html',
+    selector: 'app-instance-group-permissions',
+    templateUrl: './permissions.component.html',
+    standalone: false
 })
 export class PermissionsComponent {
   protected readonly groups = inject(GroupsService);

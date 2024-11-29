@@ -56,8 +56,9 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
 };
 
 @Component({
-  selector: 'app-process-natives',
-  templateUrl: './process-natives.component.html',
+    selector: 'app-process-natives',
+    templateUrl: './process-natives.component.html',
+    standalone: false
 })
 export class ProcessNativesComponent implements OnInit, OnDestroy {
   protected readonly details = inject(ProcessDetailsService);

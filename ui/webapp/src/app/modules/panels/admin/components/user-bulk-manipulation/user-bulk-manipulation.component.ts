@@ -8,8 +8,9 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { UserBulkService } from '../../services/user-bulk.service';
 
 @Component({
-  selector: 'app-user-bulk-manipulation',
-  templateUrl: './user-bulk-manipulation.component.html',
+    selector: 'app-user-bulk-manipulation',
+    templateUrl: './user-bulk-manipulation.component.html',
+    standalone: false
 })
 export class UserBulkManipulationComponent {
   private readonly auth = inject(AuthenticationService);

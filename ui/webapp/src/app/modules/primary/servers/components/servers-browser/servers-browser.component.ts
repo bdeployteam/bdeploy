@@ -7,8 +7,9 @@ import { ServersColumnsService } from '../../services/servers-columns.service';
 import { ServersService } from '../../services/servers.service';
 
 @Component({
-  selector: 'app-servers-browser',
-  templateUrl: './servers-browser.component.html',
+    selector: 'app-servers-browser',
+    templateUrl: './servers-browser.component.html',
+    standalone: false
 })
 export class ServersBrowserComponent implements OnInit {
   private readonly cardViewService = inject(CardViewService);

@@ -2,8 +2,9 @@ import { Component, inject, Input } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-bd-identifier',
-  templateUrl: './bd-identifier.component.html',
+    selector: 'app-bd-identifier',
+    templateUrl: './bd-identifier.component.html',
+    standalone: false
 })
 export class BdIdentifierComponent {
   @Input() id: string;

@@ -3,7 +3,8 @@ import { Version } from 'src/app/models/gen.dtos';
 import { convert2String } from '../utils/version.utils';
 
 @Pipe({
-  name: 'formatVersion',
+    name: 'formatVersion',
+    standalone: false
 })
 export class VersionPipe implements PipeTransform {
   transform(value: Version): string {
