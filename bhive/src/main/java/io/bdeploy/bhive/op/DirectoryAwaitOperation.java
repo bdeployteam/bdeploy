@@ -9,7 +9,6 @@ import io.bdeploy.common.util.Threads;
  * Waits until a given directory is unlocked.
  *
  * @see DirectoryLockOperation
- * @see DirectoryReleaseOperation
  */
 public class DirectoryAwaitOperation extends DirectoryModificationOperation<Void> {
 
