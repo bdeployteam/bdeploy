@@ -12,7 +12,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
-import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
@@ -39,7 +38,7 @@ class RemoteReportCliTest {
     void testRemoteCli(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
             RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr, @AuthPack String auth)
             throws IOException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
+        TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         StructuredOutput result;
 
