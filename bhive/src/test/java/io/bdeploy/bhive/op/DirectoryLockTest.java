@@ -11,8 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
@@ -20,8 +18,6 @@ import io.bdeploy.common.util.FutureHelper;
 
 @ExtendWith(TestHive.class)
 class DirectoryLockTest {
-
-    private static final Logger log = LoggerFactory.getLogger(DirectoryLockTest.class);
 
     @Test
     void testLockOperations(BHive hive, @TempDir Path tmp) {
