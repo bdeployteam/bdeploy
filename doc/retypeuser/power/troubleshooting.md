@@ -31,44 +31,43 @@ This is an example of how it *should* be:
 
 !!!warning Warning
 The binaries (`bin`, `lib`, ...) are *separate* from the data directory (`hive`, `storage`). This is important as
-updates to BDeploy *change* the contents of the binaries. This could potentially interfere with the data directory if it
-would reside within the same directory!
+updates to BDeploy *change* the contents of the binaries. This could potentially interfere with the data directory if it were to reside within the same directory!
 !!!
 
 The second part is to check the content of the log directory. `audit.log` will contain a brief sequence of 'modifying'
 and generally failed operations. This means it is a good first place to see things that went wrong at a glance. You can
 use the timestamp found in the `audit.log` to further continue looking for detailed information in `server.log`.
 
-Generally `server.log` will contain exceptions and stack traces for issues that occured. In case you are reporting an
+Generally, `server.log` will contain exceptions and stack traces for issues that occurred. In case you are reporting an
 issue to the BDeploy Team, please make sure to attach both `audit.log` and `server.log` to facilitate troubleshooting on
 our side.
 
 ## Issues with the Windows Service
 
-In case you are having troubles with the windows service installation, e.g. the service does not start, verify:
+In case you are having trouble with the Windows service installation, e.g. the service does not start, verify:
 
 * ... that the installation follows the example above. The binaries in one directory, e.g. C:\BDeploy\bdeploy-win64, and
   the root/data in a different directory, e.g. C:\BDeploy\root.
-* ... that you specified the full path to the `bdeploy.bat` and the root directory to the service installation bat,
+* ... that you specified the full path to `bdeploy.bat` and the root directory to the service installation bat,
   e.g. `bdeploy-service-install.bat --master C:\BDeploy\bdeploy-win64\bin\bdeploy.bat C:\BDeploy\root` - using the
   example paths from above.
 
-You can use the `bdeploy-service-uninstall.bat --master` command to remove the existing service registration, and redo
+You can use the `bdeploy-service-uninstall.bat --master` command to remove the existing service registration and redo
 the registration with the above command in case you have doubts.
 
 ## Connection to `MANAGED`
 
 Sometimes it is hard to wrap your head around how the network between `CENTRAL` and `MANAGED` servers works. Connecting
 a `MANAGED` to a `CENTRAL` server involves dropping the server information card on the `CENTRAL` server, which will
-prefill all the input fields with values (URL, Port) *as known by the `MANAGED`*. This can differ vastly from how the
+fill all the input fields with values (URL, Port) *as known by the `MANAGED`*. This can differ vastly from how the
 `CENTRAL` server *reaches* the `MANAGED`.
 
-Thus, when connecting a `MANAGED` server make sure to **change** the prefilled values so they reflect how the `CENTRAL`
-server will actually be able to reach the `MANAGED` server. This may include using IP addresses, depending on the setup
+Thus, when connecting a `MANAGED` server make sure to **change** the values so they reflect how the `CENTRAL`
+server will actually be able to reach the `MANAGED` server. This may include using IP addresses - depending on the setup
 even *different* IP addresses from what the server has if there are VPNs and NATs in place.
 
 A good indicator whether the connection will be fine is if you can ping the target server *from* the `CENTRAL`
-directly (via CLI, not BDeploy).
+directly (via a CLI, not BDeploy).
 
 ## Corrupted Installations
 
@@ -119,8 +118,7 @@ Once you know about those, make sure you convert any certificate & private key c
 [RSA Private Key (unencrypted)]
 ```
 
-This file, if prepared correctly, can be fed to BDeploy to install the certificate. All the conversions can be done e.g.
-with the `openssl` command line tooling.
+This file can be fed to BDeploy to install the certificate. All the conversions can be done e.g. with the `openssl` command line tooling.
 
 !!!warning Warning
 The certificate **must** be signed by an authority which is **trusted**. This includes both the browser that will access
