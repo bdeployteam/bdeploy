@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { ManagedMasterDto, OperatingSystem } from 'src/app/models/gen.dtos';
@@ -13,6 +13,7 @@ export interface MinionRow {
   os: OperatingSystem;
   master: boolean;
   version: string;
+  url: string;
 }
 
 const detailNameCol: BdDataColumn<MinionRow> = {
@@ -20,6 +21,12 @@ const detailNameCol: BdDataColumn<MinionRow> = {
   name: 'Name',
   data: (r) => r.name,
   component: ServerNodeNameCellComponent,
+};
+
+const detailUrlCol: BdDataColumn<MinionRow> = {
+  id: 'url',
+  name: 'Local URL',
+  data: (r) => r.url,
 };
 
 const detailMasterCol: BdDataColumn<MinionRow> = {
@@ -31,9 +38,9 @@ const detailMasterCol: BdDataColumn<MinionRow> = {
 
 const detailVersionCol: BdDataColumn<MinionRow> = {
   id: 'version',
-  name: 'Vers.',
+  name: 'Version',
   data: (r) => r.version,
-  width: '60px',
+  width: '150px',
 };
 
 const detailOsCol: BdDataColumn<MinionRow> = {
@@ -45,16 +52,16 @@ const detailOsCol: BdDataColumn<MinionRow> = {
 };
 
 @Component({
-    selector: 'app-server-nodes',
-    templateUrl: './server-nodes.component.html',
-    providers: [ServerDetailsService],
-    standalone: false
+  selector: 'app-server-nodes',
+  templateUrl: './server-nodes.component.html',
+  providers: [ServerDetailsService],
+  standalone: false,
 })
 export class ServerNodesComponent implements OnInit {
   private readonly servers = inject(ServersService);
   private readonly serverDetails = inject(ServerDetailsService);
 
-  protected columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
+  protected columns = [detailNameCol, detailUrlCol, detailVersionCol, detailMasterCol, detailOsCol];
   protected minions: MinionRow[];
   protected server: ManagedMasterDto;
 
@@ -80,6 +87,7 @@ export class ServerNodesComponent implements OnInit {
         os: dto.os,
         master: dto.master,
         version: convert2String(dto.version),
+        url: dto.remote.uri,
       };
     });
   }
