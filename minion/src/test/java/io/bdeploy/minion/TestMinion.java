@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Objects;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -32,8 +32,6 @@ import io.bdeploy.ui.api.MinionMode;
 
 /**
  * A complete Minion for unit tests.
- * <p>
- * You can provide a {@link Tag} to set the minion's mode, e.g. <code>@Tag("CENTRAL")</code>.
  */
 public class TestMinion extends TestServer {
 
@@ -44,12 +42,41 @@ public class TestMinion extends TestServer {
     public @interface AuthPack {
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+    public @interface SourceMinion {
+
+        MinionMode value();
+
+        String disambiguation() default "1";
+    }
+
+    private final MinionMode mode;
+    private final String disambiguation;
+
+    /** Compatibility with existing test code: just be able to use TestMinion directly, defaulting to TestMinionStandalone */
+    public TestMinion() {
+        this(MinionMode.STANDALONE, null);
+    }
+
+    public TestMinion(MinionMode mode) {
+        this(mode, "1");
+    }
+
+    public TestMinion(MinionMode mode, String disambiguation) {
+        this.mode = mode;
+        this.disambiguation = disambiguation;
+    }
+
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
         // Make sure previous registered resources are gone.
         resetRegistrations();
 
-        MinionMode mode = MinionMode.STANDALONE;
+        // handle mode switching on a SINGLE minion, which allows us to re-use a single
+        // minion per class and switching modes in between tests, instead of registering
+        // (and starting) multiple minions if that is not needed.
+        MinionMode mode = this.mode;
         for (String tag : context.getTags()) {
             if (MinionMode.CENTRAL.name().equals(tag)) {
                 mode = MinionMode.CENTRAL;
@@ -99,8 +126,37 @@ public class TestMinion extends TestServer {
     }
 
     @Override
+    protected Object getServerIdentifyingObject() {
+        if (mode == MinionMode.NODE) {
+            return mode.name() + "-" + disambiguation;
+        }
+        return mode;
+    }
+
+    @Override
+    protected Object getParameterIdentifyingObject(ParameterContext context) {
+        var x = context.getParameter().getAnnotationsByType(SourceMinion.class);
+        if (x.length != 1) {
+            return null;
+        }
+
+        if (x[0].value() == MinionMode.NODE) {
+            return mode.name() + "-" + x[0].disambiguation();
+        }
+
+        return x[0].value();
+    }
+
+    @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
+        // need to re-check this even though the base class does as well, but the order is... difficult.
+        if (getServerIdentifyingObject() != null && getParameterIdentifyingObject(parameterContext) != null && !Objects.equals(
+                getServerIdentifyingObject(), getParameterIdentifyingObject(parameterContext))) {
+            // all is set to distinguish servers, but no match -> nope.
+            return false;
+        }
+
         if (parameterContext.getParameter().getType().isAssignableFrom(MinionRoot.class)) {
             return true;
         }
