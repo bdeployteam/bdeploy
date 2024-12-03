@@ -42,7 +42,6 @@ class MasterCliTest {
     @RegisterExtension
     TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
-    @SuppressWarnings("resource")
     @Test
     void testMasterCli(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
         int port;
