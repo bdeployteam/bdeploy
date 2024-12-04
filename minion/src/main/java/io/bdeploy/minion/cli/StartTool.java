@@ -89,9 +89,11 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     private static final Logger log = LoggerFactory.getLogger(StartTool.class);
 
     /** Lock files should contain the writing PID. In case the process no longer exists, the lock file is invalid. */
+    @SuppressWarnings("unused") // TODO Will be used in the future
     private static final Supplier<String> LOCK_CONTENT = () -> Long.toString(ProcessHandle.current().pid());
 
     /** Validator will check whether the writing PID of the lock file is still there. */
+    @SuppressWarnings("unused") // TODO Will be used in the future
     private static final Predicate<String> LOCK_VALIDATOR = pid -> {
         var stored = Long.parseLong(pid);
         var handle = ProcessHandle.of(stored);
