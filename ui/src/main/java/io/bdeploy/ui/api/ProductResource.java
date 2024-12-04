@@ -66,7 +66,11 @@ public interface ProductResource {
     @Path("/{name : .+}/{tag}/config/{file: .+}")
     public String loadConfigFile(@PathParam("name") String name, @PathParam("tag") String tag, @PathParam("file") String file);
 
+    @GET
+    @Path("/get-response-file")
+    public String getResponseFile(@QueryParam("productId") String productId, @QueryParam("version") String version,
+            @QueryParam("instanceTemplate") String instanceTemplate);
+
     @Path("/bulk")
     public ProductBulkResource getBulkResource();
-
 }

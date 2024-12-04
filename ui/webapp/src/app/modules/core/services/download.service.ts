@@ -18,6 +18,10 @@ declare let downloadLocation: {
 export class DownloadService {
   private readonly cfg = inject(ConfigService);
 
+  public buildResponseFileName(productName: string, instanceTemplateName: string) {
+    return 'ResponseFile - ' + productName + ' - ' + instanceTemplateName + '.yaml';
+  }
+
   /**
    * Sends the given object as JSON string as download with the given file name
    *
@@ -27,7 +31,18 @@ export class DownloadService {
   public downloadJson(name: string, data: unknown) {
     const mediatype = 'application/json';
     const blob = new Blob([JSON.stringify(data)], { type: mediatype });
+    this.downloadBlob(name, blob);
+  }
 
+  /**
+   * Sends the given YAML string as download with the given file name
+   *
+   * @param name the file name the browser should save the file as
+   * @param data the string to put in the file
+   */
+  public downloadYaml(name: string, data: string) {
+    const mediatype = 'application/yaml';
+    const blob = new Blob([data], { type: mediatype });
     this.downloadBlob(name, blob);
   }
 

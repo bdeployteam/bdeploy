@@ -6,7 +6,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
+import { InstTemplateData, ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
 import {
   ProdDtoWithType,
   RepositoryService,
@@ -82,4 +82,8 @@ export class SoftwareDetailsComponent implements OnInit {
       .pipe(finalize(() => this.preparingBHive$.next(false)))
       .subscribe();
   }
+
+  protected doDownloadResponseFile = (data: InstTemplateData) => {
+    this.detailsService.downloadResponseFile(data);
+  };
 }

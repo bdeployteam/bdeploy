@@ -1,18 +1,18 @@
-import {HttpClient} from '@angular/common/http';
-import {inject, Injectable, OnDestroy} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {finalize, map} from 'rxjs/operators';
-import {ManifestKey, PluginInfoDto} from 'src/app/models/gen.dtos';
-import {ConfigService} from 'src/app/modules/core/services/config.service';
-import {DownloadService} from 'src/app/modules/core/services/download.service';
-import {NavAreasService} from 'src/app/modules/core/services/nav-areas.service';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
+import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { DownloadService } from 'src/app/modules/core/services/download.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import {
   RepositoryService,
   SwPkgCompound,
   SwPkgType,
 } from 'src/app/modules/primary/repositories/services/repository.service';
-import {LabelRecord} from '../../../core/services/product-actions-columns';
+import { InstTemplateData, LabelRecord } from '../../../core/services/product-actions-columns';
 
 /**
  * A service which extracts a single product denoted by route parameters. This requires the active route to have
@@ -41,8 +41,10 @@ export class SoftwareDetailsService implements OnDestroy {
   private readonly subscription: Subscription;
   private softwareSubscription: Subscription;
 
+  private readonly baseProductApiPath = () =>
+    `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/product`;
   private readonly productApiPath = () =>
-    `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/product/${this.manifestKey$.value}/${this.manifestTag$.value}`;
+    `${this.baseProductApiPath()}/${this.manifestKey$.value}/${this.manifestTag$.value}`;
   private readonly softwareApiPath = () =>
     `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/content/${this.manifestKey$.value}/${this.manifestTag$.value}`;
   private readonly pluginApiPath = () =>
@@ -102,6 +104,18 @@ export class SoftwareDetailsService implements OnDestroy {
           s.complete();
         });
     });
+  }
+
+  public downloadResponseFile(data: InstTemplateData) {
+    const instanceTemplate = data.config.name;
+    this.http
+      .get(`${this.baseProductApiPath()}/get-response-file`, {
+        params: { productId: data.productId, instanceTemplate },
+        responseType: 'text',
+      })
+      .subscribe((yaml) => {
+        this.downloads.downloadYaml(this.downloads.buildResponseFileName(data.productName, instanceTemplate), yaml);
+      });
   }
 
   private getApiPath4Type() {

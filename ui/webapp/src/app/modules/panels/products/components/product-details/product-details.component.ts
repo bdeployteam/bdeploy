@@ -7,7 +7,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
+import { InstTemplateData, ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ProductDetailsService } from '../../services/product-details.service';
 
@@ -174,4 +174,8 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.preparingBHive$.next(false)))
       .subscribe();
   }
+
+  protected doDownloadResponseFile = (data: InstTemplateData) => {
+    this.products.downloadResponseFile(data);
+  };
 }
