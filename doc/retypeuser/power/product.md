@@ -79,7 +79,7 @@ Basically, `app-info.yaml` allows you to specify which executable to run, and wh
 The `app-info.yaml` file must be placed in the root directory of the **Application** it describes.
 
 ```yaml app-info.yaml
-name: "My Application" <1>
+name: 'My Application' <1>
 type: CLIENT <2>
 pooling: GLOBAL <3>
 
@@ -88,21 +88,21 @@ supportedOperatingSystems: <4>
   - WINDOWS
 
 branding: <5>
-  icon: "branding/my-icon.ico"
+  icon: 'branding/my-icon.ico'
   splash:
-    image: "branding/my-splash.bmp"
+    image: 'branding/my-splash.bmp'
     textRect:
       x: 20
       y: 174
       width: 400
       height: 20
-      foreground: "#000000"
+      foreground: '#000000'
     progressRect:
       x: 15
       y: 194
       width: 450
       height: 12
-      foreground: "#333333"
+      foreground: '#333333'
 
 processControl: <6>
   supportedStartTypes:
@@ -112,42 +112,42 @@ processControl: <6>
   gracePeriod: 3000
   attachStdin: false
   startupProbe: <7>
-     endpoint: "Startup Endpoint"
+     endpoint: 'Startup Endpoint'
   livenessProbe: <8>
-     endpoint: "Liveness Endpoint"
+     endpoint: 'Liveness Endpoint'
      initialDelaySeconds: 5
      periodSeconds: 10
-  configDirs: "/dir1,/dir2" <9>
+  configDirs: '/dir1,/dir2' <9>
   supportsAutostart: true
 
 startCommand: <10>
-  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
+  launcherPath: '{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}'
   parameters:
-    - id: "my.param.1"
-      name: "My numeric parameter"
-      longDescription: "This is a numeric parameter"
-      groupName: "My Parameters"
-      parameter: "--number"
-      defaultValue: "{{X:instance-number}}"  <11>
+    - id: 'my.param.1'
+      name: 'My numeric parameter'
+      longDescription: 'This is a numeric parameter'
+      groupName: 'My Parameters'
+      parameter: '--number'
+      defaultValue: '{{X:instance-number}}'  <11>
       type: NUMERIC
-    - id: "my.param.2"
-      name: "My textual parameter"
-      longDescription: "This is a textual parameter"
-      groupName: "My Parameters"
-      parameter: "--text"
+    - id: 'my.param.2'
+      name: 'My textual parameter'
+      longDescription: 'This is a textual parameter'
+      groupName: 'My Parameters'
+      parameter: '--text'
       mandatory: true
       suggestedValues:
-        - "Value 1"
-        - "Value 2"
-    - id: "my.param.3"
-      name: "My conditional parameter"
-      longDescription: "This is only visible and configurable if my.param.2 has value 'Value 1'"
-      parameter: "--conditional"
+        - 'Value 1'
+        - 'Value 2'
+    - id: 'my.param.3'
+      name: 'My conditional parameter'
+      longDescription: 'This is only visible and configurable if my.param.2 has value 'Value 1''
+      parameter: '--conditional'
       mandatory: true
       condition: <12>
-        parameter: "my.param.2"
+        parameter: 'my.param.2'
         must: EQUAL
-        value: "Value 1"
+        value: 'Value 1'
     - template: param.template <13>
 
 stopCommand: <14>
@@ -155,23 +155,23 @@ stopCommand: <14>
 
 endpoints: <15>
   http:
-    - id: "my-endpoint" <16>
-      path: "path/to/the/endpoint"
-      port: "{{V:port-param}}" <17>
+    - id: 'my-endpoint' <16>
+      path: 'path/to/the/endpoint'
+      port: '{{V:port-param}}' <17>
       secure: false
-    - id: "Startup Endpoint"
+    - id: 'Startup Endpoint'
       type: PROBE_STARTUP <18>
-      path: "startup/endpoint"
-      port: "{{V:port-param}}"
+      path: 'startup/endpoint'
+      port: '{{V:port-param}}'
       secure: false
-    - id: "Liveness Endpoint"
+    - id: 'Liveness Endpoint'
       type: PROBE_ALIVE <18>
-      path: "liveness/endpoint"
-      port: "{{V:port-param}}"
+      path: 'liveness/endpoint'
+      port: '{{V:port-param}}'
       secure: false
 
 runtimeDependencies: <19>
-  - "adoptium/jre:1.8.0_202-b08"
+  - 'adoptium/jre:1.8.0_202-b08'
 ```
 
 1. A human readable name of the **Application**. Will be displayed in the **Configure Application** pane, and is also used as _default_ name for any process _instantiated_ from this **Application**.
@@ -330,16 +330,16 @@ In this case you will want the user to be able to edit the value of `-Dmy.prop` 
 
 ```yaml
 startCommand:
-  launcherPath: "{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}"
+  launcherPath: '{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}'
   parameters:
-    - id: "my.prop"
-      name: "My Property"
-      parameter: "-Dmy.prop"
+    - id: 'my.prop'
+      name: 'My Property'
+      parameter: '-Dmy.prop'
       mandatory: true
-    - id: "my.jar"
-      name: "Application JAR"
-      parameter: "-jar"
-      defaultValue: "application.jar"
+    - id: 'my.jar'
+      name: 'Application JAR'
+      parameter: '-jar'
+      defaultValue: 'application.jar'
       valueAsSeparateArg: true
       mandatory: true
       fixed: true <1>
@@ -376,18 +376,18 @@ A condition expression (isolated) looks like this:
 
 ```yaml
 condition:
-  parameter: "my.param.2"
+  parameter: 'my.param.2'
   must: EQUAL
-  value: "Value 1"
+  value: 'Value 1'
 ```
 
 Or, in its newer form, the very same (but ultimately more powerful) using `expression` would look like this:
 
 ```yaml
 condition:
-  expression: "{{V:my.param.2}}"
+  expression: '{{V:my.param.2}}'
   must: EQUAL
-  value: "Value 1"
+  value: 'Value 1'
 ```
 
 The power comes from the ability to provide an arbitrary amount of [Variable Expansions](/power/variables/#variable-expansions) in the [Link Expressions](/user/instance/#link-expressions).
@@ -506,14 +506,14 @@ The `product-version.yaml` file associates **Application** IDs used in the `prod
 The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product **Build** . Therefore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually.
 
 ```yaml product-version.yaml
-version: "2.1.0.201906141135" <1>
+version: '2.1.0.201906141135' <1>
 appInfo:
   my-app1: <2>
-    WINDOWS: "build/windows/app-info.yaml" <3>
-    LINUX: "build/linux/app-info.yaml"
+    WINDOWS: 'build/windows/app-info.yaml' <3>
+    LINUX: 'build/linux/app-info.yaml'
   my-app2:
-    WINDOWS: "scripts/app2/app-info.yaml" <4>
-    LINUX: "scripts/app2/app-info.yaml"
+    WINDOWS: 'scripts/app2/app-info.yaml' <4>
+    LINUX: 'scripts/app2/app-info.yaml'
 ```
 
 1. A unique **Tag** to identify the product version. There is no requirement for any version-like syntax here, it can be basically anything. It should just be unique per **Product Version**.
@@ -532,18 +532,18 @@ This file defines a single **Application Template**. A [`product-info.yaml`](#pr
 ```yaml application-template.yaml
 id: server-with-sleep <1>
 application: server-app
-name: "Server With Sleep (Oracle)" <2>
-processName: "Server With Sleep" <2>
-description: "Server application which sleeps before exiting"
-preferredProcessControlGroup: "First Group" <3>
+name: 'Server With Sleep (Oracle)' <2>
+processName: 'Server With Sleep' <2>
+description: 'Server application which sleeps before exiting'
+preferredProcessControlGroup: 'First Group' <3>
 
 applyOn: <4>
   - LINUX
 
 templateVariables: <5>
   - id: sleep-timeout
-    name: "Sleep Timeout"
-    description: "The amount of time the server application should sleep"
+    name: 'Sleep Timeout'
+    description: 'The amount of time the server application should sleep'
     type: NUMERIC
     defaultValue: 60
     suggestedValues:
@@ -559,7 +559,7 @@ processControl: <6>
 
 startParameters: <7>
 - id: param.sleep
-  value: "{{T:sleep-timeout}}"
+  value: '{{T:sleep-timeout}}'
 ```
 
 1. An **Application Template** must have an ID. This can be used to reference it from an **Instance Template**.
@@ -576,7 +576,7 @@ An **Application Template** can also _extend_ another previously defined templat
 
 ```yaml application-template.yaml
 id: fixed-sleep
-name: "Server With 10 Seconds Sleep"
+name: 'Server With 10 Seconds Sleep'
 template: server-with-sleep <1>
 
 fixedVariables: <2>
@@ -630,68 +630,68 @@ This file defines a single **Instance Template**. A [`product-info.yaml`](#produ
 
 ```yaml instance-template.yaml
 name: Default Configuration <1>
-description: "Creates an instance with the default server and client configuration"
+description: 'Creates an instance with the default server and client configuration'
 
 templateVariables: <2>
   - id: sleep-timeout
-    name: "Sleep Timeout"
-    description: "The amount of time the server application should sleep"
+    name: 'Sleep Timeout'
+    description: 'The amount of time the server application should sleep'
     defaultValue: 60
 
 instanceVariables: <3>
   - id: var.id
-    value: "MyValue"
-    description: "The description of my instance variable"
+    value: 'MyValue'
+    description: 'The description of my instance variable'
     type: PASSWORD
   - template: var.template <4>
 
 instanceVariableDefaults: <5>
   - id: var.id
-    value: "A value other than above"
+    value: 'A value other than above'
 
 instanceVariableValues: <6>
   - id: def.id
-    value: "A value that will update instance variable created from def.id definition"
+    value: 'A value that will update instance variable created from def.id definition'
   - id: other.def.id
-    value: "{{T:sleep-timeout}}"
+    value: '{{T:sleep-timeout}}'
 
 processControlGroups: <7>
-  - name: "First Group"
-    startType: "PARALLEL"
-    startWait: "WAIT"
-    stopType: "SEQUENTIAL"
+  - name: 'First Group'
+    startType: 'PARALLEL'
+    startWait: 'WAIT'
+    stopType: 'SEQUENTIAL'
 
 groups: <8>
-- name: "Server Apps"
-  description: "All server applications"
+- name: 'Server Apps'
+  description: 'All server applications'
 
   applications:
   - application: server-app
-    name: "Server No Sleep"
-    description: "Server application which immediately exits"
+    name: 'Server No Sleep'
+    description: 'Server application which immediately exits'
   - template: server-with-sleep <9>
     fixedVariables: <10>
       - id: sleep-timeout
         value: 10
   - application: server-app <11>
-    name: "Server With Sleep"
-    description: "Server application which sleeps before exiting"
+    name: 'Server With Sleep'
+    description: 'Server application which sleeps before exiting'
     applyOn: <12>
       - LINUX
     processControl:
       startType: MANUAL_CONFIRM
     startParameters: <13>
     - id: param.sleep
-      value: "{{T:sleep-timeout}}"
+      value: '{{T:sleep-timeout}}'
     applyTo: <14>
     - LINUX
-- name: "Client Apps"
+- name: 'Client Apps'
   type: CLIENT <15>
-  description: "All client applications"
+  description: 'All client applications'
 
   applications:
   - application: client-app
-    description: "A default client application."
+    description: 'A default client application.'
 ```
 
 1. Each **Instance Template** has a name and a description, which are shown on the **Instance Template** Wizard.
@@ -780,9 +780,9 @@ id: param.template <1>
 
 parameters: <2>
   - id: tpl-param
-    name: "Template Parameter"
-    defaultValue: "x"
-    longDescription: "A parameter defined in a template"
+    name: 'Template Parameter'
+    defaultValue: 'x'
+    longDescription: 'A parameter defined in a template'
 ```
 
 1. The ID can be used to reference the template afterwards from an [`app-info.yaml`](#app-infoyaml).
@@ -804,9 +804,9 @@ An `instance-variable-template.yaml` works the same as a `parameter-template.yam
 id: var.template <1>
 
 instanceVariables: <2>
-  - id: "my-instance-var"
-    description: "My Instance Variable"
-    value: "My Value!"
+  - id: 'my-instance-var'
+    description: 'My Instance Variable'
+    value: 'My Value!'
     type: STRING
 ```
 
@@ -832,7 +832,7 @@ An `instance-variable-definitions.yaml` provides definitions for instance variab
 ```yaml instance-variable-definitions.yaml
 
 definitions: <1>
-  - id: "my-instance-variable-definition"
+  - id: 'my-instance-variable-definition'
     name: 'My Instance Variable Definition'
     longDescription: 'The description for instance variable definition'
     type: 'STRING'
@@ -873,21 +873,21 @@ systemVariables: <1>
 
 templateVariables: <2>
   - id: node-base-name
-    name: "The node base name"
-    defaultValue: "Node"
+    name: 'The node base name'
+    defaultValue: 'Node'
 
 instances:
   - name: 'Demo Instance' <3>
-    description: "The Test System's Demo Instance"
+    description: 'The Test System's Demo Instance'
     productId: 'io.bdeploy/demo'
-    productVersionRegex: "2\\..*"
+    productVersionRegex: '2\\..*'
     templateName: 'Default Configuration'
   - name: 'Chat Instance'
-    description: "The Test System's first Chat Instance"
+    description: 'The Test System's first Chat Instance'
     productId: 'io.bdeploy/chat-app'
     fixedVariables: <4>
       - id: app-name
-        value: "{{T:node-base-name}}"
+        value: '{{T:node-base-name}}'
     templateName: 'Default Configuration'
     defaultMappings: <5>
       - group: 'Chat App'
@@ -993,7 +993,7 @@ plugins {
   id 'io.bdeploy.gradle.plugin' version '3.1.1-1' <1>
 }
 
-version = "1.0.0-SNAPSHOT" <2>
+version = '1.0.0-SNAPSHOT' <2>
 
 ext { <3>
   buildDate = new Date().format('yyyyMMddHHmmss')
@@ -1030,7 +1030,7 @@ task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: install
 
 task zipProduct(type: io.bdeploy.gradle.BDeployZipTask, dependsOn: buildProduct) { <6>
   of buildProduct
-  output = new File(buildDir, "product-" + project.ext.buildVersion + ".zip");
+  output = new File(buildDir, 'product-' + project.ext.buildVersion + '.zip');
 }
 
 
@@ -1078,7 +1078,7 @@ supportedOperatingSystems: <1>
   - WINDOWS
 
 startCommand:
-  launcherPath: "{{M:SELF}}/bin/test{{WINDOWS:.bat}}" <2>
+  launcherPath: '{{M:SELF}}/bin/test{{WINDOWS:.bat}}' <2>
 ```
 
 1. By default, the **BDeploy** plugin will make this application available for **all** the supported platforms specified in `app-info.yaml`. If required (usually it is not) you can configure a _different_ set of Operating Systems to build for in the `test` application configuration in `build.gradle` by adding a set of operating system literals (e.g. 'WINDOWS', 'LINUX') to the `os` list of the application.
@@ -1161,8 +1161,8 @@ This file is required and lists the [`product-build.yaml`](#product-buildyaml) f
 
 ```yaml products.yaml
 products:
-  "Product One": "prod-1-build.yaml"
-  "Product Two": "prod-2-build.yaml"
+  'Product One': 'prod-1-build.yaml'
+  'Product Two': 'prod-2-build.yaml'
 ```
 
 The path to the `products.yaml` has to be configured in the **Eclipse TEA** preferences.

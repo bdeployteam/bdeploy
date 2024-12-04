@@ -142,11 +142,11 @@ In order to use an instance template via the CLI you must have a so-called "resp
 This is an example of such a response file:
 
 ```yaml
-name: "Demo Instance"
-description: "The Test System's Demo Instance"
+name: 'Demo Instance'
+description: 'The Test System's Demo Instance'
 productId: 'io.bdeploy/demo'
-productVersionRegex: "2\\..*"
-templateName: "Default Configuration"
+productVersionRegex: '2\\..*'
+templateName: 'Default Configuration'
 fixedVariables:
  - id: 'text-param'
    value: 'XX'
