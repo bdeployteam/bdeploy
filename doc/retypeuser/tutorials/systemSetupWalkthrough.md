@@ -178,7 +178,7 @@ bdeploy remote-system --instanceGroup=<GROUP_NAME> --update --uuid=<SYSTEM_ID> -
 Next, we apply the individual instance templates, each with its response files.
 
 ```
-bdeploy remote-instance --create=<INSTANCE_NAME> --template=<PATH_TO_RESPONSE_FILE>.yaml --instanceGroup=<GROUP_NAME> --purpose=<PRODUCTIVE|TEST|DEVELOPMENT> --system=<SYSTEM_ID> --server=<MANAGED_SERVER_NAME>
+bdeploy remote-instance --create --name=<INSTANCE_NAME> --template=<PATH_TO_RESPONSE_FILE>.yaml --instanceGroup=<GROUP_NAME> --purpose=<PRODUCTIVE|TEST|DEVELOPMENT> --system=<SYSTEM_ID> --server=<MANAGED_SERVER_NAME>
 ```
 
 ## Install, Activate, Start
