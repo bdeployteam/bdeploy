@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletionStage;
@@ -169,10 +170,24 @@ public class TestServer
                 .collect(Collectors.toList());
     }
 
+    protected Object getServerIdentifyingObject() {
+        return null;
+    }
+
+    protected Object getParameterIdentifyingObject(ParameterContext context) {
+        return null;
+    }
+
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
         if (!resolver) {
+            return false;
+        }
+
+        if (getServerIdentifyingObject() != null && getParameterIdentifyingObject(parameterContext) != null && !Objects.equals(
+                getServerIdentifyingObject(), getParameterIdentifyingObject(parameterContext))) {
+            // all is set to distinguish servers, but no match -> nope.
             return false;
         }
 
