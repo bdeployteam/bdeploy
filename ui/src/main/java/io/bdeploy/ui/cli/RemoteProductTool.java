@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -218,7 +219,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getProductResource(config.instanceGroup());
         Manifest.Key pkey = Manifest.Key.parse(config.product());
-        pr.copyProduct(config.repository(), pkey.getName() + "/product", List.of(pkey.getTag()));
+        pr.copyProduct(config.repository(), pkey.getName() + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, List.of(pkey.getTag()));
 
         return createSuccess();
     }

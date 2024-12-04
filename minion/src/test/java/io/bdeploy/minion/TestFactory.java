@@ -62,7 +62,7 @@ public class TestFactory {
         Path client = TestAppFactory.createDummyApp("client", tmp, true, 0);
         Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp);
 
-        Manifest.Key prodKey = new Manifest.Key("customer/product", "1.0.0.1234");
+        Manifest.Key prodKey = new Manifest.Key("customer" + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, "1.0.0.1234");
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo", OsHelper.getRunningOs()), "1.0.0.1234");
         Manifest.Key clientKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo-client", OsHelper.getRunningOs()),
                 "1.0.0.1234");

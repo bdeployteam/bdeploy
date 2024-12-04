@@ -96,7 +96,7 @@ class PublicApiV1Test {
         assertEquals("DemoInstance", ica.name);
         assertEquals("Demo Instance", ica.description);
         assertEquals(InstancePurposeApi.TEST, ica.purpose);
-        assertEquals(new Manifest.Key("customer/product", "1.0.0.1234"), ica.product);
+        assertEquals(new Manifest.Key("customer" + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, "1.0.0.1234"), ica.product);
 
         assertThrows(NotFoundException.class, () -> pir.getAllEndpoints(ica.uuid));
 

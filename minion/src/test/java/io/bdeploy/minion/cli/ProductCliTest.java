@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
@@ -125,7 +126,7 @@ class ProductCliTest {
                 "--token=" + auth);
 
         // this is the key we expect to be created.
-        Manifest.Key prodKey = new Manifest.Key("prod/product", "1.0.0");
+        Manifest.Key prodKey = new Manifest.Key("prod" + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, "1.0.0");
 
         // check whether things went well...
         try (BHive hive = new BHive(impHive.toUri(), null, reporter)) {
