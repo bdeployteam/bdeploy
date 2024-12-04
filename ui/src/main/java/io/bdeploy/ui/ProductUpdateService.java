@@ -460,6 +460,7 @@ public class ProductUpdateService {
         return result;
     }
 
+    @SuppressWarnings("unused") // TODO Will be used in the future
     private static boolean isFileChanged(List<FileStatusDto> fileStatuses, String fileName) {
         return fileStatuses.stream().anyMatch(fileStatus -> fileStatus.file.equals(fileName));
     }
