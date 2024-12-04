@@ -330,7 +330,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 }
             }
 
-            Manifest.Key prodKey = new Manifest.Key(pd.product + "/product", pvd.version);
+            Manifest.Key prodKey = new Manifest.Key(pd.product + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, pvd.version);
             Set<Manifest.Key> existing = hive.execute(new ManifestListOperation());
             if (!existing.contains(prodKey)) {
                 ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false);
