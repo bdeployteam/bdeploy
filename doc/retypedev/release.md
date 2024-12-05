@@ -6,13 +6,11 @@ icon: package-dependents
 
 ## Preparation
 
-Make sure to run a manual test and check at least this before releasing:
+Make sure that all relevant changes are merged to the master. Then, check out the master and run a manual test, checking at least the following procedures:
 
 * Setup a fresh server.
 * Create an instance with a client application.
 * Download the installer for the client and check if it is working as intended.
-
-The rest is covered pretty well by automated tests already.
 
 ## Branches, Tags & GitHub Release
 
@@ -22,13 +20,13 @@ The steps outlined in this chapter are usually encapsuled in a single automated 
 
 Prerequisites:
 
-* Know the version you want to release (i.e. `RELEASE_VERSION`)
+* Know the version you want to release (i.e. `RELEASE_VERSION`).
 * Know the "next" version, which will be the one set as active version **after** the release (i.e. `NEXT_VERSION`).
 * A GitHub account (i.e. `GH_USER`) and a token (i.e. `GH_TOKEN`) with the permission to create and update a release on the **BDeploy** GitHub repository.
 * A SonaType account (i.e. `SONATYPE_USER`) and a token (i.e. `SONATYPE_TOKEN`) with the permission to upload and release artifacts to `oss.sonatype.org` targeting maven central.
-* A GPG Key which is registered with sonatype which can be used to sign the application JAR files for upload to maven. You need the key file (i.e. `GPG_FILE`), the ID of the key (i.e. `GPG_ID`) and the password to the key file (i.e. `GPG_PASS`).
-* A clone of the repository - since right now an internal repository is used as well as the GitHub repository, you need a clone of the internal repository
-* An empty directory where JDKs can be downloaded to. Set the path in the environment variable `JDK_DL_ROOT`
+* A GPG Key which is registered with SonaType which can be used to sign the application JAR files for upload to maven. You need the key file (i.e. `GPG_FILE`), the ID of the key (i.e. `GPG_ID`) and the password to the key file (i.e. `GPG_PASS`).
+* A clone of the repository - since right now an internal repository is used as well as the GitHub repository, you need a clone of the internal repository.
+* An empty directory where JDKs can be downloaded to. Set the path in the environment variable `JDK_DL_ROOT`.
 
 Steps:
 
@@ -67,7 +65,7 @@ While `release.sh` is running, you can gather release notes by looking at the in
 git log --no-merges v3.5.0..
 ```
 
-assuming that `3.5.0` was the last release. Scroll to the bottom of the output and work your way upwards commit after commit. Not **every** commit needs mentioning in the release notes, but quite often nearly every commit ends up in some or another way in the release notes.
+assuming that `3.5.0` was the last release. Scroll to the bottom of the output and work your way upwards commit after commit. Not **every** commit needs mentioning in the release notes, but quite often nearly every commit ends up in there in one way or another.
 
 ## MavenCentral release
 
