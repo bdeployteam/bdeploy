@@ -22,7 +22,10 @@
         </div>
 
         <app-bd-expand-button [text]="'Labels'" icon="label">
-          <app-bd-data-display [records]="detailsService.labels$ | async" [columns]="labelColumns">
+          <app-bd-data-display
+            [records]="detailsService.labels$ | async"
+            [columns]="productActionColumns.defaultLabelsColumns"
+          >
             <app-bd-no-data>
               <div>This product has no labels.</div>
             </app-bd-no-data>
@@ -30,7 +33,10 @@
         </app-bd-expand-button>
 
         <app-bd-expand-button text="Application Templates" icon="bookmark_border">
-          <app-bd-data-display [records]="asProduct(software).applicationTemplates" [columns]="appTemplColumns">
+          <app-bd-data-display
+            [records]="asProduct(software).applicationTemplates"
+            [columns]="productActionColumns.defaultApplicationTemplatesColumns"
+          >
             <app-bd-no-data>
               <div>This product has no application templates.</div>
             </app-bd-no-data>
@@ -38,7 +44,10 @@
         </app-bd-expand-button>
 
         <app-bd-expand-button text="Instance Templates" icon="bookmarks">
-          <app-bd-data-display [records]="asProduct(software).instanceTemplates" [columns]="instTemplColumns">
+          <app-bd-data-display
+            [records]="asProduct(software).instanceTemplates"
+            [columns]="productActionColumns.defaultInstanceTemplatesColumns"
+          >
             <app-bd-no-data>
               <div>This product has no instance templates.</div>
             </app-bd-no-data>
@@ -46,7 +55,10 @@
         </app-bd-expand-button>
 
         <app-bd-expand-button text="Plugins" icon="extension">
-          <app-bd-data-display [records]="softwareDetailsPlugins$ | async" [columns]="pluginColumns">
+          <app-bd-data-display
+            [records]="softwareDetailsPlugins$ | async"
+            [columns]="productActionColumns.defaultPluginsColumns"
+          >
             <app-bd-no-data>
               <div>This product has no plugins.</div>
             </app-bd-no-data>

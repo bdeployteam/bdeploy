@@ -2,21 +2,14 @@ import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  Actions,
-  FlattenedApplicationTemplateConfiguration,
-  FlattenedInstanceTemplateConfiguration,
-  InstanceUsageDto,
-  ManifestKey,
-  PluginInfoDto,
-  ProductDto,
-} from 'src/app/models/gen.dtos';
+import { Actions, InstanceUsageDto, ManifestKey, PluginInfoDto, ProductDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
-import { LabelRecord, ProductDetailsService } from '../../services/product-details.service';
+import { ProductDetailsService } from '../../services/product-details.service';
 
 const instanceNameColumn: BdDataColumn<InstanceUsageDto> = {
   id: 'name',
@@ -31,59 +24,6 @@ const instanceTagColumn: BdDataColumn<InstanceUsageDto> = {
   data: (r) => r.tag,
   isId: true,
   width: '30px',
-};
-
-const labelKeyColumn: BdDataColumn<LabelRecord> = {
-  id: 'key',
-  name: 'Label',
-  data: (r) => r.key,
-  isId: true,
-  width: '90px',
-};
-
-const labelValueColumn: BdDataColumn<LabelRecord> = {
-  id: 'value',
-  name: 'Value',
-  data: (r) => r.value,
-  width: '190px',
-};
-
-const appTemplateNameColumn: BdDataColumn<FlattenedApplicationTemplateConfiguration> = {
-  id: 'name',
-  name: 'Name',
-  data: (r) => r.name,
-  isId: true,
-  tooltip: (r) => r.description,
-};
-
-const instTemplateNameColumn: BdDataColumn<FlattenedInstanceTemplateConfiguration> = {
-  id: 'name',
-  name: 'Name',
-  data: (r) => r.name,
-  isId: true,
-  tooltip: (r) => r.description,
-};
-
-const pluginNameColumn: BdDataColumn<PluginInfoDto> = {
-  id: 'name',
-  name: 'Name',
-  data: (r) => r.name,
-  width: '130px',
-};
-
-const pluginVersionColumn: BdDataColumn<PluginInfoDto> = {
-  id: 'description',
-  name: 'Description',
-  data: (r) => r.version,
-  width: '100px',
-};
-
-const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
-  id: 'oid',
-  name: 'OID',
-  data: (r) => r.id.id,
-  isId: true,
-  width: '50px',
 };
 
 const refNameColumn: BdDataColumn<ManifestKey> = {
@@ -101,11 +41,11 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
 };
 
 @Component({
-    selector: 'app-product-details',
-    templateUrl: './product-details.component.html',
-    styleUrls: ['./product-details.component.css'],
-    providers: [ProductDetailsService],
-    standalone: false
+  selector: 'app-product-details',
+  templateUrl: './product-details.component.html',
+  styleUrls: ['./product-details.component.css'],
+  providers: [ProductDetailsService],
+  standalone: false,
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);
@@ -113,18 +53,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   protected readonly singleProduct = inject(ProductDetailsService);
   protected readonly areas = inject(NavAreasService);
   protected readonly auth = inject(AuthenticationService);
+  protected readonly productActionColumns = inject(ProductActionsColumnsService);
 
-  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto>[] = //
-    [instanceNameColumn, instanceTagColumn];
-  protected readonly labelColumns: BdDataColumn<LabelRecord>[] = //
-    [labelKeyColumn, labelValueColumn];
-  protected readonly appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = //
-    [appTemplateNameColumn];
-  protected readonly instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = //
-    [instTemplateNameColumn];
-  protected readonly pluginColumns: BdDataColumn<PluginInfoDto>[] = //
-    [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
-
+  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto>[] = [instanceNameColumn, instanceTagColumn];
   protected readonly refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
   protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
