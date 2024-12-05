@@ -106,17 +106,17 @@ branding: <5>
 
 processControl: <6>
   supportedStartTypes:
-   - INSTANCE
+    - INSTANCE
   supportsKeepAlive: true
   noOfRetries: 5
   gracePeriod: 3000
   attachStdin: false
   startupProbe: <7>
-     endpoint: 'Startup Endpoint'
+    endpoint: 'Startup Endpoint'
   livenessProbe: <8>
-     endpoint: 'Liveness Endpoint'
-     initialDelaySeconds: 5
-     periodSeconds: 10
+    endpoint: 'Liveness Endpoint'
+    initialDelaySeconds: 5
+    periodSeconds: 10
   configDirs: '/dir1,/dir2' <9>
   supportsAutostart: true
 
@@ -830,7 +830,6 @@ There is no actual requirement for the file to be named `instance-variable-defin
 An `instance-variable-definitions.yaml` provides definitions for instance variables, based on which instance variables will be created. The definition values can be overriden using `instanceVariableValues` in an [`instance-template.yaml`](#instance-templateyaml).
 
 ```yaml instance-variable-definitions.yaml
-
 definitions: <1>
   - id: 'my-instance-variable-definition'
     name: 'My Instance Variable Definition'
