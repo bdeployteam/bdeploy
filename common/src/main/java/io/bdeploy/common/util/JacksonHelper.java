@@ -67,11 +67,13 @@ public class JacksonHelper {
     }
 
     public static ObjectMapper createObjectMapper(MapperType type) {
-        if (type == MapperType.JSON) {
-            return createObjectMapper((JsonFactory) null);
-        } else {
-            return createObjectMapper(new YAMLFactory()).setSerializationInclusion(Include.NON_NULL);
+        switch (type) {
+            case JSON:
+                return createObjectMapper((JsonFactory) null);
+            case YAML:
+                return createObjectMapper(new YAMLFactory()).setSerializationInclusion(Include.NON_NULL);
         }
+        throw new IllegalArgumentException("Unsupported mapper type: " + type);
     }
 
     public static ObjectMapper getDefaultJsonObjectMapper() {
@@ -81,5 +83,4 @@ public class JacksonHelper {
     public static ObjectMapper getDefaultYamlObjectMapper() {
         return DEF_YAML_MAPPER;
     }
-
 }
