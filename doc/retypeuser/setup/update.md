@@ -13,6 +13,8 @@ To remotely update an existing server, use a command similar to the following:
 
 ```
 bdeploy login --add=<server-name> --remote=https://<hostname>:<port>/api
+```
+```
 bdeploy remote-master --update=<path/to/update.zip> --useLogin=<server-name>
 ```
 
