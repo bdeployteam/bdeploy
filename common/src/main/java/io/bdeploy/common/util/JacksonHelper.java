@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
@@ -71,7 +72,8 @@ public class JacksonHelper {
             case JSON:
                 return createObjectMapper((JsonFactory) null);
             case YAML:
-                return createObjectMapper(new YAMLFactory()).setSerializationInclusion(Include.NON_NULL);
+                return createObjectMapper(new YAMLFactory().enable(Feature.INDENT_ARRAYS_WITH_INDICATOR))
+                        .setSerializationInclusion(Include.NON_NULL);
         }
         throw new IllegalArgumentException("Unsupported mapper type: " + type);
     }
