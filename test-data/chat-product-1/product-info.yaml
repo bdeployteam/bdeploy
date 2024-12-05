@@ -2,9 +2,9 @@ name: "Demo Chat App"
 product: "io.bdeploy/chat-app"
 vendor: BDeploy Team
 applications:
-- "chat-app"
+  - "chat-app"
 
 instanceTemplates:
-- "instance-template-default.yaml"
+  - "instance-template-default.yaml"
 
 versionFile: "product-version.yaml"

@@ -10,10 +10,10 @@ templateVariables:
     description: "Name for the chat application"
 
 groups:
-- name: "Chat App"
-  description: "All applications"
+  - name: "Chat App"
+    description: "All applications"
 
-  applications:
-  - application: chat-app
-    name: "The Chat App {{T:app-name}}"
-    description: "The single chat application"
+    applications:
+      - application: chat-app
+        name: "The Chat App {{T:app-name}}"
+        description: "The single chat application"
