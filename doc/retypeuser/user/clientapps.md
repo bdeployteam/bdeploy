@@ -49,6 +49,8 @@ Installation for **All** users requires a terminal with elevated privileges (_Ru
 
 ```
 Start -FilePath "./Installer.exe" -ArgumentList "/ForAllUsers" -Verb RunAs
+```
+```
 Start -FilePath "./Installer.exe" -ArgumentList "/Unattended","/ForAllUsers" -Wait -Verb RunAs
 ```
 
