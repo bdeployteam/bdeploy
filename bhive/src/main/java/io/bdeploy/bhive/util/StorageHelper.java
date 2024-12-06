@@ -137,12 +137,12 @@ public class StorageHelper {
     }
 
     private static ObjectMapper getMapper(MapperType type) {
-        if (type == MapperType.JSON) {
-            return DEF_JSON_MAPPER_WITH_HIVE;
-        } else if (type == MapperType.YAML) {
-            return DEF_YAML_MAPPER_WITH_HIVE;
+        switch (type) {
+            case JSON:
+                return DEF_JSON_MAPPER_WITH_HIVE;
+            case YAML:
+                return DEF_YAML_MAPPER_WITH_HIVE;
         }
-        throw new IllegalStateException("Unsupported mapper type");
+        throw new IllegalArgumentException("Unsupported mapper type: " + type);
     }
-
 }
