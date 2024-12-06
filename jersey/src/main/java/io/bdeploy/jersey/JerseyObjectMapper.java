@@ -35,22 +35,12 @@ public class JerseyObjectMapper implements ContextResolver<ObjectMapper> {
      */
     public JerseyObjectMapper(Iterable<Module> additional) {
         additionalModules = additional;
-        mapper = createMapper();
+        mapper = JacksonHelper.createObjectMapper(MapperType.JSON);
+        additionalModules.forEach(mapper::registerModule);
     }
 
     @Override
     public ObjectMapper getContext(Class<?> type) {
         return mapper;
     }
-
-    private ObjectMapper createMapper() {
-        final ObjectMapper result = JacksonHelper.createObjectMapper(MapperType.JSON);
-
-        for (Module m : additionalModules) {
-            result.registerModule(m);
-        }
-
-        return result;
-    }
-
 }
