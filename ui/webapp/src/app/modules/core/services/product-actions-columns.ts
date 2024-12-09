@@ -5,7 +5,11 @@ import {
   FlattenedInstanceTemplateConfiguration,
   PluginInfoDto,
 } from 'src/app/models/gen.dtos';
-import { LabelRecord } from '../../panels/products/services/product-details.service';
+
+export interface LabelRecord {
+  key: string;
+  value: string;
+}
 
 @Injectable({
   providedIn: 'root',
