@@ -1,34 +1,44 @@
-import { formatDate } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { ReportDescriptor, ReportResponseDto } from 'src/app/models/gen.dtos';
+import { ReportColumnDescriptor, ReportDescriptor, ReportResponseDto } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 
+interface GeneratedReportRow {
+  [index: string]: string;
+}
+
 @Component({
-    selector: 'app-report',
-    templateUrl: './report.component.html',
-    standalone: false
+  selector: 'app-report',
+  templateUrl: './report.component.html',
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReportComponent implements OnInit, OnDestroy {
+export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
+  private readonly cd = inject(ChangeDetectorRef);
   private readonly download = inject(DownloadService);
   private readonly router = inject(Router);
-  protected readonly reports = inject(ReportsService);
+  private readonly search = inject(SearchService);
+  private readonly reports = inject(ReportsService);
 
   protected report: ReportDescriptor;
-  protected columns: BdDataColumn<{ [index: string]: string }>[] = [];
+  protected columns: BdDataColumn<GeneratedReportRow>[] = [];
+  protected rows: GeneratedReportRow[] = [];
   protected generated: ReportResponseDto;
-  protected definitions: BdDataGroupingDefinition<{ [index: string]: string }>[] = [];
-  protected grouping: BdDataGrouping<{ [index: string]: string }>[] = [];
+  protected definitions: BdDataGroupingDefinition<GeneratedReportRow>[] = [];
+  protected grouping: BdDataGrouping<GeneratedReportRow>[] = [];
   protected header: string;
+
+  private search$ = new BehaviorSubject<string>(null);
 
   private subscription: Subscription;
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.reports.current$, this.reports.generatedReport$]).subscribe(
-      ([desc, generated]) => {
+    this.subscription = combineLatest([this.reports.current$, this.reports.generatedReport$, this.search$]).subscribe(
+      ([desc, generated, search]) => {
         this.report = desc;
         this.generated = generated;
         this.header = `Report "${desc.name}"`;
@@ -46,37 +56,44 @@ export class ReportComponent implements OnInit, OnDestroy {
             associatedColumn: col.key,
             group: (r) => r[col.key],
           }));
+        this.rows = this.calculateRows(desc.columns, generated?.rows || [], search);
+        this.cd.markForCheck();
       },
     );
+    this.subscription.add(this.search.register(this));
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
   }
 
-  protected showRowDetails(row: { [index: string]: string }) {
+  bdOnSearch(value: string): void {
+    this.search$.next(value);
+  }
+
+  private calculateRows(
+    columns: ReportColumnDescriptor[],
+    rows: GeneratedReportRow[],
+    search: string,
+  ): GeneratedReportRow[] {
+    if (!search) {
+      return rows;
+    }
+    return rows.filter((row) =>
+      columns.some((col) => row[col.key]?.length && row[col.key].toUpperCase().indexOf(search.toUpperCase()) !== -1),
+    );
+  }
+
+  protected showRowDetails(row: GeneratedReportRow) {
     this.reports.selectedRow$.next(row);
     this.router.navigate(['', { outlets: { panel: ['panels', 'reports', 'row-details'] } }]);
   }
 
   protected exportCsv() {
     const columns = this.report.columns;
-    const csvData = [
-      columns.map((col) => col.name).join(','),
-      ...this.generated.rows.map((row) => columns.map((col) => this.escapeCsvValue(row[col.key])).join(',')),
-    ].join('\n');
-    const filename = `${this.report.name} - ${formatDate(this.generated.generatedAt, 'dd.MM.yyyy HH:mm:ss', 'en-US')}.csv`;
-    const blob = new Blob([csvData], { type: 'text/csv' });
-    this.download.downloadBlob(filename, blob);
-  }
-
-  private escapeCsvValue(value: string): string {
-    if (value === null || value === undefined) {
-      return '';
-    }
-    if (value.includes(',') || value.includes('"')) {
-      value = `"${value.replace(/"/g, '""')}"`;
-    }
-    return value;
+    const columnNames = columns.map((col) => col.name);
+    const rows = this.rows.map((row) => columns.map((col) => row[col.key]));
+    const filename = `${this.report.name} - ${this.generated.generatedAt}.csv`;
+    this.download.downloadCsv(filename, columnNames, rows);
   }
 }

@@ -13,27 +13,27 @@ public class ReportDescriptor {
     /**
      * report type which also serves as permission scope to view this report
      */
-    public ReportType type;
+    public final ReportType type;
 
     /**
      * human readable name of the report
      */
-    public String name;
+    public final String name;
 
     /**
      * short description explaining what report is about
      */
-    public String description;
+    public final String description;
 
     /**
      * input parameters used to generate report
      */
-    public List<ReportParameterDescriptor> parameters;
+    public final List<ReportParameterDescriptor> parameters;
 
     /**
      * report column definitions
      */
-    public List<ReportColumnDescriptor> columns;
+    public final List<ReportColumnDescriptor> columns;
 
     @JsonCreator
     public ReportDescriptor(@JsonProperty("type") ReportType type, @JsonProperty("name") String name,

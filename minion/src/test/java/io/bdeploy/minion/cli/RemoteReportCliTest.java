@@ -70,15 +70,17 @@ class RemoteReportCliTest {
         result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--report=productsInUse");
         assertEquals(1, result.size());
-        assertEquals("demo", result.get(0).get("InstanceGroup"));
+        assertEquals("title", result.get(0).get("InstanceGroupTitle"));
+        assertEquals("demo", result.get(0).get("InstanceGroupName"));
         assertEquals("For Unit Test", result.get(0).get("InstanceGroupDescription"));
-        assertEquals("aaa-bbb-ccc", result.get(0).get("InstanceUuid"));
-        assertEquals("DemoInstance", result.get(0).get("Instance"));
-        assertEquals("Dummy Product", result.get(0).get("Product"));
+        assertEquals("aaa-bbb-ccc", result.get(0).get("InstanceId"));
+        assertEquals("DemoInstance", result.get(0).get("InstanceName"));
+        assertEquals("Demo Product for Unit Test", result.get(0).get("ProductId"));
+        assertEquals("Dummy Product", result.get(0).get("ProductName"));
         assertEquals("1.0.0.1234", result.get(0).get("ProductVersion"));
         assertEquals("", result.get(0).get("ActiveVersion"));
         assertEquals("TEST", result.get(0).get("Purpose"));
-        assertEquals("", result.get(0).get("System"));
+        assertEquals("", result.get(0).get("SystemName"));
         assertEquals("", result.get(0).get("ManagedServer"));
         assertEquals("", result.get(0).get("LastCommunication"));
 

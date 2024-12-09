@@ -1,6 +1,5 @@
 package io.bdeploy.ui.cli;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,11 +87,9 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
         ReportResponseDto resp = rr.generateReport(config.report(), req);
 
         DataTable table = createDataTable();
-        table.setCaption("Report \"" + desc.name + "\" - generated at: "
-                + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(resp.generatedAt));
+        table.setCaption("Report \"" + desc.name + "\" - generated at: " + resp.generatedAt);
         for (ReportColumnDescriptor column : desc.columns) {
-            table.column(new DataTableColumn.Builder(column.name).setMinWidth(column.minWidth)
-                    .setScaleToContent(column.scaleToContent).build());
+            table.column(new DataTableColumn.Builder(column.name).setScaleToContent(column.identifier).build());
         }
         for (Map<String, String> row : resp.rows) {
             DataTableRowBuilder tableRow = table.row();

@@ -401,7 +401,7 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-ports', () => {
       cy.get('button[data-cy^="Export"]').downloadByLinkClick('ports.csv');
       cy.readFile(Cypress.config('downloadsFolder') + '/ports.csv').then((content) => {
-        expect(content).to.contain('Application,Name,Description,Port');
+        expect(content).to.contain(`"Application";"Name";"Description";"Port"`);
       });
     });
   });

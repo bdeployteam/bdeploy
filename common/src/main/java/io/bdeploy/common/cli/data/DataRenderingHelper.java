@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 public class DataRenderingHelper {
 
+    static final String CSV_DELIMITER = ";";
     private static final String WORD_SEPARATORS = " _-";
     private static final Pattern SPLIT_PATTERN = Pattern.compile('[' + WORD_SEPARATORS + ']');
     private static final Pattern REPLACE_PATTERN = Pattern.compile("[^a-zA-Z0-9" + WORD_SEPARATORS + ']');

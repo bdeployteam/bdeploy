@@ -1,5 +1,7 @@
 package io.bdeploy.common.cli.data;
 
+import static io.bdeploy.common.cli.data.DataRenderingHelper.CSV_DELIMITER;
+
 import java.io.PrintStream;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +16,7 @@ class DataTableCsv extends DataTableBase {
 
     @Override
     public void doRender() {
-        output.println(String.join(",",
+        output.println(String.join(CSV_DELIMITER,
                 columns.stream().map(c -> DataRenderingHelper.quoteCsv(c.getLabel())).collect(Collectors.toList())));
 
         for (List<DataTableCell> row : rows) {
@@ -22,7 +24,7 @@ class DataTableCsv extends DataTableBase {
                 output.print(DataRenderingHelper.quoteCsv(row.get(y).getData()));
 
                 if (y != (row.size() - 1)) {
-                    output.print(StringHelper.repeat(",", row.get(y).getSpan()));
+                    output.print(StringHelper.repeat(CSV_DELIMITER, row.get(y).getSpan()));
                 } else {
                     output.println();
                 }
