@@ -52,15 +52,11 @@ public class JerseyMetricsFilter implements ContainerRequestFilter, ContainerRes
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-        Timer.Context context = (Timer.Context) requestContext.getProperty(TIMER);
-        if (context != null) {
-            context.close();
-        } else {
-            // happens in case of errors in sub-resource locators, e.g. throwing a WAE.
-            if (log.isTraceEnabled()) {
+        try (Timer.Context context = (Timer.Context) requestContext.getProperty(TIMER)) {
+            // context may be null in case of errors in sub-resource locators, e.g. throwing a WAE.
+            if (context == null && log.isTraceEnabled()) {
                 log.trace("No timer running for request: {}", requestContext);
             }
         }
     }
-
 }

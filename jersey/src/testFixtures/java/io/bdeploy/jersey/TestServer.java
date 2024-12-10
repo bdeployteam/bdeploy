@@ -271,13 +271,9 @@ public class TestServer
     }
 
     protected int findFreePort() {
-        try {
-            ServerSocket ss = new ServerSocket();
+        try (ServerSocket ss = new ServerSocket()) {
             ss.bind(null);
-            int result = ss.getLocalPort();
-            ss.close();
-
-            return result;
+            return ss.getLocalPort();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot determin local port to use", e);
         }
