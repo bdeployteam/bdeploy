@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.MdcLogger;
@@ -81,10 +80,9 @@ public class MinionProcessController {
     /**
      * Returns an existing instance controller or creates a new one if not existing
      *
-     * @param hive the hive where the instance node manifest is stored
      * @param inm the current instance node manifest
      */
-    public InstanceProcessController getOrCreate(BHive hive, InstanceNodeManifest inm) {
+    public InstanceProcessController getOrCreate(InstanceNodeManifest inm) {
         return instance2Controller.computeIfAbsent(inm.getId(), instanceId -> {
             logger.log(l -> l.debug("Creating new instance controller."), instanceId);
             return new InstanceProcessController(instanceId);

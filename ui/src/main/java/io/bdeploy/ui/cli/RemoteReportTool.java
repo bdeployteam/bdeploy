@@ -83,7 +83,7 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
                 .orElseThrow(() -> new IllegalArgumentException("ERROR: report of type " + config.report() + " is not found"));
 
         ReportRequestDto req = new ReportRequestDto();
-        req.params = parseParams(config, desc);
+        req.params = parseParams(config);
 
         ReportResponseDto resp = rr.generateReport(config.report(), req);
 
@@ -104,7 +104,7 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
         return table;
     }
 
-    private Map<String, String> parseParams(RemoteReportConfig config, ReportDescriptor desc) {
+    private Map<String, String> parseParams(RemoteReportConfig config) {
         Map<String, String> params = new HashMap<>();
         if (config.params() != null) {
             for (String param : config.params()) {

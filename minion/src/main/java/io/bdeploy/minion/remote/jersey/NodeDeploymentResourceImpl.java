@@ -93,7 +93,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         // Notify that there is a new deployment
         MinionProcessController processController = root.getProcessController();
-        InstanceProcessController controller = processController.getOrCreate(hive, inm);
+        InstanceProcessController controller = processController.getOrCreate(inm);
         controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, inm.getKey().getTag(),
                 inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
     }
@@ -111,7 +111,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         // Notify that there is a new active version
         MinionProcessController processController = root.getProcessController();
-        InstanceProcessController controller = processController.getOrCreate(hive, inm);
+        InstanceProcessController controller = processController.getOrCreate(inm);
         controller.setActiveTag(key.getTag());
         getState(inm, hive).activate(key.getTag());
 
@@ -154,7 +154,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         // tell the process controller that there is no active tag anymore...
         MinionProcessController processController = root.getProcessController();
-        InstanceProcessController controller = processController.getOrCreate(hive, inm);
+        InstanceProcessController controller = processController.getOrCreate(inm);
         controller.setActiveTag(null);
 
         // deactivate by marking as removed and re-installed (there is no actual de-activation).
@@ -172,7 +172,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         // check currently active deployment
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         MinionProcessController processController = root.getProcessController();
-        InstanceProcessController controller = processController.getOrCreate(hive, inm);
+        InstanceProcessController controller = processController.getOrCreate(inm);
         InstanceNodeStatusDto status = controller.getStatus();
         if (status.areAppsRunningOrScheduledInVersion(key.getTag())) {
             throw new WebApplicationException("Key " + key + " has one or more applications running.", Status.BAD_REQUEST);
