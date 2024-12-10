@@ -134,10 +134,15 @@ describe('Groups Tests', () => {
     cy.screenshot('Doc_ProductDetailsPanel');
 
     cy.inMainNavFlyin('app-product-details', () => {
-      // check product is unused
-      cy.get('app-bd-no-data').should('exist');
+      // "Used In" button
+      cy.get(`app-bd-expand-button[data-cy="Used In"]`)
+        .click()
+        .within(() => {
+          cy.get('app-bd-no-data').should('exist');
+        })
+        .click('top');
 
-      // "Labels" panel
+      // "Labels" button
       cy.get(`app-bd-expand-button[data-cy="Labels"]`)
         .click()
         .within(() => {
@@ -145,23 +150,25 @@ describe('Groups Tests', () => {
         })
         .click('top');
 
-      // "Application Templates" panel
+      // "Application Templates" button
       cy.get(`app-bd-expand-button[data-cy="Application Templates"]`)
         .click()
         .within(() => {
           cy.contains('tr', 'Server With Sleep').should('exist');
+          cy.contains('tr', 'Server With Template').should('exist');
         })
         .click('top');
 
-      // "Instance Templates" panel
+      // "Instance Templates" button
       cy.get(`app-bd-expand-button[data-cy="Instance Templates"]`)
         .click()
         .within(() => {
           cy.contains('tr', 'Default Configuration').should('exist');
+          cy.contains('tr', 'Test Overrides').should('exist');
         })
         .click('top');
 
-      // "Plugins" panel
+      // "Plugins" button
       cy.get(`app-bd-expand-button[data-cy="Plugins"]`)
         .click()
         .within(() => {
@@ -169,7 +176,16 @@ describe('Groups Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-2.0.0.zip');
+      // "Dependencies" button
+      cy.get(`app-bd-expand-button[data-cy="Dependencies"]`)
+        .click()
+        .within(() => {
+          cy.get('app-bd-no-data').should('exist');
+        })
+        .click('top');
+
+      // "Download" button
+      cy.get('button[data-cy="Download"]').downloadByLocationAssign('product-2.0.0.zip');
       validateZip('product-2.0.0.zip', 'manifests/io.bdeploy/demo/product/2.0.0');
     });
 
