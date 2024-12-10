@@ -104,7 +104,7 @@ public class RemoteReportTool extends RemoteServiceTool<RemoteReportConfig> {
         return table;
     }
 
-    private Map<String, String> parseParams(RemoteReportConfig config) {
+    private static Map<String, String> parseParams(RemoteReportConfig config) {
         Map<String, String> params = new HashMap<>();
         if (config.params() != null) {
             for (String param : config.params()) {

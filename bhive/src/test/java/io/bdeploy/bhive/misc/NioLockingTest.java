@@ -63,7 +63,7 @@ class NioLockingTest {
         }
     }
 
-    private synchronized long doLocked(Path lockFile) throws IOException {
+    private synchronized static long doLocked(Path lockFile) throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(lockFile.toFile(), "rw");
                 FileChannel channel = raf.getChannel();
                 FileLock lock = channel.lock()) {

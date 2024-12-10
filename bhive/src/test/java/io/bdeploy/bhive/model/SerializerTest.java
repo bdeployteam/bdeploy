@@ -99,7 +99,7 @@ class SerializerTest extends DbTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T roundtrip(T obj) {
+    private static <T> T roundtrip(T obj) {
         try {
             byte[] bytes = StorageHelper.toRawBytes(obj);
             try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {

@@ -53,7 +53,7 @@ public class VerifyOperationTest {
         }
     }
 
-    private List<VerifiedBlobView> getByStatus(List<VerifiedBlobView> list, VerifyOpStatus status) {
+    private static List<VerifiedBlobView> getByStatus(List<VerifiedBlobView> list, VerifyOpStatus status) {
         return list.stream().filter(view -> view.status == status).collect(Collectors.toList());
     }
 }

@@ -53,7 +53,7 @@ public class TestHive implements ParameterResolver, BeforeEachCallback {
         return getExtensionStore(extensionContext).get("X-Hive-" + name, CloseableTestHive.class).hive;
     }
 
-    private Store getExtensionStore(ExtensionContext context) {
+    private static Store getExtensionStore(ExtensionContext context) {
         return context.getStore(Namespace.create(context.getRequiredTestMethod()));
     }
 

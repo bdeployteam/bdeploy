@@ -62,7 +62,7 @@ class ManifestAddDeleteLoadTest {
         FutureHelper.awaitAll(futures);
     }
 
-    private void delete(BHive hive, List<Manifest.Key> keys) {
+    private static void delete(BHive hive, List<Manifest.Key> keys) {
         log.info("Deleting {} manifests", keys.size());
 
         for (Manifest.Key k : keys) {
