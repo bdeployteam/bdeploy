@@ -466,28 +466,28 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * minion.
      *
      * @param minionName name of the minion
-     * @param config current minion configuration
+     * @param minionDto current minion configuration
      * @return {@code true} if the configuration changed
      */
-    private boolean doUpdateMinionConfiguration(String minionName, MinionDto config) {
+    private boolean doUpdateMinionConfiguration(String minionName, MinionDto minionDto) {
         boolean isMaster = isMaster();
         String myName = getState().self;
 
         // Ensure that the master flag is set correctly
         boolean changed = false;
-        if (minionName.equals(myName) && isMaster && !config.master) {
-            config.master = true;
+        if (minionName.equals(myName) && isMaster && !minionDto.master) {
+            minionDto.master = true;
             changed = true;
-        } else if (config.master && !isMaster) {
-            config.master = false;
+        } else if (minionDto.master && !isMaster) {
+            minionDto.master = false;
             changed = true;
         }
 
         // Update our own version
         if (myName.equals(minionName)) {
             Version running = VersionHelper.getVersion();
-            if (!VersionHelper.equals(running, config.version)) {
-                config.version = running;
+            if (!VersionHelper.equals(running, minionDto.version)) {
+                minionDto.version = running;
                 changed = true;
             }
             return changed;

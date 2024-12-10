@@ -14,27 +14,27 @@ public class VersionHelper {
     private static final Pattern V_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)([-\\.].*)*");
     public static final Version UNDEFINED = VersionHelper.parse("0.0.0");
 
-    private static final Version version;
+    private static final Version CURRENT_VERSION;
     private static final Properties properties = readProperties();
     static {
         if (!properties.containsKey(VERSION_PROP)) {
             properties.put(VERSION_PROP, System.getProperty("bdeploy.version.override", "0.0.0"));
         }
-        version = parse(properties.getProperty(VERSION_PROP));
+        CURRENT_VERSION = parse(properties.getProperty(VERSION_PROP));
     }
 
     private VersionHelper() {
     }
 
     public static Version getVersion() {
-        return version;
+        return CURRENT_VERSION;
     }
 
     public static String getVersionAsString() {
         if (isRunningUndefined()) {
             return "undefined";
         }
-        return version.toString();
+        return CURRENT_VERSION.toString();
     }
 
     public static Properties getProperties() {
