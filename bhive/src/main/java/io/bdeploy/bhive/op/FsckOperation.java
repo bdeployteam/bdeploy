@@ -25,7 +25,7 @@ public class FsckOperation extends BHive.Operation<Set<ElementView>> {
     private boolean repair;
 
     @Override
-    public Set<ElementView> call() throws Exception {
+    public Set<ElementView> call() {
         getObjectManager().invalidateCaches();
         getManifestDatabase().invalidateCaches();
 

@@ -30,7 +30,7 @@ public class VerifyOperation extends BHive.Operation<List<VerifiedBlobView>> {
     private Manifest.Key manifest;
 
     @Override
-    public List<VerifiedBlobView> call() throws Exception {
+    public List<VerifiedBlobView> call() {
         List<VerifiedBlobView> result = new ArrayList<>();
         TreeView state = execute(new ScanOperation().setManifest(manifest));
         state.visit(new TreeVisitor.Builder().onBlob(blob -> this.visit(blob, result)).build());

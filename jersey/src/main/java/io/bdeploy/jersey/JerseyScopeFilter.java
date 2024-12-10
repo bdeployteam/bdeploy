@@ -1,6 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,7 @@ public class JerseyScopeFilter implements ContainerRequestFilter, ContainerRespo
     private JerseyScopeService scopeService;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         // thread may have been pooled. if a task crashed quite hard, current activity could still be set.
         UriInfo plainInfo = requestContext.getUriInfo();
         if (plainInfo instanceof ExtendedUriInfo) {
@@ -53,7 +52,7 @@ public class JerseyScopeFilter implements ContainerRequestFilter, ContainerRespo
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         // no matter the response, we want to clear out the current scope information.
         scopeService.clear();
     }

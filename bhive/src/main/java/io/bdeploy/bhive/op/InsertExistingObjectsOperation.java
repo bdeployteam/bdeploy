@@ -35,7 +35,7 @@ public class InsertExistingObjectsOperation extends BHive.TransactedOperation<Lo
     private ObjectManager sourceMgr;
 
     @Override
-    public Long callTransacted() throws Exception {
+    public Long callTransacted() {
         assertFalse(objects.isEmpty(), "Nothing to insert");
         assertNotNull(sourceMgr, "No source object manager");
 

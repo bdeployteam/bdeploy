@@ -19,7 +19,7 @@ public class ImportFileOperation extends BHive.TransactedOperation<ObjectId> {
     private Path file;
 
     @Override
-    public ObjectId callTransacted() throws Exception {
+    public ObjectId callTransacted() {
         assertNotNull(file, "File to import not set");
         return getObjectManager().db(x -> x.addObject(file));
     }

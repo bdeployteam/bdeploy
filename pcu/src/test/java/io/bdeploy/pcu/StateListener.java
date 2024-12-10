@@ -43,7 +43,7 @@ class StateListener implements Consumer<ProcessStateChangeDto>, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         pc.removeStatusListener(this);
     }
 

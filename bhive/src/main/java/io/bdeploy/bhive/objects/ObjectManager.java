@@ -514,15 +514,11 @@ public class ObjectManager {
      * @return whether the stored object in the database is OK.
      */
     public boolean checkObject(ObjectId id, boolean remove) {
-        try {
-            boolean ok = db.checkObject(id);
-            if (!ok && remove) {
-                db.removeObject(id);
-            }
-            return ok;
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot check object consistency on " + id, e);
+        boolean ok = db.checkObject(id);
+        if (!ok && remove) {
+            db.removeObject(id);
         }
+        return ok;
     }
 
     /**

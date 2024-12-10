@@ -19,7 +19,7 @@ public class ManifestDeleteOperation extends BHive.Operation<Manifest.Key> {
     private Manifest.Key toDelete;
 
     @Override
-    public Manifest.Key call() throws Exception {
+    public Manifest.Key call() {
         assertNotNull(toDelete, "Manifest to delete not set");
 
         getManifestDatabase().removeManifest(toDelete);

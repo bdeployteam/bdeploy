@@ -1,7 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
-
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.core.SecurityContext;
@@ -17,7 +15,7 @@ public class JerseyOnBehalfOfFilter implements ClientRequestFilter {
     }
 
     @Override
-    public void filter(ClientRequestContext requestContext) throws IOException {
+    public void filter(ClientRequestContext requestContext) {
         if (onBehalf != null) {
             requestContext.getHeaders().add(ON_BEHALF_OF_HEADER, onBehalf);
         }

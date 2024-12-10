@@ -66,12 +66,12 @@ public class ObjectReferenceDatabase extends ObjectDatabase {
     }
 
     @Override
-    public InputStream getStream(ObjectId id) throws IOException {
+    public InputStream getStream(ObjectId id) {
         throw new UnsupportedOperationException("Reference-only Database");
     }
 
     @Override
-    protected ObjectId internalAddObject(ObjectWriter writer) throws IOException {
+    protected ObjectId internalAddObject(ObjectWriter writer) {
         throw new UnsupportedOperationException("Reference-only Database");
     }
 

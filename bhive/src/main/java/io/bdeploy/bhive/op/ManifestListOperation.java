@@ -15,7 +15,7 @@ public class ManifestListOperation extends BHive.Operation<SortedSet<Manifest.Ke
     private String key;
 
     @Override
-    public SortedSet<Manifest.Key> call() throws Exception {
+    public SortedSet<Manifest.Key> call() {
         if (key == null) {
             return getManifestDatabase().getAllManifests();
         } else {

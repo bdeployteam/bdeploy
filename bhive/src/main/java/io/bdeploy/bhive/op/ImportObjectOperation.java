@@ -20,7 +20,7 @@ public class ImportObjectOperation extends BHive.TransactedOperation<ObjectId> {
     private byte[] data;
 
     @Override
-    public ObjectId callTransacted() throws Exception {
+    public ObjectId callTransacted() {
         assertNotNull(data, "Data to import not set");
         return getObjectManager().db(x -> x.addObject(data));
     }

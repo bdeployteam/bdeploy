@@ -1,7 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
-
 import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.audit.AuditRecord.Severity;
 import io.bdeploy.common.audit.Auditor;
@@ -24,7 +22,7 @@ public class JerseyAuditingFilter implements ContainerResponseFilter {
     private Auditor auditor;
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         StatusType status = responseContext.getStatusInfo();
 
         // only audit *failed* requests.

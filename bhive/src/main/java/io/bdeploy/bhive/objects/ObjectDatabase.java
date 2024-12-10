@@ -199,7 +199,7 @@ public class ObjectDatabase extends LockableDatabase {
      * Verifies that a given {@link ObjectId}s backing file still hashes to the
      * given {@link ObjectId}. This can be used to detect corruption of objects.
      */
-    public boolean checkObject(ObjectId id) throws IOException {
+    public boolean checkObject(ObjectId id) {
         try (InputStream is = getStream(id)) {
             ObjectId newId = ObjectId.createFromStreamNoCopy(is);
             return newId.equals(id);

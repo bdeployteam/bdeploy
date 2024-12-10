@@ -185,8 +185,8 @@ public class TestServer
             return false;
         }
 
-        if (getServerIdentifyingObject() != null && getParameterIdentifyingObject(parameterContext) != null && !Objects.equals(
-                getServerIdentifyingObject(), getParameterIdentifyingObject(parameterContext))) {
+        if (getServerIdentifyingObject() != null && getParameterIdentifyingObject(parameterContext) != null
+                && !Objects.equals(getServerIdentifyingObject(), getParameterIdentifyingObject(parameterContext))) {
             // all is set to distinguish servers, but no match -> nope.
             return false;
         }
@@ -244,7 +244,7 @@ public class TestServer
     }
 
     @Override
-    public void afterEach(ExtensionContext context) throws Exception {
+    public void afterEach(ExtensionContext context) {
         if (auditor != null) {
             auditor.close();
         }
@@ -263,7 +263,7 @@ public class TestServer
     }
 
     @Override
-    public void beforeTestExecution(ExtensionContext context) throws Exception {
+    public void beforeTestExecution(ExtensionContext context) {
         getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).start();
     }
 
@@ -330,7 +330,7 @@ public class TestServer
     public static class JerseyAuthenticationDisabler implements ContainerRequestFilter {
 
         @Override
-        public void filter(ContainerRequestContext requestContext) throws IOException {
+        public void filter(ContainerRequestContext requestContext) {
             requestContext.setProperty("unsecured", "unsecured");
         }
     }

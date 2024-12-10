@@ -35,7 +35,7 @@ public class ManifestConsistencyCheckOperation extends BHive.Operation<Set<Eleme
     private boolean dryRun = true;
 
     @Override
-    public Set<ElementView> call() throws Exception {
+    public Set<ElementView> call() {
         assertFalse(manifests.isEmpty(), "Nothing to check");
 
         Set<ElementView> dmg = new TreeSet<>();

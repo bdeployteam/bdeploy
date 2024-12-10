@@ -1,6 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +33,7 @@ public class JerseyMetricsFilter implements ContainerRequestFilter, ContainerRes
     private static final Logger log = LoggerFactory.getLogger(JerseyMetricsFilter.class);
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         UriInfo plainInfo = requestContext.getUriInfo();
         String endpoint = plainInfo.getPath();
         if (plainInfo instanceof ExtendedUriInfo) {
@@ -52,7 +51,7 @@ public class JerseyMetricsFilter implements ContainerRequestFilter, ContainerRes
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         Timer.Context context = (Timer.Context) requestContext.getProperty(TIMER);
         if (context != null) {
             context.close();

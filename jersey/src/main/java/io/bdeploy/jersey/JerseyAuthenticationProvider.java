@@ -1,6 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -86,7 +85,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     public static class JerseyAuthenticationUnprovider implements ContainerRequestFilter {
 
         @Override
-        public void filter(ContainerRequestContext requestContext) throws IOException {
+        public void filter(ContainerRequestContext requestContext) {
             requestContext.setProperty(NO_AUTH, NO_AUTH);
         }
     }
@@ -97,7 +96,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     public static class JerseyAuthenticationWeakenerProvider implements ContainerRequestFilter {
 
         @Override
-        public void filter(ContainerRequestContext requestContext) throws IOException {
+        public void filter(ContainerRequestContext requestContext) {
             requestContext.setProperty(WEAK_AUTH, WEAK_AUTH);
         }
 
@@ -110,7 +109,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         String path = requestContext.getUriInfo().getPath();
         requestContext.setProperty(THREAD_ORIG_NAME, Thread.currentThread().getName());
         Thread.currentThread().setName(path);
@@ -180,7 +179,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         String name = (String) requestContext.getProperty(THREAD_ORIG_NAME);
         if (name != null) {
             Thread.currentThread().setName(name);

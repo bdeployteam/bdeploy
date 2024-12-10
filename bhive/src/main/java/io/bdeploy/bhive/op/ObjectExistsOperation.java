@@ -22,7 +22,7 @@ public class ObjectExistsOperation extends BHive.Operation<Result> {
     private final Set<ObjectId> objects = new LinkedHashSet<>();
 
     @Override
-    public Result call() throws Exception {
+    public Result call() {
         Result result = new Result();
         try (Activity activity = getActivityReporter().start("Looking up Objects", objects.size())) {
             for (ObjectId o : objects) {

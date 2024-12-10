@@ -1,6 +1,5 @@
 package io.bdeploy.ui.api.impl;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -56,7 +55,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
     private InjectionManager im;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         UriInfo plainInfo = requestContext.getUriInfo();
         if (!(plainInfo instanceof ExtendedUriInfo)) {
             requestContext.setProperty(PERM_SCOPE, ObjectScope.EMPTY);

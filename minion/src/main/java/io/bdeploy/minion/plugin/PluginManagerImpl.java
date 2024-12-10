@@ -352,7 +352,7 @@ public class PluginManagerImpl implements PluginManager {
         private ObjectId object;
 
         @Override
-        public Path call() throws Exception {
+        public Path call() {
             return getObjectManager().db(db -> db.getObjectFile(object));
         }
 

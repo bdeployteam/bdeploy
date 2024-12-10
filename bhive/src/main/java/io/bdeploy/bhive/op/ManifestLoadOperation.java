@@ -23,7 +23,7 @@ public class ManifestLoadOperation extends BHive.Operation<Manifest> {
     private boolean nullOnError = false;
 
     @Override
-    public Manifest call() throws Exception {
+    public Manifest call() {
         assertNotNull(manifest, "Manifest to load not set");
 
         try {

@@ -38,7 +38,7 @@ class FsckOpTest {
         Path fileToMessWith = hive.execute(new BHive.Operation<Path>() {
 
             @Override
-            public Path call() throws Exception {
+            public Path call() {
                 return getObjectManager().db(x -> {
                     return x.getObjectFile(ObjectId.parse(ContentHelper.TEST_TXT_OID));
                 });

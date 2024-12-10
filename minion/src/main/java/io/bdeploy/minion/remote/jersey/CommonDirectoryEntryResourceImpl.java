@@ -123,7 +123,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         ResponseBuilder responseBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException {
+            public void write(OutputStream output) {
                 try (InputStream is = Files.newInputStream(actual)) {
                     is.transferTo(output);
                 } catch (IOException ioe) {
@@ -154,7 +154,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         var responseBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException {
+            public void write(OutputStream output) {
                 try (var zos = new ZipOutputStream(output)) {
                     for (var entry : entries) {
                         var path = getEntryPath(root, entry); // will throw in case of error

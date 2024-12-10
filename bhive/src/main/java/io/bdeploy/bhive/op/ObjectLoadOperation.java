@@ -20,7 +20,7 @@ public class ObjectLoadOperation extends BHive.Operation<InputStream> {
     private ObjectId objectId;
 
     @Override
-    public InputStream call() throws Exception {
+    public InputStream call() {
         assertNotNull(objectId, "Object to load not set");
         return getObjectManager().db(x -> x.getStream(objectId));
     }

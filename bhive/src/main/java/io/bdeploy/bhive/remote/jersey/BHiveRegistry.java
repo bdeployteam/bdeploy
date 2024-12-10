@@ -195,7 +195,7 @@ public class BHiveRegistry implements AutoCloseable {
         private final List<Path> hives = new ArrayList<>();
 
         @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
             Path o = dir.resolve("objects");
             Path m = dir.resolve("manifests");
 

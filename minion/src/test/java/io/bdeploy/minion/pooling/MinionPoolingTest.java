@@ -89,7 +89,7 @@ class MinionPoolingTest {
     private static final class InternalListAllObjectsOp extends Operation<Integer> {
 
         @Override
-        public Integer call() throws Exception {
+        public Integer call() {
             return getObjectManager().db(db -> {
                 try {
                     return CollectingConsumer.collect(db::walkAllObjects).size();
