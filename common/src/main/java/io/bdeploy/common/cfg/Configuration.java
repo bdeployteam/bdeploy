@@ -324,31 +324,31 @@ public class Configuration {
             return mapper.apply(source);
         }
         if (target.equals(long.class)) {
-            return Long.parseLong(source);
+            return Long.valueOf(source);
         }
         if (target.equals(int.class)) {
-            return Integer.parseInt(source);
+            return Integer.valueOf(source);
         }
         if (target.equals(short.class)) {
-            return Short.parseShort(source);
+            return Short.valueOf(source);
         }
         if (target.equals(byte.class)) {
-            return Byte.parseByte(source);
+            return Byte.valueOf(source);
         }
         if (target.equals(boolean.class)) {
-            return Boolean.parseBoolean(source);
+            return Boolean.valueOf(source);
         }
         if (target.equals(double.class)) {
-            return Double.parseDouble(source);
+            return Double.valueOf(source);
         }
         if (target.equals(float.class)) {
-            return Float.parseFloat(source);
+            return Float.valueOf(source);
         }
         if (target.equals(char.class)) {
             if (source.length() > 1) {
                 throw new IllegalArgumentException("Character conversion with input length > 1: " + source);
             }
-            return source.charAt(0);
+            return Character.valueOf(source.charAt(0));
         }
         if (target.isEnum()) {
             try {
