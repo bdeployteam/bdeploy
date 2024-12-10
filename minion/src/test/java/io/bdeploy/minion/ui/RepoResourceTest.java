@@ -24,7 +24,6 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TestActivityReporter;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.minion.TestMinion;
@@ -75,8 +74,8 @@ class RepoResourceTest {
     }
 
     @Test
-    void testSw(SoftwareRepositoryResource repos, DownloadService dlService, RemoteService service, @TempDir Path tmp,
-            ActivityReporter reporter) throws IOException {
+    void testSw(SoftwareRepositoryResource repos, DownloadService dlService, @TempDir Path tmp, ActivityReporter reporter)
+            throws IOException {
         assertTrue(repos.list().isEmpty());
 
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();

@@ -18,7 +18,6 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 
@@ -27,8 +26,7 @@ import io.bdeploy.minion.TestMinion;
 class InstanceStateTest {
 
     @Test
-    void testWriteRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
-            throws IOException {
+    void testWriteRead(@TempDir Path tmp, CommonRootResource master, RemoteService remote, BHive local) throws IOException {
         Key instanceKey = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, false);
 
         InstanceState state = InstanceManifest.of(local, instanceKey).getState(local);

@@ -29,7 +29,6 @@ import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.TestServer;
-import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.endpoints.HelloEndpoint.HelloResult;
@@ -49,8 +48,8 @@ class EndpointsTest {
     TestServer server = new TestServer(false, new Object[] { HelloEndpoint.class });
 
     @Test
-    void testEndpoint(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,
-            MinionRoot mr) throws IOException {
+    void testEndpoint(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
+            throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true, server.getPort());
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()

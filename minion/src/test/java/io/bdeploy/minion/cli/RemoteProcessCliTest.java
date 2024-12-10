@@ -15,19 +15,15 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
-import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
 import io.bdeploy.ui.cli.RemoteProcessTool;
 
@@ -40,8 +36,7 @@ class RemoteProcessCliTest {
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    void testRemoteCli(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
-            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr, @AuthPack String auth)
+    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
             throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
@@ -85,7 +80,7 @@ class RemoteProcessCliTest {
 
         /* --join can go with --start/--stop and --application */
         tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                    "--uuid=" + id, "--stop", "--join", "--application=app");
+                "--uuid=" + id, "--stop", "--join", "--application=app");
 
         /* needs to be a single application */
         ex = assertThrows(IllegalArgumentException.class, () -> {
