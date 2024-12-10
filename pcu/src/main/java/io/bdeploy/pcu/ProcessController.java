@@ -583,6 +583,7 @@ public class ProcessController {
             // don't store the gobbler instance, as we cannot start pumping the streams ever again.
             RollingStreamGobbler.logProcessRecovery(processDir, processHandle, instanceId, processConfig.id);
         } catch (Exception e) {
+            logger.log(l -> l.trace("Failed to recover the application", e));
             PathHelper.deleteRecursiveRetry(pidFile);
             return;
         }
@@ -1141,16 +1142,14 @@ public class ProcessController {
         if (startupTask != null) {
             startupTask.cancel(true);
             startupTask = null;
-            lastProbeResults.put(ProcessProbeType.STARTUP,
-                    new ProcessProbeResultDto(ProcessProbeType.STARTUP, 0, "Startup probe cancelled.",
-                            System.currentTimeMillis()));
+            lastProbeResults.put(ProcessProbeType.STARTUP, new ProcessProbeResultDto(ProcessProbeType.STARTUP, 0,
+                    "Startup probe cancelled.", System.currentTimeMillis()));
         }
         if (aliveTask != null) {
             aliveTask.cancel(true);
             aliveTask = null;
-            lastProbeResults.put(ProcessProbeType.LIVENESS,
-                    new ProcessProbeResultDto(ProcessProbeType.LIVENESS, 0, "Liveness probe cancelled.",
-                            System.currentTimeMillis()));
+            lastProbeResults.put(ProcessProbeType.LIVENESS, new ProcessProbeResultDto(ProcessProbeType.LIVENESS, 0,
+                    "Liveness probe cancelled.", System.currentTimeMillis()));
         }
     }
 

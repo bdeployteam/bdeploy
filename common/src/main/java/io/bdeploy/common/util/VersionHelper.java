@@ -6,9 +6,14 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.common.Version;
 
 public class VersionHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(VersionHelper.class);
 
     private static final String VERSION_PROP = "version";
     private static final Pattern V_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)([-\\.].*)*");
@@ -50,6 +55,9 @@ public class VersionHelper {
 
             return p;
         } catch (IOException | RuntimeException e) {
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to read properties", e);
+            }
             return new Properties();
         }
     }

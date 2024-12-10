@@ -256,6 +256,9 @@ public class UpdateHelper {
             apiVersion = root.getUpdateApiVersion();
         } catch (Exception e) {
             // API version not (yet) supported, must be old BDeploy.
+            if (log.isTraceEnabled()) {
+                log.trace("API version not (yet) supported", e);
+            }
             apiVersion = UPDATE_API_V1;
         }
 

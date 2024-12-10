@@ -247,6 +247,9 @@ public class CommonEndpointHelper {
             }
         } catch (Exception e) {
             // if we cannot process, we regard as *not* enabled.
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to process endpoint {}", rawEndpoint, e);
+            }
             return null;
         }
 

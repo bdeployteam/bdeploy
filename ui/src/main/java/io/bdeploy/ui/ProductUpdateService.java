@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jvnet.hk2.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.TemplateHelper;
@@ -67,6 +69,8 @@ import io.bdeploy.interfaces.variables.ParameterValueResolver;
 
 @Service
 public class ProductUpdateService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductUpdateService.class);
 
     public InstanceUpdateDto update(InstanceUpdateDto instance, ProductManifest targetProduct, ProductManifest currentProduct,
             List<ApplicationManifest> targetApplications, List<ApplicationManifest> currentApplications,
@@ -654,6 +658,9 @@ public class ProductUpdateService {
             value = TemplateHelper.process(expression, comp);
         } catch (Exception e) {
             // that does not resolve, so it is not good :)
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to resolve expression: {}", expression, e);
+            }
             return false;
         }
 

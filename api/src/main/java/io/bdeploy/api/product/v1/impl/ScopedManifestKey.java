@@ -2,6 +2,9 @@ package io.bdeploy.api.product.v1.impl;
 
 import javax.annotation.Generated;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -11,6 +14,8 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
  * information into the manifest name.
  */
 public class ScopedManifestKey {
+
+    private static final Logger log = LoggerFactory.getLogger(ScopedManifestKey.class);
 
     private final String name;
     private final OperatingSystem os;
@@ -35,6 +40,9 @@ public class ScopedManifestKey {
             return new ScopedManifestKey(name.substring(0, lastSlash),
                     OperatingSystem.valueOf(name.substring(lastSlash + 1).toUpperCase()), tag);
         } catch (Exception e) {
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to parse key: {}", key, e);
+            }
             return null;
         }
     }

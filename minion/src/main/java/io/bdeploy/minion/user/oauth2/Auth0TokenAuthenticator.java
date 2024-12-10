@@ -51,6 +51,9 @@ public class Auth0TokenAuthenticator implements Authenticator {
             validityCache.put(user.name, Boolean.TRUE);
         } catch (Exception e) {
             // nope, nope, nope
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to verify login info", e);
+            }
             return false;
         }
 

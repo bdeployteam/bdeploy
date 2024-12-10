@@ -41,6 +41,9 @@ public class ProcessHelper {
             }
             return output;
         } catch (IOException ioe) {
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to launch", ioe);
+            }
             return null;
         }
     }

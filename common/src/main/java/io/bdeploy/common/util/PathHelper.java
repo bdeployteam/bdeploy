@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 
@@ -30,6 +33,8 @@ import io.bdeploy.common.RetryableScope;
  * Helps in handling different {@link String}s in the context of {@link Path}s.
  */
 public class PathHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(PathHelper.class);
 
     /** Time to wait between each retry when an operation fails */
     private static final int FILEOP_DELAY_MILLIS = 250;
@@ -63,6 +68,9 @@ public class PathHelper {
         try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(path)) {
             return !dirStream.iterator().hasNext();
         } catch (IOException ioe) {
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to check if directory is empty: {}", path, ioe);
+            }
             return false;
         }
     }
@@ -304,6 +312,9 @@ public class PathHelper {
             return Files.getFileAttributeView(path, PosixFileAttributeView.class);
         } catch (Exception e) {
             // JDK 17 throws *undeclared* UnsupportedOperationException.
+            if (log.isTraceEnabled()) {
+                log.trace("Failed to get posix view at {}", path, e);
+            }
             return null;
         }
     }
