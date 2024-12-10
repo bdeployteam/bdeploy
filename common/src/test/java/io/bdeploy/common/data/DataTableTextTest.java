@@ -436,7 +436,7 @@ class DataTableTextTest {
 
         String result;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+        try (PrintStream ps = new PrintStream(baos, true, DataTestUtil.CHARSET)) {
             DataTable table = TEST_UTIL.dataFormat.createTable(ps);
             table.setMaxTableLengthHint(80);
             table.column(new DataTableColumn.Builder("col1").setMinWidth(10).setScaleToContent(true).build());
@@ -445,8 +445,8 @@ class DataTableTextTest {
             table.row().cell("val1").cell("val2").cell("val3").build();
             DataTableTestUtil.addLongTextRow(table);
             table.render();
-            result = baos.toString(DataTableTestUtil.CHARSET);
+            result = baos.toString(DataTestUtil.CHARSET);
         }
-        DataTableTestUtil.assertEachLine(expected, result);
+        DataTestUtil.assertEachLine(expected, result);
     }
 }
