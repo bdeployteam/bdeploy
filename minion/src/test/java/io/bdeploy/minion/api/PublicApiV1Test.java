@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
 import io.bdeploy.api.product.v1.impl.RemoteDependencyFetcher;
@@ -41,7 +42,6 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -165,7 +165,7 @@ class PublicApiV1Test {
         // validate product.
         Path valDesc = prod.resolve("product-validation.yaml");
         Files.write(valDesc, List.of("product: product-info.yaml", "applications:",
-                " myApp: " + pathToApp.resolve(ApplicationDescriptor.FILE_NAME).toString().replace('\\', '/')));
+                " myApp: " + pathToApp.resolve(ApplicationDescriptorApi.FILE_NAME).toString().replace('\\', '/')));
         ProductValidationResponseApi resp = ProductValidationHelper.validate(valDesc, remote);
         for (var i : resp.issues) {
             System.err.println("Issue: " + i.severity + ": " + i.message);

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
@@ -30,7 +31,6 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionServerProcessManager;
 import io.bdeploy.minion.TestMinion;
@@ -93,7 +93,7 @@ class MinionUpdateTest {
         // check that an update was triggered
         assertTrue(updateTriggered.get());
         assertTrue(Files.isDirectory(root.getUpdateDir().resolve("next")));
-        assertTrue(Files.isRegularFile(root.getUpdateDir().resolve("next").resolve(ApplicationDescriptor.FILE_NAME)));
+        assertTrue(Files.isRegularFile(root.getUpdateDir().resolve("next").resolve(ApplicationDescriptorApi.FILE_NAME)));
     }
 
     @Test
@@ -143,7 +143,7 @@ class MinionUpdateTest {
         if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
             assertTrue(updateTriggered.get());
             assertTrue(Files.isDirectory(root.getUpdateDir().resolve("next")));
-            assertTrue(Files.isRegularFile(root.getUpdateDir().resolve("next").resolve(ApplicationDescriptor.FILE_NAME)));
+            assertTrue(Files.isRegularFile(root.getUpdateDir().resolve("next").resolve(ApplicationDescriptorApi.FILE_NAME)));
         } else {
             assertFalse(updateTriggered.get());
         }

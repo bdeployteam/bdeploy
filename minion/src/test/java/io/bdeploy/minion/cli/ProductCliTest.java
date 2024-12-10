@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
@@ -93,7 +94,7 @@ class ProductCliTest {
 
         // add a dependency to the app-info.yaml...
         ApplicationDescriptor appInfo;
-        Path appInfoYaml = appPath.resolve(ApplicationDescriptor.FILE_NAME);
+        Path appInfoYaml = appPath.resolve(ApplicationDescriptorApi.FILE_NAME);
         try (InputStream is = Files.newInputStream(appInfoYaml)) {
             appInfo = StorageHelper.fromYamlStream(is, ApplicationDescriptor.class);
         }

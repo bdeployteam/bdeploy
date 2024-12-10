@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
@@ -219,7 +220,7 @@ public class TestFactory {
         cfg.name = "MyApp";
         Path appPath = tmp.resolve("app");
         PathHelper.mkdirs(appPath);
-        Files.write(appPath.resolve(ApplicationDescriptor.FILE_NAME),
+        Files.write(appPath.resolve(ApplicationDescriptorApi.FILE_NAME),
                 JacksonHelper.getDefaultYamlObjectMapper().writeValueAsBytes(cfg));
 
         try (BHive hive = new BHive(tmp.resolve("hive").toUri(), null, new ActivityReporter.Null())) {

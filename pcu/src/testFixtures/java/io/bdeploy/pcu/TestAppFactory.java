@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.OsHelper;
@@ -133,7 +134,7 @@ public class TestAppFactory {
         }
 
         try {
-            Files.write(target.resolve(ApplicationDescriptor.FILE_NAME),
+            Files.write(target.resolve(ApplicationDescriptorApi.FILE_NAME),
                     JacksonHelper.getDefaultYamlObjectMapper().writeValueAsBytes(cfg));
             return target;
         } catch (IOException ioe) {
