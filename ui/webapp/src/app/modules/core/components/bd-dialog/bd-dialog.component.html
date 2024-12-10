@@ -7,11 +7,12 @@
     <div
       #scrollContainer
       class="overflow-auto h-full"
+      [class.hidden]="!(showContent$ | async)"
       [class.bd-default-padding]="padding"
       (scroll)="onScrollContent($event)"
       cdkScrollable
     >
-      <ng-content *ngIf="showContent$ | async" select="app-bd-dialog-content"></ng-content>
+      <ng-content select="app-bd-dialog-content"></ng-content>
     </div>
   </div>
 </app-bd-loading-overlay>
