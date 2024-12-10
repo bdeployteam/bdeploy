@@ -367,7 +367,7 @@ class DataTableText extends DataTableBase {
         }
 
         // create all rows in the result.
-        Integer rowCount = perColumn.values().stream().map(List::size).reduce(0, Integer::max);
+        int rowCount = perColumn.values().stream().map(List::size).reduce(0, Integer::max);
         for (int r = 0; r < rowCount; ++r) {
             wrappedRows.add(new ArrayList<>());
         }

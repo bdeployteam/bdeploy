@@ -208,7 +208,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                             val = TemplateHelper.process(param.value.linkExpression, resolver);
                         }
                         result.add(new NodePort(node.nodeName, config.name, config.id, paramDesc.type, paramDesc.name,
-                                Integer.valueOf(val)));
+                                Integer.parseInt(val)));
                     } catch (NumberFormatException e) {
                         out().println("Illegal port value configured for " + param.id + " on application " + config.id);
                     }

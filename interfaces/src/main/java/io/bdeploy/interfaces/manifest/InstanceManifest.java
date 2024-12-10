@@ -101,7 +101,7 @@ public class InstanceManifest {
             tag = hive.execute(new ManifestMaxIdOperation().setManifestName(getRootName(instance)));
         } else {
             try {
-                tag = Optional.of(Long.parseLong(versionTag));
+                tag = Optional.of(Long.valueOf(versionTag));
             } catch (NumberFormatException e) {
                 // ignore
             }

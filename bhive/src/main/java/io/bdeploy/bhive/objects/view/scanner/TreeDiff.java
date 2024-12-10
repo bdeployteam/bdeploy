@@ -116,7 +116,7 @@ public class TreeDiff {
             add(m, EntryType.MANIFEST);
         }
 
-        private Boolean tree(TreeView t) {
+        private boolean tree(TreeView t) {
             if (t instanceof ManifestRefView) {
                 return true; // handled by #manifest(ManifestRefSnapshot)
             }

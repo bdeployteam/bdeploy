@@ -1006,8 +1006,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         DirectoryLockOperation.LockHandle lockHandle = null;
         if (!readOnlyHomeDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                lockHandle = hive.execute(
-                        new DirectoryLockOperation().setDirectory(homeDir)); // This could wait for other launchers.
+                lockHandle = hive.execute(new DirectoryLockOperation().setDirectory(homeDir)); // This could wait for other launchers.
             }
         }
         log.debug("Entered locked execution mode");
@@ -1051,7 +1050,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Terminates the VM with the given exit code.
      * Careful: in tests will not exit but throw in case of non-zero and <b>continue</b> in case of zero exit code.
      */
-    private static void doExit(Integer exitCode) {
+    private static void doExit(int exitCode) {
         // if we are in test mode, System.exit will exit the JVM running the test, so we don't do that.
         if (ToolBase.isTestMode()) {
             if (exitCode != 0) {

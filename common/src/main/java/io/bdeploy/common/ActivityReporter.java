@@ -191,7 +191,7 @@ public interface ActivityReporter {
                 return;
             }
 
-            Long currentAmount = current.getCurrentAmount();
+            long currentAmount = current.getCurrentAmount();
             boolean activityChanged = lastReportedActivity != null && !current.activity.equals(lastReportedActivity);
             boolean amountChanged = currentAmount != lastReportedAmount;
 
@@ -201,7 +201,7 @@ public interface ActivityReporter {
 
             output.print('\r');
 
-            Long max = current.getMaxAmount();
+            long max = current.getMaxAmount();
             if (max < 0) {
                 output.print(String.format("[%1$08d] %2$-70s", current.duration(), current.activity));
             } else if (max == 0) {
@@ -216,7 +216,7 @@ public interface ActivityReporter {
         private synchronized void reportDone(AsyncActivity act) {
             output.print('\r');
 
-            Long max = act.getMaxAmount();
+            long max = act.getMaxAmount();
             if (max < 0) {
                 output.print(String.format("[%1$08d] %2$-70s     DONE%n", act.duration(), act.activity));
             } else if (max == 0) {

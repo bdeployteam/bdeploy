@@ -80,7 +80,7 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
                             + ProcessControlGroupWaitType.class.getSimpleName() + ' ' + waitType.name());
             }
 
-            listener.on(happyState, () -> future.complete(true));
+            listener.on(happyState, () -> future.complete(Boolean.TRUE));
             listener.on(ProcessState.CRASHED_PERMANENTLY,
                     () -> future.completeExceptionally(new IllegalStateException("Crashed permanently")));
 

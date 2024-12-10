@@ -313,9 +313,9 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
             result.put(port, ts.perform(port, () -> {
                 try (ServerSocket ss = new ServerSocket(port)) {
                     ss.setReuseAddress(true);
-                    return false; // free
+                    return Boolean.FALSE; // free
                 } catch (IOException e) {
-                    return true; // used
+                    return Boolean.TRUE; // used
                 }
             }));
         }

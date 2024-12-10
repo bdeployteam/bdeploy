@@ -35,9 +35,9 @@ class ActionsTest {
             @Override
             public void send(ObjectChangeDto change) {
                 if (change.event == ObjectEvent.CREATED) {
-                    created.get().complete(true);
+                    created.get().complete(Boolean.TRUE);
                 } else {
-                    removed.get().complete(true);
+                    removed.get().complete(Boolean.TRUE);
                 }
             }
         };

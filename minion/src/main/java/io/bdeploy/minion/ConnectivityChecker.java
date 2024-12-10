@@ -37,7 +37,7 @@ public class ConnectivityChecker {
                 new Thread(() -> {
                     try {
                         s.accept();
-                        accepted.complete(true);
+                        accepted.complete(Boolean.TRUE);
                     } catch (IOException e) {
                         accepted.completeExceptionally(e);
                     }

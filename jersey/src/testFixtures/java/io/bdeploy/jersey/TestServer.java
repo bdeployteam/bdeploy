@@ -256,7 +256,7 @@ public class TestServer
 
     protected int getServerPort(ExtensionContext context) {
         return getExtensionStore(context).getOrComputeIfAbsent("ServerPort", (k) -> {
-            this.port = Integer.valueOf(findFreePort());
+            this.port = findFreePort();
             return this.port;
         }, Integer.class);
     }

@@ -839,7 +839,7 @@ public class ProcessController {
 
             Map<String, Object> properties = new HashMap<>();
             if (timeout > 0) {
-                long actualTimeout = timeout * 1000;
+                Long actualTimeout = Long.valueOf(timeout * 1000);
                 properties.put(ClientProperties.CONNECT_TIMEOUT, actualTimeout);
                 properties.put(ClientProperties.READ_TIMEOUT, actualTimeout);
             }
