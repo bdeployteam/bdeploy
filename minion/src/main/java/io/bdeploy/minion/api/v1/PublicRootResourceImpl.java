@@ -47,6 +47,8 @@ public class PublicRootResourceImpl implements PublicRootResource {
         return rc.getResource(CommonRootResourceImpl.class).getVersion().toString();
     }
 
+    /** @deprecated Because {@link PublicRootResource#login(String, String, boolean)} is deprecated. */
+    @Deprecated
     @Override
     public Response login(String user, String pass, boolean full) {
         AuthResource auth = rc.getResource(AuthResourceImpl.class);

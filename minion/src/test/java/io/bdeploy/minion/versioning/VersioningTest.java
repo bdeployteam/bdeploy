@@ -88,6 +88,8 @@ class VersioningTest {
             return "1.2.3";
         }
 
+        /** @deprecated Because {@link PublicRootResource#login(String, String, boolean)} is deprecated. */
+        @Deprecated
         @Override
         public Response login(String user, String pass, boolean full) {
             throw new WebApplicationException(Status.NOT_FOUND);
