@@ -940,7 +940,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             }
 
             // Create controller and add to the affected instance
-            InstanceProcessController instanceController = processController.getOrCreate(hive, inm);
+            InstanceProcessController instanceController = processController.getOrCreate(inm);
             instanceController.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, tag, pgc,
                     inm.getRuntimeHistory(hive));
 
