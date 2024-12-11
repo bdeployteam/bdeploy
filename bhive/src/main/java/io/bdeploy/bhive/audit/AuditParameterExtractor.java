@@ -101,16 +101,13 @@ public class AuditParameterExtractor {
                 continue;
             }
 
-            Function<Object, String> converter = null;
             AuditParameterExtractor.AuditStrategy strategy = AuditStrategy.TO_STRING;
             AuditParameterExtractor.AuditWith with = field.getAnnotation(AuditParameterExtractor.AuditWith.class);
             if (with != null) {
                 strategy = with.value();
             }
 
-            if (converter == null) {
-                converter = strategy.converter;
-            }
+            Function<Object, String> converter = strategy.converter;
 
             field.setAccessible(true);
             try {
