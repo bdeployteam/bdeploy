@@ -12,18 +12,14 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
-import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.cli.RemoteReportTool;
 
 @ExtendWith(TestMinion.class)
@@ -35,8 +31,7 @@ class RemoteReportCliTest {
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    void testRemoteCli(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
-            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr, @AuthPack String auth)
+    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
             throws IOException {
         TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 

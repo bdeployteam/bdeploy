@@ -50,7 +50,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
@@ -215,8 +214,8 @@ class MinionDeployTest {
     }
 
     @Test
-    void testImportedDeploy(BHive local, MasterRootResource master, CommonRootResource common, NodeCleanupResource scr,
-            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException {
+    void testImportedDeploy(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote,
+            @TempDir Path tmp, MinionRoot mr) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
         InstanceManifest im1 = InstanceManifest.of(local, instance);
 

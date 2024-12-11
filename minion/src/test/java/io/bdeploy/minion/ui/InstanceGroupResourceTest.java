@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
-import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -24,7 +23,7 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 class InstanceGroupResourceTest {
 
     @Test
-    void testCrud(InstanceGroupResource res, JerseyClientFactory factory) throws IOException {
+    void testCrud(InstanceGroupResource res) throws IOException {
         assertTrue(res.list().isEmpty());
 
         InstanceGroupConfiguration cfg = new InstanceGroupConfiguration();

@@ -19,7 +19,6 @@ import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistoryRecord;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 
@@ -39,8 +38,7 @@ class InstanceManifestHistoryTest {
     }
 
     @Test
-    void testWriteRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
-            throws IOException {
+    void testWriteRead(@TempDir Path tmp, CommonRootResource master, RemoteService remote, BHive local) throws IOException {
         Key instanceKey = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, false);
         InstanceManifestHistory history = new InstanceManifestHistory(instanceKey, local);
 
