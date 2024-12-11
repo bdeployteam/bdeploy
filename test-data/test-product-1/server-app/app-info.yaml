@@ -8,9 +8,9 @@ supportedOperatingSystems:
 processControl:
   gracePeriod: 3000
   supportedStartTypes:
-   - MANUAL
-   - MANUAL_CONFIRM
-   - INSTANCE
+    - MANUAL
+    - MANUAL_CONFIRM
+    - INSTANCE
   supportsKeepAlive: true
   noOfRetries: 2
 

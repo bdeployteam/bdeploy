@@ -10,9 +10,9 @@ supportedOperatingSystems:
 processControl:
   gracePeriod: 3000
   supportedStartTypes:
-   - MANUAL
-   - MANUAL_CONFIRM
-   - INSTANCE
+    - MANUAL
+    - MANUAL_CONFIRM
+    - INSTANCE
   supportsKeepAlive: true
   noOfRetries: 2
 
@@ -260,22 +260,22 @@ startCommand:
       longDescription: "Long Desc 2"
 
 endpoints:
-    http:
-        - id: 'myVersion - enabled'
-          path: 'public/version'
-          port: 1111
-          enabled: true
-        - id: 'myVersion - disabled'
-          path: 'public/version'
-          port: 2222
-          enabled: false
-        - id: 'myVersionUI - enabled'
-          path: 'public/ui'
-          port: 3333
-          enabled: true
-          type: UI
-        - id: 'myVersionUI - disabled'
-          path: 'public/ui'
-          port: 4444
-          enabled: false
-          type: UI
+  http:
+    - id: 'myVersion - enabled'
+      path: 'public/version'
+      port: 1111
+      enabled: true
+    - id: 'myVersion - disabled'
+      path: 'public/version'
+      port: 2222
+      enabled: false
+    - id: 'myVersionUI - enabled'
+      path: 'public/ui'
+      port: 3333
+      enabled: true
+      type: UI
+    - id: 'myVersionUI - disabled'
+      path: 'public/ui'
+      port: 4444
+      enabled: false
+      type: UI

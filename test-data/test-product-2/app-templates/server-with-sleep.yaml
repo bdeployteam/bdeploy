@@ -13,5 +13,5 @@ templateVariables:
     defaultValue: 60
 
 startParameters:
-- uid: param.sleep
-  value: "{{T:sleep-timeout}}"
+  - uid: param.sleep
+    value: "{{T:sleep-timeout}}"
