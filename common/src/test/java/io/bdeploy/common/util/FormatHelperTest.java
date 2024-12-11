@@ -3,13 +3,14 @@ package io.bdeploy.common.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
 class FormatHelperTest {
 
-    private static final char DECIMAL_SEPARATOR = ((DecimalFormat) DecimalFormat.getInstance()).getDecimalFormatSymbols()
+    private static final char DECIMAL_SEPARATOR = ((DecimalFormat) NumberFormat.getInstance()).getDecimalFormatSymbols()
             .getDecimalSeparator();
 
     @Test
