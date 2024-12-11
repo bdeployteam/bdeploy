@@ -45,16 +45,16 @@ class DataTableTestUtil extends DataTestUtil {
 
     void testTableWithoutColumns() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+        try (PrintStream ps = new PrintStream(baos, true, DataTestUtil.CHARSET)) {
             DataTable table = dataFormat.createTable(ps);
             assertThrows(RuntimeException.class, table::render);
         }
-        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+        try (PrintStream ps = new PrintStream(baos, true, DataTestUtil.CHARSET)) {
             DataTable table = dataFormat.createTable(ps);
             table.row().build();
             assertThrows(RuntimeException.class, table::render);
         }
-        try (PrintStream ps = new PrintStream(baos, true, DataTableTestUtil.CHARSET)) {
+        try (PrintStream ps = new PrintStream(baos, true, DataTestUtil.CHARSET)) {
             DataTable table = dataFormat.createTable(ps);
             table.row().build();
             table.row().build();
