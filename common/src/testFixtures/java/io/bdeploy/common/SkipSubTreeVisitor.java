@@ -1,6 +1,5 @@
 package io.bdeploy.common;
 
-import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -17,7 +16,7 @@ public class SkipSubTreeVisitor extends CountingFileVisitor {
     }
 
     @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
         if (dir.endsWith(toExclude)) {
             return FileVisitResult.SKIP_SUBTREE;
         }

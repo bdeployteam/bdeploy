@@ -16,7 +16,7 @@ public class ManifestMaxIdOperation extends BHive.Operation<Optional<Long>> {
     private String key;
 
     @Override
-    public Optional<Long> call() throws Exception {
+    public Optional<Long> call() {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
         try {

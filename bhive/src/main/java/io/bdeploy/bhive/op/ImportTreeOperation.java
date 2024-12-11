@@ -19,7 +19,7 @@ public class ImportTreeOperation extends BHive.TransactedOperation<ObjectId> {
     private boolean skipEmpty = false;
 
     @Override
-    public ObjectId callTransacted() throws Exception {
+    public ObjectId callTransacted() {
         assertNotNull(toImport, "Source path not set");
 
         try (Activity activity = getActivityReporter().start("Importing", -1)) {

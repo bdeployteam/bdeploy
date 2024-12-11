@@ -10,7 +10,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -69,7 +68,7 @@ public class CheckLatestGitHubReleaseJob implements Job {
     }
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         log.info("GitHub check latest release job started");
         MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
         if (mr == null) {

@@ -49,7 +49,7 @@ class CentralManagedConnectionCliTest {
     }
 
     @Test
-    void testWithCli(@TempDir Path tmp) throws IOException {
+    void testWithCli(@TempDir Path tmp) {
         // create instance group on the central and assert its existence.
         remote(central, RemoteInstanceGroupTool.class, "--create=Test", "--title=TestTitle");
         var output = remote(central, RemoteInstanceGroupTool.class, "--list");
@@ -64,8 +64,8 @@ class CentralManagedConnectionCliTest {
         assertTrue(PathHelper.exists(managedIdentFile));
 
         // attach managed server to central using ident file.
-        remote(central, RemoteCentralTool.class, "--attach=" + managedIdentFile, "--name=Managed",
-                "--instanceGroup=Test", "--description=Test Managed Server");
+        remote(central, RemoteCentralTool.class, "--attach=" + managedIdentFile, "--name=Managed", "--instanceGroup=Test",
+                "--description=Test Managed Server");
         output = remote(central, RemoteCentralTool.class, "--list", "--instanceGroup=Test");
 
         assertEquals("Managed", output.get(0).get("Name"));

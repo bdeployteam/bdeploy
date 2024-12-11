@@ -17,7 +17,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -74,7 +73,7 @@ public class CleanupDownloadDirJob implements Job {
     }
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
         if (mr == null) {
             throw new IllegalStateException("No minion root set");

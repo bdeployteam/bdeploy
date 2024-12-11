@@ -88,7 +88,7 @@ public class DownloadServiceImpl implements DownloadService {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException {
+            public void write(OutputStream output) {
                 try (InputStream is = Files.newInputStream(targetFile)) {
                     is.transferTo(output);
                 } catch (IOException ioe) {

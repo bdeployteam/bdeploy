@@ -68,7 +68,7 @@ public class TestHive implements ParameterResolver, BeforeEachCallback {
         }
 
         @Override
-        public void close() throws Throwable {
+        public void close() {
             hive.close();
             PathHelper.deleteRecursiveRetry(path);
         }

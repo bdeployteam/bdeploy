@@ -1,6 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -37,7 +36,7 @@ public final class JerseyGZipFilter implements ClientRequestFilter {
     private volatile List<Object> supportedEncodings = null;
 
     @Override
-    public void filter(ClientRequestContext request) throws IOException {
+    public void filter(ClientRequestContext request) {
         if (getSupportedEncodings().isEmpty()) {
             return;
         }

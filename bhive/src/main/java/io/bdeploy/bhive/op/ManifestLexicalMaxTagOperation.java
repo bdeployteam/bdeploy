@@ -16,7 +16,7 @@ public class ManifestLexicalMaxTagOperation extends BHive.Operation<Optional<Str
     private String key;
 
     @Override
-    public Optional<String> call() throws Exception {
+    public Optional<String> call() {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
         return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag).sorted((a, b) -> b.compareTo(a))

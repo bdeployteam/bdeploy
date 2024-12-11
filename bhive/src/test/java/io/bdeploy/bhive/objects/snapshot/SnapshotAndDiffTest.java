@@ -92,7 +92,7 @@ class SnapshotAndDiffTest {
         hive.execute(new BHive.Operation<Void>() {
 
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 DbCallable<Void> db = x -> {
                     x.removeObject(ObjectId.parse(ContentHelper.TEST_TXT_OID));
                     return null;
@@ -126,7 +126,7 @@ class SnapshotAndDiffTest {
         hive.execute(new BHive.Operation<Void>() {
 
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 DbCallable<Void> db = x -> {
                     Path tf = x.getObjectFile(ObjectId.parse(ContentHelper.DIR_TREE_OID));
                     Files.write(tf, Arrays.asList("Bullshit"));

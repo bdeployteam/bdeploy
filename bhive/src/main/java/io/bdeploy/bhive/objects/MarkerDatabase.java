@@ -49,12 +49,12 @@ public class MarkerDatabase extends ObjectDatabase {
     }
 
     @Override
-    public InputStream getStream(ObjectId id) throws IOException {
+    public InputStream getStream(ObjectId id) {
         throw new UnsupportedOperationException("Marker-only Database");
     }
 
     @Override
-    protected ObjectId internalAddObject(ObjectWriter writer) throws IOException {
+    protected ObjectId internalAddObject(ObjectWriter writer) {
         throw new UnsupportedOperationException("Marker-only Database");
     }
 

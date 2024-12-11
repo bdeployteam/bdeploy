@@ -12,7 +12,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -84,7 +83,7 @@ public class SyncLdapUserGroupsJob implements Job {
     }
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         log.info("Sync LDAP users and groups job started");
         MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
         if (mr == null) {

@@ -42,7 +42,7 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
     private boolean partialAllowed;
 
     @Override
-    public TransferStatistics call() throws Exception {
+    public TransferStatistics call() {
         TransferStatistics result = new TransferStatistics();
         Instant start = Instant.now();
 

@@ -1460,8 +1460,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     // some apps are transitioning -> indeterminate
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.INDETERMINATE;
-                        overallStatusMessages.add(
-                                transitioningApps.size() + " instance type applications are in indeterminate state.");
+                        overallStatusMessages
+                                .add(transitioningApps.size() + " instance type applications are in indeterminate state.");
                     }
                 } else {
                     // not ok, some apps started, some stopped - that will be a warning.
@@ -1501,7 +1501,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         var responseBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException {
+            public void write(OutputStream output) {
                 zipConfigTree(output, configTree);
             }
         });

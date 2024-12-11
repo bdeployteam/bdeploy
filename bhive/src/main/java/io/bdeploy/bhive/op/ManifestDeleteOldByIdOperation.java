@@ -32,7 +32,7 @@ public class ManifestDeleteOldByIdOperation extends BHive.Operation<Void> {
     private Consumer<Key> preDelete;
 
     @Override
-    public Void call() throws Exception {
+    public Void call() {
         Set<Key> execute = execute(new ManifestListOperation().setManifestName(manifestName));
         SortedMap<Long, List<Key>> mfsByKey = execute.stream()
                 .collect(Collectors.groupingBy(k -> Long.valueOf(k.getTag()), TreeMap::new, Collectors.toList()));

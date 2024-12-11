@@ -166,7 +166,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         }
     }
 
-    private void checkHttps(MinionRoot mr, MinionState state, String https) throws IOException, GeneralSecurityException {
+    private void checkHttps(MinionRoot mr, MinionState state, String https) throws IOException {
         Path cert = Paths.get(https);
         if (!Files.isRegularFile(cert)) {
             helpAndFail("New HTTPS certificate " + cert + " does not exist!");
@@ -206,8 +206,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         }
     }
 
-    private RenderableResult doUpdateCertificate(MinionRoot mr, Path ks, char[] ksp, Path cert)
-            throws GeneralSecurityException, IOException {
+    private RenderableResult doUpdateCertificate(MinionRoot mr, Path ks, char[] ksp, Path cert) {
         mr.getAuditor()
                 .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("cert-update").build());
         try {

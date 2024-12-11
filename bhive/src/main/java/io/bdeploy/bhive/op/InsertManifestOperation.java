@@ -28,7 +28,7 @@ public class InsertManifestOperation extends BHive.Operation<Long> {
     private final SortedMap<Manifest.Key, Manifest> manifests = new TreeMap<>();
 
     @Override
-    public Long call() throws Exception {
+    public Long call() {
         assertFalse(manifests.isEmpty(), "Nothing to insert");
 
         long counter = 0;

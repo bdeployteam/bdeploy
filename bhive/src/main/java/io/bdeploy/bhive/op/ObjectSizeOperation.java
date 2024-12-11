@@ -22,7 +22,7 @@ public class ObjectSizeOperation extends BHive.Operation<Long> {
     private final SortedSet<ObjectId> objects = new TreeSet<>();
 
     @Override
-    public Long call() throws Exception {
+    public Long call() {
         RuntimeAssert.assertFalse(objects.isEmpty(), "No objects to measure");
         try (Activity activity = getActivityReporter().start("Calculating Object Sizes", -1)) {
             return objects.stream().mapToLong(id -> getObjectManager().db(x -> x.getObjectSize(id))).sum();

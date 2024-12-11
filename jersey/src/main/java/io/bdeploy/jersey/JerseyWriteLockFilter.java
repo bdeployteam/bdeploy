@@ -1,6 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -40,7 +39,7 @@ public class JerseyWriteLockFilter implements ContainerRequestFilter, ContainerR
     private ResourceInfo ri;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         LockingResource lr = ri.getResourceClass().getAnnotation(LockingResource.class);
         if (lr == null) {
             return;
@@ -81,7 +80,7 @@ public class JerseyWriteLockFilter implements ContainerRequestFilter, ContainerR
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         // find remembered, unlock
         Lock rwLock = (Lock) requestContext.getProperty(LOCK_KEY);
         if (rwLock != null) {

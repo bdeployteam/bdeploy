@@ -1,6 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
@@ -248,7 +247,7 @@ public class JerseyClientFactory {
         }
 
         @Override
-        public void filter(ClientRequestContext requestContext) throws IOException {
+        public void filter(ClientRequestContext requestContext) {
             requestContext.getHeaders().add("Authorization", "Bearer " + bearerToken);
         }
     }

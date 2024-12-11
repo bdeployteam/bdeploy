@@ -117,7 +117,7 @@ public class TestMinion extends TestServer {
     }
 
     @Override
-    public void beforeTestExecution(ExtensionContext context) throws Exception {
+    public void beforeTestExecution(ExtensionContext context) {
         super.beforeTestExecution(context);
 
         // now is the time :D run the after startup.
@@ -151,8 +151,8 @@ public class TestMinion extends TestServer {
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
         // need to re-check this even though the base class does as well, but the order is... difficult.
-        if (getServerIdentifyingObject() != null && getParameterIdentifyingObject(parameterContext) != null && !Objects.equals(
-                getServerIdentifyingObject(), getParameterIdentifyingObject(parameterContext))) {
+        if (getServerIdentifyingObject() != null && getParameterIdentifyingObject(parameterContext) != null
+                && !Objects.equals(getServerIdentifyingObject(), getParameterIdentifyingObject(parameterContext))) {
             // all is set to distinguish servers, but no match -> nope.
             return false;
         }
@@ -209,7 +209,7 @@ public class TestMinion extends TestServer {
         }
 
         @Override
-        public void close() throws Throwable {
+        public void close() {
             mr.close();
             PathHelper.deleteRecursiveRetry(root);
         }

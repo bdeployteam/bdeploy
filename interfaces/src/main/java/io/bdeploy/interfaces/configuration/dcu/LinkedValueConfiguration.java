@@ -63,7 +63,7 @@ public class LinkedValueConfiguration {
         }
 
         @Override
-        public Object createFromString(DeserializationContext ctxt, String value) throws IOException {
+        public Object createFromString(DeserializationContext ctxt, String value) {
             return new LinkedValueConfiguration(value);
         }
 
@@ -73,7 +73,7 @@ public class LinkedValueConfiguration {
         }
 
         @Override
-        public Object createFromBoolean(DeserializationContext ctxt, boolean value) throws IOException {
+        public Object createFromBoolean(DeserializationContext ctxt, boolean value) {
             return new LinkedValueConfiguration(Boolean.toString(value));
         }
 
@@ -83,7 +83,7 @@ public class LinkedValueConfiguration {
         }
 
         @Override
-        public Object createFromInt(DeserializationContext ctxt, int value) throws IOException {
+        public Object createFromInt(DeserializationContext ctxt, int value) {
             return new LinkedValueConfiguration(Integer.toString(value));
         }
 
@@ -93,7 +93,7 @@ public class LinkedValueConfiguration {
         }
 
         @Override
-        public Object createFromLong(DeserializationContext ctxt, long value) throws IOException {
+        public Object createFromLong(DeserializationContext ctxt, long value) {
             return new LinkedValueConfiguration(Long.toString(value));
         }
 
@@ -103,7 +103,7 @@ public class LinkedValueConfiguration {
         }
 
         @Override
-        public Object createUsingDefault(DeserializationContext ctxt) throws IOException {
+        public Object createUsingDefault(DeserializationContext ctxt) {
             return new LinkedValueConfiguration(null);
         }
 

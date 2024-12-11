@@ -13,7 +13,7 @@ public abstract class DirectoryModificationOperation<T> extends BHive.Operation<
     protected Path directory;
 
     @Override
-    public T call() throws Exception {
+    public T call() {
         assertNotNull(directory, "No directory to lock.");
         return doCall(directory.resolve(".lock"));
     }

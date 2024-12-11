@@ -15,7 +15,7 @@ public class ManifestExistsOperation extends BHive.Operation<Boolean> {
     private Manifest.Key manifest;
 
     @Override
-    public Boolean call() throws Exception {
+    public Boolean call() {
         assertNotNull(manifest, "Manifest to check not set");
         return getManifestDatabase().hasManifest(manifest);
     }

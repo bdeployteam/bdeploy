@@ -1,7 +1,5 @@
 package io.bdeploy.interfaces.remote.versioning;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +27,7 @@ public class VersionMismatchFilter implements ClientResponseFilter {
     }
 
     @Override
-    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
+    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) {
         if (responseContext.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
             // *something* was not found. check versions of server.
             String theirVersion;

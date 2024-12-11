@@ -1,7 +1,5 @@
 package io.bdeploy.jersey;
 
-import java.io.IOException;
-
 import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
@@ -33,7 +31,7 @@ public class JerseyCspFilter extends BaseFilter {
     // @formatter:on
 
     @Override
-    public NextAction handleWrite(FilterChainContext ctx) throws IOException {
+    public NextAction handleWrite(FilterChainContext ctx) {
         Object msg = ctx.getMessage();
         if (msg instanceof HttpContent) {
             HttpContent resp = (HttpContent) msg;

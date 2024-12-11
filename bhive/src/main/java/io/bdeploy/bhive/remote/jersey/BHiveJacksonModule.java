@@ -53,7 +53,7 @@ public class BHiveJacksonModule extends SimpleModule {
     private static class MKD extends KeyDeserializer {
 
         @Override
-        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+        public Object deserializeKey(String key, DeserializationContext ctxt) {
             return Manifest.Key.parse(key);
         }
     }

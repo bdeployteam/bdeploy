@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.objects;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import io.bdeploy.bhive.model.ObjectId;
@@ -14,7 +13,7 @@ public class ReadOnlyObjectDatabase extends ObjectDatabase {
     }
 
     @Override
-    protected ObjectId internalAddObject(ObjectWriter writer) throws IOException {
+    protected ObjectId internalAddObject(ObjectWriter writer) {
         throw new UnsupportedOperationException("Read-only Database");
     }
 

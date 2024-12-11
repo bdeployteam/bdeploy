@@ -3,7 +3,7 @@ package io.bdeploy.launcher.cli.ui.browser.workers;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
     }
 
     @Override
-    protected String doInBackground() throws Exception {
+    protected String doInBackground() {
         int i = 0;
         log.info("Executing '{}'", getTaskName());
         for (Path hiveDir : hives) {

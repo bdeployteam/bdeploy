@@ -21,7 +21,7 @@ public class ExportTreeOperation extends BHive.Operation<Void> {
     private ReferenceHandler refHandler;
 
     @Override
-    public Void call() throws Exception {
+    public Void call() {
         assertNotNull(target, "Target path not set");
         assertNotNull(treeId, "Source tree not set");
 

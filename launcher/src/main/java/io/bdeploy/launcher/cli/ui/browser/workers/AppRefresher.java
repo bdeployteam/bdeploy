@@ -42,7 +42,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
     }
 
     @Override
-    protected Void doInBackground() throws Exception {
+    protected Void doInBackground() {
         log.info("Fetching configurations...");
         int i = 0;
         Path hivePath = lpp.get(SpecialDirectory.BHIVE);

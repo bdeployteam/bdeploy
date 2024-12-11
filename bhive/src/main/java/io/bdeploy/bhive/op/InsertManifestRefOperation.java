@@ -14,7 +14,7 @@ public class InsertManifestRefOperation extends BHive.TransactedOperation<Object
     private Manifest.Key manifest;
 
     @Override
-    public ObjectId callTransacted() throws Exception {
+    public ObjectId callTransacted() {
         return getObjectManager().insertManifestReference(manifest);
     }
 

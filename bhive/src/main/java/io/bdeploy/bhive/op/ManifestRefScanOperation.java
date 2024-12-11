@@ -24,7 +24,7 @@ public class ManifestRefScanOperation extends BHive.Operation<SortedMap<String, 
     private int maxDepth = Integer.MAX_VALUE;
 
     @Override
-    public SortedMap<String, Manifest.Key> call() throws Exception {
+    public SortedMap<String, Manifest.Key> call() {
         RuntimeAssert.assertNotNull(manifest, "Nothing to scan");
 
         Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));

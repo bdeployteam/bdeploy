@@ -14,7 +14,7 @@ public class InsertArtificialTreeOperation extends BHive.TransactedOperation<Obj
     private Tree.Builder builder;
 
     @Override
-    public ObjectId callTransacted() throws Exception {
+    public ObjectId callTransacted() {
         return getObjectManager().insertTree(builder.build());
     }
 
