@@ -84,25 +84,25 @@ class PermissionFilterTest {
         if (readAllowed) {
             assertTrue(expected.matches(service.read()));
         } else {
-            assertThrows(ForbiddenException.class, () -> service.read());
+            assertThrows(ForbiddenException.class, service::read);
         }
 
         if (writeAllowed) {
             assertTrue(expected.matches(service.write()));
         } else {
-            assertThrows(ForbiddenException.class, () -> service.write());
+            assertThrows(ForbiddenException.class, service::write);
         }
 
         if (adminAllowed) {
             assertTrue(expected.matches(service.admin()));
         } else {
-            assertThrows(ForbiddenException.class, () -> service.admin());
+            assertThrows(ForbiddenException.class, service::admin);
         }
 
         if (adminNoInheritAllowed) {
             assertTrue(expected.matches(service.adminNoInherit()));
         } else {
-            assertThrows(ForbiddenException.class, () -> service.adminNoInherit());
+            assertThrows(ForbiddenException.class, service::adminNoInherit);
         }
     }
 

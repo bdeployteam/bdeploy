@@ -48,13 +48,13 @@ public class ReportResourceImpl implements ReportResource {
     }
 
     private boolean isAuthorized(String report) {
-        ScopedPermission requiredPermission = new ScopedPermission(report, Permission.READ);
         SecurityContext ctx = crq.getSecurityContext();
         if (!(ctx instanceof JerseySecurityContext)) {
             return false;
         }
         JerseySecurityContext securityContext = (JerseySecurityContext) ctx;
 
+        ScopedPermission requiredPermission = new ScopedPermission(report, Permission.READ);
         return securityContext.isAuthorized(requiredPermission)
                 || auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission);
     }

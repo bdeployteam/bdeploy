@@ -46,15 +46,13 @@ class LocalClientApplicationSettingsTest {
     @Test
     void testStartScripts() {
         testScripts(//
-                (settings, scriptName, scriptInfo, override) -> settings.putStartScriptInfo(scriptName, scriptInfo, override),
-                (settings, scriptName) -> settings.getStartScriptInfo(scriptName));
+                LocalClientApplicationSettings::putStartScriptInfo, LocalClientApplicationSettings::getStartScriptInfo);
     }
 
     @Test
     void testFileAssocScripts() {
         testScripts(//
-                (settings, scriptName, scriptInfo, override) -> settings.putFileAssocScriptInfo(scriptName, scriptInfo, override),
-                (settings, scriptName) -> settings.getFileAssocScriptInfo(scriptName));
+                LocalClientApplicationSettings::putFileAssocScriptInfo, LocalClientApplicationSettings::getFileAssocScriptInfo);
     }
 
     private static void testScripts(QuadFunction<LocalClientApplicationSettings, String, ScriptInfo, Boolean, Boolean> setter,

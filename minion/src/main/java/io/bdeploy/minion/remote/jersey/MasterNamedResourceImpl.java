@@ -1498,13 +1498,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         // Build a response with the stream
-        var responseBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) {
-                zipConfigTree(output, configTree);
-            }
-        });
+        var responseBuilder = Response.ok((StreamingOutput) output -> zipConfigTree(output, configTree));
 
         // Load and attach metadata to give the file a nice name
         var contentDisposition = ContentDisposition.type("attachement").fileName("DataFiles.zip").build();
