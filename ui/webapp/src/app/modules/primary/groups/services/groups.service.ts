@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
-import { debounceTime, finalize, first, skipWhile, switchMap } from 'rxjs/operators';
+import { debounceTime, finalize, skipWhile, switchMap } from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
@@ -202,7 +202,7 @@ export class GroupsService {
         }
       });
 
-    this.settings.settings$.pipe(first()).subscribe((s) => {
+    this.settings.settings$.subscribe((s) => {
       if (s) {
         this.attributeDefinitions$.next(s?.instanceGroup?.attributes);
       }

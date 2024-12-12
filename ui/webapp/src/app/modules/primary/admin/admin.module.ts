@@ -21,6 +21,7 @@ import { ManualJobsComponent } from './components/manual-jobs/manual-jobs.compon
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { NodesComponent } from './components/nodes/nodes.component';
+import { AttributeDeleteActionComponent } from './components/settings-general/attributes-tab/attribute-delete-action/attribute-delete-action.component';
 import { AttributeEditActionComponent } from './components/settings-general/attributes-tab/attribute-edit-action/attribute-edit-action.component';
 import { AttributesTabComponent } from './components/settings-general/attributes-tab/attributes-tab.component';
 import { Auth0TabComponent } from './components/settings-general/auth0-tab/auth0-tab.component';
@@ -60,6 +61,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     LdapTabComponent,
     BHiveComponent,
     AttributeEditActionComponent,
+    AttributeDeleteActionComponent,
     LdapEditActionComponent,
     LdapCheckActionComponent,
     LdapImportActionComponent,

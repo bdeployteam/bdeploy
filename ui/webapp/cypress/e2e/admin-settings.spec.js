@@ -270,9 +270,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.inMainNavContent(() => {
       cy.contains('.mat-mdc-tab', 'Global Attributes').click();
       cy.contains('tr', 'Attr1').as('attr');
-      cy.get('@attr').find('button[data-cy^="Remove"]').click();
-      cy.contains('tr', 'Attr1').should('not.exist');
-      cy.pressToolbarButton('Save');
+      cy.get('@attr').find('button[data-cy^="Remove"]').should('be.disabled');
     });
 
     cy.visit('/');
@@ -280,6 +278,17 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.visit('/');
     cy.deleteGroup('Attr-Test-2');
+
+    cy.get('.local-hamburger-button').click();
+    cy.get('button[data-cy=Administration]').click();
+
+    cy.inMainNavContent(() => {
+      cy.contains('.mat-mdc-tab', 'Global Attributes').click();
+      cy.contains('tr', 'Attr1').as('attr');
+      cy.get('@attr').find('button[data-cy^="Remove"]').should('be.enabled').click();
+      cy.contains('tr', 'Attr1').should('not.exist');
+      cy.pressToolbarButton('Save');
+    });
   });
 
   it('Tests Plugins', () => {

@@ -1,0 +1,9 @@
+<div class="flex justify-start items-center">
+  <app-bd-button
+    icon="delete"
+    text="Remove"
+    [disabled]="(state$ | async).disabled"
+    (click)="settings.removeAttribute(record)"
+    [matTooltip]="(state$ | async).tooltip"
+  ></app-bd-button>
+</div>

@@ -1,7 +1,5 @@
 <div class="bd-default-padding">
-  <p>
-    Global attributes can be assigned to <strong>Instance Groups</strong> as additional grouping and sorting criteria.
-  </p>
+  <p>Global attributes can be assigned to <strong>Instance Groups</strong> as additional grouping criteria.</p>
   <app-bd-data-table
     #attributeTable
     [records]="(settings.settings$ | async)?.instanceGroup?.attributes"

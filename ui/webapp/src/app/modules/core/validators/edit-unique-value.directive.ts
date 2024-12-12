@@ -1,9 +1,6 @@
-import { Directive, Input } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
-import {
-  bdValidationIdExtractor,
-  bdValidationRegisterMessageExtractor,
-} from 'src/app/modules/core/validators/messages';
+import {Directive, Input} from '@angular/core';
+import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angular/forms';
+import {bdValidationIdExtractor, bdValidationRegisterMessageExtractor,} from 'src/app/modules/core/validators/messages';
 
 const ID = 'edit-unique-value';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
@@ -21,7 +18,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 })
 export class EditUniqueValueValidatorDirective implements Validator {
   @Input() disallowedValues: string[];
-  @Input() disallowedMessage = 'ID is not unique';
+  @Input() disallowedMessage = 'Value is not unique';
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value;

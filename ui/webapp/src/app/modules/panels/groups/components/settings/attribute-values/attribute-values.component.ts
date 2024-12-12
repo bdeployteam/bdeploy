@@ -1,5 +1,5 @@
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
@@ -18,11 +18,11 @@ interface AttributeRow {
 }
 
 @Component({
-    selector: 'app-attribute-values',
-    templateUrl: './attribute-values.component.html',
-    standalone: false
+  selector: 'app-attribute-values',
+  templateUrl: './attribute-values.component.html',
+  standalone: false,
 })
-export class AttributeValuesComponent implements OnInit {
+export class AttributeValuesComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);
   private readonly details = inject(GroupDetailsService);
 
@@ -62,8 +62,10 @@ export class AttributeValuesComponent implements OnInit {
   private group: InstanceGroupConfiguration;
   private attributes: CustomAttributesRecord;
 
+  private subscription: Subscription;
+
   ngOnInit(): void {
-    combineLatest([
+    this.subscription = combineLatest([
       this.groups.current$,
       this.groups.attributeDefinitions$,
       this.groups.currentAttributeValues$,
@@ -76,6 +78,10 @@ export class AttributeValuesComponent implements OnInit {
       // if we have values for both
       this.createRows();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   protected showAddDialog(template: TemplateRef<unknown>) {
