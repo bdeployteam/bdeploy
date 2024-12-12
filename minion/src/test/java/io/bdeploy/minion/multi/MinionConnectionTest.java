@@ -17,7 +17,7 @@ import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.dto.NodeAttachDto;
 
-public class MinionConnectionTest {
+class MinionConnectionTest {
 
     @RegisterExtension
     private final TestMinion central = new TestMinion(MinionMode.CENTRAL);
