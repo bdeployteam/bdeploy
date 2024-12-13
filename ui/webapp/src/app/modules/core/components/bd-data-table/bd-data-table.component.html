@@ -217,11 +217,15 @@
 
         <!-- Items with an action (collapsed button), this may not occur on the first column -->
         <ng-container *ngIf="col.action && !row.expandable">
-          <td mat-cell [style.width]="col.width ? col.width : 'auto'" class="max-w-0">
+          <td
+            mat-cell
+            [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+            [style.width]="col.width ? col.width : 'auto'"
+            class="max-w-0"
+          >
             <div class="flex justify-start items-center">
               <app-bd-button
                 *ngIf="row.node.item"
-                [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
                 [text]="col.data(row.node.item)"
                 tooltip="left"
                 [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"

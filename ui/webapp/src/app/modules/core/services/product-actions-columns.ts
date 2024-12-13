@@ -64,6 +64,7 @@ export class ProductActionsColumnsService {
     action: (r) => r.downloadHook(r),
     icon: () => 'download',
     width: '0px',
+    classes: () => ['justify-items-center'],
   };
 
   private readonly pluginNameColumn: BdDataColumn<PluginInfoDto> = {
