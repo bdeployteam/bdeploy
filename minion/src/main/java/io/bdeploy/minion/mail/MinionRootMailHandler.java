@@ -69,14 +69,14 @@ public class MinionRootMailHandler {
             byte[] content = mimeFile.getContent();
 
             try {
-                handleAttachment(tempDir, name, content);
+                handleAttachment(name, content);
             } catch (RuntimeException e) {
                 throw new IllegalStateException("Failed to handle attachment " + name, e);
             }
         }
     }
 
-    private void handleAttachment(Path tempDir, String name, byte[] content) {
+    private void handleAttachment(String name, byte[] content) {
         log.info("Received attachment {}", name);
 
         if (!name.toLowerCase().endsWith(MinionSignedAttachment.SIGNED_SUFFIX)) {

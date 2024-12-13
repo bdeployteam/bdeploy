@@ -61,7 +61,7 @@ public class LauncherPathProvider {
 
     private static final String DEFAULT_TAG = "1";
     private final Path homeDir;
-    private String applicationId;
+    private String presetApplicationId;
 
     /**
      * @param homeDir the BDEPLOY_HOME directory
@@ -78,7 +78,7 @@ public class LauncherPathProvider {
      * @return <code>this</code>, for chaining convenience
      */
     public LauncherPathProvider setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
+        this.presetApplicationId = applicationId;
         return this;
     }
 
@@ -92,7 +92,7 @@ public class LauncherPathProvider {
      * @see #get(SpecialDirectory, String)
      */
     public Path get(SpecialDirectory dir) {
-        return get(dir, applicationId);
+        return get(dir, presetApplicationId);
     }
 
     /**
@@ -128,7 +128,7 @@ public class LauncherPathProvider {
      * @see #toDeploymentPathProvider(String)
      */
     public DeploymentPathProvider toDeploymentPathProvider() {
-        return toDeploymentPathProvider(applicationId);
+        return toDeploymentPathProvider(presetApplicationId);
     }
 
     /**

@@ -125,8 +125,8 @@ public class InstanceHistoryManager {
         return entries;
     }
 
-    private MasterRuntimeHistoryDto loadRuntimeHistory(MasterProvider mp, String group, String instanceId) {
-        RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getKey());
+    private MasterRuntimeHistoryDto loadRuntimeHistory(MasterProvider provider, String group, String instanceId) {
+        RemoteService svc = provider.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getKey());
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
 
