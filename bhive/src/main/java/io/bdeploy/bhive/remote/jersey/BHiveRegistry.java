@@ -122,11 +122,10 @@ public class BHiveRegistry implements AutoCloseable {
      * @param name the hive to remove.
      */
     public void unregister(String name) {
-        BHive hive = hives.remove(name);
-        RuntimeAssert.assertNotNull(hive);
-
-        hive.removeSpawnListener(internalListeners.remove(name));
-        hive.close();
+        try (BHive hive = hives.remove(name)) {
+            RuntimeAssert.assertNotNull(hive);
+            hive.removeSpawnListener(internalListeners.remove(name));
+        }
     }
 
     /**
