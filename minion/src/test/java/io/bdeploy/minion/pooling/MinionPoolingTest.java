@@ -76,7 +76,7 @@ class MinionPoolingTest {
         assertEquals(2, reg.get("GroupB").execute(new InternalListAllObjectsOp()));
     }
 
-    private void setupGroup(String groupName, RemoteService remote) {
+    private static void setupGroup(String groupName, RemoteService remote) {
         InstanceGroupConfiguration cfg = new InstanceGroupConfiguration();
 
         cfg.name = groupName;

@@ -243,7 +243,7 @@ class FetchPushTest extends RemoteHiveTestBase {
         }
     }
 
-    private Manifest.Key createManifestWithRefs(Path tmp, BHive local) throws IOException {
+    private static Manifest.Key createManifestWithRefs(Path tmp, BHive local) throws IOException {
         Path source = ContentHelper.genSimpleTestTree(tmp, "source");
 
         Manifest.Key na = new Manifest.Key("nested-a", "v1");

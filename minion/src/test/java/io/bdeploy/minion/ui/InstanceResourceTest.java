@@ -193,8 +193,8 @@ class InstanceResourceTest {
     }
 
     /** Creates a new instance within the given group. A new node config is created for each passed node name */
-    private void createInstance(RemoteService remote, Path tmp, String groupName, ProductManifest product, String instanceName,
-            String... nodeNames) {
+    private static void createInstance(RemoteService remote, Path tmp, String groupName, ProductManifest product,
+            String instanceName, String... nodeNames) {
         InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig(instanceName, product);
         try (BHive hive = new BHive(tmp.resolve("hive").toUri(), null, new ActivityReporter.Null())) {
             PushOperation pushOperation = new PushOperation();

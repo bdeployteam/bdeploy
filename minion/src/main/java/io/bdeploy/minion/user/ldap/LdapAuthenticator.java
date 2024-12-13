@@ -94,7 +94,8 @@ public class LdapAuthenticator implements Authenticator {
      * @param trace collector for tracing information
      * @return the successfully authenticated user, or <code>null</code> if not successful.
      */
-    private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, List<LDAPSettingsDto> servers, AuthTrace trace) {
+    private static UserInfo findAuthenticateUpdate(UserInfo user, char[] password, List<LDAPSettingsDto> servers,
+            AuthTrace trace) {
         for (LDAPSettingsDto server : servers) {
             trace.log("  query server " + server.server);
             try {
@@ -126,8 +127,8 @@ public class LdapAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx, AuthTrace trace)
-            throws NamingException {
+    private static UserInfo performUserSearch(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx,
+            AuthTrace trace) throws NamingException {
         SearchControls sc = new SearchControls();
         sc.setSearchScope(SearchControls.SUBTREE_SCOPE); // TODO: make configurable
         sc.setReturningAttributes(getAttributesToFetch(server));
@@ -148,7 +149,7 @@ public class LdapAuthenticator implements Authenticator {
         return null;
     }
 
-    private String[] getAttributesToFetch(LDAPSettingsDto server) {
+    private static String[] getAttributesToFetch(LDAPSettingsDto server) {
         List<String> result = new ArrayList<>();
 
         result.add(LDAP_DN); // always need this

@@ -98,7 +98,7 @@ class ValueResolverTest {
         assertTrue(found, "Cannot find expected recursively expanded parameter");
     }
 
-    private ParameterConfiguration fakeParam(String id, String value, String... preRendered) {
+    private static ParameterConfiguration fakeParam(String id, String value, String... preRendered) {
         ParameterConfiguration f = new ParameterConfiguration();
 
         f.id = id;

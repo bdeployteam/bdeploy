@@ -71,7 +71,7 @@ class PermissionFilterTest {
                 Collections.singletonList(new ScopedPermission(SCOPE, Permission.ADMIN)));
     }
 
-    private <T> T getAsUser(RemoteService svc, Class<T> resource, String user) {
+    private static <T> T getAsUser(RemoteService svc, Class<T> resource, String user) {
         Response resp = ResourceProvider.getResource(svc, AuthResource.class, null)
                 .authenticatePacked(new CredentialsApi(user, PASSWORD));
         String token = resp.readEntity(String.class);
@@ -79,8 +79,8 @@ class PermissionFilterTest {
         return ResourceProvider.getResource(new RemoteService(svc.getUri(), token), resource, null);
     }
 
-    private void testSvc(PermSvc service, ObjectScope expected, boolean readAllowed, boolean writeAllowed, boolean adminAllowed,
-            boolean adminNoInheritAllowed) {
+    private static void testSvc(PermSvc service, ObjectScope expected, boolean readAllowed, boolean writeAllowed,
+            boolean adminAllowed, boolean adminNoInheritAllowed) {
         if (readAllowed) {
             assertTrue(expected.matches(service.read()));
         } else {

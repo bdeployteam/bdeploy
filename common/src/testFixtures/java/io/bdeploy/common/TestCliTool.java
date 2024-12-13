@@ -75,7 +75,7 @@ public class TestCliTool implements ParameterResolver {
         return readOutput(getTool(defaultReporter, tool, args));
     }
 
-    private <T extends CliTool> StructuredOutput readOutput(T tool) throws IOException {
+    private static <T extends CliTool> StructuredOutput readOutput(T tool) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             tool.setOutput(new PrintStream(os));
             tool.setDataFormat(DataFormat.JSON);

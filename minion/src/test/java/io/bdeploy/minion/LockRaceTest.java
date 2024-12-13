@@ -98,8 +98,8 @@ class LockRaceTest {
                                         silentSleep(3000);
 
                                         log.info("Deleting data {}, {}", group, localTid);
-                                        ResourceProvider.getResource(remote, HiveResource.class, null)
-                                                .delete(group, k.getName(), k.getTag());
+                                        ResourceProvider.getResource(remote, HiveResource.class, null).delete(group, k.getName(),
+                                                k.getTag());
                                     }));
                                 }
                             } catch (Exception e) {
@@ -153,7 +153,7 @@ class LockRaceTest {
         }
     }
 
-    private void setupGroup(String groupName, RemoteService remote) {
+    private static void setupGroup(String groupName, RemoteService remote) {
         InstanceGroupConfiguration cfg = new InstanceGroupConfiguration();
 
         cfg.name = groupName;
