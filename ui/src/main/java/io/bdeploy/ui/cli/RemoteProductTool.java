@@ -1,5 +1,9 @@
 package io.bdeploy.ui.cli;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +15,8 @@ import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
@@ -73,6 +79,12 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         @Help(value = "A product version to show details about.")
         String details();
 
+        @Help(value = "Creates a response file for the given product version, taking the path of the file as an argument. Use --product and --version to define the product/version")
+        @Validator(NonExistingPathValidator.class)
+        String createResponseFile();
+
+        @Help(value = "The name of the instance template that a response file shall be created for. This parameter is optional if the product only has a single instance template.")
+        String instanceTemplate();
     }
 
     public RemoteProductTool() {
@@ -89,19 +101,22 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
             helpAndFail("--instanceGroup or --repository missing");
         }
 
-        if (config.delete() != null) {
-            return delete(remote, config);
+        if (config.details() != null) {
+            return showDetails(remote, config);
         } else if (config.copy()) {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.repository(), "Missing --repository");
             helpAndFailIfMissing(config.product(), "Missing --product");
             return copy(remote, config);
+        } else if (config.createResponseFile() != null) {
+            helpAndFailIfMissing(config.product(), "Missing --product");
+            return createResponseFile(remote, config);
         } else if (config.transferToManaged() != null) {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.product(), "Missing --product");
             return transferToManaged(remote, config);
-        } else if (config.details() != null) {
-            return showDetails(remote, config);
+        } else if (config.delete() != null) {
+            return delete(remote, config);
         } else {
             return createNoOp();
         }
@@ -276,4 +291,20 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         return createSuccess();
     }
 
+    private DataResult createResponseFile(RemoteService remote, ProductConfig config) {
+        String yamlOutput = getProductRsrc(remote, config).getResponseFile(config.product(), config.version(),
+                config.instanceTemplate());
+
+        String fileExtension = ".yaml";
+        String responseFilePath = config.createResponseFile();
+        responseFilePath = responseFilePath.endsWith(fileExtension) ? responseFilePath : responseFilePath + fileExtension;
+        Path path = Path.of(responseFilePath);
+        try {
+            Files.writeString(path, yamlOutput, StandardOpenOption.CREATE_NEW);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        return createResultWithSuccessMessage("Successfully created response file at " + path);
+    }
 }

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -21,7 +22,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -41,12 +46,17 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.actions.Actions;
+import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
+import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
@@ -401,6 +411,91 @@ public class ProductResourceImpl implements ProductResource {
         } catch (IOException e) {
             throw new WebApplicationException("Cannot read configuration file: " + file, e);
         }
+    }
+
+    @Override
+    public String getResponseFile(String productId, String version, String instanceTemplate) {
+        List<ProductDto> versions = list(productId + ProductManifestBuilder.PRODUCT_KEY_SUFFIX);
+        if (versions.isEmpty()) {
+            throw new WebApplicationException("Product with ID " + productId + " could not be found");
+        }
+
+        boolean versionSet = version != null;
+        ProductDto selectedVersion = null;
+        if (versionSet) {
+            for (ProductDto productDto : versions) {
+                if (productDto.key.getTag().equals(version)) {
+                    selectedVersion = productDto;
+                    break;
+                }
+            }
+            if (selectedVersion == null) {
+                throw new WebApplicationException("Version " + version + " of product " + productId + " could not be found");
+            }
+        } else {
+            selectedVersion = versions.iterator().next();
+            version = selectedVersion.key.getTag();
+        }
+
+        List<FlattenedInstanceTemplateConfiguration> instanceTemplates = selectedVersion.instanceTemplates;
+        FlattenedInstanceTemplateConfiguration selectedInstanceTemplate;
+        switch (instanceTemplates.size()) {
+            case 0:
+                throw new WebApplicationException(
+                        "Version " + version + " of product " + productId + " does not contain an instance template");
+            case 1:
+                selectedInstanceTemplate = instanceTemplates.iterator().next();
+                break;
+            default:
+                if (instanceTemplate == null) {
+                    throw new WebApplicationException("Version " + version + " of product " + productId
+                            + " contains multiple instance templates. Please specify one using the instanceTemplate parameter");
+                }
+                Optional<FlattenedInstanceTemplateConfiguration> selectedInstanceTemplateOpt = instanceTemplates.stream()
+                        .filter(t -> t.name.equals(instanceTemplate)).findFirst();
+                if (selectedInstanceTemplateOpt.isEmpty()) {
+                    throw new WebApplicationException("Version " + version + " of product " + productId
+                            + " does not contain an instance template called " + instanceTemplate);
+                }
+                selectedInstanceTemplate = selectedInstanceTemplateOpt.get();
+                break;
+        }
+
+        InstanceTemplateReferenceDescriptor dataHolder = new InstanceTemplateReferenceDescriptor();
+        dataHolder.name = "Instance of " + selectedVersion.name;
+        dataHolder.description = "This is an instance containing " + selectedVersion.name + (versionSet ? ":" + version : "");
+        dataHolder.productId = productId;
+        dataHolder.productVersionRegex = versionSet ? version : "<OPTIONAL REGEX EXPRESSION>";
+        dataHolder.templateName = selectedInstanceTemplate.name;
+        dataHolder.defaultMappings = selectedInstanceTemplate.groups.stream().map(x -> {
+            String node;
+            switch (x.type) {
+                case null:
+                case SERVER:
+                    node = "master";
+                    break;
+                case CLIENT:
+                    node = InstanceManifest.CLIENT_NODE_LABEL;
+                    break;
+                default:
+                    throw new NotImplementedException("Unknown instance template group type: " + x.type);
+            }
+            var mapping = new SystemTemplateInstanceTemplateGroupMapping();
+            mapping.group = x.name;
+            mapping.node = node;
+            return mapping;
+        }).toList();
+        dataHolder.fixedVariables = selectedInstanceTemplate.directlyUsedTemplateVars.stream()
+                .map(x -> new TemplateVariableFixedValueOverride(x.id, "<" + x.type + " VALUE>")).toList();
+
+        ObjectMapper mapper = JacksonHelper.getDefaultYamlObjectMapper();
+        String yamlOutput;
+        try {
+            yamlOutput = mapper.writeValueAsString(dataHolder);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+        return yamlOutput;
     }
 
     @Override

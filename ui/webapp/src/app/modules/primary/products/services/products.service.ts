@@ -3,6 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { ApplicationDto, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
+import { DownloadService } from 'src/app/modules/core/services/download.service';
+import { InstTemplateData } from 'src/app/modules/core/services/product-actions-columns';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
@@ -16,6 +18,7 @@ export class ProductsService {
   private readonly http = inject(HttpClient);
   private readonly changes = inject(ObjectChangesService);
   private readonly groups = inject(GroupsService);
+  private readonly downloads = inject(DownloadService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public products$ = new BehaviorSubject<ProductDto[]>(null);
@@ -53,6 +56,18 @@ export class ProductsService {
 
   public loadProductsOf(group: string): Observable<ProductDto[]> {
     return this.http.get<ProductDto[]>(`${this.apiPath(group)}/list`);
+  }
+
+  public downloadResponseFile(data: InstTemplateData) {
+    const instanceTemplate = data.config.name;
+    this.http
+      .get(`${this.apiPath(this.group)}/getResponseFile`, {
+        params: { productId: data.productId, instanceTemplate },
+        responseType: 'text',
+      })
+      .subscribe((yaml) => {
+        this.downloads.downloadYaml(this.downloads.buildResponseFileName(data.productName, instanceTemplate), yaml);
+      });
   }
 
   private load(group: string) {

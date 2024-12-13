@@ -60,7 +60,7 @@
 
         <app-bd-expand-button text="Instance Templates" icon="bookmarks">
           <app-bd-data-display
-            [records]="prod.instanceTemplates"
+            [records]="productActionColumns.mapToAppTemplateColumnData(prod, doDownloadResponseFile)"
             [columns]="productActionColumns.defaultInstanceTemplatesColumns"
           >
             <app-bd-no-data>

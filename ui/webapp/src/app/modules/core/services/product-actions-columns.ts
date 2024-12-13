@@ -4,11 +4,22 @@ import {
   FlattenedApplicationTemplateConfiguration,
   FlattenedInstanceTemplateConfiguration,
   PluginInfoDto,
+  ProductDto,
 } from 'src/app/models/gen.dtos';
 
 export interface LabelRecord {
   key: string;
   value: string;
+}
+
+export interface InstTemplateData {
+  productName: string;
+  productId: string;
+  config: FlattenedInstanceTemplateConfiguration;
+}
+
+export interface InstTemplateColumnData extends InstTemplateData {
+  downloadHook: (data: InstTemplateData) => void;
 }
 
 @Injectable({
@@ -38,12 +49,21 @@ export class ProductActionsColumnsService {
     tooltip: (r) => r.description,
   };
 
-  private readonly instTemplateNameColumn: BdDataColumn<FlattenedInstanceTemplateConfiguration> = {
+  private readonly instTemplateNameColumn: BdDataColumn<InstTemplateColumnData> = {
     id: 'name',
     name: 'Name',
-    data: (r) => r.name,
+    data: (r) => r.config.name,
     isId: true,
-    tooltip: (r) => r.description,
+    tooltip: (r) => r.config.description,
+  };
+
+  private readonly instTemplateResponseFileDownloadColumn: BdDataColumn<InstTemplateColumnData> = {
+    id: 'downloadResponseFile',
+    name: 'Response File',
+    data: () => 'Download a response file for this instance template',
+    action: (r) => r.downloadHook(r),
+    icon: () => 'download',
+    width: '0px',
   };
 
   private readonly pluginNameColumn: BdDataColumn<PluginInfoDto> = {
@@ -74,9 +94,21 @@ export class ProductActionsColumnsService {
   public readonly defaultApplicationTemplatesColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = //
     [this.appTemplateNameColumn];
 
-  public readonly defaultInstanceTemplatesColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = //
-    [this.instTemplateNameColumn];
+  public readonly defaultInstanceTemplatesColumns: BdDataColumn<InstTemplateData>[] = //
+    [this.instTemplateNameColumn, this.instTemplateResponseFileDownloadColumn];
 
   public readonly defaultPluginsColumns: BdDataColumn<PluginInfoDto>[] = //
     [this.pluginNameColumn, this.pluginVersionColumn, this.pluginOIDColumn];
+
+  public mapToAppTemplateColumnData(
+    product: ProductDto,
+    downloadHook: (data: InstTemplateData) => void,
+  ): InstTemplateColumnData[] {
+    return product.instanceTemplates.map((config) => ({
+      productName: product.name,
+      productId: product.product,
+      config,
+      downloadHook,
+    }));
+  }
 }
