@@ -206,7 +206,7 @@ public class HiveResourceImpl implements HiveResource {
             BHive hive = registry.get(hiveParam);
 
             SortedMap<ObjectId, Long> pruned = hive.execute(new PruneOperation());
-            Long sumFreedBytes = pruned.entrySet().stream().mapToLong(Map.Entry::getValue).sum();
+            long sumFreedBytes = pruned.entrySet().stream().mapToLong(Map.Entry::getValue).sum();
 
             return FormatHelper.formatFileSize(sumFreedBytes);
         }

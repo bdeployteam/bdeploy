@@ -39,7 +39,7 @@ public class TemplateHelper {
      * @return the resolved strings
      */
     public static List<String> process(List<String> values, VariableResolver valueResolver) {
-        return process(values, valueResolver, v -> true);
+        return process(values, valueResolver, v -> Boolean.TRUE);
     }
 
     /**
@@ -68,7 +68,7 @@ public class TemplateHelper {
      * @return the resolved string
      */
     public static String process(String value, VariableResolver valueResolver) {
-        return process(value, valueResolver, v -> true);
+        return process(value, valueResolver, v -> Boolean.TRUE);
     }
 
     /**

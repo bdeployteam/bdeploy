@@ -137,10 +137,10 @@ public class InstanceProcessController {
         if (tag2Running.isEmpty()) {
             logger.log(l -> l.info("No applications are running."));
         } else if (tag2Running.size() == 1) {
-            int counter = tag2Running.values().iterator().next();
+            Integer counter = tag2Running.values().iterator().next();
             logger.log(l -> l.info("{} application(s) are running.", counter));
         } else {
-            int counter = tag2Running.values().stream().mapToInt(Integer::intValue).sum();
+            Integer counter = tag2Running.values().stream().mapToInt(Integer::intValue).sum();
             logger.log(l -> l.info("{} application(s) from multiple different versions are running.", counter));
         }
     }

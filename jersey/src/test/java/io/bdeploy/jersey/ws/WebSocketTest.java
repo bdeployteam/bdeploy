@@ -110,7 +110,7 @@ class WebSocketTest {
 
                 @Override
                 public void onClose(WebSocket socket, DataFrame frame) {
-                    closed.complete(true);
+                    closed.complete(Boolean.TRUE);
                 }
             });
 

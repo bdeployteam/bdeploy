@@ -507,7 +507,7 @@ public class ProductUpdateService {
         String filePath = file.file;
         try {
             String content = new String(Base64.decodeBase64(file.content), StandardCharsets.UTF_8);
-            TemplateHelper.process(content, resolver, str -> true, filePath);
+            TemplateHelper.process(content, resolver, str -> Boolean.TRUE, filePath);
         } catch (Exception e) {
             result.add(new ApplicationValidationDto(filePath, null, e.getMessage() + " on node " + nodeName));
         }
