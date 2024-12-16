@@ -41,7 +41,7 @@ class BasicActivityReporterTest {
         }
 
         AtomicLong v = new AtomicLong(0);
-        try (Activity supplied = reporter.start("Fully Supplied", () -> 2l, () -> v.get())) {
+        try (Activity supplied = reporter.start("Fully Supplied", () -> 2l, v::get)) {
             v.set(2);
         }
 

@@ -38,9 +38,9 @@ const colPort: BdDataColumn<PortParam> = {
 };
 
 @Component({
-    selector: 'app-ports',
-    templateUrl: './ports.component.html',
-    standalone: false
+  selector: 'app-ports',
+  templateUrl: './ports.component.html',
+  standalone: false,
 })
 export class PortsComponent implements OnInit {
   private readonly dl = inject(DownloadService);
@@ -66,7 +66,8 @@ export class PortsComponent implements OnInit {
   }
 
   protected exportCsv() {
-    let csv = 'Application,Name,Description,Port,Node';
+    const columns = ['Application', 'Name', 'Description', 'Port', 'Node'];
+    const rows: string[][] = [];
     // only interested in server ports on applications.
     const system = this.edit.state$?.value?.config?.config?.system
       ? this.systems.systems$.value?.find((s) => s.key.name === this.edit.state$.value.config.config.system.name)
@@ -78,21 +79,16 @@ export class PortsComponent implements OnInit {
           (a) => a.application.name === port.app.application.name && a.application.tag === port.app.application.tag,
         ),
       );
-      csv +=
-        '\n' +
-        [
-          port.source,
-          port.name,
-          port.description,
-          getRenderPreview(port.value, port.app, this.edit.state$.value?.config, system?.config),
-          node?.nodeName,
-        ]
-          .map((e) => `"${e}"`)
-          .join(',');
+      rows.push([
+        port.source,
+        port.name,
+        port.description,
+        getRenderPreview(port.value, port.app, this.edit.state$.value?.config, system?.config),
+        node?.nodeName,
+      ]);
     }
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    this.dl.downloadBlob('ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv', blob);
+    const filename = 'ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv';
+    this.dl.downloadCsv(filename, columns, rows);
   }
 
   protected shiftSelectedPorts(tpl: TemplateRef<unknown>) {

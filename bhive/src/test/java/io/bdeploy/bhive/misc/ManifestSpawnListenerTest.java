@@ -64,9 +64,7 @@ class ManifestSpawnListenerTest {
 
         test.removeSpawnListener(l1);
 
-        ManifestSpawnListener l2 = k -> {
-            notifyTwo.complete(k);
-        };
+        ManifestSpawnListener l2 = notifyTwo::complete;
 
         test.addSpawnListener(l2);
 

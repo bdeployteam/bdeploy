@@ -1,8 +1,9 @@
 package io.bdeploy.ui.report;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,9 @@ import io.bdeploy.ui.utils.ProductVersionMatchHelper;
 
 public class ProductsInUseReportGenerator implements ReportGenerator {
 
+    private static final DateTimeFormatter UTC_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm '(UTC)'")
+            .withZone(ZoneId.of("UTC"));
+
     private final BHiveRegistry registry;
     private final InstanceGroupResource igr;
 
@@ -39,11 +43,11 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
 
     @Override
     public ReportResponseDto generateReport(ReportRequestDto request) {
-        String productKey = request.params.get(ProductsInUseReportDescriptor.PRODUCT_PARAM_KEY);
-        String productVersion = request.params.get(ProductsInUseReportDescriptor.PRODUCT_VERSION_PARAM_KEY);
-        boolean regex = Boolean.parseBoolean(request.params.getOrDefault(ProductsInUseReportDescriptor.REGEX_PARAM_KEY, "false"));
-        InstancePurpose purpose = request.params.get(ProductsInUseReportDescriptor.INSTANCE_PURPOSE_PARAM_KEY) == null ? null
-                : InstancePurpose.valueOf(request.params.get(ProductsInUseReportDescriptor.INSTANCE_PURPOSE_PARAM_KEY));
+        String productKey = request.params.get(ProductsInUseReportDescriptor.PRODUCT_PARAM.key);
+        String productVersion = request.params.get(ProductsInUseReportDescriptor.PRODUCT_VERSION_PARAM.key);
+        boolean regex = Boolean.parseBoolean(request.params.getOrDefault(ProductsInUseReportDescriptor.REGEX_PARAM.key, "false"));
+        InstancePurpose purpose = request.params.get(ProductsInUseReportDescriptor.INSTANCE_PURPOSE_PARAM.key) == null ? null
+                : InstancePurpose.valueOf(request.params.get(ProductsInUseReportDescriptor.INSTANCE_PURPOSE_PARAM.key));
 
         ReportResponseDto resp = new ReportResponseDto();
 
@@ -74,15 +78,16 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
                 }
                 Map<String, String> row = new HashMap<>();
                 row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_NAME_COLUMN.key, group.name);
+                row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_TITLE_COLUMN.key, group.title);
                 row.put(ProductsInUseReportDescriptor.INSTANCE_GROUP_DESCRIPTION_COLUMN.key, group.description);
 
-                row.put(ProductsInUseReportDescriptor.INSTANCE_UUID_COLUMN.key, instanceConfiguration.id);
+                row.put(ProductsInUseReportDescriptor.INSTANCE_ID_COLUMN.key, instanceConfiguration.id);
                 row.put(ProductsInUseReportDescriptor.INSTANCE_NAME_COLUMN.key, instanceConfiguration.name);
                 row.put(ProductsInUseReportDescriptor.PURPOSE_COLUMN.key, instanceConfiguration.purpose.name());
-                
+
                 if (currentProduct != null) {
-                    row.put(ProductsInUseReportDescriptor.PRODUCT_COLUMN.key, currentProduct.name);
                     row.put(ProductsInUseReportDescriptor.PRODUCT_ID_COLUMN.key, currentProduct.product);
+                    row.put(ProductsInUseReportDescriptor.PRODUCT_NAME_COLUMN.key, currentProduct.name);
                     row.put(ProductsInUseReportDescriptor.PRODUCT_VERSION_COLUMN.key, currentProduct.key.getTag());
                 }
 
@@ -91,26 +96,30 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
                 }
 
                 if (instanceConfiguration.system != null) {
-                    row.put(ProductsInUseReportDescriptor.SYSTEM_COLUMN.key, systems.stream()
-                            .filter(s -> s.key.equals(instanceConfiguration.system)).findAny().orElseThrow().config.name);
+                    var system = systems.stream().filter(s -> s.key.equals(instanceConfiguration.system)).findAny().orElseThrow();
+                    row.put(ProductsInUseReportDescriptor.SYSTEM_NAME_COLUMN.key, system.config.name);
                 }
                 if (instance.managedServer != null) {
                     row.put(ProductsInUseReportDescriptor.MANAGED_SERVER_COLUMN.key, instance.managedServer.hostName);
 
                     // (last sync & last message: take date that is more recent)
                     String lastComm = Stream.of(instance.managedServer.lastMessageReceived, instance.managedServer.lastSync)
-                            .filter(v -> v != null).max(Instant::compareTo).map(Instant::toString).orElse(null);
+                            .filter(v -> v != null).max(Instant::compareTo).map(UTC_FORMATTER::format).orElse(null);
                     row.put(ProductsInUseReportDescriptor.LAST_COMMUNICATION_COLUMN.key, lastComm);
                 }
                 resp.rows.add(row);
             }
         }
-        resp.generatedAt = new Date();
+
+        resp.requestParams = request.params;
+
+        resp.generatedAt = UTC_FORMATTER.format(Instant.now());
+
         return resp;
     }
 
     private List<InstanceGroupConfiguration> getInstanceGroups(ReportRequestDto request) {
-        String instanceGroup = request.params.get(ProductsInUseReportDescriptor.INSTANCE_GROUP_PARAM_KEY);
+        String instanceGroup = request.params.get(ProductsInUseReportDescriptor.INSTANCE_GROUP_PARAM.key);
         boolean instanceGroupSet = instanceGroup != null && !instanceGroup.isBlank();
 
         List<InstanceGroupConfiguration> result = new ArrayList<>();

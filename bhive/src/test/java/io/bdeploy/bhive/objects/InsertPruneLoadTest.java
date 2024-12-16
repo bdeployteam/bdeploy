@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -93,7 +94,7 @@ class InsertPruneLoadTest {
             }, "Pruner-" + x));
         }
 
-        threads.forEach(t -> t.start());
+        threads.forEach(Thread::start);
 
         // let the jobs work for some time :)
         TimeUnit.SECONDS.sleep(producerCount * 10);
@@ -138,7 +139,7 @@ class InsertPruneLoadTest {
     void prune(BHive hive) {
         hive.execute(new PruneOperation());
         try {
-            TimeUnit.MILLISECONDS.sleep((long) (Math.random() * 10));
+            TimeUnit.MILLISECONDS.sleep(new Random().nextInt(10));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

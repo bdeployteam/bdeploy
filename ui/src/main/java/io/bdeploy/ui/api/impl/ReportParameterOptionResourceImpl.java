@@ -100,7 +100,7 @@ public class ReportParameterOptionResourceImpl implements ReportParameterOptionR
                 }
             }
         }
-        return versions.stream().map((v) -> new ReportParameterOptionDto(v)).toList();
+        return versions.stream().map(ReportParameterOptionDto::new).toList();
     }
 
     private List<BHive> softwareRepositoryHives() {

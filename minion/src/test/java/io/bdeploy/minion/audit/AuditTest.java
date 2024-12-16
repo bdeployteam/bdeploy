@@ -79,12 +79,8 @@ class AuditTest {
     void testAudit(Service svc) throws IOException {
         svc.hello("Test");
         svc.helloNoParam();
-        assertThrows(NotFoundException.class, () -> {
-            svc.lookup();
-        });
-        assertThrows(RuntimeException.class, () -> {
-            svc.throwSomething();
-        });
+        assertThrows(NotFoundException.class, svc::lookup);
+        assertThrows(RuntimeException.class, svc::throwSomething);
 
         RollingFileAuditor auditor = (RollingFileAuditor) srv.getAuditor();
         List<String> lines = Files.readAllLines(auditor.getLogDir().resolve("audit.log"));

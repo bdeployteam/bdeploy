@@ -75,7 +75,6 @@
       [columns]="columns"
       [records]="instances.instances$ | async"
       [recordRoute]="getRecordRoute"
-      [searchable]="true"
       [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
       [checked]="bulk.selection$ | async"
       (checkedChange)="bulk.selection$.next($event)"

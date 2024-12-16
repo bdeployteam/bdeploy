@@ -34,7 +34,7 @@ class DataTableJsonTest {
                 + "  { \"Col1\": \"val1\", \"Col2\": \"val2\", \"Col3\": \"val3\" },\n"//
                 + "  { \"Col1\": \"This first cell has a very long text indeed\", \"Col2\": \"second one is shorter\", \"Col3\": \"third\" }\n"//
                 + "]";
-        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongTextRow(table));
+        TEST_UTIL.modifyAndTest(expected, expected, DataTableTestUtil::addLongTextRow);
     }
 
     @Test
@@ -47,8 +47,8 @@ class DataTableJsonTest {
                 + "  { \"Col1\": \"cell6\", \"Col2\": \"cell7\" },\n"//
                 + "  { \"Col1\": \"cell8\" }\n"//
                 + "]";
-        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortSpannedTextRows(table));
-        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addShortInfiniteSpannedTextRows(table));
+        TEST_UTIL.modifyAndTest(expected, expected, DataTableTestUtil::addShortSpannedTextRows);
+        TEST_UTIL.modifyAndTest(expected, expected, DataTableTestUtil::addShortInfiniteSpannedTextRows);
     }
 
     @Test
@@ -60,8 +60,8 @@ class DataTableJsonTest {
                 + "  { \"Col1\": \"cell2\", \"Col2\": \"the second cell has a really long text\" },\n"//
                 + "  { \"Col1\": \"this cell is so long it covers the whole table wohoooooOOOOOOooooow\" }\n"//
                 + "]";
-        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongSpannedTextRows(table));
-        TEST_UTIL.modifyAndTest(expected, expected, table -> DataTableTestUtil.addLongInfiniteSpannedTextRows(table));
+        TEST_UTIL.modifyAndTest(expected, expected, DataTableTestUtil::addLongSpannedTextRows);
+        TEST_UTIL.modifyAndTest(expected, expected, DataTableTestUtil::addLongInfiniteSpannedTextRows);
     }
 
     @Test

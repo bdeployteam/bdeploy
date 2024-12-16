@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,17 +119,13 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         }
 
         // Build a response with the stream
-        ResponseBuilder responseBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) {
-                try (InputStream is = Files.newInputStream(actual)) {
-                    is.transferTo(output);
-                } catch (IOException ioe) {
-                    log.warn("Could not fully write output: {}", ioe.toString());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Exception", ioe);
-                    }
+        ResponseBuilder responseBuilder = Response.ok((StreamingOutput) output -> {
+            try (InputStream is = Files.newInputStream(actual)) {
+                is.transferTo(output);
+            } catch (IOException ioe) {
+                log.warn("Could not fully write output: {}", ioe.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", ioe);
                 }
             }
         }, mediaType);
@@ -151,29 +146,25 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
     @Override
     public Response getEntriesZipStream(List<RemoteDirectoryEntry> entries) {
         // Build a response with the stream
-        var responseBuilder = Response.ok(new StreamingOutput() {
+        var responseBuilder = Response.ok((StreamingOutput) output -> {
+            try (var zos = new ZipOutputStream(output)) {
+                for (var entry : entries) {
+                    var path = getEntryPath(root, entry); // will throw in case of error
+                    var ze = new ZipEntry(entry.path); // relative path name.
 
-            @Override
-            public void write(OutputStream output) {
-                try (var zos = new ZipOutputStream(output)) {
-                    for (var entry : entries) {
-                        var path = getEntryPath(root, entry); // will throw in case of error
-                        var ze = new ZipEntry(entry.path); // relative path name.
+                    ze.setTime(Files.getLastModifiedTime(path).toMillis());
+                    zos.putNextEntry(ze);
 
-                        ze.setTime(Files.getLastModifiedTime(path).toMillis());
-                        zos.putNextEntry(ze);
-
-                        try (var is = Files.newInputStream(path)) {
-                            is.transferTo(zos);
-                        }
-
-                        zos.closeEntry();
+                    try (var is = Files.newInputStream(path)) {
+                        is.transferTo(zos);
                     }
-                } catch (IOException ioe) {
-                    log.warn("Could not fully write output: {}", ioe.toString());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Exception", ioe);
-                    }
+
+                    zos.closeEntry();
+                }
+            } catch (IOException ioe) {
+                log.warn("Could not fully write output: {}", ioe.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", ioe);
                 }
             }
         });

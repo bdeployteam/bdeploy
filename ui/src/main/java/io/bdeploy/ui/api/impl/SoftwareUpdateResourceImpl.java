@@ -205,17 +205,13 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         }
 
         // Build a response with the stream
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) {
-                try (InputStream is = Files.newInputStream(targetFile)) {
-                    is.transferTo(output);
-                } catch (IOException ioe) {
-                    log.warn("Could not fully write output: {}", ioe.toString());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Exception", ioe);
-                    }
+        ResponseBuilder responeBuilder = Response.ok((StreamingOutput) output -> {
+            try (InputStream is = Files.newInputStream(targetFile)) {
+                is.transferTo(output);
+            } catch (IOException ioe) {
+                log.warn("Could not fully write output: {}", ioe.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", ioe);
                 }
             }
         }, MediaType.APPLICATION_OCTET_STREAM);

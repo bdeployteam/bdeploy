@@ -50,7 +50,6 @@
       [columns]="repositoryColumns.defaultRepositoryColumns"
       [records]="repository.data$ | async"
       [recordRoute]="getRecordRoute"
-      [searchable]="true"
       [presetKey]="presetKeyValue"
       [grid]="isCardView"
       [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"

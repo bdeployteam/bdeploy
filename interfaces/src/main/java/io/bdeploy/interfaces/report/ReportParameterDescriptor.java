@@ -11,47 +11,47 @@ public class ReportParameterDescriptor {
     /**
      * key to fetch parameter value from request
      */
-    public String key;
+    public final String key;
 
     /**
      * human readable name for the parameter
      */
-    public String label;
+    public final String label;
 
     /**
      * description, displayed as tooltip on UI form
      */
-    public String description;
+    public final String description;
 
     /**
      * UI form input type
      */
-    public ReportParameterInputType inputType;
+    public final ReportParameterInputType inputType;
 
     /**
      * list of parameter keys which trigger refreshing options/suggestions for this parameter
      */
-    public List<String> dependsOn = Collections.emptyList();
+    public final List<String> dependsOn;
 
     /**
      * path in ReportParameterOptionResource to fetch options/suggestions from
      */
-    public String parameterOptionsPath;
-
-    public ReportParameterDescriptor(String key, String label, String description, ReportParameterInputType inputType) {
-        this.key = key;
-        this.label = label;
-        this.description = description;
-        this.inputType = inputType;
-    }
+    public final String parameterOptionsPath;
 
     @JsonCreator
     public ReportParameterDescriptor(@JsonProperty("key") String key, @JsonProperty("label") String label,
             @JsonProperty("description") String description, @JsonProperty("inputType") ReportParameterInputType inputType,
             @JsonProperty("dependsOn") List<String> dependsOn,
             @JsonProperty("parameterOptionsPath") String parameterOptionsPath) {
-        this(key, label, description, inputType);
+        this.key = key;
+        this.label = label;
+        this.description = description;
+        this.inputType = inputType;
         this.dependsOn = dependsOn;
         this.parameterOptionsPath = parameterOptionsPath;
+    }
+
+    public ReportParameterDescriptor(String key, String label, String description, ReportParameterInputType inputType) {
+        this(key, label, description, inputType, Collections.emptyList(), null);
     }
 }

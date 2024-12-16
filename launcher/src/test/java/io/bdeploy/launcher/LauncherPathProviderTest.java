@@ -82,7 +82,7 @@ class LauncherPathProviderTest {
 
     @Test
     void testDeploymentPathProviderConversion() {
-        assertThrows(RuntimeException.class, () -> lpp.toDeploymentPathProvider());
+        assertThrows(RuntimeException.class, lpp::toDeploymentPathProvider);
         lpp.setApplicationId(APPLICATION_ID);
         DeploymentPathProvider convertedDpp = lpp.toDeploymentPathProvider();
 

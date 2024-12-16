@@ -85,22 +85,18 @@ public class DownloadServiceImpl implements DownloadService {
         }
 
         // Build a response with the stream
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) {
-                try (InputStream is = Files.newInputStream(targetFile)) {
-                    is.transferTo(output);
-                } catch (IOException ioe) {
-                    log.warn("Could not fully write output: {}", ioe.toString());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Exception", ioe);
-                    }
-                } finally {
-                    // Cleanup token and file
-                    tokenCache.remove(token);
-                    PathHelper.deleteRecursiveRetry(targetFile);
+        ResponseBuilder responeBuilder = Response.ok((StreamingOutput) output -> {
+            try (InputStream is = Files.newInputStream(targetFile)) {
+                is.transferTo(output);
+            } catch (IOException ioe) {
+                log.warn("Could not fully write output: {}", ioe.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception", ioe);
                 }
+            } finally {
+                // Cleanup token and file
+                tokenCache.remove(token);
+                PathHelper.deleteRecursiveRetry(targetFile);
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
 

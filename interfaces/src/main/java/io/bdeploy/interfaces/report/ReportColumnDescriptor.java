@@ -11,36 +11,30 @@ public class ReportColumnDescriptor {
     /**
      * column name to display to the user
      */
-    public String name;
+    public final String name;
 
     /**
      * key to extract column data from row
      */
-    public String key;
+    public final String key;
 
     /**
      * whether this column should be displayed in the main table (Web UI)
      */
-    public boolean main;
+    public final boolean main;
 
     /**
-     * minWidth for CLI table
+     * whether this column's value is an ID.
+     * identifiers could be copied to clipboard (Web UI) and are scaled to content (CLI)
      */
-    public int minWidth;
-
-    /**
-     * scaleToContent for CLI table
-     */
-    public boolean scaleToContent;
+    public final boolean identifier;
 
     @JsonCreator
     public ReportColumnDescriptor(@JsonProperty("name") String name, @JsonProperty("key") String key,
-            @JsonProperty("main") boolean main, @JsonProperty("minWidth") int minWidth,
-            @JsonProperty("scaleToContent") boolean scaleToContent) {
+            @JsonProperty("main") boolean main, @JsonProperty("identifier") boolean identifier) {
         this.name = name;
         this.key = key;
         this.main = main;
-        this.minWidth = minWidth;
-        this.scaleToContent = scaleToContent;
+        this.identifier = identifier;
     }
 }

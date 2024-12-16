@@ -9,6 +9,8 @@ declare let downloadLocation: {
   click: (link: HTMLAnchorElement) => {};
 };
 
+const CSV_DELIMITER = ';';
+
 /**
  * Note: ALWAYS use DownloadService to trigger a download for tests to be able to intercept the action.
  */
@@ -20,6 +22,29 @@ export class DownloadService {
 
   public buildResponseFileName(productName: string, instanceTemplateName: string) {
     return 'ResponseFile - ' + productName + ' - ' + instanceTemplateName + '.yaml';
+  }
+
+  /**
+   * Sends the given csv data as download with the given file name
+   *
+   * @param name the file name the browser should save the file as
+   * @param columns an array representing the headers (first row) of the CSV file.
+   * @param rows a collection of data rows to be included in the CSV file.
+   */
+  public downloadCsv(name: string, columns: string[], rows: string[][]) {
+    const csvData = [
+      columns.map((col) => this.quoteCsv(col)).join(CSV_DELIMITER),
+      ...rows.map((row) => row.map((i) => this.quoteCsv(i)).join(CSV_DELIMITER)),
+    ].join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
+    this.downloadBlob(name, blob);
+  }
+
+  private quoteCsv(value: string): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return `"${value.replace(/"/g, '""')}"`;
   }
 
   /**
