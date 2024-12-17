@@ -51,10 +51,7 @@ import io.bdeploy.pcu.TestAppFactory;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestActivityReporter.class)
-class ProductCliTest {
-
-    @RegisterExtension
-    TestCliTool tools = new TestCliTool(new MinionServerCli());
+class ProductCliTest extends BaseMinionCliTest {
 
     @RegisterExtension
     TestCliTool hiveTools = new TestCliTool(new BHiveCli());

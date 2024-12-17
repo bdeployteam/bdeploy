@@ -9,9 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -22,10 +20,7 @@ import io.bdeploy.ui.cli.RemoteRepoTool;
 import jakarta.ws.rs.WebApplicationException;
 
 @ExtendWith(TestMinion.class)
-class RepoCliTest {
-
-    @RegisterExtension
-    TestCliTool tools = new TestCliTool(new MinionServerCli());
+class RepoCliTest extends BaseMinionCliTest {
 
     @Test
     void testCrud(CommonRootResource master, MinionRoot root) {

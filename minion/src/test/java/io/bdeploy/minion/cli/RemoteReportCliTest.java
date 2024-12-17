@@ -7,13 +7,11 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.common.TestActivityReporter;
-import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -25,10 +23,7 @@ import io.bdeploy.ui.cli.RemoteReportTool;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-class RemoteReportCliTest {
-
-    @RegisterExtension
-    TestCliTool tools = new TestCliTool(new MinionServerCli());
+class RemoteReportCliTest extends BaseMinionCliTest {
 
     @Test
     void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)

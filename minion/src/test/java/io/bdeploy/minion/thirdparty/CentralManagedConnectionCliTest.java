@@ -17,7 +17,7 @@ import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.cli.MinionServerCli;
+import io.bdeploy.minion.cli.BaseMinionCliTest;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteCentralTool;
 import io.bdeploy.ui.cli.RemoteInstanceGroupTool;
@@ -25,16 +25,13 @@ import io.bdeploy.ui.cli.RemoteInstanceGroupTool;
 /**
  * Hello world with CLI test.
  */
-class CentralManagedConnectionCliTest {
+class CentralManagedConnectionCliTest extends BaseMinionCliTest {
 
     @RegisterExtension
     TestMinion central = new TestMinion(MinionMode.CENTRAL);
 
     @RegisterExtension
     TestMinion managed = new TestMinion(MinionMode.MANAGED);
-
-    @RegisterExtension
-    TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     private TestCliTool.StructuredOutput remote(TestMinion target, Class<? extends ToolBase.CliTool> tool, String... args) {
         List<String> argList = new ArrayList<>();
