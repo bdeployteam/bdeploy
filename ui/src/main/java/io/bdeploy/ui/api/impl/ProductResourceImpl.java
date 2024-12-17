@@ -468,18 +468,12 @@ public class ProductResourceImpl implements ProductResource {
         dataHolder.productVersionRegex = versionSet ? version : "<OPTIONAL REGEX EXPRESSION>";
         dataHolder.templateName = selectedInstanceTemplate.name;
         dataHolder.defaultMappings = selectedInstanceTemplate.groups.stream().map(x -> {
-            String node;
-            switch (x.type) {
-                case null:
-                case SERVER:
-                    node = "master";
-                    break;
-                case CLIENT:
-                    node = InstanceManifest.CLIENT_NODE_LABEL;
-                    break;
-                default:
-                    throw new NotImplementedException("Unknown instance template group type: " + x.type);
-            }
+            String node = switch (x.type) {
+                case null -> "master";
+                case SERVER -> "master";
+                case CLIENT -> InstanceManifest.CLIENT_NODE_LABEL;
+                default -> throw new NotImplementedException("Unknown instance template group type: " + x.type);
+            };
             var mapping = new SystemTemplateInstanceTemplateGroupMapping();
             mapping.group = x.name;
             mapping.node = node;
