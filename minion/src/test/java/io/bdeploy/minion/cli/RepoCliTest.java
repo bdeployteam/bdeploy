@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -44,10 +45,12 @@ class RepoCliTest extends BaseMinionCliTest {
     @Test
     void testToolCreate(CommonRootResource master, RemoteService remote, @AuthPack String auth, MinionRoot root)
             throws IOException {
-        tools.execute(RemoteRepoTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc");
+        URI uri = remote.getUri();
 
-        tools.execute(RemoteRepoTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--list");
+        remote(uri, auth, RemoteRepoTool.class, "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test",
+                "--description=desc");
+
+        remote(uri, auth, RemoteRepoTool.class, "--list");
 
         List<SoftwareRepositoryConfiguration> repos = master.getSoftwareRepositories();
         assertEquals(1, repos.size());

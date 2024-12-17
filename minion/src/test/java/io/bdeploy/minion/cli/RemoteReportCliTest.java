@@ -3,6 +3,7 @@ package io.bdeploy.minion.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -28,20 +29,21 @@ class RemoteReportCliTest extends BaseMinionCliTest {
     @Test
     void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
             throws IOException {
+        URI uri = remote.getUri();
+
         TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         StructuredOutput result;
 
         /* List all possible reports */
-        result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--list");
+        result = remote(uri, auth, RemoteReportTool.class, "--list");
         assertEquals(1, result.size());
         assertEquals("Products In Use", result.get(0).get("Name"));
         assertEquals("productsInUse", result.get(0).get("Type"));
         assertEquals("Shows where products are used, in which version, and for what purpose.", result.get(0).get("Description"));
 
         /* Parameters help for productsInUse */
-        result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--report=productsInUse",
-                "--paramHelp");
+        result = remote(uri, auth, RemoteReportTool.class, "--report=productsInUse", "--paramHelp");
         assertEquals(5, result.size());
         assertEquals("instanceGroup=ARG", result.get(0).get("Argument"));
         assertEquals("instance group filter", result.get(0).get("Description"));
@@ -56,8 +58,7 @@ class RemoteReportCliTest extends BaseMinionCliTest {
         assertEquals("instance purpose filter", result.get(4).get("Description"));
 
         /* productsInUse report result */
-        result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--report=productsInUse");
+        result = remote(uri, auth, RemoteReportTool.class, "--report=productsInUse");
         assertEquals(1, result.size());
         assertEquals("title", result.get(0).get("InstanceGroupTitle"));
         assertEquals("demo", result.get(0).get("InstanceGroupName"));
@@ -74,15 +75,13 @@ class RemoteReportCliTest extends BaseMinionCliTest {
         assertEquals("", result.get(0).get("LastCommunication"));
 
         /* productsInUse report result with parameters */
-        result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--report=productsInUse",
-                "--params=instanceGroup=demo", "--params=product=customer/product", "--params=productVersion=1.*",
-                "--params=regex", "--params=purpose=TEST");
+        result = remote(uri, auth, RemoteReportTool.class, "--report=productsInUse", "--params=instanceGroup=demo",
+                "--params=product=customer/product", "--params=productVersion=1.*", "--params=regex", "--params=purpose=TEST");
         assertEquals(1, result.size());
 
         /* productsInUse report result with parameters not matching anything */
-        result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--report=productsInUse",
-                "--params=instanceGroup=demo", "--params=product=customer/product", "--params=productVersion=1.*",
-                "--params=purpose=TEST");
+        result = remote(uri, auth, RemoteReportTool.class, "--report=productsInUse", "--params=instanceGroup=demo",
+                "--params=product=customer/product", "--params=productVersion=1.*", "--params=purpose=TEST");
         assertEquals(0, result.size());
     }
 }

@@ -120,8 +120,7 @@ class ProductCliTest extends BaseMinionCliTest {
         // now import the product into a new hive, ext dependency should be fetched from remote
         Path impHive = temp.resolve("imp-hive");
         hiveTools.execute(InitTool.class, "--hive=" + impHive);
-        tools.execute(ProductTool.class, "--hive=" + impHive, "--import=" + pdFile, "--remote=" + remote.getUri(),
-                "--token=" + auth);
+        remote(remote.getUri(), auth, ProductTool.class, "--hive=" + impHive, "--import=" + pdFile);
 
         // this is the key we expect to be created.
         Manifest.Key prodKey = new Manifest.Key("prod" + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, "1.0.0");

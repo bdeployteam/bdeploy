@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,8 @@ class RemoteCliTest extends BaseMinionCliTest {
     @Test
     void testRemoteCli(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,
             @AuthPack String auth) throws IOException {
+        URI uri = remote.getUri();
+
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
@@ -47,41 +50,38 @@ class RemoteCliTest extends BaseMinionCliTest {
 
         // deploy and activate on remote master
         assertTrue(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
-        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--version=" + instance.getTag(), "--install");
+
+        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
+                "--install");
         assertFalse(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
 
-        tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--list");
+        remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
 
         // test uninstall and re-install once
-        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--version=" + instance.getTag(), "--uninstall");
+        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
+                "--uninstall");
         assertTrue(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
-        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--version=" + instance.getTag(), "--install");
+        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
+                "--install");
         assertFalse(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
 
-        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--version=" + instance.getTag(), "--activate");
+        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
+                "--activate");
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(id).activeTag);
 
         // run/control processes on the remote
-        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--application=app", "--start");
+        remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--application=app", "--start");
 
         InstanceStatusDto status = master.getNamedMaster("demo").getStatus(id);
         System.out.println(status);
         assertTrue(status.isAppRunningOrScheduled("app"));
 
-        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--list");
+        remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
 
         // give the script a bit to write output
         Threads.sleep(200);
 
-        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--application=app", "--stop");
+        remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--application=app", "--stop");
 
         status = master.getNamedMaster("demo").getStatus(id);
         System.out.println(status);

@@ -3,6 +3,7 @@ package io.bdeploy.minion.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -31,14 +32,15 @@ class RemoteConfigFilesCliTest extends BaseMinionCliTest {
     @Test
     void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
             throws IOException {
+        URI uri = remote.getUri();
+
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* Check list, add, remove, export, etc. of config files */
-        var result = tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--instanceGroup=demo", "--uuid=" + id, "--list");
+        var result = remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
 
         assertEquals(1, result.size());
         assertEquals("myconfig.json", result.get(0).get("Path"));
@@ -47,11 +49,10 @@ class RemoteConfigFilesCliTest extends BaseMinionCliTest {
         Path testSource1 = tmp.resolve("test1.txt");
         Files.writeString(testSource1, "Teststring");
 
-        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--add=test.txt", "--source=" + testSource1);
+        remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--add=test.txt",
+                "--source=" + testSource1);
 
-        result = tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--instanceGroup=demo", "--uuid=" + id, "--list");
+        result = remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
 
         assertEquals(2, result.size());
         assertEquals("myconfig.json", result.get(0).get("Path"));
@@ -59,8 +60,8 @@ class RemoteConfigFilesCliTest extends BaseMinionCliTest {
         assertEquals("ONLY-INSTANCE", result.get(1).get("Status"));
 
         Path testTarget1 = tmp.resolve("dl1.txt");
-        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--export=test.txt", "--target=" + testTarget1);
+        remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--export=test.txt",
+                "--target=" + testTarget1);
 
         String content = Files.readString(testTarget1);
         assertEquals("Teststring", content);
@@ -68,21 +69,19 @@ class RemoteConfigFilesCliTest extends BaseMinionCliTest {
         Path testSource2 = tmp.resolve("test2.txt");
         Files.writeString(testSource2, "Another Teststring");
 
-        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--update=test.txt", "--source=" + testSource2);
+        remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--update=test.txt",
+                "--source=" + testSource2);
 
         Path testTarget2 = tmp.resolve("dl2.txt");
-        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--export=test.txt", "--target=" + testTarget2);
+        remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--export=test.txt",
+                "--target=" + testTarget2);
 
         content = Files.readString(testTarget2);
         assertEquals("Another Teststring", content);
 
-        tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + id, "--delete=test.txt");
+        remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--delete=test.txt");
 
-        result = tools.execute(RemoteConfigFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                "--instanceGroup=demo", "--uuid=" + id, "--list");
+        result = remote(uri, auth, RemoteConfigFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
 
         assertEquals(1, result.size());
         assertEquals("myconfig.json", result.get(0).get("Path"));

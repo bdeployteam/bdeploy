@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +40,8 @@ class RemoteDataFilesCliTest extends BaseMinionCliTest {
     @Test
     void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
             throws IOException {
+        URI uri = remote.getUri();
+
         /* create file for upload and directory for export */
         Path tempFile = Files.createTempFile(null, null);
         Path tempDirectory = Files.createTempDirectory(null);
@@ -49,21 +52,19 @@ class RemoteDataFilesCliTest extends BaseMinionCliTest {
             String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                     .get(InstanceManifest.INSTANCE_LABEL);
 
-            tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                    "--uuid=" + id, "--version=" + instance.getTag(), "--install");
+            remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id,
+                    "--version=" + instance.getTag(), "--install");
 
-            tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                    "--uuid=" + id, "--version=" + instance.getTag(), "--activate");
+            remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id,
+                    "--version=" + instance.getTag(), "--activate");
 
             StructuredOutput result;
             Exception ex;
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--list");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
 
             /* must specify either --list, --export, --upload or --delete */
             ex = assertThrows(IllegalArgumentException.class, () -> {
-                tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                        "--uuid=" + id);
+                remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id);
             });
             assertEquals(
                     "Please specify what you want to do by enabling one of the flags: --list, --export, --upload or --delete",
@@ -71,8 +72,7 @@ class RemoteDataFilesCliTest extends BaseMinionCliTest {
 
             /* must specify only one flag. either --list, --export, --upload or --delete */
             ex = assertThrows(IllegalArgumentException.class, () -> {
-                tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                        "--uuid=" + id, "--list", "--upload");
+                remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list", "--upload");
             });
             assertEquals("You can enable only one flag at a time: --list, --export, --upload or --delete", ex.getMessage());
 
@@ -80,37 +80,32 @@ class RemoteDataFilesCliTest extends BaseMinionCliTest {
             assertEquals(0, result.size());
 
             /* upload a data file as file1 */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--upload", "--fileSource=" + tempFile.toString(),
-                    "--fileTarget=file1", "--targetNode=master");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--upload",
+                    "--fileSource=" + tempFile.toString(), "--fileTarget=file1", "--targetNode=master");
             assertEquals("Success", result.get(0).get("message"));
             assertEquals("file1", result.get(0).get("UploadedFileAs"));
 
             /* uploading existing file1 without --force will fail */
             ex = assertThrows(BadRequestException.class, () -> {
-                tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                        "--uuid=" + id, "--upload", "--fileSource=" + tempFile.toString(), "--fileTarget=file1",
-                        "--targetNode=master");
+                remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--upload",
+                        "--fileSource=" + tempFile.toString(), "--fileTarget=file1", "--targetNode=master");
             });
             assertTrue(ex.getMessage().contains("Cannot update file1 in aaa-bbb-ccc"));
 
             /* uploading existing file1 with --force will succeed */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--upload", "--fileSource=" + tempFile.toString(),
-                    "--fileTarget=file1", "--targetNode=master", "--force");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--upload",
+                    "--fileSource=" + tempFile.toString(), "--fileTarget=file1", "--targetNode=master", "--force");
             assertEquals("Success", result.get(0).get("message"));
             assertEquals("file1", result.get(0).get("UploadedFileAs"));
 
             /* upload a data file as file2 */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--upload", "--fileSource=" + tempFile.toString(),
-                    "--fileTarget=file2", "--targetNode=master");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--upload",
+                    "--fileSource=" + tempFile.toString(), "--fileTarget=file2", "--targetNode=master");
             assertEquals("Success", result.get(0).get("message"));
             assertEquals("file2", result.get(0).get("UploadedFileAs"));
 
             /* list returns two uploaded data files: file1 and file2 */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--list");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
             assertEquals(2, result.size());
 
             /* don't assume order, might be locale dependent. */
@@ -121,38 +116,35 @@ class RemoteDataFilesCliTest extends BaseMinionCliTest {
             assertTrue(x.contains("file2"));
 
             /* list with --filter */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--list", "--filter=file2");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list",
+                    "--filter=file2");
             assertEquals(1, result.size());
             assertEquals("file2", result.get(0).get("Path"));
 
             /* export */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--export", "--exportTo=" + tempDirectory.toString());
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--export",
+                    "--exportTo=" + tempDirectory.toString());
             assertEquals("Success", result.get(0).get("message"));
             assertEquals(tempDirectory.toString(), result.get(0).get("ExportedFilesTo"));
 
             /* delete only file2 using --filter */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--delete", "--filter=file2");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--delete",
+                    "--filter=file2");
             assertEquals("Success", result.get(0).get("message"));
             assertEquals("Successfully deleted 1 files", result.get(0).get("DeleteFiles"));
 
             /* file1 remains */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--list");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
             assertEquals(1, result.size());
             assertEquals("file1", result.get(0).get("Path"));
 
             /* delete remaining file1 */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--delete");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--delete");
             assertEquals("Success", result.get(0).get("message"));
             assertEquals("Successfully deleted 1 files", result.get(0).get("DeleteFiles"));
 
             /* no files remain */
-            result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                    "--instanceGroup=demo", "--uuid=" + id, "--list");
+            result = remote(uri, auth, RemoteDataFilesTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
             assertEquals(0, result.size());
         } finally {
             PathHelper.deleteRecursiveRetry(tempFile);
