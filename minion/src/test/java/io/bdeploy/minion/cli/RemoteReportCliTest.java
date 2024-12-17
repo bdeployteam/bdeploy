@@ -37,18 +37,14 @@ class RemoteReportCliTest {
 
         StructuredOutput result;
 
-        /*
-         * List all possible reports
-         */
+        /* List all possible reports */
         result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--list");
         assertEquals(1, result.size());
         assertEquals("Products In Use", result.get(0).get("Name"));
         assertEquals("productsInUse", result.get(0).get("Type"));
         assertEquals("Shows where products are used, in which version, and for what purpose.", result.get(0).get("Description"));
 
-        /*
-         * Parameters help for productsInUse
-         */
+        /* Parameters help for productsInUse */
         result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--report=productsInUse",
                 "--paramHelp");
         assertEquals(5, result.size());
@@ -64,9 +60,7 @@ class RemoteReportCliTest {
         assertEquals("purpose=ARG", result.get(4).get("Argument"));
         assertEquals("instance purpose filter", result.get(4).get("Description"));
 
-        /*
-         * productsInUse report result
-         */
+        /* productsInUse report result */
         result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--report=productsInUse");
         assertEquals(1, result.size());
@@ -84,22 +78,16 @@ class RemoteReportCliTest {
         assertEquals("", result.get(0).get("ManagedServer"));
         assertEquals("", result.get(0).get("LastCommunication"));
 
-        /*
-         * productsInUse report result with parameters
-         */
+        /* productsInUse report result with parameters */
         result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--report=productsInUse",
                 "--params=instanceGroup=demo", "--params=product=customer/product", "--params=productVersion=1.*",
                 "--params=regex", "--params=purpose=TEST");
         assertEquals(1, result.size());
 
-        /*
-         * productsInUse report result with parameters not matching anything
-         */
+        /* productsInUse report result with parameters not matching anything */
         result = tools.execute(RemoteReportTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--report=productsInUse",
                 "--params=instanceGroup=demo", "--params=product=customer/product", "--params=productVersion=1.*",
                 "--params=purpose=TEST");
         assertEquals(0, result.size());
-
     }
-
 }

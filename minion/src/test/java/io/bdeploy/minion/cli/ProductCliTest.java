@@ -60,7 +60,7 @@ class ProductCliTest {
     TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
     @Test
-    void testProductImportWithExtDep(CommonRootResource master, RemoteService svc, MinionRoot root, @TempDir Path temp,
+    void testProductImportWithExtDep(CommonRootResource master, RemoteService remote, MinionRoot root, @TempDir Path temp,
             ActivityReporter reporter, @AuthPack String auth) throws IOException {
         // add a repository
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
@@ -79,11 +79,11 @@ class ProductCliTest {
             try (Transaction t = tmpHive.getTransactions().begin()) {
                 tmpHive.execute(new ImportOperation().setManifest(smk.getKey()).setSourcePath(src));
             }
-            tmpHive.execute(new PushOperation().addManifest(smk.getKey()).setRemote(svc).setHiveName("ext"));
+            tmpHive.execute(new PushOperation().addManifest(smk.getKey()).setRemote(remote).setHiveName("ext"));
         }
 
         // check ext software
-        BHiveResource extHive = ResourceProvider.getResource(svc, BHiveLocator.class, null).getNamedHive("ext");
+        BHiveResource extHive = ResourceProvider.getResource(remote, BHiveLocator.class, null).getNamedHive("ext");
         SortedMap<Key, ObjectId> inventory = extHive.getManifestInventory("external-dep");
 
         assertEquals(1, inventory.size());
@@ -122,8 +122,8 @@ class ProductCliTest {
 
         // now import the product into a new hive, ext dependency should be fetched from remote
         Path impHive = temp.resolve("imp-hive");
-        hiveTools.execute(io.bdeploy.bhive.cli.InitTool.class, "--hive=" + impHive);
-        tools.execute(ProductTool.class, "--hive=" + impHive, "--import=" + pdFile, "--remote=" + svc.getUri(),
+        hiveTools.execute(InitTool.class, "--hive=" + impHive);
+        tools.execute(ProductTool.class, "--hive=" + impHive, "--import=" + pdFile, "--remote=" + remote.getUri(),
                 "--token=" + auth);
 
         // this is the key we expect to be created.
@@ -145,8 +145,7 @@ class ProductCliTest {
             igc.description = "test";
 
             master.addInstanceGroup(igc, root.getStorageLocations().get(0).toString());
-            hive.execute(new PushOperation().addManifest(prodKey).setRemote(svc).setHiveName("test"));
+            hive.execute(new PushOperation().addManifest(prodKey).setRemote(remote).setHiveName("test"));
         }
     }
-
 }

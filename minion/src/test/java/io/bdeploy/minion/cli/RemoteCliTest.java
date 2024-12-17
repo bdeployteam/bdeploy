@@ -50,7 +50,7 @@ class RemoteCliTest {
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
-        /* STEP 5: deploy, activate on remote master */
+        // deploy and activate on remote master
         assertTrue(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--version=" + instance.getTag(), "--install");
@@ -59,7 +59,7 @@ class RemoteCliTest {
         tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list");
 
-        // test uninstall, re-install once
+        // test uninstall and re-install once
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--version=" + instance.getTag(), "--uninstall");
         assertTrue(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
@@ -71,7 +71,7 @@ class RemoteCliTest {
                 "--uuid=" + id, "--version=" + instance.getTag(), "--activate");
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(id).activeTag);
 
-        /* STEP 6: run/control processes on the remote */
+        // run/control processes on the remote
         tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--application=app", "--start");
 

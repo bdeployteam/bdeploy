@@ -145,5 +145,4 @@ class RemoteProcessCliTest {
                 "--uuid=" + id, "--stop", "--application=app");
         assertEquals("Success", result.get(0).get("message"));
     }
-
 }

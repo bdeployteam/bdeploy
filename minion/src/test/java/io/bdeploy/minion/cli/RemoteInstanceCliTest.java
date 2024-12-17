@@ -44,9 +44,7 @@ class RemoteInstanceCliTest {
 
         StructuredOutput result;
 
-        /*
-         * At first we have only one version of instance aaa-bbb-ccc
-         */
+        /* At first we have only one version of instance aaa-bbb-ccc */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all");
         assertEquals(1, result.size());
@@ -69,9 +67,7 @@ class RemoteInstanceCliTest {
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("PRODUCTIVE", result.get(0).get("NewPurpose"));
 
-        /*
-         * list --all returns all 3 versions
-         */
+        /* list --all returns all 3 versions */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all");
         assertEquals(3, result.size());
@@ -82,9 +78,7 @@ class RemoteInstanceCliTest {
         assertEquals("1", result.get(2).get("Version"));
         assertEquals("TEST", result.get(2).get("Purpose"));
 
-        /*
-         * since there are no active or installed versions, list by default will return latest version (3)
-         */
+        /* since there are no active or installed versions, list by default will return latest version (3) */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list");
 
@@ -96,9 +90,7 @@ class RemoteInstanceCliTest {
         assertEquals("", result.get(0).get("Active")); // not active
         assertEquals("PRODUCTIVE", result.get(0).get("Purpose"));
 
-        /*
-         * let's install first (1) and second (2) versions
-         */
+        /* let's install first (1) and second (2) versions */
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--version=1", "--install");
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
@@ -123,9 +115,7 @@ class RemoteInstanceCliTest {
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--version=1", "--activate");
 
-        /*
-         * since there is an active version (1), list by default will return it.
-         */
+        /* since there is an active version (1), list by default will return it. */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list");
 
@@ -137,16 +127,12 @@ class RemoteInstanceCliTest {
         assertEquals("*", result.get(0).get("Active")); // active
         assertEquals("TEST", result.get(0).get("Purpose"));
 
-        /*
-         * even though we have 3 versions to display, limit = 2 should return only 2 entries
-         */
+        /* even though we have 3 versions to display, limit = 2 should return only 2 entries */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all", "--limit=2");
         assertEquals(2, result.size());
 
-        /*
-         * filter by version
-         */
+        /* filter by version */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all", "--version=2");
 
@@ -158,9 +144,7 @@ class RemoteInstanceCliTest {
         assertEquals("", result.get(0).get("Active")); // active
         assertEquals("DEVELOPMENT", result.get(0).get("Purpose"));
 
-        /*
-         * filter by purpose
-         */
+        /** filter by purpose */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all", "--purpose=TEST");
 
@@ -178,16 +162,12 @@ class RemoteInstanceCliTest {
         assertEquals("aaa-bbb-ccc", result.get(0).get("Instance"));
         assertEquals("Deleted", result.get(0).get("Result"));
 
-        /*
-         * list will return nothing, since instance is deleted
-         */
+        /* list will return nothing, since instance is deleted */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all");
         assertEquals(0, result.size());
 
-        /*
-         * let's create instance with name unitTestInstance
-         */
+        /* let's create instance with name unitTestInstance */
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--create", "--name=unitTestInstance", "--purpose=DEVELOPMENT", "--product=customer/product",
                 "--productVersion=1.0.0.1234");
@@ -208,7 +188,5 @@ class RemoteInstanceCliTest {
         result = tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list", "--all");
         assertEquals(0, result.size());
-
     }
-
 }

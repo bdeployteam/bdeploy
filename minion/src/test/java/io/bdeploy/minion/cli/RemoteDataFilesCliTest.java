@@ -49,7 +49,6 @@ class RemoteDataFilesCliTest {
         Path tempDirectory = Files.createTempDirectory(null);
         Files.write(tempFile, "testing data files\n".getBytes(StandardCharsets.UTF_8));
         try {
-
             Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
             String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
@@ -119,7 +118,7 @@ class RemoteDataFilesCliTest {
                     "--instanceGroup=demo", "--uuid=" + id, "--list");
             assertEquals(2, result.size());
 
-            // don't assume order, might be locale dependent.
+            /* don't assume order, might be locale dependent. */
             var x = new ArrayList<String>();
             x.add(result.get(0).get("Path"));
             x.add(result.get(1).get("Path"));
@@ -165,5 +164,4 @@ class RemoteDataFilesCliTest {
             PathHelper.deleteRecursiveRetry(tempDirectory);
         }
     }
-
 }

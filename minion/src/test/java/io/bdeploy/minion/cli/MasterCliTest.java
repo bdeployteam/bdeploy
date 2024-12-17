@@ -191,5 +191,4 @@ class MasterCliTest {
             tools.execute(ConfigTool.class, "--root=" + root, "--mode=CENTRAL");
         });
     }
-
 }

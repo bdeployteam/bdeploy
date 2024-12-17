@@ -24,9 +24,6 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.ui.cli.RemoteProcessConfigTool;
 
-/**
- * Basically the same test as {@link MinionDeployTest} but using the CLI.
- */
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
