@@ -3,7 +3,6 @@ package io.bdeploy.minion.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
 
@@ -31,10 +29,7 @@ import io.bdeploy.ui.cli.RemoteInstanceTool;
 class RemoteInstanceCliTest extends BaseMinionCliTest {
 
     @Test
-    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
-            throws IOException {
-        URI uri = remote.getUri();
-
+    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
@@ -43,7 +38,7 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         StructuredOutput result;
 
         /* At first we have only one version of instance aaa-bbb-ccc */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
         assertEquals("DemoInstance", result.get(0).get("Name"));
@@ -51,21 +46,21 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("TEST", result.get(0).get("Purpose"));
 
         /* update purpose to DEVELOPMENT to create a second instance version */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--update", "--uuid=" + id,
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--update", "--uuid=" + id,
                 "--purpose=DEVELOPMENT");
 
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("DEVELOPMENT", result.get(0).get("NewPurpose"));
 
         /* update purpose to PRODUCTIVE to create a third instance version */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--update", "--uuid=" + id,
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--update", "--uuid=" + id,
                 "--purpose=PRODUCTIVE");
 
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("PRODUCTIVE", result.get(0).get("NewPurpose"));
 
         /* list --all returns all 3 versions */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(3, result.size());
         assertEquals("3", result.get(0).get("Version"));
         assertEquals("PRODUCTIVE", result.get(0).get("Purpose"));
@@ -75,7 +70,7 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("TEST", result.get(2).get("Purpose"));
 
         /* since there are no active or installed versions, list by default will return latest version (3) */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
 
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
@@ -86,14 +81,14 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("PRODUCTIVE", result.get(0).get("Purpose"));
 
         /* let's install first (1) and second (2) versions */
-        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=1", "--install");
-        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=2", "--install");
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=1", "--install");
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=2", "--install");
 
         /*
          * since there are no active versions, list by default will return latest installed version.
          * since there are only two installed versions: (1) and (2), list will return (2) as it is the latest one
          */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
 
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
@@ -104,10 +99,10 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("DEVELOPMENT", result.get(0).get("Purpose"));
 
         /* let's activate first (1) version */
-        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=1", "--activate");
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=1", "--activate");
 
         /* since there is an active version (1), list by default will return it. */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
 
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
@@ -118,11 +113,11 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("TEST", result.get(0).get("Purpose"));
 
         /* even though we have 3 versions to display, limit = 2 should return only 2 entries */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--limit=2");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--limit=2");
         assertEquals(2, result.size());
 
         /* filter by version */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--version=2");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--version=2");
 
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
@@ -133,7 +128,7 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("DEVELOPMENT", result.get(0).get("Purpose"));
 
         /** filter by purpose */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--purpose=TEST");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--purpose=TEST");
 
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
@@ -144,20 +139,20 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("TEST", result.get(0).get("Purpose"));
 
         /* let's delete instance */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + id, "--delete", "--yes");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + id, "--delete", "--yes");
         assertEquals("aaa-bbb-ccc", result.get(0).get("Instance"));
         assertEquals("Deleted", result.get(0).get("Result"));
 
         /* list will return nothing, since instance is deleted */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(0, result.size());
 
         /* let's create instance with name unitTestInstance */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--create", "--name=unitTestInstance",
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--create", "--name=unitTestInstance",
                 "--purpose=DEVELOPMENT", "--product=customer/product", "--productVersion=1.0.0.1234");
         String createdInstanceId = result.get(0).get("InstanceId");
 
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(1, result.size());
         assertEquals(createdInstanceId, result.get(0).get("Id"));
         assertEquals("unitTestInstance", result.get(0).get("Name"));
@@ -165,10 +160,10 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("DEVELOPMENT", result.get(0).get("Purpose"));
 
         /* let's delete instance */
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + createdInstanceId, "--delete",
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + createdInstanceId, "--delete",
                 "--yes");
 
-        result = remote(uri, auth, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(0, result.size());
     }
 }

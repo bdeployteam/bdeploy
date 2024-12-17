@@ -3,7 +3,6 @@ package io.bdeploy.minion.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.ui.cli.RemoteProcessConfigTool;
 
 @ExtendWith(TestMinion.class)
@@ -29,17 +27,14 @@ import io.bdeploy.ui.cli.RemoteProcessConfigTool;
 class RemoteProcessConfigCliTest extends BaseMinionCliTest {
 
     @Test
-    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
-            throws IOException {
-        URI uri = remote.getUri();
-
+    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* Check list, add, set, remove of process parameters */
-        var result = remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        var result = remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--showParameters");
 
         assertEquals(2, result.size());
@@ -48,10 +43,10 @@ class RemoteProcessConfigCliTest extends BaseMinionCliTest {
         assertEquals("XENV", result.get(1).get("Id"));
         assertEquals("Value", result.get(1).get("Value"));
 
-        remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
-                "--set=--param1", "--value=TestValue");
+        remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--set=--param1",
+                "--value=TestValue");
 
-        result = remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        result = remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--showParameters");
 
         assertEquals(3, result.size());
@@ -62,33 +57,33 @@ class RemoteProcessConfigCliTest extends BaseMinionCliTest {
         assertEquals("XENV", result.get(2).get("Id"));
         assertEquals("Value", result.get(2).get("Value"));
 
-        remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
-                "--set=--param1", "--value=Other Test Value");
+        remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--set=--param1",
+                "--value=Other Test Value");
 
-        result = remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        result = remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--showParameters");
 
         assertEquals(3, result.size());
         assertEquals("--param1", result.get(1).get("Id"));
         assertEquals("Other Test Value", result.get(1).get("Value"));
 
-        remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--remove=--param1");
 
-        result = remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        result = remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--showParameters");
 
         assertEquals(2, result.size());
         assertEquals("sleepParam", result.get(0).get("Id"));
         assertEquals("XENV", result.get(1).get("Id"));
 
-        remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--set=my.custom.1", "--value=Custom One");
 
-        remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--set=my.custom.2", "--value=Custom Two", "--predecessor=sleepParam");
 
-        result = remote(uri, auth, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
+        result = remote(remote, RemoteProcessConfigTool.class, "--instanceGroup=demo", "--uuid=" + id, "--process=app",
                 "--showParameters");
 
         assertEquals(4, result.size());

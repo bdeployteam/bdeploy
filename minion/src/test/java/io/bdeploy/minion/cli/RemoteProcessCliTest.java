@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
 import io.bdeploy.ui.cli.RemoteProcessTool;
 
@@ -32,67 +30,63 @@ import io.bdeploy.ui.cli.RemoteProcessTool;
 class RemoteProcessCliTest extends BaseMinionCliTest {
 
     @Test
-    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp, @AuthPack String auth)
-            throws IOException {
-        URI uri = remote.getUri();
-
+    void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
-        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
                 "--install");
 
-        remote(uri, auth, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=" + instance.getTag(),
                 "--activate");
 
         StructuredOutput result;
         Exception ex;
         /* must specify only one flag: --list, --start or --stop */
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id);
+            remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id);
         });
         assertEquals("Missing --start or --stop or --list", ex.getMessage());
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--stop");
+            remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--stop");
         });
         assertEquals("You can enable only one flag at a time: --start, --stop or --list", ex.getMessage());
 
         /* cannot specify --controlGroupName without --controlGroupNodeName */
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list",
+            remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list",
                     "--controlGroupName=Default");
         });
         assertEquals("--controlGroupName cannot be specified without --controlGroupNodeName and vice versa", ex.getMessage());
 
         /* cannot specify --application and --controlGroupName at the same time */
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list", "--application=app",
+            remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list", "--application=app",
                     "--controlGroupName=Default", "--controlGroupNodeName=master");
         });
         assertEquals("specify either only --application or only --controlGroupName", ex.getMessage());
 
         /* --join can go with --start/--stop and --application */
-        remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--join",
-                "--application=app");
+        remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--join", "--application=app");
 
         /* needs to be a single application */
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--join");
+            remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--join");
         });
         assertEquals("--join is only possible when starting/stopping a single application", ex.getMessage());
 
         /* list all processes */
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
         assertEquals(1, result.size());
         assertEquals("app", result.get(0).get("Id"));
         assertEquals("app", result.get(0).get("Name"));
         assertEquals("STOPPED", result.get(0).get("Status"));
 
         /* list by --controlGroupName */
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list",
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list",
                 "--controlGroupName=Default", "--controlGroupNodeName=master");
         assertEquals(1, result.size());
         assertEquals("app", result.get(0).get("Id"));
@@ -100,8 +94,7 @@ class RemoteProcessCliTest extends BaseMinionCliTest {
         assertEquals("STOPPED", result.get(0).get("Status"));
 
         /* list by --application */
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list",
-                "--application=app");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list", "--application=app");
         assertEquals(1, result.size());
         assertEquals("Details for app of instance aaa-bbb-ccc of instance group demo", result.get(0).get("message"));
         assertEquals("app", result.get(0).get("ApplicationId"));
@@ -109,32 +102,30 @@ class RemoteProcessCliTest extends BaseMinionCliTest {
         assertEquals("STOPPED", result.get(0).get("State"));
 
         /* start/stop all processes */
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start");
         assertEquals("Success", result.get(0).get("message"));
 
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop");
         assertEquals("Success", result.get(0).get("message"));
 
         /* start/stop by --controlGroupName */
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start",
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start",
                 "--controlGroupName=Default", "--controlGroupNodeName=master");
         assertEquals("Success", result.get(0).get("message"));
 
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop",
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop",
                 "--controlGroupName=Default", "--controlGroupNodeName=master");
         assertEquals("Success", result.get(0).get("message"));
 
         /* start/stop by --application */
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start",
-                "--application=app");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--application=app");
         assertEquals("Success", result.get(0).get("message"));
 
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start",
-                "--application=app", "--join");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--application=app",
+                "--join");
         assertEquals("Success", result.get(0).get("message"));
 
-        result = remote(uri, auth, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop",
-                "--application=app");
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--application=app");
         assertEquals("Success", result.get(0).get("message"));
     }
 }

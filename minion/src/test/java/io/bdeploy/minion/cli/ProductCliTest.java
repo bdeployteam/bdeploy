@@ -46,7 +46,6 @@ import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.pcu.TestAppFactory;
 
 @ExtendWith(TestMinion.class)
@@ -58,7 +57,7 @@ class ProductCliTest extends BaseMinionCliTest {
 
     @Test
     void testProductImportWithExtDep(CommonRootResource master, RemoteService remote, MinionRoot root, @TempDir Path temp,
-            ActivityReporter reporter, @AuthPack String auth) throws IOException {
+            ActivityReporter reporter) throws IOException {
         // add a repository
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
         cfg.name = "ext";
@@ -120,7 +119,7 @@ class ProductCliTest extends BaseMinionCliTest {
         // now import the product into a new hive, ext dependency should be fetched from remote
         Path impHive = temp.resolve("imp-hive");
         hiveTools.execute(InitTool.class, "--hive=" + impHive);
-        remote(remote.getUri(), auth, ProductTool.class, "--hive=" + impHive, "--import=" + pdFile);
+        remote(remote, ProductTool.class, "--hive=" + impHive, "--import=" + pdFile);
 
         // this is the key we expect to be created.
         Manifest.Key prodKey = new Manifest.Key("prod" + ProductManifestBuilder.PRODUCT_KEY_SUFFIX, "1.0.0");
