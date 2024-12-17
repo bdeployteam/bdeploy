@@ -2,46 +2,31 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/io.bdeploy.api.iml" filepath="$PROJECT_DIR$/.idea/modules/api/io.bdeploy.api.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/io.bdeploy.api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api/io.bdeploy.api.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.main.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.test.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.testFixtures.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.testFixtures.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.iml" filepath="$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.test.iml" filepath="$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/doc/io.bdeploy.doc.iml" filepath="$PROJECT_DIR$/.idea/modules/doc/io.bdeploy.doc.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.iml" filepath="$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.main.iml" filepath="$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.test.iml" filepath="$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.iml" filepath="$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.main.iml" filepath="$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.test.iml" filepath="$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.testFixtures.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.main.iml" filepath="$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.test.iml" filepath="$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/logging/io.bdeploy.logging.iml" filepath="$PROJECT_DIR$/.idea/modules/logging/io.bdeploy.logging.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/logging/io.bdeploy.logging.main.iml" filepath="$PROJECT_DIR$/.idea/modules/logging/io.bdeploy.logging.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.iml" filepath="$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.main.iml" filepath="$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.test.iml" filepath="$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/minion/io.bdeploy.minion.iml" filepath="$PROJECT_DIR$/.idea/modules/minion/io.bdeploy.minion.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/minion/io.bdeploy.minion.main.iml" filepath="$PROJECT_DIR$/.idea/modules/minion/io.bdeploy.minion.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/minion/io.bdeploy.minion.test.iml" filepath="$PROJECT_DIR$/.idea/modules/minion/io.bdeploy.minion.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.test.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.testFixtures.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/schema/io.bdeploy.schema.iml" filepath="$PROJECT_DIR$/.idea/modules/schema/io.bdeploy.schema.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/schema/io.bdeploy.schema.main.iml" filepath="$PROJECT_DIR$/.idea/modules/schema/io.bdeploy.schema.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-data/io.bdeploy.test-data.iml" filepath="$PROJECT_DIR$/.idea/modules/test-data/io.bdeploy.test-data.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ui/io.bdeploy.ui.iml" filepath="$PROJECT_DIR$/.idea/modules/ui/io.bdeploy.ui.iml" />
     </modules>
   </component>
 </project>
