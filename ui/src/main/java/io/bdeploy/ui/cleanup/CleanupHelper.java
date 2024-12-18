@@ -271,7 +271,7 @@ public class CleanupHelper {
 
             // keep all InstanceNodeManifests on minion
             SortedSet<Key> inmfs = context.getAllInstanceManifests().stream() //
-                    .filter(im -> im.getName().equals(imKey.getName())) // 
+                    .filter(im -> im.getName().equals(imKey.getName())) //
                     .map(key -> InstanceManifest.of(context.getHive(), key))
                     .flatMap(im -> im.getInstanceNodeManifests().values().stream())
                     .collect(Collectors.toCollection(TreeSet::new));

@@ -186,7 +186,7 @@ public class InstanceNodeConfiguration {
                 CompositeResolver perApp = new CompositeResolver();
                 perApp.add(new ApplicationParameterValueResolver(cfg.id, this));
                 perApp.add(resolver);
-                perApp.add(new EmptyVariableResolver()); // last one: ignore all other expansions. 
+                perApp.add(new EmptyVariableResolver()); // last one: ignore all other expansions.
 
                 // this will update the tracking resolver with all required variables.
                 cfg.renderDescriptor(perApp);

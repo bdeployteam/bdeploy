@@ -93,7 +93,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
     /**
      * Provides access to the root directory for very specific operations outside the normal workflows.
      * If unsure, don't use this, rather use existing other operations.
-     * 
+     *
      * @return the root directory where the manifest database is located.
      */
     public Path getRoot() {
