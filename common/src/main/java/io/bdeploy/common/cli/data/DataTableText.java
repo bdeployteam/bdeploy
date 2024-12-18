@@ -130,9 +130,9 @@ class DataTableText extends DataTableBase {
             for (List<DataTableCell> wrappedRow : wrapped) {
                 StringBuilder sb = new StringBuilder();
                 int colIndex = 0;
-                for (int i = 0; i < wrappedRow.size(); ++i) {
-                    sb.append(content(columnWidths, wrappedRow.get(i).getData(), colIndex, wrappedRow.get(i).getSpan()));
-                    colIndex += wrappedRow.get(i).getSpan();
+                for (DataTableCell cell : wrappedRow) {
+                    sb.append(content(columnWidths, cell.getData(), colIndex, cell.getSpan()));
+                    colIndex += cell.getSpan();
                 }
                 lines.add(sb.toString());
             }

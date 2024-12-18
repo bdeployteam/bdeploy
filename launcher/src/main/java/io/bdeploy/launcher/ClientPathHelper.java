@@ -5,7 +5,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import io.bdeploy.bhive.util.StorageHelper;
@@ -85,9 +84,7 @@ public class ClientPathHelper {
         Path homeDir = lpp.get(SpecialDirectory.HOME);
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(homeDir,
                 p -> p.getFileName().toString().toLowerCase().startsWith(BDEPLOY_PREFIX))) {
-            Iterator<Path> dirs = stream.iterator();
-            while (dirs.hasNext()) {
-                Path nestedRoot = dirs.next();
+            for (Path nestedRoot : stream) {
                 Path nestedHive = nestedRoot.resolve("bhive");
                 if (!nestedHive.toFile().isDirectory()) {
                     continue;
