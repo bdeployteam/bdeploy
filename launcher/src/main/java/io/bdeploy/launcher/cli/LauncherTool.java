@@ -672,14 +672,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if necessary.
         doExecuteLocked(hive, reporter, () -> {
-            installApplication(hive, splash, reporter, clientAppCfg, auditor, serverVersion);
+            installApplication(hive, splash, reporter, auditor, serverVersion);
             return null;
         });
     }
 
     /** Installs the application with all requirements if necessary. */
-    private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
-            ClientApplicationConfiguration clientAppCfg, Auditor auditor, Version serverVersion) {
+    private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter, Auditor auditor,
+            Version serverVersion) {
         // Update scripts
         OperatingSystem os = OsHelper.getRunningOs();
         updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
@@ -687,7 +687,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Check if the application has any missing artifacts
         ApplicationConfiguration appCfg = clientAppCfg.appConfig;
-        Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
+        Collection<String> missing = getMissingArtifacts(hive);
         if (missing.isEmpty()) {
             log.info("Application has no missing artifacts.");
             if (readOnlyHomeDir) {
@@ -799,7 +799,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Checks if the application and ALL the required dependencies are already installed. The check is done by verifying that the
      * target directories are existing. No deep verification is done. The returned list indicates which artifacts are missing.
      */
-    private Collection<String> getMissingArtifacts(BHive hive, ClientApplicationConfiguration clientAppCfg) {
+    private Collection<String> getMissingArtifacts(BHive hive) {
         // Application directory must exist
         // NOTE: Directory is created before by the native installer
         Collection<String> missing = new ArrayList<>();
