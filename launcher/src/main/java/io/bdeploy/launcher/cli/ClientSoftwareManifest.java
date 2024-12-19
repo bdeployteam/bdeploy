@@ -146,6 +146,8 @@ public class ClientSoftwareManifest {
         }
 
         hive.execute(new ManifestDeleteOldByIdOperation().setToDelete(manifestName).setAmountToKeep(1));
+
+        log.info("Updated metadata of application {}", appId);
     }
 
     /**

@@ -690,17 +690,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         Collection<String> missing = getMissingArtifacts(hive);
         if (missing.isEmpty()) {
             log.info("Application has no missing artifacts.");
-            if (readOnlyHomeDir) {
-                log.info("Cannot update server version because home directory is read-only.");
-            } else {
-                ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-                ClientSoftwareConfiguration config = manifest.readNewest(appCfg.id, false);
-                if (config != null) {
-                    config.metadata.serverVersion = serverVersion.toString();
-                    manifest.update(config.clickAndStart.applicationId, config);
-                    log.info("Updated server version to {}", config.metadata.serverVersion);
-                }
-            }
             return;
         }
 
