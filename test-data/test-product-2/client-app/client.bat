@@ -24,7 +24,7 @@ IF %argumentCount%==1 (
 ) ELSE (
 	(
 		ECHO BDeploy Launcher is working!
-		ECHO This file has been written by the demo client application on your system and opened with notepad.
+		ECHO This file has been written by version 2 of the demo client application on your system and opened with notepad.
 		IF %argumentCount%==0 (
 			ECHO No command line arguments were provided.
 		)
