@@ -111,7 +111,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
             try {
                 BHive h = registry.get(hive);
                 if (h == null) {
-                    return entries; // not found = empty. 
+                    return entries; // not found = empty.
                 }
                 RollingFileAuditor a = (RollingFileAuditor) h.getAuditor();
                 logDir = a.getLogDir();

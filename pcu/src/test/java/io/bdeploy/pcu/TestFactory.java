@@ -54,7 +54,7 @@ class TestFactory {
         config.name = name;
         config.processControl = new ProcessControlConfiguration();
         config.processControl.keepAlive = keepAlive;
-        config.processControl.gracePeriod = 250; // 250ms 
+        config.processControl.gracePeriod = 250; // 250ms
         config.processControl.startType = keepAlive ? ApplicationStartType.INSTANCE : ApplicationStartType.MANUAL;
         config.start.addAll(Arrays.asList(script.toString(), argument));
         return config;

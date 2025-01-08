@@ -48,7 +48,7 @@ public class FileSystemSpaceService {
 
         long freeSpace = getFreeSpace(path);
         if (freeSpace < 0) {
-            return true; // safety fallback - we continue even though dangerous.. 
+            return true; // safety fallback - we continue even though dangerous..
         }
         return freeSpace > minFreeBytes.get();
     }
