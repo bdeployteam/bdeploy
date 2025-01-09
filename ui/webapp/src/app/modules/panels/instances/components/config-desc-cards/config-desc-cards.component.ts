@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { MatCard } from '@angular/material/card';
 
 export type AppBaseFields = 'cfg.name' | 'cfg.id';
 
@@ -42,7 +43,7 @@ export type AllFields = AppBaseFields | AppProcessCtrlFields | AppCommandFields 
 @Component({
     selector: 'app-config-desc-cards',
     templateUrl: './config-desc-cards.component.html',
-    standalone: false
+    imports: [MatCard]
 })
 export class ConfigDescCardsComponent {
   @Input() field: AllFields;

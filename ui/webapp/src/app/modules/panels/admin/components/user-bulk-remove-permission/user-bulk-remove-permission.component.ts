@@ -1,18 +1,28 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Subscription, combineLatest, finalize, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, skipWhile, Subscription, switchMap } from 'rxjs';
 import { BulkOperationResultDto } from 'src/app/models/gen.dtos';
 import { ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { UserBulkService } from '../../services/user-bulk.service';
+import {
+  BdBulkOperationResultComponent
+} from '../../../../core/components/bd-bulk-operation-result/bd-bulk-operation-result.component';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { FormsModule } from '@angular/forms';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-user-bulk-remove-permission',
     templateUrl: './user-bulk-remove-permission.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  imports: [BdBulkOperationResultComponent, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormSelectComponent, BdButtonComponent, AsyncPipe]
 })
 export class UserBulkRemovePermissionComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);

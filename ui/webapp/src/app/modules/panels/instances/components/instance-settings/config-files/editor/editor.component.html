@@ -11,16 +11,18 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="!(loading$ | async) && file$ | async as file" class="flex flex-col h-full">
-      <app-bd-editor
-        class="grow basis-0"
-        [(content)]="content"
-        [path]="file"
-        [completions]="completions"
-        [recursivePrefixes]="recursivePrefixes"
-        [markerRegex]="variableExpansionRegex"
-        [createMarker]="markUnresolvedExpansion"
-      ></app-bd-editor>
-    </div>
+    @if (!(loading$ | async) && file$ | async; as file) {
+      <div class="flex flex-col h-full">
+        <app-bd-editor
+          class="grow basis-0"
+          [(content)]="content"
+          [path]="file"
+          [completions]="completions"
+          [recursivePrefixes]="recursivePrefixes"
+          [markerRegex]="variableExpansionRegex"
+          [createMarker]="markUnresolvedExpansion"
+        ></app-bd-editor>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

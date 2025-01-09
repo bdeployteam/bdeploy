@@ -1,15 +1,17 @@
 <div [ngStyle]="hostStyle" class="flex justify-center items-center">
-  <mat-icon
-    [ngStyle]="avatarStyle"
-    *ngIf="(settings.loading$ | async) || !(settings.settings$ | async)?.general?.enableGravatar || !mail"
-    >account_circle</mat-icon
-  >
-  <img
-    *ngIf="(settings.settings$ | async)?.general?.enableGravatar && mail"
-    ngxGravatar
-    fallback="mm"
-    [email]="mail"
-    [size]="avatarSize"
-    alt="user avatar"
-  />
-</div>
+  @if ((settings.loading$ | async) || !(settings.settings$ | async)?.general?.enableGravatar || !mail) {
+    <mat-icon
+      [ngStyle]="avatarStyle"
+      >account_circle</mat-icon
+      >
+    }
+    @if ((settings.settings$ | async)?.general?.enableGravatar && mail) {
+      <img
+        ngxGravatar
+        fallback="mm"
+        [email]="mail"
+        [size]="avatarSize"
+        alt="user avatar"
+        />
+    }
+  </div>

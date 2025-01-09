@@ -1,14 +1,14 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationValidationDto,
   FlattenedInstanceTemplateConfiguration,
   InstanceConfiguration,
-  InstanceNodeConfigurationDto,
+  InstanceNodeConfigurationDto
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -20,11 +20,30 @@ import { ProductsService } from '../../../products/services/products.service';
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceEditService } from '../../services/instance-edit.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { InstanceManagedServerComponent } from '../browser/instance-managed-server/instance-managed-server.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import {
+  BdServerSyncButtonComponent
+} from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdBannerComponent } from '../../../../core/components/bd-banner/bd-banner.component';
+import { ConfigNodeComponent } from './config-node/config-node.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-configuration',
     templateUrl: './configuration.component.html',
     styleUrls: ['./configuration.component.css'],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, InstanceManagedServerComponent, BdButtonComponent, MatDivider, BdServerSyncButtonComponent, BdPanelButtonComponent, MatTooltip, BdDialogContentComponent, BdNotificationCardComponent, BdDataTableComponent, BdBannerComponent, ConfigNodeComponent, BdNoDataComponent, RouterLink, AsyncPipe]
 })
 export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly media = inject(BreakpointObserver);

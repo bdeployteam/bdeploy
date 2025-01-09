@@ -3,53 +3,57 @@
   [(expanded)]="expanded"
   (expandedChange)="expandedChange.emit($event)"
   togglePosition="before"
->
-  <mat-expansion-panel-header *ngIf="(group$ | async) as group">
-    <mat-panel-title>
-      <div class="flex-auto flex justify-start items-center gap-1">
-        <div class="local-padding local-header flex-auto flex flex-col">
-          <div class="flex gap-1 justify-start items-center">
-            <div class="flex flex-col">
-              <div class="bd-type-text">Control Group</div>
-              <div class="bd-title-text">{{ group.name }}</div>
-            </div>
-            <div class="flex-auto"></div>
-            <div class="local-config flex flex-wrap justify-start items-center gap-1" *ngIf="!(narrow$ | async)">
-              <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
-              <div>{{ group.startType }} - {{ group.startWait }}</div>
+  >
+  @if ((group$ | async); as group) {
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <div class="flex-auto flex justify-start items-center gap-1">
+          <div class="local-padding local-header flex-auto flex flex-col">
+            <div class="flex gap-1 justify-start items-center">
+              <div class="flex flex-col">
+                <div class="bd-type-text">Control Group</div>
+                <div class="bd-title-text">{{ group.name }}</div>
+              </div>
+              <div class="flex-auto"></div>
+              @if (!(narrow$ | async)) {
+                <div class="local-config flex flex-wrap justify-start items-center gap-1">
+                  <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
+                  <div>{{ group.startType }} - {{ group.startWait }}</div>
+                  <mat-divider [vertical]="true"></mat-divider>
+                  <mat-icon class="material-symbols-filled">stop</mat-icon>
+                  <div>{{ group.stopType }}</div>
+                </div>
+              }
               <mat-divider [vertical]="true"></mat-divider>
-              <mat-icon class="material-symbols-filled">stop</mat-icon>
-              <div>{{ group.stopType }}</div>
+              <app-bd-button
+                text="Move Up"
+                icon="keyboard_arrow_up"
+                [disabled]="isTop"
+                (click)="onMoveUp()"
+                appClickStopPropagation
+                tooltip="below"
+              ></app-bd-button>
+              <app-bd-button
+                text="Move Down"
+                icon="keyboard_arrow_down"
+                [disabled]="isBottom"
+                (click)="onMoveDown()"
+                appClickStopPropagation
+                tooltip="below"
+              ></app-bd-button>
+              <app-bd-panel-button
+                text="Edit Control Group"
+                icon="edit"
+                [route]="['panels', 'instances', 'config', 'edit-control-group', (node$ | async)?.nodeName, group.name]"
+                appClickStopPropagation
+                tooltip="below"
+              ></app-bd-panel-button>
             </div>
-            <mat-divider [vertical]="true"></mat-divider>
-            <app-bd-button
-              text="Move Up"
-              icon="keyboard_arrow_up"
-              [disabled]="isTop"
-              (click)="onMoveUp()"
-              appClickStopPropagation
-              tooltip="below"
-            ></app-bd-button>
-            <app-bd-button
-              text="Move Down"
-              icon="keyboard_arrow_down"
-              [disabled]="isBottom"
-              (click)="onMoveDown()"
-              appClickStopPropagation
-              tooltip="below"
-            ></app-bd-button>
-            <app-bd-panel-button
-              text="Edit Control Group"
-              icon="edit"
-              [route]="['panels', 'instances', 'config', 'edit-control-group', (node$ | async)?.nodeName, group.name]"
-              appClickStopPropagation
-              tooltip="below"
-            ></app-bd-panel-button>
           </div>
         </div>
-      </div>
-    </mat-panel-title>
-  </mat-expansion-panel-header>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+  }
 
   <div class="flex flex-col">
     <ng-content></ng-content>

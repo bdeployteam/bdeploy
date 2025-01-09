@@ -1,10 +1,11 @@
+@use "sass:map";
 @use "@angular/material" as mat;
 
 @mixin bd-form-toggle-theme($theme) {
   // This is straight from angular materials mat-form-field styles.
   $config: mat.m2-get-color-config($theme);
-  $foreground: map-get($config, foreground);
-  $is-dark-theme: map-get($config, is-dark);
+  $foreground: map.get($config, foreground);
+  $is-dark-theme: map.get($config, is-dark);
   $label-color: mat.m2-get-color-from-palette($foreground, secondary-text, if($is-dark-theme, 0.7, 0.6));
 
   $fill-background: mat.m2-get-color-from-palette($foreground, base, if($is-dark-theme, 0.1, 0.04));

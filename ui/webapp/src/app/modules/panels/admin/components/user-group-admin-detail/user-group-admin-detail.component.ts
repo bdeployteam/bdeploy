@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, finalize, map, Observable, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { ScopedPermission, UserGroupInfo, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -9,11 +9,22 @@ import { UsersColumnsService } from 'src/app/modules/core/services/users-columns
 import { ALL_USERS_GROUP_ID } from 'src/app/modules/core/utils/user-group.utils';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AddUserToGroupComponent } from '../add-user-to-group/add-user-to-group.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-user-group-admin-detail',
     templateUrl: './user-group-admin-detail.component.html',
     styleUrls: ['./user-group-admin-detail.component.css'],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatIcon, MatTooltip, AddUserToGroupComponent, BdDataTableComponent, MatDivider, BdButtonComponent, BdPanelButtonComponent, AsyncPipe]
 })
 export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

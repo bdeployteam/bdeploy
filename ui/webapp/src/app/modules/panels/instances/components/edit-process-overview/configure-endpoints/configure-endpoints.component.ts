@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { Observable, Subscription, combineLatest, of } from 'rxjs';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 import {
   ApplicationConfiguration,
@@ -9,10 +9,14 @@ import {
   InstanceConfigurationDto,
   LinkedValueConfiguration,
   SystemConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
-import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  ContentCompletion
+} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -22,6 +26,19 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
 
+
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { ConfigDescElementComponent } from '../../config-desc-element/config-desc-element.component';
+import { BdValueEditorComponent } from '../../../../../core/components/bd-value-editor/bd-value-editor.component';
+import { AllowedValuesValidatorDirective } from '../../../validators/allowed-values-validator.directive';
+import {
+  BdExpressionToggleComponent
+} from '../../../../../core/components/bd-expression-toggle/bd-expression-toggle.component';
+import { BdFormToggleComponent } from '../../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { BdNoDataComponent } from '../../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
+
 interface HttpEndpointDisabledStatus {
   disabled: boolean;
   reason: string;
@@ -30,7 +47,7 @@ interface HttpEndpointDisabledStatus {
 @Component({
     selector: 'app-configure-endpoints',
     templateUrl: './configure-endpoints.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, FormsModule, ConfigDescElementComponent, BdValueEditorComponent, AllowedValuesValidatorDirective, BdExpressionToggleComponent, BdFormToggleComponent, BdNoDataComponent, AsyncPipe]
 })
 export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnDestroy, AfterViewInit {
   private readonly systems = inject(SystemsService);

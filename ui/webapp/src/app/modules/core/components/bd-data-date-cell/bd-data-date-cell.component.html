@@ -1,4 +1,10 @@
-<div class="flex justify-start" *ngIf="column.data(record) as item">
-  <ng-container *ngIf="!!item">{{ item | date: 'dd.MM.yy HH:mm:ss' }}</ng-container>
-  <ng-container *ngIf="!item">Never</ng-container>
-</div>
+@if (column.data(record); as item) {
+  <div class="flex justify-start">
+    @if (!!item) {
+      {{ item | date: 'dd.MM.yy HH:mm:ss' }}
+    }
+    @if (!item) {
+      Never
+    }
+  </div>
+}

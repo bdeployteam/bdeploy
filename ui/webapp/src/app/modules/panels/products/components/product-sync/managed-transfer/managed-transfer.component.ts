@@ -1,17 +1,25 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest, finalize, map, of } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, finalize, map, of, Subscription } from 'rxjs';
 import { Actions, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsColumnsService } from 'src/app/modules/primary/products/services/products-columns.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-managed-transfer',
     templateUrl: './managed-transfer.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, BdButtonComponent, AsyncPipe]
 })
 export class ManagedTransferComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

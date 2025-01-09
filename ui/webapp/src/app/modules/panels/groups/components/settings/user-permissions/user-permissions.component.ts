@@ -17,11 +17,15 @@ import { GroupUsersService } from 'src/app/modules/panels/groups/services/group-
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { BdDataPermissionLevelCellComponent } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
+import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-instance-group-user-permissions',
     templateUrl: './user-permissions.component.html',
-    standalone: false
+    imports: [BdFormSelectComponent, FormsModule, BdDataTableComponent, AsyncPipe]
 })
 export class UserPermissionsComponent {
   protected readonly groups = inject(GroupsService);

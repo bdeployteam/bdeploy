@@ -1,0 +1,240 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+/**
+ * Classes required for every page's layout. A typical page should be built of three main divs as
+ * follows to create a properly scrolling layout (toolbar not scrolling, content scrolling):
+ *  +-------------------------------------------+
+ *  | class='bd-page-root'                      |
+ *  | +---------------------------------------+ |
+ *  | | class='bd-page-toolbar'               | |
+ *  | +---------------------------------------+ |
+ *  | +---------------------------------------| |
+ *  | |                                       | |
+ *  | +---------------------------------------+ |
+ *  +-------------------------------------------+
+ */
+@mixin root-layout-classes() {
+  /* class for the top level <div> in each route-target component */
+  .bd-page-root {
+    position: absolute;
+
+    height: 100%;
+    width: 100%;
+
+    overflow: hidden;
+  }
+
+  /* a typical toolbar on top of each page */
+  .bd-page-toolbar {
+    position: relative;
+    z-index: 1000;
+
+    @include mat.overridable-elevation(1);
+  }
+
+  /* Layout helper for small icons displayed in table cells and card's detail section */
+  .bd-small-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+
+    position: relative;
+    top: -1px;
+  }
+}
+
+// hack to make bd-text apply to body element
+.bd-text {
+  color: var(--bd-text);
+}
+
+/**
+ * The root style classes provide commonly used styling like highlights, non-theme coloring, shadows, etc.
+ */
+@mixin root-style-classes($theme) {
+  $dark: map.get($theme, "is-dark");
+
+  /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
+  .bd-rect-card {
+    $background: map.get(mat.m2-get-color-config($theme), background);
+    $foreground: map.get(mat.m2-get-color-config($theme), foreground);
+
+    background: mat.m2-get-color-from-palette($background, card);
+    color: mat.m2-get-color-from-palette($foreground, text);
+
+    @include mat.overridable-elevation(2);
+  }
+
+  .bd-toggle-highlight {
+    background-color: var(--bd-main-bar-darker) !important;
+    color: var(--bd-main-bar-contrast) !important;
+  }
+
+  /* Use when wrapping a button in an <a> tag - will remove underlines on button contents */
+  .bd-button-link {
+    text-decoration: none;
+  }
+
+  .bd-hint-text {
+    font-size: smaller;
+    font-style: italic;
+    text-align: center;
+  }
+
+  .bd-description-text {
+    font-size: smaller;
+    color: var(--bd-text-secondary);
+  }
+
+  .bd-secondary-text {
+    color: var(--bd-text-secondary);
+  }
+
+  .bd-disabled-text {
+    color: var(--bd-text-disabled);
+  }
+
+  .bd-type-text {
+    text-transform: uppercase;
+    font-size: smaller;
+    color: var(--bd-text-secondary);
+  }
+
+  .bd-title-text {
+    font-weight: bold;
+    height: 19px;
+  }
+
+  .bd-warning-text {
+    color: var(--bd-warn);
+  }
+
+  .bd-orange-text {
+    color: var(--bd-orange);
+  }
+
+  .bd-success-text {
+    color: var(--bd-text-success);
+  }
+
+  .bd-accent-text {
+    color: var(--bd-accent);
+  }
+
+  .bd-primary-text {
+    color: var(--bd-primary);
+  }
+
+  .bd-text {
+    color: var(--bd-text);
+  }
+
+  .bd-status-border-added {
+    border-left: solid 4px var(--bd-text-success);
+  }
+
+  .bd-status-border-changed {
+    border-left: solid 4px var(--bd-accent);
+  }
+
+  .bd-status-border-invalid {
+    border-left: solid 4px var(--bd-warn);
+  }
+
+  .bd-status-border-none {
+    border-left: solid 4px var(--bd-bg-toolbar);
+  }
+
+  .bd-no-backdrop {
+    background-color: rgba($color: #000000, $alpha: 0);
+  }
+
+  .bd-slight-backdrop {
+    background-color: rgba($color: #000000, $alpha: 0.16);
+  }
+
+  .bd-normal-backdrop {
+    background-color: rgba($color: #000000, $alpha: 0.32);
+  }
+
+  .bd-strong-backdrop {
+    background-color: rgba($color: #000000, $alpha: 0.7);
+  }
+
+  .bd-glow-bg {
+    background: radial-gradient(circle, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 100%);
+    color: var(--bd-main-bar-contrast);
+  }
+
+  .bd-glow-bg-warn {
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
+    color: var(--bd-warn-contrast);
+  }
+
+  .bd-glow-bg-error {
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
+    color: var(--bd-warn-contrast);
+  }
+
+  $drag-color: if(
+                  $dark,
+                  mat.m2-get-color-from-palette(mat.$m2-grey-palette, 800),
+                  mat.m2-get-color-from-palette(mat.$m2-yellow-palette, 200)
+  );
+  $border-color: if(
+                  $dark,
+                  mat.m2-get-color-from-palette(mat.$m2-grey-palette, 300),
+                  mat.m2-get-color-from-palette(mat.$m2-grey-palette, 700)
+  );
+  .bd-drag-card {
+    background-color: $drag-color !important;
+  }
+
+  .bd-drop-card {
+    border: dashed 2px $border-color;
+  }
+
+  .bd-inherited-spinner circle {
+    stroke: currentColor;
+  }
+
+  .bd-bg-toolbar {
+    background-color: var(--bd-bg-toolbar);
+  }
+
+  code {
+    background-color: var(--bd-bg-toolbar);
+    border-radius: 3px;
+    padding: 1px 3px;
+  }
+}
+
+/**
+ * The root spacing classes provide generic spacing, margin, padding classes to be used for all spacing...
+ * They need to be global for overlays (menus, etc.).
+ */
+@mixin root-spacing-classes() {
+  .bd-default-padding {
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+  }
+
+  mat-stepper .mat-vertical-stepper-header {
+    padding: 12px 12px !important;
+  }
+
+  mat-stepper .mat-vertical-content-container {
+    margin-left: 24px !important;
+  }
+
+  mat-stepper .mat-vertical-content {
+    padding: 0px 12px 12px 12px !important;
+  }
+}
+
+@mixin common-classes($theme) {
+  @include root-layout-classes();
+  @include root-style-classes($theme);
+  @include root-spacing-classes();
+}

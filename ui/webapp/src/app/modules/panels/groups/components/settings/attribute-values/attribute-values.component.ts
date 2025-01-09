@@ -5,11 +5,20 @@ import { BdDataColumn } from 'src/app/models/data';
 import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import {
   ACTION_APPLY,
-  ACTION_CANCEL,
+  ACTION_CANCEL
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { GroupDetailsService } from '../../../services/group-details.service';
+import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataDisplayComponent } from '../../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../../core/components/bd-no-data/bd-no-data.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
 
 interface AttributeRow {
   id: string;
@@ -18,9 +27,19 @@ interface AttributeRow {
 }
 
 @Component({
-  selector: 'app-attribute-values',
-  templateUrl: './attribute-values.component.html',
-  standalone: false,
+    selector: 'app-attribute-values',
+    templateUrl: './attribute-values.component.html',
+    imports: [
+        BdFormSelectComponent,
+        FormsModule,
+        BdFormInputComponent,
+      BdDialogComponent,
+        BdDialogToolbarComponent,
+        BdDialogContentComponent,
+        BdDataDisplayComponent,
+        BdNoDataComponent,
+        BdButtonComponent,
+    ],
 })
 export class AttributeValuesComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);

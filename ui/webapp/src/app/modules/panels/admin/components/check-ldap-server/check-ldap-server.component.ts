@@ -4,12 +4,16 @@ import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdTerminalComponent } from '../../../../core/components/bd-terminal/bd-terminal.component';
 
 @Component({
     selector: 'app-check-ldap-server',
     templateUrl: './check-ldap-server.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdTerminalComponent]
 })
 export class CheckLdapServerComponent implements OnInit, OnDestroy {
   private readonly settings = inject(SettingsService);

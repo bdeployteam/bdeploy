@@ -14,6 +14,9 @@ import {
   gatherSpecialExpansions,
   gatherVariableExpansions,
 } from 'src/app/modules/core/utils/linked-values.utils';
+import { MatCard } from '@angular/material/card';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 
 const colVarName: BdDataColumn<LinkVariable> = {
   id: 'name',
@@ -43,7 +46,7 @@ const colVarDesc: BdDataColumn<LinkVariable> = {
     selector: 'app-bd-expression-picker',
     templateUrl: './bd-expression-picker.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatCard, MatTabGroup, MatTab, BdDataTableComponent]
 })
 export class BdExpressionPickerComponent implements OnChanges {
   @Input() process: ApplicationConfiguration;

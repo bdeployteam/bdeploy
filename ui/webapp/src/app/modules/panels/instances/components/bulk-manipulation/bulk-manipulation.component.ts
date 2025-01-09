@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize, map, switchMap } from 'rxjs/operators';
 import { Actions, BulkOperationResultDto, InstanceDto, ProductDto } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   ACTION_OK,
-  BdDialogMessage,
+  BdDialogMessage
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
@@ -13,11 +13,25 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { InstanceBulkService } from '../../services/instance-bulk.service';
 import { ACTION_APPLY } from './../../../../core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import {
+  BdBulkOperationResultComponent
+} from '../../../../core/components/bd-bulk-operation-result/bd-bulk-operation-result.component';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bulk-manipulation',
     templateUrl: './bulk-manipulation.component.html',
-    standalone: false
+  imports: [BdNotificationCardComponent, BdFormSelectComponent, FormsModule, BdBulkOperationResultComponent, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatDivider, BdButtonComponent, AsyncPipe]
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
   protected readonly bulk = inject(InstanceBulkService);

@@ -1,12 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { VariableType } from 'src/app/models/gen.dtos';
 import { PortParam } from '../../../../services/ports-edit.service';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-port-type-cell',
     templateUrl: './port-type-cell.component.html',
     styleUrls: ['./port-type-cell.component.css'],
-    standalone: false
+    imports: [NgClass, MatTooltip]
 })
 export class PortTypeCellComponent implements OnInit {
   @Input() record: PortParam;

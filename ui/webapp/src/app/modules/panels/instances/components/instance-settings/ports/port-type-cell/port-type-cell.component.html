@@ -1,9 +1,10 @@
-<div
-  *ngIf="shortType"
-  class="local-type"
-  [ngClass]="'local-type-' + shortType"
-  [matTooltip]="shortDesc"
-  [matTooltipShowDelay]="500"
->
-  {{shortType}}
-</div>
+@if (shortType) {
+  <div
+    class="local-type"
+    [ngClass]="'local-type-' + shortType"
+    [matTooltip]="shortDesc"
+    [matTooltipShowDelay]="500"
+    >
+    {{shortType}}
+  </div>
+}

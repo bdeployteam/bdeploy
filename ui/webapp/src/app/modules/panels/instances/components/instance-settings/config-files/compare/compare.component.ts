@@ -1,8 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, Subscription, combineLatest, forkJoin, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, forkJoin, of, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdEditorDiffComponent } from 'src/app/modules/core/components/bd-editor-diff/bd-editor-diff.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -10,10 +12,18 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ConfigFilesService } from '../../../../services/config-files.service';
 
+
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import {
+  BdDialogContentComponent
+} from '../../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-compare',
     templateUrl: './compare.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdEditorDiffComponent, AsyncPipe]
 })
 export class CompareComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly edit = inject(InstanceEditService);

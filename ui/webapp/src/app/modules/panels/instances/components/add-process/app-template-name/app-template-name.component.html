@@ -1,14 +1,18 @@
-<div class="flex gap-1 justify-start items-center" *ngIf="!!record.template">
-  <div
-    class="local-template"
-    [matTooltip]="'Creates a pre-configure process applying the ' + record.template.name + ' template to the ' + record.app.appDisplayName + ' application.'"
-  >
-    {{ column.data(record) }}
+@if (!!record.template) {
+  <div class="flex gap-1 justify-start items-center">
+    <div
+      class="local-template"
+      [matTooltip]="'Creates a pre-configure process applying the ' + record.template.name + ' template to the ' + record.app.appDisplayName + ' application.'"
+      >
+      {{ column.data(record) }}
+    </div>
   </div>
-</div>
+}
 
-<div class="flex gap-1 justify-start items-center" *ngIf="!record.template">
-  <div class="local-app" [matTooltip]="'Creates a plain, unconfigured process from ' + record.app.appDisplayName + '.'">
-    {{ column.data(record) }}
+@if (!record.template) {
+  <div class="flex gap-1 justify-start items-center">
+    <div class="local-app" [matTooltip]="'Creates a plain, unconfigured process from ' + record.app.appDisplayName + '.'">
+      {{ column.data(record) }}
+    </div>
   </div>
-</div>
+}

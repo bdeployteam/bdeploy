@@ -1,26 +1,26 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
-import { RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { NavAreasService } from './modules/core/services/nav-areas.service';
+import { LoadingBarModule } from '@ngx-loading-bar/core';
+import { MainNavComponent } from './modules/core/components/main-nav/main-nav.component';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+    imports: [LoadingBarModule, MainNavComponent, RouterOutlet]
 })
-export class AppComponent implements OnInit {
-  subscription: Subscription;
-  loadCount = 0;
+export class AppComponent {
+  private readonly router = inject(Router);
+  private readonly areas = inject(NavAreasService);
 
-  constructor(
-    private readonly router: Router,
-    private readonly areas: NavAreasService,
-    @Inject(DOCUMENT) document: Document,
-  ) {
+  subscription: Subscription;
+
+  constructor() {
+    const document = inject<Document>(DOCUMENT);
+
     console.log('----------------------------------------');
     console.log('BDeploy started...');
     console.log('----------------------------------------');
@@ -28,37 +28,6 @@ export class AppComponent implements OnInit {
     // in case of UI tests we may need some additional classes. this dummy class gives the scope.
     if (environment.uiTest) {
       document.body.classList.add('ui-test');
-    }
-  }
-
-  ngOnInit() {
-    this.subscription = this.areas.primaryRoute$.subscribe((url) => {
-      if (!url) {
-        return;
-      }
-      // safety, reduce load count, route is loaded so it cannot be loading anymore :)
-      // this can happen if lazy loading is initiated but a guard redirects the router
-      // somewhere else.
-      this.decreaseLoadCount();
-    });
-
-    this.subscription.add(
-      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadStart)).subscribe(() => {
-        this.loadCount++;
-      }),
-    );
-
-    this.subscription.add(
-      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadEnd)).subscribe(() => {
-        this.decreaseLoadCount();
-      }),
-    );
-  }
-
-  private decreaseLoadCount() {
-    this.loadCount--;
-    if (this.loadCount < 0) {
-      this.loadCount = 0;
     }
   }
 }

@@ -1,46 +1,50 @@
-<app-bd-data-table
-  #table
-  *ngIf="!_grid && !!records?.length"
-  [caption]="caption"
-  [columns]="columns"
-  [sortData]="sortData"
-  [sort]="sort"
-  [searchData]="searchData"
-  [searchable]="searchable"
-  [grouping]="grouping"
-  [records]="records"
-  [checkMode]="checkMode"
-  [checked]="checked"
-  [checkChangeAllowed]="checkChangeAllowed"
-  [checkChangeForbidden]="checkChangeForbidden"
-  [checkedFrozenWhen$]="checkedFrozenWhen$"
-  [recordRoute]="recordRoute"
-  (checkedChange)="checkedChange.emit($event)"
-  (recordClick)="recordClick.emit($event)"
-></app-bd-data-table>
+@if (!_grid && !!records?.length) {
+  <app-bd-data-table
+    #table
+    [caption]="caption"
+    [columns]="columns"
+    [sortData]="sortData"
+    [sort]="sort"
+    [searchData]="searchData"
+    [searchable]="searchable"
+    [grouping]="grouping"
+    [records]="records"
+    [checkMode]="checkMode"
+    [checked]="checked"
+    [checkChangeAllowed]="checkChangeAllowed"
+    [checkChangeForbidden]="checkChangeForbidden"
+    [checkedFrozenWhen$]="checkedFrozenWhen$"
+    [recordRoute]="recordRoute"
+    (checkedChange)="checkedChange.emit($event)"
+    (recordClick)="recordClick.emit($event)"
+  ></app-bd-data-table>
+}
 
-<app-bd-data-grid
-  #grid
-  *ngIf="_grid && !!records?.length"
-  [columns]="columns"
-  [sortData]="sortData"
-  [sort]="sort"
-  [searchData]="searchData"
-  [searchable]="searchable"
-  [grouping]="!!grouping && !!grouping.length ? grouping[0] : null"
-  [records]="records"
-  [checkMode]="checkMode"
-  [checked]="checked"
-  [checkChangeAllowed]="checkChangeAllowed"
-  [checkChangeForbidden]="checkChangeForbidden"
-  [checkedFrozenWhen$]="checkedFrozenWhen$"
-  [recordRoute]="recordRoute"
-  (checkedChange)="checkedChange.emit($event)"
-  (recordClick)="recordClick.emit($event)"
->
-  <ng-template #dataGridExtraCardDetails let-record="record">
-    <ng-container *ngTemplateOutlet="dataDisplayExtraCardDetails; context: { record }"> </ng-container>
-  </ng-template>
-</app-bd-data-grid>
+@if (_grid && !!records?.length) {
+  <app-bd-data-grid
+    #grid
+    [columns]="columns"
+    [sortData]="sortData"
+    [sort]="sort"
+    [searchData]="searchData"
+    [searchable]="searchable"
+    [grouping]="!!grouping && !!grouping.length ? grouping[0] : null"
+    [records]="records"
+    [checkMode]="checkMode"
+    [checked]="checked"
+    [checkChangeAllowed]="checkChangeAllowed"
+    [checkChangeForbidden]="checkChangeForbidden"
+    [checkedFrozenWhen$]="checkedFrozenWhen$"
+    [recordRoute]="recordRoute"
+    (checkedChange)="checkedChange.emit($event)"
+    (recordClick)="recordClick.emit($event)"
+    >
+    <ng-template #dataGridExtraCardDetails let-record="record">
+      <ng-container *ngTemplateOutlet="dataDisplayExtraCardDetails; context: { record }"> </ng-container>
+    </ng-template>
+  </app-bd-data-grid>
+}
 
-<ng-content *ngIf="!records?.length"></ng-content>
+@if (!records?.length) {
+  <ng-content></ng-content>
+}

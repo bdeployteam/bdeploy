@@ -1,118 +1,118 @@
-<app-bd-dialog [loadingWhen$]="instances.loading$" *ngIf="groups.current$ | async as group">
-  <app-bd-dialog-toolbar header="Instances">
-    <div class="flex-auto"></div>
-    <app-bd-data-sorting
-      [columns]="columns"
-      [sort]="sort"
-      [disabled]="!isCardView"
-      (sortChange)="dataTable.sort = $event"
-    ></app-bd-data-sorting>
-    <app-bd-data-grouping
-      [multiple]="!isCardView"
-      (groupingChange)="dataTable.grouping = $event"
-      [definitions]="grouping"
-      [defaultGrouping]="defaultGrouping"
-      [records]="instances.instances$ | async"
-      [presetKey]="presetKeyValue"
-      [hasGlobalPreset]="true"
-      (globalPresetSaved)="saveGlobalPreset($event)"
-    ></app-bd-data-grouping>
-    <app-bd-button
-      [isToggle]="true"
-      icon="grid_view"
-      text="Toggle Card Mode"
-      [(toggle)]="isCardView"
-      tooltip="below"
-      [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
-    ></app-bd-button>
-    <app-bd-panel-button
-      #bulkMode
-      icon="library_add_check"
-      text="Bulk Manipulation"
-      [route]="['panels', 'instances', 'bulk-manip']"
-      tooltip="below"
-      [disabled]="!(authService.isCurrentScopeWrite$ | async)"
-    ></app-bd-panel-button>
-    <app-bd-button
-      icon="cloud_sync"
-      text="Fetch instance states"
-      tooltip="below"
-      (click)="doSyncAll()"
-      [loadingWhen$]="instances.overallStatesLoading$"
-      [disabled]="instances.overallStatesLoading$| async"
-    ></app-bd-button>
-    <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-panel-button
-      icon="settings"
-      text="Group Settings"
-      [route]="['panels', 'groups', 'settings']"
-      tooltip="below"
-      [disabled]="!!(authService.isCurrentScopedExclusiveReadClient$ | async)"
-    ></app-bd-panel-button>
-
-    <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-button
-      text="Apply System Template..."
-      icon="auto_awesome"
-      tooltip="below"
-      [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
-      [disabled]="!(authService.isCurrentScopeWrite$ | async)"
-    ></app-bd-button>
-    <div matTooltip="{{instanceCreationDisabledReason$ | async}}" [matTooltipDisabled]="allowInstanceCreation$ | async">
-      <app-bd-panel-button
-        icon="add"
-        text="Add Instance..."
-        [route]="['panels', 'instances', 'add']"
+@if (groups.current$ | async; as group) {
+  <app-bd-dialog [loadingWhen$]="instances.loading$">
+    <app-bd-dialog-toolbar header="Instances">
+      <div class="flex-auto"></div>
+      <app-bd-data-sorting
+        [columns]="columns"
+        [sort]="sort"
+        [disabled]="!isCardView"
+        (sortChange)="dataTable.sort = $event"
+      ></app-bd-data-sorting>
+      <app-bd-data-grouping
+        [multiple]="!isCardView"
+        (groupingChange)="dataTable.grouping = $event"
+        [definitions]="grouping"
+        [defaultGrouping]="defaultGrouping"
+        [records]="instances.instances$ | async"
+        [presetKey]="presetKeyValue"
+        [hasGlobalPreset]="true"
+        (globalPresetSaved)="saveGlobalPreset($event)"
+      ></app-bd-data-grouping>
+      <app-bd-button
+        [isToggle]="true"
+        icon="grid_view"
+        text="Toggle Card Mode"
+        [(toggle)]="isCardView"
         tooltip="below"
-        [disabled]="!(allowInstanceCreation$ | async)"
+        [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+      ></app-bd-button>
+      <app-bd-panel-button
+        #bulkMode
+        icon="library_add_check"
+        text="Bulk Manipulation"
+        [route]="['panels', 'instances', 'bulk-manip']"
+        tooltip="below"
+        [disabled]="!(authService.isCurrentScopeWrite$ | async)"
       ></app-bd-panel-button>
-    </div>
-  </app-bd-dialog-toolbar>
-
-  <app-bd-dialog-content>
-    <app-bd-data-display
-      #dataTable
-      [columns]="columns"
-      [records]="instances.instances$ | async"
-      [recordRoute]="getRecordRoute"
-      [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
-      [checked]="bulk.selection$ | async"
-      (checkedChange)="bulk.selection$.next($event)"
-      [checkedFrozenWhen$]="bulk.frozen$"
-      [presetKey]="presetKeyValue"
-      [grid]="isCardView"
-      [sort]="sort"
-    >
-      <app-bd-no-data>
-        <p>No instances have been created yet.</p>
-        <ng-container *ngIf="allowInstanceCreation$ | async">
-          <p>Start by creating a new one.</p>
-          <div class="flex gap-2.5">
+      <app-bd-button
+        icon="cloud_sync"
+        text="Fetch instance states"
+        tooltip="below"
+        (click)="doSyncAll()"
+        [loadingWhen$]="instances.overallStatesLoading$"
+        [disabled]="instances.overallStatesLoading$| async"
+      ></app-bd-button>
+      <mat-divider [vertical]="true"></mat-divider>
+      <app-bd-panel-button
+        icon="settings"
+        text="Group Settings"
+        [route]="['panels', 'groups', 'settings']"
+        tooltip="below"
+        [disabled]="!!(authService.isCurrentScopedExclusiveReadClient$ | async)"
+      ></app-bd-panel-button>
+      <mat-divider [vertical]="true"></mat-divider>
+      <app-bd-button
+        text="Apply System Template..."
+        icon="auto_awesome"
+        tooltip="below"
+        [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
+        [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+      ></app-bd-button>
+      <div matTooltip="{{instanceCreationDisabledReason$ | async}}" [matTooltipDisabled]="allowInstanceCreation$ | async">
+        <app-bd-panel-button
+          icon="add"
+          text="Add Instance..."
+          [route]="['panels', 'instances', 'add']"
+          tooltip="below"
+          [disabled]="!(allowInstanceCreation$ | async)"
+        ></app-bd-panel-button>
+      </div>
+    </app-bd-dialog-toolbar>
+    <app-bd-dialog-content>
+      <app-bd-data-display
+        #dataTable
+        [columns]="columns"
+        [records]="instances.instances$ | async"
+        [recordRoute]="getRecordRoute"
+        [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+        [checked]="bulk.selection$ | async"
+        (checkedChange)="bulk.selection$.next($event)"
+        [checkedFrozenWhen$]="bulk.frozen$"
+        [presetKey]="presetKeyValue"
+        [grid]="isCardView"
+        [sort]="sort"
+        >
+        <app-bd-no-data>
+          <p>No instances have been created yet.</p>
+          @if (allowInstanceCreation$ | async) {
+            <p>Start by creating a new one.</p>
+            <div class="flex gap-2.5">
+              <app-bd-button
+                text="Apply System Template..."
+                icon="auto_awesome"
+                [collapsed]="false"
+                [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
+                [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+              ></app-bd-button>
+              <app-bd-panel-button
+                icon="add"
+                text="Add Instance..."
+                [collapsed]="false"
+                [route]="['panels', 'instances', 'add']"
+              ></app-bd-panel-button>
+            </div>
+          }
+          @if (!(hasProducts$ | async)) {
+            <p>No product is available yet to create one.</p>
             <app-bd-button
-              text="Apply System Template..."
-              icon="auto_awesome"
+              icon="apps"
+              text="Manage Products"
               [collapsed]="false"
-              [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
-              [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+              [routerLink]="['/products', 'browser', areas.groupContext$.value]"
             ></app-bd-button>
-            <app-bd-panel-button
-              icon="add"
-              text="Add Instance..."
-              [collapsed]="false"
-              [route]="['panels', 'instances', 'add']"
-            ></app-bd-panel-button>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="!(hasProducts$ | async)">
-          <p>No product is available yet to create one.</p>
-          <app-bd-button
-            icon="apps"
-            text="Manage Products"
-            [collapsed]="false"
-            [routerLink]="['/products', 'browser', areas.groupContext$.value]"
-          ></app-bd-button>
-        </ng-container>
-      </app-bd-no-data>
-    </app-bd-data-display>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+          }
+        </app-bd-no-data>
+      </app-bd-data-display>
+    </app-bd-dialog-content>
+  </app-bd-dialog>
+}

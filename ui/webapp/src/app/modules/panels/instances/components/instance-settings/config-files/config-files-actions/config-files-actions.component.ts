@@ -1,21 +1,30 @@
-import { Component, Input, OnInit, TemplateRef, ViewChild, forwardRef, inject } from '@angular/core';
+import { Component, forwardRef, inject, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, first, skipWhile } from 'rxjs';
 import { FileStatusType } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   ACTION_CONFIRM,
-  ACTION_OK,
+  ACTION_OK
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import { ConfigFile, ConfigFileStatusType, ConfigFilesService } from '../../../../services/config-files.service';
+import { ConfigFile, ConfigFilesService, ConfigFileStatusType } from '../../../../services/config-files.service';
 import { ConfigFilesComponent } from '../config-files.component';
+
+import { CfgFileNameValidatorDirective } from '../../../../validators/cfg-file-name-validator.directive';
+import { FormsModule } from '@angular/forms';
+import { TrimmedValidator } from '../../../../../../core/validators/trimmed.directive';
+import { BdFileDropComponent } from '../../../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-config-files-actions',
     templateUrl: './config-files-actions.component.html',
-    standalone: false
+  imports: [BdFormInputComponent, CfgFileNameValidatorDirective, FormsModule, TrimmedValidator, BdFileDropComponent, BdButtonComponent, BdPanelButtonComponent, MatTooltip, AsyncPipe]
 })
 export class ConfigFilesActionsComponent implements OnInit {
   private readonly cfgFiles = inject(ConfigFilesService);

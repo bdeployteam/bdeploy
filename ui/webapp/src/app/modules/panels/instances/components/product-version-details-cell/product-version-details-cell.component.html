@@ -3,7 +3,9 @@
     <mat-card appearance="outlined" class="local-details-popup-sizing flex flex-col gap-1 p-2.5">
       <h2>Product Details</h2>
       <mat-chip-listbox>
-        <mat-chip-option *ngFor="let label of labels"><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip-option>
+        @for (label of labels; track label) {
+          <mat-chip-option><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip-option>
+        }
       </mat-chip-listbox>
     </mat-card>
   </div>

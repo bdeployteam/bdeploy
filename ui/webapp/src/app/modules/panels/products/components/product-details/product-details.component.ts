@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { Actions, InstanceUsageDto, ManifestKey, PluginInfoDto, ProductDto } from 'src/app/models/gen.dtos';
@@ -10,6 +10,19 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { InstTemplateData, ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ProductDetailsService } from '../../services/product-details.service';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-button/bd-expand-button.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 const instanceNameColumn: BdDataColumn<InstanceUsageDto> = {
   id: 'name',
@@ -41,11 +54,25 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
 };
 
 @Component({
-  selector: 'app-product-details',
-  templateUrl: './product-details.component.html',
-  styleUrls: ['./product-details.component.css'],
-  providers: [ProductDetailsService],
-  standalone: false,
+    selector: 'app-product-details',
+    templateUrl: './product-details.component.html',
+    styleUrls: ['./product-details.component.css'],
+    providers: [ProductDetailsService],
+    imports: [
+      BdDialogComponent,
+        BdDialogToolbarComponent,
+        BdDialogContentComponent,
+        MatIcon,
+        BdIdentifierComponent,
+        BdExpandButtonComponent,
+        BdDataDisplayComponent,
+        BdNoDataComponent,
+        MatProgressSpinner,
+        BdButtonComponent,
+        BdPanelButtonComponent,
+        MatTooltip,
+        AsyncPipe,
+    ],
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);

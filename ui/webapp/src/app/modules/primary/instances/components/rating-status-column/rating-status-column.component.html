@@ -1,15 +1,19 @@
 <div class="flex justify-start">
-  <mat-icon
-    *ngIf="column.data(record).status === false"
-    class="bd-warning-text"
-    [matTooltip]="column.data(record).message"
-    >warning</mat-icon
-  >
-  <mat-icon
-    *ngIf="column.data(record).status === true"
-    class="bd-success-text"
-    [matTooltip]="column.data(record).message"
-    >done</mat-icon
-  >
-  <mat-icon *ngIf="column.data(record).status === undefined" class="local-unknown">help</mat-icon>
-</div>
+  @if (column.data(record).status === false) {
+    <mat-icon
+      class="bd-warning-text"
+      [matTooltip]="column.data(record).message"
+      >warning</mat-icon
+      >
+    }
+    @if (column.data(record).status === true) {
+      <mat-icon
+        class="bd-success-text"
+        [matTooltip]="column.data(record).message"
+        >done</mat-icon
+        >
+      }
+      @if (column.data(record).status === undefined) {
+        <mat-icon class="local-unknown">help</mat-icon>
+      }
+    </div>

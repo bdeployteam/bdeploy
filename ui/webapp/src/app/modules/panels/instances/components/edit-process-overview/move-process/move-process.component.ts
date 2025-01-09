@@ -7,6 +7,11 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { RouterLink } from '@angular/router';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
 
 interface NodeRow {
   name: string;
@@ -26,7 +31,7 @@ const colNodeName: BdDataColumn<NodeRow> = {
 @Component({
     selector: 'app-move-process',
     templateUrl: './move-process.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, RouterLink, BdDataTableComponent]
 })
 export class MoveProcessComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

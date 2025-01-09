@@ -1,5 +1,7 @@
 import { Component, Input, OnChanges, inject } from '@angular/core';
 import { ClientUsagePerApp, ClientsUsageService } from '../../../services/clients-usage.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { DatePipe } from '@angular/common';
 
 const PERC_PER_DAY = 100 / 29;
 
@@ -7,7 +9,7 @@ const PERC_PER_DAY = 100 / 29;
     selector: 'app-client-usage-graph',
     templateUrl: './usage-graph.component.html',
     styleUrls: ['./usage-graph.component.css'],
-    standalone: false
+    imports: [MatTooltip, DatePipe]
 })
 export class ClientUsageGraphComponent implements OnChanges {
   private readonly clients = inject(ClientsUsageService);

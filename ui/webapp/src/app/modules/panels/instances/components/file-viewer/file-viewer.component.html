@@ -1,17 +1,18 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Viewing {{ (file$ | async)?.path }}" [panel]="true">
     <div class="flex-auto"></div>
-    <app-bd-panel-button
-      *ngIf="showEdit"
-      icon="edit"
-      text="Edit File"
-      tooltip="below"
-      [disabled]="oversized || !canEdit"
-      [route]="['..', 'edit']"
-      [relative]="true"
-      appClickStopPropagation
-      [matTooltip]="oversized ? 'The file is too large for online editing.' : null"
-    ></app-bd-panel-button>
+    @if (showEdit) {
+      <app-bd-panel-button
+        icon="edit"
+        text="Edit File"
+        tooltip="below"
+        [disabled]="oversized || !canEdit"
+        [route]="['..', 'edit']"
+        [relative]="true"
+        appClickStopPropagation
+        [matTooltip]="oversized ? 'The file is too large for online editing.' : null"
+      ></app-bd-panel-button>
+    }
     <app-bd-button
       text="Download File"
       tooltip="left"

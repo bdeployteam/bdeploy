@@ -23,11 +23,11 @@
       [refreshingWhen$]="processes.loading$"
       (manualRefresh)="onManualRefresh()"
     ></app-node-state-panel>
-    <ng-container *ngIf="!(collapsed$ | async)">
+    @if (!(collapsed$ | async)) {
       <mat-divider></mat-divider>
-    </ng-container>
+    }
   </div>
-  <ng-container *ngIf="!(collapsed$ | async)">
+  @if (!(collapsed$ | async)) {
     <app-node-process-list
       class="bd-default-padding"
       [node]="node"
@@ -35,5 +35,5 @@
       [groupingWhen$]="groupingWhen$"
       [bulkMode]="bulkMode"
     ></app-node-process-list>
-  </ng-container>
+  }
 </div>

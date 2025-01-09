@@ -4,52 +4,52 @@
   "newProjectRoot": "projects",
   "projects": {
     "webapp": {
-      "root": "",
-      "sourceRoot": "src",
       "projectType": "application",
-      "prefix": "app",
       "schematics": {
-        "@schematics/angular:component": {
+        "@schematics/angular:class": {
           "skipTests": true
+        },
+        "@schematics/angular:component": {
+          "skipTests": true,
+          "standalone": false
         },
         "@schematics/angular:directive": {
+          "skipTests": true,
+          "standalone": false
+        },
+        "@schematics/angular:guard": {
           "skipTests": true
         },
-        "@schematics/angular:modules": {
+        "@schematics/angular:interceptor": {
           "skipTests": true
         },
         "@schematics/angular:pipe": {
+          "skipTests": true,
+          "standalone": false
+        },
+        "@schematics/angular:resolver": {
           "skipTests": true
         },
         "@schematics/angular:service": {
           "skipTests": true
-        },
-        "@schematics/angular:class": {
-          "skipTests": true
         }
       },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "customWebpackConfig": {
-              "path": "./webpack-build.config.js",
-              "mergeRules": {
-                "externals": "replace"
-              }
-            },
-            "allowedCommonJsDependencies": ["clone-deep"],
             "outputPath": "dist/webapp",
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "src/tsconfig.app.json",
+            "browser": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
             "assets": [
-              "src/favicon.ico",
               "src/assets",
-              "src/bootstrap.css",
-              "src/browsercheck.js",
-              "src/badbrowser.html",
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor",
@@ -57,171 +57,121 @@
               }
             ],
             "styles": [
+              "src/styles/bootstrap.css",
               {
-                "input": "src/app-theme.scss"
+                "input": "src/styles/app-theme.scss"
               },
               "src/styles.css"
             ],
-            "scripts": [],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true
+            "stylePreprocessorOptions": {
+              "sass": {
+                "silenceDeprecations": [
+                  "import"
+                ]
+              }
+            },
+            "allowedCommonJsDependencies": [
+              "@xterm/xterm",
+              "@xterm/addon-fit",
+              "@xterm/addon-search",
+              "@xterm/addon-webgl",
+              "ts-md5/dist/md5",
+              "he",
+              "tiny-emitter",
+              "cross-fetch",
+              "p-cancelable"
+            ],
+            "scripts": []
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "4mb",
-                  "maximumError": "6mb"
+                  "maximumWarning": "4MB",
+                  "maximumError": "6MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ]
-            },
-            "central": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ]
-            },
-            "managed": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ]
-            },
-            "cov-standalone": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
                 }
               ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "ui-test": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cypress.ts"
-                }
-              ]
-            },
-            "cov-central": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cypress.ts"
-                }
-              ]
-            },
-            "cov-managed": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cypress.ts"
+                  "with": "src/environments/environment.uitest.ts"
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "ngx-build-plus:dev-server",
-          "options": {
-            "buildTarget": "webapp:build",
-            "proxyConfig": "src/proxy/proxy.conf.js"
-          },
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "webapp:build:production"
             },
+            "standalone": {
+              "buildTarget": "webapp:build:development",
+              "proxyConfig": "src/proxy/proxy.dev-standalone.json",
+              "port": 4200
+            },
             "central": {
-              "buildTarget": "webapp:build:central",
-              "proxyConfig": "src/proxy/proxy.conf.dev-central.js",
+              "buildTarget": "webapp:build:development",
+              "proxyConfig": "src/proxy/proxy.dev-central.json",
               "port": 4201
             },
             "managed": {
-              "buildTarget": "webapp:build:managed",
-              "proxyConfig": "src/proxy/proxy.conf.dev-managed.js",
+              "buildTarget": "webapp:build:development",
+              "proxyConfig": "src/proxy/proxy.dev-managed.json",
               "port": 4202
             },
-            "cov-standalone": {
-              "buildTarget": "webapp:build:cov-standalone",
-              "proxyConfig": "src/proxy/proxy.conf.cov-standalone.js",
-              "port": 4210,
-              "extraWebpackConfig": "./cypress/coverage.webpack.js"
+            "uitest-standalone": {
+              "buildTarget": "webapp:build:ui-test",
+              "proxyConfig": "src/proxy/proxy.uitest-standalone.json",
+              "port": 4210
             },
-            "cov-central": {
-              "buildTarget": "webapp:build:cov-central",
-              "proxyConfig": "src/proxy/proxy.conf.cov-central.js",
-              "port": 4211,
-              "extraWebpackConfig": "./cypress/coverage.webpack.js"
+            "uitest-central": {
+              "buildTarget": "webapp:build:ui-test",
+              "proxyConfig": "src/proxy/proxy.uitest-central.json",
+              "port": 4211
             },
-            "cov-managed": {
-              "buildTarget": "webapp:build:cov-managed",
-              "proxyConfig": "src/proxy/proxy.conf.cov-managed.js",
-              "port": 4212,
-              "extraWebpackConfig": "./cypress/coverage.webpack.js"
+            "uitest-managed": {
+              "buildTarget": "webapp:build:ui-test",
+              "proxyConfig": "src/proxy/proxy.uitest-managed.json",
+              "port": 4212
             }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular/build:extract-i18n",
-          "options": {
-            "buildTarget": "webapp:build"
-          }
+          },
+          "defaultConfiguration": "standalone"
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }
     }
   },
   "cli": {
-    "analytics": false,
-    "schematicCollections": ["@angular-eslint/schematics"]
-  },
-  "schematics": {
-    "@angular-eslint/schematics:application": {
-      "setParserOptionsProject": true
-    },
-    "@angular-eslint/schematics:library": {
-      "setParserOptionsProject": true
-    }
+    "schematicCollections": [
+      "angular-eslint"
+    ]
   }
 }

@@ -6,6 +6,11 @@ import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataPopoverCellComponent } from 'src/app/modules/core/components/bd-data-popover-cell/bd-data-popover-cell.component';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
 
 const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
   id: 'pid',
@@ -58,7 +63,7 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
 @Component({
     selector: 'app-process-natives',
     templateUrl: './process-natives.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent]
 })
 export class ProcessNativesComponent implements OnInit, OnDestroy {
   protected readonly details = inject(ProcessDetailsService);

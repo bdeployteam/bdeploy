@@ -2,60 +2,65 @@
   <app-bd-dialog-toolbar header="User Details" [panel]="true"> </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="user$ | async as user">
-      <div class="flex gap-2.5">
-        <app-user-avatar [mail]="user?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
-        <div class="flex-auto grid grid-cols-[70px_auto] gap-1">
-          <div><strong>Username:</strong></div>
-          <div class="truncate" [matTooltip]="user.name" [matTooltipShowDelay]="1000">{{ user.name }}</div>
-          <div><strong>Full Name:</strong></div>
-          <div class="truncate" [matTooltip]="user.fullName" [matTooltipShowDelay]="1000">{{ user.fullName }}</div>
-          <div><strong>E-Mail:</strong></div>
-          <div class="truncate" [matTooltip]="user.email" [matTooltipShowDelay]="1000">{{ user.email }}</div>
+    @if (user$ | async; as user) {
+      <div class="flex flex-col gap-2.5">
+        <div class="flex gap-2.5">
+          <app-user-avatar [mail]="user?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
+          <div class="flex-auto grid grid-cols-[70px_auto] gap-1">
+            <div><strong>Username:</strong></div>
+            <div class="truncate" [matTooltip]="user.name" [matTooltipShowDelay]="1000">{{ user.name }}</div>
+            <div><strong>Full Name:</strong></div>
+            <div class="truncate" [matTooltip]="user.fullName" [matTooltipShowDelay]="1000">{{ user.fullName }}</div>
+            <div><strong>E-Mail:</strong></div>
+            <div class="truncate" [matTooltip]="user.email" [matTooltipShowDelay]="1000">{{ user.email }}</div>
+          </div>
         </div>
+        @if (user.inactive) {
+          <div class="local-chip local-inactive-chip">INACTIVE</div>
+        }
+        @if (isCurrentUser) {
+          <div class="local-chip local-inactive-chip">Current user - editing restricted.</div>
+        }
+        <app-bd-data-table [records]="user.permissions" [columns]="permColumns"></app-bd-data-table>
+        @if (!user.inactive) {
+          <app-bd-button
+            [disabled]="isCurrentUser"
+            [collapsed]="false"
+            icon="person_off"
+            text="Deactivate Account"
+            (click)="onSetInactive(user, true)"
+          ></app-bd-button>
+        }
+        @if (user.inactive) {
+          <app-bd-button
+            [disabled]="isCurrentUser"
+            [collapsed]="false"
+            icon="person"
+            text="Activate Account"
+            (click)="onSetInactive(user, false)"
+          ></app-bd-button>
+        }
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Assign Permission..."
+          icon="security"
+          [route]="['panels', 'admin', 'user-detail', user.name, 'permission']"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Edit User..."
+          icon="edit"
+          [route]="['panels', 'admin', 'user-detail', user.name, 'edit']"
+          [disabled]="isCurrentUser"
+        ></app-bd-panel-button>
+        <app-bd-button
+          [disabled]="isCurrentUser"
+          icon="delete"
+          text="Delete User"
+          [collapsed]="false"
+          (click)="onDelete(user)"
+        ></app-bd-button>
       </div>
-
-      <div class="local-chip local-inactive-chip" *ngIf="user.inactive">INACTIVE</div>
-      <div class="local-chip local-inactive-chip" *ngIf="isCurrentUser">Current user - editing restricted.</div>
-
-      <app-bd-data-table [records]="user.permissions" [columns]="permColumns"></app-bd-data-table>
-
-      <app-bd-button
-        [disabled]="isCurrentUser"
-        *ngIf="!user.inactive"
-        [collapsed]="false"
-        icon="person_off"
-        text="Deactivate Account"
-        (click)="onSetInactive(user, true)"
-      ></app-bd-button>
-      <app-bd-button
-        [disabled]="isCurrentUser"
-        *ngIf="user.inactive"
-        [collapsed]="false"
-        icon="person"
-        text="Activate Account"
-        (click)="onSetInactive(user, false)"
-      ></app-bd-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Assign Permission..."
-        icon="security"
-        [route]="['panels', 'admin', 'user-detail', user.name, 'permission']"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Edit User..."
-        icon="edit"
-        [route]="['panels', 'admin', 'user-detail', user.name, 'edit']"
-        [disabled]="isCurrentUser"
-      ></app-bd-panel-button>
-      <app-bd-button
-        [disabled]="isCurrentUser"
-        icon="delete"
-        text="Delete User"
-        [collapsed]="false"
-        (click)="onDelete(user)"
-      ></app-bd-button>
-    </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

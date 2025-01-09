@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { CustomDataGrouping, InstanceDto, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -18,10 +18,23 @@ import { InstancesService } from '../../services/instances.service';
 import { BdDataDisplayComponent } from './../../../../core/components/bd-data-display/bd-data-display.component';
 import { OverallStatusColumnComponent } from './overall-status-column/overall-status-column.component';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDataSortingComponent } from '../../../../core/components/bd-data-sorting/bd-data-sorting.component';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { RouterLink } from '@angular/router';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-instances-browser',
     templateUrl: './browser.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDataSortingComponent, BdDataGroupingComponent, BdButtonComponent, BdPanelButtonComponent, MatDivider, RouterLink, MatTooltip, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent, AsyncPipe]
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   private readonly config = inject(ConfigService);

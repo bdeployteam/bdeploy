@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
-import { PopupPosition } from '../bd-popup/bd-popup.directive';
+import { PopupPosition, BdPopupDirective } from '../bd-popup/bd-popup.directive';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 @Component({
     selector: 'app-bd-button-popup',
     templateUrl: './bd-button-popup.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdButtonComponent, BdPopupDirective]
 })
 export class BdButtonPopupComponent {
   @Input() text: string;

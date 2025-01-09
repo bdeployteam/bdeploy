@@ -1,16 +1,24 @@
-import { Component, HostListener, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, HostListener, inject, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logging-admin.service';
 
+
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdEditorComponent } from '../../../../core/components/bd-editor/bd-editor.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-log-config-editor',
     templateUrl: './log-config-editor.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdEditorComponent, AsyncPipe]
 })
 export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
   private readonly loggingAdmin = inject(LoggingAdminService);

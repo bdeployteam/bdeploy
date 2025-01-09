@@ -21,13 +21,17 @@ import { EditorPlugin } from 'src/app/modules/core/plugins/plugin.editor';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
 import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
+import { MatCard } from '@angular/material/card';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-bd-custom-editor',
     templateUrl: './bd-custom-editor.component.html',
     styleUrls: ['./bd-custom-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatCard, BdButtonComponent, MatIcon, BdPopupDirective, MatTooltip]
 })
 export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewInit {
   private readonly plugins = inject(PluginService);

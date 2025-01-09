@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
@@ -15,19 +15,19 @@ enum DirtyActionType {
 const actCancel: BdDialogMessageAction<DirtyActionType> = {
   name: 'Stay',
   result: DirtyActionType.CANCEL,
-  confirm: true,
+  confirm: true
 };
 
 const actDiscard: BdDialogMessageAction<DirtyActionType> = {
   name: 'Discard',
   result: DirtyActionType.DISCARD,
-  confirm: false,
+  confirm: false
 };
 
 const actSave: BdDialogMessageAction<DirtyActionType> = {
   name: 'Save',
   result: DirtyActionType.SAVE,
-  confirm: false,
+  confirm: false
 };
 
 /**
@@ -64,14 +64,14 @@ export interface DirtyableDialog {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class DirtyDialogGuard {
   private readonly areas = inject(NavAreasService);
   private readonly router = inject(Router);
 
   canDeactivate(component: DirtyableDialog): Observable<boolean> {
-    const ignore = this.router.getCurrentNavigation()?.extras?.state?.ignoreDirtyGuard;
+    const ignore = this.router.getCurrentNavigation()?.extras?.state?.['ignoreDirtyGuard'];
     if (ignore) {
       return of(true); // forced navigation.
     }
@@ -108,7 +108,7 @@ export class DirtyDialogGuard {
             // ask confirmation on the actual component (the primary one in this case).
             return this.confirmAndSavePrimaryComponent(panelSave, component);
           }
-        }),
+        })
       );
     }
 
@@ -146,17 +146,17 @@ export class DirtyDialogGuard {
               }
               this.areas.forcePanelClose$.next(closeDialog);
               return of(closeDialog);
-            }),
+            })
           );
         }
         return of(true);
-      }),
+      })
     );
   }
 
   private confirmAndSavePrimaryComponent(
     panelSave: Observable<boolean>,
-    component: DirtyableDialog,
+    component: DirtyableDialog
   ): Observable<boolean> {
     return panelSave.pipe(
       switchMap(() =>
@@ -177,9 +177,9 @@ export class DirtyDialogGuard {
               this.areas.closePanel(true);
               return of(false);
             }
-          }),
-        ),
-      ),
+          })
+        )
+      )
     );
   }
 
@@ -191,14 +191,14 @@ export class DirtyDialogGuard {
         message:
           'The dialog contains unsaved changes. Save the changes before leaving? You may also stay and continue editing.',
         icon: 'save',
-        actions: canSave ? [actCancel, actDiscard, actSave] : [actCancel, actDiscard],
+        actions: canSave ? [actCancel, actDiscard, actSave] : [actCancel, actDiscard]
       })
       .pipe(
         tap((result) => {
           if (result === DirtyActionType.DISCARD) {
             console.warn('User confirmed discarding pending changes.');
           }
-        }),
+        })
       );
   }
 }

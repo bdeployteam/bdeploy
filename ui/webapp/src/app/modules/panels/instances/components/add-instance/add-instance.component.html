@@ -4,10 +4,14 @@
   <app-bd-dialog-content>
     <form class="flex flex-col gap-2.5" #form="ngForm" (ngSubmit)="onSave()">
       <div>Creating instance: <strong>{{ config.id }}</strong></div>
-      <div class="bd-warning-text" *ngIf="!prodList?.length">No products are available. Upload a product first.</div>
-      <div class="bd-warning-text" *ngIf="isCentral && !serverList?.length">
-        No managed server available. Link a managed server first.
-      </div>
+      @if (!prodList?.length) {
+        <div class="bd-warning-text">No products are available. Upload a product first.</div>
+      }
+      @if (isCentral && !serverList?.length) {
+        <div class="bd-warning-text">
+          No managed server available. Link a managed server first.
+        </div>
+      }
       <app-bd-form-input label="Name" name="name" [(ngModel)]="config.name" required appTrimmed></app-bd-form-input>
       <app-bd-form-input
         label="Description"
@@ -68,20 +72,21 @@
         name="productFilterRegex"
         [(ngModel)]="config.productFilterRegex"
       ></app-bd-form-input>
-      <app-bd-form-select
-        *ngIf="isCentral"
-        label="Managed Server"
-        name="server"
-        [(ngModel)]="server"
-        [values]="serverList"
-        [labels]="serverNames"
-        required
-        (ngModelChange)="delayRevalidateSystem(form.controls['system'])"
-      ></app-bd-form-select>
+      @if (isCentral) {
+        <app-bd-form-select
+          label="Managed Server"
+          name="server"
+          [(ngModel)]="server"
+          [values]="serverList"
+          [labels]="serverNames"
+          required
+          (ngModelChange)="delayRevalidateSystem(form.controls['system'])"
+        ></app-bd-form-select>
+      }
       <div
         matTooltip="Either a mandatory field is missing or a given value is invalid"
         [matTooltipDisabled]="!form.invalid"
-      >
+        >
         <app-bd-button
           type="submit"
           text="Save"

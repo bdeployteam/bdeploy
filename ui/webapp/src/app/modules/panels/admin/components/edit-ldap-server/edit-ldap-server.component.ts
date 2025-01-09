@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, combineLatest, debounceTime, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, Observable, of, Subscription } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -9,11 +9,19 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-edit-ldap-server',
     templateUrl: './edit-ldap-server.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormToggleComponent, BdButtonComponent, AsyncPipe]
 })
 export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly settings = inject(SettingsService);
@@ -37,7 +45,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
           return;
         }
         this.tempServer = cloneDeep(this.initialServer);
-      }),
+      })
     );
   }
 
@@ -48,7 +56,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.isDirty$.next(this.isDirty());
-      }),
+      })
     );
   }
 
@@ -60,6 +68,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.tempServer && this.initialServer) {
       return isDirty(this.tempServer, this.initialServer);
     }
+    return false;
   }
 
   public canSave(): boolean {

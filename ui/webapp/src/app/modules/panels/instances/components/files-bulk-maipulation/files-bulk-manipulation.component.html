@@ -11,15 +11,16 @@
         icon="cloud_download"
         (click)="filesBulkService.downloadFiles(filesBulkService.selectedFiles)"
       ></app-bd-button>
-      <app-bd-button
-        *ngIf="showDelete"
-        [collapsed]="false"
-        [disabled]="!filesBulkService.selection.length || (deleting$ | async)"
-        [loadingWhen$]="deleting$"
-        text="Delete Selected Files"
-        icon="delete"
-        (click)="onDelete()"
-      ></app-bd-button>
+      @if (showDelete) {
+        <app-bd-button
+          [collapsed]="false"
+          [disabled]="!filesBulkService.selection.length || (deleting$ | async)"
+          [loadingWhen$]="deleting$"
+          text="Delete Selected Files"
+          icon="delete"
+          (click)="onDelete()"
+        ></app-bd-button>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

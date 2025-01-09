@@ -15,13 +15,18 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { InstancesService } from '../../../services/instances.service';
 import { NodeApplicationPort, PortsService } from '../../../services/ports.service';
 import { ProcessesService } from '../../../services/processes.service';
-import { StateItem, StateType } from '../state-panel/state-panel.component';
+import { StateItem, StateType, NodeStatePanelComponent } from '../state-panel/state-panel.component';
+import { BdPanelButtonComponent } from '../../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { NodeHeaderComponent } from './header/header.component';
+import { MatDivider } from '@angular/material/divider';
+import { NodeProcessListComponent } from './process-list/process-list.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-instance-server-node',
     templateUrl: './server-node.component.html',
     styleUrls: ['./server-node.component.css'],
-    standalone: false
+    imports: [BdPanelButtonComponent, NodeHeaderComponent, NodeStatePanelComponent, MatDivider, NodeProcessListComponent, AsyncPipe]
 })
 export class ServerNodeComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

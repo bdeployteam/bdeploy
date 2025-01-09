@@ -1,13 +1,37 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { AfterViewInit, Component, EventEmitter, inject, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
+import { FormsModule, NgForm } from '@angular/forms';
+import {
+  MatTree,
+  MatTreeFlatDataSource,
+  MatTreeFlattener,
+  MatTreeNode,
+  MatTreeNodeDef,
+  MatTreeNodePadding,
+  MatTreeNodeToggle
+} from '@angular/material/tree';
 import { debounceTime, skipWhile, Subscription } from 'rxjs';
 import { ApplicationDto, ApplicationStartType, ConfigDirDto } from 'src/app/models/gen.dtos';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
+import { MatCard } from '@angular/material/card';
+import { MatIconButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { ConfigDescElementComponent } from '../../../config-desc-element/config-desc-element.component';
+import { BdFormInputComponent } from '../../../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../../../core/validators/trimmed.directive';
+import { EditProcessNameValidatorDirective } from '../../../../validators/edit-process-name-validator.directive';
+import { BdFormSelectComponent } from '../../../../../../core/components/bd-form-select/bd-form-select.component';
+import { BdFormToggleComponent } from '../../../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { EditItemInListValidatorDirective } from '../../../../../../core/validators/edit-item-in-list.directive';
+import { ClickStopPropagationDirective } from '../../../../../../core/directives/click-stop-propagation.directive';
+
+import { AsyncPipe } from '@angular/common';
 
 export class DirTreeNode {
   name: string;
@@ -19,7 +43,7 @@ export class DirTreeNode {
     selector: 'app-config-process-header',
     templateUrl: './config-process-header.component.html',
     styleUrls: ['./config-process-header.component.css'],
-    standalone: false
+  imports: [MatCard, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, BdButtonComponent, FormsModule, ConfigDescElementComponent, BdFormInputComponent, TrimmedValidator, EditProcessNameValidatorDirective, BdFormSelectComponent, BdFormToggleComponent, MatTooltip, EditItemInListValidatorDirective, ClickStopPropagationDirective, BdPopupDirective, AsyncPipe]
 })
 export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly instances = inject(InstancesService);

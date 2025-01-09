@@ -7,7 +7,7 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <form #form="ngForm" class="flex flex-col gap-1">
-        <ng-container *ngIf="!(loading$ | async)">
+        @if (!(loading$ | async)) {
           <app-bd-form-input
             name="fullName"
             label="Full Name"
@@ -23,7 +23,7 @@
             email
             appTrimmed
           ></app-bd-form-input>
-          <ng-container *ngIf="!tempUser.external">
+          @if (!tempUser.external) {
             <app-bd-form-input
               name="pass"
               label="New Password"
@@ -46,12 +46,12 @@
               [required]="!!tempUser.password?.length"
             ></app-bd-form-input>
             <password-strength-meter [password]="tempUser.password"></password-strength-meter>
-          </ng-container>
-        </ng-container>
+          }
+        }
       </form>
-      <ng-container *ngIf="tempUser.external">
+      @if (tempUser.external) {
         <mat-divider></mat-divider>
-        <ng-container *ngIf="tempUser.externalSystem === 'LDAP'">
+        @if (tempUser.externalSystem === 'LDAP') {
           <p>
             The user is currently authenticated by
             <strong>{{tempUser.externalTag ? tempUser.externalTag : 'any configured server'}}</strong>
@@ -75,16 +75,16 @@
             [collapsed]="false"
             (click)="tempUser.externalTag = null; updateDirty()"
           ></app-bd-button>
-        </ng-container>
-        <ng-container *ngIf="tempUser.externalSystem === 'OIDC'">
+        }
+        @if (tempUser.externalSystem === 'OIDC') {
           <app-bd-button
             text="Switch to LDAP Provider"
             icon="badge"
             [collapsed]="false"
             (click)="tempUser.externalSystem = 'LDAP'; tempUser.externalTag = ''; updateDirty()"
           ></app-bd-button>
-        </ng-container>
-      </ng-container>
+        }
+      }
       <app-bd-button
         color="primary"
         [collapsed]="false"

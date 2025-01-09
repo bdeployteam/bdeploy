@@ -1,149 +1,155 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [panel]="true" header="History Details"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="entry$ | async as entry" class="flex flex-col gap-2.5">
-      <div class="flex gap-2.5">
-        <app-user-avatar [mail]="entry?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
-        <div class="flex-auto grid grid-cols-[70px_auto] gap-1 items-center">
-          <div><strong>Username:</strong></div>
-          <div class="truncate" [matTooltip]="entry.user" [matTooltipShowDelay]="1000">{{ entry.user }}</div>
-          <div><strong>E-Mail:</strong></div>
-          <div class="truncate" [matTooltip]="entry.email" [matTooltipShowDelay]="1000">{{ entry.email }}</div>
+    @if (entry$ | async; as entry) {
+      <div class="flex flex-col gap-2.5">
+        <div class="flex gap-2.5">
+          <app-user-avatar [mail]="entry?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
+          <div class="flex-auto grid grid-cols-[70px_auto] gap-1 items-center">
+            <div><strong>Username:</strong></div>
+            <div class="truncate" [matTooltip]="entry.user" [matTooltipShowDelay]="1000">{{ entry.user }}</div>
+            <div><strong>E-Mail:</strong></div>
+            <div class="truncate" [matTooltip]="entry.email" [matTooltipShowDelay]="1000">{{ entry.email }}</div>
+          </div>
         </div>
-      </div>
-      <div class="grid gap-1 items-center grid-cols-[100px_auto]">
-        <div>Occurred at:</div>
-        <div>{{ entry.timestamp | date: 'dd.MM.yyy HH:mm:ss' }}</div>
-        <div>Type:</div>
-        <div>{{ entry.type }}</div>
-        <div>Version:</div>
-        <div>{{ entry.instanceTag }}</div>
-        <div>Event:</div>
-        <div>{{ entry.title }}</div>
-        <ng-container *ngIf="!!entry.runtimeEvent">
-          <div>Node:</div>
-          <div>{{ entry.runtimeEvent.node }}</div>
-          <div>Runtime State:</div>
-          <div>{{ entry.runtimeEvent.state }}</div>
-          <div>PID:</div>
-          <div>{{ entry.runtimeEvent.pid }}</div>
-          <div>Exit Code:</div>
-          <div>{{ entry.runtimeEvent.exitCode }}</div>
-        </ng-container>
-      </div>
-      <ng-container *ngIf="isCreate">
-        <app-bd-panel-button
-          [collapsed]="false"
-          [toggle]="false"
-          icon="visibility"
-          text="Show Details"
-          [relative]="true"
-          [route]="['view', entry.instanceTag]"
-        ></app-bd-panel-button>
-        <app-bd-button
-          [collapsed]="false"
-          [toggle]="false"
-          icon="visibility"
-          [text]="hasProduct ? 'View Product' : 'Product N/A'"
-          [disabled]="!hasProduct"
-          (click)="goToProductPage()"
-        ></app-bd-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          [toggle]="false"
-          icon="compare"
-          text="Compare with Current"
-          [disabled]="entry.instanceTag === (instances.current$ | async)?.instance.tag"
-          [relative]="true"
-          [route]="['compare', entry.instanceTag, (instances.current$ | async)?.instance.tag]"
-        ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          [toggle]="false"
-          icon="compare"
-          text="Compare with Active"
-          [disabled]="!(instances.current$ | async)?.activeVersion?.tag || entry.instanceTag === (instances.current$ | async).activeVersion?.tag"
-          [relative]="true"
-          [route]="['compare', entry.instanceTag, (instances.current$ | async)?.activeVersion?.tag]"
-        ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          [toggle]="false"
-          icon="compare"
-          text="Compare with Version"
-          [relative]="true"
-          [route]="['select', entry.instanceTag]"
-        ></app-bd-panel-button>
-        <app-bd-button
-          [collapsed]="false"
-          [toggle]="false"
-          icon="file_download"
-          text="Export"
-          (click)="doExport()"
-        ></app-bd-button>
-        <app-bd-button
-          *ngIf="auth.isCurrentScopeAdmin$ | async"
-          [collapsed]="false"
-          [toggle]="false"
-          icon="delete"
-          text="Delete"
-          (click)="doDelete()"
-          [disabled]="(mappedDelete$ | async) || isInstalled"
-          [loadingWhen$]="mappedDelete$"
-        ></app-bd-button>
-        <ng-container *ngIf="state$ | async as state">
-          <mat-divider></mat-divider>
-          <app-bd-notification-card
-            icon="sync"
-            [type]="'warning'"
-            [dismissable]="false"
-            header="Server Not Synchronized"
-            *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-          >
-            <div class="text-justify">
-              The managed server responsible for this instance is not synchronized, version controls are unavailable.
-              Please synchronize the server to use these controls.
-            </div>
-          </app-bd-notification-card>
+        <div class="grid gap-1 items-center grid-cols-[100px_auto]">
+          <div>Occurred at:</div>
+          <div>{{ entry.timestamp | date: 'dd.MM.yyy HH:mm:ss' }}</div>
+          <div>Type:</div>
+          <div>{{ entry.type }}</div>
+          <div>Version:</div>
+          <div>{{ entry.instanceTag }}</div>
+          <div>Event:</div>
+          <div>{{ entry.title }}</div>
+          @if (!!entry.runtimeEvent) {
+            <div>Node:</div>
+            <div>{{ entry.runtimeEvent.node }}</div>
+            <div>Runtime State:</div>
+            <div>{{ entry.runtimeEvent.state }}</div>
+            <div>PID:</div>
+            <div>{{ entry.runtimeEvent.pid }}</div>
+            <div>Exit Code:</div>
+            <div>{{ entry.runtimeEvent.exitCode }}</div>
+          }
+        </div>
+        @if (isCreate) {
+          <app-bd-panel-button
+            [collapsed]="false"
+            [toggle]="false"
+            icon="visibility"
+            text="Show Details"
+            [relative]="true"
+            [route]="['view', entry.instanceTag]"
+          ></app-bd-panel-button>
           <app-bd-button
             [collapsed]="false"
-            text="Install"
-            icon="deployed_code_update"
-            color="primary"
-            [disabled]="(mappedInstall$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
-            (click)="doInstall()"
-            [loadingWhen$]="mappedInstall$"
+            [toggle]="false"
+            icon="visibility"
+            [text]="hasProduct ? 'View Product' : 'Product N/A'"
+            [disabled]="!hasProduct"
+            (click)="goToProductPage()"
           ></app-bd-button>
+          <app-bd-panel-button
+            [collapsed]="false"
+            [toggle]="false"
+            icon="compare"
+            text="Compare with Current"
+            [disabled]="entry.instanceTag === (instances.current$ | async)?.instance.tag"
+            [relative]="true"
+            [route]="['compare', entry.instanceTag, (instances.current$ | async)?.instance.tag]"
+          ></app-bd-panel-button>
+          <app-bd-panel-button
+            [collapsed]="false"
+            [toggle]="false"
+            icon="compare"
+            text="Compare with Active"
+            [disabled]="!(instances.current$ | async)?.activeVersion?.tag || entry.instanceTag === (instances.current$ | async).activeVersion?.tag"
+            [relative]="true"
+            [route]="['compare', entry.instanceTag, (instances.current$ | async)?.activeVersion?.tag]"
+          ></app-bd-panel-button>
+          <app-bd-panel-button
+            [collapsed]="false"
+            [toggle]="false"
+            icon="compare"
+            text="Compare with Version"
+            [relative]="true"
+            [route]="['select', entry.instanceTag]"
+          ></app-bd-panel-button>
           <app-bd-button
             [collapsed]="false"
-            text="Activate"
-            icon="deployed_code_alert"
-            color="primary"
+            [toggle]="false"
+            icon="file_download"
+            text="Export"
+            (click)="doExport()"
+          ></app-bd-button>
+          @if (auth.isCurrentScopeAdmin$ | async) {
+            <app-bd-button
+              [collapsed]="false"
+              [toggle]="false"
+              icon="delete"
+              text="Delete"
+              (click)="doDelete()"
+              [disabled]="(mappedDelete$ | async) || isInstalled"
+              [loadingWhen$]="mappedDelete$"
+            ></app-bd-button>
+          }
+          @if (state$ | async; as state) {
+            <mat-divider></mat-divider>
+            @if (!(servers.isCurrentInstanceSynchronized$ | async)) {
+              <app-bd-notification-card
+                icon="sync"
+                [type]="'warning'"
+                [dismissable]="false"
+                header="Server Not Synchronized"
+                >
+                <div class="text-justify">
+                  The managed server responsible for this instance is not synchronized, version controls are unavailable.
+                  Please synchronize the server to use these controls.
+                </div>
+              </app-bd-notification-card>
+            }
+            <app-bd-button
+              [collapsed]="false"
+              text="Install"
+              icon="deployed_code_update"
+              color="primary"
+              [disabled]="(mappedInstall$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
+              (click)="doInstall()"
+              [loadingWhen$]="mappedInstall$"
+            ></app-bd-button>
+            <app-bd-button
+              [collapsed]="false"
+              text="Activate"
+              icon="deployed_code_alert"
+              color="primary"
             [disabled]="
               (mappedActivate$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
-            (click)="doActivate()"
-            [loadingWhen$]="mappedActivate$"
-          ></app-bd-button>
-          <app-bd-button
-            [collapsed]="false"
-            text="Uninstall"
-            icon="delete_forever"
+              (click)="doActivate()"
+              [loadingWhen$]="mappedActivate$"
+            ></app-bd-button>
+            <app-bd-button
+              [collapsed]="false"
+              text="Uninstall"
+              icon="delete_forever"
             [disabled]="
               (mappedUninstall$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
-            (click)="doUninstall()"
-            [loadingWhen$]="mappedUninstall$"
-          ></app-bd-button>
-        </ng-container>
-      </ng-container>
-    </div>
-  </app-bd-dialog-content>
-  <app-bd-dialog-content *ngIf="!(entry$ | async)">
-    <app-bd-notification-card icon="deployed_code_history" [type]="'warning'" [dismissable]="false" header="No Information">
-      <div class="text-justify">
-        The selected history entry cannot be retrieved. Please select another one from the list.
+              (click)="doUninstall()"
+              [loadingWhen$]="mappedUninstall$"
+            ></app-bd-button>
+          }
+        }
       </div>
-    </app-bd-notification-card>
+    }
   </app-bd-dialog-content>
+  @if (!(entry$ | async)) {
+    <app-bd-dialog-content>
+      <app-bd-notification-card icon="deployed_code_history" [type]="'warning'" [dismissable]="false" header="No Information">
+        <div class="text-justify">
+          The selected history entry cannot be retrieved. Please select another one from the list.
+        </div>
+      </app-bd-notification-card>
+    </app-bd-dialog-content>
+  }
 </app-bd-dialog>

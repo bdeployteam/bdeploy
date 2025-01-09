@@ -16,8 +16,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: PropagateErrorValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class PropagateErrorValidatorDirective implements Validator {
   @Input('appPropagateErrorValidator') error: string;

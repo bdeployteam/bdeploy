@@ -9,8 +9,13 @@ import {
   inject,
 } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
-import { TooltipPosition } from '@angular/material/tooltip';
+import { TooltipPosition, MatTooltip } from '@angular/material/tooltip';
 import { BehaviorSubject, Observable, fromEvent } from 'rxjs';
+import { MatButton } from '@angular/material/button';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inherit';
 
@@ -19,7 +24,7 @@ export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inh
     templateUrl: './bd-button.component.html',
     styleUrls: ['./bd-button.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatButton, NgClass, MatTooltip, MatIcon, MatBadge, MatProgressSpinner, AsyncPipe]
 })
 export class BdButtonComponent implements AfterViewInit {
   private readonly _elementRef = inject(ElementRef);

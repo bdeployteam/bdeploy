@@ -17,13 +17,15 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="!(loading$ | async) && file$ | async as file" class="flex flex-col h-full">
-      <app-bd-editor-diff
-        class="grow basis-0"
-        [(modifiedContent)]="content"
-        [originalContent]="contentTemplate"
-        [path]="file"
-      ></app-bd-editor-diff>
-    </div>
+    @if (!(loading$ | async) && file$ | async; as file) {
+      <div class="flex flex-col h-full">
+        <app-bd-editor-diff
+          class="grow basis-0"
+          [(modifiedContent)]="content"
+          [originalContent]="contentTemplate"
+          [path]="file"
+        ></app-bd-editor-diff>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

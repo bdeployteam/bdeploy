@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { UserInfo } from 'src/app/models/gen.dtos';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-add-user-to-group',
     templateUrl: './add-user-to-group.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdFormInputComponent, FormsModule, MatIcon]
 })
 export class AddUserToGroupComponent {
   @Input() suggestedUsers: UserInfo[];

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { Actions, ManagedMasterDto } from 'src/app/models/gen.dtos';
@@ -11,11 +11,22 @@ import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../services/server-details.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import {
+  BdServerSyncButtonComponent
+} from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+
 @Component({
     selector: 'app-server-details',
     templateUrl: './server-details.component.html',
     providers: [ServerDetailsService],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatIcon, BdButtonComponent, MatTooltip, BdPanelButtonComponent, BdServerSyncButtonComponent, AsyncPipe, DatePipe]
 })
 export class ServerDetailsComponent implements OnInit {
   private readonly actions = inject(ActionsService);

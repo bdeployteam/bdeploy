@@ -1,119 +1,121 @@
-<ng-container *ngIf="diff$ | async as diff">
-  <div [ngClass]="borderClass" *ngIf="diff.type !== 'not-in-base'">
-    <div class="local-padding local-header flex flex-col">
-      <div class="flex flex-wrap gap-1 justify-start items-center">
-        <div class="flex justify-start items-center">
-          <ng-template #namePopup>
-            <app-config-desc-cards field="inst.name"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Name:</div>
-          <strong>
+@if (diff$ | async; as diff) {
+  @if (diff.type !== 'not-in-base') {
+    <div [ngClass]="borderClass">
+      <div class="local-padding local-header flex flex-col">
+        <div class="flex flex-wrap gap-1 justify-start items-center">
+          <div class="flex justify-start items-center">
+            <ng-template #namePopup>
+              <app-config-desc-cards field="inst.name"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Name:</div>
+            <strong>
+              <app-history-diff-field
+                [diffSide]="diffSide"
+                [diff]="diff.name"
+                [popup]="namePopup"
+              ></app-history-diff-field>
+            </strong>
+            <div>,</div>
+          </div>
+          <div class="flex justify-start items-center">
+            <ng-template #instProdPopup>
+              <app-config-desc-cards field="inst.productTag"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Product Version:</div>
+            <strong>
+              <app-history-diff-field
+                [diffSide]="diffSide"
+                [diff]="diff.productTag"
+                [popup]="instProdPopup"
+              ></app-history-diff-field>
+            </strong>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1 justify-start items-center">
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instDescPopup>
+              <app-config-desc-cards field="inst.description"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Description:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
-              [diff]="diff.name"
-              [popup]="namePopup"
+              [diff]="diff.description"
+              [popup]="instDescPopup"
             ></app-history-diff-field>
-          </strong>
-          <div>,</div>
-        </div>
-        <div class="flex justify-start items-center">
-          <ng-template #instProdPopup>
-            <app-config-desc-cards field="inst.productTag"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Product Version:</div>
-          <strong>
+            <div>,</div>
+          </div>
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instPurposePopup>
+              <app-config-desc-cards field="inst.purpose"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Purpose:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
-              [diff]="diff.productTag"
-              [popup]="instProdPopup"
+              [diff]="diff.purpose"
+              [popup]="instPurposePopup"
             ></app-history-diff-field>
-          </strong>
-        </div>
-      </div>
-      <div class="flex flex-wrap gap-1 justify-start items-center">
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instDescPopup>
-            <app-config-desc-cards field="inst.description"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Description:</div>
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            [diff]="diff.description"
-            [popup]="instDescPopup"
-          ></app-history-diff-field>
-          <div>,</div>
-        </div>
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instPurposePopup>
-            <app-config-desc-cards field="inst.purpose"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Purpose:</div>
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            [diff]="diff.purpose"
-            [popup]="instPurposePopup"
-          ></app-history-diff-field>
-          <div>,</div>
-        </div>
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instAutoStartPopup>
-            <app-config-desc-cards field="inst.autoStart"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Auto Start:</div>
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            [diff]="diff.autoStart"
-            [popup]="instAutoStartPopup"
-          ></app-history-diff-field>
-          <div>,</div>
-        </div>
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instAutoUninstallPopup>
-            <app-config-desc-cards field="inst.autoUninstall"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Auto Uninstall:</div>
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            [diff]="diff.autoUninstall"
-            [popup]="instAutoUninstallPopup"
-          ></app-history-diff-field>
-          <div>,</div>
-        </div>
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instCfgPopup>
-            <app-config-desc-cards field="inst.configTree"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Config ID:</div>
-          <app-history-diff-field
-            [maxWidthPx]="60"
-            [diffSide]="diffSide"
-            [diff]="diff.configTree"
-            [popup]="instCfgPopup"
-          ></app-history-diff-field>
-        </div>
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instSysPopup>
-            <app-config-desc-cards field="inst.systemId"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">System ID:</div>
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            [diff]="diff.system"
-            [popup]="instSysPopup"
-          ></app-history-diff-field>
-        </div>
-        <div class="bd-description-text flex justify-start items-center">
-          <ng-template #instSysTagPopup>
-            <app-config-desc-cards field="inst.systemTag"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">System Ver.:</div>
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            [diff]="diff.systemTag"
-            [popup]="instSysTagPopup"
-          ></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instAutoStartPopup>
+              <app-config-desc-cards field="inst.autoStart"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Auto Start:</div>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.autoStart"
+              [popup]="instAutoStartPopup"
+            ></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instAutoUninstallPopup>
+              <app-config-desc-cards field="inst.autoUninstall"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Auto Uninstall:</div>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.autoUninstall"
+              [popup]="instAutoUninstallPopup"
+            ></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instCfgPopup>
+              <app-config-desc-cards field="inst.configTree"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">Config ID:</div>
+            <app-history-diff-field
+              [maxWidthPx]="60"
+              [diffSide]="diffSide"
+              [diff]="diff.configTree"
+              [popup]="instCfgPopup"
+            ></app-history-diff-field>
+          </div>
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instSysPopup>
+              <app-config-desc-cards field="inst.systemId"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">System ID:</div>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.system"
+              [popup]="instSysPopup"
+            ></app-history-diff-field>
+          </div>
+          <div class="bd-description-text flex justify-start items-center">
+            <ng-template #instSysTagPopup>
+              <app-config-desc-cards field="inst.systemTag"></app-config-desc-cards>
+            </ng-template>
+            <div class="mr-1">System Ver.:</div>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.systemTag"
+              [popup]="instSysTagPopup"
+            ></app-history-diff-field>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</ng-container>
+  }
+}

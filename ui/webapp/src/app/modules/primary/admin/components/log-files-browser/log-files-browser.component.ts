@@ -6,11 +6,20 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { RemoteDirectory, RemoteDirectoryEntry } from '../../../../../models/gen.dtos';
 import { LogColumnsService } from '../../services/log-columns.service';
 import { LoggingAdminService } from '../../services/logging-admin.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-log-files-browser',
     templateUrl: './log-files-browser.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdPanelButtonComponent, MatDivider, BdButtonComponent, BdDialogContentComponent, MatTabGroup, MatTab, BdDataTableComponent, AsyncPipe]
 })
 export class LogFilesBrowserComponent implements OnInit {
   private readonly cols = inject(LogColumnsService);

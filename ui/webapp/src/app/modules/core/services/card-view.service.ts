@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CardViewService {
   public checkCardView(presetKey: string): boolean {
@@ -13,9 +13,9 @@ export class CardViewService {
           return tempParsedValue[key] ? tempParsedValue[key] : false;
         }
       }
-    } else {
-      return false;
     }
+
+    return false;
   }
 
   public setCardView(presetKey: string, value: boolean): void {

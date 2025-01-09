@@ -2,8 +2,7 @@ import { Component, ComponentRef, Input, OnDestroy, OnInit, Type, ViewContainerR
 
 @Component({
     selector: 'app-bd-form-select-component-option',
-    templateUrl: './bd-form-select-component-option.component.html',
-    standalone: false
+    templateUrl: './bd-form-select-component-option.component.html'
 })
 export class BdFormSelectComponentOptionComponent<T, X> implements OnInit, OnDestroy {
   private readonly vc = inject(ViewContainerRef);

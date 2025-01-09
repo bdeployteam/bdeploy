@@ -1,23 +1,27 @@
-<ng-container *ngIf="diff$ | async as diffs">
-  <div [ngClass]="borderClass" *ngIf="diffs.type !== 'not-in-base'">
-    <div class="local-padding local-header flex flex-col">
-      <div class="bd-description-text">Instance Variables:</div>
-      <div class="flex flex-wrap gap-1 justify-start items-center">
-        <ng-container *ngFor="let diff of diffs.diffs; let i = index">
-          <ng-template #varPopup>
-            <bd-variable-desc-card [variable]="diff.base"></bd-variable-desc-card>
-          </ng-template>
-          <div class="mr-1">{{diff.key}}:</div>
-          <strong>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.value"
-              [popup]="varPopup"
-            ></app-history-diff-field>
-          </strong>
-          <div *ngIf="i !== diffs.diffs.length -1">,</div>
-        </ng-container>
+@if (diff$ | async; as diffs) {
+  @if (diffs.type !== 'not-in-base') {
+    <div [ngClass]="borderClass">
+      <div class="local-padding local-header flex flex-col">
+        <div class="bd-description-text">Instance Variables:</div>
+        <div class="flex flex-wrap gap-1 justify-start items-center">
+          @for (diff of diffs.diffs; track diff; let i = $index) {
+            <ng-template #varPopup>
+              <bd-variable-desc-card [variable]="diff.base"></bd-variable-desc-card>
+            </ng-template>
+            <div class="mr-1">{{diff.key}}:</div>
+            <strong>
+              <app-history-diff-field
+                [diffSide]="diffSide"
+                [diff]="diff.value"
+                [popup]="varPopup"
+              ></app-history-diff-field>
+            </strong>
+            @if (i !== diffs.diffs.length -1) {
+              <div>,</div>
+            }
+          }
+        </div>
       </div>
     </div>
-  </div>
-</ng-container>
+  }
+}

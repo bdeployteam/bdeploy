@@ -8,6 +8,17 @@ import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { NavAreasService } from '../../services/nav-areas.service';
+import { MatCard } from '@angular/material/card';
+import { BdActionsComponent } from '../bd-actions/bd-actions.component';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MainNavButtonComponent } from '../main-nav-button/main-nav-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { VersionPipe } from '../../pipes/version.pipe';
+import { VersionShortPipe } from '../../pipes/version-short.pipe';
 
 @Component({
     selector: 'app-main-nav-menu',
@@ -36,7 +47,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
             transition('closed => open', [animate('0.2s ease')]),
         ]),
     ],
-    standalone: false
+    imports: [MatCard, BdActionsComponent, NgClass, MainNavButtonComponent, MatDivider, MatTooltip, BdPopupDirective, MatProgressSpinner, BdButtonComponent, AsyncPipe, VersionPipe, VersionShortPipe]
 })
 export class MainNavMenuComponent {
   protected readonly cfgService = inject(ConfigService);

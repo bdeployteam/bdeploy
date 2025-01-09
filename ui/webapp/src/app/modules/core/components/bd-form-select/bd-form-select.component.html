@@ -8,26 +8,36 @@
       [required]="required"
       [disabled]="disabled"
       [errorStateMatcher]="this"
-    >
-      <ng-container *ngIf="!component">
-        <mat-option *ngIf="!values || !values.length || allowNone">--</mat-option>
-        <mat-option *ngFor="let value of values; let i = index" [value]="value"
-          >{{ !!labels && !!labels[i] ? labels[i] : values[i] }}</mat-option
-        >
-      </ng-container>
+      >
+      @if (!component) {
+        @if (!values || !values.length || allowNone) {
+          <mat-option>--</mat-option>
+        }
+        @for (value of values; track value; let i = $index) {
+          <mat-option [value]="value"
+            >{{ !!labels && !!labels[i] ? labels[i] : values[i] }}</mat-option
+            >
+          }
+        }
 
-      <ng-container *ngIf="component">
-        <mat-option *ngFor="let value of values; let i = index" [value]="value">
-          <app-bd-form-select-component-option
-            [componentType]="component"
-            [option]="value"
-          ></app-bd-form-select-component-option>
-        </mat-option>
-      </ng-container>
-    </mat-select>
-    <div *ngIf="prefix" matPrefix>
-      <ng-container *ngTemplateOutlet="prefix"></ng-container>
-    </div>
-    <mat-error *ngIf="ngControl && ngControl.invalid">{{ getErrorMessage() }}</mat-error>
-  </mat-form-field>
-</div>
+        @if (component) {
+          @for (value of values; track value; let i = $index) {
+            <mat-option [value]="value">
+              <app-bd-form-select-component-option
+                [componentType]="component"
+                [option]="value"
+              ></app-bd-form-select-component-option>
+            </mat-option>
+          }
+        }
+      </mat-select>
+      @if (prefix) {
+        <div matPrefix>
+          <ng-container *ngTemplateOutlet="prefix"></ng-container>
+        </div>
+      }
+      @if (ngControl && ngControl.invalid) {
+        <mat-error>{{ getErrorMessage() }}</mat-error>
+      }
+    </mat-form-field>
+  </div>

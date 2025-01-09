@@ -5,13 +5,15 @@
   [matTooltip]="groupByFull"
   matTooltipPosition="below"
   matTooltipShowDelay="500"
->
+  >
   <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5">
     <div class="flex gap-1 justify-end items-center">
       <mat-form-field class="preset-select" appearance="outline">
         <mat-label>Favorite</mat-label>
         <mat-select [value]="presetType" (valueChange)="setPresetType($event)">
-          <mat-option *ngFor="let fav of presetTypes" [value]="fav">{{ capitalize(fav) }}</mat-option>
+          @for (fav of presetTypes; track fav) {
+            <mat-option [value]="fav">{{ capitalize(fav) }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
       <app-bd-button
@@ -37,35 +39,38 @@
         cdkDropList
         cdkDropListOrientation="horizontal"
         (cdkDropListDropped)="onDrop($event)"
-      >
-        <app-bd-data-grouping-panel
-          *ngFor="let grp of groupings; let i = index"
-          cdkDrag
-          [definitions]="availableDefinitions"
-          [records]="records"
-          [index]="i"
-          [(grouping)]="groupings[i]"
-          (groupingChange)="fireUpdate()"
-          [popupEmitter]="popup.popupOpened"
-          [removeDisabled]="groupings.length === 1 && !groupings[0].definition"
-          (removeClicked)="removeGrouping($event)"
         >
-          <mat-icon cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]">drag_indicator</mat-icon>
-        </app-bd-data-grouping-panel>
+        @for (grp of groupings; track grp; let i = $index) {
+          <app-bd-data-grouping-panel
+            cdkDrag
+            [definitions]="availableDefinitions"
+            [records]="records"
+            [index]="i"
+            [(grouping)]="groupings[i]"
+            (groupingChange)="fireUpdate()"
+            [popupEmitter]="popup.popupOpened"
+            [removeDisabled]="groupings.length === 1 && !groupings[0].definition"
+            (removeClicked)="removeGrouping($event)"
+            >
+            <mat-icon cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]">drag_indicator</mat-icon>
+          </app-bd-data-grouping-panel>
+        }
       </div>
 
       <!-- the management panel add new groupings -->
-      <div class="flex flex-col gap-1 pt-1 items-center" *ngIf="multiple">
-        <ng-container>
-          <app-bd-button
-            text="Add"
-            icon="add"
-            tooltip="above"
-            (click)="addGrouping()"
-            [disabled]="groupings.length >= 5"
-          ></app-bd-button>
-        </ng-container>
-      </div>
+      @if (multiple) {
+        <div class="flex flex-col gap-1 pt-1 items-center">
+          <ng-container>
+            <app-bd-button
+              text="Add"
+              icon="add"
+              tooltip="above"
+              (click)="addGrouping()"
+              [disabled]="groupings.length >= 5"
+            ></app-bd-button>
+          </ng-container>
+        </div>
+      }
     </div>
   </mat-card>
 </app-bd-button-popup>

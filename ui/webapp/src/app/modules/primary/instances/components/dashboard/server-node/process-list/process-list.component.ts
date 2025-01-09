@@ -1,11 +1,11 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, filter } from 'rxjs';
+import { AfterViewInit, Component, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, filter, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
   InstanceNodeConfigurationListDto,
-  ParameterConfiguration,
+  ParameterConfiguration
 } from 'src/app/models/gen.dtos';
 import { BdDataDisplayComponent } from 'src/app/modules/core/components/bd-data-display/bd-data-display.component';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -16,6 +16,10 @@ import { ProcessesBulkService } from '../../../../services/processes-bulk.servic
 import { ProcessesColumnsService } from '../../../../services/processes-columns.service';
 import { PortsService } from './../../../../services/ports.service';
 
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
+
 interface PinnedParameter {
   name: string;
   value: string;
@@ -25,7 +29,7 @@ export const CONTROL_GROUP_COL_ID = 'ctrlGroup';
 @Component({
     selector: 'app-node-process-list',
     templateUrl: './process-list.component.html',
-    standalone: false
+  imports: [BdDataDisplayComponent, MatIcon, MatTooltip, AsyncPipe]
 })
 export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly appCols = inject(ProcessesColumnsService);

@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -10,10 +10,20 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdImageUploadComponent } from '../../../../core/components/bd-image-upload/bd-image-upload.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { IdentifierValidator } from '../../../../core/validators/identifier.directive';
+import { EditUniqueValueValidatorDirective } from '../../../../core/validators/edit-unique-value.directive';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+
 @Component({
     selector: 'app-add-group',
     templateUrl: './add-group.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdImageUploadComponent, BdFormInputComponent, IdentifierValidator, EditUniqueValueValidatorDirective, TrimmedValidator, BdFormToggleComponent, BdButtonComponent]
 })
 export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly groups = inject(GroupsService);

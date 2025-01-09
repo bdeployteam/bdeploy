@@ -1,5 +1,8 @@
-<mat-card appearance="outlined" *ngIf="!!descriptor" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
-  <div>Variable <strong>{{ descriptor.name }}</strong><em *ngIf="descriptor.fixed"> (fixed)</em></div>
+@if (!!descriptor) {
+  <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
+    <div>Variable <strong>{{ descriptor.name }}</strong>@if (descriptor.fixed) {
+      <em> (fixed)</em>
+    }</div>
   <div class="grid grid-cols-[100px_auto] gap-1 p-2.5">
     <strong><div>Name:</div></strong>
     <div>{{ descriptor.name }}</div>
@@ -15,38 +18,54 @@
     </div>
     <strong><div>Default Value:</div></strong>
     <div class="break-all">
-      <code *ngIf="!!descriptor.defaultValue?.value; else defaultIsExpression"
-        >{{ descriptor.defaultValue ? (descriptor.type === 'PASSWORD' ?
-        '*'.repeat(descriptor.defaultValue?.value?.length) : descriptor.defaultValue?.value) : '(none)' }}</code
-      >
-      <ng-template #defaultIsExpression>
+      @if (!!descriptor.defaultValue?.value) {
         <code
-          >{{ descriptor.defaultValue ? (descriptor.type === 'PASSWORD' ?
-          '*'.repeat(descriptor.defaultValue?.linkExpression?.length) : descriptor.defaultValue?.linkExpression) :
-          '(none)' }}</code
+        >{{
+            descriptor.defaultValue ? (descriptor.type === 'PASSWORD' ?
+              '*'.repeat(descriptor.defaultValue?.value?.length) : descriptor.defaultValue?.value) : '(none)'
+          }}</code
         >
-      </ng-template>
+      } @else {
+        <code
+        >{{
+            descriptor.defaultValue ? (descriptor.type === 'PASSWORD' ?
+                '*'.repeat(descriptor.defaultValue?.linkExpression?.length) : descriptor.defaultValue?.linkExpression) :
+              '(none)'
+          }}</code
+        >
+      }
     </div>
-    <ng-container *ngIf="descriptor?.validateRegex">
-      <strong><div>Validation:</div></strong>
+    @if (descriptor?.validateRegex) {
+      <strong>
+        <div>Validation:</div>
+      </strong>
       <code>{{ descriptor.validateRegex }}</code>
-    </ng-container>
+    }
   </div>
-</mat-card>
-<mat-card *ngIf="!descriptor" appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
-  <div>Variable <strong>{{ variable?.id }}</strong></div>
-  <div class="p-2.5 grid grid-cols-[100px_auto] gap-1">
-    <strong><div>Description:</div></strong>
-    <div>{{ variable?.description }}</div>
-    <strong><div>Type:</div></strong>
-    <div>
-      <code>{{ variable?.type || 'STRING' }}</code>
-    </div>
-    <ng-container *ngIf="variable?.customEditor">
-      <strong><div>Custom Editor:</div></strong>
+  </mat-card>
+}
+@if (!descriptor) {
+  <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
+    <div>Variable <strong>{{ variable?.id }}</strong></div>
+    <div class="p-2.5 grid grid-cols-[100px_auto] gap-1">
+      <strong>
+        <div>Description:</div>
+      </strong>
+      <div>{{ variable?.description }}</div>
+      <strong>
+        <div>Type:</div>
+      </strong>
       <div>
-        <code>{{ variable?.customEditor }}</code>
+        <code>{{ variable?.type || 'STRING' }}</code>
       </div>
-    </ng-container>
-  </div>
-</mat-card>
+      @if (variable?.customEditor) {
+        <strong>
+          <div>Custom Editor:</div>
+        </strong>
+        <div>
+          <code>{{ variable?.customEditor }}</code>
+        </div>
+      }
+    </div>
+  </mat-card>
+}

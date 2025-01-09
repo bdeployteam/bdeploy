@@ -2,92 +2,96 @@
   <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="server">
-      <div class="p-3 grid grid-cols-[102px_auto] gap-2.5 items-center">
-        <strong>Name:</strong>
-        <div class="truncate">{{ server.hostName }}</div>
-        <strong>Description:</strong>
-        <div class="truncate">{{ server.description }}</div>
-        <strong>URI:</strong>
-        <div class="truncate">{{ server.uri }}</div>
-        <strong>Last Sync.:</strong>
-        <div>{{ server.lastSync | date: 'dd.MM.yyyy HH:mm' }}</div>
-        <strong>Last Message:</strong>
-        <div>{{ server.lastMessageReceived | date: 'dd.MM.yyyy HH:mm' }}</div>
-        <ng-container *ngIf="server.update?.updateAvailable">
-          <strong>Update available:</strong>
-          <div class="flex justify-start items-center">
-            {{ version }}
-            <mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
+    @if (server) {
+      <div class="flex flex-col gap-2.5">
+        <div class="p-3 grid grid-cols-[102px_auto] gap-2.5 items-center">
+          <strong>Name:</strong>
+          <div class="truncate">{{ server.hostName }}</div>
+          <strong>Description:</strong>
+          <div class="truncate">{{ server.description }}</div>
+          <strong>URI:</strong>
+          <div class="truncate">{{ server.uri }}</div>
+          <strong>Last Sync.:</strong>
+          <div>{{ server.lastSync | date: 'dd.MM.yyyy HH:mm' }}</div>
+          <strong>Last Message:</strong>
+          <div>{{ server.lastMessageReceived | date: 'dd.MM.yyyy HH:mm' }}</div>
+          @if (server.update?.updateAvailable) {
+            <strong>Update available:</strong>
+            <div class="flex justify-start items-center">
+              {{ version }}
+              <mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
+            </div>
+          }
+        </div>
+        @if (server.update?.updateAvailable) {
+          @if (!(servers.isServerDetailsSynchronized$ | async) && !server.update.forceUpdate) {
+            <div
+              class="grid grid-cols-[24px_auto] gap-2.5 items-center"
+              >
+              <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize to enable update related actions.
+            </div>
+          }
+          @if (!(servers.isServerDetailsSynchronized$ | async) && server.update.forceUpdate) {
+            <div
+              class="grid grid-cols-[24px_auto] gap-2.5 items-center"
+              >
+              <mat-icon class="bd-warning-text">warning</mat-icon>A major version update must be installed to re-enable
+              synchronizing.
+            </div>
+          }
+          <div class="bd-description-text text-justify">
+            An update can be transfered without installing to prepare a future update up front. This option is only
+            available if the update package is not yet present on the managed server.
           </div>
-        </ng-container>
-      </div>
-      <ng-container *ngIf="server.update?.updateAvailable">
-        <div
-          class="grid grid-cols-[24px_auto] gap-2.5 items-center"
-          *ngIf="!(servers.isServerDetailsSynchronized$ | async) && !server.update.forceUpdate"
-        >
-          <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize to enable update related actions.
-        </div>
-        <div
-          class="grid grid-cols-[24px_auto] gap-2.5 items-center"
-          *ngIf="!(servers.isServerDetailsSynchronized$ | async) && server.update.forceUpdate"
-        >
-          <mat-icon class="bd-warning-text">warning</mat-icon>A major version update must be installed to re-enable
-          synchronizing.
-        </div>
-        <div class="bd-description-text text-justify">
-          An update can be transfered without installing to prepare a future update up front. This option is only
-          available if the update package is not yet present on the managed server.
-        </div>
-        <app-bd-button
-          text="Transfer Update Package"
-          icon="cloud_upload"
-          [collapsed]="false"
+          <app-bd-button
+            text="Transfer Update Package"
+            icon="cloud_upload"
+            [collapsed]="false"
           [disabled]="
             (mappedTransfer$ | async) ||
             !server.update.packagesToTransfer?.length ||
             !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)
           "
-          [loadingWhen$]="mappedTransfer$"
-          (click)="doUpdateTransfer(server)"
-          [matTooltip]="!server.update.packagesToTransfer?.length ? 'All packages have already been transfered' : null"
-          matTooltipPosition="above"
-        ></app-bd-button>
-        <app-bd-button
-          [text]="!server.update.packagesToTransfer?.length ? 'Install Update' : 'Transfer & Install Update'"
-          icon="system_update"
+            [loadingWhen$]="mappedTransfer$"
+            (click)="doUpdateTransfer(server)"
+            [matTooltip]="!server.update.packagesToTransfer?.length ? 'All packages have already been transfered' : null"
+            matTooltipPosition="above"
+          ></app-bd-button>
+          <app-bd-button
+            [text]="!server.update.packagesToTransfer?.length ? 'Install Update' : 'Transfer & Install Update'"
+            icon="system_update"
+            [collapsed]="false"
+            color="primary"
+            [disabled]="(mappedInstall$ | async) || !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)"
+            [loadingWhen$]="mappedInstall$"
+            (click)="doUpdateInstall(server)"
+          ></app-bd-button>
+        }
+        <app-bd-panel-button
           [collapsed]="false"
-          color="primary"
-          [disabled]="(mappedInstall$ | async) || !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)"
-          [loadingWhen$]="mappedInstall$"
-          (click)="doUpdateInstall(server)"
+          [toggle]="false"
+          icon="dns"
+          text="Nodes"
+          [relative]="true"
+          [route]="['nodes']"
+        ></app-bd-panel-button>
+        <app-bd-server-sync-button [collapsed]="false" [server]="server"></app-bd-server-sync-button>
+        <app-bd-panel-button
+          text="Edit Server Details..."
+          icon="edit"
+          [collapsed]="false"
+          [toggle]="false"
+          [route]="['edit']"
+          [relative]="true"
+        ></app-bd-panel-button>
+        <app-bd-button
+          [collapsed]="false"
+          text="Delete"
+          icon="delete"
+          (click)="doDelete(server)"
+          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (loading$ | async)"
         ></app-bd-button>
-      </ng-container>
-      <app-bd-panel-button
-        [collapsed]="false"
-        [toggle]="false"
-        icon="dns"
-        text="Nodes"
-        [relative]="true"
-        [route]="['nodes']"
-      ></app-bd-panel-button>
-      <app-bd-server-sync-button [collapsed]="false" [server]="server"></app-bd-server-sync-button>
-      <app-bd-panel-button
-        text="Edit Server Details..."
-        icon="edit"
-        [collapsed]="false"
-        [toggle]="false"
-        [route]="['edit']"
-        [relative]="true"
-      ></app-bd-panel-button>
-      <app-bd-button
-        [collapsed]="false"
-        text="Delete"
-        icon="delete"
-        (click)="doDelete(server)"
-        [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (loading$ | async)"
-      ></app-bd-button>
-    </div>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -5,11 +5,11 @@
       <div class="bd-title-text">Client Applications</div>
     </div>
     <app-node-state-panel [items]="nodeStateItems$ | async" [narrowWhen$]="narrowWhen$"></app-node-state-panel>
-    <ng-container *ngIf="!(collapsedWhen$ | async)">
+    @if (!(collapsedWhen$ | async)) {
       <mat-divider></mat-divider>
-    </ng-container>
+    }
   </div>
-  <ng-container *ngIf="!(collapsedWhen$ | async)">
+  @if (!(collapsedWhen$ | async)) {
     <div class="bd-default-padding">
       <app-bd-data-display
         [records]="node.nodeConfiguration.applications"
@@ -21,5 +21,5 @@
         [grid]="isCardView"
       ></app-bd-data-display>
     </div>
-  </ng-container>
+  }
 </div>

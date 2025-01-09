@@ -3,58 +3,62 @@
     header="View version {{ base$ | async }} of {{ (instances.current$ | async)?.instanceConfiguration.name }}"
     [panel]="true"
     [route]="['..', '..']"
-  >
+    >
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5 pt-0.5" *ngIf="(config$ | async) as cfg">
-      <div class="bd-rect-card flex flex-col">
-        <div class="flex flex-col">
-          <div class="bd-default-padding flex pb-0">
-            <div class="flex flex-col">
-              <div class="bd-type-text">Instance Configuration</div>
-            </div>
-          </div>
-        </div>
-        <div class="bd-default-padding flex flex-col gap-2.5">
-          <app-history-header-config
-            class="basis-1/2"
-            [baseConfig]="cfg.config"
-            [compareConfig]="cfg.config"
-          ></app-history-header-config>
-        </div>
-        <div class="bd-default-padding flex flex-col gap-2.5">
-          <app-history-variables-config
-            class="basis-1/2"
-            [baseConfig]="cfg.config"
-            [compareConfig]="cfg.config"
-          ></app-history-variables-config>
-        </div>
-      </div>
-
-      <!-- Nodes. -->
-      <ng-container *ngFor="let node of cfg.nodes?.nodeConfigDtos">
-        <div class="bd-rect-card" *ngIf="!!node.nodeConfiguration?.applications?.length">
+    @if ((config$ | async); as cfg) {
+      <div class="flex flex-col gap-2.5 pt-0.5">
+        <div class="bd-rect-card flex flex-col">
           <div class="flex flex-col">
             <div class="bd-default-padding flex pb-0">
               <div class="flex flex-col">
-                <div class="bd-type-text">NODE</div>
-                <div class="bd-title-text">
-                  {{ node?.nodeName === clientNodeName ? 'Client Applications' : node?.nodeName }}
-                </div>
+                <div class="bd-type-text">Instance Configuration</div>
               </div>
             </div>
           </div>
           <div class="bd-default-padding flex flex-col gap-2.5">
-            <app-history-process-config
-              *ngFor="let app of node.nodeConfiguration.applications | nodeFilter: searchTerm"
-              [baseConfig]="app"
-              [compareConfig]="app"
-              [baseDescriptor]="getAppDesc(cfg?.nodes, app.application.name)"
-              [hasProcessControl]="node?.nodeName !== clientNodeName"
-            ></app-history-process-config>
+            <app-history-header-config
+              class="basis-1/2"
+              [baseConfig]="cfg.config"
+              [compareConfig]="cfg.config"
+            ></app-history-header-config>
+          </div>
+          <div class="bd-default-padding flex flex-col gap-2.5">
+            <app-history-variables-config
+              class="basis-1/2"
+              [baseConfig]="cfg.config"
+              [compareConfig]="cfg.config"
+            ></app-history-variables-config>
           </div>
         </div>
-      </ng-container>
-    </div>
+        <!-- Nodes. -->
+        @for (node of cfg.nodes?.nodeConfigDtos; track node) {
+          @if (!!node.nodeConfiguration?.applications?.length) {
+            <div class="bd-rect-card">
+              <div class="flex flex-col">
+                <div class="bd-default-padding flex pb-0">
+                  <div class="flex flex-col">
+                    <div class="bd-type-text">NODE</div>
+                    <div class="bd-title-text">
+                      {{ node?.nodeName === clientNodeName ? 'Client Applications' : node?.nodeName }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="bd-default-padding flex flex-col gap-2.5">
+                @for (app of node.nodeConfiguration.applications | nodeFilter: searchTerm; track app) {
+                  <app-history-process-config
+                    [baseConfig]="app"
+                    [compareConfig]="app"
+                    [baseDescriptor]="getAppDesc(cfg?.nodes, app.application.name)"
+                    [hasProcessControl]="node?.nodeName !== clientNodeName"
+                  ></app-history-process-config>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

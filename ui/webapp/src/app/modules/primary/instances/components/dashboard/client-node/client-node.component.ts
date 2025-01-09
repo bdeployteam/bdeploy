@@ -7,13 +7,16 @@ import { CardViewService } from 'src/app/modules/core/services/card-view.service
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from '../../../services/instances.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
-import { StateItem } from '../state-panel/state-panel.component';
+import { StateItem, NodeStatePanelComponent } from '../state-panel/state-panel.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDataDisplayComponent } from '../../../../../core/components/bd-data-display/bd-data-display.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-instance-client-node',
     templateUrl: './client-node.component.html',
     styleUrls: ['./client-node.component.css'],
-    standalone: false
+    imports: [NodeStatePanelComponent, MatDivider, BdDataDisplayComponent, AsyncPipe]
 })
 export class ClientNodeComponent implements OnInit, OnDestroy {
   private readonly appCols = inject(ProcessesColumnsService);

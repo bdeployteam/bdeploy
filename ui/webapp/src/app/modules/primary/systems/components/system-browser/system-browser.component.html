@@ -23,10 +23,10 @@
       [records]="systems.systems$ | async"
       [columns]="sysCols"
       [recordRoute]="getRecordRoute"
-    >
+      >
       <app-bd-no-data>
         <p>No systems have been created yet.</p>
-        <ng-container *ngIf="(authService.isCurrentScopeWrite$ | async)">
+        @if ((authService.isCurrentScopeWrite$ | async)) {
           <p>Start by creating a new one.</p>
           <app-bd-panel-button
             icon="add"
@@ -34,7 +34,7 @@
             [collapsed]="false"
             [route]="['panels', 'systems', 'add']"
           ></app-bd-panel-button>
-        </ng-container>
+        }
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>

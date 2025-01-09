@@ -1,8 +1,9 @@
+@use "sass:map";
 @use "@angular/material" as mat;
 
 @mixin settings-shell-theme($theme) {
-  $background: map-get(mat.m2-get-color-config($theme), background);
-  $dark: map-get($theme, is-dark);
+  $background: map.get(mat.m2-get-color-config($theme), background);
+  $dark: map.get($theme, is-dark);
 
   $groupTextColor: if(
     $dark,

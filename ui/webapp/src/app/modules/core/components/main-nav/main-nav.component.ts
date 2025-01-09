@@ -7,12 +7,17 @@ import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { ObjectChangesService } from '../../services/object-changes.service';
 import { ThemeService } from '../../services/theme.service';
+import { MainNavMenuComponent } from '../main-nav-menu/main-nav-menu.component';
+import { MainNavTopComponent } from '../main-nav-top/main-nav-top.component';
+import { MainNavContentComponent } from '../main-nav-content/main-nav-content.component';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MainNavFlyinComponent } from '../main-nav-flyin/main-nav-flyin.component';
 
 @Component({
     selector: 'app-main-nav',
     templateUrl: './main-nav.component.html',
     styleUrls: ['./main-nav.component.css'],
-    standalone: false
+    imports: [MainNavMenuComponent, MainNavTopComponent, MainNavContentComponent, NgClass, MainNavFlyinComponent, AsyncPipe]
 })
 export class MainNavComponent implements OnInit {
   private readonly authService = inject(AuthenticationService);

@@ -12,13 +12,14 @@ import { TooltipPosition } from '@angular/material/tooltip';
 import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { NavAreasService } from '../../services/nav-areas.service';
-import { BdButtonColorMode } from '../bd-button/bd-button.component';
+import { BdButtonColorMode, BdButtonComponent } from '../bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-panel-button',
     templateUrl: './bd-panel-button.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdButtonComponent, RouterLinkActive, RouterLink, AsyncPipe]
 })
 export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   private readonly areas = inject(NavAreasService);

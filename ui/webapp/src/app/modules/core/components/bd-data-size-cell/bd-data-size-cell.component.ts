@@ -4,8 +4,7 @@ import { formatSize } from '../../utils/object.utils';
 
 @Component({
     selector: 'app-bd-data-size-cell',
-    templateUrl: './bd-data-size-cell.component.html',
-    standalone: false
+    templateUrl: './bd-data-size-cell.component.html'
 })
 export class BdDataSizeCellComponent<T> implements OnInit {
   @Input() record: T;

@@ -4,9 +4,14 @@ import {
   ReportDescriptor,
   ReportParameterDescriptor,
   ReportParameterInputType,
-  ReportRequestDto,
+  ReportRequestDto
 } from 'src/app/models/gen.dtos';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
 
 export interface ReportInputChange {
   key: string;
@@ -17,20 +22,16 @@ export interface ReportInputChange {
     selector: 'app-report-form-input',
     templateUrl: './report-form-input.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdFormInputComponent, MatTooltip, FormsModule, BdFormToggleComponent, BdFormSelectComponent]
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
   protected readonly reports = inject(ReportsService);
   protected readonly ReportParameterInputType = ReportParameterInputType;
 
-  @Input()
-  protected param: ReportParameterDescriptor;
-  @Input()
-  protected report: ReportDescriptor;
-  @Input()
-  protected request: ReportRequestDto;
-  @Input()
-  changed$: BehaviorSubject<ReportInputChange>;
+  @Input() param: ReportParameterDescriptor;
+  @Input() report: ReportDescriptor;
+  @Input() request: ReportRequestDto;
+  @Input() changed$: BehaviorSubject<ReportInputChange>;
 
   protected values: string[] = [];
   protected labels: string[] = [];
@@ -47,7 +48,7 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
         .subscribe((ps) => {
           this.values = ps.map((p) => p.value);
           this.labels = ps.map((p) => p.label);
-        }),
+        })
     );
     if (!this.param.dependsOn) {
       return;
@@ -69,14 +70,14 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
             this.reports.getParameterOptions(
               this.param.parameterOptionsPath,
               this.param.dependsOn,
-              this.request.params,
-            ),
-          ),
+              this.request.params
+            )
+          )
         )
         .subscribe((ps) => {
           this.values = ps.map((p) => p.value);
           this.labels = ps.map((p) => p.label);
-        }),
+        })
     );
   }
 

@@ -11,10 +11,10 @@ import {
   TemplateRef,
   ViewChild,
   ViewChildren,
-  ViewEncapsulation,
+  ViewEncapsulation
 } from '@angular/core';
-import { NgControl, NgForm } from '@angular/forms';
-import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { FormsModule, NgControl, NgForm } from '@angular/forms';
+import { MatButtonToggle, MatButtonToggleChange, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, map, skipWhile } from 'rxjs/operators';
@@ -28,12 +28,14 @@ import {
   ParameterConfigurationTarget,
   ParameterDescriptor,
   SystemConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
-import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import {
+  ContentCompletion
+} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
-  ACTION_OK,
+  ACTION_OK
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
@@ -46,6 +48,29 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
 import { HistoryProcessConfigComponent } from '../../../history-process-config/history-process-config.component';
+import { BdFormInputComponent } from '../../../../../../core/components/bd-form-input/bd-form-input.component';
+import { EditCustomIdValidatorDirective } from '../../../../validators/edit-custom-id-validator.directive';
+import { EditUniqueValueValidatorDirective } from '../../../../../../core/validators/edit-unique-value.directive';
+import { TrimmedValidator } from '../../../../../../core/validators/trimmed.directive';
+import { BdFormSelectComponent } from '../../../../../../core/components/bd-form-select/bd-form-select.component';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelDescription,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { ClickStopPropagationDirective } from '../../../../../../core/directives/click-stop-propagation.directive';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { ParamDescCardComponent } from '../../../param-desc-card/param-desc-card.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdValueEditorComponent } from '../../../../../../core/components/bd-value-editor/bd-value-editor.component';
+
+import { EditServerIssuesValidatorDirective } from '../../../../validators/edit-server-issues-validator.directive';
+import { MatDivider } from '@angular/material/divider';
 
 const UNGROUPED = 'Ungrouped Parameters';
 const CUSTOM = 'Custom Parameters';
@@ -66,11 +91,38 @@ interface ParameterGroup {
 }
 
 @Component({
-  selector: 'app-config-process-param-group',
-  templateUrl: './config-process-param-group.component.html',
-  styleUrls: ['./config-process-param-group.component.css'],
-  encapsulation: ViewEncapsulation.None,
-  standalone: false,
+    selector: 'app-config-process-param-group',
+    templateUrl: './config-process-param-group.component.html',
+    styleUrls: ['./config-process-param-group.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    imports: [
+        BdFormInputComponent,
+        EditCustomIdValidatorDirective,
+        EditUniqueValueValidatorDirective,
+        FormsModule,
+        TrimmedValidator,
+        BdFormSelectComponent,
+        MatAccordion,
+        MatExpansionPanel,
+        MatExpansionPanelHeader,
+        MatExpansionPanelTitle,
+        MatExpansionPanelDescription,
+        BdButtonComponent,
+        ClickStopPropagationDirective,
+        MatIcon,
+        NgClass,
+        ParamDescCardComponent,
+        MatCheckbox,
+        MatTooltip,
+        BdValueEditorComponent,
+      BdPopupDirective,
+        EditServerIssuesValidatorDirective,
+        MatDivider,
+        MatButtonToggleGroup,
+        MatButtonToggle,
+        HistoryProcessConfigComponent,
+        AsyncPipe,
+    ],
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly bop = inject(BreakpointObserver);
@@ -141,7 +193,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
             name: grpName,
             pairs: [],
             isCustom: false,
-            isSelectMode: false,
+            isSelectMode: false
           };
           r.push(grp);
         }
@@ -149,7 +201,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         const pair: ParameterPair = {
           descriptor: pd,
           value: null,
-          editorEnabled: true, // used to lock once custom editor is loaded.
+          editorEnabled: true // used to lock once custom editor is loaded.
         };
         grp.pairs.push(pair);
 
@@ -180,7 +232,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         name: CUSTOM,
         pairs: [],
         isCustom: true,
-        isSelectMode: false,
+        isSelectMode: false
       };
       for (const pv of process.start.parameters) {
         if (!app.descriptor?.startCommand?.parameters?.find((d) => d.id === pv.id)) {
@@ -188,7 +240,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
           this.custom.pairs.push({
             descriptor: null,
             value: pv,
-            editorEnabled: true,
+            editorEnabled: true
           });
         }
       }
@@ -208,7 +260,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         this.edit.application$,
         this.instance$,
         this.system$,
-        this.updatePreview$.pipe(debounceTime(400)),
+        this.updatePreview$.pipe(debounceTime(400))
       ])
         .pipe(skipWhile(([p, a, i]) => !p || !a || !i))
         .subscribe(([process, application, instance, system]) => {
@@ -221,22 +273,22 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
             p.preRendered = this.edit.preRenderParameter(descriptor, lv);
           });
           this.previewProcess$.next(previewProcess);
-        }),
+        })
     );
 
     this.subscription.add(
       this.previewProcess$
         .pipe(
           skipWhile((x) => !x),
-          debounceTime(100),
+          debounceTime(100)
         )
-        .subscribe(() => this.preview.update()),
+        .subscribe(() => this.preview.update())
     );
 
     this.subscription.add(
       this.bop.observe('(max-width: 800px)').subscribe((bs) => {
         this.narrow$.next(bs.matches);
-      }),
+      })
     );
 
     this.subscription.add(
@@ -250,10 +302,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         }
 
         this.system$.next(
-          s.find((x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag)?.config,
+          s.find((x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag)?.config
         );
         this.completions = this.buildCompletions();
-      }),
+      })
     );
 
     this.subscription.add(this.searchService.register(this));
@@ -267,7 +319,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       this.instance$.value,
       this.system$.value,
       this.process,
-      this.instances.stateApplications$.value,
+      this.instances.stateApplications$.value
     );
   }
 
@@ -315,19 +367,19 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     navigator.clipboard.writeText(json).then(
       () =>
         this.snackbar.open('Copied to clipboard successfully', null, {
-          duration: 1000,
+          duration: 1000
         }),
       () =>
         this.snackbar.open('Unable to write to clipboard', null, {
-          duration: 1000,
-        }),
+          duration: 1000
+        })
     );
   }
 
   protected doPaste() {
     if (!this.clipboardParams?.length) {
       this.snackbar.open('Unable to read from clipboard', null, {
-        duration: 1000,
+        duration: 1000
       });
       return;
     }
@@ -344,7 +396,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         predecessor: null,
         id: param.id,
         value: param.value.linkExpression || param.value.value,
-        isEdit: false,
+        isEdit: false
       };
       this.insertCustomParameterAtCorrectPosition();
       this.customTemp = null;
@@ -406,7 +458,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         target:
           p.descriptor.type === VariableType.ENVIRONMENT
             ? ParameterConfigurationTarget.ENVIRONMENT
-            : ParameterConfigurationTarget.COMMAND,
+            : ParameterConfigurationTarget.COMMAND
       };
       this.doPreRender(p);
 
@@ -423,13 +475,13 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         paramList.splice(
           paramList.findIndex((x) => x.id === nextDesc.id),
           0,
-          p.value,
+          p.value
         );
       }
     } else {
       paramList.splice(
         paramList.findIndex((x) => x.id === p.value.id),
-        1,
+        1
       );
 
       if (g.isCustom) {
@@ -462,7 +514,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
   protected getAllValueIdLabels() {
     return this.getAllValueIds().map(
-      (u) => this.edit.application$.value.descriptor.startCommand.parameters.find((x) => x.id === u)?.name || u,
+      (u) => this.edit.application$.value.descriptor.startCommand.parameters.find((x) => x.id === u)?.name || u
     );
   }
 
@@ -474,7 +526,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       predecessor: paramIndex > 0 ? parameters[paramIndex - 1].id : null,
       id: param.value.id,
       value: param.value.value.value,
-      isEdit: true,
+      isEdit: true
     };
     this.dialog
       .message({
@@ -486,7 +538,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
             return false;
           }
           return this.validateCustomFields.map((ctrl) => ctrl.valid || ctrl.disabled).reduce((p, c) => p && c, true);
-        },
+        }
       })
       .subscribe((r) => {
         if (r) {
@@ -504,7 +556,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       predecessor: null,
       id: null,
       value: null,
-      isEdit: false,
+      isEdit: false
     };
     this.dialog
       .message({
@@ -516,7 +568,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
             return false;
           }
           return this.validateCustomFields.map((ctrl) => ctrl.valid).reduce((p, c) => p && c, true);
-        },
+        }
       })
       .subscribe((r) => {
         if (r) {
@@ -547,9 +599,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         value: createLinkedValue(this.customTemp.value),
         pinned: false,
         preRendered: [],
-        target: ParameterConfigurationTarget.COMMAND, // TODO: support custom environment?
+        target: ParameterConfigurationTarget.COMMAND // TODO: support custom environment?
       },
-      editorEnabled: true,
+      editorEnabled: true
     };
     this.doPreRender(param);
     this.custom.pairs.push(param);
@@ -558,7 +610,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       this.edit.process$.value.start.parameters.unshift(param.value);
     } else {
       const predecessorIndex = this.edit.process$.value.start.parameters.findIndex(
-        (p) => p.id === this.customTemp.predecessor,
+        (p) => p.id === this.customTemp.predecessor
       );
       if (predecessorIndex === this.edit.process$.value.start.parameters.length - 1) {
         // last parameter
@@ -646,7 +698,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         (p) =>
           p.descriptor?.mandatory &&
           !p.value?.value &&
-          this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process),
+          this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process)
       )?.length > 0
     );
   }
@@ -660,7 +712,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         (p) =>
           p.descriptor?.mandatory &&
           p.value?.value &&
-          !this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process),
+          !this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process)
       )?.length > 0
     );
   }
@@ -689,6 +741,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         return true;
       }
     }
+    return false;
   }
 
   protected canAddRemove(param: ParameterPair): Observable<boolean> {

@@ -12,7 +12,7 @@ import {
 import { SearchAddon } from '@xterm/addon-search';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { IDisposable } from '@xterm/xterm';
-import { NgTerminal } from 'ng-terminal';
+import { NgTerminal, NgTerminalModule } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
 import { SearchService } from '../../services/search.service';
 
@@ -30,7 +30,7 @@ const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
     selector: 'app-bd-terminal',
     templateUrl: './bd-terminal.component.html',
     styleUrls: ['./bd-terminal.component.css'],
-    standalone: false
+    imports: [NgTerminalModule]
 })
 export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly searchService = inject(SearchService);

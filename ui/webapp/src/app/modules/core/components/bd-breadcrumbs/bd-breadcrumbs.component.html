@@ -1,6 +1,12 @@
 <div class="breadcrumb">
-  <a *ngFor="let crumb of crumbs; last as last; index as index" (click)="onClick(crumb, last)">
-    <span class="truncate" *ngIf="!isMiddle(index)">{{ crumb.label }}</span>
-    <span *ngIf="isMiddle(index)">...</span>
-  </a>
+  @for (crumb of crumbs; track crumb; let last = $last; let index = $index) {
+    <a (click)="onClick(crumb, last)">
+      @if (!isMiddle(index)) {
+        <span class="truncate">{{ crumb.label }}</span>
+      }
+      @if (isMiddle(index)) {
+        <span>...</span>
+      }
+    </a>
+  }
 </div>

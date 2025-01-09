@@ -49,9 +49,8 @@
         [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-panel-button>
 
-      <ng-container *ngIf="groups.current$ | async as group">
+      @if (groups.current$ | async; as group) {
         <mat-divider></mat-divider>
-
         <app-bd-button
           text="Repair BHive Problems and Prune"
           icon="build"
@@ -68,7 +67,7 @@
           [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (mappedDelete$ | async)"
           [loadingWhen$]="mappedDelete$"
         ></app-bd-button>
-      </ng-container>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

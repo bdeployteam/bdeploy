@@ -7,12 +7,19 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatCard } from '@angular/material/card';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
 
 @Component({
     selector: 'app-link-central',
     templateUrl: './link-central.component.html',
     styleUrls: ['./link-central.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatCard, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, BdButtonComponent, BdFileDropComponent]
 })
 export class LinkCentralComponent implements OnInit, OnDestroy {
   private readonly servers = inject(ServersService);

@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { HiveInfoDto } from 'src/app/models/gen.dtos';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-pooling-status-cell',
     templateUrl: './pooling-status-cell.component.html',
     styleUrl: './pooling-status-cell.component.css',
-    standalone: false
+    imports: [MatTooltip]
 })
 export class PoolingStatusCellComponent {
   @Input() record: HiveInfoDto;

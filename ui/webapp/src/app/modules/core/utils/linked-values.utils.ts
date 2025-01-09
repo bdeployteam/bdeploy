@@ -8,7 +8,7 @@ import {
   ParameterConfiguration,
   SystemConfiguration,
   VariableConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
 import { escapeSpecialCharacters, SpecialCharacterType } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
@@ -57,7 +57,7 @@ export function getRenderPreview(
   val: LinkedValueConfiguration,
   process: ApplicationConfiguration,
   instance: InstanceConfigurationDto,
-  system: SystemConfiguration,
+  system: SystemConfiguration
 ): string {
   if (val.linkExpression) {
     // need to expand. gather all supported expansions for the preview.
@@ -102,7 +102,7 @@ function expand(expression: string, expansions: LinkVariable[]): string {
 
 export function gatherVariableExpansions(
   instance: InstanceConfigurationDto,
-  system: SystemConfiguration,
+  system: SystemConfiguration
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
@@ -116,7 +116,7 @@ export function gatherVariableExpansions(
           link: `{{X:${v.id}}}`,
           group: null,
           matches: (s: string) => doMatchVariable(s, v),
-          expand: (s: string) => doExpand(s, v.value, v.type),
+          expand: (s: string) => doExpand(s, v.value, v.type)
         };
       })
       .forEach((v) => {
@@ -134,7 +134,7 @@ export function gatherVariableExpansions(
           link: `{{X:${v.id}}}`,
           group: null,
           matches: (s: string) => doMatchVariable(s, v),
-          expand: (s: string) => doExpand(s, v.value, v.type),
+          expand: (s: string) => doExpand(s, v.value, v.type)
         };
       })
       .forEach((v) => {
@@ -150,7 +150,7 @@ export function gatherVariableExpansions(
 export function gatherProcessExpansions(
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  apps: ApplicationDto[] = [],
+  apps: ApplicationDto[] = []
 ): LinkVariable[] {
   if (!instance?.nodeDtos?.length) {
     return [];
@@ -192,7 +192,7 @@ function processParameter(
   app: ApplicationConfiguration,
   param: ParameterConfiguration,
   apps: ApplicationDto[],
-  result: LinkVariable[],
+  result: LinkVariable[]
 ) {
   let name: string;
   let description: string;
@@ -236,7 +236,7 @@ function processParameter(
     link: link,
     group: group,
     matches: (s: string) => doMatchProcessParameter(s, param.id, app.name, thisApp),
-    expand: expandMapper,
+    expand: expandMapper
   });
 }
 
@@ -282,7 +282,7 @@ function doExpand(wholeExpression: string, config: LinkedValueConfiguration, par
 
   if (paramType) {
     return attemptArithmethic &&
-      [VariableType.NUMERIC, VariableType.SERVER_PORT, VariableType.CLIENT_PORT].includes(paramType)
+    [VariableType.NUMERIC, VariableType.SERVER_PORT, VariableType.CLIENT_PORT].includes(paramType)
       ? doAttemptArithmetic(inner, lastColonIndex, valueAsNumber) || getPreRenderable(config, paramType)
       : getPreRenderable(config, paramType);
   }
@@ -297,6 +297,7 @@ function doAttemptArithmetic(inner: string, lastColonIndex: number, valueAsNumbe
   if (otherNumber) {
     return String(valueAsNumber + otherNumber);
   }
+  return null;
 }
 
 export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVariable[] {
@@ -306,56 +307,56 @@ export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVa
     description: 'The root directory of the instance version installation.',
     preview: `/deploy/${getInstanceIdOrMock(instance)}`,
     link: '{{P:ROOT}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:CONFIG',
     description: 'Resolved path to the configuration folder.',
     preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/<tag>/config`,
     link: '{{P:CONFIG}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:RUNTIME',
     description: 'The directory where version specific runtime information is stored.',
     preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/<tag>/runtime`,
     link: '{{P:RUNTIME}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:BIN',
     description: 'The directory where binaries are installed without pooling (per instance version).',
     preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/<tag>`,
     link: '{{P:BIN}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:DATA',
     description: 'The directory where applications can place version independant data.',
     preview: `/deploy/${getInstanceIdOrMock(instance)}/data`,
     link: '{{P:DATA}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:LOG_DATA',
     description: 'The logging directory which may be outside the usual scope of the application.',
     preview: `/log_data/${getInstanceIdOrMock(instance)}`,
     link: '{{P:LOG_DATA}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:MANIFEST_POOL',
     description: 'The directory where globally pooled applications are installed.',
     preview: `/deploy/pool`,
     link: '{{P:MANIFEST_POOL}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'P:INSTANCE_MANIFEST_POOL',
     description: 'The directory where instance-locally pooled applications are installed.',
     preview: `/deploy/${getInstanceIdOrMock(instance)}/pool`,
     link: '{{P:INSTANCE_MANIFEST_POOL}}',
-    group: null,
+    group: null
   });
   return result;
 }
@@ -367,7 +368,7 @@ function getInstanceIdOrMock(instance: InstanceConfigurationDto): string {
 export function gatherSpecialExpansions(
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  system: SystemConfiguration,
+  system: SystemConfiguration
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
@@ -378,7 +379,7 @@ export function gatherSpecialExpansions(
     preview: '/deploy/pool/example_1.0.0',
     link: '{{M:<manifest-name>}}',
     group: null,
-    matches: (s) => s.startsWith('{{M:') && s.endsWith('}}'),
+    matches: (s) => s.startsWith('{{M:') && s.endsWith('}}')
   });
 
   // Environment
@@ -388,7 +389,7 @@ export function gatherSpecialExpansions(
     preview: '<env-value>',
     link: '{{ENV:<env-name>}}',
     group: null,
-    matches: (s) => s.startsWith('{{ENV:') && s.endsWith('}}'),
+    matches: (s) => s.startsWith('{{ENV:') && s.endsWith('}}')
   });
   result.push({
     name: 'DELAYED',
@@ -397,7 +398,7 @@ export function gatherSpecialExpansions(
     preview: '<delayed-value>',
     link: '{{DELAYED:<link-expression>}}',
     group: null,
-    matches: (s) => s.startsWith('{{DELAYED:') && s.endsWith('}}'),
+    matches: (s) => s.startsWith('{{DELAYED:') && s.endsWith('}}')
   });
 
   // Instance
@@ -406,49 +407,49 @@ export function gatherSpecialExpansions(
     description: `The instance's configured purpose`,
     preview: instance?.config?.purpose ? instance.config.purpose : '<system-purpose>',
     link: '{{I:SYSTEM_PURPOSE}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'I:NAME',
     description: `The instance name`,
     preview: instance?.config?.name ? instance.config.name : '<instance-name>',
     link: '{{I:NAME}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'I:UUID',
     description: `The instance ID`,
     preview: getInstanceIdOrMock(instance),
     link: '{{I:UUID}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'I:TAG',
     description: 'The instance version',
     preview: 'X',
     link: '{{I:TAG}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'I:PRODUCT_ID',
     description: `The instance's configured product ID`,
     preview: instance?.config?.product?.name ? instance.config.product.name : '<product-id>',
     link: '{{I:PRODUCT_ID}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'I:PRODUCT_TAG',
     description: `The instance's configured product version`,
     preview: instance?.config?.product?.tag ? instance.config.product.tag : '<product-tag>',
     link: '{{I:PRODUCT_TAG}}',
-    group: null,
+    group: null
   });
   result.push({
     name: 'I:DEPLOYMENT_INFO_FILE',
     description: `The path to a file containing the instance's serialized deployment configuration.`,
     preview: '/deploy/instance/deployment-info.json',
     link: '{{I:DEPLOYMENT_INFO_FILE}}',
-    group: null,
+    group: null
   });
 
   // Application
@@ -474,7 +475,7 @@ export function gatherSpecialExpansions(
       'The hostname of the machine executing this application. In case of client applications, this is the hostname of the client PC.',
     preview: '<hostname>',
     link: '{{H:HOSTNAME}}',
-    group: null,
+    group: null
   });
 
   // Operating System
@@ -490,7 +491,7 @@ export function gatherSpecialExpansions(
         ? getAppOs(process.application) === OperatingSystem.WINDOWS
           ? s.substring('{{WINDOWS:'.length, s.indexOf('}}'))
           : ''
-        : '',
+        : ''
   });
   result.push({
     name: 'LINUX',
@@ -504,7 +505,7 @@ export function gatherSpecialExpansions(
         ? getAppOs(process.application) === OperatingSystem.LINUX
           ? s.substring('{{LINUX:'.length, s.indexOf('}}'))
           : ''
-        : '',
+        : ''
   });
 
   // Logical
@@ -517,7 +518,7 @@ export function gatherSpecialExpansions(
     group: null,
     matches: (s) =>
       s.startsWith('{{IF:') && s.endsWith('}}') && s.split('?').length === 2 && s.split('?')[1].split(':').length === 2,
-    expand: (s) => expandCondition(s, instance, process, system),
+    expand: (s) => expandCondition(s, instance, process, system)
   });
 
   // Escaping
@@ -528,7 +529,7 @@ export function gatherSpecialExpansions(
     link: '{{XML:<xml>}}',
     group: null,
     matches: (s) => s.startsWith('{{XML:') && s.endsWith('}}'),
-    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.XML, s, instance, process, system),
+    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.XML, s, instance, process, system)
   });
   result.push({
     name: 'JSON',
@@ -537,7 +538,7 @@ export function gatherSpecialExpansions(
     link: '{{JSON:<json>}}',
     group: null,
     matches: (s) => s.startsWith('{{JSON:') && s.endsWith('}}'),
-    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.JSON, s, instance, process, system),
+    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.JSON, s, instance, process, system)
   });
   result.push({
     name: 'YAML',
@@ -546,7 +547,7 @@ export function gatherSpecialExpansions(
     link: '{{YAML:<yaml>}}',
     group: null,
     matches: (s) => s.startsWith('{{YAML:') && s.endsWith('}}'),
-    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.YAML, s, instance, process, system),
+    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.YAML, s, instance, process, system)
   });
 
   return result;
@@ -557,7 +558,7 @@ function expandEscapeSpecialCharacters(
   s: string,
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  system: SystemConfiguration,
+  system: SystemConfiguration
 ): string {
   const prefix = `{{${type}:`;
   if (!s.startsWith(prefix) || !s.endsWith('}}')) {
@@ -575,7 +576,7 @@ function expandCondition(
   condition: string,
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  system: SystemConfiguration,
+  system: SystemConfiguration
 ) {
   const match = /{{IF:([^?]+)\?([^:]*):(.*)}}/.exec(condition);
 

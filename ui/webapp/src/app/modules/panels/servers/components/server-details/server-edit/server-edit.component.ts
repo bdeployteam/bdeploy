@@ -1,10 +1,12 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -12,11 +14,17 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../../services/server-details.service';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../../core/validators/trimmed.directive';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+
 @Component({
     selector: 'app-server-edit',
     templateUrl: './server-edit.component.html',
     providers: [ServerDetailsService],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdButtonComponent]
 })
 export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly servers = inject(ServersService);

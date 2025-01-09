@@ -3,7 +3,7 @@
     header="Configure Endpoints of {{ (edit.process$ | async)?.name }}{{ hasPendingChanges ? '*' : '' }}"
     [panel]="true"
     [route]="['..']"
-  >
+    >
     <div class="flex-auto"></div>
     <app-bd-button
       text="Apply"
@@ -16,221 +16,229 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form form #epForm="ngForm">
-      <div *ngIf="process?.endpoints?.http?.length" class="flex flex-col gap-2.5 pt-0.5">
-        <div *ngFor="let endpoint of process.endpoints.http; let i = index;" class="bd-rect-card flex flex-col">
-          <div class="bd-bg-toolbar flex">
-            <div class="bd-default-padding">
-              Endpoint
-              <strong
-                >{{ endpoint.id }} - {{ endpoint.path }} {{ endpoint.contextPath.value ? ('(' +
-                endpoint.contextPath.value + ')') : '' }}{{ endpoint.contextPath.linkExpression ? ('(' +
-                endpoint.contextPath.linkExpression + ')') : '' }}</strong
-              >
-              <span *ngIf="endpointDisabledStatus.get(endpoint).disabled" class="bd-warning-text"
-                >&nbsp;-&nbsp;{{ endpointDisabledStatus.get(endpoint).reason }}</span
-              >
+      @if (process?.endpoints?.http?.length) {
+        <div class="flex flex-col gap-2.5 pt-0.5">
+          @for (endpoint of process.endpoints.http; track endpoint; let i = $index) {
+            <div class="bd-rect-card flex flex-col">
+              <div class="bd-bg-toolbar flex">
+                <div class="bd-default-padding">
+                  Endpoint
+                  <strong
+                    >{{ endpoint.id }} - {{ endpoint.path }} {{ endpoint.contextPath.value ? ('(' +
+                    endpoint.contextPath.value + ')') : '' }}{{ endpoint.contextPath.linkExpression ? ('(' +
+                    endpoint.contextPath.linkExpression + ')') : '' }}</strong
+                    >
+                    @if (endpointDisabledStatus.get(endpoint).disabled) {
+                      <span class="bd-warning-text"
+                        >&nbsp;-&nbsp;{{ endpointDisabledStatus.get(endpoint).reason }}</span
+                        >
+                      }
+                    </div>
+                    <div class="flex-auto"></div>
+                    <div class="bd-default-padding bd-description-text">{{ endpoint.type }}</div>
+                  </div>
+                  <div class="bd-default-padding">
+                    <div>
+                      <div class="pt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-2.5 gap-y-1">
+                        <app-config-desc-element card="cfg.ep.port">
+                          <app-bd-value-editor
+                            [name]="'epPort' + i"
+                            label="Port"
+                            [(ngModel)]="endpoint.port"
+                            [required]="true"
+                            [completionPrefixes]="completionPrefixes"
+                            [completions]="completions"
+                            [type]="TYPE_PORT"
+                            [process]="process"
+                            [instance]="instance"
+                            [system]="system"
+                            [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                          ></app-bd-value-editor>
+                        </app-config-desc-element>
+                        <app-config-desc-element card="cfg.ep.authType">
+                          <app-bd-value-editor
+                            [name]="'epAuthType' + i"
+                            label="Authentication"
+                            [(ngModel)]="endpoint.authType"
+                            [completionPrefixes]="completionPrefixes"
+                            [completions]="completions"
+                            [type]="TYPE_STRING"
+                            [process]="process"
+                            [instance]="instance"
+                            [system]="system"
+                            [suggested]="authTypeValues"
+                            (ngModelChange)="onChangeAuthType($event, i)"
+                            [appAllowedValuesValidator]="authTypeValues"
+                            [required]="true"
+                            [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                          ></app-bd-value-editor>
+                        </app-config-desc-element>
+                        @if (authTypes[i] !== 'OIDC') {
+                          <app-config-desc-element card="cfg.ep.authUser">
+                            <app-bd-value-editor
+                              [name]="'epUser' + i"
+                              label="User"
+                              [(ngModel)]="endpoint.authUser"
+                              [required]="true"
+                              [completionPrefixes]="completionPrefixes"
+                              [completions]="completions"
+                              [type]="TYPE_STRING"
+                              [process]="process"
+                              [instance]="instance"
+                              [system]="system"
+                              [disabled]="endpointDisabledStatus.get(endpoint).disabled || authTypes[i] === 'NONE'"
+                              [required]="authTypes[i] !== 'NONE'"
+                            ></app-bd-value-editor>
+                          </app-config-desc-element>
+                        }
+                        @if (authTypes[i] !== 'OIDC') {
+                          <app-config-desc-element card="cfg.ep.authPass">
+                            <app-bd-value-editor
+                              [name]="'epPass' + i"
+                              label="Password"
+                              [(ngModel)]="endpoint.authPass"
+                              [required]="true"
+                              [completionPrefixes]="completionPrefixes"
+                              [completions]="completions"
+                              [type]="TYPE_PASSWORD"
+                              [process]="process"
+                              [instance]="instance"
+                              [system]="system"
+                              [disabled]="endpointDisabledStatus.get(endpoint).disabled || authTypes[i] === 'NONE'"
+                              [required]="authTypes[i] !== 'NONE'"
+                            ></app-bd-value-editor>
+                          </app-config-desc-element>
+                        }
+                        @if (authTypes[i] === 'OIDC') {
+                          <app-config-desc-element card="cfg.ep.tokenUrl">
+                            <app-bd-value-editor
+                              [name]="'epTokenUrl' + i"
+                              label="Token URL"
+                              [(ngModel)]="endpoint.tokenUrl"
+                              [required]="true"
+                              [completionPrefixes]="completionPrefixes"
+                              [completions]="completions"
+                              [type]="TYPE_STRING"
+                              [process]="process"
+                              [instance]="instance"
+                              [system]="system"
+                              [disabled]="endpointDisabledStatus.get(endpoint).disabled "
+                              [required]="true"
+                            ></app-bd-value-editor>
+                          </app-config-desc-element>
+                        }
+                        @if (authTypes[i] === 'OIDC') {
+                          <app-config-desc-element card="cfg.ep.clientId">
+                            <app-bd-value-editor
+                              [name]="'epClientId' + i"
+                              label="Client ID"
+                              [(ngModel)]="endpoint.clientId"
+                              [required]="true"
+                              [completionPrefixes]="completionPrefixes"
+                              [completions]="completions"
+                              [type]="TYPE_STRING"
+                              [process]="process"
+                              [instance]="instance"
+                              [system]="system"
+                              [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                              [required]="true"
+                            ></app-bd-value-editor>
+                          </app-config-desc-element>
+                        }
+                        @if (authTypes[i] === 'OIDC') {
+                          <app-config-desc-element card="cfg.ep.clientSecret">
+                            <app-bd-value-editor
+                              [name]="'epClientSecret' + i"
+                              label="Client Secret"
+                              [(ngModel)]="endpoint.clientSecret"
+                              [required]="true"
+                              [completionPrefixes]="completionPrefixes"
+                              [completions]="completions"
+                              [type]="TYPE_PASSWORD"
+                              [process]="process"
+                              [instance]="instance"
+                              [system]="system"
+                              [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                              [required]="true"
+                            ></app-bd-value-editor>
+                          </app-config-desc-element>
+                        }
+                        <app-config-desc-element card="cfg.ep.secure">
+                          <app-bd-value-editor
+                            [name]="'epSecure' + i"
+                            label="Secure (Use HTTPS)"
+                            [(ngModel)]="endpoint.secure"
+                            [required]="true"
+                            [completionPrefixes]="completionPrefixes"
+                            [completions]="completions"
+                            [type]="TYPE_BOOLEAN"
+                            [process]="process"
+                            [instance]="instance"
+                            [system]="system"
+                            [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                          ></app-bd-value-editor>
+                        </app-config-desc-element>
+                        <ng-template #linkToggleTrust>
+                          <app-bd-expression-toggle
+                            class="opacity-30"
+                            [link]="false"
+                            [disabled]="true"
+                          ></app-bd-expression-toggle>
+                        </ng-template>
+                        <app-config-desc-element card="cfg.ep.trustAll">
+                          <app-bd-form-toggle
+                            name="epTrustAll{{ i }}"
+                            label="Trust All Certificates"
+                            [(ngModel)]="endpoint.trustAll"
+                            [prefix]="linkToggleTrust"
+                            [disabled]="endpointDisabledStatus.get(endpoint).disabled"
+                          ></app-bd-form-toggle>
+                        </app-config-desc-element>
+                        <app-config-desc-element card="cfg.ep.trustStore">
+                          <app-bd-value-editor
+                            [name]="'tsPath' + i"
+                            label="Trust Store Path"
+                            [(ngModel)]="endpoint.trustStore"
+                            [required]="true"
+                            [completionPrefixes]="completionPrefixes"
+                            [completions]="completions"
+                            [type]="TYPE_STRING"
+                            [process]="process"
+                            [instance]="instance"
+                            [system]="system"
+                            [disabled]="endpointDisabledStatus.get(endpoint).disabled || !isSecure(endpoint) || endpoint.trustAll"
+                            [required]="isSecure(endpoint) && !endpoint.trustAll"
+                          ></app-bd-value-editor>
+                        </app-config-desc-element>
+                        <app-config-desc-element card="cfg.ep.trustStorePass">
+                          <app-bd-value-editor
+                            [name]="'tsPass' + i"
+                            label="Trust Store Password"
+                            [(ngModel)]="endpoint.trustStorePass"
+                            [required]="true"
+                            [completionPrefixes]="completionPrefixes"
+                            [completions]="completions"
+                            [type]="TYPE_PASSWORD"
+                            [process]="process"
+                            [instance]="instance"
+                            [system]="system"
+                            [disabled]="endpointDisabledStatus.get(endpoint).disabled || !isSecure(endpoint) || endpoint.trustAll"
+                            [required]="isSecure(endpoint) && !endpoint.trustAll"
+                          ></app-bd-value-editor>
+                        </app-config-desc-element>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
-            <div class="flex-auto"></div>
-            <div class="bd-default-padding bd-description-text">{{ endpoint.type }}</div>
-          </div>
-          <div class="bd-default-padding">
-            <div>
-              <div class="pt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-2.5 gap-y-1">
-                <app-config-desc-element card="cfg.ep.port">
-                  <app-bd-value-editor
-                    [name]="'epPort' + i"
-                    label="Port"
-                    [(ngModel)]="endpoint.port"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_PORT"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
+          }
 
-                <app-config-desc-element card="cfg.ep.authType">
-                  <app-bd-value-editor
-                    [name]="'epAuthType' + i"
-                    label="Authentication"
-                    [(ngModel)]="endpoint.authType"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_STRING"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [suggested]="authTypeValues"
-                    (ngModelChange)="onChangeAuthType($event, i)"
-                    [appAllowedValuesValidator]="authTypeValues"
-                    [required]="true"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.authUser" *ngIf="authTypes[i] !== 'OIDC'">
-                  <app-bd-value-editor
-                    [name]="'epUser' + i"
-                    label="User"
-                    [(ngModel)]="endpoint.authUser"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_STRING"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled || authTypes[i] === 'NONE'"
-                    [required]="authTypes[i] !== 'NONE'"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.authPass" *ngIf="authTypes[i] !== 'OIDC'">
-                  <app-bd-value-editor
-                    [name]="'epPass' + i"
-                    label="Password"
-                    [(ngModel)]="endpoint.authPass"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_PASSWORD"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled || authTypes[i] === 'NONE'"
-                    [required]="authTypes[i] !== 'NONE'"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.tokenUrl" *ngIf="authTypes[i] === 'OIDC'">
-                  <app-bd-value-editor
-                    [name]="'epTokenUrl' + i"
-                    label="Token URL"
-                    [(ngModel)]="endpoint.tokenUrl"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_STRING"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled "
-                    [required]="true"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.clientId" *ngIf="authTypes[i] === 'OIDC'">
-                  <app-bd-value-editor
-                    [name]="'epClientId' + i"
-                    label="Client ID"
-                    [(ngModel)]="endpoint.clientId"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_STRING"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
-                    [required]="true"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.clientSecret" *ngIf="authTypes[i] === 'OIDC'">
-                  <app-bd-value-editor
-                    [name]="'epClientSecret' + i"
-                    label="Client Secret"
-                    [(ngModel)]="endpoint.clientSecret"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_PASSWORD"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
-                    [required]="true"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.secure">
-                  <app-bd-value-editor
-                    [name]="'epSecure' + i"
-                    label="Secure (Use HTTPS)"
-                    [(ngModel)]="endpoint.secure"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_BOOLEAN"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <ng-template #linkToggleTrust>
-                  <app-bd-expression-toggle
-                    class="opacity-30"
-                    [link]="false"
-                    [disabled]="true"
-                  ></app-bd-expression-toggle>
-                </ng-template>
-                <app-config-desc-element card="cfg.ep.trustAll">
-                  <app-bd-form-toggle
-                    name="epTrustAll{{ i }}"
-                    label="Trust All Certificates"
-                    [(ngModel)]="endpoint.trustAll"
-                    [prefix]="linkToggleTrust"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled"
-                  ></app-bd-form-toggle>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.trustStore">
-                  <app-bd-value-editor
-                    [name]="'tsPath' + i"
-                    label="Trust Store Path"
-                    [(ngModel)]="endpoint.trustStore"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_STRING"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled || !isSecure(endpoint) || endpoint.trustAll"
-                    [required]="isSecure(endpoint) && !endpoint.trustAll"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-
-                <app-config-desc-element card="cfg.ep.trustStorePass">
-                  <app-bd-value-editor
-                    [name]="'tsPass' + i"
-                    label="Trust Store Password"
-                    [(ngModel)]="endpoint.trustStorePass"
-                    [required]="true"
-                    [completionPrefixes]="completionPrefixes"
-                    [completions]="completions"
-                    [type]="TYPE_PASSWORD"
-                    [process]="process"
-                    [instance]="instance"
-                    [system]="system"
-                    [disabled]="endpointDisabledStatus.get(endpoint).disabled || !isSecure(endpoint) || endpoint.trustAll"
-                    [required]="isSecure(endpoint) && !endpoint.trustAll"
-                  ></app-bd-value-editor>
-                </app-config-desc-element>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <app-bd-no-data *ngIf="!edit.process$.value?.endpoints?.http?.length">
-        <p>This process has no defined endpoints to configure.</p>
-      </app-bd-no-data>
-    </form>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+          @if (!edit.process$.value?.endpoints?.http?.length) {
+            <app-bd-no-data>
+              <p>This process has no defined endpoints to configure.</p>
+            </app-bd-no-data>
+          }
+        </form>
+      </app-bd-dialog-content>
+    </app-bd-dialog>

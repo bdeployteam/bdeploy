@@ -4,15 +4,14 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 export const PASSWORD_VALIDATION = 'passwordMismatch';
 
 @Directive({
-  selector: '[appPasswordVerification]',
-  providers: [
-    {
-      provide: NG_VALIDATORS,
-      useExisting: PasswordVerificationValidator,
-      multi: true,
-    },
-  ],
-  standalone: false,
+    selector: '[appPasswordVerification]',
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: PasswordVerificationValidator,
+            multi: true,
+        },
+    ],
 })
 export class PasswordVerificationValidator implements Validator {
   private validateCb: () => void = () => {};

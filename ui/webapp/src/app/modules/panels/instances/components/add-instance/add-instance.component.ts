@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { AbstractControl, NgForm } from '@angular/forms';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceConfiguration, InstancePurpose, ManagedMasterDto, ManifestKey } from 'src/app/models/gen.dtos';
@@ -13,6 +13,16 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { SystemOnServerValidatorDirective } from '../../validators/system-on-server-validator.directive';
+import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+
 interface ProductRow {
   id: string;
   name: string;
@@ -22,7 +32,7 @@ interface ProductRow {
 @Component({
     selector: 'app-add-instance',
     templateUrl: './add-instance.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, SystemOnServerValidatorDirective, BdFormToggleComponent, MatTooltip, BdButtonComponent]
 })
 export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly groups = inject(GroupsService);

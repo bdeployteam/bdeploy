@@ -1,13 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, Input, ViewEncapsulation } from '@angular/core';
-import { ControlValueAccessor, NgControl } from '@angular/forms';
+import { ControlValueAccessor, NgControl, FormsModule } from '@angular/forms';
 import { TemplateVariable, TemplateVariableType } from 'src/app/models/gen.dtos';
+import { BdFormToggleComponent } from '../bd-form-toggle/bd-form-toggle.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
 
 @Component({
     selector: 'app-bd-form-template-variable',
     templateUrl: './bd-form-template-variable.component.html',
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdFormToggleComponent, FormsModule, MatTooltip, BdFormInputComponent]
 })
 export class BdFormTemplateVariableComponent implements ControlValueAccessor {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

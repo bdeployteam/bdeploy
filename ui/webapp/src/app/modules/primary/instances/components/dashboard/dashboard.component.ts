@@ -28,12 +28,27 @@ import { InstanceStateService } from '../../services/instance-state.service';
 import { InstancesService } from '../../services/instances.service';
 import { ProcessesColumnsService } from '../../services/processes-columns.service';
 import { CONTROL_GROUP_COL_ID } from './server-node/process-list/process-list.component';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdServerSyncButtonComponent } from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { RouterLink } from '@angular/router';
+import { BdBannerComponent } from '../../../../core/components/bd-banner/bd-banner.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { ServerNodeComponent } from './server-node/server-node.component';
+import { ClientNodeComponent } from './client-node/client-node.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, MatTooltip, BdButtonComponent, MatDivider, BdServerSyncButtonComponent, BdDataGroupingComponent, BdPanelButtonComponent, BdDialogContentComponent, RouterLink, BdBannerComponent, BdNoDataComponent, ServerNodeComponent, ClientNodeComponent, AsyncPipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly media = inject(BreakpointObserver);

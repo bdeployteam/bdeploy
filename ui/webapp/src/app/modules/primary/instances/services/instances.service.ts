@@ -10,7 +10,7 @@ import {
   share,
   ShareConfig,
   Subscription,
-  switchMap,
+  switchMap
 } from 'rxjs';
 import { debounceTime, finalize, first, map, skip, skipWhile, tap } from 'rxjs/operators';
 import {
@@ -32,7 +32,7 @@ import {
   ProductUpdateDto,
   RemoteDirectory,
   RemoteDirectoryEntry,
-  StringEntryChunkDto,
+  StringEntryChunkDto
 } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { HttpReplayService } from 'src/app/modules/core/services/http-replay.service';
@@ -47,16 +47,16 @@ import { ServersService } from '../../servers/services/servers.service';
 
 const DEF_PROD_UPDATES: ProductUpdateDto = {
   newerVersionAvailable: false,
-  newerVersionAvailableInRepository: null,
+  newerVersionAvailableInRepository: null
 };
 
 const DEF_SHARE_CONFIG: ShareConfig<ProductUpdateDto> = {
   connector: () => new BehaviorSubject(DEF_PROD_UPDATES),
-  resetOnRefCountZero: false,
+  resetOnRefCountZero: false
 };
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class InstancesService {
   private readonly cfg = inject(ConfigService);
@@ -84,7 +84,7 @@ export class InstancesService {
   public productUpdates$ = this.current$.pipe(
     map((i) => i?.instanceConfiguration?.id),
     switchMap((i) => (i ? this.loadProductUpdates(i).pipe(map((u) => u || DEF_PROD_UPDATES)) : of(DEF_PROD_UPDATES))),
-    share(DEF_SHARE_CONFIG),
+    share(DEF_SHARE_CONFIG)
   );
 
   /** the *active* instance version */
@@ -186,7 +186,7 @@ export class InstancesService {
 
   public create(instance: Partial<InstanceConfiguration>, managedServer: string): Observable<any> {
     return this.http.put(`${this.apiPath(this.group)}`, instance, {
-      params: { managedServer },
+      params: { managedServer }
     });
   }
 
@@ -197,13 +197,13 @@ export class InstancesService {
         this.activeNodeCfgs$.next(null);
         this.active$.next(null);
         this.checkActiveReloadState(null);
-      }),
+      })
     );
   }
 
   public deleteVersion(version: string) {
     return this.http.delete(
-      `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.id}/deleteVersion/${version}`,
+      `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.id}/deleteVersion/${version}`
     );
   }
 
@@ -220,7 +220,7 @@ export class InstancesService {
 
     this.http
       .post(`${this.apiPath(this.group)}/${origin.instanceConfiguration.id}/request/${dir.minion}`, entry, {
-        responseType: 'text',
+        responseType: 'text'
       })
       .subscribe((token) => {
         this.downloads.download(`${this.apiPath(this.group)}/${origin.instanceConfiguration.id}/stream/${token}`);
@@ -231,12 +231,12 @@ export class InstancesService {
     dir: RemoteDirectory,
     entry: RemoteDirectoryEntry,
     offset: number,
-    length: number,
+    length: number
   ): Observable<StringEntryChunkDto> {
     const origin = this.current$.value;
 
     if (!origin) {
-      return;
+      return null;
     }
 
     return this.http.post<StringEntryChunkDto>(
@@ -244,8 +244,8 @@ export class InstancesService {
       entry,
       {
         params: { offset: offset.toString(), length: length.toString() },
-        context: NO_LOADING_BAR_CONTEXT,
-      },
+        context: NO_LOADING_BAR_CONTEXT
+      }
     );
   }
 
@@ -253,14 +253,14 @@ export class InstancesService {
     return this.http
       .post<HistoryResultDto>(
         `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.id}/history`,
-        filterDto,
+        filterDto
       )
       .pipe(measure('Current Instance History'));
   }
 
   public loadNodes(instance: string, tag: string): Observable<InstanceNodeConfigurationListDto> {
     return this.httpReplayService.get<InstanceNodeConfigurationListDto>(
-      `${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`,
+      `${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`
     );
   }
 
@@ -301,8 +301,8 @@ export class InstancesService {
       this.overallStates$.next(
         instances.map((x) => ({
           id: x.instanceConfiguration.id,
-          ...x.overallState,
-        })),
+          ...x.overallState
+        }))
       );
 
       // last update the current$ subject to inform about changes
@@ -330,7 +330,7 @@ export class InstancesService {
     const wrongScopeLength = this.instancesChanges.find((change) => change.scope.scope.length < 2);
     if (wrongScopeLength) {
       console.warn(
-        `Found instance change with scope length ${wrongScopeLength.scope.scope.length} (less than 2). Reloading.`,
+        `Found instance change with scope length ${wrongScopeLength.scope.scope.length} (less than 2). Reloading.`
       );
       return false;
     }
@@ -338,7 +338,7 @@ export class InstancesService {
     const wrongGroup = this.instancesChanges.find((change) => change.scope.scope[0] !== group);
     if (wrongGroup) {
       console.warn(
-        `Found instance change that belongs to group ${wrongGroup.scope.scope[0]} instead of ${group}. Reloading`,
+        `Found instance change that belongs to group ${wrongGroup.scope.scope[0]} instead of ${group}. Reloading`
       );
       return false;
     }
@@ -356,20 +356,20 @@ export class InstancesService {
     this.partiallyReloadInstances(this.group, [], [this.current$.value?.instanceConfiguration?.id]).subscribe(
       (list) => {
         this.instances$.next(list);
-      },
+      }
     );
   }
 
   private partiallyReloadInstances(
     group: string,
     deletedInstanceIds: string[],
-    updatedInstanceIds: string[],
+    updatedInstanceIds: string[]
   ): Observable<InstanceDto[]> {
     // remove changed instances. updated/created will be reloaded, and deleted should be excluded
     const unchangedInstances = this.instances$.value.filter(
       (i) =>
         !deletedInstanceIds.includes(i.instanceConfiguration.id) &&
-        !updatedInstanceIds.includes(i.instanceConfiguration.id),
+        !updatedInstanceIds.includes(i.instanceConfiguration.id)
     );
 
     // if no instances were created/updated, we can return immediately (since deleted instances were already removed)
@@ -382,10 +382,10 @@ export class InstancesService {
     return forkJoin(fetchUpdated).pipe(
       map((updated) => {
         return [...unchangedInstances, ...updated].sort((a, b) =>
-          a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name),
+          a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name)
         );
       }),
-      measure('Instance Partial Load'),
+      measure('Instance Partial Load')
     );
   }
 
@@ -415,7 +415,7 @@ export class InstancesService {
       .post<InstanceOverallStatusDto[]>(`${this.apiPath(this.group)}/bulk/bulkSync`, instances)
       .pipe(
         finalize(() => this.overallStatesLoading$.next(false)),
-        measure('Sync and fetch instance state'),
+        measure('Sync and fetch instance state')
       )
       .subscribe((s) => {
         // merge the result according to id in the existing list.
@@ -462,7 +462,7 @@ export class InstancesService {
         // update banner in active version if it changes on the server.
         this.http
           .get<InstanceBannerRecord>(
-            `${this.apiPath(this.group)}/${this.active$.value.instanceConfiguration.id}/banner`,
+            `${this.apiPath(this.group)}/${this.active$.value.instanceConfiguration.id}/banner`
           )
           .subscribe((banner) => {
             this.active$.value.banner = banner;
@@ -501,7 +501,7 @@ export class InstancesService {
     if (inst.activeVersion.tag !== inst.instance.tag) {
       activeFetch = this.http
         .get<InstanceConfiguration>(
-          `${this.apiPath(this.group)}/${inst.instanceConfiguration.id}/${inst.activeVersion.tag}`,
+          `${this.apiPath(this.group)}/${inst.instanceConfiguration.id}/${inst.activeVersion.tag}`
         )
         .pipe(
           measure('Active Instance Configuration Load'),
@@ -512,7 +512,7 @@ export class InstancesService {
             r.instance = r.activeVersion;
             r.instanceConfiguration = c;
             return r;
-          }),
+          })
         );
     }
 
@@ -521,11 +521,11 @@ export class InstancesService {
     activeFetch.subscribe((act) => {
       this.httpReplayService
         .get<InstanceNodeConfigurationListDto>(
-          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${act.activeVersion.tag}/nodeConfiguration`,
+          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${act.activeVersion.tag}/nodeConfiguration`
         )
         .pipe(
           finalize(() => this.activeLoading$.next(false)),
-          measure('Active Nodes Load'),
+          measure('Active Nodes Load')
         )
         .subscribe((nodes) => {
           this.activeNodeCfgs$.next(nodes);
@@ -556,11 +556,11 @@ export class InstancesService {
       this.activeStateCall ||
       this.http
         .get<{ [minionName: string]: MinionStatusDto }>(
-          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${act.activeVersion.tag}/minionState`,
+          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${act.activeVersion.tag}/minionState`
         )
         .pipe(
           measure('Node States'),
-          finalize(() => (this.activeStateCall = null)),
+          finalize(() => (this.activeStateCall = null))
         )
         .subscribe((states) => {
           this.activeNodeStates$.next(states);
@@ -570,7 +570,7 @@ export class InstancesService {
       showCreateEvents: true,
       showDeploymentEvents: true,
       showRuntimeEvents: true,
-      maxResults: 150,
+      maxResults: 150
     };
     this.activeHistoryCall =
       this.activeHistoryCall ||
@@ -578,7 +578,7 @@ export class InstancesService {
         .post<HistoryResultDto>(`${this.apiPath(this.group)}/${act.instanceConfiguration.id}/history`, historyFilter)
         .pipe(
           measure('Active Instance History'),
-          finalize(() => (this.activeHistoryCall = null)),
+          finalize(() => (this.activeHistoryCall = null))
         )
         .subscribe((history) => {
           this.activeHistory$.next(history);

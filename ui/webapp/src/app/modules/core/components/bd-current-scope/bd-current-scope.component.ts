@@ -3,6 +3,9 @@ import { combineLatest, map } from 'rxjs';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
+import { RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
 
 interface LinkableScope {
   name: string;
@@ -13,7 +16,7 @@ interface LinkableScope {
     selector: 'app-bd-current-scope',
     templateUrl: './bd-current-scope.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [RouterLink, MatIcon, AsyncPipe]
 })
 export class BdCurrentScopeComponent {
   private readonly groups = inject(GroupsService);

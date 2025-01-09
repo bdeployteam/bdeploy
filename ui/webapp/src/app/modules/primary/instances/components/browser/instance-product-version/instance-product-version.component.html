@@ -1,10 +1,11 @@
 <div class="flex justify-start items-center">
   <div class="truncate">{{ record.instanceConfiguration.product.tag }}</div>
-  <div
-    *ngIf="!(hasProduct$ | async)"
-    class="local-na-chip"
-    matTooltip="The product version is not available on this server."
-  >
-    N/A
-  </div>
+  @if (!(hasProduct$ | async)) {
+    <div
+      class="local-na-chip"
+      matTooltip="The product version is not available on this server."
+      >
+      N/A
+    </div>
+  }
 </div>

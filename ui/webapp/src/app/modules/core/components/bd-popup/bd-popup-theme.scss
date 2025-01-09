@@ -1,3 +1,4 @@
+@use "sass:map";
 @use "@angular/material" as mat;
 
 @mixin _bd-popup-theme-colored($name, $card-color, $outline-var) {
@@ -132,25 +133,25 @@
 
 /** These classes are applied to the panel of the popup, thus they MUST be global */
 @mixin bd-popup-theme($theme) {
-  $dark: map-get($theme, "is-dark");
-  $bg: map-get(mat.m2-get-color-config($theme), "background");
+  $dark: map.get($theme, "is-dark");
+  $bg: map.get(mat.m2-get-color-config($theme), "background");
 
   $outline: if($dark, #595959, #e0e0e0); // TODO: figure out better way to achieve this when re-writing themes.
 
-  @include _bd-popup-theme-colored("default", map-get($bg, "card"), $outline);
+  @include _bd-popup-theme-colored("default", map.get($bg, "card"), $outline);
   @include _bd-popup-theme-colored(
-    "primary",
-    mat.m2-get-color-from-palette(map-get(mat.m2-get-color-config($theme), "primary")),
-    $outline
+                  "primary",
+                  mat.m2-get-color-from-palette(map.get(mat.m2-get-color-config($theme), "primary")),
+                  $outline
   );
   @include _bd-popup-theme-colored(
-    "accent",
-    mat.m2-get-color-from-palette(map-get(mat.m2-get-color-config($theme), "accent")),
-    $outline
+                  "accent",
+                  mat.m2-get-color-from-palette(map.get(mat.m2-get-color-config($theme), "accent")),
+                  $outline
   );
   @include _bd-popup-theme-colored(
-    "warn",
-    mat.m2-get-color-from-palette(map-get(mat.m2-get-color-config($theme), "warn")),
-    $outline
+                  "warn",
+                  mat.m2-get-color-from-palette(map.get(mat.m2-get-color-config($theme), "warn")),
+                  $outline
   );
 }

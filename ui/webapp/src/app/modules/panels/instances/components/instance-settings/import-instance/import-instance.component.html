@@ -8,14 +8,15 @@
         <strong>Note</strong> that the product used in the instance version must be available on the server.
       </div>
       <app-bd-file-drop (fileAdded)="fileAdded($event)" [types]="['.zip', '.jar']"></app-bd-file-drop>
-      <app-bd-file-upload
-        *ngFor="let file of files; let i = index"
-        [file]="file.file"
-        [parameters]="file.parameters"
-        [url]="instances.importURL$ | async"
-        (dismiss)="onDismiss(i)"
-        [resultEvaluator]="resultEval"
-      ></app-bd-file-upload>
+      @for (file of files; track file; let i = $index) {
+        <app-bd-file-upload
+          [file]="file.file"
+          [parameters]="file.parameters"
+          [url]="instances.importURL$ | async"
+          (dismiss)="onDismiss(i)"
+          [resultEvaluator]="resultEval"
+        ></app-bd-file-upload>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

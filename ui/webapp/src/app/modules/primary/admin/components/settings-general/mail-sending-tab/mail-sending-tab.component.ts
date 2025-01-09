@@ -2,11 +2,18 @@ import { Component, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { BdFormToggleComponent } from '../../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { FormsModule } from '@angular/forms';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../../core/validators/trimmed.directive';
+import { ServerConnectionUrlSyntaxValidator } from '../../../../../core/validators/server-connection-url-syntax-validator.directive';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-mail-sending-tab',
     templateUrl: './mail-sending-tab.component.html',
-    standalone: false
+    imports: [BdFormToggleComponent, FormsModule, BdFormInputComponent, TrimmedValidator, ServerConnectionUrlSyntaxValidator, BdButtonComponent, AsyncPipe]
 })
 export class MailSendingTabComponent {
   protected readonly settings = inject(SettingsService);

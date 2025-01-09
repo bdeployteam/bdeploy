@@ -14,7 +14,7 @@
     (cdkDropListDropped)="onDrop($event)"
     [trackBy]="trackNode"
     [class.local-header-hidden]="headerHidden"
-  >
+    >
     <caption style="display: none">
       {{ caption }}
     </caption>
@@ -24,7 +24,7 @@
     </ng-container>
 
     <!-- each record is a router link -->
-    <ng-container *ngIf="!!recordRoute">
+    @if (!!recordRoute) {
       <tr
         mat-row
         *matRowDef="let row; columns: _visibleColumns"
@@ -36,10 +36,10 @@
         class="local-row group"
         cdkDrag
       ></tr>
-    </ng-container>
+    }
 
     <!-- no router links, delegate clicking to outside -->
-    <ng-container *ngIf="!recordRoute">
+    @if (!recordRoute) {
       <tr
         mat-row
         *matRowDef="let row; columns: _visibleColumns"
@@ -49,7 +49,7 @@
         class="group"
         cdkDrag
       ></tr>
-    </ng-container>
+    }
 
     <!-- In case no data is available (empty data, filter, etc.) -->
     <tr class="mdc-data-table__row" *matNoDataRow>
@@ -65,178 +65,190 @@
       [style.display]="hasMoreData ? 'table-row' : 'none'"
     ></tr>
 
-    <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">
-      <!-- Column headers -->
-      <th
-        scope="col"
-        mat-header-cell
-        *matHeaderCellDef
-        [style.width]="col.width ? col.width : 'auto'"
-        [matTooltip]="col.description"
-        [matTooltipShowDelay]="1000"
-        mat-sort-header
-        [disabled]="!sortData"
-      >
-        <div
-          [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null"
-          class="truncate"
-          *ngIf="!checkMode || i !== 0"
-        >
-          {{ col.name }}
-        </div>
-
-        <mat-checkbox
-          #cb
-          *ngIf="checkMode && i === 0"
-          [checked]="isAllChecked()"
-          [indeterminate]="!isAllChecked() && isAnyChecked()"
-          (change)="toggleCheckAll(cb)"
-          appClickStopPropagation
-          [disabled]="headerCheckForbidden || (!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async))"
-          class="truncate local-table-checkbox"
-          >{{ col.name }}</mat-checkbox
-        >
-      </th>
-
-      <td mat-footer-cell *matFooterCellDef [attr.colspan]="_visibleColumns.length" class="bd-hint-text w-auto max-w-0">
-        Some data is hidden. Use the search and/or sort to find it.
-      </td>
-
-      <ng-container *matCellDef="let row">
-        <!-- First column, can not be an action. -->
-        <ng-container *ngIf="i === 0">
-          <td
-            mat-cell
-            [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-            [style.width]="col.width ? col.width : 'auto'"
-            class="max-w-0"
-            [attr.colspan]="row.expandable ? _columns.length : 1"
+    @for (col of _columns; track col; let i = $index) {
+      <ng-container [matColumnDef]="col.id">
+        <!-- Column headers -->
+        <th
+          scope="col"
+          mat-header-cell
+          *matHeaderCellDef
+          [style.width]="col.width ? col.width : 'auto'"
+          [matTooltip]="col.description"
+          [matTooltipShowDelay]="1000"
+          mat-sort-header
+          [disabled]="!sortData"
           >
-            <!-- Text for the first column, either group name or item text -->
+          @if (!checkMode || i !== 0) {
             <div
-              class="local-first-column flex justify-start items-center"
-              [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
-              [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
-              [matTooltip]="!row.expandable ? (!!col.tooltip ? col.tooltip(row.node.item) : row.node.groupOrFirstColumn) : null"
-              [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
-            >
-              <!-- Button to expand or collapse a group -->
-              <button
-                *ngIf="row.expandable"
-                mat-icon-button
-                class="local-expand-button"
-                [style.marginLeft.px]="row.level * 24"
-                (click)="treeControl.toggle(row)"
-                aria-label="Expand / Collapse"
-                appClickStopPropagation
+              [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null"
+              class="truncate"
               >
-                <mat-icon class="mat-icon-rtl-mirror">
-                  {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
-                </mat-icon>
-              </button>
-
-              <!-- Either simple label or check box in check mode -->
-              <ng-container *ngIf="!checkMode">
-                <!-- issue with angular: it cannot pick up the drag handle since it is in a child template, so the *whole* row can be dragged... -->
-                <mat-icon *ngIf="dragReorderMode" cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]"
-                  >drag_indicator</mat-icon
-                >
-                <div *ngIf="!col.component || row.expandable" class="truncate grow basis-0 text-left">
-                  {{ row.node.groupOrFirstColumn }}
-                </div>
-                <app-bd-data-component-cell
-                  *ngIf="!!col.component && !row.expandable"
-                  [componentType]="col.component"
-                  [record]="row.node.item"
-                  [column]="col"
-                ></app-bd-data-component-cell>
-              </ng-container>
-              <mat-checkbox
-                #cb
-                *ngIf="checkMode"
-                [checked]="isChecked(row)"
-                [indeterminate]="isPartiallyChecked(row)"
-                (change)="toggleCheck(row, cb)"
-                appClickStopPropagation
-                [disabled]="row.node.checkForbidden || (!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async))"
-                class="truncate local-table-checkbox"
-              >
-                <div *ngIf="!col.component || row.expandable" class="truncate grow basis-0 text-left">
-                  {{ row.node.groupOrFirstColumn }}
-                </div>
-                <app-bd-data-component-cell
-                  *ngIf="!!col.component && !row.expandable"
-                  [componentType]="col.component"
-                  [record]="row.node.item"
-                  [column]="col"
-                ></app-bd-data-component-cell>
-              </mat-checkbox>
+              {{ col.name }}
             </div>
+          }
+          @if (checkMode && i === 0) {
+            <mat-checkbox
+              #cb
+              [checked]="isAllChecked()"
+              [indeterminate]="!isAllChecked() && isAnyChecked()"
+              (change)="toggleCheckAll(cb)"
+              appClickStopPropagation
+              [disabled]="headerCheckForbidden || (!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async))"
+              class="truncate local-table-checkbox"
+              >{{ col.name }}</mat-checkbox
+              >
+            }
+          </th>
+          <td mat-footer-cell *matFooterCellDef [attr.colspan]="_visibleColumns.length" class="bd-hint-text w-auto max-w-0">
+            Some data is hidden. Use the search and/or sort to find it.
           </td>
-        </ng-container>
-
-        <!-- Columns after the first one -->
-        <ng-container *ngIf="i !== 0 && !col.action && !row.expandable">
-          <td
-            mat-cell
-            [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-            [style.width]="col.width ? col.width : 'auto'"
-            class="max-w-0"
-          >
-            <ng-container *ngIf="!row.expandable">
-              <ng-container *ngIf="!isImageColumn(col)">
+          <ng-container *matCellDef="let row">
+            <!-- First column, can not be an action. -->
+            @if (i === 0) {
+              <td
+                mat-cell
+                [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+                [style.width]="col.width ? col.width : 'auto'"
+                class="max-w-0"
+                [attr.colspan]="row.expandable ? _columns.length : 1"
+                >
+                <!-- Text for the first column, either group name or item text -->
                 <div
-                  *ngIf="!col.component"
-                  class="truncate"
-                  [matTooltip]="!!row.node.item ? (!!col.tooltip ? col.tooltip(row.node.item) : col.data(row.node.item)) : null"
+                  class="local-first-column flex justify-start items-center"
+                  [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
+                  [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
+                  [matTooltip]="!row.expandable ? (!!col.tooltip ? col.tooltip(row.node.item) : row.node.groupOrFirstColumn) : null"
                   [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
-                >
-                  {{ col.data(row.node.item) }}
-                </div>
-                <app-bd-data-component-cell
-                  *ngIf="!!col.component"
-                  [componentType]="col.component"
-                  [record]="row.node.item"
-                  [column]="col"
-                ></app-bd-data-component-cell>
-              </ng-container>
-              <ng-container *ngIf="isImageColumn(col)">
-                <div class="flex justify-start items-center">
-                  <img
-                    class="local-row-image"
-                    [style.maxWidth]="col.width ? col.width : null"
-                    *ngIf="!!col.data(row.node.item)"
-                    [alt]="col.data(row.node.item)"
-                    [src]="getImageUrl(col, row.node.item)"
-                  />
-                </div>
-              </ng-container>
+                  >
+                  <!-- Button to expand or collapse a group -->
+                  @if (row.expandable) {
+                    <button
+                      mat-icon-button
+                      class="local-expand-button"
+                      [style.marginLeft.px]="row.level * 24"
+                      (click)="treeControl.toggle(row)"
+                      aria-label="Expand / Collapse"
+                      appClickStopPropagation
+                      >
+                      <mat-icon class="mat-icon-rtl-mirror">
+                        {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
+                      </mat-icon>
+                    </button>
+                  }
+                  <!-- Either simple label or check box in check mode -->
+                  @if (!checkMode) {
+                    <!-- issue with angular: it cannot pick up the drag handle since it is in a child template, so the *whole* row can be dragged... -->
+                    @if (dragReorderMode) {
+                      <mat-icon cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]"
+                        >drag_indicator</mat-icon
+                        >
+                      }
+                      @if (!col.component || row.expandable) {
+                        <div class="truncate grow basis-0 text-left">
+                          {{ row.node.groupOrFirstColumn }}
+                        </div>
+                      }
+                      @if (!!col.component && !row.expandable) {
+                        <app-bd-data-component-cell
+                          [componentType]="col.component"
+                          [record]="row.node.item"
+                          [column]="col"
+                        ></app-bd-data-component-cell>
+                      }
+                    }
+                    @if (checkMode) {
+                      <mat-checkbox
+                        #cb
+                        [checked]="isChecked(row)"
+                        [indeterminate]="isPartiallyChecked(row)"
+                        (change)="toggleCheck(row, cb)"
+                        appClickStopPropagation
+                        [disabled]="row.node.checkForbidden || (!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async))"
+                        class="truncate local-table-checkbox"
+                        >
+                        @if (!col.component || row.expandable) {
+                          <div class="truncate grow basis-0 text-left">
+                            {{ row.node.groupOrFirstColumn }}
+                          </div>
+                        }
+                        @if (!!col.component && !row.expandable) {
+                          <app-bd-data-component-cell
+                            [componentType]="col.component"
+                            [record]="row.node.item"
+                            [column]="col"
+                          ></app-bd-data-component-cell>
+                        }
+                      </mat-checkbox>
+                    }
+                  </div>
+                </td>
+              }
+              <!-- Columns after the first one -->
+              @if (i !== 0 && !col.action && !row.expandable) {
+                <td
+                  mat-cell
+                  [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+                  [style.width]="col.width ? col.width : 'auto'"
+                  class="max-w-0"
+                  >
+                  @if (!row.expandable) {
+                    @if (!isImageColumn(col)) {
+                      @if (!col.component) {
+                        <div
+                          class="truncate"
+                          [matTooltip]="!!row.node.item ? (!!col.tooltip ? col.tooltip(row.node.item) : col.data(row.node.item)) : null"
+                          [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
+                          >
+                          {{ col.data(row.node.item) }}
+                        </div>
+                      }
+                      @if (!!col.component) {
+                        <app-bd-data-component-cell
+                          [componentType]="col.component"
+                          [record]="row.node.item"
+                          [column]="col"
+                        ></app-bd-data-component-cell>
+                      }
+                    }
+                    @if (isImageColumn(col)) {
+                      <div class="flex justify-start items-center">
+                        @if (!!col.data(row.node.item)) {
+                          <img
+                            class="local-row-image"
+                            [style.maxWidth]="col.width ? col.width : null"
+                            [alt]="col.data(row.node.item)"
+                            [src]="getImageUrl(col, row.node.item)"
+                            />
+                        }
+                      </div>
+                    }
+                  }
+                </td>
+              }
+              <!-- Items with an action (collapsed button), this may not occur on the first column -->
+              @if (col.action && !row.expandable) {
+                <td
+                  mat-cell
+                  [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+                  [style.width]="col.width ? col.width : 'auto'"
+                  class="max-w-0"
+                  >
+                  <div class="flex justify-start items-center">
+                    @if (row.node.item) {
+                      <app-bd-button
+                        [text]="col.data(row.node.item)"
+                        tooltip="left"
+                        [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
+                        (click)="col.action(row.node.item)"
+                        [disabled]="!col.actionDisabled ? false : col.actionDisabled(row.node.item)"
+                        appClickStopPropagation
+                      ></app-bd-button>
+                    }
+                  </div>
+                </td>
+              }
             </ng-container>
-          </td>
-        </ng-container>
-
-        <!-- Items with an action (collapsed button), this may not occur on the first column -->
-        <ng-container *ngIf="col.action && !row.expandable">
-          <td
-            mat-cell
-            [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-            [style.width]="col.width ? col.width : 'auto'"
-            class="max-w-0"
-          >
-            <div class="flex justify-start items-center">
-              <app-bd-button
-                *ngIf="row.node.item"
-                [text]="col.data(row.node.item)"
-                tooltip="left"
-                [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
-                (click)="col.action(row.node.item)"
-                [disabled]="!col.actionDisabled ? false : col.actionDisabled(row.node.item)"
-                appClickStopPropagation
-              ></app-bd-button>
-            </div>
-          </td>
-        </ng-container>
-      </ng-container>
-    </ng-container>
-  </table>
-</div>
+          </ng-container>
+        }
+      </table>
+    </div>

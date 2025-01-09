@@ -5,8 +5,12 @@
   appBdPopupTrigger="hover"
   [appBdPopupDelay]="500"
   appBdPopupPosition="above-right"
->
+  >
   <div class="local-bg-position" [ngClass]="bgClass"></div>
-  <div *ngIf="!maxWidthPx" class="local-text">{{ value }}</div>
-  <div *ngIf="!!maxWidthPx" class="local-text truncate" [style.max-width.px]="maxWidthPx">{{ value }}</div>
+  @if (!maxWidthPx) {
+    <div class="local-text">{{ value }}</div>
+  }
+  @if (!!maxWidthPx) {
+    <div class="local-text truncate" [style.max-width.px]="maxWidthPx">{{ value }}</div>
+  }
 </div>

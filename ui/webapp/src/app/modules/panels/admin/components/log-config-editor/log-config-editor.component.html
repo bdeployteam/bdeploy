@@ -11,8 +11,10 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="!(loading$ | async)" class="flex flex-col h-full">
-      <app-bd-editor class="flex-auto" [(content)]="config" path="log4j2.xml"></app-bd-editor>
-    </div>
+    @if (!(loading$ | async)) {
+      <div class="flex flex-col h-full">
+        <app-bd-editor class="flex-auto" [(content)]="config" path="log4j2.xml"></app-bd-editor>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

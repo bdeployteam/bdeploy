@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { ManagedMasterDto, SystemConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -10,10 +10,17 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { VariableServerValidatorDirective } from '../../validators/variable-server-validator.directive';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+
 @Component({
     selector: 'app-add-system',
     templateUrl: './add-system.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, BdFormSelectComponent, VariableServerValidatorDirective, BdButtonComponent]
 })
 export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

@@ -36,21 +36,25 @@
 
   <app-bd-dialog-content>
     <div class="local-group flex flex-col w-full h-full">
-      <div class="local-loading" *ngIf="!app">Application or Endpoint not found.</div>
-      <div
-        *ngIf="!app?.endpoint?.endpoint?.proxying"
-        class="flex flex-col gap-2.5 justify-center items-center w-full h-full"
-      >
-        <span>This endpoint does not support proxying and can thus not be displayed inline.</span>
-        <app-bd-button
-          *ngIf="directUri"
-          [collapsed]="false"
-          text="Open directly on host in new Tab"
-          icon="open_in_browser"
-          (click)="openUiEndpointDirect()"
-        ></app-bd-button>
-      </div>
-      <ng-container *ngIf="app?.endpoint?.endpoint?.proxying">
+      @if (!app) {
+        <div class="local-loading">Application or Endpoint not found.</div>
+      }
+      @if (!app?.endpoint?.endpoint?.proxying) {
+        <div
+          class="flex flex-col gap-2.5 justify-center items-center w-full h-full"
+          >
+          <span>This endpoint does not support proxying and can thus not be displayed inline.</span>
+          @if (directUri) {
+            <app-bd-button
+              [collapsed]="false"
+              text="Open directly on host in new Tab"
+              icon="open_in_browser"
+              (click)="openUiEndpointDirect()"
+            ></app-bd-button>
+          }
+        </div>
+      }
+      @if (app?.endpoint?.endpoint?.proxying) {
         <div class="local-loading" [class.local-loading-done]="frameLoaded">Loading...</div>
         <iframe
           #iframe
@@ -62,7 +66,7 @@
           referrerpolicy="no-referrer"
           (load)="frameLoaded = true"
         ></iframe>
-      </ng-container>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -1,29 +1,31 @@
-<app-bd-button
-  *ngIf="!panel"
-  [icon]="icon"
-  [svgIcon]="svgIcon"
-  [text]="text"
-  color="toolbar"
-  [collapsed]="collapsed"
-  tooltip="right"
-  [isToggle]="true"
-  [toggleOnClick]="false"
-  [toggle]="!!rla?.isActive"
-  [routerLink]="route"
-  routerLinkActive
-  [@showHide]="visible ? 'visible' : 'hidden'"
-  [disabled]="disabled"
-></app-bd-button>
+@if (!panel) {
+  <app-bd-button
+    [icon]="icon"
+    [svgIcon]="svgIcon"
+    [text]="text"
+    color="toolbar"
+    [collapsed]="collapsed"
+    tooltip="right"
+    [isToggle]="true"
+    [toggleOnClick]="false"
+    [toggle]="!!rla?.isActive"
+    [routerLink]="route"
+    routerLinkActive
+    [@showHide]="visible ? 'visible' : 'hidden'"
+    [disabled]="disabled"
+  ></app-bd-button>
+}
 
-<app-bd-panel-button
-  *ngIf="panel"
-  [icon]="icon"
-  [svgIcon]="svgIcon"
-  [text]="text"
-  color="toolbar"
-  [collapsed]="collapsed"
-  tooltip="right"
-  [route]="route"
-  [@showHide]="visible ? 'visible' : 'hidden'"
-  [disabled]="disabled"
-></app-bd-panel-button>
+@if (panel) {
+  <app-bd-panel-button
+    [icon]="icon"
+    [svgIcon]="svgIcon"
+    [text]="text"
+    color="toolbar"
+    [collapsed]="collapsed"
+    tooltip="right"
+    [route]="route"
+    [@showHide]="visible ? 'visible' : 'hidden'"
+    [disabled]="disabled"
+  ></app-bd-panel-button>
+}

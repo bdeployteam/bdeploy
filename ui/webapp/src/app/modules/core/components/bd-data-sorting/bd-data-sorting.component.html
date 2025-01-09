@@ -1,9 +1,11 @@
 <app-bd-button-popup #popup [text]="sortBy" tooltip="below" [collapsed]="false" [hidden]="disabled">
   <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5">
     <mat-radio-group class="flex flex-col" [ngModel]="selectedColumn" (ngModelChange)="updateSortColumn($event)">
-      <mat-radio-button class="sort-column-radio-button" *ngFor="let column of _columns" [value]="column">
-        {{column.name}}
-      </mat-radio-button>
+      @for (column of _columns; track column) {
+        <mat-radio-button class="sort-column-radio-button" [value]="column">
+          {{column.name}}
+        </mat-radio-button>
+      }
     </mat-radio-group>
     <div class="flex justify-center items-center">
       <mat-button-toggle-group
@@ -11,7 +13,7 @@
         name="sortDirection"
         [value]="sort?.direction"
         (valueChange)="updateSortDirection($event)"
-      >
+        >
         <mat-button-toggle value="asc">
           <mat-icon svgIcon="sort_asc"></mat-icon>
         </mat-button-toggle>

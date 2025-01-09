@@ -11,7 +11,7 @@ import {
   InstanceNodeConfigurationDto,
   MinionDto,
   OperatingSystem,
-  TemplateVariableType,
+  TemplateVariableType
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ClipboardData, ClipboardService } from 'src/app/modules/core/services/clipboard.service';
@@ -20,6 +20,19 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../services/process-edit.service';
 import { AppTemplateNameComponent } from './app-template-name/app-template-name.component';
+import {
+  BdFormTemplateVariableComponent
+} from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { FormsModule } from '@angular/forms';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 export interface AppRow {
   app: AppGroup;
@@ -48,7 +61,7 @@ const colAppName: BdDataColumn<AppRow> = {
     templateUrl: './add-process.component.html',
     styleUrls: ['./add-process.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+  imports: [BdFormTemplateVariableComponent, FormsModule, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdButtonComponent, BdNotificationCardComponent, BdDataTableComponent, AsyncPipe]
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
   private readonly edit = inject(ProcessEditService);

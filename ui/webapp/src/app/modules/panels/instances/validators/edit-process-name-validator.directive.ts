@@ -18,8 +18,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: EditProcessNameValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class EditProcessNameValidatorDirective implements Validator {
   private readonly edit = inject(InstanceEditService);

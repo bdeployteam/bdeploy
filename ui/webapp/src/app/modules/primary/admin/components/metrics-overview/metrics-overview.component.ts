@@ -4,6 +4,14 @@ import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
+import { LineChartModule, BarChartModule } from '@swimlane/ngx-charts';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
+import { AsyncPipe } from '@angular/common';
 
 export interface SeriesElement {
   name: any;
@@ -14,7 +22,7 @@ export interface SeriesElement {
     selector: 'app-metrics-overview',
     templateUrl: './metrics-overview.component.html',
     styleUrls: ['./metrics-overview.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatTabGroup, MatTab, MatTabLabel, LineChartModule, MatIcon, BarChartModule, MatDivider, AsyncPipe]
 })
 export class MetricsOverviewComponent implements OnInit {
   private readonly metrics = inject(MetricsService);

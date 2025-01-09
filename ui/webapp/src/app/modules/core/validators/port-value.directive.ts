@@ -11,8 +11,7 @@ export const PORT_VALIDATION = 'port-value';
             useExisting: PortValueValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class PortValueValidatorDirective implements Validator {
   @Input() appPortValueValidator: boolean;

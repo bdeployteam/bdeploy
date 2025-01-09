@@ -1,90 +1,90 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [panel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="nodeState$ | async as state; else noState" class="flex flex-col gap-2.5">
-      <app-bd-notification-card
-        [svgIcon]="state.config.os"
-        [dismissable]="false"
-        header="{{ nodeName$ | async }} - {{ state.config.os }}"
-      >
-        <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
-          <div>BDeploy Version:</div>
-          <div class="truncate">{{ nodeVersion }}</div>
-          <div>Number of CPUs:</div>
-          <div>{{ !!state.monitoring?.availableProcessors ? state.monitoring.availableProcessors : 'Unknown' }}</div>
-          <div>Master:</div>
-          <div>{{ state.config.master ? 'yes' : 'no' }}</div>
-          <ng-container *ngIf="!state.offline">
-            <div>Up Since:</div>
-            <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>
-          </ng-container>
-          <div>Response Time:</div>
-          <div>{{ state.lastRoundtrip }}ms</div>
-        </div>
-        <ng-container *ngIf="state.offline">
-          <strong class="pt-2" [matTooltip]="state.infoText" [matTooltipShowDelay]="500">{{ state.infoText }}</strong>
-        </ng-container>
-      </app-bd-notification-card>
-
-      <mat-divider></mat-divider>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Edit..."
-        icon="edit"
-        [relative]="true"
-        [route]="['edit']"
-        [disabled]="state.config?.master"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Replace..."
-        icon="swap_calls"
-        [relative]="true"
-        [route]="['replace']"
-        [disabled]="state.config?.master"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Convert to Node..."
-        icon="drive_file_move"
-        [relative]="true"
-        [route]="['conversion']"
-        [disabled]="!state.config?.master"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Apply Software Update"
-        icon="system_update"
-        [relative]="true"
-        [route]="['update']"
-        [disabled]="isCurrent || state.offline || state.config?.master"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Remote Maintenance"
-        icon="build"
-        [relative]="true"
-        [route]="['maintenance']"
-        [disabled]="state.offline"
-      ></app-bd-panel-button>
-      <app-bd-button
-        text="Remove"
-        icon="delete"
-        [collapsed]="false"
-        (click)="onDelete()"
-        [disabled]="state.config?.master || (mappedDelete$ | async)"
-        [loadingWhen$]="mappedDelete$"
-      ></app-bd-button>
-    </div>
-    <ng-template #noState>
+    @if (nodeState$ | async; as state) {
+      <div class="flex flex-col gap-2.5">
+        <app-bd-notification-card
+          [svgIcon]="state.config.os"
+          [dismissable]="false"
+          header="{{ nodeName$ | async }} - {{ state.config.os }}"
+          >
+          <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
+            <div>BDeploy Version:</div>
+            <div class="truncate">{{ nodeVersion }}</div>
+            <div>Number of CPUs:</div>
+            <div>{{ !!state.monitoring?.availableProcessors ? state.monitoring.availableProcessors : 'Unknown' }}</div>
+            <div>Master:</div>
+            <div>{{ state.config.master ? 'yes' : 'no' }}</div>
+            @if (!state.offline) {
+              <div>Up Since:</div>
+              <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>
+            }
+            <div>Response Time:</div>
+            <div>{{ state.lastRoundtrip }}ms</div>
+          </div>
+          @if (state.offline) {
+            <strong class="pt-2" [matTooltip]="state.infoText" [matTooltipShowDelay]="500">{{ state.infoText }}</strong>
+          }
+        </app-bd-notification-card>
+        <mat-divider></mat-divider>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Edit..."
+          icon="edit"
+          [relative]="true"
+          [route]="['edit']"
+          [disabled]="state.config?.master"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Replace..."
+          icon="swap_calls"
+          [relative]="true"
+          [route]="['replace']"
+          [disabled]="state.config?.master"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Convert to Node..."
+          icon="drive_file_move"
+          [relative]="true"
+          [route]="['conversion']"
+          [disabled]="!state.config?.master"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Apply Software Update"
+          icon="system_update"
+          [relative]="true"
+          [route]="['update']"
+          [disabled]="isCurrent || state.offline || state.config?.master"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Remote Maintenance"
+          icon="build"
+          [relative]="true"
+          [route]="['maintenance']"
+          [disabled]="state.offline"
+        ></app-bd-panel-button>
+        <app-bd-button
+          text="Remove"
+          icon="delete"
+          [collapsed]="false"
+          (click)="onDelete()"
+          [disabled]="state.config?.master || (mappedDelete$ | async)"
+          [loadingWhen$]="mappedDelete$"
+        ></app-bd-button>
+      </div>
+    } @else {
       <app-bd-notification-card
         icon="info"
         [type]="'warning'"
         [dismissable]="false"
         header="Server Details not available"
-      >
+        >
         <div class="text-justify">Node details are not available.</div>
       </app-bd-notification-card>
-    </ng-template>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-bd-image-upload',
     templateUrl: './bd-image-upload.component.html',
     styleUrls: ['./bd-image-upload.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatIconButton, MatIcon]
 })
 export class BdImageUploadComponent implements OnInit {
   private readonly sanitizer = inject(DomSanitizer);

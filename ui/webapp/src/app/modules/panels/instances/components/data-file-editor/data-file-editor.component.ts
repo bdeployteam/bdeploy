@@ -1,19 +1,28 @@
-import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { FileStatusDto, FileStatusType, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
+
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdEditorComponent } from '../../../../core/components/bd-editor/bd-editor.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-data-file-editor',
     templateUrl: './data-file-editor.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdEditorComponent, BdNoDataComponent, AsyncPipe]
 })
 export class DataFileEditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

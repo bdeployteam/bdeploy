@@ -1,41 +1,47 @@
-<ng-container [ngSwitch]="param.inputType">
-  <app-bd-form-input
-    *ngSwitchCase="ReportParameterInputType.INPUT"
-    [label]="param.label"
-    [name]="param.key"
-    [attr.name]="param.key"
-    [matTooltip]="param.description"
-    matTooltipPosition="above"
-    [(ngModel)]="request.params[param.key]"
-    (ngModelChange)="onModelChange($event)"
-    errorDisplay="immediate"
-    [suggested]="values"
-  ></app-bd-form-input>
-  <app-bd-form-toggle
-    *ngSwitchCase="ReportParameterInputType.CHECKBOX"
-    [label]="param.label"
-    [name]="param.key"
-    [attr.name]="param.key"
-    [matTooltip]="param.description"
-    matTooltipPosition="above"
-    [(ngModel)]="request.params[param.key]"
-    (ngModelChange)="onModelChange($event)"
-    errorDisplay="immediate"
-  >
-  </app-bd-form-toggle>
-  <app-bd-form-select
-    *ngSwitchCase="ReportParameterInputType.SELECT"
-    [allowNone]="true"
-    [label]="param.label"
-    [name]="param.key"
-    [attr.name]="param.key"
-    [matTooltip]="param.description"
-    matTooltipPosition="above"
-    [(ngModel)]="request.params[param.key]"
-    (ngModelChange)="onModelChange($event)"
-    errorDisplay="immediate"
-    [labels]="labels"
-    [values]="values"
-  ></app-bd-form-select>
-  <div *ngSwitchDefault>{{param.inputType}} IS NOT SUPPORTED</div>
-</ng-container>
+
+@switch (param.inputType) {
+  @case (ReportParameterInputType.INPUT) {
+    <app-bd-form-input
+      [label]="param.label"
+      [name]="param.key"
+      [attr.name]="param.key"
+      [matTooltip]="param.description"
+      matTooltipPosition="above"
+      [(ngModel)]="request.params[param.key]"
+      (ngModelChange)="onModelChange($event)"
+      errorDisplay="immediate"
+      [suggested]="values"
+    ></app-bd-form-input>
+  }
+  @case (ReportParameterInputType.CHECKBOX) {
+    <app-bd-form-toggle
+      [label]="param.label"
+      [name]="param.key"
+      [attr.name]="param.key"
+      [matTooltip]="param.description"
+      matTooltipPosition="above"
+      [(ngModel)]="request.params[param.key]"
+      (ngModelChange)="onModelChange($event)"
+      errorDisplay="immediate"
+      >
+    </app-bd-form-toggle>
+  }
+  @case (ReportParameterInputType.SELECT) {
+    <app-bd-form-select
+      [allowNone]="true"
+      [label]="param.label"
+      [name]="param.key"
+      [attr.name]="param.key"
+      [matTooltip]="param.description"
+      matTooltipPosition="above"
+      [(ngModel)]="request.params[param.key]"
+      (ngModelChange)="onModelChange($event)"
+      errorDisplay="immediate"
+      [labels]="labels"
+      [values]="values"
+    ></app-bd-form-select>
+  }
+  @default {
+    <div>{{param.inputType}} IS NOT SUPPORTED</div>
+  }
+}

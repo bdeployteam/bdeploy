@@ -8,12 +8,21 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { HistoryDetailsService } from '../../services/history-details.service';
 import { ApplicationPair, ConfigPair, NodePair } from '../../utils/diff-utils';
 import { InstanceConfigCache } from '../../utils/instance-utils';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { HistoryHeaderConfigComponent } from '../history-header-config/history-header-config.component';
+import { HistoryVariablesConfigComponent } from '../history-variables-config/history-variables-config.component';
+import { HistoryProcessConfigComponent } from '../history-process-config/history-process-config.component';
+import { AsyncPipe } from '@angular/common';
+import { CustomNodeFilterPipe } from '../../utils/filter-node';
 
 @Component({
     selector: 'app-history-compare',
     templateUrl: './history-compare.component.html',
     styleUrls: ['./history-compare.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, HistoryHeaderConfigComponent, HistoryVariablesConfigComponent, HistoryProcessConfigComponent, AsyncPipe, CustomNodeFilterPipe]
 })
 export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly areas = inject(NavAreasService);

@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -10,10 +10,24 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { SystemsEditService } from '../../services/systems-edit.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-button/bd-expand-button.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-system-details',
     templateUrl: './system-details.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, MatIcon, BdIdentifierComponent, BdExpandButtonComponent, BdDataTableComponent, BdPanelButtonComponent, BdButtonComponent, MatTooltip, AsyncPipe]
 })
 export class SystemDetailsComponent implements OnInit, OnDestroy {
   private readonly systems = inject(SystemsService);

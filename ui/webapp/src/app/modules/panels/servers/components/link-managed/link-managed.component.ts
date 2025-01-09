@@ -7,12 +7,21 @@ import { DownloadService } from 'src/app/modules/core/services/download.service'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { AttachType, ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { FormsModule } from '@angular/forms';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-link-managed',
     templateUrl: './link-managed.component.html',
     styleUrls: ['./link-managed.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdFileDropComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdButtonComponent, AsyncPipe]
 })
 export class LinkManagedComponent {
   private readonly servers = inject(ServersService);

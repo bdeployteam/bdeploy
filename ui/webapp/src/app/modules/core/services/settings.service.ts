@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { finalize, first, skipWhile, switchMap, tap } from 'rxjs/operators';
@@ -8,7 +8,7 @@ import { measure } from '../utils/performance.utils';
 import { ConfigService } from './config.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class SettingsService {
   private readonly config = inject(ConfigService);
@@ -30,7 +30,7 @@ export class SettingsService {
       .get<SettingsConfiguration>(this.config.config.api + '/master/settings')
       .pipe(
         measure('Load Settings'),
-        finalize(() => this.loading$.next(false)),
+        finalize(() => this.loading$.next(false))
       )
       .subscribe((r) => {
         this.settings$.next(r);
@@ -46,7 +46,7 @@ export class SettingsService {
     return this.loading$.pipe(
       skipWhile((v) => v === true),
       switchMap(() => this.settings$),
-      first(),
+      first()
     );
   }
 
@@ -57,7 +57,7 @@ export class SettingsService {
 
   public save() {
     if (!this.isDirty()) {
-      return;
+      return of(null);
     }
     this.loading$.next(true);
     return this.http
@@ -65,7 +65,7 @@ export class SettingsService {
       .pipe(
         tap(() => {
           this.load();
-        }),
+        })
       );
   }
 
@@ -79,7 +79,7 @@ export class SettingsService {
     this.settings$.value.auth.ldapSettings.splice(
       this.settings$.value.auth.ldapSettings.indexOf(initialServer),
       1,
-      server,
+      server
     );
     this.settingsUpdated$.next(true);
   }
@@ -99,7 +99,7 @@ export class SettingsService {
     this.settings$.value.instanceGroup.attributes.splice(
       this.settings$.value.instanceGroup.attributes.indexOf(initialAttribute),
       1,
-      attribute,
+      attribute
     );
     this.settingsUpdated$.next(true);
   }
@@ -107,7 +107,7 @@ export class SettingsService {
   public removeAttribute(attribute) {
     this.settings$.value.instanceGroup.attributes.splice(
       this.settings$.value.instanceGroup.attributes.indexOf(attribute),
-      1,
+      1
     );
     this.settingsUpdated$.next(true);
   }

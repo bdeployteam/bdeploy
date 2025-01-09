@@ -7,6 +7,11 @@ import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../services/server-details.service';
 import { ServerNodeNameCellComponent } from './server-node-name-cell/server-node-name-cell.component';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
 
 export interface MinionRow {
   name: string;
@@ -52,10 +57,16 @@ const detailOsCol: BdDataColumn<MinionRow> = {
 };
 
 @Component({
-  selector: 'app-server-nodes',
-  templateUrl: './server-nodes.component.html',
-  providers: [ServerDetailsService],
-  standalone: false,
+    selector: 'app-server-nodes',
+    templateUrl: './server-nodes.component.html',
+    providers: [ServerDetailsService],
+    imports: [
+        BdDialogComponent,
+        BdDialogToolbarComponent,
+        BdDialogContentComponent,
+        BdDataDisplayComponent,
+        BdNoDataComponent,
+    ],
 })
 export class ServerNodesComponent implements OnInit {
   private readonly servers = inject(ServersService);

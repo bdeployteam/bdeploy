@@ -13,14 +13,16 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex" animationDuration="0ms">
-      <mat-tab *ngFor="let logDirectory of loggingAdmin.directories$ | async" label="{{ logDirectory.minion }}">
-        <app-bd-data-table
-          [records]="logDirectory.entries"
-          [columns]="columns"
-          [sort]="sort"
-          [recordRoute]="getRecordRoute"
-        ></app-bd-data-table>
-      </mat-tab>
+      @for (logDirectory of loggingAdmin.directories$ | async; track logDirectory) {
+        <mat-tab label="{{ logDirectory.minion }}">
+          <app-bd-data-table
+            [records]="logDirectory.entries"
+            [columns]="columns"
+            [sort]="sort"
+            [recordRoute]="getRecordRoute"
+          ></app-bd-data-table>
+        </mat-tab>
+      }
     </mat-tab-group>
   </app-bd-dialog-content>
 </app-bd-dialog>

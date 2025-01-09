@@ -7,16 +7,17 @@
         <div>Creating system: <strong>{{ system.id }}</strong></div>
         <app-bd-form-input label="System Name" name="name" [(ngModel)]="system.name" required></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="system.description"></app-bd-form-input>
-        <app-bd-form-select
-          *ngIf="isCentral"
-          label="Managed Server"
-          name="server"
-          [(ngModel)]="server"
-          [values]="serverList"
-          [labels]="serverNames"
-          required
-          appVariableServerValidator
-        ></app-bd-form-select>
+        @if (isCentral) {
+          <app-bd-form-select
+            label="Managed Server"
+            name="server"
+            [(ngModel)]="server"
+            [values]="serverList"
+            [labels]="serverNames"
+            required
+            appVariableServerValidator
+          ></app-bd-form-select>
+        }
 
         <app-bd-button
           color="primary"

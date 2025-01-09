@@ -1,6 +1,6 @@
-import { Component, NgZone, OnDestroy, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { Component, inject, NgZone, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Subscription, combineLatest, iif, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, iif, of, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, finalize, map, switchMap } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -13,11 +13,11 @@ import {
   ProcessDetailDto,
   ProcessProbeResultDto,
   ProcessState,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_OK,
+  ACTION_OK
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
@@ -35,6 +35,27 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
 import { ProcessDetailsService } from '../../services/process-details.service';
 import { VerifyResultComponent } from '../verify-result/verify-result.component';
 import { PinnedParameterValueComponent } from './pinned-parameter-value/pinned-parameter-value.component';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  ProcessStatusIconComponent
+} from '../../../../primary/instances/components/dashboard/process-status-icon/process-status-icon.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-button/bd-expand-button.component';
+import { ProbeStatusComponent } from './probe-status/probe-status.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
 
 export interface PinnedParameter {
   appId: string;
@@ -66,7 +87,7 @@ interface ProcessUiEndpoint extends HttpEndpoint {
     templateUrl: './process-status.component.html',
     styleUrls: ['./process-status.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, ProcessStatusIconComponent, MatDivider, BdButtonComponent, BdDialogContentComponent, BdNotificationCardComponent, MatIcon, BdIdentifierComponent, MatProgressSpinner, MatTooltip, BdExpandButtonComponent, ProbeStatusComponent, BdNoDataComponent, BdPanelButtonComponent, BdDataTableComponent, AsyncPipe, DatePipe]
 })
 export class ProcessStatusComponent implements OnInit, OnDestroy {
   private readonly cfg = inject(ConfigService);

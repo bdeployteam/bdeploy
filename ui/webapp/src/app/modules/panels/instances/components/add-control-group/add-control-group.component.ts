@@ -1,33 +1,48 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { Observable, Subscription, combineLatest, debounceTime, of, tap } from 'rxjs';
+import { combineLatest, debounceTime, Observable, of, Subscription, tap } from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
   ProcessControlGroupHandlingType,
-  ProcessControlGroupWaitType,
+  ProcessControlGroupWaitType
 } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { MatCard } from '@angular/material/card';
+
+
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 const GROUP_TEMPLATE = {
   name: '',
   processOrder: [],
   startType: ProcessControlGroupHandlingType.PARALLEL,
   startWait: ProcessControlGroupWaitType.CONTINUE,
-  stopType: ProcessControlGroupHandlingType.SEQUENTIAL,
+  stopType: ProcessControlGroupHandlingType.SEQUENTIAL
 };
 
 @Component({
     selector: 'app-add-control-group',
     templateUrl: './add-control-group.component.html',
-    standalone: false
+  imports: [MatCard, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdNotificationCardComponent, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, BdPopupDirective, BdButtonComponent, AsyncPipe]
 })
 export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly areas = inject(NavAreasService);
@@ -45,7 +60,7 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
   protected waitTypeValues = [
     ProcessControlGroupWaitType.CONTINUE,
     ProcessControlGroupWaitType.WAIT,
-    ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED,
+    ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED
   ];
 
   protected newGroup: ProcessControlGroupConfiguration = cloneDeep(GROUP_TEMPLATE);
@@ -55,12 +70,12 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
 
   ngOnInit(): void {
     this.subscription = combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-      if (!state || !route?.params?.node) {
+      if (!state || !route?.params?.['node']) {
         this.node = null;
         return;
       }
-      this.nodeName = route.params.node;
-      this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
+      this.nodeName = route.params['node'];
+      this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params['node'])?.nodeConfiguration;
     });
   }
 
@@ -91,7 +106,7 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Add Control Group ' + this.newGroup.name);
-      }),
+      })
     );
   }
 }

@@ -10,12 +10,20 @@ import {
   UploadStatus,
   UrlParameter,
 } from '../../services/upload.service';
+import { BdNotificationCardComponent } from '../bd-notification-card/bd-notification-card.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
+import { FormsModule } from '@angular/forms';
+import { TrimmedValidator } from '../../validators/trimmed.directive';
+import { BdFormToggleComponent } from '../bd-form-toggle/bd-form-toggle.component';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-file-upload-raw',
     templateUrl: './bd-file-upload-raw.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdNotificationCardComponent, MatProgressBar, BdFormInputComponent, FormsModule, TrimmedValidator, BdFormToggleComponent, BdButtonComponent, AsyncPipe]
 })
 export class BdFileUploadRawComponent implements OnInit {
   @Input() file: File;

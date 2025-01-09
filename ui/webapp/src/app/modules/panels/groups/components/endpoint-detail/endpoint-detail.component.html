@@ -3,51 +3,53 @@
     <mat-icon class="ml-2.5" svgIcon="WEB"></mat-icon>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="(app$ | async) as app">
-      <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
-        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
-        <div class="bd-secondary-text">ID:</div>
-        <div class="bd-secondary-text">
-          <app-bd-identifier [showCopyButton]="true" [id]="app.endpoint.id"></app-bd-identifier>
+    @if ((app$ | async); as app) {
+      <div class="flex flex-col gap-2.5">
+        <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
+          <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+          <div class="bd-secondary-text">ID:</div>
+          <div class="bd-secondary-text">
+            <app-bd-identifier [showCopyButton]="true" [id]="app.endpoint.id"></app-bd-identifier>
+          </div>
+          <mat-icon>badge</mat-icon>
+          <div>Name:</div>
+          <div>{{ header }}</div>
+          <mat-icon>settings_system_daydream</mat-icon>
+          <div>Instance:</div>
+          <div>{{ app.instanceName }}</div>
         </div>
-        <mat-icon>badge</mat-icon>
-        <div>Name:</div>
-        <div>{{ header }}</div>
-        <mat-icon>settings_system_daydream</mat-icon>
-        <div>Instance:</div>
-        <div>{{ app.instanceName }}</div>
+        <mat-divider></mat-divider>
+        <app-bd-button
+          text="Open inline"
+          icon="preview"
+          [collapsed]="false"
+          tooltip="left"
+          [routerLink]="getRouterLink()"
+          [disabled]="!enabled || !app?.endpoint?.endpoint?.proxying || !rawUrl"
+          [matTooltip]="openUiEndpointDisabledReason(!enabled, !app?.endpoint?.endpoint?.proxying, !rawUrl)"
+          matTooltipPosition="left"
+        ></app-bd-button>
+        <app-bd-button
+          text="Open in new Tab"
+          icon="open_in_new"
+          [collapsed]="false"
+          tooltip="left"
+          (click)="openUiEndpoint()"
+          [disabled]="!enabled || !app?.endpoint?.endpoint?.proxying || !rawUrl"
+          [matTooltip]="openUiEndpointDisabledReason(!enabled, !app?.endpoint?.endpoint?.proxying, !rawUrl)"
+          matTooltipPosition="left"
+        ></app-bd-button>
+        <app-bd-button
+          text="Open directly on host in new Tab"
+          icon="open_in_browser"
+          [collapsed]="false"
+          tooltip="left"
+          (click)="openUiEndpointDirect()"
+          [disabled]="!enabled || !directUri"
+          [matTooltip]="openUiEndpointDirectDisabledReason(!enabled, !directUri)"
+          matTooltipPosition="left"
+        ></app-bd-button>
       </div>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        text="Open inline"
-        icon="preview"
-        [collapsed]="false"
-        tooltip="left"
-        [routerLink]="getRouterLink()"
-        [disabled]="!enabled || !app?.endpoint?.endpoint?.proxying || !rawUrl"
-        [matTooltip]="openUiEndpointDisabledReason(!enabled, !app?.endpoint?.endpoint?.proxying, !rawUrl)"
-        matTooltipPosition="left"
-      ></app-bd-button>
-      <app-bd-button
-        text="Open in new Tab"
-        icon="open_in_new"
-        [collapsed]="false"
-        tooltip="left"
-        (click)="openUiEndpoint()"
-        [disabled]="!enabled || !app?.endpoint?.endpoint?.proxying || !rawUrl"
-        [matTooltip]="openUiEndpointDisabledReason(!enabled, !app?.endpoint?.endpoint?.proxying, !rawUrl)"
-        matTooltipPosition="left"
-      ></app-bd-button>
-      <app-bd-button
-        text="Open directly on host in new Tab"
-        icon="open_in_browser"
-        [collapsed]="false"
-        tooltip="left"
-        (click)="openUiEndpointDirect()"
-        [disabled]="!enabled || !directUri"
-        [matTooltip]="openUiEndpointDirectDisabledReason(!enabled, !directUri)"
-        matTooltipPosition="left"
-      ></app-bd-button>
-    </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

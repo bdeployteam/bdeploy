@@ -18,6 +18,9 @@ import {
   BdDialogMessage,
   BdDialogMessageComponent,
 } from '../bd-dialog-message/bd-dialog-message.component';
+import { BdLoadingOverlayComponent } from '../bd-loading-overlay/bd-loading-overlay.component';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { AsyncPipe } from '@angular/common';
 
 /** Amount of pixels within which we trigger "near" events */
 const SCROLL_PROXIMITY = 100;
@@ -32,7 +35,7 @@ export enum BdDialogScrollEvent {
 @Component({
     selector: 'app-bd-dialog',
     templateUrl: './bd-dialog.component.html',
-    standalone: false
+    imports: [BdLoadingOverlayComponent, CdkScrollable, BdDialogMessageComponent, AsyncPipe]
 })
 export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);

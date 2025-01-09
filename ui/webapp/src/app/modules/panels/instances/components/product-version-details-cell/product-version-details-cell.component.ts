@@ -1,11 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
+import { MatCard } from '@angular/material/card';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
 
 @Component({
     selector: 'app-product-version-details-cell',
     templateUrl: './product-version-details-cell.component.html',
-    standalone: false
+    imports: [MatCard, MatChipListbox, MatChipOption, BdPopupDirective]
 })
 export class ProductVersionDetailsCellComponent implements OnInit {
   @Input() record: ProductDto;

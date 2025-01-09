@@ -2,17 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnInit,
   Output,
   TemplateRef,
-  ViewChild,
-  inject,
+  ViewChild
 } from '@angular/core';
-import { ControlContainer, ControlValueAccessor, NgControl, NgForm } from '@angular/forms';
+import { ControlContainer, ControlValueAccessor, FormsModule, NgControl, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Subject, debounceTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, Subject } from 'rxjs';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -21,22 +21,35 @@ import {
   LinkedValueConfiguration,
   ManifestKey,
   SystemConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
 import { getRenderPreview } from '../../utils/linked-values.utils';
 import { bdValidationMessage } from '../../validators/messages';
-import { VariableRegexValidationContext } from '../../validators/variable-regex-validator.directive';
+import {
+  VariableRegexValidationContext,
+  VariableRegexValidator
+} from '../../validators/variable-regex-validator.directive';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
 import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
+import { BdExpressionPickerComponent } from '../bd-expression-picker/bd-expression-picker.component';
+import { BdExpressionToggleComponent } from '../bd-expression-toggle/bd-expression-toggle.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
+import { PortValueValidatorDirective } from '../../validators/port-value.directive';
+import { LinkExpressionInputValidatorDirective } from '../../validators/link-expression-input-validator.directive';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { BdCustomEditorComponent } from '../bd-custom-editor/bd-custom-editor.component';
+import { BdFormToggleComponent } from '../bd-form-toggle/bd-form-toggle.component';
 
 @Component({
-  selector: 'app-bd-value-editor',
-  templateUrl: './bd-value-editor.component.html',
-  styleUrls: ['./bd-value-editor.component.css'],
-  viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+    selector: 'app-bd-value-editor',
+    templateUrl: './bd-value-editor.component.html',
+    styleUrls: ['./bd-value-editor.component.css'],
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BdExpressionPickerComponent, BdExpressionToggleComponent, MatIcon, MatTooltip, ClickStopPropagationDirective, BdFormInputComponent, FormsModule, PortValueValidatorDirective, LinkExpressionInputValidatorDirective, NgTemplateOutlet, BdCustomEditorComponent, BdFormToggleComponent, BdPopupDirective, AsyncPipe, VariableRegexValidator]
 })
 export class BdValueEditorComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
@@ -59,9 +72,11 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
       this.internalValue.value = 'false';
     }
   }
+
   get type(): VariableType {
     return this._type;
   }
+
   @Input() customEditor: string;
   @Input() product: ManifestKey;
   @Input() group: string;
@@ -89,6 +104,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   protected get value(): LinkedValueConfiguration {
     return this.internalValue;
   }
+
   protected set value(v: LinkedValueConfiguration) {
     if (v !== this.internalValue) {
       this.writeValue(v);
@@ -98,7 +114,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
   protected internalValue: LinkedValueConfiguration = {
     value: null,
-    linkExpression: null,
+    linkExpression: null
   };
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
@@ -227,13 +243,14 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
       case VariableType.PASSWORD:
         return 'password';
     }
+    return undefined;
   }
 
   protected doRevert() {
     if (!this.defaultValue) {
       this.writeValue({
         value: this.isBoolean() ? 'false' : '',
-        linkExpression: null,
+        linkExpression: null
       });
     } else {
       this.writeValue(cloneDeep(this.defaultValue));
@@ -286,7 +303,8 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     this.fireChange(this.internalValue);
   }
 
-  /* template */ doChangeBooleanValue() {
+  /* template */
+  doChangeBooleanValue() {
     this.doChangeValue(this.booleanValue ? 'true' : 'false');
   }
 

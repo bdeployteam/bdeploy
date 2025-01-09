@@ -15,73 +15,81 @@
   <div class="flex flex-col gap-2.5 min-w-[400px]">
     <span
       >Replace <strong>{{record.persistent?.path ? record.persistent.path : record.modification.file}}</strong></span
-    >
-    <app-bd-file-drop (fileAdded)="doAddFileContent($event)" hintText="Drop file to replace content"></app-bd-file-drop>
-    <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
-    <div *ngIf="tempFileError" class="bd-warning-text">{{ tempFileError }}</div>
-    <div *ngIf="tempFileContent">Loaded {{tempFileContent.length}} bytes</div>
+      >
+      <app-bd-file-drop (fileAdded)="doAddFileContent($event)" hintText="Drop file to replace content"></app-bd-file-drop>
+      @if (tempFileContentLoading$ | async) {
+        <div>Loading...</div>
+      }
+      @if (tempFileError) {
+        <div class="bd-warning-text">{{ tempFileError }}</div>
+      }
+      @if (tempFileContent) {
+        <div>Loaded {{tempFileContent.length}} bytes</div>
+      }
+    </div>
+  </ng-template>
+
+  <div class="justify-end items-center gap-1 hidden group-hover:flex">
+    @switch (status) {
+      @case ('unsync') {
+        @if (!isText) {
+          <app-bd-button
+            text="Update from product template"
+            icon="file_upload"
+            (click)="doRestoreFromTemplate()"
+            tooltip="below"
+          ></app-bd-button>
+        }
+        @if (isText) {
+          <app-bd-panel-button
+            text="Compare with product template."
+            icon="compare"
+            [route]="['compare', path]"
+            [relative]="true"
+            tooltip="below"
+          ></app-bd-panel-button>
+        }
+      }
+      @case ('missing') {
+        <app-bd-button
+          text="Create from product template"
+          icon="add"
+          (click)="doAddFromTemplate()"
+          tooltip="below"
+        ></app-bd-button>
+      }
+    }
+
+    <app-bd-button
+      text="Delete"
+      icon="delete"
+      tooltip="below"
+      (click)="onDelete()"
+      [disabled]="!!record.persistent && !record.persistent.instanceId && !record.modification?.file"
+    ></app-bd-button>
+
+    <app-bd-button
+      text="Replace"
+      icon="upload_file"
+      tooltip="below"
+      (click)="doReplaceFile(replaceDialog)"
+    ></app-bd-button>
+
+    <app-bd-button
+      text="Rename"
+      icon="drive_file_rename_outline"
+      tooltip="below"
+      [disabled]="!renameAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
+      (click)="onRename(renameDialog)"
+    ></app-bd-button>
+
+    <app-bd-panel-button
+      icon="edit"
+      text="Edit"
+      tooltip="below"
+      [disabled]="!isEditAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
+      [route]="[path]"
+      [relative]="true"
+      [matTooltip]="isText ? null : 'Edit not possible for binary files.'"
+    ></app-bd-panel-button>
   </div>
-</ng-template>
-
-<div class="justify-end items-center gap-1 hidden group-hover:flex">
-  <ng-container [ngSwitch]="status">
-    <ng-container *ngSwitchCase="'unsync'">
-      <app-bd-button
-        *ngIf="!isText"
-        text="Update from product template"
-        icon="file_upload"
-        (click)="doRestoreFromTemplate()"
-        tooltip="below"
-      ></app-bd-button>
-      <app-bd-panel-button
-        text="Compare with product template."
-        icon="compare"
-        *ngIf="isText"
-        [route]="['compare', path]"
-        [relative]="true"
-        tooltip="below"
-      ></app-bd-panel-button>
-    </ng-container>
-    <ng-container *ngSwitchCase="'missing'">
-      <app-bd-button
-        text="Create from product template"
-        icon="add"
-        (click)="doAddFromTemplate()"
-        tooltip="below"
-      ></app-bd-button>
-    </ng-container>
-  </ng-container>
-
-  <app-bd-button
-    text="Delete"
-    icon="delete"
-    tooltip="below"
-    (click)="onDelete()"
-    [disabled]="!!record.persistent && !record.persistent.instanceId && !record.modification?.file"
-  ></app-bd-button>
-
-  <app-bd-button
-    text="Replace"
-    icon="upload_file"
-    tooltip="below"
-    (click)="doReplaceFile(replaceDialog)"
-  ></app-bd-button>
-
-  <app-bd-button
-    text="Rename"
-    icon="drive_file_rename_outline"
-    tooltip="below"
-    [disabled]="!renameAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
-    (click)="onRename(renameDialog)"
-  ></app-bd-button>
-
-  <app-bd-panel-button
-    icon="edit"
-    text="Edit"
-    tooltip="below"
-    [disabled]="!isEditAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
-    [route]="[path]"
-    [relative]="true"
-    [matTooltip]="isText ? null : 'Edit not possible for binary files.'"
-  ></app-bd-panel-button>
-</div>

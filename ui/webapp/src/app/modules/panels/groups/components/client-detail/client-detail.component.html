@@ -1,7 +1,9 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [panel]="true">
-    <mat-icon class="ml-2.5" *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
-    <ng-container *ngIf="app$.value && areas.instanceContext$.value === app$.value.instanceId">
+    @if ((app$ | async)?.client?.os) {
+      <mat-icon class="ml-2.5" [svgIcon]="(app$ | async).client.os"></mat-icon>
+    }
+    @if (app$.value && areas.instanceContext$.value === app$.value.instanceId) {
       <div class="flex-auto"></div>
       <mat-divider [vertical]="true"></mat-divider>
       <app-bd-button
@@ -13,60 +15,62 @@
           areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value], ['panels', 'instances', 'config', 'process', CLIENT_NODE, app$.value.client.id])
         "
       ></app-bd-button>
-    </ng-container>
+    }
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="app$ | async as app">
-      <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
-        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
-        <div class="bd-secondary-text">Process ID:</div>
-        <div class="bd-secondary-text">
-          <app-bd-identifier [showCopyButton]="true" [id]="app.client.id"></app-bd-identifier>
+    @if (app$ | async; as app) {
+      <div class="flex flex-col gap-2.5">
+        <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
+          <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+          <div class="bd-secondary-text">Process ID:</div>
+          <div class="bd-secondary-text">
+            <app-bd-identifier [showCopyButton]="true" [id]="app.client.id"></app-bd-identifier>
+          </div>
         </div>
-      </div>
-      <app-bd-expand-button text="Usage Statistics" icon="insights" [expanded]="true">
-        <div class="local-graph flex">
-          <app-client-usage-graph
-            class="flex-auto"
-            [appId]="app.client.id"
-            [instanceId]="app.instanceId"
-          ></app-client-usage-graph>
+        <app-bd-expand-button text="Usage Statistics" icon="insights" [expanded]="true">
+          <div class="local-graph flex">
+            <app-client-usage-graph
+              class="flex-auto"
+              [appId]="app.client.id"
+              [instanceId]="app.instanceId"
+            ></app-client-usage-graph>
+          </div>
+        </app-bd-expand-button>
+        <mat-divider></mat-divider>
+        <app-bd-button
+          color="primary"
+          icon="cloud_download"
+          text="Download Installer"
+          [collapsed]="false"
+          [disabled]="!hasLauncher || (downloadingInstaller$ | async)"
+          (click)="downloadInstaller(app)"
+          [loadingWhen$]="downloadingInstaller$"
+          [matTooltip]="!hasLauncher ? 'No Launcher available for the selected operating system' : null"
+        ></app-bd-button>
+        <app-bd-button
+          icon="play_arrow"
+          text="Click & Start"
+          [collapsed]="false"
+          (click)="downloadClickAndStart(app)"
+          [loadingWhen$]="downloadingClickAndStart$"
+          [disabled]="downloadingClickAndStart$ | async"
+        ></app-bd-button>
+        <mat-divider></mat-divider>
+        <div class="bd-description-text text-justify">
+          For <em>Click & Start</em> to work, you need to have the <em>BDeploy Launcher</em> application installed. This
+          is done by <strong>any</strong> installer automatically. If you still don't have the launcher and don't want to
+          install the application using its installer from above, you can download the standalone launcher from here.
         </div>
-      </app-bd-expand-button>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        color="primary"
-        icon="cloud_download"
-        text="Download Installer"
-        [collapsed]="false"
-        [disabled]="!hasLauncher || (downloadingInstaller$ | async)"
-        (click)="downloadInstaller(app)"
-        [loadingWhen$]="downloadingInstaller$"
-        [matTooltip]="!hasLauncher ? 'No Launcher available for the selected operating system' : null"
-      ></app-bd-button>
-      <app-bd-button
-        icon="play_arrow"
-        text="Click & Start"
-        [collapsed]="false"
-        (click)="downloadClickAndStart(app)"
-        [loadingWhen$]="downloadingClickAndStart$"
-        [disabled]="downloadingClickAndStart$ | async"
-      ></app-bd-button>
-      <mat-divider></mat-divider>
-      <div class="bd-description-text text-justify">
-        For <em>Click & Start</em> to work, you need to have the <em>BDeploy Launcher</em> application installed. This
-        is done by <strong>any</strong> installer automatically. If you still don't have the launcher and don't want to
-        install the application using its installer from above, you can download the standalone launcher from here.
+        <app-bd-button
+          [svgIcon]="app.client.os"
+          text="Download Launcher Installer"
+          [collapsed]="false"
+          [disabled]="!hasLauncher || (downloadingLauncher$ | async)"
+          (click)="downloadLauncher(app.client.os)"
+          [loadingWhen$]="downloadingLauncher$"
+          [matTooltip]="!(clients.loading$ | async) && !hasLauncher ? 'No Launcher available for the selected operating system' : null"
+        ></app-bd-button>
       </div>
-      <app-bd-button
-        [svgIcon]="app.client.os"
-        text="Download Launcher Installer"
-        [collapsed]="false"
-        [disabled]="!hasLauncher || (downloadingLauncher$ | async)"
-        (click)="downloadLauncher(app.client.os)"
-        [loadingWhen$]="downloadingLauncher$"
-        [matTooltip]="!(clients.loading$ | async) && !hasLauncher ? 'No Launcher available for the selected operating system' : null"
-      ></app-bd-button>
-    </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

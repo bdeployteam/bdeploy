@@ -3,8 +3,10 @@
   [style.color]="fg"
   [style.background-color]="bg"
   (click)="onClick()"
->
+  >
   <div>{{ name }}</div>
   <div class="flex-auto"></div>
-  <mat-icon *ngIf="selected">check_circle_outline</mat-icon>
+  @if (selected) {
+    <mat-icon>check_circle_outline</mat-icon>
+  }
 </div>

@@ -12,12 +12,21 @@ import { UsersColumnsService } from 'src/app/modules/core/services/users-columns
 import { getGlobalPermission } from 'src/app/modules/core/utils/permission.utils';
 import { UserBulkService } from 'src/app/modules/panels/admin/services/user-bulk.service';
 import { AuthAdminService } from '../../services/auth-admin.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-users-browser',
     templateUrl: './users-browser.component.html',
     styleUrls: ['./users-browser.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDataGroupingComponent, BdPanelButtonComponent, MatDivider, MatTooltip, BdDialogContentComponent, BdDataDisplayComponent, AsyncPipe]
 })
 export class UsersBrowserComponent {
   private readonly userColumns = inject(UsersColumnsService);

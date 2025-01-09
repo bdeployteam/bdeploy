@@ -6,6 +6,12 @@ import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { timeAgo } from 'src/app/modules/core/utils/time.utils';
 import { JobService } from '../../services/jobs.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 const colName: BdDataColumn<JobDto> = {
   id: 'name',
@@ -48,7 +54,7 @@ const colNextRunTime: BdDataColumn<JobDto> = {
     selector: 'app-manual-jobs',
     templateUrl: './manual-jobs.component.html',
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class ManualJobsComponent implements OnInit, OnDestroy {
   private readonly colRun: BdDataColumn<JobDto> = {

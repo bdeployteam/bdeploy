@@ -11,12 +11,14 @@ import {
 } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { MatIcon } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-bd-search-field',
     templateUrl: './bd-search-field.component.html',
     styleUrls: ['./bd-search-field.component.css'],
-    standalone: false
+    imports: [MatIcon, FormsModule]
 })
 export class BdSearchFieldComponent implements OnInit, OnDestroy {
   @Input() disabled = false;

@@ -16,8 +16,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: EditCustomIdValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class EditCustomIdValidatorDirective implements Validator {
   private readonly idRegExp = new RegExp(/^[A-Za-z][A-Za-z0-9_\\-\\.]*$/);

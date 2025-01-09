@@ -1,4 +1,6 @@
 <div class="flex gap-1 pb-1">
-  <div *ngIf="align === 'right'" class="flex-auto"></div>
+  @if (align === 'right') {
+    <div class="flex-auto"></div>
+  }
   <ng-content></ng-content>
 </div>

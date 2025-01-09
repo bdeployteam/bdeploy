@@ -5,16 +5,18 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex" animationDuration="0ms">
-      <ng-container *ngFor="let logDirectory of hiveLogging.directories$ | async">
-        <mat-tab *ngIf="logDirectory.entries?.length" label="{{ logDirectory.minion }}">
-          <app-bd-data-table
-            [records]="logDirectory.entries"
-            [columns]="columns"
-            [sort]="sort"
-            [recordRoute]="getRecordRoute"
-          ></app-bd-data-table>
-        </mat-tab>
-      </ng-container>
+      @for (logDirectory of hiveLogging.directories$ | async; track logDirectory) {
+        @if (logDirectory.entries?.length) {
+          <mat-tab label="{{ logDirectory.minion }}">
+            <app-bd-data-table
+              [records]="logDirectory.entries"
+              [columns]="columns"
+              [sort]="sort"
+              [recordRoute]="getRecordRoute"
+            ></app-bd-data-table>
+          </mat-tab>
+        }
+      }
     </mat-tab-group>
   </app-bd-dialog-content>
 </app-bd-dialog>

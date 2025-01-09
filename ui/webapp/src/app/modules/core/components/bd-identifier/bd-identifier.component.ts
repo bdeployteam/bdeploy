@@ -1,10 +1,13 @@
 import { Component, inject, Input } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdMicroIconButtonComponent } from '../bd-micro-icon-button/bd-micro-icon-button.component';
 
 @Component({
     selector: 'app-bd-identifier',
     templateUrl: './bd-identifier.component.html',
-    standalone: false
+    imports: [NgClass, MatTooltip, BdMicroIconButtonComponent]
 })
 export class BdIdentifierComponent {
   @Input() id: string;

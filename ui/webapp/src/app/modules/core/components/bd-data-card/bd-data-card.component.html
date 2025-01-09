@@ -1,152 +1,184 @@
 <ng-template #cardContents>
   <div class="flex">
     <div class="flex flex-col">
-      <div *ngIf="!!colType" class="bd-type-text truncate" [ngClass]="colType.classes ? colType.classes(record) : []">
-        <ng-container *ngIf="!colType.component" class="truncate">{{ colType.data(record) }}</ng-container>
-        <app-bd-data-component-cell
-          *ngIf="!!colType.component"
-          [componentType]="colType.component"
-          [record]="record"
-          [column]="colType"
-        ></app-bd-data-component-cell>
-      </div>
-      <div
-        *ngIf="!!colTitle"
-        class="bd-title-text truncate"
-        [ngClass]="colTitle.classes ? colTitle.classes(record) : []"
-        [matTooltip]="!!colTitle.tooltip ? colTitle.tooltip(record) : colTitle.data(record)"
-        [matTooltipShowDelay]="1000"
-      >
-        <ng-container *ngIf="!colTitle.component" class="truncate">{{ colTitle.data(record) }}</ng-container>
-        <app-bd-data-component-cell
-          *ngIf="!!colTitle.component"
-          [componentType]="colTitle.component"
-          [record]="record"
-          [column]="colTitle"
-        ></app-bd-data-component-cell>
-      </div>
-      <div
-        *ngIf="!!colDescription"
-        class="bd-description-text h-4 truncate"
-        [ngClass]="colDescription.classes ? colDescription.classes(record) : []"
-        [matTooltip]="!!colDescription.tooltip ? colDescription.tooltip(record) : colDescription.data(record)"
-        [matTooltipShowDelay]="1000"
-      >
-        <ng-container *ngIf="!colDescription.component" class="truncate"
-          >{{ colDescription.data(record) }}</ng-container
-        >
-        <app-bd-data-component-cell
-          *ngIf="!!colDescription.component"
-          [componentType]="colDescription.component"
-          [record]="record"
-          [column]="colDescription"
-        ></app-bd-data-component-cell>
-      </div>
-    </div>
-    <div class="flex-auto"></div>
-    <div *ngIf="!!colStatus" class="truncate" [ngClass]="colStatus.classes ? colStatus.classes(record) : []">
-      <ng-container *ngIf="!colStatus.component" class="truncate">{{ colStatus.data(record) }}</ng-container>
-      <app-bd-data-component-cell
-        *ngIf="!!colStatus.component"
-        [componentType]="colStatus.component"
-        [record]="record"
-        [column]="colStatus"
-      ></app-bd-data-component-cell>
-    </div>
-  </div>
-  <div
-    class="local-card-actions flex-auto flex gap-1"
-    *ngIf="!!colActions?.length || !!colDetails?.length || !!colAvatar || !!extraCardDetails"
-    [style.backgroundImage]="getImageUrl()"
-    [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
-  >
-    <div class="grow basis-0 flex items-center">
-      <div
-        *ngIf="!!colDetails?.length || !!extraCardDetails"
-        class="text-xs grid grid-cols-[16px_auto] items-center gap-0.5"
-      >
-        <ng-container *ngFor="let detail of colDetails">
-          <ng-container *ngIf="!!detail.data(record)">
-            <mat-icon
-              class="bd-small-icon"
-              [matTooltip]="detail.description ? detail.description : detail.name"
-              [matTooltipShowDelay]="1000"
-              >{{ detail.icon ? detail.icon(record) : 'error_outline' }}</mat-icon
-            >
-            <span *ngIf="!detail.component" class="truncate">{{ detail.data(record) }}</span>
-            <div *ngIf="!!detail.component">
-              <app-bd-data-component-cell
-                [componentType]="detail.component"
-                [record]="record"
-                [column]="detail"
-              ></app-bd-data-component-cell>
-            </div>
-          </ng-container>
-        </ng-container>
-        <ng-container *ngTemplateOutlet="extraCardDetails; context: { record }"></ng-container>
-      </div>
-    </div>
-
-    <ng-container *ngIf="!!colActions?.length">
-      <div class="flex gap-1 items-center justify-end">
-        <ng-container *ngFor="let action of colActions">
-          <app-bd-button
-            *ngIf="!action.component"
-            [ngClass]="action.classes ? action.classes(record) : []"
-            [icon]="action.icon(record)"
-            [text]="action.data(record)"
-            tooltip="below"
-            (click)="action.action(record)"
-            [disabled]="!action.actionDisabled ? false : action.actionDisabled(record)"
-            color="inherit"
-            appClickStopPropagation
-          ></app-bd-button>
-          <div *ngIf="!!action.component">
+      @if (!!colType) {
+        <div class="bd-type-text truncate" [ngClass]="colType.classes ? colType.classes(record) : []">
+          @if (!colType.component) {
+            <ng-container class="truncate">{{ colType.data(record) }}</ng-container>
+          }
+          @if (!!colType.component) {
             <app-bd-data-component-cell
-              [componentType]="action.component"
+              [componentType]="colType.component"
               [record]="record"
-              [column]="action"
+              [column]="colType"
             ></app-bd-data-component-cell>
+          }
+        </div>
+      }
+      @if (!!colTitle) {
+        <div
+          class="bd-title-text truncate"
+          [ngClass]="colTitle.classes ? colTitle.classes(record) : []"
+          [matTooltip]="!!colTitle.tooltip ? colTitle.tooltip(record) : colTitle.data(record)"
+          [matTooltipShowDelay]="1000"
+          >
+          @if (!colTitle.component) {
+            <ng-container class="truncate">{{ colTitle.data(record) }}</ng-container>
+          }
+          @if (!!colTitle.component) {
+            <app-bd-data-component-cell
+              [componentType]="colTitle.component"
+              [record]="record"
+              [column]="colTitle"
+            ></app-bd-data-component-cell>
+          }
+        </div>
+      }
+      @if (!!colDescription) {
+        <div
+          class="bd-description-text h-4 truncate"
+          [ngClass]="colDescription.classes ? colDescription.classes(record) : []"
+          [matTooltip]="!!colDescription.tooltip ? colDescription.tooltip(record) : colDescription.data(record)"
+          [matTooltipShowDelay]="1000"
+          >
+          @if (!colDescription.component) {
+            <ng-container class="truncate"
+              >{{ colDescription.data(record) }}</ng-container
+              >
+            }
+            @if (!!colDescription.component) {
+              <app-bd-data-component-cell
+                [componentType]="colDescription.component"
+                [record]="record"
+                [column]="colDescription"
+              ></app-bd-data-component-cell>
+            }
           </div>
-        </ng-container>
+        }
       </div>
-    </ng-container>
-  </div>
-  <div
-    *ngIf="!!colFooter"
-    class="text-xs truncate"
-    [ngClass]="colFooter.classes ? colFooter.classes(record) : []"
-    [matTooltip]="!!colFooter.tooltip ? colFooter.tooltip(record) : colFooter.data(record)"
-    [matTooltipShowDelay]="1000"
-  >
-    <ng-container *ngIf="!colFooter.component" class="truncate">{{ colFooter.data(record) }}</ng-container>
-    <app-bd-data-component-cell
-      *ngIf="!!colFooter.component"
-      [componentType]="colFooter.component"
-      [record]="record"
-      [column]="colFooter"
-    ></app-bd-data-component-cell>
-  </div>
-</ng-template>
+      <div class="flex-auto"></div>
+      @if (!!colStatus) {
+        <div class="truncate" [ngClass]="colStatus.classes ? colStatus.classes(record) : []">
+          @if (!colStatus.component) {
+            <ng-container class="truncate">{{ colStatus.data(record) }}</ng-container>
+          }
+          @if (!!colStatus.component) {
+            <app-bd-data-component-cell
+              [componentType]="colStatus.component"
+              [record]="record"
+              [column]="colStatus"
+            ></app-bd-data-component-cell>
+          }
+        </div>
+      }
+    </div>
+    @if (!!colActions?.length || !!colDetails?.length || !!colAvatar || !!extraCardDetails) {
+      <div
+        class="local-card-actions flex-auto flex gap-1"
+        [style.backgroundImage]="getImageUrl()"
+        [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
+        >
+        <div class="grow basis-0 flex items-center">
+          @if (!!colDetails?.length || !!extraCardDetails) {
+            <div
+              class="text-xs grid grid-cols-[16px_auto] items-center gap-0.5"
+              >
+              @for (detail of colDetails; track detail) {
+                @if (!!detail.data(record)) {
+                  <mat-icon
+                    class="bd-small-icon"
+                    [matTooltip]="detail.description ? detail.description : detail.name"
+                    [matTooltipShowDelay]="1000"
+                    >{{ detail.icon ? detail.icon(record) : 'error_outline' }}</mat-icon
+                    >
+                    @if (!detail.component) {
+                      <span class="truncate">{{ detail.data(record) }}</span>
+                    }
+                    @if (!!detail.component) {
+                      <div>
+                        <app-bd-data-component-cell
+                          [componentType]="detail.component"
+                          [record]="record"
+                          [column]="detail"
+                        ></app-bd-data-component-cell>
+                      </div>
+                    }
+                  }
+                }
+                <ng-container *ngTemplateOutlet="extraCardDetails; context: { record }"></ng-container>
+              </div>
+            }
+          </div>
+          @if (!!colActions?.length) {
+            <div class="flex gap-1 items-center justify-end">
+              @for (action of colActions; track action) {
+                @if (!action.component) {
+                  <app-bd-button
+                    [ngClass]="action.classes ? action.classes(record) : []"
+                    [icon]="action.icon(record)"
+                    [text]="action.data(record)"
+                    tooltip="below"
+                    (click)="action.action(record)"
+                    [disabled]="!action.actionDisabled ? false : action.actionDisabled(record)"
+                    color="inherit"
+                    appClickStopPropagation
+                  ></app-bd-button>
+                }
+                @if (!!action.component) {
+                  <div>
+                    <app-bd-data-component-cell
+                      [componentType]="action.component"
+                      [record]="record"
+                      [column]="action"
+                    ></app-bd-data-component-cell>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (!!colFooter) {
+        <div
+          class="text-xs truncate"
+          [ngClass]="colFooter.classes ? colFooter.classes(record) : []"
+          [matTooltip]="!!colFooter.tooltip ? colFooter.tooltip(record) : colFooter.data(record)"
+          [matTooltipShowDelay]="1000"
+          >
+          @if (!colFooter.component) {
+            <ng-container class="truncate">{{ colFooter.data(record) }}</ng-container>
+          }
+          @if (!!colFooter.component) {
+            <app-bd-data-component-cell
+              [componentType]="colFooter.component"
+              [record]="record"
+              [column]="colFooter"
+            ></app-bd-data-component-cell>
+          }
+        </div>
+      }
+    </ng-template>
 
-<mat-card
-  appearance="outlined"
-  [class.local-card-selected]="isSelected"
-  class="flex-auto cursor-pointer flex flex-col p-2.5"
-  (click)="recordClick.emit(record)"
-  *ngIf="!recordRoute"
->
-  <ng-container *ngTemplateOutlet="cardContents"></ng-container>
-  <ng-container *ngTemplateOutlet="extraCardDetails; context: { record }"></ng-container>
-</mat-card>
+    @if (!recordRoute) {
+      <mat-card
+        appearance="outlined"
+        [class.local-card-selected]="isSelected"
+        class="flex-auto cursor-pointer flex flex-col p-2.5"
+        (click)="recordClick.emit(record)"
+        >
+        <ng-container *ngTemplateOutlet="cardContents"></ng-container>
+        <ng-container *ngTemplateOutlet="extraCardDetails; context: { record }"></ng-container>
+      </mat-card>
+    }
 
-<mat-card
-  appearance="outlined"
-  *ngIf="!!recordRoute"
-  [routerLink]="recordRoute(record)"
-  routerLinkActive="mat-card-route-active"
-  [class.local-card-selected]="isSelected"
-  class="local-route-card flex-auto cursor-pointer flex flex-col p-2.5"
->
-  <ng-container *ngTemplateOutlet="cardContents"></ng-container>
-</mat-card>
+    @if (!!recordRoute) {
+      <mat-card
+        appearance="outlined"
+        [routerLink]="recordRoute(record)"
+        routerLinkActive="mat-card-route-active"
+        [class.local-card-selected]="isSelected"
+        class="local-route-card flex-auto cursor-pointer flex flex-col p-2.5"
+        >
+        <ng-container *ngTemplateOutlet="cardContents"></ng-container>
+      </mat-card>
+    }

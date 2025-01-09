@@ -1,5 +1,5 @@
 import { ComponentType } from '@angular/cdk/portal';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { BdConfirmationComponent } from '../components/bd-confirmation/bd-confirmation.component';
@@ -8,7 +8,8 @@ import { BdConfirmationComponent } from '../components/bd-confirmation/bd-confir
   providedIn: 'root',
 })
 export class ConfirmationService {
-  constructor(private readonly dialog: MatDialog) {}
+  private readonly dialog = inject(MatDialog);
+
 
   public confirm(header: string, message: string): Observable<boolean> {
     const dialogRef = this.dialog.open(BdConfirmationComponent, {

@@ -18,8 +18,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: SystemOnServerValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class SystemOnServerValidatorDirective implements Validator {
   private readonly systems = inject(SystemsService);

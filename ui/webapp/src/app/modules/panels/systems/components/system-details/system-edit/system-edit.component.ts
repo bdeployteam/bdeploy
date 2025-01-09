@@ -1,18 +1,27 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
+import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { SystemConfigurationDto } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from '../../../../../core/utils/dirty.utils';
 import { SystemsEditService } from '../../../services/systems-edit.service';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { FormsModule } from '@angular/forms';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-system-edit',
     templateUrl: './system-edit.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdFormInputComponent, FormsModule, BdButtonComponent, AsyncPipe]
 })
 export class SystemEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly edit = inject(SystemsEditService);

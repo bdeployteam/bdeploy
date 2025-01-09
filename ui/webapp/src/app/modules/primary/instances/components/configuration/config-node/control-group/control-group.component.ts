@@ -5,13 +5,20 @@ import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { InstanceNodeConfigurationDto, ProcessControlGroupConfiguration } from 'src/app/models/gen.dtos';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { InstanceEditService } from '../../../../services/instance-edit.service';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { ClickStopPropagationDirective } from '../../../../../../core/directives/click-stop-propagation.directive';
+import { BdPanelButtonComponent } from '../../../../../../core/components/bd-panel-button/bd-panel-button.component';
 
 @Component({
     selector: 'app-control-group',
     templateUrl: './control-group.component.html',
     styleUrls: ['./control-group.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [MatExpansionPanel, NgClass, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatDivider, BdButtonComponent, ClickStopPropagationDirective, BdPanelButtonComponent, AsyncPipe]
 })
 export class ControlGroupComponent implements OnInit, OnDestroy {
   private readonly edit = inject(InstanceEditService);

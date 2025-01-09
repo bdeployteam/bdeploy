@@ -1,5 +1,8 @@
 import { Component, HostBinding, Input, OnInit, inject } from '@angular/core';
 import { SettingsService } from '../../services/settings.service';
+import { NgStyle, AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { GravatarModule } from 'ngx-gravatar';
 
 export interface StyleDef {
   width: string;
@@ -10,7 +13,7 @@ export interface StyleDef {
 @Component({
     selector: 'app-user-avatar',
     templateUrl: './user-avatar.component.html',
-    standalone: false
+    imports: [NgStyle, MatIcon, GravatarModule, AsyncPipe]
 })
 export class UserAvatarComponent implements OnInit {
   protected readonly settings = inject(SettingsService);

@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostBinding, Input, ViewEncapsulation } from '@angular/core';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-bd-expand-button',
@@ -6,7 +8,12 @@ import { ChangeDetectionStrategy, Component, HostBinding, Input, ViewEncapsulati
     styleUrls: ['./bd-expand-button.component.css'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [
+        MatExpansionPanel,
+        MatExpansionPanelHeader,
+        MatExpansionPanelTitle,
+        MatIcon,
+    ],
 })
 export class BdExpandButtonComponent {
   @Input() icon: string;

@@ -8,11 +8,18 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ProductVersionDetailsCellComponent } from '../../product-version-details-cell/product-version-details-cell.component';
 import { UpdateActionComponent } from './update-action/update-action.component';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdNotificationCardComponent } from '../../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-product-update',
     templateUrl: './product-update.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdNotificationCardComponent, BdDataTableComponent, AsyncPipe]
 })
 export class ProductUpdateComponent implements OnInit, OnDestroy {
   private readonly groups = inject(GroupsService);

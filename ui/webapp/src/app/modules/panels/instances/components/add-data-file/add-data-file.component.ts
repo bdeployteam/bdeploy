@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map, of, switchMap, tap } from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { BehaviorSubject, combineLatest, finalize, map, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { FileStatusDto, FileStatusType, RemoteDirectory } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -8,11 +8,19 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
 import { decodeFilePath } from '../../utils/data-file-utils';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { CfgFileNameValidatorDirective } from '../../validators/cfg-file-name-validator.directive';
+import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-add-data-file',
     templateUrl: './add-data-file.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, CfgFileNameValidatorDirective, BdFileDropComponent, BdButtonComponent, AsyncPipe]
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

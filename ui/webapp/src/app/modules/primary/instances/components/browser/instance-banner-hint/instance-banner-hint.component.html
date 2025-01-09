@@ -1,1 +1,3 @@
-<mat-icon *ngIf="!!record.banner?.text" class="local-icon-color" [matTooltip]="record.banner.text">lightbulb</mat-icon>
+@if (!!record.banner?.text) {
+  <mat-icon class="local-icon-color" [matTooltip]="record.banner.text">lightbulb</mat-icon>
+}

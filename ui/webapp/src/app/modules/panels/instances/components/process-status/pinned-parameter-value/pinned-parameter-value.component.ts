@@ -3,12 +3,16 @@ import { BehaviorSubject } from 'rxjs';
 import { VariableType } from 'src/app/models/gen.dtos';
 import { NodeApplicationPort, PortsService } from 'src/app/modules/primary/instances/services/ports.service';
 import { PinnedParameter } from '../process-status.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-pinned-parameter-value',
     templateUrl: './pinned-parameter-value.component.html',
     styleUrls: ['./pinned-parameter-value.component.css'],
-    standalone: false
+    imports: [MatCheckbox, MatTooltip, MatIcon, AsyncPipe]
 })
 export class PinnedParameterValueComponent implements OnInit, OnChanges {
   private readonly ports = inject(PortsService);

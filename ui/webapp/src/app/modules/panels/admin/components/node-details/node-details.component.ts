@@ -1,7 +1,9 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, finalize, Subscription } from 'rxjs';
 import { Actions, MinionStatusDto } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -9,10 +11,21 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
+
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatDivider } from '@angular/material/divider';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+
 @Component({
     selector: 'app-node-details',
     templateUrl: './node-details.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, MatTooltip, MatDivider, BdPanelButtonComponent, BdButtonComponent, AsyncPipe, DatePipe]
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
   private readonly nodeAdmin = inject(NodesAdminService);
@@ -35,13 +48,13 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = combineLatest([this.nodeAdmin.nodes$, this.areas.panelRoute$]).subscribe(([nodes, route]) => {
-      if (!nodes || !route?.params?.node) {
+      if (!nodes || !route?.params?.['node']) {
         this.nodeName$.next(null);
         this.nodeState$.next(null);
         return;
       }
 
-      const nodeName = route.params.node;
+      const nodeName = route.params['node'];
       const nodeStatus = nodes.find((node) => node.name === nodeName);
 
       this.nodeName$.next(nodeName);
@@ -65,7 +78,7 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
       .confirm(
         `Remove ${nodeName}?`,
         'The node will be removed. This cannot be undone. Any Instance configured to this node will <strong>stop working until configured differently.</strong>',
-        'delete',
+        'delete'
       )
       .subscribe((r) => {
         if (r) {

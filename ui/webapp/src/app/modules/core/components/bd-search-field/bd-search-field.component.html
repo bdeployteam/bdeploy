@@ -2,7 +2,7 @@
   <div
     class="local-search-group flex-auto flex justify-start items-center"
     [class.local-search-group-disabled]="disabled"
-  >
+    >
     <mat-icon>search</mat-icon>
     <input
       #searchField
@@ -12,12 +12,13 @@
       [(ngModel)]="value"
       (ngModelChange)="queueChange()"
       [disabled]="disabled"
-    />
-    <mat-icon
-      class="local-search-clear"
-      *ngIf="searchField.value"
-      (click)="searchField.value = ''; value = ''; valueChange.emit(value)"
-      >clear</mat-icon
-    >
+      />
+    @if (searchField.value) {
+      <mat-icon
+        class="local-search-clear"
+        (click)="searchField.value = ''; value = ''; valueChange.emit(value)"
+        >clear</mat-icon
+        >
+      }
+    </div>
   </div>
-</div>

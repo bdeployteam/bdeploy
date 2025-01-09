@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, Inject, InjectionToken } from '@angular/core';
+import { ChangeDetectionStrategy, Component, InjectionToken, inject } from '@angular/core';
 import { MinionMode, Version } from 'src/app/models/gen.dtos';
 import { convert2String } from '../../utils/version.utils';
+import { BdLogoComponent } from '../bd-logo/bd-logo.component';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 export interface VersionMismatch {
   oldVersion: Version;
@@ -15,14 +17,16 @@ export const VERSION_DATA = new InjectionToken<VersionMismatch>('VERSION_DATA');
     templateUrl: './connection-version.component.html',
     styleUrls: ['./connection-version.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdLogoComponent, BdButtonComponent]
 })
 export class ConnectionVersionComponent {
   protected newVersion: string;
   protected oldVersion: string;
   protected mode: MinionMode;
 
-  constructor(@Inject(VERSION_DATA) data: VersionMismatch) {
+  constructor() {
+    const data = inject<VersionMismatch>(VERSION_DATA);
+
     this.newVersion = convert2String(data.newVersion);
     this.oldVersion = convert2String(data.oldVersion);
     this.mode = data.mode;

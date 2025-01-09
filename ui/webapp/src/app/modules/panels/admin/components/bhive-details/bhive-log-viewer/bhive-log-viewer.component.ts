@@ -4,13 +4,20 @@ import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file-viewer.utils';
 import { HiveLoggingService } from '../../../services/hive-logging.service';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdTerminalComponent } from '../../../../../core/components/bd-terminal/bd-terminal.component';
+import { AsyncPipe } from '@angular/common';
 
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
     selector: 'app-bhive-log-viewer',
     templateUrl: './bhive-log-viewer.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdTerminalComponent, AsyncPipe]
 })
 export class BhiveLogViewerComponent implements OnInit, OnDestroy {
   private readonly hiveLogging = inject(HiveLoggingService);

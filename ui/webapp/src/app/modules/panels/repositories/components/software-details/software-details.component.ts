@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { Actions, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -12,16 +12,39 @@ import {
   RepositoryService,
   SwDtoWithType,
   SwPkgCompound,
-  SwPkgType,
+  SwPkgType
 } from 'src/app/modules/primary/repositories/services/repository.service';
 import { SoftwareDetailsService } from '../../services/software-details.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-button/bd-expand-button.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
-  selector: 'app-software-details',
-  templateUrl: './software-details.component.html',
-  styleUrls: ['./software-details.component.css'],
-  providers: [SoftwareDetailsService],
-  standalone: false,
+    selector: 'app-software-details',
+    templateUrl: './software-details.component.html',
+    styleUrls: ['./software-details.component.css'],
+    providers: [SoftwareDetailsService],
+    imports: [
+      BdDialogComponent,
+        BdDialogToolbarComponent,
+        BdDialogContentComponent,
+        MatIcon,
+        BdIdentifierComponent,
+        BdExpandButtonComponent,
+        BdDataDisplayComponent,
+        BdNoDataComponent,
+        BdButtonComponent,
+        BdPanelButtonComponent,
+        AsyncPipe,
+    ],
 })
 export class SoftwareDetailsComponent implements OnInit {
   protected readonly repository = inject(RepositoryService);

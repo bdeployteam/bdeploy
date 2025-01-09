@@ -1,7 +1,13 @@
 <div class="flex justify-start">
-  <mat-icon *ngIf="column.data(record) === false" matTooltip="Port is not in open state." class="local-greyed"
-    >link_off</mat-icon
-  >
-  <mat-icon *ngIf="column.data(record) === true" matTooltip="Port is in open state.">link</mat-icon>
-  <mat-icon *ngIf="column.data(record) === undefined" class="local-greyed">help</mat-icon>
-</div>
+  @if (column.data(record) === false) {
+    <mat-icon matTooltip="Port is not in open state." class="local-greyed"
+      >link_off</mat-icon
+      >
+    }
+    @if (column.data(record) === true) {
+      <mat-icon matTooltip="Port is in open state.">link</mat-icon>
+    }
+    @if (column.data(record) === undefined) {
+      <mat-icon class="local-greyed">help</mat-icon>
+    }
+  </div>

@@ -5,51 +5,53 @@
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Bulk User Manipulation" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="bulk.selection$ | async as selections">
-      <div><strong>{{ selections.length }}</strong> users selected.</div>
-      <mat-divider></mat-divider>
-      <app-bd-panel-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (currentUserSelected$ | async)"
-        text="Assign Permission..."
-        icon="security"
-        [route]="['panels', 'admin', 'user-bulk-manip', 'assign-permission']"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (currentUserSelected$ | async)"
-        text="Remove Permission..."
-        icon="gpp_bad"
-        [route]="['panels', 'admin', 'user-bulk-manip', 'remove-permission']"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        [disabled]="!selections.length"
-        text="Add Selected User Accounts to User groups"
-        icon="supervised_user_circle"
-        [route]="['panels', 'admin', 'user-bulk-manip', 'add-to-group']"
-      ></app-bd-panel-button>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length"
-        text="Activate Selected User Accounts"
-        icon="person"
-        (click)="onSetInactive(false)"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (currentUserSelected$ | async)"
-        text="Deactivate Selected User Accounts"
-        icon="person_off"
-        (click)="onSetInactive(true)"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (currentUserSelected$ | async)"
-        text="Delete Selected User Accounts"
-        icon="delete"
-        (click)="onDelete()"
-      ></app-bd-button>
-    </div>
+    @if (bulk.selection$ | async; as selections) {
+      <div class="flex flex-col gap-2.5">
+        <div><strong>{{ selections.length }}</strong> users selected.</div>
+        <mat-divider></mat-divider>
+        <app-bd-panel-button
+          [collapsed]="false"
+          [disabled]="!selections.length || (currentUserSelected$ | async)"
+          text="Assign Permission..."
+          icon="security"
+          [route]="['panels', 'admin', 'user-bulk-manip', 'assign-permission']"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          [disabled]="!selections.length || (currentUserSelected$ | async)"
+          text="Remove Permission..."
+          icon="gpp_bad"
+          [route]="['panels', 'admin', 'user-bulk-manip', 'remove-permission']"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          [disabled]="!selections.length"
+          text="Add Selected User Accounts to User groups"
+          icon="supervised_user_circle"
+          [route]="['panels', 'admin', 'user-bulk-manip', 'add-to-group']"
+        ></app-bd-panel-button>
+        <app-bd-button
+          [collapsed]="false"
+          [disabled]="!selections.length"
+          text="Activate Selected User Accounts"
+          icon="person"
+          (click)="onSetInactive(false)"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          [disabled]="!selections.length || (currentUserSelected$ | async)"
+          text="Deactivate Selected User Accounts"
+          icon="person_off"
+          (click)="onSetInactive(true)"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          [disabled]="!selections.length || (currentUserSelected$ | async)"
+          text="Delete Selected User Accounts"
+          icon="delete"
+          (click)="onDelete()"
+        ></app-bd-button>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

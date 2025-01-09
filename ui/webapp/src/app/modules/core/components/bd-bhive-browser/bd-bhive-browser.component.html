@@ -15,22 +15,26 @@
     [panel]="true"
     [relative]="true"
     [route]="['..', '..']"
-  >
+    >
     <div class="flex-auto"></div>
-    <app-bd-button
-      *ngIf="(path$ | async)?.length > 0"
-      icon="cloud_download"
-      text="Download All"
-      (click)="downloadAll()"
-    ></app-bd-button>
-    <mat-divider *ngIf="(path$ | async)?.length > 0" [vertical]="true"></mat-divider>
-    <app-bd-button
-      *ngIf="(crumbs$ | async)?.length > 1"
-      icon="navigate_before"
-      text="Back to Parent"
-      color="primary"
-      (click)="onNavigateUp()"
-    ></app-bd-button>
+    @if ((path$ | async)?.length > 0) {
+      <app-bd-button
+        icon="cloud_download"
+        text="Download All"
+        (click)="downloadAll()"
+      ></app-bd-button>
+    }
+    @if ((path$ | async)?.length > 0) {
+      <mat-divider [vertical]="true"></mat-divider>
+    }
+    @if ((crumbs$ | async)?.length > 1) {
+      <app-bd-button
+        icon="navigate_before"
+        text="Back to Parent"
+        color="primary"
+        (click)="onNavigateUp()"
+      ></app-bd-button>
+    }
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="mx-1.5">

@@ -16,8 +16,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: AllowedValuesValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class AllowedValuesValidatorDirective implements Validator {
   @Input() appAllowedValuesValidator: string[];

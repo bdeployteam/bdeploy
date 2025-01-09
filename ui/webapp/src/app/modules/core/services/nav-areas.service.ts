@@ -1,12 +1,13 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DirtyableDialog } from '../guards/dirty-dialog.guard';
 
 export type DirtyableKey = 'primary' | 'panel' | 'admin';
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class NavAreasService {
   private readonly router = inject(Router);
@@ -35,7 +36,7 @@ export class NavAreasService {
   private dirtyables: { [P in DirtyableKey]: DirtyableDialog } = {
     panel: null,
     primary: null,
-    admin: null,
+    admin: null
   };
 
   private primaryState: string;
@@ -44,7 +45,7 @@ export class NavAreasService {
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),
-        map(() => this.activatedRoute),
+        map(() => this.activatedRoute)
       )
       .subscribe((route) => {
         // SOMEthing changed in the routing, some navigation happened. we need to find out which outlet changed
@@ -139,19 +140,19 @@ export class NavAreasService {
   }
 
   public getAnimationRouteId(snapshot: ActivatedRouteSnapshot) {
-    return snapshot?.data?.routeId ?? '';
+    return snapshot?.data?.['routeId'] ?? '';
   }
 
   public closePanel(force = false) {
     if (force) {
       this.router.navigate(['', { outlets: { panel: null } }], {
         replaceUrl: true,
-        state: { ignoreDirtyGuard: true },
+        state: { ignoreDirtyGuard: true }
       });
     } else {
       this.router.navigate(['', { outlets: { panel: null } }], {
         replaceUrl: true,
-        queryParamsHandling: 'preserve',
+        queryParamsHandling: 'preserve'
       });
     }
   }
@@ -160,7 +161,7 @@ export class NavAreasService {
     primary: unknown[],
     panel: unknown[],
     primaryExtra?: NavigationExtras,
-    panelExtra?: NavigationExtras,
+    panelExtra?: NavigationExtras
   ) {
     this.router.navigate(primary, primaryExtra).then((nav) => {
       if (nav) {
@@ -194,6 +195,7 @@ export class NavAreasService {
     } else if (this.dirtyables['admin'] === dirtyable) {
       return 'admin';
     }
+    return null;
   }
 
   public getDirtyable(type: DirtyableKey) {
@@ -236,5 +238,6 @@ export class NavAreasService {
         }
       }
     }
+    return null;
   }
 }

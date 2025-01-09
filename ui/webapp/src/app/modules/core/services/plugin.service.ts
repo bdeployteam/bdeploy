@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { Api } from '../plugins/plugin.api';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -29,7 +29,7 @@ export class PluginService {
 
   public load(plugin: PluginInfoDto, modulePath: string): Promise<any> {
     // Note: webpackIgnore is extremely important, otherwise webpack tries to resolve the import locally at build time.
-    return import(/* webpackIgnore: true */ this.config.getPluginUrl(plugin) + modulePath);
+    return import(/* webpackIgnore: true */ /* @vite-ignore */ this.config.getPluginUrl(plugin) + modulePath);
   }
 
   private buildPluginUrl(plugin: PluginInfoDto, path: string): string {

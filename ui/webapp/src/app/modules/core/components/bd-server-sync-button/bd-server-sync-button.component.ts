@@ -16,13 +16,16 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass, AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-server-sync-button',
     templateUrl: './bd-server-sync-button.component.html',
     styleUrls: ['./bd-server-sync-button.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdButtonComponent, MatTooltip, NgClass, AsyncPipe]
 })
 export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   @Input() server: ManagedMasterDto;

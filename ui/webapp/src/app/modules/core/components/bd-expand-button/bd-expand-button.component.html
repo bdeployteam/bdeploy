@@ -2,7 +2,9 @@
   <mat-expansion-panel-header>
     <mat-panel-title>
       <div class="flex gap-1 justify-start items-center">
-        <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+        @if (icon) {
+          <mat-icon>{{ icon }}</mat-icon>
+        }
         <div>{{ text }}</div>
       </div>
     </mat-panel-title>

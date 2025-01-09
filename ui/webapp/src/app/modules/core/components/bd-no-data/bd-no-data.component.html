@@ -1,5 +1,9 @@
 <div class="flex-auto flex flex-col justify-center items-center p-8 max-w-full text-center">
-  <app-bd-logo *ngIf="header" [size]="128"></app-bd-logo>
-  <div class="text-lg font-bold mb-4" *ngIf="header">{{ header }}</div>
+  @if (header) {
+    <app-bd-logo [size]="128"></app-bd-logo>
+  }
+  @if (header) {
+    <div class="text-lg font-bold mb-4">{{ header }}</div>
+  }
   <ng-content></ng-content>
 </div>

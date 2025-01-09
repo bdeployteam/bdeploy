@@ -3,7 +3,9 @@
     <div class="truncate">
       <strong>Edit Value</strong>
     </div>
-    <div #editorPanel *ngIf="editor" class="editorPanel"></div>
+    @if (editor) {
+      <div #editorPanel class="editorPanel"></div>
+    }
     <div class="flex gap-2.5 justify-end">
       <app-bd-button text="Cancel" [collapsed]="false" (click)="popup.closeOverlay()"></app-bd-button>
       <app-bd-button
@@ -35,4 +37,4 @@
       : 'Open custom editor to modify the parameter value'
   "
   >{{ readonly ? 'visibility' : 'edit' }}</mat-icon
->
+  >

@@ -1,13 +1,16 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HistoryEntryDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { InstanceStateService } from '../../services/instance-state.service';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-history-state-column',
     templateUrl: './history-state-column.component.html',
     styleUrls: ['./history-state-column.component.css'],
-    standalone: false
+    imports: [MatIcon, NgClass, MatTooltip]
 })
 export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy {
   private readonly state = inject(InstanceStateService);
@@ -57,6 +60,7 @@ export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy
     } else if (this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
       return 'This version is installed'; // installed
     }
+    return null;
   }
 
   private getStateClass(): string[] {

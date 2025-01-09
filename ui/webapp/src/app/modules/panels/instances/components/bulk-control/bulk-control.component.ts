@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Actions, ApplicationStartType, InstanceDto } from 'src/app/models/gen.dtos';
@@ -9,10 +9,19 @@ import { ProcessesBulkService } from 'src/app/modules/primary/instances/services
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-bulk-control',
     templateUrl: './bulk-control.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, BdButtonComponent, MatDivider, AsyncPipe]
 })
 export class BulkControlComponent implements OnInit {
   private readonly processes = inject(ProcessesService);

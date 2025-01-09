@@ -2,6 +2,8 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, ElementRef, Input, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { getRecursivePrefix } from '../../utils/completion.utils';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 
 export class ContentCompletion {
   value: string;
@@ -13,7 +15,7 @@ export class ContentCompletion {
     selector: 'app-bd-content-assist-menu',
     templateUrl: './bd-content-assist-menu.component.html',
     styleUrls: ['./bd-content-assist-menu.component.css'],
-    standalone: false
+    imports: [MatCard, MatIcon]
 })
 export class BdContentAssistMenuComponent {
   private readonly overlay = inject(Overlay);

@@ -1,49 +1,52 @@
 <div class="flex justify-start items-center gap-1">
-  <ng-container *ngIf="getStatus() as status; else noStatus">
-    <mat-icon
-      *ngIf="status.status === 'RUNNING'"
-      class="bd-success-text material-symbols-filled"
-      matTooltip="Instance is running"
-      matTooltipShowDelay="500"
-      >play_arrow</mat-icon
-    >
-    <mat-icon
-      *ngIf="status.status === 'STOPPED'"
-      class="bd-disabled-text material-symbols-filled"
-      matTooltip="Instance is stopped"
-      matTooltipShowDelay="500"
-      >stop</mat-icon
-    >
-    <mat-icon
-      *ngIf="status.status === 'WARNING'"
-      class="bd-warning-text material-symbols-filled"
-      [matTooltip]="status.messages?.join('\n')"
-      matTooltipClass="tooltip-with-newline"
-      matTooltipShowDelay="500"
-      >warning</mat-icon
-    >
-    <mat-icon
-      *ngIf="status.status === 'INDETERMINATE'"
-      class="bd-orange-text material-symbols-filled"
-      [matTooltip]="status.messages?.join('\n')"
-      matTooltipClass="tooltip-with-newline"
-      matTooltipShowDelay="500"
-    >hourglass_empty
-    </mat-icon>
-    <span
-      class="local-timestamp"
-      matTooltip="The time when the overall status was updated last."
-      matTooltipShowDelay="500"
-      matTooltipPosition="above"
-      >{{ status.timestamp | date: 'HH:mm' }}</span
-    >
-  </ng-container>
-  <ng-template #noStatus>
-    <mat-icon
-      class="bd-disabled-text material-symbols-filled"
-      matTooltip="No information available, or information timed out."
-      matTooltipShowDelay="500"
-      >help</mat-icon
-    >
-  </ng-template>
-</div>
+  @if (getStatus(); as status) {
+    @if (status.status === 'RUNNING') {
+      <mat-icon
+        class="bd-success-text material-symbols-filled"
+        matTooltip="Instance is running"
+        matTooltipShowDelay="500"
+        >play_arrow</mat-icon
+        >
+      }
+      @if (status.status === 'STOPPED') {
+        <mat-icon
+          class="bd-disabled-text material-symbols-filled"
+          matTooltip="Instance is stopped"
+          matTooltipShowDelay="500"
+          >stop</mat-icon
+          >
+        }
+        @if (status.status === 'WARNING') {
+          <mat-icon
+            class="bd-warning-text material-symbols-filled"
+            [matTooltip]="status.messages?.join('\n')"
+            matTooltipClass="tooltip-with-newline"
+            matTooltipShowDelay="500"
+            >warning</mat-icon
+            >
+          }
+          @if (status.status === 'INDETERMINATE') {
+            <mat-icon
+              class="bd-orange-text material-symbols-filled"
+              [matTooltip]="status.messages?.join('\n')"
+              matTooltipClass="tooltip-with-newline"
+              matTooltipShowDelay="500"
+              >hourglass_empty
+            </mat-icon>
+          }
+          <span
+            class="local-timestamp"
+            matTooltip="The time when the overall status was updated last."
+            matTooltipShowDelay="500"
+            matTooltipPosition="above"
+            >{{ status.timestamp | date: 'HH:mm' }}</span
+            >
+          } @else {
+            <mat-icon
+              class="bd-disabled-text material-symbols-filled"
+              matTooltip="No information available, or information timed out."
+              matTooltipShowDelay="500"
+              >help</mat-icon
+              >
+            }
+          </div>

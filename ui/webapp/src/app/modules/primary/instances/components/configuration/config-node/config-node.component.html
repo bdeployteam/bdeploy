@@ -5,18 +5,19 @@
         <div class="bd-type-text">{{ nodeType }}</div>
         <div class="bd-title-text">{{ node }}</div>
       </div>
-      <ng-container *ngIf="node$ | async as node">
+      @if (node$ | async; as node) {
         <mat-icon class="self-center ml-5" [svgIcon]="node.os"></mat-icon>
-      </ng-container>
+      }
       <div class="flex-auto"></div>
       <div class="flex gap-1">
-        <app-bd-panel-button
-          *ngIf="!isClientNode"
-          text="Add Process Control Group"
-          icon="more_time"
-          [route]="['panels', 'instances', 'config', 'add-control-group', nodeName]"
-          tooltip="below"
-        ></app-bd-panel-button>
+        @if (!isClientNode) {
+          <app-bd-panel-button
+            text="Add Process Control Group"
+            icon="more_time"
+            [route]="['panels', 'instances', 'config', 'add-control-group', nodeName]"
+            tooltip="below"
+          ></app-bd-panel-button>
+        }
         <app-bd-panel-button
           text="Add Application"
           icon="add"
@@ -28,26 +29,26 @@
     </div>
   </div>
   <div class="bd-default-padding flex flex-col gap-2.5">
-    <ng-container *ngIf="!isClientNode; else clientTable">
-      <app-control-group
-        *ngFor="let group of (config$ | async)?.nodeConfiguration.controlGroups; trackBy: doTrack"
-        [group]="group"
-        [node$]="config$"
-        [(expanded)]="groupExpansion[group.name]"
-      >
-        <app-bd-data-table
-          [id]="nodeName + '||' + group.name"
-          [records]="(groupedProcesses$ | async)[group.name]"
-          [columns]="cols"
-          [sortData]="null"
-          [recordRoute]="getRecordRoute"
-          [dragConnected]="allowedSources$ | async"
-          [dragReorderMode]="true"
-          (dragReorder)="onReorder($event)"
-        ></app-bd-data-table>
-      </app-control-group>
-    </ng-container>
-    <ng-template #clientTable>
+    @if (!isClientNode) {
+      @for (group of (config$ | async)?.nodeConfiguration.controlGroups; track doTrack($index, group)) {
+        <app-control-group
+          [group]="group"
+          [node$]="config$"
+          [(expanded)]="groupExpansion[group.name]"
+          >
+          <app-bd-data-table
+            [id]="nodeName + '||' + group.name"
+            [records]="(groupedProcesses$ | async)[group.name]"
+            [columns]="cols"
+            [sortData]="null"
+            [recordRoute]="getRecordRoute"
+            [dragConnected]="allowedSources$ | async"
+            [dragReorderMode]="true"
+            (dragReorder)="onReorder($event)"
+          ></app-bd-data-table>
+        </app-control-group>
+      }
+    } @else {
       <app-bd-data-table
         [id]="clientTableId"
         [records]="(config$ | async)?.nodeConfiguration.applications"
@@ -57,6 +58,6 @@
         [dragReorderMode]="true"
         (dragReorder)="onReorder($event)"
       ></app-bd-data-table>
-    </ng-template>
+    }
   </div>
 </div>

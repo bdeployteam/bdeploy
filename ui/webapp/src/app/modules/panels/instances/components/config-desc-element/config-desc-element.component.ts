@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { PopupPosition } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
-import { AllFields } from '../config-desc-cards/config-desc-cards.component';
+import { AllFields, ConfigDescCardsComponent } from '../config-desc-cards/config-desc-cards.component';
+import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
 
 @Component({
     selector: 'app-config-desc-element',
     templateUrl: './config-desc-element.component.html',
-    standalone: false
+    imports: [ConfigDescCardsComponent, BdPopupDirective]
 })
 export class ConfigDescElementComponent {
   @Input() card: AllFields;
