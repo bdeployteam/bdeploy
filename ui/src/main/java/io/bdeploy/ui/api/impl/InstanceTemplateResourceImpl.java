@@ -74,7 +74,9 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
+import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
 import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import io.bdeploy.ui.utils.InstanceTemplateHelper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -117,10 +119,22 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             instance.fixedVariables = Collections.emptyList();
         }
 
-        // 1. find and verify product.
+        // 1. import, find and verify product.
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
-        List<ProductDto> products = pr.list(null);
-        ProductDto product = InstanceTemplateHelper.findMatchingProductOrFail(instance, products);
+        Optional<ProductDto> productOpt = InstanceTemplateHelper.findMatchingProduct(instance, pr.list(null));
+        ProductDto product;
+        if (productOpt.isPresent()) {
+            product = productOpt.get();
+        } else {
+            LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
+            req.productId = instance.productId;
+            req.version = instance.productVersionRegex;
+            req.regex = true;
+            SoftwareRepositoryResourceImpl srr = rc.initResource(new SoftwareRepositoryResourceImpl());
+            ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
+            pr.copyProduct(toImport.groupOrRepo, toImport.key.getName(), List.of(toImport.key.getTag()));
+            product = InstanceTemplateHelper.findMatchingProduct(instance, pr.list(null)).get();
+        }
 
         // 2. find and verify all group mappings and whether all variables are set for each required group.
         Set<String> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes().keySet();
