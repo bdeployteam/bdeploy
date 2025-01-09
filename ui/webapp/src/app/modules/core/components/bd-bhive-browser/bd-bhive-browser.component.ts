@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, Observable, Subscription, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { HiveEntryDto, TreeEntryType } from 'src/app/models/gen.dtos';
 import { CrumbInfo } from 'src/app/modules/core/components/bd-breadcrumbs/bd-breadcrumbs.component';
@@ -26,9 +26,9 @@ interface PathIdName {
 type BHivePathSegment = PathIdName;
 
 @Component({
-    selector: 'app-bd-bhive-browser',
-    templateUrl: './bd-bhive-browser.component.html',
-    standalone: false
+  selector: 'app-bd-bhive-browser',
+  templateUrl: './bd-bhive-browser.component.html',
+  standalone: false
 })
 export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -44,14 +44,14 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     name: '',
     data: (r) => this.getImage(r),
     width: '40px',
-    component: BdDataIconCellComponent,
+    component: BdDataIconCellComponent
   };
 
   private readonly colName: BdDataColumn<HiveEntryDto> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
-    isId: true,
+    isId: true
   };
 
   private readonly colSize: BdDataColumn<HiveEntryDto> = {
@@ -59,7 +59,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     name: 'Size',
     data: (r) => (r.size > 0 ? r.size : null),
     width: '120px',
-    component: BdDataSizeCellComponent,
+    component: BdDataSizeCellComponent
   };
 
   private readonly colDownload: BdDataColumn<HiveEntryDto> = {
@@ -68,7 +68,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     data: () => 'Download',
     action: (r) => this.doDownload(r),
     icon: () => 'cloud_download',
-    width: '50px',
+    width: '50px'
   };
 
   private readonly colDelete: BdDataColumn<HiveEntryDto> = {
@@ -76,7 +76,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     name: 'Delete',
     data: (r) => `Delete ${r.name}`,
     width: '40px',
-    component: BdManifestDeleteActionComponent,
+    component: BdManifestDeleteActionComponent
   };
 
   public bhive$ = new BehaviorSubject<string>(null);
@@ -127,7 +127,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
         }
 
         this.load();
-      },
+      }
     );
   }
 
@@ -143,6 +143,8 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
       const tag = panelRoute.params['tag'];
       return [{ name, tag }];
     }
+
+    throw Error(`Unexpected type ${this.type}`);
   }
 
   private getBHive(primaryRoute: ActivatedRouteSnapshot, panelRoute: ActivatedRouteSnapshot): string {
@@ -204,7 +206,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
         return {
           name: parts[0],
           tag: parts[1]?.length ? parts[1] : undefined,
-          id: parts[2]?.length ? parts[2] : undefined,
+          id: parts[2]?.length ? parts[2] : undefined
         };
       }
       return s;
@@ -235,7 +237,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
           .message({
             header: `Preview ${name}`,
             template: this.previewTemplate,
-            actions: [ACTION_CLOSE],
+            actions: [ACTION_CLOSE]
           })
           .subscribe();
       } else {
@@ -264,7 +266,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
 
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
-      queryParams: { q: this.encodePathForUrl(path) },
+      queryParams: { q: this.encodePathForUrl(path) }
     });
   }
 
@@ -289,14 +291,14 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
         });
         const root = { label: this.bhive$.value, onClick: () => this.navigateTo(null) };
         return this.type === 'bhive' ? [root, ...crumbs] : crumbs;
-      }),
+      })
     );
   }
 
   private navigateTo(path: BHivePathSegment[]) {
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
-      queryParams: { q: this.encodePathForUrl(path) },
+      queryParams: { q: this.encodePathForUrl(path) }
     });
   }
 
@@ -313,7 +315,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
       mTag: s.tag,
       name: s.tag ? `${s.name}:${s.tag}` : s.name,
       type: s.id ? TreeEntryType.TREE : TreeEntryType.MANIFEST,
-      size: null,
+      size: null
     };
     this.doDownload(dto);
   }

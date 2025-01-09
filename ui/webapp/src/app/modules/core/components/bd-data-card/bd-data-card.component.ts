@@ -2,22 +2,22 @@ import {
   Component,
   ContentChild,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   OnInit,
   Output,
   SimpleChanges,
-  TemplateRef,
-  inject,
+  TemplateRef
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 
 @Component({
-    selector: 'app-bd-data-card',
-    templateUrl: './bd-data-card.component.html',
-    styleUrls: ['./bd-data-card.component.css'],
-    standalone: false
+  selector: 'app-bd-data-card',
+  templateUrl: './bd-data-card.component.html',
+  styleUrls: ['./bd-data-card.component.css'],
+  standalone: false
 })
 export class BdDataCardComponent<T> implements OnInit, OnChanges {
   private readonly sanitizer = inject(DomSanitizer);
@@ -89,5 +89,6 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
         return this.sanitizer.bypassSecurityTrustStyle(`url(${url})`);
       }
     }
+    return null;
   }
 }

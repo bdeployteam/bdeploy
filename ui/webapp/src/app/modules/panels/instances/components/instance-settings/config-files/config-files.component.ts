@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { FileStatusType } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_OK,
+  ACTION_OK
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
@@ -13,9 +13,9 @@ import { ConfigFilesColumnsService } from '../../../services/config-files-column
 import { ConfigFile, ConfigFilesService } from '../../../services/config-files.service';
 
 @Component({
-    selector: 'app-config-files',
-    templateUrl: './config-files.component.html',
-    standalone: false
+  selector: 'app-config-files',
+  templateUrl: './config-files.component.html',
+  standalone: false
 })
 export class ConfigFilesComponent implements OnInit, OnDestroy {
   protected readonly cfgFiles = inject(ConfigFilesService);
@@ -26,7 +26,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
 
   protected groupingDefinition: BdDataGroupingDefinition<ConfigFile> = {
     name: 'Configuration File Availability',
-    group: (r) => this.getGroup(r),
+    group: (r) => this.getGroup(r)
   };
 
   protected grouping: BdDataGrouping<ConfigFile>[] = [{ definition: this.groupingDefinition, selected: [] }];
@@ -63,6 +63,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
     if (r?.persistent?.productId) {
       return 'Files available from the current product version.';
     }
+    return null;
   }
 
   protected doAddFile(tpl: TemplateRef<unknown>): void {
@@ -76,7 +77,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
         template: tpl,
         validation: () =>
           !this.tempFileInput ? false : !this.tempFileInput.isInvalid() && !this.tempFileContentLoading$.value,
-        actions: [ACTION_CANCEL, ACTION_OK],
+        actions: [ACTION_CANCEL, ACTION_OK]
       })
       .subscribe((r) => {
         if (!r) {
@@ -125,7 +126,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
     this.dialog
       .confirm(
         `Delete ${selected.length} files?`,
-        `This will remove ${selected.length} files from the current set of configuration files.`,
+        `This will remove ${selected.length} files from the current set of configuration files.`
       )
       .subscribe((r) => {
         if (r) {

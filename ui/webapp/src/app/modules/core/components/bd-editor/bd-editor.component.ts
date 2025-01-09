@@ -2,13 +2,13 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges,
-  inject,
+  SimpleChanges
 } from '@angular/core';
 import { editor } from 'monaco-editor';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -17,9 +17,9 @@ import { ThemeService } from '../../services/theme.service';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 
 @Component({
-    selector: 'app-bd-editor',
-    templateUrl: './bd-editor.component.html',
-    standalone: false
+  selector: 'app-bd-editor',
+  templateUrl: './bd-editor.component.html',
+  standalone: false
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private readonly themeService = inject(ThemeService);
@@ -67,15 +67,15 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
       readOnly: this.readonly,
       minimap: { enabled: false },
       autoClosingBrackets: false,
-      automaticLayout: true,
+      automaticLayout: true
     };
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.completions) {
+    if (changes['completions']) {
       this.editorCompletions.setCompletions(this.completions, this.recursivePrefixes);
     }
-    if (changes.markerRegex || changes.createMarker) {
+    if (changes['markerRegex'] || changes['createMarker']) {
       this.setModelMarkers();
     }
   }
@@ -135,7 +135,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     const model = this.globalMonaco.editor.createModel(
       this.editorContent,
       undefined,
-      this.globalMonaco.Uri.parse(this.editorPath),
+      this.globalMonaco.Uri.parse(this.editorPath)
     );
     this.monaco.setModel(model);
     this.setModelMarkers();
@@ -152,7 +152,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
           startLineNumber: position.lineNumber,
           startColumn: 1,
           endLineNumber: position.lineNumber,
-          endColumn: position.column,
+          endColumn: position.column
         });
 
         // check if current word starts with '{{' and find the position.
@@ -171,7 +171,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
           startLineNumber: position.lineNumber,
           endLineNumber: position.lineNumber,
           startColumn: wordBegin + 1,
-          endColumn: position.column,
+          endColumn: position.column
         };
 
         const kindByIcon = (icon: string) => {
@@ -198,9 +198,9 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
         };
 
         return {
-          suggestions: editorCompletions.getCompletions(word, range).map((c) => ({ ...c, kind: kindByIcon(c.icon) })),
+          suggestions: editorCompletions.getCompletions(word, range).map((c) => ({ ...c, kind: kindByIcon(c.icon) }))
         };
-      },
+      }
     };
   }
 }

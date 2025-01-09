@@ -170,7 +170,8 @@
 
       <!-- Metrics of selected group -->
       <h3 *ngIf="selectedGroup" class="flex justify-start items-center gap-1">
-        <mat-icon>lightbulb</mat-icon>Click a metric to view details. Sorted by mean duration of calls, slowest first.
+        <mat-icon>lightbulb</mat-icon>
+        Click a metric to view details. Sorted by mean duration of calls, slowest first.
       </h3>
       <div *ngIf="selectedGroup" class="charts-area flex-auto">
         <div class="count-chart" [style.height.px]="countGraphHeight">
@@ -218,7 +219,8 @@
               ></ngx-charts-line-chart>
             </div>
             <h3 class="flex justify-start items-center gap-1">
-              <mat-icon>lightbulb</mat-icon>Histogram values are sorted by value, not time.
+              <mat-icon>lightbulb</mat-icon>
+              Histogram values are sorted by value, not time.
             </h3>
           </ng-container>
         </div>

@@ -11,7 +11,7 @@ export function timeAgo(input: number) {
     days: 3600 * 24,
     hours: 3600,
     minutes: 60,
-    seconds: 1,
+    seconds: 1
   };
   const secondsElapsed = (date.getTime() - Date.now()) / 1000;
   for (const key in ranges) {
@@ -20,4 +20,5 @@ export function timeAgo(input: number) {
       return formatter.format(Math.round(delta), key as Intl.RelativeTimeFormatUnit);
     }
   }
+  return 'Never';
 }

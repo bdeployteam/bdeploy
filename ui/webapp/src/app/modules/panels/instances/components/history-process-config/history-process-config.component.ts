@@ -1,13 +1,13 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ApplicationConfiguration, ApplicationDescriptor } from 'src/app/models/gen.dtos';
 import { ApplicationConfigurationDiff, DiffType, HistoryDiffService } from '../../services/history-diff.service';
 
 @Component({
-    selector: 'app-history-process-config',
-    templateUrl: './history-process-config.component.html',
-    styleUrls: ['./history-process-config.component.css'],
-    standalone: false
+  selector: 'app-history-process-config',
+  templateUrl: './history-process-config.component.html',
+  styleUrls: ['./history-process-config.component.css'],
+  standalone: false
 })
 export class HistoryProcessConfigComponent implements OnInit {
   private readonly diffService = inject(HistoryDiffService);
@@ -48,5 +48,6 @@ export class HistoryProcessConfigComponent implements OnInit {
     } else if (this.diff$.value?.type === DiffType.CHANGED) {
       return 'local-border-changed';
     }
+    return [];
   }
 }

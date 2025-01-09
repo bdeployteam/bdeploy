@@ -1,14 +1,16 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { Observable, Subscription, combineLatest, debounceTime, of, tap } from 'rxjs';
+import { combineLatest, debounceTime, Observable, of, Subscription, tap } from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
   ProcessControlGroupHandlingType,
-  ProcessControlGroupWaitType,
+  ProcessControlGroupWaitType
 } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -18,9 +20,9 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
-    selector: 'app-edit-control-group',
-    templateUrl: './edit-control-group.component.html',
-    standalone: false
+  selector: 'app-edit-control-group',
+  templateUrl: './edit-control-group.component.html',
+  standalone: false
 })
 export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit {
   private readonly areas = inject(NavAreasService);
@@ -38,7 +40,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
   protected waitTypeValues = [
     ProcessControlGroupWaitType.CONTINUE,
     ProcessControlGroupWaitType.WAIT,
-    ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED,
+    ProcessControlGroupWaitType.WAIT_UNTIL_STOPPED
   ];
 
   protected origGroup: ProcessControlGroupConfiguration;
@@ -51,19 +53,19 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-        if (!state || !route?.params?.node || !route.params.cgrp) {
+        if (!state || !route?.params?.['node'] || !route.params['cgrp']) {
           this.node = null;
           return;
         }
 
-        this.nodeName = route.params.node;
-        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
+        this.nodeName = route.params['node'];
+        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params['node'])?.nodeConfiguration;
 
-        const index = this.node.controlGroups.findIndex((cg) => cg.name === route.params.cgrp);
+        const index = this.node.controlGroups.findIndex((cg) => cg.name === route.params['cgrp']);
 
         this.origGroup = this.node.controlGroups[index];
         this.group = cloneDeep(this.origGroup);
-      }),
+      })
     );
   }
 
@@ -74,7 +76,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.hasPendingChanges = this.isDirty();
-      }),
+      })
     );
   }
 
@@ -101,7 +103,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     return of(true).pipe(
       tap(() => {
         this.edit.conceal('Update Control Group ' + this.group.name);
-      }),
+      })
     );
   }
 
@@ -119,13 +121,13 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     for (const id of contained) {
       apps.splice(
         apps.findIndex((a) => a.id === id),
-        1,
+        1
       );
     }
 
     this.node.controlGroups.splice(
       this.node.controlGroups.findIndex((cg) => cg.name === this.group.name),
-      1,
+      1
     );
   }
 }

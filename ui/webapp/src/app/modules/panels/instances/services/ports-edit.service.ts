@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { ApplicationConfiguration, LinkedValueConfiguration, VariableType } from 'src/app/models/gen.dtos';
 import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
@@ -19,7 +19,7 @@ export interface PortParam {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class PortsEditService {
   private readonly procEdit = inject(ProcessEditService);
@@ -55,7 +55,7 @@ export class PortsEditService {
               expression: this.isPortExpression(param.value, paramDesc.type),
               port: this.getPortValue(param.value, paramDesc.type),
               app: app,
-              apply: (lv) => (param.preRendered = this.procEdit.preRenderParameter(paramDesc, lv)),
+              apply: (lv) => (param.preRendered = this.procEdit.preRenderParameter(paramDesc, lv))
             });
           }
         }
@@ -80,7 +80,7 @@ export class PortsEditService {
             app: null,
             apply: (lv) => {
               val.value = lv;
-            },
+            }
           });
         }
       }
@@ -91,7 +91,7 @@ export class PortsEditService {
 
   public shiftPorts(ports: PortParam[], amount: number): string[] {
     if (!ports?.length) {
-      return;
+      return null;
     }
 
     const errors: string[] = [];

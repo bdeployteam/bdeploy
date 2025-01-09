@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, finalize, Subscription } from 'rxjs';
 import { Actions, MinionStatusDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
@@ -7,9 +7,9 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
 @Component({
-    selector: 'app-node-maintenance',
-    templateUrl: './node-maintenance.component.html',
-    standalone: false
+  selector: 'app-node-maintenance',
+  templateUrl: './node-maintenance.component.html',
+  standalone: false
 })
 export class NodeMaintenanceComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -28,7 +28,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
     this.repairing$,
     null,
     null,
-    this.nodeName$,
+    this.nodeName$
   );
 
   protected mappedRestart$ = this.actions.action([Actions.RESTART_NODE], this.restarting$, null, null, this.nodeName$);
@@ -37,14 +37,14 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
     this.shuttingDown$,
     null,
     null,
-    this.nodeName$,
+    this.nodeName$
   );
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.nodesAdmin.nodes$]).subscribe(([route, nodes]) => {
-      this.nodeName$.next(route?.params?.node);
+      this.nodeName$.next(route?.params?.['node']);
       this.state = nodes?.find((n) => n.name === this.nodeName$.value)?.status;
     });
   }
@@ -89,7 +89,8 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
           this.nodesAdmin
             .restartNode(this.nodeName$.value)
             .pipe(finalize(() => this.restarting$.next(false)))
-            .subscribe(() => {});
+            .subscribe(() => {
+            });
         }
       });
   }
@@ -98,7 +99,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
     this.dialog
       .confirm(
         'Shutdown',
-        'Shutting down the node will make it unavailable until started manually. ATTENTION: The node cannot be remotely restarted after shutdown.',
+        'Shutting down the node will make it unavailable until started manually. ATTENTION: The node cannot be remotely restarted after shutdown.'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
@@ -106,7 +107,8 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
           this.nodesAdmin
             .shutdownNode(this.nodeName$.value)
             .pipe(finalize(() => this.shuttingDown$.next(false)))
-            .subscribe(() => {});
+            .subscribe(() => {
+            });
         }
       });
   }

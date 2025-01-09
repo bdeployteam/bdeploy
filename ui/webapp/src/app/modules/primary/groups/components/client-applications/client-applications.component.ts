@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { map } from 'rxjs';
 import {
@@ -6,10 +6,12 @@ import {
   BdDataColumnDisplay,
   BdDataColumnTypeHint,
   BdDataGrouping,
-  BdDataGroupingDefinition,
+  BdDataGroupingDefinition
 } from 'src/app/models/data';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
-import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
+import {
+  BdDataSvgIconCellComponent
+} from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ClientApp, ClientsService } from '../../services/clients.service';
 import { GroupsService } from '../../services/groups.service';
@@ -18,7 +20,7 @@ const clientNameColumn: BdDataColumn<ClientApp> = {
   id: 'name',
   name: 'Client Name',
   data: (r) => (r.client ? r.client.description : `${r.endpoint.appName} - ${r.endpoint.endpoint.id}`),
-  hint: BdDataColumnTypeHint.TITLE,
+  hint: BdDataColumnTypeHint.TITLE
 };
 
 const clientIdColumn: BdDataColumn<ClientApp> = {
@@ -27,14 +29,14 @@ const clientIdColumn: BdDataColumn<ClientApp> = {
   data: (r) => (r.client ? r.client.id : r.endpoint.id),
   isId: true,
   hint: BdDataColumnTypeHint.DETAILS,
-  icon: () => 'computer',
+  icon: () => 'computer'
 };
 
 const clientInstanceColumn: BdDataColumn<ClientApp> = {
   id: 'instance',
   name: 'Instance Name',
   data: (r) => r.instanceName,
-  hint: BdDataColumnTypeHint.DESCRIPTION,
+  hint: BdDataColumnTypeHint.DESCRIPTION
 };
 
 const clientOsColumn: BdDataColumn<ClientApp> = {
@@ -42,7 +44,7 @@ const clientOsColumn: BdDataColumn<ClientApp> = {
   name: 'OS',
   data: (r) => (r.client ? r.client.os : 'WEB'),
   display: BdDataColumnDisplay.TABLE,
-  component: BdDataSvgIconCellComponent,
+  component: BdDataSvgIconCellComponent
 };
 
 const clientAvatarColumn: BdDataColumn<ClientApp> = {
@@ -50,13 +52,13 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
   name: 'OS',
   hint: BdDataColumnTypeHint.AVATAR,
   data: (r) => `/assets/${r.client ? r.client.os.toLowerCase() : 'web'}.svg`,
-  display: BdDataColumnDisplay.CARD,
+  display: BdDataColumnDisplay.CARD
 };
 
 @Component({
-    selector: 'app-client-applications',
-    templateUrl: './client-applications.component.html',
-    standalone: false
+  selector: 'app-client-applications',
+  templateUrl: './client-applications.component.html',
+  standalone: false
 })
 export class ClientApplicationsComponent implements OnInit {
   private readonly dd = inject(DeviceDetectorService);
@@ -70,19 +72,19 @@ export class ClientApplicationsComponent implements OnInit {
     clientIdColumn,
     clientInstanceColumn,
     clientOsColumn,
-    clientAvatarColumn,
+    clientAvatarColumn
   ];
 
   protected grouping: BdDataGroupingDefinition<ClientApp>[] = [
     {
       name: 'Instance Name',
       group: (r) => r.instanceName,
-      associatedColumn: clientInstanceColumn.id,
+      associatedColumn: clientInstanceColumn.id
     },
     {
       name: 'Operating System',
-      group: (r) => (r.client ? r.client.os : 'WEB'),
-    },
+      group: (r) => (r.client ? r.client.os : 'WEB')
+    }
   ];
   protected defaultGrouping: BdDataGrouping<ClientApp>[];
 
@@ -94,9 +96,9 @@ export class ClientApplicationsComponent implements OnInit {
         '',
         {
           outlets: {
-            panel: ['panels', 'groups', 'endpoint-detail', row.endpoint.id, row.endpoint.endpoint.id],
-          },
-        },
+            panel: ['panels', 'groups', 'endpoint-detail', row.endpoint.id, row.endpoint.endpoint.id]
+          }
+        }
       ];
     }
   };
@@ -111,8 +113,8 @@ export class ClientApplicationsComponent implements OnInit {
           return app.endpoint.endpointEnabledPreresolved;
         }
         return true;
-      }),
-    ),
+      })
+    )
   );
 
   ngOnInit(): void {
@@ -125,11 +127,12 @@ export class ClientApplicationsComponent implements OnInit {
         case 'Mac':
           return OperatingSystem.MACOS;
       }
+      return null;
     })();
 
     this.defaultGrouping = [
       { definition: this.grouping[0], selected: [] },
-      { definition: this.grouping[1], selected: [this.currentOs, 'WEB'] },
+      { definition: this.grouping[1], selected: [this.currentOs, 'WEB'] }
     ];
 
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);

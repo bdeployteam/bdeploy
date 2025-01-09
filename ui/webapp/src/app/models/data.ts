@@ -165,6 +165,8 @@ export function bdDataDefaultSort<T>(data: T[], column: BdDataColumn<T>, directi
     if (da > db) {
       return 1 * dir;
     }
+
+    throw new Error('Unreachable');
   });
 }
 

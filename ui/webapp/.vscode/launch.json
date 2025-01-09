@@ -1,65 +1,20 @@
 {
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "firefox",
+      "name": "ng serve",
+      "type": "chrome",
       "request": "launch",
-      "name": "Firefox (Standalone)",
-      "keepProfileChanges": true,
-      "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
-      "url": "http://localhost:4200/",
-      "webRoot": "${workspaceFolder}"
+      "preLaunchTask": "npm: start",
+      "url": "http://localhost:4200/"
     },
     {
-      "type": "firefox",
+      "name": "ng test",
+      "type": "chrome",
       "request": "launch",
-      "name": "Firefox (Central)",
-      "keepProfileChanges": true,
-      "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
-      "url": "http://localhost:4201/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "type": "firefox",
-      "request": "launch",
-      "name": "Firefox (Managed)",
-      "keepProfileChanges": true,
-      "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
-      "url": "http://localhost:4202/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome (Standalone)",
-      "url": "http://localhost:4200",
-      "webRoot": "${workspaceFolder}",
-      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
-      "runtimeArgs": ["--allow-insecure-localhost"]
-    },
-    {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome (Central)",
-      "url": "http://localhost:4201",
-      "webRoot": "${workspaceFolder}",
-      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
-      "runtimeArgs": ["--allow-insecure-localhost"]
-    },
-    {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome (Managed)",
-      "url": "http://localhost:4202",
-      "webRoot": "${workspaceFolder}",
-      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
-      "runtimeArgs": ["--allow-insecure-localhost"]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Central Chrome & Managed Firefox",
-      "configurations": ["Chrome (Central)", "Firefox (Managed)"]
+      "preLaunchTask": "npm: test",
+      "url": "http://localhost:9876/debug.html"
     }
   ]
 }

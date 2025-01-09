@@ -7,10 +7,10 @@ import { environment } from 'src/environments/environment';
 import { NavAreasService } from './modules/core/services/nav-areas.service';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  standalone: false
 })
 export class AppComponent implements OnInit {
   subscription: Subscription;
@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
   constructor(
     private readonly router: Router,
     private readonly areas: NavAreasService,
-    @Inject(DOCUMENT) document: Document,
+    @Inject(DOCUMENT) document: Document
   ) {
     console.log('----------------------------------------');
     console.log('BDeploy started...');
@@ -45,13 +45,13 @@ export class AppComponent implements OnInit {
     this.subscription.add(
       this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadStart)).subscribe(() => {
         this.loadCount++;
-      }),
+      })
     );
 
     this.subscription.add(
       this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadEnd)).subscribe(() => {
         this.decreaseLoadCount();
-      }),
+      })
     );
   }
 

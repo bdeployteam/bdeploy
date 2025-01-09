@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, combineLatest, debounceTime, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, Observable, of, Subscription } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -10,10 +10,10 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
-    selector: 'app-edit-ldap-server',
-    templateUrl: './edit-ldap-server.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'app-edit-ldap-server',
+  templateUrl: './edit-ldap-server.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly settings = inject(SettingsService);
@@ -37,7 +37,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
           return;
         }
         this.tempServer = cloneDeep(this.initialServer);
-      }),
+      })
     );
   }
 
@@ -48,7 +48,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.isDirty$.next(this.isDirty());
-      }),
+      })
     );
   }
 
@@ -60,6 +60,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.tempServer && this.initialServer) {
       return isDirty(this.tempServer, this.initialServer);
     }
+    return false;
   }
 
   public canSave(): boolean {

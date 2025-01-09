@@ -4,7 +4,7 @@ import {
   ReportDescriptor,
   ReportParameterDescriptor,
   ReportParameterInputType,
-  ReportRequestDto,
+  ReportRequestDto
 } from 'src/app/models/gen.dtos';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 
@@ -14,23 +14,19 @@ export interface ReportInputChange {
 }
 
 @Component({
-    selector: 'app-report-form-input',
-    templateUrl: './report-form-input.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'app-report-form-input',
+  templateUrl: './report-form-input.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
   protected readonly reports = inject(ReportsService);
   protected readonly ReportParameterInputType = ReportParameterInputType;
 
-  @Input()
-  protected param: ReportParameterDescriptor;
-  @Input()
-  protected report: ReportDescriptor;
-  @Input()
-  protected request: ReportRequestDto;
-  @Input()
-  changed$: BehaviorSubject<ReportInputChange>;
+  @Input() param: ReportParameterDescriptor;
+  @Input() report: ReportDescriptor;
+  @Input() request: ReportRequestDto;
+  @Input() changed$: BehaviorSubject<ReportInputChange>;
 
   protected values: string[] = [];
   protected labels: string[] = [];
@@ -47,7 +43,7 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
         .subscribe((ps) => {
           this.values = ps.map((p) => p.value);
           this.labels = ps.map((p) => p.label);
-        }),
+        })
     );
     if (!this.param.dependsOn) {
       return;
@@ -69,14 +65,14 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
             this.reports.getParameterOptions(
               this.param.parameterOptionsPath,
               this.param.dependsOn,
-              this.request.params,
-            ),
-          ),
+              this.request.params
+            )
+          )
         )
         .subscribe((ps) => {
           this.values = ps.map((p) => p.value);
           this.labels = ps.map((p) => p.label);
-        }),
+        })
     );
   }
 

@@ -1,6 +1,0 @@
-# don't update token when the build writes the file
-token.json
-*.zip
-managed-ident.txt
-data.txt
-system-template.yaml

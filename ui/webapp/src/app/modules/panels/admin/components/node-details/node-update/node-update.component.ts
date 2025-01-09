@@ -1,7 +1,9 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest, finalize, map } from 'rxjs';
+import { Component, inject, OnDestroy, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, finalize, map, Subscription } from 'rxjs';
 import { Actions, ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -11,9 +13,9 @@ import { MinionRecord, NodesAdminService } from 'src/app/modules/primary/admin/s
 import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Component({
-    selector: 'app-node-update',
-    templateUrl: './node-update.component.html',
-    standalone: false
+  selector: 'app-node-update',
+  templateUrl: './node-update.component.html',
+  standalone: false
 })
 export class NodeUpdateComponent implements OnDestroy {
   private readonly cfg = inject(ConfigService);
@@ -37,7 +39,7 @@ export class NodeUpdateComponent implements OnDestroy {
   constructor(areas: NavAreasService) {
     this.subscription = combineLatest([areas.panelRoute$, this.nodesAdmin.nodes$, this.software.software$]).subscribe(
       ([r, n, s]) => {
-        if (!n || !s || !r?.params?.node) {
+        if (!n || !s || !r?.params?.['node']) {
           this.nodeName$.next(null);
           this.node = null;
           return;
@@ -45,15 +47,15 @@ export class NodeUpdateComponent implements OnDestroy {
 
         const currentVersion = convert2String(this.cfg.config.version);
 
-        this.nodeName$.next(r.params.node);
+        this.nodeName$.next(r.params['node']);
         this.node = n.find((minionRecord) => minionRecord.name === this.nodeName$.value);
         this.version = s.find(
-          (v) => this.hasSystemFor(this.node.status.config.os, v.system) && v.version === currentVersion,
+          (v) => this.hasSystemFor(this.node.status.config.os, v.system) && v.version === currentVersion
         );
         this.isCurrent =
           !(this.node.status.config?.version && this.version?.version) ||
           convert2String(this.node.status.config.version) === this.version.version;
-      },
+      }
     );
 
     // trigger loading software...

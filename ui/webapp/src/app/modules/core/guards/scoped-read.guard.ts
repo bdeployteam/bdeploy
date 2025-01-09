@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -19,10 +19,11 @@ export function findParam(name: string, route: ActivatedRouteSnapshot): string {
       return tParam;
     }
   }
+  return null;
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ScopedReadGuard {
   private readonly authService = inject(AuthenticationService);
@@ -46,14 +47,14 @@ export class ScopedReadGuard {
         }
         this.snackbar.open(
           `Unfortunately, ${route.url.join(
-            '/',
+            '/'
           )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
           'DISMISS',
-          { panelClass: 'error-snackbar' },
+          { panelClass: 'error-snackbar' }
         );
         this.router.navigate(['/groups/browser']);
         return false;
-      }),
+      })
     );
   }
 }

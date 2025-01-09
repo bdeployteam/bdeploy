@@ -21,21 +21,37 @@ import { ManualJobsComponent } from './components/manual-jobs/manual-jobs.compon
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { NodesComponent } from './components/nodes/nodes.component';
-import { AttributeDeleteActionComponent } from './components/settings-general/attributes-tab/attribute-delete-action/attribute-delete-action.component';
-import { AttributeEditActionComponent } from './components/settings-general/attributes-tab/attribute-edit-action/attribute-edit-action.component';
+import {
+  AttributeDeleteActionComponent
+} from './components/settings-general/attributes-tab/attribute-delete-action/attribute-delete-action.component';
+import {
+  AttributeEditActionComponent
+} from './components/settings-general/attributes-tab/attribute-edit-action/attribute-edit-action.component';
 import { AttributesTabComponent } from './components/settings-general/attributes-tab/attributes-tab.component';
 import { Auth0TabComponent } from './components/settings-general/auth0-tab/auth0-tab.component';
 import { GeneralTabComponent } from './components/settings-general/general-tab/general-tab.component';
-import { LdapCheckActionComponent } from './components/settings-general/ldap-tab/ldap-check-action/ldap-check-action.component';
-import { LdapEditActionComponent } from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
-import { LdapImportActionComponent } from './components/settings-general/ldap-tab/ldap-import-action/ldap-import-action.component';
+import {
+  LdapCheckActionComponent
+} from './components/settings-general/ldap-tab/ldap-check-action/ldap-check-action.component';
+import {
+  LdapEditActionComponent
+} from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
+import {
+  LdapImportActionComponent
+} from './components/settings-general/ldap-tab/ldap-import-action/ldap-import-action.component';
 import { LdapTabComponent } from './components/settings-general/ldap-tab/ldap-tab.component';
-import { MailReceivingTabComponent } from './components/settings-general/mail-receiving-tab/mail-receiving-tab.component';
+import {
+  MailReceivingTabComponent
+} from './components/settings-general/mail-receiving-tab/mail-receiving-tab.component';
 import { MailSendingTabComponent } from './components/settings-general/mail-sending-tab/mail-sending-tab.component';
 import { OidcTabComponent } from './components/settings-general/oidc-tab/oidc-tab.component';
 import { OktaTabComponent } from './components/settings-general/okta-tab/okta-tab.component';
-import { PluginDeleteActionComponent } from './components/settings-general/plugins-tab/plugin-delete-action/plugin-delete-action.component';
-import { PluginLoadActionComponent } from './components/settings-general/plugins-tab/plugin-load-action/plugin-load-action.component';
+import {
+  PluginDeleteActionComponent
+} from './components/settings-general/plugins-tab/plugin-delete-action/plugin-delete-action.component';
+import {
+  PluginLoadActionComponent
+} from './components/settings-general/plugins-tab/plugin-load-action/plugin-load-action.component';
 import { PluginsTabComponent } from './components/settings-general/plugins-tab/plugins-tab.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
@@ -71,7 +87,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     OktaTabComponent,
     MailSendingTabComponent,
     MailReceivingTabComponent,
-    PoolingStatusCellComponent,
+    PoolingStatusCellComponent
   ],
   imports: [
     CommonModule,
@@ -91,7 +107,8 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     MatListModule,
 
     NgTerminalModule,
-    MonacoEditorModule.forRoot(),
-  ],
+    MonacoEditorModule.forRoot()
+  ]
 })
-export class AdminModule {}
+export class AdminModule {
+}

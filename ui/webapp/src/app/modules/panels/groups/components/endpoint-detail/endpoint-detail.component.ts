@@ -1,16 +1,16 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BehaviorSubject,
-  Observable,
-  Subscription,
   catchError,
   combineLatest,
   first,
   map,
+  Observable,
   of,
   skipWhile,
-  switchMap,
+  Subscription,
+  switchMap
 } from 'rxjs';
 import { InstanceGroupConfiguration, LinkedValueConfiguration } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -22,9 +22,9 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-    selector: 'app-endpoint-detail',
-    templateUrl: './endpoint-detail.component.html',
-    standalone: false
+  selector: 'app-endpoint-detail',
+  templateUrl: './endpoint-detail.component.html',
+  standalone: false
 })
 export class EndpointDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
@@ -53,7 +53,7 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
       }
 
       const app = apps.find(
-        (a) => a.endpoint?.id === route.params.app && a.endpoint.endpoint.id === route.params.endpoint,
+        (a) => a.endpoint?.id === route.params['app'] && a.endpoint.endpoint.id === route.params['endpoint']
       );
 
       if (!app) {
@@ -65,17 +65,17 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
     });
 
     this.subscription.add(
-      this.app$.pipe(switchMap((app) => this.getDirectUiUri(app))).subscribe((url) => (this.directUri = url)),
+      this.app$.pipe(switchMap((app) => this.getDirectUiUri(app))).subscribe((url) => (this.directUri = url))
     );
 
     this.subscription.add(
       combineLatest([this.app$, this.groups.current$])
         .pipe(switchMap(([app, group]) => this.getRawUrl(app, group)))
-        .subscribe((url) => (this.rawUrl = url)),
+        .subscribe((url) => (this.rawUrl = url))
     );
 
     this.subscription.add(
-      this.app$.pipe(switchMap((app) => this.isEnabled$(app))).subscribe((enabled) => (this.enabled = enabled)),
+      this.app$.pipe(switchMap((app) => this.isEnabled$(app))).subscribe((enabled) => (this.enabled = enabled))
     );
   }
 
@@ -99,9 +99,9 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
         (cp) =>
           `${this.cfg.config.api}/master/upx/${group.name}/${app.instanceId}/${app.endpoint.id}/${
             app.endpoint.endpoint.id
-          }${this.cpWithSlash(cp)}`,
+          }${this.cpWithSlash(cp)}`
       ),
-      catchError(() => of(null)),
+      catchError(() => of(null))
     );
   }
 
@@ -112,7 +112,7 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
     const expr = app.endpoint.endpoint.enabled;
     return this.renderPreview$(expr, app).pipe(
       map((val) => !!val && val !== 'false' && !val.match(/{{([^}]+)}}/g)),
-      catchError(() => of(false)),
+      catchError(() => of(false))
     );
   }
 
@@ -127,10 +127,10 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) => instances?.find((i) => i.instanceConfiguration.id === app.instanceId)),
-      skipWhile((instance) => !instance?.activeVersion),
+      skipWhile((instance) => !instance?.activeVersion)
     );
     const activeNodeCfgs$ = instance$.pipe(
-      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag)),
+      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag))
     );
     return combineLatest([instance$, this.systems.systems$, activeNodeCfgs$]).pipe(
       skipWhile(([i, s, n]) => !i || (i?.instanceConfiguration?.system && !s?.length) || !n?.nodeConfigDtos?.length),
@@ -147,11 +147,11 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
           process,
           {
             config: instance?.instanceConfiguration,
-            nodeDtos: nodes?.nodeConfigDtos,
+            nodeDtos: nodes?.nodeConfigDtos
           },
-          system?.config,
+          system?.config
         );
-      }),
+      })
     );
   }
 
@@ -169,11 +169,11 @@ export class EndpointDetailComponent implements OnInit, OnDestroy {
             app.endpoint.id,
             app.endpoint.endpoint.id,
             {
-              returnPanel: returnUrl,
-            },
-          ],
-        },
-      },
+              returnPanel: returnUrl
+            }
+          ]
+        }
+      }
     ];
   }
 

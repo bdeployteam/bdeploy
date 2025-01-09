@@ -2,17 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnInit,
   Output,
   TemplateRef,
-  ViewChild,
-  inject,
+  ViewChild
 } from '@angular/core';
 import { ControlContainer, ControlValueAccessor, NgControl, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Subject, debounceTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, Subject } from 'rxjs';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -21,7 +21,7 @@ import {
   LinkedValueConfiguration,
   ManifestKey,
   SystemConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
 import { getRenderPreview } from '../../utils/linked-values.utils';
 import { bdValidationMessage } from '../../validators/messages';
@@ -36,7 +36,7 @@ import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
   styleUrls: ['./bd-value-editor.component.css'],
   viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  standalone: false
 })
 export class BdValueEditorComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
@@ -59,9 +59,11 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
       this.internalValue.value = 'false';
     }
   }
+
   get type(): VariableType {
     return this._type;
   }
+
   @Input() customEditor: string;
   @Input() product: ManifestKey;
   @Input() group: string;
@@ -89,6 +91,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   protected get value(): LinkedValueConfiguration {
     return this.internalValue;
   }
+
   protected set value(v: LinkedValueConfiguration) {
     if (v !== this.internalValue) {
       this.writeValue(v);
@@ -98,7 +101,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
   protected internalValue: LinkedValueConfiguration = {
     value: null,
-    linkExpression: null,
+    linkExpression: null
   };
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
@@ -227,13 +230,14 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
       case VariableType.PASSWORD:
         return 'password';
     }
+    return undefined;
   }
 
   protected doRevert() {
     if (!this.defaultValue) {
       this.writeValue({
         value: this.isBoolean() ? 'false' : '',
-        linkExpression: null,
+        linkExpression: null
       });
     } else {
       this.writeValue(cloneDeep(this.defaultValue));
@@ -286,7 +290,8 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     this.fireChange(this.internalValue);
   }
 
-  /* template */ doChangeBooleanValue() {
+  /* template */
+  doChangeBooleanValue() {
     this.doChangeValue(this.booleanValue ? 'true' : 'false');
   }
 
