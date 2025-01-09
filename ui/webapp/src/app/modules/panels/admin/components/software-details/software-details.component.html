@@ -9,15 +9,27 @@
         <strong>Version:</strong>
         <span>{{ (software$ | async)?.version }}</span>
         <strong>System Supported OS:</strong>
-        <span *ngIf="systemOs$ | async as os">
-          <ng-container *ngIf="!!os?.length">{{ os.join(', ') }}</ng-container>
-          <ng-container *ngIf="!os?.length">None</ng-container>
-        </span>
+        @if (systemOs$ | async; as os) {
+          <span>
+            @if (!!os?.length) {
+              {{ os.join(', ') }}
+            }
+            @if (!os?.length) {
+              None
+            }
+          </span>
+        }
         <strong>Launcher Supported OS:</strong>
-        <span *ngIf="launcherOs$ | async as os">
-          <ng-container *ngIf="!!os?.length">{{ os.join(', ') }}</ng-container>
-          <ng-container *ngIf="!os?.length">None</ng-container>
-        </span>
+        @if (launcherOs$ | async; as os) {
+          <span>
+            @if (!!os?.length) {
+              {{ os.join(', ') }}
+            }
+            @if (!os?.length) {
+              None
+            }
+          </span>
+        }
       </div>
 
       <app-bd-button

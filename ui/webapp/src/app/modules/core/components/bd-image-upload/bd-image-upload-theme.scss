@@ -1,9 +1,10 @@
+@use "sass:map";
 @use "@angular/material" as mat;
 
 @mixin bd-image-upload-theme($theme) {
-  $dark: map-get($theme, "is-dark");
+  $dark: map.get($theme, "is-dark");
 
-  $palette: map-get(mat.m2-get-color-config($theme), "main-toolbar");
+  $palette: map.get(mat.m2-get-color-config($theme), "main-toolbar");
 
   .bd-image-upload-title-container {
     background-color: mat.m2-get-color-from-palette($palette);

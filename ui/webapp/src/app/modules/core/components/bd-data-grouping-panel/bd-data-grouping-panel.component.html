@@ -12,39 +12,50 @@
       </div>
       <mat-icon class="grouping-remove-icon" matTooltip="Remove" matTooltipPosition="above" (click)="removeGrouping()"
         >close</mat-icon
-      >
-    </div>
-    <mat-form-field class="grouping-select" appearance="outline">
-      <mat-label>{{ selectGroupingLabel }}</mat-label>
-      <mat-select name="grouping-select" [value]="grouping?.definition" (valueChange)="setGrouping($event)">
-        <mat-option>--</mat-option>
-        <mat-option *ngIf="grouping?.definition" [value]="grouping.definition"
-          >{{ grouping.definition.name }}</mat-option
         >
-        <mat-option *ngFor="let def of definitions" [value]="def">{{ def.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <div *ngIf="!grouping?.definition" class="bd-hint-text pb-2.5">
-      Choose an available grouping<br />
-      from the dropdown.
-    </div>
+      </div>
+      <mat-form-field class="grouping-select" appearance="outline">
+        <mat-label>{{ selectGroupingLabel }}</mat-label>
+        <mat-select name="grouping-select" [value]="grouping?.definition" (valueChange)="setGrouping($event)">
+          <mat-option>--</mat-option>
+          @if (grouping?.definition) {
+            <mat-option [value]="grouping.definition"
+              >{{ grouping.definition.name }}</mat-option
+              >
+            }
+            @for (def of definitions; track def) {
+              <mat-option [value]="def">{{ def.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (!grouping?.definition) {
+          <div class="bd-hint-text pb-2.5">
+            Choose an available grouping<br />
+            from the dropdown.
+          </div>
+        }
 
-    <div *ngIf="!!groupingValues?.length" class="flex">
-      <mat-form-field class="grouping-panel-filter flex-auto" appearance="outline">
-        <mat-label>{{ filterPlaceholder }}</mat-label>
-        <input matInput [(ngModel)]="filter" />
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-    </div>
-    <div *ngIf="!!groupingValues?.length" class="grouping-values-container flex flex-col gap-1 pl-2.5 pb-2.5">
-      <mat-checkbox
-        *ngFor="let group of filteredGroupingValues"
-        [checked]="!grouping?.selected?.length || grouping.selected.includes(group)"
-        [disabled]="grouping?.selected?.length === 1 && grouping.selected.includes(group)"
-        (change)="groupCheckChanged(group, $event)"
-        >{{ !!group ? group : noGroup }}</mat-checkbox
-      >
-    </div>
-  </div>
-  <mat-divider [vertical]="true"></mat-divider>
-</div>
+        @if (!!groupingValues?.length) {
+          <div class="flex">
+            <mat-form-field class="grouping-panel-filter flex-auto" appearance="outline">
+              <mat-label>{{ filterPlaceholder }}</mat-label>
+              <input matInput [(ngModel)]="filter" />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+        }
+        @if (!!groupingValues?.length) {
+          <div class="grouping-values-container flex flex-col gap-1 pl-2.5 pb-2.5">
+            @for (group of filteredGroupingValues; track group) {
+              <mat-checkbox
+                [checked]="!grouping?.selected?.length || grouping.selected.includes(group)"
+                [disabled]="grouping?.selected?.length === 1 && grouping.selected.includes(group)"
+                (change)="groupCheckChanged(group, $event)"
+                >{{ !!group ? group : noGroup }}</mat-checkbox
+                >
+              }
+            </div>
+          }
+        </div>
+        <mat-divider [vertical]="true"></mat-divider>
+      </div>

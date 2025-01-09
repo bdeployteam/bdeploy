@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -9,7 +9,7 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class SystemsEditService {
   private readonly cfg = inject(ConfigService);
@@ -23,11 +23,11 @@ export class SystemsEditService {
 
   constructor() {
     combineLatest([this.systems.systems$, this.nav.panelRoute$]).subscribe(([systems, panelRoute]) => {
-      if (!systems?.length || !panelRoute?.params?.skey) {
+      if (!systems?.length || !panelRoute?.params?.['skey']) {
         this.current$.next(null);
         return;
       }
-      this.current$.next(systems.find((s) => s.key.name === panelRoute.params.skey));
+      this.current$.next(systems.find((s) => s.key.name === panelRoute.params['skey']));
     });
   }
 

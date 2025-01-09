@@ -1,33 +1,50 @@
-<div class="local-state-panel flex gap-5" *ngIf="!!items?.length">
-  <ng-container *ngFor="let item of itemsToDisplay">
-    <div
-      class="flex gap-1"
-      [matTooltip]="item.tooltip ? (item.tooltip | async) : (item.name | async)"
-      matTooltipClass="tooltip-with-newline"
-      [matTooltipShowDelay]="300"
-      matTooltipPosition="above"
-      [class.cursor-pointer]="item.click"
-      (click)="item.click ? item.click() : null"
-    >
-      <ng-container *ngIf="item.type | async as type">
-        <mat-icon class="bd-warning-text" *ngIf="type === 'warning'">warning</mat-icon>
-        <mat-icon class="local-ok" *ngIf="type === 'ok'">done</mat-icon>
-        <mat-icon class="local-info" *ngIf="type === 'info'">info</mat-icon>
-        <mat-icon class="local-hint" *ngIf="type === 'product'">apps</mat-icon>
-        <mat-icon class="local-hint" *ngIf="type === 'update'">system_update</mat-icon>
-        <mat-icon class="local-hint" *ngIf="type === 'unknown'">help</mat-icon>
-      </ng-container>
-      <div *ngIf="(narrowWhen$ | async) === false">{{ item.name | async }}</div>
-    </div>
-  </ng-container>
-  <div class="flex-auto"></div>
-  <div *ngIf="lastRefreshAt$" class="bd-secondary-text flex gap-1 justify-start items-center">
-    <div>Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}</div>
-    <ng-template #refreshButton>
-      <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)">refresh</app-bd-micro-icon-button>
-    </ng-template>
-    <ng-container *ngIf="refreshingWhen$ | async; else refreshButton">
-      <mat-spinner [diameter]="16"></mat-spinner>
-    </ng-container>
+@if (!!items?.length) {
+  <div class="local-state-panel flex gap-5">
+    @for (item of itemsToDisplay; track item) {
+      <div
+        class="flex gap-1"
+        [matTooltip]="item.tooltip ? (item.tooltip | async) : (item.name | async)"
+        matTooltipClass="tooltip-with-newline"
+        [matTooltipShowDelay]="300"
+        matTooltipPosition="above"
+        [class.cursor-pointer]="item.click"
+        (click)="item.click ? item.click() : null"
+        >
+        @if (item.type | async; as type) {
+          @if (type === 'warning') {
+            <mat-icon class="bd-warning-text">warning</mat-icon>
+          }
+          @if (type === 'ok') {
+            <mat-icon class="local-ok">done</mat-icon>
+          }
+          @if (type === 'info') {
+            <mat-icon class="local-info">info</mat-icon>
+          }
+          @if (type === 'product') {
+            <mat-icon class="local-hint">apps</mat-icon>
+          }
+          @if (type === 'update') {
+            <mat-icon class="local-hint">system_update</mat-icon>
+          }
+          @if (type === 'unknown') {
+            <mat-icon class="local-hint">help</mat-icon>
+          }
+        }
+        @if ((narrowWhen$ | async) === false) {
+          <div>{{ item.name | async }}</div>
+        }
+      </div>
+    }
+    <div class="flex-auto"></div>
+    @if (lastRefreshAt$) {
+      <div class="bd-secondary-text flex gap-1 justify-start items-center">
+        <div>Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}</div>
+        @if (refreshingWhen$ | async) {
+          <mat-spinner [diameter]="16"></mat-spinner>
+        } @else {
+          <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)">refresh</app-bd-micro-icon-button>
+        }
+      </div>
+    }
   </div>
-</div>
+}

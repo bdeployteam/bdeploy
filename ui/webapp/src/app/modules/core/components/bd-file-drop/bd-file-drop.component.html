@@ -4,7 +4,7 @@
   appFileDrop
   (filesHovered)="active = $event"
   (filesDropped)="onFilesDropped($event)"
->
+  >
   <div class="flex justify-center items-center">
     <mat-icon class="local-drop-icon">cloud_upload</mat-icon>
     <div class="local-drop-text flex">
@@ -15,19 +15,25 @@
           (click)="doSelectFiles()"
           class="local-drop-browse"
           [ngClass]="disabled ? 'local-drop-browse-disabled' : []"
-        >
+          >
           browse.
         </button>
       </div>
       <input type="file" #file style="display: none" (change)="onFilesAdded()" [accept]="types" multiple />
     </div>
   </div>
-  <div *ngIf="validationError$ | async" class="local-error flex justify-center items-center">
-    <mat-icon class="local-drop-icon">report</mat-icon>
-    <div>Unsupported File Type.</div>
-    <div *ngIf="!!types" class="flex">
-      &nbsp;Supported:
-      <div *ngFor="let type of types">&nbsp;<strong>{{ type }}</strong></div>
+  @if (validationError$ | async) {
+    <div class="local-error flex justify-center items-center">
+      <mat-icon class="local-drop-icon">report</mat-icon>
+      <div>Unsupported File Type.</div>
+      @if (!!types) {
+        <div class="flex">
+          &nbsp;Supported:
+          @for (type of types; track type) {
+            <div>&nbsp;<strong>{{ type }}</strong></div>
+          }
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

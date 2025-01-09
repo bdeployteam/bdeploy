@@ -10,6 +10,8 @@ import {
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { MatRipple } from '@angular/material/core';
 
 @Component({
     selector: 'app-bd-form-toggle',
@@ -17,7 +19,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     styleUrls: ['./bd-form-toggle.component.css'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgClass, MatRipple, NgTemplateOutlet, MatCheckbox, MatSlideToggle]
 })
 export class BdFormToggleComponent implements ControlValueAccessor {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

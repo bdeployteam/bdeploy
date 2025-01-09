@@ -1,6 +1,6 @@
 <div class="text-xs truncate tracking-tighter" [ngClass]="showCopyButton ? ['flex','items-center'] : []">
-  <code [matTooltip]="id" matTooltipShowDelay="500" matTooltipPosition="below">{{id}}</code>
-  <app-bd-micro-icon-button *ngIf="showCopyButton" [size]="16" (click)="doCopy()"
-    >content_copy</app-bd-micro-icon-button
-  >
+  <code [matTooltip]="id" matTooltipShowDelay="500" matTooltipPosition="below">{{ id }}</code>
+  @if (showCopyButton) {
+    <app-bd-micro-icon-button [size]="16" (click)="doCopy()">content_copy</app-bd-micro-icon-button>
+  }
 </div>

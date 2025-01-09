@@ -6,6 +6,15 @@ import { BdDataColumn } from 'src/app/models/data';
 import { ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { PermissionColumnsService } from 'src/app/modules/core/services/permission-columns.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { UserAvatarComponent } from '../../../../core/components/user-avatar/user-avatar.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-button/bd-expand-button.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 
 interface UserGroupPermission extends ScopedPermission {
   userGroup: string;
@@ -20,7 +29,7 @@ const colUserGroupName: BdDataColumn<UserGroupPermission> = {
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, UserAvatarComponent, MatTooltip, BdExpandButtonComponent, BdDataTableComponent, BdPanelButtonComponent, BdButtonComponent]
 })
 export class SettingsComponent implements OnInit {
   private readonly router = inject(Router);

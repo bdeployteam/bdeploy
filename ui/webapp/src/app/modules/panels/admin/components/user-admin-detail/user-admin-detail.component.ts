@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
@@ -9,11 +9,20 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { PermissionColumnsService } from 'src/app/modules/core/services/permission-columns.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { UserAvatarComponent } from '../../../../core/components/user-avatar/user-avatar.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-user-admin-detail',
     templateUrl: './user-admin-detail.component.html',
     styleUrls: ['./user-admin-detail.component.css'],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, UserAvatarComponent, MatTooltip, BdDataTableComponent, BdButtonComponent, BdPanelButtonComponent, AsyncPipe]
 })
 export class UserAdminDetailComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

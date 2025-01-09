@@ -9,6 +9,7 @@ import { VARIABLE_REGEX_VALIDATION } from './variable-regex-validator.directive'
 export type BdValidationMessageExtractor = (label: string, errors: ValidationErrors) => string;
 
 const msgExtractors: BdValidationMessageExtractor[] = [];
+
 export function bdValidationRegisterMessageExtractor(extractor: BdValidationMessageExtractor) {
   msgExtractors.push(extractor);
 }
@@ -76,4 +77,6 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
       return r;
     }
   }
+
+  return 'Unknown validation error';
 }

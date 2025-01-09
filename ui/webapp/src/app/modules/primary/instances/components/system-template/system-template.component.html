@@ -18,11 +18,12 @@
         [selectedIndex]="(cfg.isCentral$ | async) ? 0 : 1"
         labelPosition="bottom"
         animationDuration="200"
-      >
+        >
         <mat-step label="Target Server" [completed]="serverSelectionCompleted" [editable]="!serverSelectionCompleted">
           <div [attr.data-cy]="'step-server'" class="flex flex-col gap-2.5 p-2.5">
-            <div *ngIf="!isCentral; else selectManaged">Choosing a target server is not required for your setup.</div>
-            <ng-template #selectManaged>
+            @if (!isCentral) {
+              <div>Choosing a target server is not required for your setup.</div>
+            } @else {
               <div>Choose the target server. The system and all instances will be created on the selected server.</div>
               <app-bd-form-select
                 [values]="serverDtos"
@@ -32,7 +33,7 @@
                 [(ngModel)]="selectedServer"
                 (ngModelChange)="serverSelectionCompleted = !!selectedServer"
               ></app-bd-form-select>
-            </ng-template>
+            }
             <div class="flex">
               <app-bd-button
                 color="primary"
@@ -46,20 +47,22 @@
         </mat-step>
         <mat-step label="System Template" [completed]="!!this.template">
           <div [attr.data-cy]="'step-template-upload'" class="flex flex-col gap-2.5 p-2.5">
-            <app-bd-file-drop
-              *ngIf="!file"
-              [types]="['.yaml']"
-              hintText="Drop System Template"
-              (fileAdded)="readSystemTemplate($event)"
-            ></app-bd-file-drop>
-            <app-bd-file-upload
-              *ngIf="file"
-              [url]="systems.getTemplateUploadUrl()"
-              [file]="file"
-              [resultEvaluator]="onUploadResult"
-              [parameters]="[{id: 'server', name: 'server', type: 'string', value: selectedServer?.hostName}]"
-              (dismiss)="onDismiss()"
-            ></app-bd-file-upload>
+            @if (!file) {
+              <app-bd-file-drop
+                [types]="['.yaml']"
+                hintText="Drop System Template"
+                (fileAdded)="readSystemTemplate($event)"
+              ></app-bd-file-drop>
+            }
+            @if (file) {
+              <app-bd-file-upload
+                [url]="systems.getTemplateUploadUrl()"
+                [file]="file"
+                [resultEvaluator]="onUploadResult"
+                [parameters]="[{id: 'server', name: 'server', type: 'string', value: selectedServer?.hostName}]"
+                (dismiss)="onDismiss()"
+              ></app-bd-file-upload>
+            }
             <div class="flex">
               <app-bd-button
                 color="primary"
@@ -73,22 +76,26 @@
         </mat-step>
         <mat-step label="Missing Products" [completed]="importProductsState.completed">
           <div [attr.data-cy]="'step-import-missing-products'" class="flex flex-col gap-2.5 p-2.5">
-            <app-bd-notification-card
-              *ngIf="importProductsState.error"
-              icon="warning"
-              type="warning"
-              header="Failed to import products"
-            >
-              <div class="text-justify">{{ importProductsState.error }}</div>
-            </app-bd-notification-card>
+            @if (importProductsState.error) {
+              <app-bd-notification-card
+                icon="warning"
+                type="warning"
+                header="Failed to import products"
+                >
+                <div class="text-justify">{{ importProductsState.error }}</div>
+              </app-bd-notification-card>
+            }
             <div>{{ importProductsState.message }}</div>
-            <app-bd-data-table
-              *ngIf="template?.productsToImport"
-              [records]="template.productsToImport"
-              [columns]="importProductCols"
-              [sortData]="null"
-            ></app-bd-data-table>
-            <mat-spinner *ngIf="importProductsState.loading" [diameter]="24"></mat-spinner>
+            @if (template?.productsToImport) {
+              <app-bd-data-table
+                [records]="template.productsToImport"
+                [columns]="importProductCols"
+                [sortData]="null"
+              ></app-bd-data-table>
+            }
+            @if (importProductsState.loading) {
+              <mat-spinner [diameter]="24"></mat-spinner>
+            }
             <div class="flex">
               <app-bd-button
                 color="primary"
@@ -134,16 +141,16 @@
         </mat-step>
         <mat-step label="System Template Variables" [completed]="isAllSystemVariablesSet">
           <div [attr.data-cy]="'step-system-variables'" class="flex flex-col gap-2.5 p-2.5">
-            <ng-container *ngFor="let v of requiredSystemVariables">
+            @for (v of requiredSystemVariables; track v) {
               <app-bd-form-template-variable
                 [templateVariable]="v"
                 [(ngModel)]="systemVariables[v.id]"
                 (ngModelChange)="validateHasAllSystemVariables()"
               ></app-bd-form-template-variable>
-            </ng-container>
-            <ng-container *ngIf="!requiredSystemVariables.length">
+            }
+            @if (!requiredSystemVariables.length) {
               <div class="bd-description-text pb-5">No system template variables.</div>
-            </ng-container>
+            }
             <div class="flex">
               <app-bd-button
                 color="primary"
@@ -158,55 +165,57 @@
         <mat-step label="Instance Templates" [completed]="isAllTemplateGroupsSelected && isAllVariablesSet">
           <div [attr.data-cy]="'step-instance-templates'" class="flex flex-col gap-2.5 p-2.5">
             <mat-tab-group #tabGroup animationDuration="0ms">
-              <mat-tab *ngFor="let tpl of templates">
-                <ng-template matTabLabel>
-                  <div
-                    [class.local-required-label]="tpl.isApplyInstance && (!tpl.isAnyGroupSelected || !tpl.isAllVariablesSet)"
-                  >
-                    {{ tpl.expandedName }}
+              @for (tpl of templates; track tpl) {
+                <mat-tab>
+                  <ng-template matTabLabel>
+                    <div
+                      [class.local-required-label]="tpl.isApplyInstance && (!tpl.isAnyGroupSelected || !tpl.isAllVariablesSet)"
+                      >
+                      {{ tpl.expandedName }}
+                    </div>
+                  </ng-template>
+                  <div [attr.data-cy]="'tab-' + tpl.expandedName" class="flex gap-1">
+                    <div class="flex-auto flex flex-col gap-2.5 p-2.5">
+                      <app-bd-form-toggle
+                        label="Apply this instance"
+                        [(ngModel)]="tpl.isApplyInstance"
+                        (ngModelChange)="toggleSkipInstance($event, tpl)"
+                      ></app-bd-form-toggle>
+                      @if (tpl.isApplyInstance) {
+                        @for (group of tpl.tpl.groups; track group) {
+                          <app-bd-form-select
+                            [label]="'Group \'' + group.name + '\''"
+                            [matTooltip]="group.description"
+                            matTooltipPosition="above"
+                            [attr.name]="group.name"
+                            [values]="tpl.nodeNames[group.name]"
+                            [labels]="tpl.nodeLabels[group.name]"
+                            [(ngModel)]="tpl.groups[group.name]"
+                            (ngModelChange)="validateAnyGroupSelected(tpl)"
+                          ></app-bd-form-select>
+                        }
+                      }
+                    </div>
+                    <mat-divider [vertical]="true"></mat-divider>
+                    <div class="grow-2 flex flex-col gap-2.5 p-2.5">
+                      @if (tpl.isApplyInstance) {
+                        @for (v of tpl.requiredVariables; track v) {
+                          <app-bd-form-template-variable
+                            [templateVariable]="v"
+                            [(ngModel)]="tpl.variables[v.id]"
+                            (ngModelChange)="validateHasAllVariables(tpl)"
+                          ></app-bd-form-template-variable>
+                        }
+                        @if (!tpl.requiredVariables.length) {
+                          <div class="bd-description-text py-4">No template variables.</div>
+                        }
+                      } @else {
+                        <div class="bd-description-text py-4">This instance will not be applied.</div>
+                      }
+                    </div>
                   </div>
-                </ng-template>
-                <div [attr.data-cy]="'tab-' + tpl.expandedName" class="flex gap-1">
-                  <div class="flex-auto flex flex-col gap-2.5 p-2.5">
-                    <app-bd-form-toggle
-                      label="Apply this instance"
-                      [(ngModel)]="tpl.isApplyInstance"
-                      (ngModelChange)="toggleSkipInstance($event, tpl)"
-                    ></app-bd-form-toggle>
-                    <ng-container *ngIf="tpl.isApplyInstance">
-                      <app-bd-form-select
-                        *ngFor="let group of tpl.tpl.groups"
-                        [label]="'Group \'' + group.name + '\''"
-                        [matTooltip]="group.description"
-                        matTooltipPosition="above"
-                        [attr.name]="group.name"
-                        [values]="tpl.nodeNames[group.name]"
-                        [labels]="tpl.nodeLabels[group.name]"
-                        [(ngModel)]="tpl.groups[group.name]"
-                        (ngModelChange)="validateAnyGroupSelected(tpl)"
-                      ></app-bd-form-select>
-                    </ng-container>
-                  </div>
-                  <mat-divider [vertical]="true"></mat-divider>
-                  <div class="grow-[2] flex flex-col gap-2.5 p-2.5">
-                    <ng-container *ngIf="tpl.isApplyInstance; else: noApply">
-                      <ng-container *ngFor="let v of tpl.requiredVariables">
-                        <app-bd-form-template-variable
-                          [templateVariable]="v"
-                          [(ngModel)]="tpl.variables[v.id]"
-                          (ngModelChange)="validateHasAllVariables(tpl)"
-                        ></app-bd-form-template-variable>
-                      </ng-container>
-                      <ng-container *ngIf="!tpl.requiredVariables.length">
-                        <div class="bd-description-text py-4">No template variables.</div>
-                      </ng-container>
-                    </ng-container>
-                    <ng-template #noApply>
-                      <div class="bd-description-text py-4">This instance will not be applied.</div>
-                    </ng-template>
-                  </div>
-                </div>
-              </mat-tab>
+                </mat-tab>
+              }
             </mat-tab-group>
             <div class="flex">
               <app-bd-button
@@ -228,38 +237,44 @@
           </div>
         </mat-step>
         <mat-step label="Result">
-          <div [attr.data-cy]="'step-done'" class="flex flex-col gap-2.5 p-5" *ngIf="result">
-            <div *ngIf="resultIsSuccess">
-              <app-bd-notification-card
-                icon="check"
-                [type]="resultHasWarnings ? 'warning' : 'generic'"
-                [header]="'Instances have been created' + (resultHasWarnings ? ' (with warnings)' : '.')"
-                [dismissable]="false"
-              >
+          @if (result) {
+            <div [attr.data-cy]="'step-done'" class="flex flex-col gap-2.5 p-5">
+              @if (resultIsSuccess) {
                 <div>
-                  You may now head back to the
-                  <a [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]">Instance Browser</a>
-                  to start using the created instances, or inspect detailed results below.
+                  <app-bd-notification-card
+                    icon="check"
+                    [type]="resultHasWarnings ? 'warning' : 'generic'"
+                    [header]="'Instances have been created' + (resultHasWarnings ? ' (with warnings)' : '.')"
+                    [dismissable]="false"
+                    >
+                    <div>
+                      You may now head back to the
+                      <a [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]">Instance Browser</a>
+                      to start using the created instances, or inspect detailed results below.
+                    </div>
+                  </app-bd-notification-card>
                 </div>
-              </app-bd-notification-card>
+              }
+              @if (!resultIsSuccess) {
+                <div>
+                  <app-bd-notification-card type="error" header="Problems occured." [dismissable]="false">
+                    Applying was not fully successful. You can find details about the problem(s) encountered below. Note
+                    that some instance may still have been created successfully. Please make sure to create the remaining
+                    instances manually.
+                  </app-bd-notification-card>
+                </div>
+              }
+              <app-bd-data-table [records]="result.results" [columns]="resultCols" [sortData]="null"></app-bd-data-table>
+              <div class="flex">
+                <app-bd-button
+                  text="Finish"
+                  color="primary"
+                  [collapsed]="false"
+                  [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
+                ></app-bd-button>
+              </div>
             </div>
-            <div *ngIf="!resultIsSuccess">
-              <app-bd-notification-card type="error" header="Problems occured." [dismissable]="false">
-                Applying was not fully successful. You can find details about the problem(s) encountered below. Note
-                that some instance may still have been created successfully. Please make sure to create the remaining
-                instances manually.
-              </app-bd-notification-card>
-            </div>
-            <app-bd-data-table [records]="result.results" [columns]="resultCols" [sortData]="null"></app-bd-data-table>
-            <div class="flex">
-              <app-bd-button
-                text="Finish"
-                color="primary"
-                [collapsed]="false"
-                [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
-              ></app-bd-button>
-            </div>
-          </div>
+          }
         </mat-step>
       </mat-stepper>
     </div>

@@ -1,4 +1,4 @@
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import {
   Component,
   EventEmitter,
@@ -16,6 +16,16 @@ import { CustomDataGrouping } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
 import { ConfirmationService } from '../../services/confirmation.service';
+import { BdButtonPopupComponent } from '../bd-button-popup/bd-button-popup.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCard } from '@angular/material/card';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDataGroupingPanelComponent } from '../bd-data-grouping-panel/bd-data-grouping-panel.component';
+import { MatIcon } from '@angular/material/icon';
 
 enum PresetType {
   PERSONAL = 'PERSONAL',
@@ -27,7 +37,7 @@ enum PresetType {
     templateUrl: './bd-data-grouping.component.html',
     styleUrls: ['./bd-data-grouping.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [BdButtonPopupComponent, MatTooltip, MatCard, MatFormField, MatLabel, MatSelect, MatOption, BdButtonComponent, MatDivider, CdkDropList, BdDataGroupingPanelComponent, CdkDrag, MatIcon, CdkDragHandle]
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   private readonly snackBar = inject(MatSnackBar);

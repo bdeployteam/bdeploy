@@ -6,47 +6,51 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm">
-      <div class="flex flex-col gap-2.5" *ngIf="data && orig">
-        <strong>{{nodeName$ | async}}</strong>
-        <span
-          >You can either manually enter node information below, or drop a <code>node-ident</code> file which is created
-          during the initialization process on the physical node.</span
-        >
-        <span *ngIf="replace">
-          Note that <strong>replacing</strong> a node may take a while, since all software and configuration on the new
-          node will be restored.
-        </span>
-        <app-bd-file-drop
-          hintText="Drop node information here"
-          (drop)="onDrop($event)"
-          (dragover)="onOver($event)"
-          (fileAdded)="fileAdded($event)"
-          [disabled]="(mappedSave$ | async)"
-        ></app-bd-file-drop>
-        <app-bd-form-input
-          name="uri"
-          label="Node URI"
-          [(ngModel)]="data.uri"
-          [disabled]="(mappedSave$ | async)"
-          required
-        ></app-bd-form-input>
-        <app-bd-form-input
-          name="auth"
-          label="Full Auth. Token"
-          [(ngModel)]="data.authPack"
-          [disabled]="(mappedSave$ | async)"
-          required
-        ></app-bd-form-input>
-        <app-bd-button
-          color="primary"
-          [disabled]="!canSave() || (mappedSave$ | async)"
-          [loadingWhen$]="mappedSave$"
-          [collapsed]="false"
-          text="Save"
-          icon="save"
-          (click)="onSave()"
-        ></app-bd-button>
-      </div>
-    </form>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+      @if (data && orig) {
+        <div class="flex flex-col gap-2.5">
+          <strong>{{nodeName$ | async}}</strong>
+          <span
+            >You can either manually enter node information below, or drop a <code>node-ident</code> file which is created
+            during the initialization process on the physical node.</span
+            >
+            @if (replace) {
+              <span>
+                Note that <strong>replacing</strong> a node may take a while, since all software and configuration on the new
+                node will be restored.
+              </span>
+            }
+            <app-bd-file-drop
+              hintText="Drop node information here"
+              (drop)="onDrop($event)"
+              (dragover)="onOver($event)"
+              (fileAdded)="fileAdded($event)"
+              [disabled]="(mappedSave$ | async)"
+            ></app-bd-file-drop>
+            <app-bd-form-input
+              name="uri"
+              label="Node URI"
+              [(ngModel)]="data.uri"
+              [disabled]="(mappedSave$ | async)"
+              required
+            ></app-bd-form-input>
+            <app-bd-form-input
+              name="auth"
+              label="Full Auth. Token"
+              [(ngModel)]="data.authPack"
+              [disabled]="(mappedSave$ | async)"
+              required
+            ></app-bd-form-input>
+            <app-bd-button
+              color="primary"
+              [disabled]="!canSave() || (mappedSave$ | async)"
+              [loadingWhen$]="mappedSave$"
+              [collapsed]="false"
+              text="Save"
+              icon="save"
+              (click)="onSave()"
+            ></app-bd-button>
+          </div>
+        }
+      </form>
+    </app-bd-dialog-content>
+  </app-bd-dialog>

@@ -4,11 +4,18 @@ import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-attribute-delete-action',
-  templateUrl: './attribute-delete-action.component.html',
-  standalone: false,
+    selector: 'app-attribute-delete-action',
+    templateUrl: './attribute-delete-action.component.html',
+    imports: [
+        BdButtonComponent,
+        MatTooltip,
+        AsyncPipe,
+    ],
 })
 export class AttributeDeleteActionComponent {
   private readonly areas = inject(NavAreasService);

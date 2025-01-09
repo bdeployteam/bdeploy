@@ -2,11 +2,12 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
 
 @Component({
     selector: 'app-update-action',
     templateUrl: './update-action.component.html',
-    standalone: false
+    imports: [BdButtonComponent]
 })
 export class UpdateActionComponent implements OnInit {
   private readonly products = inject(ProductsService);

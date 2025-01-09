@@ -10,8 +10,7 @@ class WordInfo {
 
 @Directive({
     selector: 'input[appBdContentAssist]',
-    exportAs: 'appBdContentAssist',
-    standalone: false
+    exportAs: 'appBdContentAssist'
 })
 export class BdContentAssistDirective implements OnInit {
   private readonly elementRef = inject(ElementRef);
@@ -29,7 +28,7 @@ export class BdContentAssistDirective implements OnInit {
     this.appBdContentAssist.show(this.getWordInfo().word);
   }
 
-  @HostListener('blur') onBlur() {
+  @HostListener('blur-sm') onBlur() {
     this.appBdContentAssist.hide();
   }
 

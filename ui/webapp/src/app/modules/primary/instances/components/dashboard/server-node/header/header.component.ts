@@ -3,6 +3,8 @@ import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { HistoryEntryType, InstanceNodeConfigurationDto, OperatingSystem, ProcessState } from 'src/app/models/gen.dtos';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { InstancesService } from '../../../../services/instances.service';
+import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
 
 /** The percentage in the image per minute on the X axis */
 const PERC_PER_MIN = 100 / 14;
@@ -25,7 +27,7 @@ interface MarkedEvent {
     selector: 'app-node-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
-    standalone: false
+    imports: [NgClass, MatTooltip, AsyncPipe, DatePipe]
 })
 export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   private readonly instances = inject(InstancesService);

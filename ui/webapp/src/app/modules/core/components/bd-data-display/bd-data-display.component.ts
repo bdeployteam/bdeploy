@@ -5,11 +5,12 @@ import { BdDataColumn, BdDataGrouping, bdDataDefaultSearch, bdDataDefaultSort } 
 import { CardViewService } from '../../services/card-view.service';
 import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
     selector: 'app-bd-data-display',
     templateUrl: './bd-data-display.component.html',
-    standalone: false
+    imports: [BdDataTableComponent, BdDataGridComponent, NgTemplateOutlet]
 })
 export class BdDataDisplayComponent<T> {
   private readonly cardViewService = inject(CardViewService);

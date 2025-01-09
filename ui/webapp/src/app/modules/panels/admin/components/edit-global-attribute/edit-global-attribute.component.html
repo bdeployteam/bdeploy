@@ -5,7 +5,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
-      <ng-container *ngIf="!(loading$ | async) && tempAttribute">
+      @if (!(loading$ | async) && tempAttribute) {
         <app-bd-form-input
           label="Name"
           name="name"
@@ -29,7 +29,7 @@
           icon="save"
           [disabled]="form.invalid || tempAttribute.description === initialAttribute.description"
         ></app-bd-button>
-      </ng-container>
+      }
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

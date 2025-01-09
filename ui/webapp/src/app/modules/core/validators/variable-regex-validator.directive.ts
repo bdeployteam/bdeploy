@@ -15,7 +15,6 @@ export interface VariableRegexValidationContext {
 @Directive({
   selector: '[appVariableRegexValidator]',
   providers: [{ provide: NG_VALIDATORS, useExisting: VariableRegexValidator, multi: true }],
-  standalone: false,
 })
 export class VariableRegexValidator implements Validator {
   @Input('appVariableRegexValidator') context: VariableRegexValidationContext;

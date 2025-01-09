@@ -3,14 +3,15 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <app-bd-file-drop (fileAdded)="fileAdded($event)" [types]="['.zip', '.jar']"></app-bd-file-drop>
-      <app-bd-file-upload
-        *ngFor="let file of files; let i = index"
-        [file]="file"
-        formDataParam="plugin"
-        [url]="plugins.globalUploadUrl$ | async"
-        (dismiss)="onDismiss(i)"
-        [resultEvaluator]="resultEvaluator"
-      ></app-bd-file-upload>
+      @for (file of files; track file; let i = $index) {
+        <app-bd-file-upload
+          [file]="file"
+          formDataParam="plugin"
+          [url]="plugins.globalUploadUrl$ | async"
+          (dismiss)="onDismiss(i)"
+          [resultEvaluator]="resultEvaluator"
+        ></app-bd-file-upload>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

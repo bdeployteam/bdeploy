@@ -4,8 +4,7 @@ import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 
 @Pipe({
     name: 'nodeFilter',
-    pure: false,
-    standalone: false
+    pure: false
 })
 export class NodeFilterPipe implements PipeTransform {
   transform(items: ApplicationConfiguration[], args: string): any {
@@ -21,8 +20,7 @@ export class NodeFilterPipe implements PipeTransform {
 
 @Pipe({
     name: 'customNodeFilter',
-    pure: false,
-    standalone: false
+    pure: false
 })
 export class CustomNodeFilterPipe implements PipeTransform {
   transform(item: unknown, args: any): unknown {
@@ -33,6 +31,7 @@ export class CustomNodeFilterPipe implements PipeTransform {
         return searchThroughObject(item, args);
       }
     }
+    return null;
   }
 }
 

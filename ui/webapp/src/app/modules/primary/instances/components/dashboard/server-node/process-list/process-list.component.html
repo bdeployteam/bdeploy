@@ -10,11 +10,11 @@
   [checkMode]="bulkMode"
   [checked]="(bulk.selection$ | async)[node.nodeName] || []"
   (checkedChange)="bulk.update(node.nodeName, $event)"
->
+  >
   <ng-template #dataDisplayExtraCardDetails let-record="record">
-    <ng-container *ngFor="let param of getPinnedParameters(record); trackBy: doTrack">
+    @for (param of getPinnedParameters(record); track doTrack($index, param)) {
       <mat-icon class="bd-small-icon" matTooltip="Pinned Parameter" [matTooltipShowDelay]="1000">push_pin</mat-icon>
       <span class="truncate">{{ param.name }} = {{ param.value }}</span>
-    </ng-container>
+    }
   </ng-template>
 </app-bd-data-display>

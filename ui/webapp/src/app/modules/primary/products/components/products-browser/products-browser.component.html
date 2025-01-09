@@ -32,14 +32,15 @@
       [disabled]="(auth.isCurrentScopeWrite$ | async) === false || isCardView"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-panel-button
-      *ngIf="cfg.isCentral$ | async"
-      icon="sync_alt"
-      text="Synchronize Product Versions"
-      [route]="['panels', 'products', 'sync']"
-      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
-      tooltip="below"
-    ></app-bd-panel-button>
+    @if (cfg.isCentral$ | async) {
+      <app-bd-panel-button
+        icon="sync_alt"
+        text="Synchronize Product Versions"
+        [route]="['panels', 'products', 'sync']"
+        [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
+        tooltip="below"
+      ></app-bd-panel-button>
+    }
     <app-bd-panel-button
       icon="drive_file_move"
       text="Import Product..."
@@ -67,7 +68,7 @@
       (checkedChange)="bulk.selection$.next($event)"
       [presetKey]="presetKeyValue"
       [grid]="isCardView"
-    >
+      >
       <app-bd-no-data>
         <p>No products have been uploaded yet.</p>
         <p>Start by uploading a new one.</p>

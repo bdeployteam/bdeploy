@@ -23,7 +23,7 @@ dependencies {
 sourceSets {
     main {
         resources {
-            srcDirs = ["$webappDir/dist"]
+            srcDirs = ["$webappDir/dist/webapp"]
         }
     }
 }
@@ -40,23 +40,17 @@ ext.sharedNpmLogic = { task, List<String> target ->
     }
 }
 
-ext.sharedCoverageServeLogic = { task, List<String> target -> 
+ext.sharedUitestServeLogic = { task, List<String> target ->
     configure(task) {
         workingDir "$webappDir"
         group = BasePlugin.BUILD_GROUP
-        // the scripts (run.sh, run.bat) are required due to a dumb change in the execfork plugin
-        // which now expects a File instead of a String, which will automatically expand any given
-        // string to an absolute path using the current directory. Since we don't know where npm
-        // resides, we need to fix that by wrapping it in something we *do* know.
         if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            executable "${projectDir}/.scripts/run.sh"
+            executable "npm"
         } else {
-            executable "${projectDir}/.scripts/run.bat"
+            executable "npm.cmd"
         }
 
-        // we need --host in *some* network environments for unknown reason for cypress to be able
-        // to connect to the server(s).
-        args = ["npm", "run", "--", "ng", "serve", "--host", "0.0.0.0", "--no-watch", "--no-live-reload"] + target
+        args = ["run", "--", "ng", "serve"] + target
     }
 }
 
@@ -64,6 +58,7 @@ evaluationDependsOn(':test-data')
 
 task updateFixtureProducts(type: Copy) {
     def prj = project(':test-data')
+    /*
     from prj.product1Zip.outputs
     from prj.product2Zip.outputs
     from prj.product3Zip.outputs
@@ -77,143 +72,100 @@ task updateFixtureProducts(type: Copy) {
     doFirst {
         delete fileTree("${webappDir}/cypress/fixtures").matching { include "*.zip" }
     }
-}
-
-task triggerStopCoverageStandalone {
+    */
     doLast {
-        println "Stop Coverage for Standalone"
+        println "FIXME: provide test data"
     }
 }
 
-task runCoverageServerStandalone(type: com.github.psxpaul.task.ExecFork) {
-    sharedCoverageServeLogic(it, ["-c", "cov-standalone"])
-    waitForOutput = "Compiled successfully"
+task triggerStopStandalone {
+    doLast {
+        println "Stop Standalone UI"
+    }
+}
+
+task runServerStandalone(type: com.github.psxpaul.task.ExecFork) {
+    sharedUitestServeLogic(it, ["-c", "uitest-standalone"])
+    waitForOutput = "Application bundle generation complete"
     timeout = 240
-    stopAfter = triggerStopCoverageStandalone
+    stopAfter = triggerStopStandalone
     dependsOn 'buildAngular'
     mustRunAfter(updateFixtureProducts)
 }
 
-task triggerStopCoverageCentral {
+task triggerStopCentral {
     doLast {
-        println "Stop Coverage for Central"
+        println "Stop Central UI"
     }
 }
 
-task runCoverageServerCentral(type: com.github.psxpaul.task.ExecFork) {
-    sharedCoverageServeLogic(it, ["-c", "cov-central"])
-    waitForOutput = "Compiled successfully"
+task runServerCentral(type: com.github.psxpaul.task.ExecFork) {
+    sharedUitestServeLogic(it, ["-c", "uitest-central"])
+    waitForOutput = "Application bundle generation complete"
     timeout = 240
-    stopAfter = triggerStopCoverageCentral
+    stopAfter = triggerStopCentral
     dependsOn 'buildAngular'
     mustRunAfter(updateFixtureProducts)
 }
 
-task triggerStopCoverageManaged {
+task triggerStopManaged {
     doLast {
-        println "Stop Coverage for Managed"
+        println "Stop Managed UI"
     }
 }
 
-task runCoverageServerManaged(type: com.github.psxpaul.task.ExecFork) {
-    sharedCoverageServeLogic(it, ["-c", "cov-managed"])
-    waitForOutput = "Compiled successfully"
+task runServerManaged(type: com.github.psxpaul.task.ExecFork) {
+    sharedUitestServeLogic(it, ["-c", "uitest-managed"])
+    waitForOutput = "Application bundle generation complete"
     timeout = 240
-    stopAfter = triggerStopCoverageManaged
+    stopAfter = triggerStopManaged
     dependsOn 'buildAngular'
     mustRunAfter(updateFixtureProducts)
 }
 
 task updateFixtures() {
-    // currently nothing except dependencies...
     dependsOn ':test-data:setupDemoServer'
     dependsOn 'updateFixtureProducts'
-    dependsOn runCoverageServerStandalone
-    if(!project.hasProperty('cypressNoCentral')) {
-        dependsOn runCoverageServerCentral
-        dependsOn runCoverageServerManaged
-    }
+    dependsOn runServerStandalone
+    dependsOn runServerCentral
+    dependsOn runServerManaged
 }
 
-String quoteJson(String s) {
-    if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        // on windows, cypress CLI runs through an additional set of unquoting. hate this.
-        s = s.replace("\"", "\\\"");
-    }
-    return s;
-}
-
-List<String> getCypressConfig() {
-    def managedPort = project(":test-data").testServerPortManaged
-    def timeout = '60000'
-    if(project.hasProperty('cypressTimeout')) {
-        timeout = project.property('cypressTimeout')
-    }
-    return [
-        "--config", quoteJson("{\"baseUrl\":\"http://localhost:4210\","+
-                    "\"defaultCommandTimeout\":${timeout},"+
-                    "\"requestTimeout\":${timeout},"+
-                    "\"responseTimeout\":${timeout},"+
-                    "\"taskTimeout\":${timeout},"+
-                    "\"execTimeout\":${timeout},"+
-                    "\"pageLoadTimeout\":${timeout}"
-                    + (project.hasProperty('cypressNoCentral') 
-                        ? ",\"e2e\":{\"excludeSpecPattern\":\"**/central-managed.spec.js\"}" 
-                        : "") +
-                    "}"),
-        "--env", "baseUrlCentral=http://localhost:4211"
-        + ",baseUrlManaged=http://localhost:4212"
-        + ",backendBaseUrlManaged=https://localhost:${managedPort}/api"
-        + (project.hasProperty('cypressNoCoverage') ? ",DISABLE_COVERAGE=yes" : "")
-    ]
-}
-
-String cypressCmd() {
-    if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        return "cypress";
-    } else {
-        return "cypress.cmd";
-    }
-}
-
-task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
+task installBrowsers(type: Exec) { t ->
     workingDir "$webappDir"
-    group = BasePlugin.BUILD_GROUP
+    group = BasePlugin.BUILD_GROUP;
 
-    // required for bin-test-data update.
-    outputs.file "${webappDir}/cypress/fixtures/instance-export.zip"
-    outputs.upToDateWhen { false }
-
-    List<String> properties = getCypressConfig()
-    if(project.hasProperty('cypressIgnoreExitValue')) {
-        ignoreExitValue = true
-    }
-    if(project.hasProperty('cypressBrowser')) {
-        properties.add('--browser')
-        properties.add(project.property('cypressBrowser'))
-    }
-    if(project.hasProperty('cypressHeadless')) {
-    	properties.add('--headless')
-    }
-    if(project.hasProperty('recordCypress')) {
-        properties.add('--record')
-        properties.add('--key')
-        properties.add('a32f4a49-c18e-4942-8fb3-38928b39318e')
-    }
-    if(project.hasProperty('cypressParallel')) {
-        properties.add('--parallel')
-    }
-    if(project.hasProperty('cypressGroup')) {
-        properties.add('--group')
-    }
-    if(project.hasProperty('cypressBuildId')) {
-        properties.add('--ci-build-id')
-    }
-    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run" ] + properties)
+    sharedNpmLogic(t, ["run", "--", "playwright", "install"])
 }
 
-task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
-    from file("${webappDir}/cypress/screenshots/")
+task runUitests(type: Exec, dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) { t ->
+    workingDir "$webappDir"
+    group = BasePlugin.BUILD_GROUP;
+
+    def opts = [];
+    if(project.hasProperty("ui")) {
+        opts.add("--ui");
+    }
+
+    def target = "test";
+    if(project.hasProperty("codegen")) {
+        target = "codegen";
+    }
+
+    sharedNpmLogic(t, ["run", "--", "playwright", target] + opts)
+}
+
+task runUitestInfra(dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) {
+    doLast() {
+        // no println will work in doLast, it will appear only AFTER the question is answered.
+        def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
+        def answer = userInput.askUser(i -> i.askQuestion("Enter any value (or press enter) to stop the server", "Stop")).getOrNull();
+    }
+}
+
+
+task updateDocuScreenshots(type: Copy, dependsOn: runUitests) {
+    from file("${webappDir}/screenshots/")
     into new File(project(":doc").projectDir, "retypeuser/images")
 
     include "**/*.png"
@@ -226,55 +178,25 @@ task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
     includeEmptyDirs = false
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    doLast {  
+    doLast {
         println('Updating screenshots of user documentation done.')
     }
 }
 
-task runCypress(type: Exec, dependsOn: updateFixtures) {
-    workingDir "$webappDir"
-    def port = project(":test-data").testServerPort
-    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open"] + getCypressConfig())
-}
-
-task runDevCypress(type: Exec) {
-    workingDir "$webappDir"
-    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", 
-        "--config", "baseUrl=http://localhost:4200", 
-        "--env", "baseUrlCentral=http://localhost:4201"
-        + ",baseUrlManaged=http://localhost:4202"
-    ])
-}
-
 // this one is required to stop the server and accumulate coverage data
-task doneWithCypressHeadless(dependsOn: [':test-data:triggerStopBDeploy', triggerStopCoverageStandalone]) {
+task doneWithUitest(dependsOn: [':test-data:triggerStopBDeploy', triggerStopStandalone, triggerStopCentral, triggerStopManaged]) {
     doLast {
-        println('Cypress Testing done...')
+        println('UI Testing done...')
     }
 
-    dependsOn runCypressHeadless
-    if(!project.hasProperty('cypressNoCentral')) {
-        dependsOn triggerStopCoverageCentral
-        dependsOn triggerStopCoverageManaged
-    }
+    dependsOn runUitests
 }
 
-project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadless
-triggerStopCoverageStandalone.mustRunAfter runCypressHeadless
-triggerStopCoverageCentral.mustRunAfter runCypressHeadless
-triggerStopCoverageManaged.mustRunAfter runCypressHeadless
-test.dependsOn doneWithCypressHeadless
-
-task release(type: Copy, dependsOn: runCypressHeadless) {
-    from("${webappDir}/cypress/fixtures/instance-export.zip") {
-        rename { version + ".zip" }
-    }
-    into new File(project(':test-data').projectDir, "bin-test-data")
-
-    doLast {
-        println "Release seems to do well with UI tests"
-    }
-}
+project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runUitests
+triggerStopStandalone.mustRunAfter runUitests
+triggerStopCentral.mustRunAfter runUitests
+triggerStopManaged.mustRunAfter runUitests
+test.dependsOn doneWithUitest
 
 task cleanAngular(type:Delete) {
     delete "$webappDir/dist"
@@ -282,7 +204,7 @@ task cleanAngular(type:Delete) {
 
 task buildAngularInternal(type:Exec) { t ->
     inputs.dir "$webappDir/src"
-    outputs.dir "$webappDir/dist"
+    outputs.dir "$webappDir/dist/webapp"
     sharedNpmLogic(t, ["run", "--", "ng", "build", "-c", "production"])
 	dependsOn 'installAngular'
     dependsOn 'genDtos'
@@ -302,7 +224,7 @@ task installAngular(type:Exec) { t ->
 evaluationDependsOn(':doc')
 task copyUserDoc(type:Copy, dependsOn:':doc:retypeUserDoc') {
     from tasks.getByPath(':doc:retypeUserDoc').outputs
-    into "$webappDir/dist/webapp/assets/doc"
+    into "$webappDir/dist/webapp/browser/assets/doc"
 
     mustRunAfter 'buildAngularInternal'
 }
@@ -443,8 +365,8 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
 
 sonarqube {
     properties {
-        properties["sonar.sources"] += "${projectDir}/webapp/src"
-        property "sonar.javascript.lcov.reportPaths", "${projectDir}/webapp/coverage/lcov.info"
+        properties["sonar.sources"] += "${webappDir}/src"
+        property "sonar.javascript.lcov.reportPaths", "${webappDir}/test-reports/monocart/lcov/coverage.lcov.info"
     }
 }
 

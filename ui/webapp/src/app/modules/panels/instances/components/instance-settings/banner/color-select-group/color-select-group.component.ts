@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { ColorSelectComponent } from '../color-select/color-select.component';
+import { BdExpandButtonComponent } from '../../../../../../core/components/bd-expand-button/bd-expand-button.component';
 
 export interface ColorDef {
   name: string;
@@ -10,7 +11,7 @@ export interface ColorDef {
 @Component({
     selector: 'app-color-select-group',
     templateUrl: './color-select-group.component.html',
-    standalone: false
+    imports: [BdExpandButtonComponent, ColorSelectComponent]
 })
 export class ColorSelectGroupComponent {
   @Output() colorChanged = new EventEmitter<ColorDef>();

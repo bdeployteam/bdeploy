@@ -1,15 +1,25 @@
-import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { BehaviorSubject, finalize, switchMap } from 'rxjs';
 import { BulkOperationResultDto } from 'src/app/models/gen.dtos';
 import { ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { UserGroupBulkService } from '../../services/user-group-bulk.service';
+import {
+  BdBulkOperationResultComponent
+} from '../../../../core/components/bd-bulk-operation-result/bd-bulk-operation-result.component';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-user-group-bulk-manipulation',
     templateUrl: './user-group-bulk-manipulation.component.html',
-    standalone: false
+  imports: [BdBulkOperationResultComponent, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatDivider, BdPanelButtonComponent, BdButtonComponent, AsyncPipe]
 })
 export class UserGroupBulkManipulationComponent {
   protected readonly actions = inject(ActionsService);

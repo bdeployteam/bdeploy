@@ -5,11 +5,16 @@ import { InstanceVersionDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-history-compare-select',
     templateUrl: './history-compare-select.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

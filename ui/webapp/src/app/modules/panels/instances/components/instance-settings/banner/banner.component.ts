@@ -1,9 +1,11 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceBannerRecord } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -12,10 +14,20 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ColorDef, ColorSelectGroupComponent } from './color-select-group/color-select-group.component';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdBannerComponent } from '../../../../../core/components/bd-banner/bd-banner.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-banner',
     templateUrl: './banner.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdBannerComponent, MatFormField, MatLabel, MatInput, FormsModule, ColorSelectGroupComponent, MatDivider, BdButtonComponent, AsyncPipe]
 })
 export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly auth = inject(AuthenticationService);

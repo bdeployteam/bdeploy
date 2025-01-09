@@ -8,12 +8,14 @@ import {
   inject,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
+import { MatRipple } from '@angular/material/core';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-bd-micro-icon-button',
     templateUrl: './bd-micro-icon-button.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatRipple, MatIcon]
 })
 export class BdMicroIconButtonComponent implements AfterViewInit {
   private readonly _elementRef = inject(ElementRef);

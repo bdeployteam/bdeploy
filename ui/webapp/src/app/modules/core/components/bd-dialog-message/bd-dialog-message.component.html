@@ -1,38 +1,44 @@
-<div
-  *ngIf="message$ | async as msg"
-  class="absolute top-0 left-0 w-full h-full z-[9999] bd-normal-backdrop flex flex-col justify-center items-center"
-  [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
->
-  <app-bd-notification-card
-    [collapsed]="true"
-    class="mat-elevation-z3 max-h-[99%] max-w-[98%]"
-    [dismissable]="msg.dismissResult !== undefined"
-    (dismiss)="complete(msg.dismissResult)"
-    [header]="msg.header"
-    [icon]="msg.icon ? msg.icon : 'info'"
-  >
-    <div class="flex flex-col gap-2.5">
-      <ng-container *ngIf="msg.template">
-        <ng-container *ngTemplateOutlet="msg.template"></ng-container>
-      </ng-container>
-      <div *ngIf="!msg.template" [innerHtml]="msg.message"></div>
-      <ng-container *ngIf="!!msg.confirmation">
-        <app-bd-form-input
-          name="confirm"
-          [label]="msg.confirmationHint ? msg.confirmationHint : 'Enter confirmation'"
-          [(ngModel)]="userConfirmation"
-        ></app-bd-form-input>
-      </ng-container>
-      <app-bd-action-row *ngIf="!!msg.actions?.length">
-        <app-bd-button
-          *ngFor="let action of msg.actions"
-          [text]="action.name"
-          [collapsed]="false"
-          [color]="action.confirm ? 'primary' : null"
-          (click)="complete(action.result)"
-          [disabled]="(action.confirm && (!(confirmed$ | async) || (msg.validation && !msg.validation()))) || (!!action.disabled && action.disabled())"
-        ></app-bd-button>
-      </app-bd-action-row>
-    </div>
-  </app-bd-notification-card>
-</div>
+@if (message$ | async; as msg) {
+  <div
+    class="absolute top-0 left-0 w-full h-full z-9999 bd-normal-backdrop flex flex-col justify-center items-center"
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
+    >
+    <app-bd-notification-card
+      [collapsed]="true"
+      class="mat-elevation-z3 max-h-[99%] max-w-[98%]"
+      [dismissable]="msg.dismissResult !== undefined"
+      (dismiss)="complete(msg.dismissResult)"
+      [header]="msg.header"
+      [icon]="msg.icon ? msg.icon : 'info'"
+      >
+      <div class="flex flex-col gap-2.5">
+        @if (msg.template) {
+          <ng-container *ngTemplateOutlet="msg.template"></ng-container>
+        }
+        @if (!msg.template) {
+          <div [innerHtml]="msg.message"></div>
+        }
+        @if (!!msg.confirmation) {
+          <app-bd-form-input
+            name="confirm"
+            [label]="msg.confirmationHint ? msg.confirmationHint : 'Enter confirmation'"
+            [(ngModel)]="userConfirmation"
+          ></app-bd-form-input>
+        }
+        @if (!!msg.actions?.length) {
+          <app-bd-action-row>
+            @for (action of msg.actions; track action) {
+              <app-bd-button
+                [text]="action.name"
+                [collapsed]="false"
+                [color]="action.confirm ? 'primary' : null"
+                (click)="complete(action.result)"
+                [disabled]="(action.confirm && (!(confirmed$ | async) || (msg.validation && !msg.validation()))) || (!!action.disabled && action.disabled())"
+              ></app-bd-button>
+            }
+          </app-bd-action-row>
+        }
+      </div>
+    </app-bd-notification-card>
+  </div>
+}

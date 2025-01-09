@@ -6,12 +6,14 @@
       [icon]="record.message.icon"
       class="min-w-[350px]"
       background="dialog"
-    >
+      >
       <div class="bd-default-padding flex flex-col gap-1">
         <div>
           While applying <strong>{{ record.group }}</strong> to <strong>{{ record.node }}</strong
-          ><span *ngIf="!!record.appname">, when processing <strong>{{ record.appname }}</strong></span
-          >:
+          >@if (!!record.appname) {
+          <span>, when processing <strong>{{ record.appname }}</strong></span
+          >
+          }:
         </div>
         <div>
           <em>{{ record.message.message }}</em>

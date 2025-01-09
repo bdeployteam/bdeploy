@@ -7,14 +7,16 @@
       (selectedIndexChange)="doSelect($event)"
       [(selectedIndex)]="tabIndex"
       class="metrics-tabs-group"
-    >
-      <mat-tab class="flex flex-col" *ngFor="let key of keys$ | async" [label]="key">
-        <ng-template mat-tab-label>{{ key }}</ng-template>
-      </mat-tab>
+      >
+      @for (key of keys$ | async; track key) {
+        <mat-tab class="flex flex-col" [label]="key">
+          <ng-template mat-tab-label>{{ key }}</ng-template>
+        </mat-tab>
+      }
     </mat-tab-group>
     <!-- General server metrics -->
     <div class="bd-default-padding">
-      <ng-container *ngIf="!selectedGroup && serverStats">
+      @if (!selectedGroup && serverStats) {
         <h2>Java VM</h2>
         <div class="charts-area">
           <div class="flex-chart-2">
@@ -50,7 +52,6 @@
             </div>
           </div>
         </div>
-
         <h2>Requests</h2>
         <div class="charts-area">
           <div class="flex-chart-2">
@@ -82,7 +83,6 @@
             </div>
           </div>
         </div>
-
         <h2>Thread Pool</h2>
         <div class="charts-area">
           <div class="flex-chart-2">
@@ -116,7 +116,6 @@
             </div>
           </div>
         </div>
-
         <h2>Connections</h2>
         <div class="charts-area">
           <div class="flex-chart-2">
@@ -148,7 +147,6 @@
             </div>
           </div>
         </div>
-
         <h2>Sessions</h2>
         <div class="charts-area">
           <div class="flex-chart-2">
@@ -166,63 +164,70 @@
             </div>
           </div>
         </div>
-      </ng-container>
+      }
 
       <!-- Metrics of selected group -->
-      <h3 *ngIf="selectedGroup" class="flex justify-start items-center gap-1">
-        <mat-icon>lightbulb</mat-icon>Click a metric to view details. Sorted by mean duration of calls, slowest first.
-      </h3>
-      <div *ngIf="selectedGroup" class="charts-area flex-auto">
-        <div class="count-chart" [style.height.px]="countGraphHeight">
-          <ngx-charts-bar-horizontal
-            [results]="groupCounts"
-            [maxYAxisTickLength]="40"
-            xAxisLabel="Count"
-            [showXAxisLabel]="true"
-            [xAxis]="true"
-            [yAxis]="true"
-            (select)="selectTimer($event)"
-            #countChart
-          >
-          </ngx-charts-bar-horizontal>
-        </div>
-
-        <div class="details-group">
-          <ng-container *ngIf="selectedTimer">
-            <h3>{{ selectedTimerName }}</h3>
-            <div class="details-element-group">
-              <span>Count: <strong>{{ selectedTimer.counter.value }}</strong></span>
-              <span>Rate [mean]: <strong>{{ selectedTimer.meter.meanRate }}</strong></span>
-              <span>Rate [1min]: <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span>
+      @if (selectedGroup) {
+        <h3 class="flex justify-start items-center gap-1">
+          <mat-icon>lightbulb</mat-icon>
+          Click a metric to view details. Sorted by mean duration of calls, slowest first.
+        </h3>
+      }
+      @if (selectedGroup) {
+        <div class="charts-area flex-auto">
+          <div class="count-chart" [style.height.px]="countGraphHeight">
+            <ngx-charts-bar-horizontal
+              [results]="groupCounts"
+              [maxYAxisTickLength]="40"
+              xAxisLabel="Count"
+              [showXAxisLabel]="true"
+              [xAxis]="true"
+              [yAxis]="true"
+              (select)="selectTimer($event)"
+              #countChart
+              >
+            </ngx-charts-bar-horizontal>
+          </div>
+          <div class="details-group">
+            @if (selectedTimer) {
+              <h3>{{ selectedTimerName }}</h3>
+              <div class="details-element-group">
+                <span>Count: <strong>{{ selectedTimer.counter.value }}</strong></span>
+                <span>Rate [mean]: <strong>{{ selectedTimer.meter.meanRate }}</strong></span>
+                <span>Rate [1min]: <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span>
+                <mat-divider></mat-divider>
+                <span>Time [Median]: <strong>{{ histogramDetails.median }} ms</strong></span>
+                <span>Time [75th]: <strong>{{ histogramDetails.p75th }} ms</strong></span>
+                <span>Time [99th]: <strong>{{ histogramDetails.p99th }} ms</strong></span>
+                <span>Time [min]: <strong>{{ histogramDetails.min }} ms</strong></span>
+                <span>Time [max]: <strong>{{ histogramDetails.max }} ms</strong></span>
+              </div>
               <mat-divider></mat-divider>
-              <span>Time [Median]: <strong>{{ histogramDetails.median }} ms</strong></span>
-              <span>Time [75th]: <strong>{{ histogramDetails.p75th }} ms</strong></span>
-              <span>Time [99th]: <strong>{{ histogramDetails.p99th }} ms</strong></span>
-              <span>Time [min]: <strong>{{ histogramDetails.min }} ms</strong></span>
-              <span>Time [max]: <strong>{{ histogramDetails.max }} ms</strong></span>
-            </div>
-            <mat-divider></mat-divider>
-            Histogram weighted values:
-            <div *ngIf="timerSeries" class="timer-chart h-[300px]">
-              <ngx-charts-line-chart
-                [referenceLines]="referenceLines"
-                [showRefLines]="true"
-                [results]="timerSeries"
-                [xAxis]="false"
-                [yAxis]="true"
-                [xAxisLabel]="'Calls'"
-                [yAxisLabel]="'Timing [ms]'"
-                [legend]="false"
-                [showXAxisLabel]="false"
-                [showYAxisLabel]="true"
-              ></ngx-charts-line-chart>
-            </div>
-            <h3 class="flex justify-start items-center gap-1">
-              <mat-icon>lightbulb</mat-icon>Histogram values are sorted by value, not time.
-            </h3>
-          </ng-container>
+              Histogram weighted values:
+              @if (timerSeries) {
+                <div class="timer-chart h-[300px]">
+                  <ngx-charts-line-chart
+                    [referenceLines]="referenceLines"
+                    [showRefLines]="true"
+                    [results]="timerSeries"
+                    [xAxis]="false"
+                    [yAxis]="true"
+                    [xAxisLabel]="'Calls'"
+                    [yAxisLabel]="'Timing [ms]'"
+                    [legend]="false"
+                    [showXAxisLabel]="false"
+                    [showYAxisLabel]="true"
+                  ></ngx-charts-line-chart>
+                </div>
+              }
+              <h3 class="flex justify-start items-center gap-1">
+                <mat-icon>lightbulb</mat-icon>
+                Histogram values are sorted by value, not time.
+              </h3>
+            }
+          </div>
         </div>
-      </div>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -4,6 +4,13 @@ import { BdDataColumn } from 'src/app/models/data';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { MinionRecord, NodesAdminService } from '../../services/nodes-admin.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 const nodeColName: BdDataColumn<MinionRecord> = {
   id: 'name',
@@ -45,7 +52,7 @@ const nodeColOs: BdDataColumn<MinionRecord> = {
 @Component({
     selector: 'app-nodes',
     templateUrl: './nodes.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdPanelButtonComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class NodesComponent {
   protected readonly nodesAdmin = inject(NodesAdminService);

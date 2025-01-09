@@ -1,13 +1,16 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { InstanceConfiguration } from 'src/app/models/gen.dtos';
 import { DiffType, HistoryDiffService, InstanceConfigurationDiff } from '../../services/history-diff.service';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { ConfigDescCardsComponent } from '../config-desc-cards/config-desc-cards.component';
+import { HistoryDiffFieldComponent } from '../history-diff-field/history-diff-field.component';
 
 @Component({
     selector: 'app-history-header-config',
     templateUrl: './history-header-config.component.html',
     styleUrls: ['./history-header-config.component.css'],
-    standalone: false
+    imports: [NgClass, ConfigDescCardsComponent, HistoryDiffFieldComponent, AsyncPipe]
 })
 export class HistoryHeaderConfigComponent implements OnInit {
   private readonly diffService = inject(HistoryDiffService);
@@ -38,5 +41,6 @@ export class HistoryHeaderConfigComponent implements OnInit {
     } else if (this.diff$.value?.type === DiffType.CHANGED) {
       return 'local-border-changed';
     }
+    return [];
   }
 }

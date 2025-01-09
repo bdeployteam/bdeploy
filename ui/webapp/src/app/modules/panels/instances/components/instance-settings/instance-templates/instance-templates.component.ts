@@ -1,8 +1,8 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
-import { MatStepper } from '@angular/material/stepper';
+import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { MatStep, MatStepper } from '@angular/material/stepper';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -16,13 +16,15 @@ import {
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateVariable,
-  TemplateVariableType,
+  TemplateVariableType
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_OK,
+  ACTION_OK
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
@@ -32,6 +34,19 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
 import { TemplateMessageDetailsComponent } from './template-message-details/template-message-details.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import {
+  BdFormTemplateVariableComponent
+} from '../../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { BdNoDataComponent } from '../../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
 
 export interface TemplateMessage {
   group: string;
@@ -59,7 +74,7 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
     selector: 'app-instance-templates',
     templateUrl: './instance-templates.component.html',
     styleUrls: ['./instance-templates.component.css'],
-    standalone: false
+  imports: [BdDataTableComponent, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatStepper, MatStep, BdFormSelectComponent, FormsModule, MatTooltip, BdButtonComponent, BdFormTemplateVariableComponent, BdNoDataComponent, AsyncPipe]
 })
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private readonly products = inject(ProductsService);

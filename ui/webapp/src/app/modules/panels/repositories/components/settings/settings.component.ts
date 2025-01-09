@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -8,10 +8,18 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { RepositoryDetailsService } from '../../services/repository-details.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatIcon, BdIdentifierComponent, BdPanelButtonComponent, BdButtonComponent, AsyncPipe]
 })
 export class SettingsComponent {
   private readonly router = inject(Router);

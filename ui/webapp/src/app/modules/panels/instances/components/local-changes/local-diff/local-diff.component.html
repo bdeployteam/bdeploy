@@ -3,104 +3,110 @@
     header="Compare version {{ (edit.current$ | async)?.instance?.tag }} with local changes"
     [panel]="true"
     [route]="['..']"
-  >
+    >
     <div class="flex-auto"></div>
     <app-bd-button text="Show only differences" [(toggle)]="showOnlyDifferences" [isToggle]="true" [collapsed]="false">
     </app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5 pt-0.5" *ngIf="configPair$ | async as pair">
-      <div class="bd-rect-card flex flex-col">
-        <div class="flex flex-col">
-          <div class="bd-default-padding flex pb-0">
-            <div class="flex flex-col">
-              <div class="bd-type-text">Instance Configuration</div>
-            </div>
-          </div>
-        </div>
-        <div class="bd-default-padding flex flex-col gap-2.5">
-          <div class="flex gap-2.5">
-            <div class="local-compare-header basis-1/2">{{ pair.base.version }}</div>
-            <div class="local-compare-header basis-1/2">{{ pair.compare.version }}</div>
-          </div>
-          <div class="flex gap-2.5">
-            <app-history-header-config
-              class="basis-1/2"
-              diffSide="left"
-              [baseConfig]="pair.header.base"
-              [compareConfig]="pair.header.compare"
-            ></app-history-header-config>
-            <app-history-header-config
-              class="basis-1/2"
-              diffSide="right"
-              [baseConfig]="pair.header.compare"
-              [compareConfig]="pair.header.base"
-            ></app-history-header-config>
-          </div>
-          <div class="flex gap-2.5">
-            <app-history-variables-config
-              class="basis-1/2"
-              diffSide="left"
-              [baseConfig]="pair.header.base"
-              [compareConfig]="pair.header.compare"
-            ></app-history-variables-config>
-            <app-history-variables-config
-              class="basis-1/2"
-              diffSide="right"
-              [baseConfig]="pair.header.compare"
-              [compareConfig]="pair.header.base"
-            ></app-history-variables-config>
-          </div>
-        </div>
-      </div>
-
-      <!-- Nodes. -->
-      <ng-container *ngFor="let nodePair of pair.nodes">
-        <div class="bd-rect-card" *ngIf="showNodePair(nodePair)">
+    @if (configPair$ | async; as pair) {
+      <div class="flex flex-col gap-2.5 pt-0.5">
+        <div class="bd-rect-card flex flex-col">
           <div class="flex flex-col">
             <div class="bd-default-padding flex pb-0">
               <div class="flex flex-col">
-                <div class="bd-type-text">NODE</div>
-                <div class="bd-title-text">
-                  {{ nodePair.name === clientNodeName ? 'Client Applications' : nodePair.name }}
-                </div>
+                <div class="bd-type-text">Instance Configuration</div>
               </div>
             </div>
           </div>
           <div class="bd-default-padding flex flex-col gap-2.5">
             <div class="flex gap-2.5">
-              <div class="local-compare-header basis-1/2 flex">
-                <div>{{ pair.base.version }}</div>
-                <div class="bd-description-text local-order-changed" *ngIf="nodePair.isOrderChanged">
-                  &nbsp;- Note: The order of the processes is not exactly as configured in this version.
-                </div>
-              </div>
+              <div class="local-compare-header basis-1/2">{{ pair.base.version }}</div>
               <div class="local-compare-header basis-1/2">{{ pair.compare.version }}</div>
             </div>
-
-            <div class="flex gap-2.5 items-stretch" *ngFor="let appPair of nodePair.applications">
-              <ng-container *ngIf="showAppPair(appPair)">
-                <app-history-process-config
-                  class="basis-1/2"
-                  [baseConfig]="appPair.base"
-                  [compareConfig]="appPair.compare"
-                  [baseDescriptor]="appPair.baseDesc"
-                  [hasProcessControl]="nodePair.name !== clientNodeName"
-                  diffSide="left"
-                ></app-history-process-config>
-                <app-history-process-config
-                  class="basis-1/2"
-                  [baseConfig]="appPair.compare"
-                  [compareConfig]="appPair.base"
-                  [baseDescriptor]="appPair.compareDesc"
-                  [hasProcessControl]="nodePair.name !== clientNodeName"
-                  diffSide="right"
-                ></app-history-process-config>
-              </ng-container>
+            <div class="flex gap-2.5">
+              <app-history-header-config
+                class="basis-1/2"
+                diffSide="left"
+                [baseConfig]="pair.header.base"
+                [compareConfig]="pair.header.compare"
+              ></app-history-header-config>
+              <app-history-header-config
+                class="basis-1/2"
+                diffSide="right"
+                [baseConfig]="pair.header.compare"
+                [compareConfig]="pair.header.base"
+              ></app-history-header-config>
+            </div>
+            <div class="flex gap-2.5">
+              <app-history-variables-config
+                class="basis-1/2"
+                diffSide="left"
+                [baseConfig]="pair.header.base"
+                [compareConfig]="pair.header.compare"
+              ></app-history-variables-config>
+              <app-history-variables-config
+                class="basis-1/2"
+                diffSide="right"
+                [baseConfig]="pair.header.compare"
+                [compareConfig]="pair.header.base"
+              ></app-history-variables-config>
             </div>
           </div>
         </div>
-      </ng-container>
-    </div>
+        <!-- Nodes. -->
+        @for (nodePair of pair.nodes; track nodePair) {
+          @if (showNodePair(nodePair)) {
+            <div class="bd-rect-card">
+              <div class="flex flex-col">
+                <div class="bd-default-padding flex pb-0">
+                  <div class="flex flex-col">
+                    <div class="bd-type-text">NODE</div>
+                    <div class="bd-title-text">
+                      {{ nodePair.name === clientNodeName ? 'Client Applications' : nodePair.name }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="bd-default-padding flex flex-col gap-2.5">
+                <div class="flex gap-2.5">
+                  <div class="local-compare-header basis-1/2 flex">
+                    <div>{{ pair.base.version }}</div>
+                    @if (nodePair.isOrderChanged) {
+                      <div class="bd-description-text local-order-changed">
+                        &nbsp;- Note: The order of the processes is not exactly as configured in this version.
+                      </div>
+                    }
+                  </div>
+                  <div class="local-compare-header basis-1/2">{{ pair.compare.version }}</div>
+                </div>
+                @for (appPair of nodePair.applications; track appPair) {
+                  <div class="flex gap-2.5 items-stretch">
+                    @if (showAppPair(appPair)) {
+                      <app-history-process-config
+                        class="basis-1/2"
+                        [baseConfig]="appPair.base"
+                        [compareConfig]="appPair.compare"
+                        [baseDescriptor]="appPair.baseDesc"
+                        [hasProcessControl]="nodePair.name !== clientNodeName"
+                        diffSide="left"
+                      ></app-history-process-config>
+                      <app-history-process-config
+                        class="basis-1/2"
+                        [baseConfig]="appPair.compare"
+                        [compareConfig]="appPair.base"
+                        [baseDescriptor]="appPair.compareDesc"
+                        [hasProcessControl]="nodePair.name !== clientNodeName"
+                        diffSide="right"
+                      ></app-history-process-config>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

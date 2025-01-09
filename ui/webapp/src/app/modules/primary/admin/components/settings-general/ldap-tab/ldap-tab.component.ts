@@ -1,11 +1,11 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import {
   BdDataTableComponent,
-  DragReorderEvent,
+  DragReorderEvent
 } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
@@ -13,10 +13,12 @@ import { LdapCheckActionComponent } from './ldap-check-action/ldap-check-action.
 import { LdapEditActionComponent } from './ldap-edit-action/ldap-edit-action.component';
 import { LdapImportActionComponent } from './ldap-import-action/ldap-import-action.component';
 
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-ldap-tab',
     templateUrl: './ldap-tab.component.html',
-    standalone: false
+  imports: [BdDataTableComponent, AsyncPipe]
 })
 export class LdapTabComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

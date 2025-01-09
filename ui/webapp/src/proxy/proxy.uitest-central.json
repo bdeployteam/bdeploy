@@ -1,0 +1,11 @@
+{
+  "/api": {
+    "target": "https://localhost:7715",
+    "secure": false
+  },
+  "/ws/object-changes": {
+    "target": "wss://localhost:7715",
+    "secure": false,
+    "ws": true
+  }
+}

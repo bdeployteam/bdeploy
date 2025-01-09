@@ -1,38 +1,35 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Instance Banner" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="servers.isCurrentInstanceSynchronized$ | async">
-      <div>A banner provides a version independent way of bringing information to other users attention.</div>
-
-      <app-bd-banner [banner]="banner"></app-bd-banner>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Banner Text</mat-label>
-        <textarea matInput [(ngModel)]="banner.text" class="!h-28" (ngModelChange)="onChange()"></textarea>
-      </mat-form-field>
-
-      <app-color-select-group (colorChanged)="doChangeColor($event)"></app-color-select-group>
-
-      <mat-divider></mat-divider>
-
-      <app-bd-button
-        text="Apply"
-        [collapsed]="false"
-        icon="done"
-        color="primary"
-        [disabled]="!disableApply"
-        (click)="onSave()"
-        [disabled]="saving$ | async"
-        [loadingWhen$]="saving$"
-      ></app-bd-button>
-      <app-bd-button
-        text="Remove Banner"
-        [collapsed]="false"
-        icon="delete"
-        [disabled]="!(instances.current$ | async)?.banner?.text?.length || (removing$ | async)"
-        (click)="doRemove()"
-        [loadingWhen$]="removing$"
-      ></app-bd-button>
-    </div>
+    @if (servers.isCurrentInstanceSynchronized$ | async) {
+      <div class="flex flex-col gap-2.5">
+        <div>A banner provides a version independent way of bringing information to other users attention.</div>
+        <app-bd-banner [banner]="banner"></app-bd-banner>
+        <mat-form-field appearance="fill">
+          <mat-label>Banner Text</mat-label>
+          <textarea matInput [(ngModel)]="banner.text" class="h-28!" (ngModelChange)="onChange()"></textarea>
+        </mat-form-field>
+        <app-color-select-group (colorChanged)="doChangeColor($event)"></app-color-select-group>
+        <mat-divider></mat-divider>
+        <app-bd-button
+          text="Apply"
+          [collapsed]="false"
+          icon="done"
+          color="primary"
+          [disabled]="!disableApply"
+          (click)="onSave()"
+          [disabled]="saving$ | async"
+          [loadingWhen$]="saving$"
+        ></app-bd-button>
+        <app-bd-button
+          text="Remove Banner"
+          [collapsed]="false"
+          icon="delete"
+          [disabled]="!(instances.current$ | async)?.banner?.text?.length || (removing$ | async)"
+          (click)="doRemove()"
+          [loadingWhen$]="removing$"
+        ></app-bd-button>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

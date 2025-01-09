@@ -1,15 +1,23 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { Observable, Subscription, combineLatest, of } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 interface NodeRow {
   name: string;
@@ -26,7 +34,7 @@ const colNodeName: BdDataColumn<NodeRow> = {
 @Component({
     selector: 'app-nodes',
     templateUrl: './nodes.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, BdButtonComponent, AsyncPipe]
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

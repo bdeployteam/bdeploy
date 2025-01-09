@@ -1,6 +1,6 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
-import { MatStepper } from '@angular/material/stepper';
+import { MatStepper, MatStep } from '@angular/material/stepper';
 import { Observable, map } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -29,6 +29,27 @@ import {
   TemplateVariableType,
 } from './../../../../../models/gen.dtos';
 import { GroupsService } from './../../../groups/services/groups.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { RouterLink } from '@angular/router';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { BdFileUploadComponent } from '../../../../core/components/bd-file-upload/bd-file-upload.component';
+import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { EditUniqueValueValidatorDirective } from '../../../../core/validators/edit-unique-value.directive';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdFormTemplateVariableComponent } from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
+import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatDivider } from '@angular/material/divider';
+import { AsyncPipe } from '@angular/common';
 
 interface ImportProductsState {
   error?: string;
@@ -100,7 +121,7 @@ const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto> = {
     templateUrl: './system-template.component.html',
     styleUrls: ['./system-template.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, RouterLink, BdDialogContentComponent, MatStepper, MatStep, BdFormSelectComponent, FormsModule, BdFileDropComponent, BdFileUploadComponent, BdNotificationCardComponent, BdDataTableComponent, MatProgressSpinner, BdFormInputComponent, EditUniqueValueValidatorDirective, TrimmedValidator, BdFormTemplateVariableComponent, MatTabGroup, MatTab, MatTabLabel, BdFormToggleComponent, MatTooltip, MatDivider, AsyncPipe]
 })
 export class SystemTemplateComponent implements OnInit {
   protected readonly cfg = inject(ConfigService);

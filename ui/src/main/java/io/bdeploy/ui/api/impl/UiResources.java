@@ -41,7 +41,7 @@ public class UiResources {
                 }
             }, HttpHandlerRegistration.ROOT);
         } else {
-            server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"),
+            server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/browser/"),
                     HttpHandlerRegistration.ROOT);
         }
 

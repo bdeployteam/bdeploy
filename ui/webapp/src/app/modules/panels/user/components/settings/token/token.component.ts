@@ -4,12 +4,21 @@ import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormToggleComponent } from '../../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-token',
     templateUrl: './token.component.html',
     styleUrls: ['./token.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdFormToggleComponent, FormsModule, MatFormField, MatLabel, MatInput, BdButtonComponent, AsyncPipe]
 })
 export class TokenComponent implements OnInit {
   private readonly authService = inject(AuthenticationService);

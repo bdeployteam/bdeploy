@@ -1,17 +1,17 @@
 <app-bd-notification-card header="Result" [collapsed]="true" [dismissable]="false" icon="info" class="mat-elevation-z3">
   <div class="flex flex-col gap-2.5">
     <div class="grid grid-cols-[16px_250px_auto] gap-x-1 gap-y-2 items-center max-h-60 overflow-auto pr-1 pl-0.5">
-      <ng-container *ngFor="let res of bulkOpResult.results">
+      @for (res of bulkOpResult.results; track res) {
         <mat-icon [style.width.px]="16" [style.height.px]="16" [style.font-size.px]="16"
           >{{ res.type === 'INFO' ? 'info' : 'warning' }}</mat-icon
-        >
-        <span class="text-xs font-mono tracking-tighter">{{res.target}}</span>
-        <span class="text-xs">{{res.message}}</span>
-      </ng-container>
-    </div>
+          >
+          <span class="text-xs font-mono tracking-tighter">{{res.target}}</span>
+          <span class="text-xs">{{res.message}}</span>
+        }
+      </div>
 
-    <app-bd-action-row>
-      <app-bd-button text="Close" [collapsed]="false" (click)="close()"></app-bd-button>
-    </app-bd-action-row>
-  </div>
-</app-bd-notification-card>
+      <app-bd-action-row>
+        <app-bd-button text="Close" [collapsed]="false" (click)="close()"></app-bd-button>
+      </app-bd-action-row>
+    </div>
+  </app-bd-notification-card>

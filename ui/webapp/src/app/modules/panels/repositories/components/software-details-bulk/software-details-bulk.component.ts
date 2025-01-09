@@ -1,17 +1,25 @@
 import { Component, inject, ViewChild } from '@angular/core';
 import { BehaviorSubject, finalize, map, switchMap } from 'rxjs';
 import { Actions } from 'src/app/models/gen.dtos';
-import { BdBulkOperationResultConfirmationPromptComponent } from 'src/app/modules/core/components/bd-bulk-operation-result-confirmation-prompt/bd-bulk-operation-result-confirmation-prompt.component';
+import {
+  BdBulkOperationResultConfirmationPromptComponent
+} from 'src/app/modules/core/components/bd-bulk-operation-result-confirmation-prompt/bd-bulk-operation-result-confirmation-prompt.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ConfirmationService } from 'src/app/modules/core/services/confirmation.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { SoftwareDetailsBulkService } from '../../services/software-details-bulk.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-software-details-bulk',
     templateUrl: './software-details-bulk.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatDivider, BdButtonComponent, AsyncPipe]
 })
 export class SoftwareDetailsBulkComponent {
   private readonly confirm = inject(ConfirmationService);

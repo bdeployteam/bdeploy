@@ -1,13 +1,19 @@
 import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { BdDataColumn } from 'src/app/models/data';
+import { BdButtonPopupComponent } from '../bd-button-popup/bd-button-popup.component';
+import { MatCard } from '@angular/material/card';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-bd-data-sorting',
     templateUrl: './bd-data-sorting.component.html',
     styleUrls: ['./bd-data-sorting.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [BdButtonPopupComponent, MatCard, MatRadioGroup, FormsModule, MatRadioButton, MatButtonToggleGroup, MatButtonToggle, MatIcon]
 })
 export class BdDataSortingComponent<T> {
   /**

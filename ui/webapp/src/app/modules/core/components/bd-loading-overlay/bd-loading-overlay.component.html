@@ -1,11 +1,14 @@
-<ng-content *ngIf="!(show && mode === 'hide')"></ng-content>
+@if (!(show && mode === 'hide')) {
+  <ng-content></ng-content>
+}
 
-<div
-  *ngIf="show"
-  [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
-  [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-  class="absolute top-0 left-0 w-full h-full z-[9998] flex flex-col justify-center items-center"
-  [class.bd-normal-backdrop]="show && mode === 'dim'"
->
-  <mat-spinner [diameter]="48"></mat-spinner>
-</div>
+@if (show) {
+  <div
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
+    [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+    class="absolute top-0 left-0 w-full h-full z-9998 flex flex-col justify-center items-center"
+    [class.bd-normal-backdrop]="show && mode === 'dim'"
+    >
+    <mat-spinner [diameter]="48"></mat-spinner>
+  </div>
+}

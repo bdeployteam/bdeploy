@@ -3,12 +3,14 @@ import { BehaviorSubject } from 'rxjs';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { InstancesService } from '../../../services/instances.service';
 import { ProcessesService } from '../../../services/processes.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-process-outdated',
     templateUrl: './process-outdated.component.html',
     styleUrls: ['./process-outdated.component.css'],
-    standalone: false
+    imports: [MatTooltip, AsyncPipe]
 })
 export class ProcessOutdatedComponent implements OnInit {
   private readonly processes = inject(ProcessesService);

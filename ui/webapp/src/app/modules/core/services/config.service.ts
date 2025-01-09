@@ -1,19 +1,19 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, Injector, NgZone, inject } from '@angular/core';
+import { inject, Injectable, Injector, NgZone } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthClientConfig } from '@auth0/auth0-angular';
 import { isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable, Subject, combineLatest, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, map, retry, switchMap, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, PluginInfoDto, Version, WebAuthSettingsDto } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import {
   ConnectionVersionComponent,
-  VERSION_DATA,
+  VERSION_DATA
 } from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_CONTEXT } from '../utils/loading-bar.util';
 import { suppressGlobalErrorHandling, suppressUnauthenticatedDelay } from '../utils/server.utils';
@@ -28,7 +28,7 @@ export interface AppConfig {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ConfigService {
   private readonly themes = inject(ThemeService); /* dummy: required to bootstrap theming early! */
@@ -61,7 +61,7 @@ export class ConfigService {
 
   // prettier-ignore
   constructor() {
-    this.icons.setDefaultFontSetClass('material-symbols-outlined')
+    this.icons.setDefaultFontSetClass('material-symbols-outlined');
 
     // register all custom icons we want to use with <mat-icon>
     this.icons.addSvgIcon('bdeploy', this.sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
@@ -87,7 +87,7 @@ export class ConfigService {
 
     this.offline$.pipe(distinctUntilChanged()).subscribe((o) => {
       this.ngZone.run(() => {
-        if(!o) {
+        if (!o) {
           this.closeOverlay();
         } else {
           this.showOfflineOverlayAndPoll();
@@ -106,7 +106,7 @@ export class ConfigService {
             hostname: bv.name,
             api: environment.apiUrl,
             ws: environment.wsUrl,
-            mode: bv.mode,
+            mode: bv.mode
           };
           console.log('API URL set to ' + this.config.api);
           console.log('WS URL set to ' + this.config.ws);
@@ -122,7 +122,7 @@ export class ConfigService {
           // trigger load of an existing session in case there is one on the server.
           // finally load authentication setting.
           const loadAuthSettings = this.http.get<WebAuthSettingsDto>(this.config.api + '/master/settings/web-auth', {
-            headers: suppressUnauthenticatedDelay(new HttpHeaders()),
+            headers: suppressUnauthenticatedDelay(new HttpHeaders())
           });
 
           const fullHref = window.location.href;
@@ -137,39 +137,39 @@ export class ConfigService {
           if (authSettings?.auth0?.enabled) {
             this.auth0.set({
               clientId: authSettings.auth0.clientId,
-              domain: authSettings.auth0.domain,
+              domain: authSettings.auth0.domain
             });
           } else {
             // avoid problems (crash) in auth0 servive.
             this.auth0.set({
               clientId: '',
-              domain: '',
+              domain: ''
             });
           }
 
           return config;
-        }),
-      ),
+        })
+      )
     );
   }
 
   public loadSession(oneTimePassword: string): Observable<any> {
     const params = oneTimePassword
       ? {
-          otp: oneTimePassword,
-        }
+        otp: oneTimePassword
+      }
       : null;
     return this.http
       .get(`${this.config.api}/auth/session`, {
         params: params,
         responseType: 'text',
-        headers: suppressGlobalErrorHandling(suppressUnauthenticatedDelay(new HttpHeaders())),
+        headers: suppressGlobalErrorHandling(suppressUnauthenticatedDelay(new HttpHeaders()))
       })
       .pipe(
         catchError((err) => {
           console.log(`No existing session on the remote: ${err}`);
           return of(null);
-        }),
+        })
       );
   }
 
@@ -194,7 +194,7 @@ export class ConfigService {
 
         this.overlayRef = this.overlay.create({
           positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-          hasBackdrop: true,
+          hasBackdrop: true
         });
 
         // create a portal with a custom injector which passes the received version data to show it.
@@ -207,11 +207,11 @@ export class ConfigService {
                 provide: VERSION_DATA,
                 useValue: {
                   oldVersion: this.config.version,
-                  newVersion: bv.version,
-                },
-              },
-            ],
-          }),
+                  newVersion: bv.version
+                }
+              }
+            ]
+          })
         );
         this.overlayRef.attach(portal);
       });
@@ -232,7 +232,7 @@ export class ConfigService {
   private showOfflineOverlayAndPoll(): void {
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-      hasBackdrop: true,
+      hasBackdrop: true
     });
 
     const portal = new ComponentPortal(ConnectionLostComponent);
@@ -272,9 +272,9 @@ export class ConfigService {
     return this.http
       .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
         headers: suppressUnauthenticatedDelay(
-          errorHandling ? new HttpHeaders() : suppressGlobalErrorHandling(new HttpHeaders()),
+          errorHandling ? new HttpHeaders() : suppressGlobalErrorHandling(new HttpHeaders())
         ),
-        context: NO_LOADING_BAR_CONTEXT,
+        context: NO_LOADING_BAR_CONTEXT
       })
       .pipe(
         catchError((e) => {
@@ -312,7 +312,7 @@ export class ConfigService {
 
           // however we ended here, we're not offline anymore in case we were!
           this.offline$.next(false);
-        }),
+        })
       );
   }
 

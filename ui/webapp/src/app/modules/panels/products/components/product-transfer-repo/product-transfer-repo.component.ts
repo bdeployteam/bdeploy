@@ -1,6 +1,6 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { MatStepper } from '@angular/material/stepper';
+import { MatStepper, MatStep } from '@angular/material/stepper';
 import { groupBy } from 'lodash-es';
 import { BehaviorSubject, combineLatest, finalize, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
@@ -11,11 +11,20 @@ import { ProductsColumnsService } from 'src/app/modules/primary/products/service
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { BdLoadingOverlayComponent } from '../../../../core/components/bd-loading-overlay/bd-loading-overlay.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-product-transfer-repo',
     templateUrl: './product-transfer-repo.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatStepper, MatStep, BdFormSelectComponent, FormsModule, BdLoadingOverlayComponent, BdDataTableComponent, BdButtonComponent, AsyncPipe]
 })
 export class ProductTransferRepoComponent implements OnInit {
   private readonly repositories = inject(RepositoriesService);

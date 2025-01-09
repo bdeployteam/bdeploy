@@ -1,20 +1,32 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, finalize, map, of, skipWhile, startWith, tap } from 'rxjs';
+import { BehaviorSubject, finalize, map, Observable, of, skipWhile, startWith, Subscription, tap } from 'rxjs';
 import { Actions, MinionMode, NodeAttachDto } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  BdDialogMessageAction,
+  BdDialogMessageAction
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
+
+
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { IdentifierValidator } from '../../../../core/validators/identifier.directive';
+import { EditUniqueValueValidatorDirective } from '../../../../core/validators/edit-unique-value.directive';
+import { RevalidateOnDirective } from '../../../../core/directives/revalidate-on.directive';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 export const NODE_MIME_TYPE = 'text/plain';
 
@@ -37,7 +49,7 @@ const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
     selector: 'app-add-node',
     templateUrl: './add-node.component.html',
     styleUrls: ['./add-node.component.css'],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFileDropComponent, BdFormInputComponent, IdentifierValidator, EditUniqueValueValidatorDirective, RevalidateOnDirective, BdButtonComponent, AsyncPipe]
 })
 export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { BehaviorSubject, combineLatest, finalize, map, Observable, Subscription } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -9,10 +9,17 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { IdentifierValidator } from '../../../../core/validators/identifier.directive';
+import { EditUniqueValueValidatorDirective } from '../../../../core/validators/edit-unique-value.directive';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+
 @Component({
     selector: 'app-add-repository',
     templateUrl: './add-repository.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, IdentifierValidator, EditUniqueValueValidatorDirective, BdButtonComponent]
 })
 export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly repositories = inject(RepositoriesService);

@@ -1,10 +1,12 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, combineLatest, finalize } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, Observable, Subscription } from 'rxjs';
 import { Actions, NodeAttachDto, RemoteService } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
@@ -13,11 +15,18 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFileDropComponent } from '../../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-node-edit',
     templateUrl: './node-edit.component.html',
     styleUrls: ['./node-edit.component.css'],
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFileDropComponent, BdFormInputComponent, BdButtonComponent, AsyncPipe]
 })
 export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
@@ -33,7 +42,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.saving$,
     null,
     null,
-    this.nodeName$,
+    this.nodeName$
   );
 
   protected data: RemoteService;
@@ -50,18 +59,18 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       combineLatest([this.areas.panelRoute$, this.nodesAdmin.nodes$]).subscribe(([r, n]) => {
-        if (!r?.params?.node || !n?.length) {
+        if (!r?.params?.['node'] || !n?.length) {
           this.nodeName$.next(null);
           this.data = null;
           return;
         }
 
-        this.replace = !!r.data.replace;
-        this.nodeName$.next(r.params.node);
-        this.orig = cloneDeep(n.find((x) => x.name === r.params.node).status?.config?.remote);
+        this.replace = !!r.data['replace'];
+        this.nodeName$.next(r.params['node']);
+        this.orig = cloneDeep(n.find((x) => x.name === r.params['node']).status?.config?.remote);
         this.orig.authPack = ''; // clear existing pack, not relevant AT ALL.
         this.data = cloneDeep(this.orig);
-      }),
+      })
     );
   }
 

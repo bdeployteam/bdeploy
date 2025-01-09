@@ -5,18 +5,19 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <app-bd-notification-card
-        *ngIf="!isSynchronized()"
-        icon="history"
-        type="warning"
-        [dismissable]="false"
-        header="Server Not Synchronized"
-      >
-        <div class="text-justify">
-          The managed server responsible for this system is not synchronized, details are unavailable. Please
-          synchronize the server to enable editing.
-        </div>
-      </app-bd-notification-card>
+      @if (!isSynchronized()) {
+        <app-bd-notification-card
+          icon="history"
+          type="warning"
+          [dismissable]="false"
+          header="Server Not Synchronized"
+          >
+          <div class="text-justify">
+            The managed server responsible for this system is not synchronized, details are unavailable. Please
+            synchronize the server to enable editing.
+          </div>
+        </app-bd-notification-card>
+      }
       <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
         <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
         <div class="bd-secondary-text">System ID:</div>

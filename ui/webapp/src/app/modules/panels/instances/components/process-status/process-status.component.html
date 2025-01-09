@@ -17,92 +17,100 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-notification-card
-      *ngIf="outdated$ | async"
-      icon="warning"
-      header="Outdated"
-      [dismissable]="false"
-      [type]="'warning'"
-    >
-      <div class="text-justify">
-        The process is currently running from an instance version (<strong
+    @if (outdated$ | async) {
+      <app-bd-notification-card
+        icon="warning"
+        header="Outdated"
+        [dismissable]="false"
+        [type]="'warning'"
+        >
+        <div class="text-justify">
+          The process is currently running from an instance version (<strong
           >{{ processDetail?.status.instanceTag }}</strong
-        >) which is not the active version (<strong>{{ (instances.active$ | async)?.instance?.tag }}</strong>). Stop the
-        process and start it again to launch it from the active version instead.
-      </div>
-    </app-bd-notification-card>
-    <app-bd-notification-card
-      *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-      icon="history"
-      [type]="'warning'"
-      [dismissable]="false"
-      header="Server Not Synchronized"
-    >
-      <div class="text-justify">
-        The managed server hosting this instance is not synchronized, runtime details are unavailable. Please
-        synchronize the server to see additional details.
-      </div>
-    </app-bd-notification-card>
-    <div *ngIf="processConfig" class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
-      <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
-      <div class="bd-secondary-text">Process ID:</div>
-      <div class="bd-secondary-text">
-        <app-bd-identifier [showCopyButton]="true" [id]="processConfig?.id"></app-bd-identifier>
-      </div>
-
-      <mat-icon>flight_takeoff</mat-icon>
-      <div>Start Type:</div>
-      <div>{{ startType }}</div>
-
-      <mat-icon>favorite_outline</mat-icon>
-      <div>Keep Alive:</div>
-      <div>{{ processConfig?.processControl.keepAlive ? 'Enabled' : 'Disabled' }}</div>
-
-      <ng-container *ngIf="processDetail">
-        <ng-container *ngIf="!isRunning && !isCrashedWaiting">
-          <ng-container *ngIf="processDetail?.status.exitCode || processDetail?.stopTime > 0">
-            <mat-icon>exit_to_app</mat-icon>
-            <div>Exit Code:</div>
-            <div>{{ processDetail?.status.exitCode }}</div>
-          </ng-container>
-
-          <ng-container *ngIf="processDetail?.stopTime > 0">
+          >) which is not the active version (<strong>{{ (instances.active$ | async)?.instance?.tag }}</strong>). Stop the
+          process and start it again to launch it from the active version instead.
+        </div>
+      </app-bd-notification-card>
+    }
+    @if (!(servers.isCurrentInstanceSynchronized$ | async)) {
+      <app-bd-notification-card
+        icon="history"
+        [type]="'warning'"
+        [dismissable]="false"
+        header="Server Not Synchronized"
+        >
+        <div class="text-justify">
+          The managed server hosting this instance is not synchronized, runtime details are unavailable. Please
+          synchronize the server to see additional details.
+        </div>
+      </app-bd-notification-card>
+    }
+    @if (processConfig) {
+      <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
+        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+        <div class="bd-secondary-text">Process ID:</div>
+        <div class="bd-secondary-text">
+          <app-bd-identifier [showCopyButton]="true" [id]="processConfig?.id"></app-bd-identifier>
+        </div>
+        <mat-icon>flight_takeoff</mat-icon>
+        <div>Start Type:</div>
+        <div>{{ startType }}</div>
+        <mat-icon>favorite_outline</mat-icon>
+        <div>Keep Alive:</div>
+        <div>{{ processConfig?.processControl.keepAlive ? 'Enabled' : 'Disabled' }}</div>
+        @if (processDetail) {
+          @if (!isRunning && !isCrashedWaiting) {
+            @if (processDetail?.status.exitCode || processDetail?.stopTime > 0) {
+              <mat-icon>exit_to_app</mat-icon>
+              <div>Exit Code:</div>
+              <div>{{ processDetail?.status.exitCode }}</div>
+            }
+            @if (processDetail?.stopTime > 0) {
+              <mat-icon>timer</mat-icon>
+              <div>Stopped At:</div>
+              @if (!!processDetail?.stopTime) {
+                <div>{{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
+              }
+              @if (!processDetail?.stopTime) {
+                <div>-</div>
+              }
+            }
+          }
+          @if (isRunning) {
+            <mat-icon>timelapse</mat-icon>
+            <div>Up Time:</div>
+            <div>{{ uptime$ | async }}</div>
             <mat-icon>timer</mat-icon>
+            <div>Started At:</div>
+            <div>{{ processDetail?.handle.startTime | date: 'dd.MM.yyyy HH:mm' }}</div>
+          }
+          @if (isCrashedWaiting) {
+            <mat-icon>report</mat-icon>
             <div>Stopped At:</div>
-            <div *ngIf="!!processDetail?.stopTime">{{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
-            <div *ngIf="!processDetail?.stopTime">-</div>
-          </ng-container>
-        </ng-container>
-        <ng-container *ngIf="isRunning">
-          <mat-icon>timelapse</mat-icon>
-          <div>Up Time:</div>
-          <div>{{ uptime$ | async }}</div>
-
-          <mat-icon>timer</mat-icon>
-          <div>Started At:</div>
-          <div>{{ processDetail?.handle.startTime | date: 'dd.MM.yyyy HH:mm' }}</div>
-        </ng-container>
-        <ng-container *ngIf="isCrashedWaiting">
-          <mat-icon>report</mat-icon>
-          <div>Stopped At:</div>
-          <div *ngIf="!!processDetail?.stopTime">{{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
-          <div *ngIf="!processDetail?.stopTime">-</div>
-
-          <mat-progress-spinner
-            [value]="restartProgress$ | async"
-            color="primary"
-            [diameter]="24"
-          ></mat-progress-spinner>
-          <div>Restart In:</div>
-          <div>{{ restartProgressText$ | async }}</div>
-        </ng-container>
-      </ng-container>
-    </div>
+            @if (!!processDetail?.stopTime) {
+              <div>{{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
+            }
+            @if (!processDetail?.stopTime) {
+              <div>-</div>
+            }
+            <mat-progress-spinner
+              [value]="restartProgress$ | async"
+              color="primary"
+              [diameter]="24"
+            ></mat-progress-spinner>
+            <div>Restart In:</div>
+            <div>{{ restartProgressText$ | async }}</div>
+          }
+        }
+      </div>
+    }
     <mat-divider></mat-divider>
-    <div *ngIf="!processDetail && !(details.loading$ | async)" class="bd-hint-text mt-2.5">
-      No process details available.
-    </div>
-    <ng-container *ngIf="processDetail">
+    @if (!processDetail && !(details.loading$ | async)) {
+      <div class="bd-hint-text mt-2.5">
+        No process details available.
+      </div>
+    }
+    @if (processDetail) {
       <div class="flex justify-center items-center gap-2.5 p-2.5">
         <app-bd-button
           class="local-control-button"
@@ -111,11 +119,15 @@
           [disabled]="startDisabled$ | async"
           (click)="start()"
           matTooltip="Start Process"
-        >
-          <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedStart$ | async)">play_arrow</mat-icon>
-          <div class="flex-auto flex justify-center items-center" *ngIf="mappedStart$ | async">
-            <mat-spinner [diameter]="24"></mat-spinner>
-          </div>
+          >
+          @if (!(mappedStart$ | async)) {
+            <mat-icon class="material-symbols-filled flex-auto">play_arrow</mat-icon>
+          }
+          @if (mappedStart$ | async) {
+            <div class="flex-auto flex justify-center items-center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+            </div>
+          }
         </app-bd-button>
         <app-bd-button
           class="local-control-button"
@@ -123,11 +135,15 @@
           [disabled]="stopDisabled$ | async"
           (click)="stop()"
           matTooltip="Stop Process"
-        >
-          <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedStop$ | async)">stop</mat-icon>
-          <div class="flex-auto flex justify-center items-center" *ngIf="mappedStop$ | async">
-            <mat-spinner [diameter]="24"></mat-spinner>
-          </div>
+          >
+          @if (!(mappedStop$ | async)) {
+            <mat-icon class="material-symbols-filled flex-auto">stop</mat-icon>
+          }
+          @if (mappedStop$ | async) {
+            <div class="flex-auto flex justify-center items-center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+            </div>
+          }
         </app-bd-button>
         <app-bd-button
           class="local-control-button"
@@ -135,26 +151,35 @@
           [disabled]="restartDisabled$ | async"
           (click)="restart()"
           matTooltip="Restart Process"
-        >
-          <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedRestart$ | async)">replay</mat-icon>
-          <div class="flex-auto flex justify-center items-center" *ngIf="mappedRestart$ | async">
-            <mat-spinner [diameter]="24"></mat-spinner>
-          </div>
+          >
+          @if (!(mappedRestart$ | async)) {
+            <mat-icon class="material-symbols-filled flex-auto">replay</mat-icon>
+          }
+          @if (mappedRestart$ | async) {
+            <div class="flex-auto flex justify-center items-center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+            </div>
+          }
         </app-bd-button>
       </div>
       <mat-divider></mat-divider>
       <div class="flex flex-col gap-2.5 pt-2.5">
-        <app-bd-expand-button
-          *ngIf="!!processConfig?.processControl?.startupProbe?.endpoint || !!processConfig?.processControl?.livenessProbe?.endpoint"
-          text="Process Probes"
-          icon="network_check"
-        >
-          <ng-container *ngFor="let probe of processDetail?.lastProbes; let isLast = last; trackBy: trackProbe">
-            <app-probe-status [probe]="probe"></app-probe-status>
-            <mat-divider *ngIf="!isLast"></mat-divider>
-          </ng-container>
-          <app-bd-no-data *ngIf="!processDetail?.lastProbes?.length"> No Probe Information. </app-bd-no-data>
-        </app-bd-expand-button>
+        @if (!!processConfig?.processControl?.startupProbe?.endpoint || !!processConfig?.processControl?.livenessProbe?.endpoint) {
+          <app-bd-expand-button
+            text="Process Probes"
+            icon="network_check"
+            >
+            @for (probe of processDetail?.lastProbes; track trackProbe($index, probe); let isLast = $last) {
+              <app-probe-status [probe]="probe"></app-probe-status>
+              @if (!isLast) {
+                <mat-divider></mat-divider>
+              }
+            }
+            @if (!processDetail?.lastProbes?.length) {
+              <app-bd-no-data> No Probe Information. </app-bd-no-data>
+            }
+          </app-bd-expand-button>
+        }
         <app-bd-panel-button
           [collapsed]="false"
           [toggle]="false"
@@ -180,23 +205,24 @@
           icon="terminal"
           text="Process Console"
         ></app-bd-panel-button>
-        <ng-container *ngIf="uiEndpoints?.length">
+        @if (uiEndpoints?.length) {
           <mat-divider></mat-divider>
-          <app-bd-button
-            *ngFor="let ep of uiEndpoints"
-            [text]="'Open UI: ' + ep.id"
-            icon="preview"
-            [collapsed]="false"
-            [disabled]="!ep.proxying && !ep.directUri"
-            (click)="openUI(ep)"
-          ></app-bd-button>
-        </ng-container>
-        <ng-container *ngIf="pinnedParameters?.length">
+          @for (ep of uiEndpoints; track ep) {
+            <app-bd-button
+              [text]="'Open UI: ' + ep.id"
+              icon="preview"
+              [collapsed]="false"
+              [disabled]="!ep.proxying && !ep.directUri"
+              (click)="openUI(ep)"
+            ></app-bd-button>
+          }
+        }
+        @if (pinnedParameters?.length) {
           <mat-divider></mat-divider>
           <app-bd-expand-button text="Pinned Parameters" icon="push_pin" [expanded]="true">
             <app-bd-data-table [records]="pinnedParameters" [columns]="pinnedColumns"></app-bd-data-table>
           </app-bd-expand-button>
-        </ng-container>
+        }
         <app-bd-button
           icon="construction"
           text="Verify Installation"
@@ -206,9 +232,9 @@
           (click)="verify()"
           [loadingWhen$]="verifying$"
           [disabled]="verifyDisabled$ | async"
-        >
+          >
         </app-bd-button>
       </div>
-    </ng-container>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

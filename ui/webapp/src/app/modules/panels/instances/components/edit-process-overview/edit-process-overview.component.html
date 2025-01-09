@@ -1,61 +1,61 @@
 <app-bd-dialog [loadingWhen$]="instanceEdit.loading$">
   <app-bd-dialog-toolbar header="Edit {{ (edit.process$ | async)?.name }}" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      class="flex flex-col gap-2.5"
-      *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized"
-    >
-      <app-bd-panel-button
-        text="Configure Parameters..."
-        icon="settings"
-        [collapsed]="false"
-        [disabled]="!(edit.process$ | async)"
-        [relative]="true"
-        [route]="['edit']"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        text="Configure Endpoints..."
-        icon="settings_ethernet"
-        [collapsed]="false"
-        [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeName === clientNodeName"
-        [relative]="true"
-        [route]="['endpoints']"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        text="Move to Node"
-        icon="dns"
-        [collapsed]="false"
-        [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeName === clientNodeName"
-        [relative]="true"
-        [route]="['move']"
-      ></app-bd-panel-button>
-      <app-bd-button
-        text="Copy to Clipboard"
-        icon="content_copy"
-        [collapsed]="false"
-        (click)="doCopy()"
-        [disabled]="!(edit.process$ | async)"
-      ></app-bd-button>
-      <app-bd-button
-        text="Delete"
-        icon="delete"
-        [collapsed]="false"
-        (click)="doDelete()"
-        [disabled]="!(edit.process$ | async)"
-      ></app-bd-button>
-    </div>
-    <ng-template #currentInstanceIsNotSynchronized>
+    @if (servers.isCurrentInstanceSynchronized$ | async) {
+      <div
+        class="flex flex-col gap-2.5"
+        >
+        <app-bd-panel-button
+          text="Configure Parameters..."
+          icon="settings"
+          [collapsed]="false"
+          [disabled]="!(edit.process$ | async)"
+          [relative]="true"
+          [route]="['edit']"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          text="Configure Endpoints..."
+          icon="settings_ethernet"
+          [collapsed]="false"
+          [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeName === clientNodeName"
+          [relative]="true"
+          [route]="['endpoints']"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          text="Move to Node"
+          icon="dns"
+          [collapsed]="false"
+          [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeName === clientNodeName"
+          [relative]="true"
+          [route]="['move']"
+        ></app-bd-panel-button>
+        <app-bd-button
+          text="Copy to Clipboard"
+          icon="content_copy"
+          [collapsed]="false"
+          (click)="doCopy()"
+          [disabled]="!(edit.process$ | async)"
+        ></app-bd-button>
+        <app-bd-button
+          text="Delete"
+          icon="delete"
+          [collapsed]="false"
+          (click)="doDelete()"
+          [disabled]="!(edit.process$ | async)"
+        ></app-bd-button>
+      </div>
+    } @else {
       <app-bd-notification-card
         icon="sync"
         [type]="'warning'"
         [dismissable]="false"
         header="Server Not Synchronized"
-      >
+        >
         <div class="text-justify">
           The managed server responsible for the selected node is not synchronized. Please synchronize the server to
           continue editing.
         </div>
       </app-bd-notification-card>
-    </ng-template>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

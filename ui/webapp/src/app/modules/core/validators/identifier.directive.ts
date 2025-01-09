@@ -6,8 +6,7 @@ const ID_REGEX = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
 
 @Directive({
     selector: '[appIdentifier]',
-    providers: [{ provide: NG_VALIDATORS, useExisting: IdentifierValidator, multi: true }],
-    standalone: false
+    providers: [{ provide: NG_VALIDATORS, useExisting: IdentifierValidator, multi: true }]
 })
 export class IdentifierValidator implements Validator {
   public validate(control: AbstractControl): ValidationErrors {

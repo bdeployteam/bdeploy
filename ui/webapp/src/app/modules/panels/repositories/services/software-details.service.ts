@@ -10,7 +10,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import {
   RepositoryService,
   SwPkgCompound,
-  SwPkgType,
+  SwPkgType
 } from 'src/app/modules/primary/repositories/services/repository.service';
 import { InstTemplateData, LabelRecord } from '../../../core/services/product-actions-columns';
 
@@ -59,8 +59,8 @@ export class SoftwareDetailsService implements OnDestroy {
       this.softwareSubscription = this.repository.data$
         .pipe(
           map((data) =>
-            data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value),
-          ),
+            data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value)
+          )
         )
         .subscribe((data) => {
           this.softwarePackage$.next(data);
@@ -78,7 +78,7 @@ export class SoftwareDetailsService implements OnDestroy {
       this.pluginsLoading$.next(true);
       const key: ManifestKey = {
         name: this.manifestKey$.value,
-        tag: this.manifestTag$.value,
+        tag: this.manifestTag$.value
       };
       this.http
         .post<PluginInfoDto[]>(this.pluginApiPath(), key)
@@ -96,7 +96,7 @@ export class SoftwareDetailsService implements OnDestroy {
     return new Observable<unknown>((s) => {
       this.http
         .get(`${this.getApiPath4Type()}/zip`, {
-          responseType: 'text',
+          responseType: 'text'
         })
         .subscribe((token) => {
           this.downloads.download(this.downloads.createDownloadUrl(token));
@@ -124,6 +124,7 @@ export class SoftwareDetailsService implements OnDestroy {
     } else if (this.softwarePackage$.value?.type === SwPkgType.EXTERNAL_SOFTWARE) {
       return this.softwareApiPath();
     }
+    throw new Error('Invalid software package type');
   }
 
   private mapLabels(software: any) {

@@ -3,21 +3,30 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   Output,
   SimpleChanges,
   TemplateRef,
   ViewChild,
-  ViewEncapsulation,
-  inject,
+  ViewEncapsulation
 } from '@angular/core';
-import { ControlValueAccessor, NgControl, UntypedFormControl } from '@angular/forms';
-import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
-import { ErrorStateMatcher } from '@angular/material/core';
+import { ControlValueAccessor, NgControl, UntypedFormControl, FormsModule } from '@angular/forms';
+import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
-import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
+import { ContentCompletion, BdContentAssistMenuComponent } from '../bd-content-assist-menu/bd-content-assist-menu.component';
+import { MatFormField, MatLabel, MatPrefix, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
+import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
+import { MatInput } from '@angular/material/input';
+import { BdContentAssistDirective } from '../bd-content-assist/bd-content-assist.directive';
+import { CdkAutofill } from '@angular/cdk/text-field';
+import { NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard } from '@angular/material/card';
+import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
 
 @Component({
     selector: 'app-bd-form-input',
@@ -25,7 +34,7 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
     styleUrls: ['./bd-form-input.component.css'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatFormField, ClickStopPropagationDirective, MatLabel, BdContentAssistMenuComponent, MatInput, MatAutocompleteTrigger, FormsModule, BdContentAssistDirective, CdkAutofill, MatAutocomplete, MatOption, MatPrefix, NgTemplateOutlet, MatSuffix, MatIcon, MatError, MatCard, MatHint, BdPopupDirective, AsyncPipe]
 })
 export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMatcher, OnChanges {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
@@ -60,6 +69,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   public get value() {
     return this.internalValue;
   }
+
   public set value(v) {
     if (v !== this.internalValue) {
       this.writeValue(v);
@@ -83,7 +93,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.suggested) {
+    if (changes['suggested']) {
       this.updateFilter();
     }
   }
@@ -147,6 +157,8 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
     if (this.errorFallback) {
       return this.errorFallback;
     }
+
+    throw new Error('Missing error message and fallback for ' + this.label);
   }
 
   private updateFilter() {

@@ -22,18 +22,20 @@
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="groups.current$ | async as group">
-      <app-bd-data-display [columns]="columns" [records]="group.instanceAttributes">
-        <app-bd-no-data>
-          <div>No attribute definitions</div>
-        </app-bd-no-data>
-      </app-bd-data-display>
-      <app-bd-button
-        text="Add Definition..."
-        icon="add"
-        [collapsed]="false"
-        (click)="showAddDialog(group, addTemplate)"
-      ></app-bd-button>
-    </div>
+    @if (groups.current$ | async; as group) {
+      <div class="flex flex-col gap-2.5">
+        <app-bd-data-display [columns]="columns" [records]="group.instanceAttributes">
+          <app-bd-no-data>
+            <div>No attribute definitions</div>
+          </app-bd-no-data>
+        </app-bd-data-display>
+        <app-bd-button
+          text="Add Definition..."
+          icon="add"
+          [collapsed]="false"
+          (click)="showAddDialog(group, addTemplate)"
+        ></app-bd-button>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

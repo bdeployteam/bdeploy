@@ -1,21 +1,35 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { ReportColumnDescriptor, ReportDescriptor, ReportResponseDto } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 
 interface GeneratedReportRow {
   [index: string]: string;
 }
 
 @Component({
-  selector: 'app-report',
-  templateUrl: './report.component.html',
-  standalone: false,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-report',
+    templateUrl: './report.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        BdDialogComponent,
+        BdDialogToolbarComponent,
+        BdButtonComponent,
+        RouterLink,
+        BdDataGroupingComponent,
+        BdDialogContentComponent,
+        BdDataTableComponent,
+    ],
 })
 export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly cd = inject(ChangeDetectorRef);

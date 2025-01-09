@@ -3,103 +3,105 @@
     <span
       >Choose the target product version to set on
       <strong>{{ (bulk.selection$ | async)?.length }}</strong> instances</span
-    >
-    <ng-container *ngIf="countRestrictions(bulk.selection$ | async) as count">
-      <app-bd-notification-card [dismissable]="false" type="warning" header="Version Restriction">
-        <div>
-          <strong>{{count}}</strong> instance(s) have configured version restrictions. Selecting a version which does
-          not match the restriction will lead to failure.
-        </div>
-      </app-bd-notification-card>
-    </ng-container>
-    <app-bd-form-select
-      name="prodVersion"
-      [(ngModel)]="selectedTarget"
-      [values]="selectableProducts"
-      [labels]="selectableProductLabels"
-    ></app-bd-form-select>
-  </div>
-</ng-template>
-
-<ng-template #opResult>
-  <app-bd-bulk-operation-result [bulkOpResult]="bulkOpResult"></app-bd-bulk-operation-result>
-</ng-template>
-
-<app-bd-dialog>
-  <app-bd-dialog-toolbar header="Bulk Instance Manipulation" [panel]="true"></app-bd-dialog-toolbar>
-  <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="bulk.selection$ | async as selections">
-      <div><strong>{{ selections.length }}</strong> instances selected.</div>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedStart$ | async)"
-        [loadingWhen$]="mappedStart$"
-        text="Start Selected Instances"
-        icon="play_arrow"
-        (click)="onStart()"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedRestart$ | async)"
-        [loadingWhen$]="mappedRestart$"
-        text="Restart Selected Instances"
-        icon="replay"
-        (click)="onRestart()"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedStop$ | async)"
-        [loadingWhen$]="mappedStop$"
-        text="Stop Selected Instances"
-        icon="stop"
-        (click)="onStop()"
-      ></app-bd-button>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (instance.overallStatesLoading$ | async)"
-        [loadingWhen$]="instance.overallStatesLoading$"
-        text="Fetch Instance States"
-        icon="cloud_sync"
-        (click)="onFetchStates()"
-      ></app-bd-button>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || !isAllSameProduct || (mappedUpdate$ | async)"
-        [loadingWhen$]="mappedUpdate$"
-        text="Set Product Version"
-        icon="security_update_good"
-        [toggle]="false"
-        (click)="onUpdate()"
-      ></app-bd-button>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedInstall$ | async)"
-        [loadingWhen$]="mappedInstall$"
-        text="Install Latest Version"
-        icon="deployed_code_update"
-        (click)="onInstall()"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedActivate$ | async)"
-        [loadingWhen$]="mappedActivate$"
-        text="Activate Latest Version..."
-        icon="deployed_code_alert"
-        (click)="onActivate()"
-      ></app-bd-button>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedDelete$ | async)"
-        [loadingWhen$]="mappedDelete$"
-        text="Delete Selected Instances"
-        icon="delete"
-        (click)="onDelete()"
-      ></app-bd-button>
+      >
+      @if (countRestrictions(bulk.selection$ | async); as count) {
+        <app-bd-notification-card [dismissable]="false" type="warning" header="Version Restriction">
+          <div>
+            <strong>{{count}}</strong> instance(s) have configured version restrictions. Selecting a version which does
+            not match the restriction will lead to failure.
+          </div>
+        </app-bd-notification-card>
+      }
+      <app-bd-form-select
+        name="prodVersion"
+        [(ngModel)]="selectedTarget"
+        [values]="selectableProducts"
+        [labels]="selectableProductLabels"
+      ></app-bd-form-select>
     </div>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+  </ng-template>
+
+  <ng-template #opResult>
+    <app-bd-bulk-operation-result [bulkOpResult]="bulkOpResult"></app-bd-bulk-operation-result>
+  </ng-template>
+
+  <app-bd-dialog>
+    <app-bd-dialog-toolbar header="Bulk Instance Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+    <app-bd-dialog-content>
+      @if (bulk.selection$ | async; as selections) {
+        <div class="flex flex-col gap-2.5">
+          <div><strong>{{ selections.length }}</strong> instances selected.</div>
+          <mat-divider></mat-divider>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (mappedStart$ | async)"
+            [loadingWhen$]="mappedStart$"
+            text="Start Selected Instances"
+            icon="play_arrow"
+            (click)="onStart()"
+          ></app-bd-button>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (mappedRestart$ | async)"
+            [loadingWhen$]="mappedRestart$"
+            text="Restart Selected Instances"
+            icon="replay"
+            (click)="onRestart()"
+          ></app-bd-button>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (mappedStop$ | async)"
+            [loadingWhen$]="mappedStop$"
+            text="Stop Selected Instances"
+            icon="stop"
+            (click)="onStop()"
+          ></app-bd-button>
+          <mat-divider></mat-divider>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (instance.overallStatesLoading$ | async)"
+            [loadingWhen$]="instance.overallStatesLoading$"
+            text="Fetch Instance States"
+            icon="cloud_sync"
+            (click)="onFetchStates()"
+          ></app-bd-button>
+          <mat-divider></mat-divider>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || !isAllSameProduct || (mappedUpdate$ | async)"
+            [loadingWhen$]="mappedUpdate$"
+            text="Set Product Version"
+            icon="security_update_good"
+            [toggle]="false"
+            (click)="onUpdate()"
+          ></app-bd-button>
+          <mat-divider></mat-divider>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (mappedInstall$ | async)"
+            [loadingWhen$]="mappedInstall$"
+            text="Install Latest Version"
+            icon="deployed_code_update"
+            (click)="onInstall()"
+          ></app-bd-button>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (mappedActivate$ | async)"
+            [loadingWhen$]="mappedActivate$"
+            text="Activate Latest Version..."
+            icon="deployed_code_alert"
+            (click)="onActivate()"
+          ></app-bd-button>
+          <mat-divider></mat-divider>
+          <app-bd-button
+            [collapsed]="false"
+            [disabled]="!selections.length || (mappedDelete$ | async)"
+            [loadingWhen$]="mappedDelete$"
+            text="Delete Selected Instances"
+            icon="delete"
+            (click)="onDelete()"
+          ></app-bd-button>
+        </div>
+      }
+    </app-bd-dialog-content>
+  </app-bd-dialog>

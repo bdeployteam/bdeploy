@@ -1,9 +1,9 @@
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { VariableType } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_CONFIRM,
+  ACTION_CONFIRM
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
@@ -13,6 +13,13 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { PortParam, PortsEditService } from '../../../services/ports-edit.service';
 import { PortTypeCellComponent } from './port-type-cell/port-type-cell.component';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { FormsModule } from '@angular/forms';
+
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
 
 const colName: BdDataColumn<PortParam> = {
   id: 'name',
@@ -38,9 +45,17 @@ const colPort: BdDataColumn<PortParam> = {
 };
 
 @Component({
-  selector: 'app-ports',
-  templateUrl: './ports.component.html',
-  standalone: false,
+    selector: 'app-ports',
+    templateUrl: './ports.component.html',
+    imports: [
+        BdFormInputComponent,
+        FormsModule,
+      BdDialogComponent,
+        BdDialogToolbarComponent,
+        BdDialogContentComponent,
+        BdButtonComponent,
+        BdDataTableComponent,
+    ],
 })
 export class PortsComponent implements OnInit {
   private readonly dl = inject(DownloadService);

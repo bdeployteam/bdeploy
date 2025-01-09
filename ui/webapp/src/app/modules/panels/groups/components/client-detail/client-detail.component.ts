@@ -6,12 +6,23 @@ import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-button/bd-expand-button.component';
+import { ClientUsageGraphComponent } from './usage-graph/usage-graph.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-client-detail',
     templateUrl: './client-detail.component.html',
     styleUrls: ['./client-detail.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, MatIcon, MatDivider, BdButtonComponent, BdDialogContentComponent, BdIdentifierComponent, BdExpandButtonComponent, ClientUsageGraphComponent, MatTooltip, AsyncPipe]
 })
 export class ClientDetailComponent implements OnInit, OnDestroy {
   protected readonly areas = inject(NavAreasService);

@@ -24,37 +24,48 @@
       [errorStateMatcher]="this"
       [appBdContentAssist]="assistContent"
       (focus)="focus.emit(true)"
-    />
+      />
     <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let suggestedValue of filteredSuggested$ | async" [value]="suggestedValue">
-        {{ suggestedValue }}
-      </mat-option>
+      @for (suggestedValue of filteredSuggested$ | async; track suggestedValue) {
+        <mat-option [value]="suggestedValue">
+          {{ suggestedValue }}
+        </mat-option>
+      }
     </mat-autocomplete>
-    <div *ngIf="prefix" matPrefix class="bd-form-input-prefix">
-      <ng-container *ngTemplateOutlet="prefix"></ng-container>
-    </div>
-    <div *ngIf="!passwordShowable" matSuffix class="bd-form-input-suffix">
-      <ng-content></ng-content>
-    </div>
-    <div *ngIf="passwordShowable" matSuffix class="bd-form-input-suffix">
-      <mat-icon (click)="showPassword = !showPassword" class="cursor-pointer"
-        >{{ showPassword ? 'visibility_off' : 'visibility'}}</mat-icon
-      >
-    </div>
-    <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)">{{ getErrorMessage() }}</mat-error>
-    <ng-template #statusPopup>
-      <mat-card appearance="outlined" class="flex flex-col gap-2.5 p-2.5 break-all">
-        <div class="flex">{{statusMessage}}</div>
-      </mat-card>
-    </ng-template>
-    <mat-hint
-      class="truncate"
-      *ngIf="statusMessage"
-      [appBdPopup]="statusPopup"
-      [appBdPopupDelay]="750"
-      appBdPopupTrigger="hover"
-    >
-      {{statusMessage}}
-    </mat-hint>
-  </mat-form-field>
-</div>
+    @if (prefix) {
+      <div matPrefix class="bd-form-input-prefix">
+        <ng-container *ngTemplateOutlet="prefix"></ng-container>
+      </div>
+    }
+    @if (!passwordShowable) {
+      <div matSuffix class="bd-form-input-suffix">
+        <ng-content></ng-content>
+      </div>
+    }
+    @if (passwordShowable) {
+      <div matSuffix class="bd-form-input-suffix">
+        <mat-icon (click)="showPassword = !showPassword" class="cursor-pointer"
+          >{{ showPassword ? 'visibility_off' : 'visibility'}}</mat-icon
+          >
+        </div>
+      }
+      @if (errorFallback || (ngControl && ngControl.invalid)) {
+        <mat-error>{{ getErrorMessage() }}</mat-error>
+      }
+      <ng-template #statusPopup>
+        <mat-card appearance="outlined" class="flex flex-col gap-2.5 p-2.5 break-all">
+          <div class="flex">{{statusMessage}}</div>
+        </mat-card>
+      </ng-template>
+      @if (statusMessage) {
+        <mat-hint
+          class="truncate"
+          [appBdPopup]="statusPopup"
+          [appBdPopupDelay]="750"
+          appBdPopupTrigger="hover"
+          >
+          {{statusMessage}}
+        </mat-hint>
+      }
+    </mat-form-field>
+  </div>

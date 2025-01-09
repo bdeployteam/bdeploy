@@ -23,8 +23,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: LinkExpressionInputValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class LinkExpressionInputValidatorDirective implements Validator {
   @Input('appLinkExpressionInputValidator') isLink: boolean;

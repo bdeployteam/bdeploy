@@ -2,33 +2,36 @@ import {
   Component,
   ContentChild,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
   Output,
   SimpleChanges,
-  TemplateRef,
-  inject,
+  TemplateRef
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
-import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
-  BdDataGrouping,
-  UNMATCHED_GROUP,
   bdDataDefaultSearch,
   bdDataDefaultSort,
+  BdDataGrouping,
   bdExtractGroups,
+  UNMATCHED_GROUP
 } from 'src/app/models/data';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { BdDataCardComponent } from '../bd-data-card/bd-data-card.component';
+import { NgClass, NgTemplateOutlet, AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-data-grid',
     templateUrl: './bd-data-grid.component.html',
-    standalone: false
+    imports: [MatTabGroup, MatTab, BdDataCardComponent, NgClass, NgTemplateOutlet, AsyncPipe]
 })
 export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
   private readonly searchService = inject(SearchService);
@@ -41,7 +44,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
-      (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH,
+      (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH
     );
   }
 
@@ -127,8 +130,10 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
    */
   @Output() recordClick = new EventEmitter<T>();
 
-  /*template*/ recordsToDisplay$ = new BehaviorSubject<T[]>([]);
-  /*template*/ groupValues: string[];
+  /*template*/
+  recordsToDisplay$ = new BehaviorSubject<T[]>([]);
+  /*template*/
+  groupValues: string[];
   private activeGroup: string;
 
   private subscription: Subscription;
@@ -144,10 +149,10 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.records || changes.grouping) {
+    if (changes['records'] || changes['grouping']) {
       this.populateRecords();
     }
-    if (changes.sort) {
+    if (changes['sort']) {
       this.calculateRecordsToDisplay();
     }
   }

@@ -1,6 +1,6 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Observable, Subscription, catchError, combineLatest, first, map, of, skipWhile, switchMap } from 'rxjs';
+import { catchError, combineLatest, first, map, Observable, of, skipWhile, Subscription, switchMap } from 'rxjs';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -8,12 +8,18 @@ import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/servic
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 
 @Component({
     selector: 'app-process-ui-inline',
     templateUrl: './process-ui-inline.component.html',
     styleUrls: ['./process-ui-inline.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, MatTooltip, BdDialogContentComponent]
 })
 export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   private readonly clients = inject(ClientsService);
@@ -38,12 +44,12 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = combineLatest([this.nav.panelRoute$, this.groups.current$, this.clients.apps$])
       .pipe(
-        skipWhile(([r, g, a]) => !r?.params?.endpoint || !r?.params?.app || !g || !a?.length),
-        first(), // only calculate this *ONCE* when all data is there.
+        skipWhile(([r, g, a]) => !r?.params?.['endpoint'] || !r?.params?.['app'] || !g || !a?.length),
+        first() // only calculate this *ONCE* when all data is there.
       )
       .subscribe(([route, group, apps]) => {
-        if (route.params.returnPanel) {
-          let panel: string = route.params.returnPanel;
+        if (route.params['returnPanel']) {
+          let panel: string = route.params['returnPanel'];
           if (panel.startsWith('/')) {
             panel = panel.substring(1);
           }
@@ -51,7 +57,7 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
         }
 
         this.app = apps.find(
-          (a) => a.endpoint?.id === route.params.app && a.endpoint.endpoint.id === route.params.endpoint,
+          (a) => a.endpoint?.id === route.params['app'] && a.endpoint.endpoint.id === route.params['endpoint']
         );
 
         if (!this.app) {
@@ -86,10 +92,10 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) => instances?.find((i) => i.instanceConfiguration.id === app.instanceId)),
-      skipWhile((instance) => !instance?.activeVersion),
+      skipWhile((instance) => !instance?.activeVersion)
     );
     const activeNodeCfgs$ = instance$.pipe(
-      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag)),
+      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag))
     );
     return combineLatest([instance$, this.systems.systems$, activeNodeCfgs$]).pipe(
       skipWhile(([i, s, n]) => !i || (i?.instanceConfiguration?.system && !s?.length) || !n?.nodeConfigDtos?.length),
@@ -106,11 +112,11 @@ export class ProcessUiInlineComponent implements OnInit, OnDestroy {
           process,
           {
             config: instance?.instanceConfiguration,
-            nodeDtos: nodes.nodeConfigDtos,
+            nodeDtos: nodes.nodeConfigDtos
           },
-          system?.config,
+          system?.config
         );
-      }),
+      })
     );
   }
 

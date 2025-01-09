@@ -1,0 +1,316 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+@use "app-common" as common;
+@use "app-externals" as externals;
+@use "app-ngx-charts-dark" as ngx-charts-dark;
+@use "app-scrollbars" as scrollbars;
+@use "app-palettes" as palettes;
+@use "../app/modules/core/components/bd-popup/bd-popup-theme.scss" as popup;
+@use "../app/modules/core/components/bd-image-upload/bd-image-upload-theme.scss" as upload;
+@use "../app/modules/core/components/bd-form-toggle/bd-form-toggle-theme.scss" as toggle;
+@use "../app/modules/primary/admin/components/admin-shell/admin-shell.theme.scss" as shell;
+
+// TODO: Rework theme according to https://material.angular.io/guide/theming
+
+$mdc-typography-config: mat.m2-define-typography-config(
+        $button: mat.m2-define-typography-level(14px, 14px, 500, normal),
+);
+
+@include mat.all-component-typographies();
+@include mat.elevation-classes();
+@include mat.app-background();
+
+@mixin all-themes($theme) {
+  @include common.common-classes($theme);
+
+  @include popup.bd-popup-theme($theme);
+  @include upload.bd-image-upload-theme($theme);
+  @include toggle.bd-form-toggle-theme($theme);
+
+  @include shell.settings-shell-theme($theme);
+
+  $default-font-level: mat.m2-define-typography-level(
+          $font-weight: 400,
+          $font-size: 14px,
+          $line-height: 1,
+          $letter-spacing: normal,
+  );
+
+  $button-font-level: mat.m2-define-typography-level(
+          $font-weight: 500,
+          $font-size: 14px,
+          $line-height: 1,
+          $letter-spacing: normal,
+  );
+
+  $typography: mat.m2-define-typography-config(
+          $body-1: $default-font-level,
+          $button: $button-font-level,
+  );
+  @include mat.all-component-typographies($typography);
+
+  // more than -1 will hide the floating labels.
+  @include mat.form-field-density(-1);
+
+  // -2 to achieve roughly the previous spacing.
+  @include mat.icon-button-density(-2);
+  @include mat.table-density(-2);
+  @include mat.radio-density(-3);
+  @include mat.checkbox-density(-3);
+
+  $dark: map.get($theme, "is-dark");
+  $color: mat.m2-get-color-config($theme);
+  $primary: map.get($color, "primary");
+  $accent: map.get($color, "accent");
+  $warn: map.get($color, "warn");
+  $bg: map.get($color, "background");
+  $fg: map.get($color, "foreground");
+  $maintb: map.get($color, "main-toolbar");
+  $maintb-dark: map.get($color, "main-toolbar-darker");
+  $success: map.get($color, "success");
+
+  .mat-mdc-form-field-focus-overlay {
+    pointer-events: none;
+  }
+
+  // checkbox theme fixups to match old checkbox.
+  .mdc-checkbox {
+    padding: 0;
+  }
+
+  .mdc-checkbox .mdc-checkbox__background {
+    top: 0;
+    left: 0;
+  }
+
+  // general element themings
+  .mat-badge-content {
+    background-color: rgb(194, 194, 194);
+    color: black;
+  }
+  .mat-mdc-row:hover,
+  .mat-mdc-card:hover {
+    background-color: if($dark, #3e3e3e, #fafafa);
+    transition: background-color 0.2s ease;
+  }
+  .mat-row-route-active,
+  .mat-card-route-active,
+  .mat-row-route-active:hover,
+  .mat-card-route-active:hover {
+    background-color: mat.m2-get-color-from-palette($maintb-dark, 900, 0.1);
+  }
+
+  a {
+    color: if(
+                    $dark,
+                    mat.m2-get-color-from-palette(mat.$m2-blue-palette, 300),
+                    mat.m2-get-color-from-palette(mat.$m2-blue-palette, 800)
+    );
+  }
+
+  // Define scrollbar style on each element as it is not inherited in some cases.
+  * {
+    @include scrollbars.scrollbars(mat.m2-get-color-from-palette($primary), if($dark, #555555, #cccccc));
+  }
+
+  // Pseudo selector to define variables on the main theme class.
+  & {
+    --bd-primary: #{mat.m2-get-color-from-palette($primary)};
+    --bd-accent: #{mat.m2-get-color-from-palette($accent)};
+    --bd-warn: #{mat.m2-get-color-from-palette($warn)};
+    --bd-warn-darker: #{mat.m2-get-color-from-palette($warn, 900)};
+    --bd-main-bar: #{mat.m2-get-color-from-palette($maintb)};
+    --bd-orange: darkorange;
+
+    --bd-text: #{mat.m2-get-color-from-palette($fg, "text")};
+    --bd-text-secondary: #{mat.m2-get-color-from-palette($fg, "secondary-text")};
+    --bd-text-success: #{mat.m2-get-color-from-palette($success)};
+    --bd-text-very-light: #{if($dark, #aeaeae, #747474)};
+    --bd-text-disabled: #{mat.m2-get-color-from-palette($fg, "disabled-text")};
+    --bd-text-validation: #dc000f;
+
+    --bd-bg-dialog: #{mat.m2-get-color-from-palette($bg, "dialog")};
+    --bd-bg-toolbar: #{mat.m2-get-color-from-palette($bg, "app-bar")};
+    --bd-bg-hover: #{mat.m2-get-color-from-palette($bg, "hover")};
+    --bd-bg-disabled: #{mat.m2-get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
+    --bd-bg-grey: #{mat.m2-get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
+
+    --bd-main-bar-darker: #{mat.m2-get-color-from-palette($maintb-dark)};
+
+    --bd-primary-contrast: #{mat.m2-get-color-from-palette($primary, "default-contrast")};
+    --bd-accent-contrast: #{mat.m2-get-color-from-palette($accent, "default-contrast")};
+    --bd-warn-contrast: #{mat.m2-get-contrast-color-from-palette($warn, 900)};
+    --bd-main-bar-contrast: #{mat.m2-get-color-from-palette($maintb, "default-contrast")};
+
+    --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
+    --bd-breadcrumb-hover: #{if($dark, #333, #ccc)};
+    --bd-bg-toolbar-gradient: #{if($dark, #222222, #e6e6e6)};
+  }
+
+  .inline-code {
+    font-family: monospace;
+    padding: 2px 4px;
+    color: if($dark, white, black);
+    background-color: if($dark, #333333, #eeeeee);
+    border-radius: 3px;
+  }
+}
+
+@mixin theme-chooser($theme) {
+  $color: mat.m2-get-color-config($theme);
+  $theme-bg: map.get($color, "background");
+  $theme-primary: mat.m2-get-color-from-palette(map.get($color, "primary"));
+  $theme-accent: mat.m2-get-color-from-palette(map.get($color, "accent"));
+  $theme-main-tb: mat.m2-get-color-from-palette(map.get($color, "main-toolbar"));
+
+  .preview-background {
+    cursor: pointer;
+    display: block;
+    position: relative;
+    margin: 3px;
+    width: 56px;
+    height: 56px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: map.get($theme-bg, "background");
+  }
+
+  .preview-accent {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    background-color: $theme-accent;
+  }
+
+  .preview-selected {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    color: $theme-accent;
+  }
+
+  .preview-circle {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 34px;
+    height: 34px;
+    border-radius: 25%;
+    background: linear-gradient(
+                    to right,
+                    $theme-main-tb 0%,
+                    $theme-main-tb 50%,
+                    $theme-primary 51%,
+                    $theme-primary 100%
+    );
+  }
+}
+
+/* Theme definitions - keep in sync with ThemeService.Theme */
+@function add-custom-colors($theme, $toolbar-palette, $toolbar-darker-palette, $success-palette) {
+  $colors: map.merge(
+                  mat.m2-get-color-config($theme),
+                  (
+                          "main-toolbar": $toolbar-palette,
+                          "main-toolbar-darker": $toolbar-darker-palette,
+                          "success": $success-palette,
+                  )
+  );
+
+  $result: map.merge(
+                  $theme,
+                  (
+                          "color": $colors,
+                  )
+  );
+  @return $result;
+}
+
+@function override-theme-background($theme, $key, $value) {
+  $bg: map.get(mat.m2-get-color-config($theme), background);
+  $bg: map.merge(
+                  $bg,
+                  (
+                          $key: $value,
+                  )
+  );
+  $colors: map.merge(
+                  mat.m2-get-color-config($theme),
+                  (
+                          background: $bg,
+                  )
+  );
+  @return map.merge(
+                  $theme,
+                  (
+                          color: $colors,
+                  )
+  );
+}
+
+/* light theme - default */
+$app-light-primary: mat.m2-define-palette(palettes.$md-bdblue, 500);
+$app-light-accent: mat.m2-define-palette(palettes.$md-bdblue, 500);
+$app-light-warning: mat.m2-define-palette(palettes.$md-bdred, 500);
+$app-light-theme: add-custom-colors(
+                mat.m2-define-light-theme(
+                                (
+                                        color: (
+                                                primary: $app-light-primary,
+                                                accent: $app-light-accent,
+                                                warn: $app-light-warning,
+                                        ),
+                                        typography: mat.m2-define-typography-config(),
+                                        density: 0,
+                                )
+                ),
+                $app-light-primary,
+                mat.m2-define-palette(palettes.$md-bdblue, 700),
+                mat.m2-define-palette(palettes.$md-bdgreen, 700)
+);
+.app-light-theme {
+  @include all-themes($app-light-theme);
+}
+
+.app-light-theme-chooser {
+  @include theme-chooser($app-light-theme);
+}
+
+// only do this for the first theme - following themes only define their colors.
+@include mat.all-component-themes($app-light-theme);
+
+/* dark theme */
+$app-dark-primary: mat.m2-define-palette(palettes.$md-bdorange, 500);
+$app-dark-accent: mat.m2-define-palette(palettes.$md-bdorange, 500);
+$app-dark-warning: mat.m2-define-palette(palettes.$md-bdred, 500);
+$app-dark-theme: add-custom-colors(
+                mat.m2-define-dark-theme(
+                                (
+                                        color: (
+                                                primary: $app-dark-primary,
+                                                accent: $app-dark-accent,
+                                                warn: $app-dark-warning,
+                                        ),
+                                        typography: mat.m2-define-typography-config(),
+                                        density: 0,
+                                )
+                ),
+                mat.m2-define-palette(palettes.$md-bdgrey, 500),
+                mat.m2-define-palette(palettes.$md-bdgrey, 700),
+                mat.m2-define-palette(palettes.$md-bdgreen, 700)
+);
+$app-dark-theme: override-theme-background($app-dark-theme, app-bar, #2e2e2e);
+.app-dark-theme {
+  @include mat.all-component-colors($app-dark-theme);
+  @include all-themes($app-dark-theme);
+  @include ngx-charts-dark.ngx-charts-dark();
+}
+
+.app-dark-theme-chooser {
+  @include theme-chooser($app-dark-theme);
+}

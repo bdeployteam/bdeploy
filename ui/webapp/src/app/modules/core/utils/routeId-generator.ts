@@ -5,13 +5,13 @@ import { Route } from '@angular/router';
  */
 export function setRouteId(routes: Route[]): Route[] {
   if (!routes) {
-    return;
+    return null;
   }
 
   routes.forEach((route, index) => {
     route.data = {
       ...route.data,
-      ...{ routeId: getUniqueId(route.path, index + 1) },
+      ...{ routeId: getUniqueId(route.path, index + 1) }
     };
   });
   return routes;

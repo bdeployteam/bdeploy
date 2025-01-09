@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { MatTabChangeEvent } from '@angular/material/tabs';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
@@ -18,12 +18,25 @@ import {
   encodeFilePath,
   findFilePath,
   getDescendants,
-  toFileList,
+  toFileList
 } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { FilesBulkService } from '../../services/files-bulk.service';
 import { FileListEntry, FilePath, FilesService } from '../../services/files.service';
 import { InstancesService } from '../../services/instances.service';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdServerSyncButtonComponent
+} from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { BdBreadcrumbsComponent } from '../../../../core/components/bd-breadcrumbs/bd-breadcrumbs.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 const colName: BdDataColumn<FilePath> = {
   id: 'name',
@@ -74,7 +87,7 @@ const colAvatar: BdDataColumn<FilePath> = {
     selector: 'app-files-display',
     templateUrl: './files-display.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdServerSyncButtonComponent, MatDivider, BdPanelButtonComponent, BdButtonComponent, BdDialogContentComponent, BdNoDataComponent, MatTabGroup, MatTab, BdBreadcrumbsComponent, BdDataTableComponent, AsyncPipe]
 })
 export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly instances = inject(InstancesService);

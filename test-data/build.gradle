@@ -142,13 +142,11 @@ task checkTestBDeploy(type: JavaExec, dependsOn: startTestBDeploy) {
     mustRunAfter(startTestBDeploy)
 }
 
-if(!project.hasProperty('cypressNoCentral')) {
-    createServerTasks("Central", testServerRootCentral, testServerPortCentral);
-    createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
+createServerTasks("Central", testServerRootCentral, testServerPortCentral);
+createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
 
-    startTestBDeployManaged.mustRunAfter(checkTestBDeploy)
-    startTestBDeployCentral.mustRunAfter(startTestBDeployManaged)
-}
+startTestBDeployManaged.mustRunAfter(checkTestBDeploy)
+startTestBDeployCentral.mustRunAfter(startTestBDeployManaged)
 
 
 task cleanExternalSoftwareHive(type: Delete) {
@@ -258,20 +256,16 @@ jacoco {
     applyTo checkTestBDeploy
     if(!project.hasProperty('yourkitPath')) {
         applyTo startTestBDeploy
-        if(!project.hasProperty('cypressNoCentral')) {
-            applyTo startTestBDeployCentral
-            applyTo startTestBDeployManaged
-        }
+        applyTo startTestBDeployCentral
+        applyTo startTestBDeployManaged
     }
 }
 
 // now all tasks that depend on any of the generated tasks
 task setupDemoServer() {
     dependsOn checkTestBDeploy
-    if(!project.hasProperty('cypressNoCentral')) {
-        dependsOn startTestBDeployCentral
-        dependsOn startTestBDeployManaged
-    }
+    dependsOn startTestBDeployCentral
+    dependsOn startTestBDeployManaged
 
     doFirst() {
         println("----------------------------------------------------------------------------------------")
@@ -292,7 +286,7 @@ task runDemoServer(dependsOn: setupDemoServer) {
     doLast() {
         // no println will work in doLast, it will appear only AFTER the question is answered.
         def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
-        def answer = userInput.askQuestion("Enter any value (or press enter) to stop the server", "Stop");
+        def answer = userInput.askUser(i -> i.askQuestion("Enter any value (or press enter) to stop the server", "Stop")).getOrNull();
     }
 }
 

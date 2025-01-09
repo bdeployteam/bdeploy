@@ -7,7 +7,7 @@
           <div class="flex flex-col items-center -mt-2"><img class="ml-1" src="assets/by-ssi.png" /></div>
         </div>
       </div>
-      <div class="grow-[2] flex justify-center items-center">
+      <div class="grow-2 flex justify-center items-center">
         <div class="local-login-area flex flex-col flex-auto gap-2.5 m-4">
           <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
             <div class="local-header">BDeploy Login</div>
@@ -22,43 +22,47 @@
               required
             ></app-bd-form-input>
             <div class="flex justify-start items-center">
-              <div *ngIf="loginFailed">
-                <mat-error>{{ loginFailedMessage }}</mat-error>
-              </div>
+              @if (loginFailed) {
+                <div>
+                  <mat-error>{{ loginFailedMessage }}</mat-error>
+                </div>
+              }
               <div class="flex-auto"></div>
               <button
                 mat-raised-button
                 [disabled]="loginForm.invalid && !(userInput.autoFilled && passInput.autoFilled)"
                 type="submit"
                 color="accent"
-              >
+                >
                 Login
               </button>
             </div>
           </form>
-          <div class="flex flex-col gap-2.5" *ngIf="cfg.webAuthCfg?.auth0?.enabled || cfg.webAuthCfg?.okta?.enabled">
-            <div class="local-divider">
-              <span>OR</span>
+          @if (cfg.webAuthCfg?.auth0?.enabled || cfg.webAuthCfg?.okta?.enabled) {
+            <div class="flex flex-col gap-2.5">
+              <div class="local-divider">
+                <span>OR</span>
+              </div>
+              @if (cfg.webAuthCfg?.auth0?.enabled) {
+                <app-bd-button
+                  class="flex-auto"
+                  svgIcon="auth0"
+                  [text]="'Login using ' + cfg.webAuthCfg.auth0.displayName"
+                  [collapsed]="false"
+                  (click)="loginAuth0()"
+                ></app-bd-button>
+              }
+              @if (cfg.webAuthCfg?.okta?.enabled) {
+                <app-bd-button
+                  class="flex-auto"
+                  svgIcon="okta"
+                  [text]="'Login using ' + cfg.webAuthCfg.okta.displayName"
+                  [collapsed]="false"
+                  (click)="loginOkta()"
+                ></app-bd-button>
+              }
             </div>
-            <ng-container *ngIf="cfg.webAuthCfg?.auth0?.enabled">
-              <app-bd-button
-                class="flex-auto"
-                svgIcon="auth0"
-                [text]="'Login using ' + cfg.webAuthCfg.auth0.displayName"
-                [collapsed]="false"
-                (click)="loginAuth0()"
-              ></app-bd-button>
-            </ng-container>
-            <ng-container *ngIf="cfg.webAuthCfg?.okta?.enabled">
-              <app-bd-button
-                class="flex-auto"
-                svgIcon="okta"
-                [text]="'Login using ' + cfg.webAuthCfg.okta.displayName"
-                [collapsed]="false"
-                (click)="loginOkta()"
-              ></app-bd-button>
-            </ng-container>
-          </div>
+          }
         </div>
       </div>
     </div>

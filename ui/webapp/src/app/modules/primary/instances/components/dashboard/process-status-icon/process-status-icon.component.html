@@ -1,21 +1,25 @@
-<ng-template #spinner>
-  <mat-spinner class="flex justify-start" [diameter]="24"></mat-spinner>
-</ng-template>
 
-<div class="flex justify-start" *ngIf="!(mappedAction$ | async); else spinner">
-  <mat-icon
-    *ngIf="svgIcon$ | async as svg"
-    class="material-symbols-filled"
-    [matTooltip]="hint$ | async"
-    [ngClass]="class$ | async"
-    [svgIcon]="svg"
-  >
-  </mat-icon>
-  <mat-icon
-    *ngIf="icon$ | async as icon"
-    class="material-symbols-filled"
-    [matTooltip]="hint$ | async"
-    [ngClass]="class$ | async"
-    >{{ icon }}
-  </mat-icon>
-</div>
+
+@if (!(mappedAction$ | async)) {
+  <div class="flex justify-start">
+    @if (svgIcon$ | async; as svg) {
+      <mat-icon
+        class="material-symbols-filled"
+        [matTooltip]="hint$ | async"
+        [ngClass]="class$ | async"
+        [svgIcon]="svg"
+        >
+      </mat-icon>
+    }
+    @if (icon$ | async; as icon) {
+      <mat-icon
+        class="material-symbols-filled"
+        [matTooltip]="hint$ | async"
+        [ngClass]="class$ | async"
+        >{{ icon }}
+      </mat-icon>
+    }
+  </div>
+} @else {
+  <mat-spinner class="flex justify-start" [diameter]="24"></mat-spinner>
+}

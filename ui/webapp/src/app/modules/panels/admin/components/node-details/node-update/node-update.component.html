@@ -4,30 +4,29 @@
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-1">
-      <ng-container *ngIf="isCurrent; else updateOk">
+      @if (isCurrent) {
         <app-bd-notification-card type="generic" [dismissable]="false" header="Update Not Required" icon="build">
           <div>An update is not required, as the current version is already installed on the node.</div>
         </app-bd-notification-card>
-      </ng-container>
-      <ng-template #updateOk>
+      } @else {
         <span
           >The node <strong>{{nodeName$ | async}}</strong> will be updated to the version currently running on the
           master: <strong>{{version?.version}}</strong></span
-        >
-        <strong>
-          Be aware that after the update it may take a few seconds until the update is recognized by the master server.
-        </strong>
-      </ng-template>
-      <mat-divider></mat-divider>
-      <app-bd-button
-        text="Perform Update"
-        icon="build"
-        color="primary"
-        [collapsed]="false"
-        [disabled]="isCurrent || (mappedUpdate$ | async)"
-        (click)="performUpdate()"
-        [loadingWhen$]="mappedUpdate$"
-      ></app-bd-button>
-    </div>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+          >
+          <strong>
+            Be aware that after the update it may take a few seconds until the update is recognized by the master server.
+          </strong>
+        }
+        <mat-divider></mat-divider>
+        <app-bd-button
+          text="Perform Update"
+          icon="build"
+          color="primary"
+          [collapsed]="false"
+          [disabled]="isCurrent || (mappedUpdate$ | async)"
+          (click)="performUpdate()"
+          [loadingWhen$]="mappedUpdate$"
+        ></app-bd-button>
+      </div>
+    </app-bd-dialog-content>
+  </app-bd-dialog>

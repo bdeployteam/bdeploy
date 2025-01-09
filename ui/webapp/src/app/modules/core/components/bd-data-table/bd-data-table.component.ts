@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import {
@@ -8,6 +8,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -15,25 +16,33 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
-  ViewEncapsulation,
-  inject,
+  ViewEncapsulation
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatSort, Sort, SortDirection } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection, MatSortHeader } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
-import { BehaviorSubject, Observable, Subject, Subscription, debounceTime, of } from 'rxjs';
+import { BehaviorSubject, debounceTime, Observable, of, Subject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
   BdDataColumnTypeHint,
-  BdDataGrouping,
-  UNMATCHED_GROUP,
   bdDataDefaultSearch,
   bdDataDefaultSort,
+  BdDataGrouping,
   bdSortGroups,
+  UNMATCHED_GROUP
 } from 'src/app/models/data';
 import { BdSearchable, SearchService } from '../../services/search.service';
+import { MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatFooterRowDef, MatFooterRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatFooterCellDef, MatFooterCell, MatCellDef, MatCell } from '@angular/material/table';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { BdDataComponentCellComponent } from '../bd-data-component-cell/bd-data-component-cell.component';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 // member ordering due to default implementation for callbacks.
 // tslint:disable: member-ordering
@@ -82,7 +91,7 @@ const MAX_ROWS_PER_GROUP = 500;
     styleUrls: ['./bd-data-table.component.css'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatTable, MatSort, CdkDropList, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, CdkDrag, RouterLink, RouterLinkActive, MatNoDataRow, MatFooterRowDef, MatFooterRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatTooltip, MatCheckbox, ClickStopPropagationDirective, MatFooterCellDef, MatFooterCell, MatCellDef, MatCell, NgClass, MatIconButton, MatIcon, CdkDragHandle, BdDataComponentCellComponent, BdButtonComponent, AsyncPipe]
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
   private readonly searchService = inject(SearchService);
@@ -106,13 +115,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    */
   protected _columns: BdDataColumn<T>[] = [];
   protected _visibleColumns: string[] = [];
+
   @Input() set columns(val: BdDataColumn<T>[]) {
     if (!val) {
       return;
     }
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
-      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH,
+      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH
     );
     this.updateColumnsToDisplay();
     this.updateMediaSubscriptions();
@@ -231,7 +241,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** The treeControl provides the hierarchy and flattened nodes rendered by the table */
   treeControl = new FlatTreeControl<FlatNode<T>>(
     (node) => node.level,
-    (node) => node.expandable,
+    (node) => node.expandable
   );
 
   /** The transformer bound to 'this', so we can use this in the transformer function */
@@ -240,7 +250,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     this.boundTransformer,
     (n) => n.level,
     (n) => n.expandable,
-    (n) => n.children,
+    (n) => n.children
   );
   private subscription: Subscription;
   private mediaSubscription: Subscription;
@@ -258,7 +268,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   protected headerCheckForbidden = false;
 
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
-  /* tempalte */ dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+  /* tempalte */
+  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -286,7 +297,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       this.update();
     }
 
-    if (!!changes['checked'] && !changes.checked.currentValue?.length) {
+    if (!!changes['checked'] && !changes['checked'].currentValue?.length) {
       this.checkSelection.clear();
     }
   }
@@ -300,7 +311,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // validate that input parameters are consistent and correct.
     if (this.dragReorderMode && (!!this.sortData || !!this.grouping?.length || this.checkMode)) {
       throw new Error(
-        'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.',
+        'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.'
       );
     }
 
@@ -313,7 +324,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     this._columns
       .filter((c) => !!c.showWhen)
       .forEach((c) =>
-        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe(() => this.updateColumnsToDisplay())),
+        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe(() => this.updateColumnsToDisplay()))
       );
   }
 
@@ -393,7 +404,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     const flatNode = {
       node: node,
       expandable: expandable,
-      level: level,
+      level: level
     };
 
     if (!!node.item && !!this.checked && !!this.checked.find((c) => c === node.item)) {
@@ -433,7 +444,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
             return grouping[0].definition.sort(a[0], b[0], a[1], b[1]);
           }
           return bdSortGroups(a[0], b[0]);
-        }),
+        })
       );
 
       // create nodes for groups, recurse grouping.
@@ -448,7 +459,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
             item: null,
             groupOrFirstColumn: key,
             children: children,
-            checkForbidden: children.some((child) => child.checkForbidden),
+            checkForbidden: children.some((child) => child.checkForbidden)
           });
         }
       }
@@ -478,7 +489,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       item: i,
       groupOrFirstColumn: this._columns[0].data(i),
       children: [],
-      checkForbidden: this.checkChangeForbidden(i),
+      checkForbidden: this.checkChangeForbidden(i)
     }));
   }
 
@@ -572,6 +583,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if (url) {
       return this.sanitizer.bypassSecurityTrustUrl(url);
     }
+    return null;
   }
 
   protected onDrop(event: CdkDragDrop<T[]>) {
@@ -581,7 +593,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       currentIndex: event.currentIndex,
       item: event.previousContainer.data[event.previousIndex],
       sourceId: event.previousContainer.id,
-      targetId: event.container.id,
+      targetId: event.container.id
     });
   }
 }

@@ -1,14 +1,24 @@
-import { Component, HostBinding, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import { Component, HostBinding, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { Actions, ApplicationConfiguration, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ProcessesService } from '../../../services/processes.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-process-status-icon',
     templateUrl: './process-status-icon.component.html',
     styleUrls: ['./process-status-icon.component.css'],
-    standalone: false
+    imports: [
+        MatIcon,
+        MatTooltip,
+        NgClass,
+        MatProgressSpinner,
+        AsyncPipe,
+    ],
 })
 export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
   private readonly processes = inject(ProcessesService);
@@ -31,7 +41,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
     of(false),
     null,
     null,
-    this.id$,
+    this.id$
   );
 
   ngOnInit(): void {
@@ -80,7 +90,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
           'heart_broken',
           null,
           'Process liveness probe reported a problem in the running process',
-          'local-crashed',
+          'local-crashed'
         );
       case ProcessState.RUNNING_STOP_PLANNED:
         return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');

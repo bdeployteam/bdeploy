@@ -1,5 +1,7 @@
-<div class="flex justify-start" *ngIf="column.data(record) as perm">
-  <div [matTooltip]="!!column.tooltip ? column.tooltip(record) : ''" class="local-chip local-{{ perm }}-chip">
-    {{ perm }}
+@if (column.data(record); as perm) {
+  <div class="flex justify-start">
+    <div [matTooltip]="!!column.tooltip ? column.tooltip(record) : ''" class="local-chip local-{{ perm }}-chip">
+      {{ perm }}
+    </div>
   </div>
-</div>
+}

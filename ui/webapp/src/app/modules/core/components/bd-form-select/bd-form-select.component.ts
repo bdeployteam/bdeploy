@@ -1,14 +1,18 @@
 import { ChangeDetectionStrategy, Component, Input, TemplateRef, Type, ViewEncapsulation, inject } from '@angular/core';
-import { ControlValueAccessor, NgControl, UntypedFormControl } from '@angular/forms';
-import { ErrorStateMatcher } from '@angular/material/core';
+import { ControlValueAccessor, NgControl, UntypedFormControl, FormsModule } from '@angular/forms';
+import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
+import { MatFormField, MatLabel, MatPrefix, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { BdFormSelectComponentOptionComponent } from '../bd-form-select-component-option/bd-form-select-component-option.component';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
     selector: 'app-bd-form-select',
     templateUrl: './bd-form-select.component.html',
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatFormField, MatLabel, MatSelect, FormsModule, MatOption, BdFormSelectComponentOptionComponent, MatPrefix, NgTemplateOutlet, MatError]
 })
 export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });

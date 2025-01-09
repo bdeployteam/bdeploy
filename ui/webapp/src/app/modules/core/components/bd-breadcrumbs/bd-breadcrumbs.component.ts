@@ -9,12 +9,10 @@ export interface CrumbInfo {
     selector: 'app-bd-breadcrumbs',
     templateUrl: './bd-breadcrumbs.component.html',
     styleUrls: ['./bd-breadcrumbs.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BdBreadcrumbsComponent {
-  @Input()
-  protected crumbs: CrumbInfo[];
+  @Input() crumbs: CrumbInfo[];
 
   protected onClick(crumb: CrumbInfo, last: boolean) {
     if (!last) {

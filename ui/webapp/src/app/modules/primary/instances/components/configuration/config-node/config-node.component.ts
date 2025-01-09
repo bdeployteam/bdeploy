@@ -3,36 +3,47 @@ import {
   AfterViewInit,
   Component,
   HostBinding,
+  inject,
   Input,
   OnDestroy,
   OnInit,
   QueryList,
-  ViewChildren,
-  inject,
+  ViewChildren
 } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
   MinionDto,
-  ProcessControlGroupConfiguration,
+  ProcessControlGroupConfiguration
 } from 'src/app/models/gen.dtos';
 import {
   BdDataTableComponent,
-  DragReorderEvent,
+  DragReorderEvent
 } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { DEF_CONTROL_GROUP } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { InstanceEditService, ProcessEditState } from '../../../services/instance-edit.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
 import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-name-and-os.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdPanelButtonComponent } from '../../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { ControlGroupComponent } from './control-group/control-group.component';
+
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-config-node',
     templateUrl: './config-node.component.html',
     styleUrls: ['./config-node.component.css'],
-    standalone: false
+    imports: [
+        MatIcon,
+        BdPanelButtonComponent,
+        ControlGroupComponent,
+      BdDataTableComponent,
+        AsyncPipe,
+    ],
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly edit = inject(InstanceEditService);
@@ -109,7 +120,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
       combineLatest([this.edit.validating$, this.edit.issues$]).subscribe(() => {
         // update in case validation is run in the background - this means something may have changed
         this.data?.forEach((t) => t?.redraw());
-      }),
+      })
     );
   }
 
@@ -153,12 +164,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
           // don't use groupedProcesses keys, as this will not contain *empty* groups.
           this.allowedSources$.next(
-            nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name),
+            nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name)
           );
           this.groupedProcesses$.next(grouped);
           this.data.forEach((t) => t.update());
         });
-      }),
+      })
     );
   }
 
@@ -187,8 +198,8 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
         order.previousIndex,
         order.currentIndex,
         sourceGroup,
-        targetGroup,
-      ),
+        targetGroup
+      )
     );
     this.data.forEach((t) => t.update());
   }

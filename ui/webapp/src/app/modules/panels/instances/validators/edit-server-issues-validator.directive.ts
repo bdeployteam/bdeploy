@@ -20,8 +20,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: EditServerIssuesValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class EditServerIssuesValidatorDirective implements AsyncValidator {
   private readonly edit = inject(ProcessEditService);

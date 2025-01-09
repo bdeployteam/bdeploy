@@ -1,11 +1,13 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-editor-diff',
     templateUrl: './bd-editor-diff.component.html',
-    standalone: false
+    imports: [MonacoEditorModule, AsyncPipe]
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);

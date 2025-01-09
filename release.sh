@@ -111,7 +111,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
 fi
 
 ./gradlew setVersion -PtargetVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
-[[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x releaseTest -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
+[[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x releaseTest -x runUitests "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x releaseTest "${GRADLE_ARG_ARR[@]}"
 
 [[ -z "${NO_MAVEN}" ]] && ./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
@@ -122,7 +122,7 @@ git push https://$GH_USER:$GH_TOKEN@github.com/bdeployteam/bdeploy.git HEAD:mast
 
 ./gradlew githubRelease -PgithubToken=$GH_TOKEN "${GRADLE_ARG_ARR[@]}"
 ./gradlew setVersion -PtargetVersion=$NEXT_VER "${GRADLE_ARG_ARR[@]}"
-[[ -z "${NO_TESTS}" ]] && ./gradlew build releaseTest -x test -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
+[[ -z "${NO_TESTS}" ]] && ./gradlew build releaseTest -x test -x runUitests "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version
 git commit -m "Update to $NEXT_VER"

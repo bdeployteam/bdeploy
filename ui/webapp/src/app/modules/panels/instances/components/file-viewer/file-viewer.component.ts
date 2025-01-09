@@ -6,13 +6,23 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file-viewer.utils';
 import { FilesService } from 'src/app/modules/primary/instances/services/files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { ClickStopPropagationDirective } from '../../../../core/directives/click-stop-propagation.directive';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdTerminalComponent } from '../../../../core/components/bd-terminal/bd-terminal.component';
+import { AsyncPipe } from '@angular/common';
 
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
     selector: 'app-file-viewer',
     templateUrl: './file-viewer.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdPanelButtonComponent, ClickStopPropagationDirective, MatTooltip, BdButtonComponent, MatDivider, BdDialogContentComponent, BdTerminalComponent, AsyncPipe]
 })
 export class FileViewerComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
