@@ -61,7 +61,7 @@ export class ProductsService {
   public downloadResponseFile(data: InstTemplateData) {
     const instanceTemplate = data.config.name;
     this.http
-      .get(`${this.apiPath(this.group)}/getResponseFile`, {
+      .get(`${this.apiPath(this.group)}/get-response-file`, {
         params: { productId: data.productId, instanceTemplate },
         responseType: 'text',
       })
