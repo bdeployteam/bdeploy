@@ -16,7 +16,7 @@ import io.bdeploy.common.security.RemoteService;
 public abstract class BaseMinionCliTest {
 
     @RegisterExtension
-    protected TestCliTool tools = new TestCliTool(new MinionServerCli());
+    protected final TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     protected StructuredOutput remote(RemoteService remote, Class<? extends CliTool> tool, String... args) {
         List<String> argList = new ArrayList<>();

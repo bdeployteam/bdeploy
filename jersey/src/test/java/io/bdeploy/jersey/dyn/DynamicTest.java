@@ -15,7 +15,7 @@ class DynamicTest {
     DynamicTestResourceLocatorImpl locator = new DynamicTestResourceLocatorImpl();
 
     @RegisterExtension
-    TestServer ext = new TestServer(locator);
+    private final TestServer ext = new TestServer(locator);
 
     @Test
     void testRegisterDynamic(JerseyClientFactory f) {

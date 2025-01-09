@@ -40,7 +40,7 @@ class PermissionFilterTest {
     PermControlSvcImpl control = new PermControlSvcImpl();
 
     @RegisterExtension
-    TestMinion ext = new TestMinion();
+    private final TestMinion ext = new TestMinion();
 
     @BeforeEach
     void registerResource(MinionRoot root) {

@@ -34,7 +34,7 @@ import io.bdeploy.jersey.TestServer;
 class TestTwoHivesServer {
 
     @RegisterExtension
-    TestServer ext = new TestServer();
+    private final TestServer ext = new TestServer();
 
     private BHiveRegistry registry;
 

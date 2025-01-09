@@ -21,7 +21,7 @@ import io.bdeploy.jersey.TestServer;
 class RemoteHiveTestBase {
 
     @RegisterExtension
-    TestServer ext = new TestServer();
+    private final TestServer ext = new TestServer();
 
     private BHiveRegistry registry;
     private RemoteBHive remote;

@@ -39,7 +39,7 @@ import io.bdeploy.common.util.PathHelper;
 class BasicToolTest {
 
     @RegisterExtension
-    final TestCliTool tools = new TestCliTool(new BHiveCli());
+    private final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @SlowTest
     @Test

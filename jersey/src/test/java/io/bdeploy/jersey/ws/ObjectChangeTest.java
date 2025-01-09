@@ -24,7 +24,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 class ObjectChangeTest {
 
     @RegisterExtension
-    TestServer ext = new TestServer();
+    private final TestServer ext = new TestServer();
 
     ObjectChangeWebSocket ocb;
 

@@ -23,10 +23,10 @@ import io.bdeploy.ui.cli.RemoteInstanceGroupTool;
 class CentralManagedConnectionCliTest extends BaseMinionCliTest {
 
     @RegisterExtension
-    TestMinion centralMinion = new TestMinion(MinionMode.CENTRAL);
+    private final TestMinion centralMinion = new TestMinion(MinionMode.CENTRAL);
 
     @RegisterExtension
-    TestMinion managedMinion = new TestMinion(MinionMode.MANAGED);
+    private final TestMinion managedMinion = new TestMinion(MinionMode.MANAGED);
 
     @Test
     void testWithCli(@TempDir Path tmp) {

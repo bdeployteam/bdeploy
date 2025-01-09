@@ -29,7 +29,7 @@ class WebSocketTest {
     private static final Logger log = LoggerFactory.getLogger(WebSocketTest.class);
 
     @RegisterExtension
-    TestServer ext = new TestServer();
+    private final TestServer ext = new TestServer();
 
     private final WebSocketTestApplication wsa;
 

@@ -45,7 +45,7 @@ class EndpointsTest {
     private static final Logger log = LoggerFactory.getLogger(EndpointsTest.class);
 
     @RegisterExtension
-    TestServer server = new TestServer(false, new Object[] { HelloEndpoint.class });
+    private final TestServer server = new TestServer(false, new Object[] { HelloEndpoint.class });
 
     @Test
     void testEndpoint(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp)

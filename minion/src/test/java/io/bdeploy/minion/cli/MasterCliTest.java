@@ -37,7 +37,7 @@ import io.bdeploy.ui.cli.RemoteUserTool;
 class MasterCliTest extends BaseMinionCliTest {
 
     @RegisterExtension
-    TestCliTool hiveTools = new TestCliTool(new BHiveCli());
+    private final TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
     @Test
     void testMasterCli(@TempDir Path tmp, ActivityReporter reporter) throws Exception {

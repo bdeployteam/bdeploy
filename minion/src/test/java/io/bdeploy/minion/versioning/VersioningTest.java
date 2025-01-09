@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.Response.Status;
 class VersioningTest {
 
     @RegisterExtension
-    TestServer srv = new TestServer(VersionedImpl.class, UnversionedImpl.class, FakePRR.class);
+    private final TestServer srv = new TestServer(VersionedImpl.class, UnversionedImpl.class, FakePRR.class);
 
     @Path("/versioned")
     @Consumes(MediaType.APPLICATION_JSON)

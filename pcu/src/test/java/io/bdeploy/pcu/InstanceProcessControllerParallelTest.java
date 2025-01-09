@@ -29,7 +29,7 @@ class InstanceProcessControllerParallelTest {
     private final AtomicBoolean fakeStart = new AtomicBoolean(false);
 
     @RegisterExtension
-    TestServer server = new TestServer(false, new Object[] { StartupProbe.class, new AbstractBinder() {
+    private final TestServer server = new TestServer(false, new Object[] { StartupProbe.class, new AbstractBinder() {
 
         @Override
         protected void configure() {

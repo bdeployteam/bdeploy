@@ -67,7 +67,7 @@ import io.bdeploy.ui.api.Minion;
 class MinionDeployTest {
 
     @RegisterExtension
-    TestCliTool launcher = new TestCliTool(new LauncherCli());
+    private final TestCliTool launcher = new TestCliTool(new LauncherCli());
 
     @Test
     @SlowTest

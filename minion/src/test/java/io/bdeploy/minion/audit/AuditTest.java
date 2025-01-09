@@ -68,7 +68,7 @@ class AuditTest {
     }
 
     @RegisterExtension
-    TestServer srv = new TestServer(ServiceImpl.class);
+    private final TestServer srv = new TestServer(ServiceImpl.class);
 
     @BeforeEach
     void setAuditor(@TempDir java.nio.file.Path tmp) {
