@@ -30,12 +30,12 @@ import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
 import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
 
 @Component({
-    selector: 'app-bd-value-editor',
-    templateUrl: './bd-value-editor.component.html',
-    styleUrls: ['./bd-value-editor.component.css'],
-    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'app-bd-value-editor',
+  templateUrl: './bd-value-editor.component.html',
+  styleUrls: ['./bd-value-editor.component.css'],
+  viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class BdValueEditorComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
@@ -151,7 +151,8 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
   private updatePreview(value: LinkedValueConfiguration) {
     if (value?.linkExpression?.length) {
-      this.preview = getRenderPreview(this.internalValue, this.process, this.instance, this.system);
+      const preview = getRenderPreview(this.internalValue, this.process, this.instance, this.system);
+      this.preview = this.type === VariableType.PASSWORD ? '*'.repeat(preview.length) : preview;
     } else {
       this.preview = null;
     }
