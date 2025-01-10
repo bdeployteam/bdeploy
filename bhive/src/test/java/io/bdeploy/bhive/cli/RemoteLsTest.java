@@ -16,7 +16,7 @@ import io.bdeploy.common.TestCliTool;
 class RemoteLsTest {
 
     @RegisterExtension
-    final TestCliTool tools = new TestCliTool(new BHiveCli());
+    private final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @Test
     void testRemoteLs(@TempDir Path tmp) throws Exception {

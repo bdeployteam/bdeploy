@@ -23,7 +23,7 @@ import jakarta.ws.rs.PathParam;
 class DynamicInjectionTest {
 
     @RegisterExtension
-    TestServer ext = new TestServer(new TestBinder(), DynamicInjectionTestResourceLocatorImpl.class);
+    private final TestServer ext = new TestServer(new TestBinder(), DynamicInjectionTestResourceLocatorImpl.class);
 
     private class TestBinder extends AbstractBinder {
 

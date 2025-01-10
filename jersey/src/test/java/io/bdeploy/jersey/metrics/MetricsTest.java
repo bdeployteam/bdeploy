@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.MediaType;
 class MetricsTest {
 
     @RegisterExtension
-    TestServer srv = new TestServer(ProducerImpl.class);
+    private final TestServer srv = new TestServer(ProducerImpl.class);
 
     @Path("/metrics-producer")
     @Consumes(MediaType.APPLICATION_JSON)

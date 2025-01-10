@@ -12,7 +12,7 @@ import io.bdeploy.common.TestCliTool;
 class LocalPushFetchToolTest {
 
     @RegisterExtension
-    final TestCliTool tools = new TestCliTool(new BHiveCli());
+    private final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @Test
     void testPush(@TempDir Path tmp) throws Exception {

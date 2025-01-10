@@ -53,7 +53,7 @@ import io.bdeploy.pcu.TestAppFactory;
 class ProductCliTest extends BaseMinionCliTest {
 
     @RegisterExtension
-    TestCliTool hiveTools = new TestCliTool(new BHiveCli());
+    private final TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
     @Test
     void testProductImportWithExtDep(CommonRootResource master, RemoteService remote, MinionRoot root, @TempDir Path temp,

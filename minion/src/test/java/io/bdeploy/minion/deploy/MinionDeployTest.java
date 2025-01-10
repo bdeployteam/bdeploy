@@ -67,10 +67,10 @@ import io.bdeploy.ui.api.Minion;
 class MinionDeployTest {
 
     @RegisterExtension
-    TestCliTool launcher = new TestCliTool(new LauncherCli());
+    private final TestCliTool launcher = new TestCliTool(new LauncherCli());
 
-    @Test
     @SlowTest
+    @Test
     void testRemoteDeploy(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
             RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr)
             throws IOException, InterruptedException {

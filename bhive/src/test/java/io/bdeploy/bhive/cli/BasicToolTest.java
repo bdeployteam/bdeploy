@@ -26,7 +26,6 @@ import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.SkipSubTreeVisitor;
-import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.cli.ToolBase;
@@ -39,9 +38,8 @@ import io.bdeploy.common.util.PathHelper;
 class BasicToolTest {
 
     @RegisterExtension
-    final TestCliTool tools = new TestCliTool(new BHiveCli());
+    private final TestCliTool tools = new TestCliTool(new BHiveCli());
 
-    @SlowTest
     @Test
     void testRoundTrip(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
         Path hiveDir = tmp.resolve("hive");

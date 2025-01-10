@@ -13,7 +13,7 @@ class InjectionTest {
     private static final String TEST = "test";
 
     @RegisterExtension
-    TestServer ext = new TestServer(InjectionTestResourceImpl.class, new AbstractBinder() {
+    private final TestServer ext = new TestServer(InjectionTestResourceImpl.class, new AbstractBinder() {
 
         @Override
         protected void configure() {

@@ -14,6 +14,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
+import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
@@ -29,6 +30,7 @@ import io.bdeploy.ui.cli.RemoteProcessTool;
 @ExtendWith(TestActivityReporter.class)
 class RemoteProcessCliTest extends BaseMinionCliTest {
 
+    @SlowTest
     @Test
     void testRemoteCli(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);

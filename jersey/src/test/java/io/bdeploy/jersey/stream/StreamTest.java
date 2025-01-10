@@ -25,7 +25,7 @@ class StreamTest {
     StreamTestResourceImpl impl = new StreamTestResourceImpl(src);
 
     @RegisterExtension
-    TestServer ext = new TestServer(impl);
+    private final TestServer ext = new TestServer(impl);
 
     @BeforeAll
     static void prepare(@TempDir Path tmp) throws Exception {

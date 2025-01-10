@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.Response;
 class SecurityTest {
 
     @RegisterExtension
-    TestServer ext = new TestServer(SecurityTestResourceImpl.class);
+    private final TestServer ext = new TestServer(SecurityTestResourceImpl.class);
 
     @Test
     void testPlain(RemoteService service, JerseyClientFactory factory) {

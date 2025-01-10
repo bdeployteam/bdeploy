@@ -13,7 +13,6 @@ import org.junit.jupiter.api.io.TempDir;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -26,7 +25,6 @@ import io.bdeploy.ui.api.Minion;
 class DescriptorRenderTest {
 
     @Test
-    @SlowTest
     void testRemoteDeploy(BHive local, @TempDir Path tmp) throws IOException {
 
         // the easiest way to get some test data, although it is a little overkill.

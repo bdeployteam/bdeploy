@@ -44,7 +44,7 @@ import io.bdeploy.ui.cli.RemoteMasterTool;
 class MinionUpdateTest {
 
     @RegisterExtension
-    TestCliTool cli = new TestCliTool(new MinionServerCli());
+    private final TestCliTool cli = new TestCliTool(new MinionServerCli());
 
     @Test
     void testUpdate(MinionRoot root, RemoteService remote, @TempDir Path tmp, BHive local) {

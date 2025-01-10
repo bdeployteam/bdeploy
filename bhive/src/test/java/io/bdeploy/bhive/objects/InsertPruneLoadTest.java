@@ -27,6 +27,7 @@ import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.SlowTest;
 
 /**
  * This tests simultaneous writes/prunes on multiple threads. The same test can be run through
@@ -49,6 +50,7 @@ class InsertPruneLoadTest {
 
     private static final Logger log = LoggerFactory.getLogger(InsertPruneLoadTest.class);
 
+    @SlowTest
     @ParameterizedTest
     @ValueSource(ints = { 1, 3, 7 })
     void testMulti(int producerCount, BHive tstHive) throws Exception {

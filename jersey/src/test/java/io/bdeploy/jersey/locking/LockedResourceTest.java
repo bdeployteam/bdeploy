@@ -19,7 +19,7 @@ import io.bdeploy.jersey.TestServer;
 class LockedResourceTest {
 
     @RegisterExtension
-    TestServer srv = new TestServer(LockedResourceImpl.class);
+    private final TestServer srv = new TestServer(LockedResourceImpl.class);
 
     private static final Logger log = LoggerFactory.getLogger(LockedResourceTest.class);
 

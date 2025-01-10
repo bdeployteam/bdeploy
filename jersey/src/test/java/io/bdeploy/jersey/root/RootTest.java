@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.UriBuilder;
 class RootTest {
 
     @RegisterExtension
-    TestServer ext = new TestServer();
+    private final TestServer ext = new TestServer();
 
     public RootTest() {
         // registers a handler which will server /fake-webapp/* from the current class loader,

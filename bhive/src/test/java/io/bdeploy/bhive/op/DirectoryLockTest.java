@@ -14,11 +14,13 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
+import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.util.FutureHelper;
 
 @ExtendWith(TestHive.class)
 class DirectoryLockTest {
 
+    @SlowTest
     @Test
     void testLockOperations(BHive hive, @TempDir Path tmp) {
         hive.setLockContentSupplier(() -> "12345678");
