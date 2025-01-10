@@ -26,79 +26,79 @@ import io.bdeploy.gradle.config.BDeployRepositoryServerConfig;
  */
 public class BDeployValidationTask extends DefaultTask {
 
-	private static final Logger log = LoggerFactory.getLogger(BDeployValidationTask.class);
+    private static final Logger log = LoggerFactory.getLogger(BDeployValidationTask.class);
 
-	private BDeployRepositoryServerConfig validationServer = new BDeployRepositoryServerConfig();
-	private RegularFileProperty validationYaml;
+    private BDeployRepositoryServerConfig validationServer = new BDeployRepositoryServerConfig();
+    private RegularFileProperty validationYaml;
 
-	/**
-	 * @param factory creates the task
-	 */
-	@Inject
-	public BDeployValidationTask(ObjectFactory factory) {
-		validationYaml = factory.fileProperty();
-		
-		// never up to date.
-		getOutputs().upToDateWhen(e -> false);
-	}
+    /**
+     * @param factory creates the task
+     */
+    @Inject
+    public BDeployValidationTask(ObjectFactory factory) {
+        validationYaml = factory.fileProperty();
 
-	/**
-	 * Executes the task
-	 * 
-	 * @throws IOException in case of issues.
-	 */
-	@TaskAction
-	public void perform() throws IOException {
-		// apply from extension if set, but prefer local configuration.
-		File descriptorYaml = validationYaml.getAsFile().getOrNull();
+        // never up to date.
+        getOutputs().upToDateWhen(e -> false);
+    }
 
-		RemoteService sourceServer = validationServer.getRemote();
+    /**
+     * Executes the task
+     *
+     * @throws IOException in case of issues.
+     */
+    @TaskAction
+    public void perform() throws IOException {
+        // apply from extension if set, but prefer local configuration.
+        File descriptorYaml = validationYaml.getAsFile().getOrNull();
 
-		if (descriptorYaml == null || !descriptorYaml.exists()) {
-			throw new IllegalArgumentException("product-validation.yaml is not set or does not exist: " + descriptorYaml);
-		}
+        RemoteService sourceServer = validationServer.getRemote();
 
-		log.warn(" :: Repository Server: {}", sourceServer.getUri());
-		log.warn(" :: Product Validation: {}", descriptorYaml);
-		
-		if(Boolean.TRUE.equals(validationServer.isUseLogin())) {
-			var login = validationServer.getLogin() == null ? "<active>" : validationServer.getLogin();
-			var storage = validationServer.getLoginStorage() == null ? "<default>" : validationServer.getLoginStorage();
-			log.warn(" :: Validation Login: {} from {}", login, storage);
-		}
+        if (descriptorYaml == null || !descriptorYaml.exists()) {
+            throw new IllegalArgumentException("product-validation.yaml is not set or does not exist: " + descriptorYaml);
+        }
 
-		ProductValidationResponseApi validate = ProductValidationHelper.validate(descriptorYaml.toPath(), sourceServer);
-		
-		for(var issue : validate.issues) {
-			log.error("{}: {}", issue.severity.name(), issue.message);
-		}
-		
-		if(validate.issues.stream().anyMatch(i -> i.severity == ProductValidationSeverity.ERROR)) {
-			throw new IllegalStateException("Errors found during validation");
-		}
-	}
+        log.warn(" :: Repository Server: {}", sourceServer.getUri());
+        log.warn(" :: Product Validation: {}", descriptorYaml);
 
-	/**
-	 * @return the server which is used to validate the product
-	 */
-	@Nested
-	public BDeployRepositoryServerConfig getValidationServer() {
-		return validationServer;
-	}
+        if (Boolean.TRUE.equals(validationServer.isUseLogin())) {
+            var login = validationServer.getLogin() == null ? "<active>" : validationServer.getLogin();
+            var storage = validationServer.getLoginStorage() == null ? "<default>" : validationServer.getLoginStorage();
+            log.warn(" :: Validation Login: {} from {}", login, storage);
+        }
 
-	/**
-	 * @param action configuration action for validation server.
-	 */
-	public void validationServer(Action<? super BDeployRepositoryServerConfig> action) {
-		action.execute(validationServer);
-	}
+        ProductValidationResponseApi validate = ProductValidationHelper.validate(descriptorYaml.toPath(), sourceServer);
 
-	/**
-	 * @return path to the validation YAML file which is used.
-	 */
-	@InputFile
-	public RegularFileProperty getValidationYaml() {
-		return validationYaml;
-	}
-	
+        for (var issue : validate.issues) {
+            log.error("{}: {}", issue.severity.name(), issue.message);
+        }
+
+        if (validate.issues.stream().anyMatch(i -> i.severity == ProductValidationSeverity.ERROR)) {
+            throw new IllegalStateException("Errors found during validation");
+        }
+    }
+
+    /**
+     * @return the server which is used to validate the product
+     */
+    @Nested
+    public BDeployRepositoryServerConfig getValidationServer() {
+        return validationServer;
+    }
+
+    /**
+     * @param action configuration action for validation server.
+     */
+    public void validationServer(Action<? super BDeployRepositoryServerConfig> action) {
+        action.execute(validationServer);
+    }
+
+    /**
+     * @return path to the validation YAML file which is used.
+     */
+    @InputFile
+    public RegularFileProperty getValidationYaml() {
+        return validationYaml;
+    }
+
 }
