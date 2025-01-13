@@ -167,9 +167,9 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let runningApps = 0;
+    let runningAliveApps = 0;
+    let runningDeadApps = 0;
     let stoppedApps = 0;
-    let deadApps = 0;
     this.node.nodeConfiguration.applications.forEach((app) => {
       if (app.processControl.startType !== ApplicationStartType.INSTANCE) {
         return;
@@ -179,26 +179,26 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       if (!ProcessesService.isRunning(state)) {
         stoppedApps++;
       } else if (state === ProcessState.RUNNING_NOT_ALIVE) {
-        deadApps++;
+        runningDeadApps++;
       } else {
-        runningApps++;
+        runningAliveApps++;
       }
     });
 
-    this.updateProcessStateItem(stoppedApps, deadApps, runningApps);
+    this.updateProcessStateItem(runningAliveApps, runningDeadApps, stoppedApps);
   }
 
-  private updateProcessStateItem(stoppedApps: number, deadApps: number, runningApps: number) {
-    this.processesState.next(!stoppedApps && !deadApps ? 'ok' : !runningApps ? 'info' : 'warning');
+  private updateProcessStateItem(runningAliveApps: number, runningDeadApps: number, stoppedApps: number) {
+    this.processesState.next(!stoppedApps && !runningDeadApps ? 'ok' : !runningAliveApps ? 'info' : 'warning');
     this.processesTooltip.next(
-      !runningApps
+      !runningAliveApps
         ? 'The instance is stopped'
-        : !stoppedApps && !deadApps
+        : !stoppedApps && !runningDeadApps
           ? 'All applications OK'
           : `${stoppedApps} 'Instance' type ${
               stoppedApps === 1 ? 'application is' : 'applications are'
-            } not running.\n${deadApps} 'Instance' type ${
-              deadApps === 1 ? 'application reports' : 'applications are reporting'
+            } not running.\n${runningDeadApps} 'Instance' type ${
+              runningDeadApps === 1 ? 'application reports' : 'applications are reporting'
             } problems.`,
     );
   }
