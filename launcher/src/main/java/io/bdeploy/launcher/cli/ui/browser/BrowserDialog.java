@@ -608,8 +608,9 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setIndeterminate(true);
         progressBar.setString("Launching '" + app.clickAndStart.applicationId + "'");
 
-        AppLauncher task = new AppLauncher(lpp, app, args);
+        AppLauncher task = new AppLauncher(lpp, auditor, app, args, !readonlyHome);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
     }
 

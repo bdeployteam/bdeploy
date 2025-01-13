@@ -1,16 +1,17 @@
 package io.bdeploy.launcher.cli.ui.browser.workers;
 
+import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.launcher.ClientPathHelper;
 import io.bdeploy.launcher.LauncherPathProvider;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
@@ -18,22 +19,28 @@ import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 /**
  * A worker that launches the application
  */
-public class AppLauncher extends SwingWorker<Object, Void> {
+public class AppLauncher extends AppRefresher {
 
     private static final Logger log = LoggerFactory.getLogger(AppLauncher.class);
 
-    private final LauncherPathProvider lpp;
-    private final List<String> args;
     private final ClientSoftwareConfiguration app;
+    private final List<String> args;
+    private final boolean doRefresh;
 
-    public AppLauncher(LauncherPathProvider lpp, ClientSoftwareConfiguration app, List<String> args) {
-        this.lpp = lpp;
+    public AppLauncher(LauncherPathProvider lpp, Auditor auditor, ClientSoftwareConfiguration app, List<String> args,
+            boolean doRefresh) {
+        super(lpp, auditor, List.of(app));
         this.app = app;
         this.args = args;
+        this.doRefresh = doRefresh;
     }
 
     @Override
-    protected Object doInBackground() throws Exception {
+    protected Void doInBackground() throws IOException {
+        if (doRefresh) {
+            super.doInBackground();
+        }
+
         Path launcher = ClientPathHelper.getNativeLauncher(lpp);
         Path launchFile = ClientPathHelper.getOrCreateClickAndStart(lpp, app.clickAndStart);
 

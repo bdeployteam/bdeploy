@@ -1,5 +1,6 @@
 package io.bdeploy.launcher.cli.ui.browser.workers;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 
@@ -31,8 +32,8 @@ public class AppRefresher extends SwingWorker<Void, Object> {
 
     private static final Logger log = LoggerFactory.getLogger(AppRefresher.class);
 
-    private final LauncherPathProvider lpp;
-    private final Auditor auditor;
+    protected final LauncherPathProvider lpp;
+    protected final Auditor auditor;
     private final Collection<ClientSoftwareConfiguration> apps;
 
     public AppRefresher(LauncherPathProvider lpp, Auditor auditor, Collection<ClientSoftwareConfiguration> apps) {
@@ -42,7 +43,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
     }
 
     @Override
-    protected Void doInBackground() {
+    protected Void doInBackground() throws IOException {
         log.info("Fetching configurations...");
         int i = 0;
         Path hivePath = lpp.get(SpecialDirectory.BHIVE);
