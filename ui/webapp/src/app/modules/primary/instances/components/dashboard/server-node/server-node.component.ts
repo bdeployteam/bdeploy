@@ -189,9 +189,9 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   }
 
   private updateProcessStateItem(runningAliveApps: number, runningDeadApps: number, stoppedApps: number) {
-    this.processesState.next(!stoppedApps && !runningDeadApps ? 'ok' : !runningAliveApps ? 'info' : 'warning');
+    this.processesState.next(runningDeadApps ? 'warning' : stoppedApps ? 'info' : 'ok');
     this.processesTooltip.next(
-      !runningAliveApps
+      !runningAliveApps && !runningDeadApps
         ? 'The instance is stopped'
         : !stoppedApps && !runningDeadApps
           ? 'All applications are running without problems'
