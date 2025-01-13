@@ -194,12 +194,12 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       !runningAliveApps
         ? 'The instance is stopped'
         : !stoppedApps && !runningDeadApps
-          ? 'All applications OK'
+          ? 'All applications are running without problems'
           : `${stoppedApps} 'Instance' type ${
               stoppedApps === 1 ? 'application is' : 'applications are'
-            } not running.\n${runningDeadApps} 'Instance' type ${
-              runningDeadApps === 1 ? 'application reports' : 'applications are reporting'
-            } problems.`,
+            } not running\n${runningDeadApps} 'Instance' type ${
+              runningDeadApps === 1 ? 'application is reporting' : 'applications are reporting'
+            } problems`,
     );
   }
 
