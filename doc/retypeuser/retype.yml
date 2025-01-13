@@ -22,6 +22,9 @@ links:
     target: blank
 footer:
   copyright: "&copy; Copyright {{ year }}. All rights reserved."
+  links:
+    - text: Release {{ releaseVersion }}
+      link: '{{ releaseLink }}'
 search:
   preload: true
 generator:

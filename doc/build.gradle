@@ -1,11 +1,39 @@
+ext.resolveVersion = { task ->
+    configure(task) {
+        doFirst {
+            def retypeFile = new File("${workingDir}/retype.yml")
+            def clonedFile = new File("${workingDir}/retype.yml.clone")
+            clonedFile.text = retypeFile.text
+
+            def releaseTagPattern = ~/^\d+\.\d+\.\d+$/
+            def releaseVersion = project.version.toString()
+            def releaseLink = (releaseVersion ==~ releaseTagPattern) ? "https://github.com/bdeployteam/bdeploy/releases/tag/v${releaseVersion}" : "https://github.com/bdeployteam/bdeploy/releases"
+            retypeFile.text = retypeFile.text.replace("{{ releaseVersion }}", releaseVersion).replace("{{ releaseLink }}", releaseLink)
+        }
+    }
+}
+
+ext.revertVersion = { task ->
+    configure(task) {
+        doLast {
+            def retypeFile = new File("${workingDir}/retype.yml")
+            def clonedFile = new File("${workingDir}/retype.yml.clone")
+            retypeFile.text = clonedFile.text
+            delete(clonedFile)
+        }
+    }
+}
+
 ext.buildRetype = { task ->
     configure(task) {
+        resolveVersion(task)
         group = BasePlugin.BUILD_GROUP
 	    if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
 	        commandLine (["npx", "retypeapp", "build"])
 	    } else {
 	        commandLine (["npx.cmd", "retypeapp", "build"])
 	    }
+        revertVersion(task)
     }
 }
 
