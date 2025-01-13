@@ -25,89 +25,94 @@ import io.bdeploy.gradle.extensions.ServerExtension;
  */
 public class BDeployPushTask extends DefaultTask {
 
-	private static final Logger log = LoggerFactory.getLogger(BDeployPushTask.class);
-	
-	private BDeployProductTask productTask;
-	private DirectoryProperty localBHive;
-	private Property<Key> key;
+    private static final Logger log = LoggerFactory.getLogger(BDeployPushTask.class);
 
-	/**
-	 * @param factory the factory to create properties
-	 */
-	@Inject
-	public BDeployPushTask(ObjectFactory factory) {
-		localBHive = factory.directoryProperty();
-		key = factory.property(Key.class);
-		getExtensions().create("target", BDeployServerExtension.class, factory);
+    private BDeployProductTask productTask;
+    private DirectoryProperty localBHive;
+    private Property<Key> key;
 
-		getProject().afterEvaluate(prj -> {
-			if (productTask != null) {
-				if (!localBHive.isPresent()) {
-					localBHive.set(productTask.getLocalBHive());
-				}
-				if (!key.isPresent()) {
-					key.set(prj.provider(() -> productTask.getKey()));
-				}
-			}
-		});
-	}
+    /**
+     * @param factory the factory to create properties
+     */
+    @Inject
+    public BDeployPushTask(ObjectFactory factory) {
+        localBHive = factory.directoryProperty();
+        key = factory.property(Key.class);
+        getExtensions().create("target", BDeployServerExtension.class, factory);
 
-	/**
-	 * Executes the task
-	 */
-	@TaskAction
-	public void perform() {
-		BDeployServerExtension ext = getExtensions().getByType(BDeployServerExtension.class);
-		if (ext.getServers().isEmpty()) {
-			throw new IllegalStateException("No server configured");
-		}
+        getProject().afterEvaluate(prj -> {
+            if (productTask != null) {
+                if (!localBHive.isPresent()) {
+                    localBHive.set(productTask.getLocalBHive());
+                }
+                if (!key.isPresent()) {
+                    key.set(prj.provider(() -> productTask.getKey()));
+                }
+            }
+        });
+    }
 
-		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
-				: new ActivityReporter.Null();
-		boolean failedOne = false;
-		for (ServerExtension target : ext.getServers().getAsMap().values()) {
-			RemoteService svc = target.getRemote();
+    /**
+     * Executes the task
+     */
+    @TaskAction
+    public void perform() {
+        try {
+            BDeployServerExtension ext = getExtensions().getByType(BDeployServerExtension.class);
+            if (ext.getServers().isEmpty()) {
+                throw new IllegalStateException("No server configured");
+            }
 
-			log.warn(" >> Pushing {} to {}", key.get(), target.getName());
-			
-			try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
-				local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup().get())
-						.addManifest(key.get()));
-			} catch(Exception e) {
-				log.error("Cannot push {} to {}: {}", key.get(), target.getName(), e.toString());
-				if(log.isInfoEnabled()) {
-					log.info("Exception:", e);
-				}
-				failedOne = true;
-			}
-		}
-		if(failedOne) {
-			throw new RuntimeException("Could not push to all targets. Run with --info to receive more information.");
-		}
-	}
+            ActivityReporter reporter = getProject().hasProperty("verbose")
+                    ? new ActivityReporter.Stream(System.out)
+                    : new ActivityReporter.Null();
+            boolean failedOne = false;
+            for (ServerExtension target : ext.getServers().getAsMap().values()) {
+                RemoteService svc = target.getRemote();
 
-	/**
-	 * @param task the {@link BDeployProductTask} to grab configuration from (local
-	 *             BHive path, key to push).
-	 */
-	public void of(BDeployProductTask task) {
-		productTask = task;
-	}
+                log.warn(" >> Pushing {} to {} ({})", key.get(), target.getName(), svc.getUri());
 
-	/**
-	 * @return the local BHive containing the specified product.
-	 */
-	@InputDirectory
-	public DirectoryProperty getLocalBHive() {
-		return localBHive;
-	}
+                try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
+                    local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup().get())
+                            .addManifest(key.get()));
+                } catch (Exception e) {
+                    log.error("Cannot push {} to {}: {}", key.get(), target.getName(), e.toString());
+                    if (log.isInfoEnabled()) {
+                        log.info("Exception:", e);
+                    }
+                    failedOne = true;
+                }
+            }
+            if (failedOne) {
+                throw new RuntimeException("Could not push to all targets. Run with --info to receive more information.");
+            }
+        } catch (Exception e) {
+            log.error("\nError while pushing product: {}", GradleExceptionHelper.mapExceptionCausesToReasonWithNewline(e));
+            throw e;
+        }
+    }
 
-	/**
-	 * @return the product to push.
-	 */
-	@Input
-	public Property<Key> getKey() {
-		return key;
-	}
+    /**
+     * @param task the {@link BDeployProductTask} to grab configuration from (local BHive path, key to push).
+     */
+    public void of(BDeployProductTask task) {
+        productTask = task;
+    }
+
+    /**
+     * @return the local BHive containing the specified product.
+     */
+    @InputDirectory
+    public DirectoryProperty getLocalBHive() {
+        return localBHive;
+    }
+
+    /**
+     * @return the product to push.
+     */
+    @Input
+    public Property<Key> getKey() {
+        return key;
+    }
 
 }

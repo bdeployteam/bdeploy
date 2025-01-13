@@ -29,6 +29,45 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/plugins/bdeploy-demo-plugin" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/plugins/bdeploy-demo-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/plugins/build-tool-gradle" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/plugins/build-tool-gradle" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/plugins/build-tool-gradle" name="bdeploy-gradle">
+                <projects>
+                  <project path="$PROJECT_DIR$/plugins/build-tool-gradle" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/plugins/gradle-plugin-test-project" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/plugins/build-tool-gradle" />
+            <option value="$PROJECT_DIR$/plugins/gradle-plugin-test-project" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

@@ -28,84 +28,89 @@ import jakarta.ws.rs.core.UriBuilder;
  */
 public class BDeployZipTask extends DefaultTask {
 
-	private static final Logger log = LoggerFactory.getLogger(BDeployZipTask.class);
-	
-	private BDeployProductTask productTask;
-	private DirectoryProperty localBHive;
-	private Property<Key> key;
-	private RegularFileProperty output;
+    private static final Logger log = LoggerFactory.getLogger(BDeployZipTask.class);
 
-	/**
-	 * @param factory the factory to create properties.
-	 */
-	@Inject
-	public BDeployZipTask(ObjectFactory factory) {
-		localBHive = factory.directoryProperty();
-		key = factory.property(Key.class);
-		output = factory.fileProperty();
+    private BDeployProductTask productTask;
+    private DirectoryProperty localBHive;
+    private Property<Key> key;
+    private RegularFileProperty output;
 
-		getProject().afterEvaluate(prj -> {
-			if (productTask != null) {
-				if (!localBHive.isPresent()) {
-					localBHive.set(productTask.getLocalBHive());
-				}
-				if (!key.isPresent()) {
-					key.set(prj.provider(() -> productTask.getKey()));
-				}
-			}
-		});
-	}
+    /**
+     * @param factory the factory to create properties.
+     */
+    @Inject
+    public BDeployZipTask(ObjectFactory factory) {
+        localBHive = factory.directoryProperty();
+        key = factory.property(Key.class);
+        output = factory.fileProperty();
 
-	/**
-	 * Executes the task
-	 */
-	@TaskAction
-	public void perform() {
-		log.warn(" >> Zip'ing " + key.get());
+        getProject().afterEvaluate(prj -> {
+            if (productTask != null) {
+                if (!localBHive.isPresent()) {
+                    localBHive.set(productTask.getLocalBHive());
+                }
+                if (!key.isPresent()) {
+                    key.set(prj.provider(() -> productTask.getKey()));
+                }
+            }
+        });
+    }
 
-		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
-				: new ActivityReporter.Null();
-		URI targetUri = UriBuilder.fromUri("jar:" + output.getAsFile().get().toURI()).build();
-		try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
-			local.execute(new PushOperation().setRemote(new RemoteService(targetUri)).addManifest(key.get()));
-		} catch(Exception e) {
-			log.error("Cannot create zip: {}", e.toString());
-			if(log.isInfoEnabled()) {
-				log.info("Exception:", e);
-			}
-		}
-	}
+    /**
+     * Executes the task
+     */
+    @TaskAction
+    public void perform() {
+        try {
+            log.warn(" >> Zip'ing " + key.get());
 
-	/**
-	 * @param task the {@link BDeployProductTask} to grab configuration from (local
-	 *             BHive path, key to push).
-	 */
-	public void of(BDeployProductTask task) {
-		productTask = task;
-	}
+            ActivityReporter reporter = getProject().hasProperty("verbose")
+                    ? new ActivityReporter.Stream(System.out)
+                    : new ActivityReporter.Null();
+            URI targetUri = UriBuilder.fromUri("jar:" + output.getAsFile().get().toURI()).build();
+            try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
+                local.execute(new PushOperation().setRemote(new RemoteService(targetUri)).addManifest(key.get()));
+            } catch (Exception e) {
+                log.error("Cannot create zip: {}", e.toString());
+                if (log.isInfoEnabled()) {
+                    log.info("Exception:", e);
+                }
+            }
+        } catch (Exception e) {
+            log.error("\nError while zip'ing product: {}", GradleExceptionHelper.mapExceptionCausesToReasonWithNewline(e));
+            throw e;
+        }
+    }
 
-	/**
-	 * @return the local BHive containing the specified product.
-	 */
-	@InputDirectory
-	public DirectoryProperty getLocalBHive() {
-		return localBHive;
-	}
+    /**
+     * @param task the {@link BDeployProductTask} to grab configuration from (local BHive path, key to push).
+     */
+    public void of(BDeployProductTask task) {
+        productTask = task;
+    }
 
-	/**
-	 * @return the product to package.
-	 */
-	@Input
-	public Property<Key> getKey() {
-		return key;
-	}
+    /**
+     * @return the local BHive containing the specified product.
+     */
+    @InputDirectory
+    public DirectoryProperty getLocalBHive() {
+        return localBHive;
+    }
 
-	/**
-	 * @return the target ZIP file.
-	 */
-	@OutputFile
-	public RegularFileProperty getOutput() {
-		return output;
-	}
+    /**
+     * @return the product to package.
+     */
+    @Input
+    public Property<Key> getKey() {
+        return key;
+    }
+
+    /**
+     * @return the target ZIP file.
+     */
+    @OutputFile
+    public RegularFileProperty getOutput() {
+        return output;
+    }
 
 }
