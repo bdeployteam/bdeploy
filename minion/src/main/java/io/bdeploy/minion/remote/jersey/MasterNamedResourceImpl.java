@@ -1378,9 +1378,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 InstanceStatusDto processStatus = getStatus(config.id);
                 List<InstanceNodeConfigurationDto> nodeConfigs = readExistingNodeConfigs(im);
 
-                List<String> stoppedApps = new ArrayList<>();
-                List<String> runningApps = new ArrayList<>();
-                List<String> transitioningApps = new ArrayList<>();
+                int stoppedApps = 0;
+                int runningApps = 0;
+                int transitioningApps = 0;
 
                 OverallStatus overallStatus = OverallStatus.RUNNING;
                 List<String> overallStatusMessages = new ArrayList<>();
@@ -1415,18 +1415,18 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         switch (status.processState) {
                             case RUNNING:
                             case RUNNING_UNSTABLE:
-                                runningApps.add(app.name);
+                                runningApps++;
                                 break;
                             case STOPPED:
                             case CRASHED_PERMANENTLY:
-                                stoppedApps.add(app.name);
+                                stoppedApps++;
                                 break;
                             case RUNNING_STOP_PLANNED:
                             case RUNNING_NOT_STARTED:
                             case CRASHED_WAITING:
                             case RUNNING_NOT_ALIVE:
                             case STOPPED_START_PLANNED:
-                                transitioningApps.add(app.name);
+                                transitioningApps++;
                                 break;
                         }
                     }
@@ -1437,9 +1437,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 // * STOPPED: all applications of type `INSTANCE` are stopped.
                 // * WARNING: one or more applications of type `INSTANCE` are stopped.
                 // * INDETERMINATE: one or more applications of type `INSTANCE` are starting or stopping.
-                boolean hasStoppedApps = !stoppedApps.isEmpty();
-                boolean hasRunningApps = !runningApps.isEmpty();
-                boolean hasTransitioningApps = !transitioningApps.isEmpty();
+                boolean hasStoppedApps = stoppedApps > 0;
+                boolean hasRunningApps = runningApps > 0;
+                boolean hasTransitioningApps = transitioningApps > 0;
 
                 if (!hasStoppedApps && !hasRunningApps && !hasTransitioningApps) {
                     // this means that there are no instance type applications on the instance.
@@ -1460,13 +1460,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     // some apps are transitioning -> indeterminate
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.INDETERMINATE;
-                        overallStatusMessages
-                                .add(transitioningApps.size() + " instance type applications are in indeterminate state.");
+                        overallStatusMessages.add(transitioningApps + " instance type applications are in indeterminate state.");
                     }
                 } else {
                     // not ok, some apps started, some stopped - that will be a warning.
                     overallStatus = OverallStatus.WARNING;
-                    overallStatusMessages.add(stoppedApps.size() + " instance type applications are not running.");
+                    overallStatusMessages.add(stoppedApps + " instance type applications are not running.");
                 }
 
                 im.getOverallState(hive).update(overallStatus, overallStatusMessages);
