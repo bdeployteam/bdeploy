@@ -1379,7 +1379,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 List<InstanceNodeConfigurationDto> nodeConfigs = readExistingNodeConfigs(im);
 
                 int stoppedApps = 0;
-                int runningApps = 0;
+                int runningWithProbeApps = 0;
+                int runningWithoutProbeApps = 0;
                 int transitioningApps = 0;
 
                 OverallStatus overallStatus = OverallStatus.RUNNING;
@@ -1415,7 +1416,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         switch (status.processState) {
                             case RUNNING:
                             case RUNNING_UNSTABLE:
-                                runningApps++;
+                                runningWithProbeApps++;
+                                break;
+                            case RUNNING_NOT_ALIVE:
+                                runningWithoutProbeApps++;
                                 break;
                             case STOPPED:
                             case CRASHED_PERMANENTLY:
@@ -1424,7 +1428,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             case RUNNING_STOP_PLANNED:
                             case RUNNING_NOT_STARTED:
                             case CRASHED_WAITING:
-                            case RUNNING_NOT_ALIVE:
                             case STOPPED_START_PLANNED:
                                 transitioningApps++;
                                 break;
@@ -1438,34 +1441,41 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 // * WARNING: one or more applications of type `INSTANCE` are stopped.
                 // * INDETERMINATE: one or more applications of type `INSTANCE` are starting or stopping.
                 boolean hasStoppedApps = stoppedApps > 0;
-                boolean hasRunningApps = runningApps > 0;
+                boolean hasRunningWithProbeApps = runningWithProbeApps > 0;
+                boolean hasRunningWithoutProbeApps = runningWithoutProbeApps > 0;
                 boolean hasTransitioningApps = transitioningApps > 0;
 
-                if (!hasStoppedApps && !hasRunningApps && !hasTransitioningApps) {
-                    // this means that there are no instance type applications on the instance.
+                if (!hasStoppedApps && !hasRunningWithProbeApps && !hasRunningWithoutProbeApps && !hasTransitioningApps) {
+                    // valid - this means that there are no instance type applications on the instance -> stopped
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.STOPPED;
                     }
-                } else if (hasRunningApps && !hasStoppedApps && !hasTransitioningApps) {
-                    // valid - nothing stopped, nothing transitioning -> running.
-                    if (overallStatus != OverallStatus.WARNING) {
-                        overallStatus = OverallStatus.RUNNING;
-                    }
-                } else if (hasStoppedApps && !hasRunningApps && !hasTransitioningApps) {
+                } else if (hasStoppedApps && !hasRunningWithoutProbeApps && !hasRunningWithProbeApps && !hasTransitioningApps) {
                     // valid - all stopped, nothing running, nothing transitioning -> stopped
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.STOPPED;
+                    }
+                } else if (hasRunningWithProbeApps && !hasRunningWithoutProbeApps && !hasStoppedApps && !hasTransitioningApps) {
+                    // valid - nothing stopped, nothing transitioning, no liveness issues -> running
+                    if (overallStatus != OverallStatus.WARNING) {
+                        overallStatus = OverallStatus.RUNNING;
                     }
                 } else if (hasTransitioningApps) {
                     // some apps are transitioning -> indeterminate
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.INDETERMINATE;
-                        overallStatusMessages.add(transitioningApps + " instance type applications are in indeterminate state.");
+                        overallStatusMessages.add(transitioningApps + " instance type applications are in indeterminate state");
                     }
                 } else {
-                    // not ok, some apps started, some stopped - that will be a warning.
+                    // not ok, some apps started, some stopped, or a failed liveness probe -> warning.
                     overallStatus = OverallStatus.WARNING;
-                    overallStatusMessages.add(stoppedApps + " instance type applications are not running.");
+                    if (hasRunningWithoutProbeApps) {
+                        overallStatusMessages
+                                .add(runningWithoutProbeApps + " instance type applications failed their liveness probe check");
+                    }
+                    if (hasStoppedApps) {
+                        overallStatusMessages.add(stoppedApps + " instance type applications are not running");
+                    }
                 }
 
                 im.getOverallState(hive).update(overallStatus, overallStatusMessages);
