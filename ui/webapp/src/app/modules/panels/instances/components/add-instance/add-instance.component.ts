@@ -119,7 +119,12 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
           return;
         }
         this.systemKeys = s.map((configDto) => configDto.key);
-        this.systemLabels = s.map((configDto) => `${configDto.config.name} (${configDto.config.description})`);
+        this.systemLabels = s.map((configDto) => {
+          const config = configDto.config;
+          const name = config.name;
+          const description = config.description;
+          return description ? `${name} (${description})` : name;
+        });
       }),
     );
   }
