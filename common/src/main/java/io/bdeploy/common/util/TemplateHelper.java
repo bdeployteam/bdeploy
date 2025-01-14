@@ -158,7 +158,7 @@ public class TemplateHelper {
         }
 
         // Append remaining content of the input
-        builder.append(value.substring(currentStart, value.length()));
+        builder.append(value.substring(currentStart));
         return builder.toString();
     }
 
@@ -191,7 +191,7 @@ public class TemplateHelper {
         }
 
         // Append remaining content of the input
-        builder.append(value.substring(currentStart, value.length()));
+        builder.append(value.substring(currentStart));
         return builder.toString();
     }
 

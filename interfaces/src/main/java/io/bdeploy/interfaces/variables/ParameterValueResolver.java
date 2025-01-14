@@ -25,7 +25,7 @@ public class ParameterValueResolver extends PrefixResolver {
                         "Illegal parameter reference. Expecting appName:paramId but got " + nameAndParam);
             }
             String app = nameAndParam.substring(0, idx);
-            String parameter = nameAndParam.substring(idx + 1, nameAndParam.length());
+            String parameter = nameAndParam.substring(idx + 1);
             return provider.getValueByDisplayName(app, parameter);
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
