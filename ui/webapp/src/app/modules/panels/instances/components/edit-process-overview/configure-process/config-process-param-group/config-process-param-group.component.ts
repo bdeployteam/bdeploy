@@ -66,11 +66,11 @@ interface ParameterGroup {
 }
 
 @Component({
-    selector: 'app-config-process-param-group',
-    templateUrl: './config-process-param-group.component.html',
-    styleUrls: ['./config-process-param-group.component.css'],
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: 'app-config-process-param-group',
+  templateUrl: './config-process-param-group.component.html',
+  styleUrls: ['./config-process-param-group.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly bop = inject(BreakpointObserver);
@@ -616,7 +616,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   protected toggleExpandPreview(event: MatButtonToggleChange) {
-    this.expandPreview = event.value == '1';
+    this.expandPreview = event.value === '1';
     this.updatePreview$.next(true);
   }
 

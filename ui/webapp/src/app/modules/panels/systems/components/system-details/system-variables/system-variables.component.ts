@@ -18,10 +18,10 @@ import { VariableConfiguration } from './../../../../../../models/gen.dtos';
 const MAGIC_ABORT = 'abort_save';
 
 @Component({
-    selector: 'app-system-variables',
-    templateUrl: './system-variables.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'app-system-variables',
+  templateUrl: './system-variables.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);
@@ -121,7 +121,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
 
   protected onSave(): void {
     this.doSave().subscribe((x) => {
-      if (x != MAGIC_ABORT) {
+      if (x !== MAGIC_ABORT) {
         this.system = this.orig = null;
         this.tb.closePanel();
       }
