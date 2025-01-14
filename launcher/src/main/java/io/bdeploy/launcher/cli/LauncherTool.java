@@ -686,7 +686,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association", fileAssocScriptsDir);
 
         // Check if the application has any missing artifacts
-        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
         Collection<String> missing = getMissingArtifacts(hive);
         if (missing.isEmpty()) {
             log.info("Application has no missing artifacts.");
@@ -696,6 +695,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Application has missing artifacts: {}", missing);
 
         // Throw an exception if we do not have write permissions in the directory
+        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
         if (readOnlyHomeDir) {
             throw new SoftwareUpdateException(appCfg.name, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
         }
