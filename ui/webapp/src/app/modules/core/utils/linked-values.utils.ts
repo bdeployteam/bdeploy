@@ -246,7 +246,7 @@ function doMatchVariable(s: string, config: VariableConfiguration): boolean {
     config &&
     (s === `{{X:${config.id}}}` ||
       ([VariableType.NUMERIC, VariableType.CLIENT_PORT, VariableType.SERVER_PORT].includes(config.type) &&
-        s.match(`{{X:${config.id}:${ARITH_EXPR}}}`) != null))
+        /{{X:${config.id}:${ARITH_EXPR}}}/.exec(s) != null))
   );
 }
 
@@ -255,9 +255,9 @@ function doMatchProcessParameter(s: string, paramId: string, appName: string, th
     return false;
   }
   if (thisApp) {
-    return s === `{{V:${paramId}}}` || s.match(`{{V:${paramId}:${ARITH_EXPR}}}`) != null;
+    return s === `{{V:${paramId}}}` || /{{V:${paramId}:${ARITH_EXPR}}}/.exec(s) != null;
   }
-  return s === `{{V:${appName}:${paramId}}}` || s.match(`{{V:${appName}:${paramId}:${ARITH_EXPR}}}`) != null;
+  return s === `{{V:${appName}:${paramId}}}` || /{{V:${appName}:${paramId}:${ARITH_EXPR}}}/.exec(s) != null;
 }
 
 function doExpand(wholeExpression: string, config: LinkedValueConfiguration, paramType?: VariableType): string {
@@ -571,7 +571,7 @@ function expandCondition(
   process: ApplicationConfiguration,
   system: SystemConfiguration,
 ) {
-  const match = condition.match(/{{IF:([^?]+)\?([^:]*):(.*)}}/);
+  const match = /{{IF:([^?]+)\?([^:]*):(.*)}}/.exec(condition);
 
   if (!match) {
     return condition; // no match, expression malformed? just don't expand it...
