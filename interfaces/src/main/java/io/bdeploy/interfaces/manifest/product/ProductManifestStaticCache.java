@@ -30,11 +30,7 @@ public class ProductManifestStaticCache {
 
     /** Reads existing cached information if available. Returns <code>null</code> in case no information is available. */
     public ProductManifestStaticCacheRecordV2 read() {
-        ProductManifestStaticCacheRecordV2 stored = meta.read(hive);
-        if (stored == null) {
-            return null;
-        }
-        return stored;
+        return meta.read(hive);
     }
 
     public void store(SortedSet<Key> appRefs, SortedSet<Key> otherRefs, ProductDescriptor desc, ObjectId cfgEntry,
