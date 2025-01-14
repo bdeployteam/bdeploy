@@ -292,9 +292,6 @@ public class WindowsExecutableUtils {
      * @return
      */
     private static DigestInfo getSpcIndirectDataContent(ContentInfo contentInfo) {
-
-        DigestInfo digestInfo;
-
         AlgorithmIdentifier algId = null;
         byte[] digest = null;
 
@@ -330,8 +327,7 @@ public class WindowsExecutableUtils {
             }
         }
 
-        digestInfo = new DigestInfo(algId, digest);
-        return digestInfo;
+        return new DigestInfo(algId, digest);
     }
 
     /**
