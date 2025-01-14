@@ -261,21 +261,21 @@ startCommand:
 
 endpoints:
   http:
-    - id: 'myVersion - enabled'
-      path: 'public/version'
+    - id: "myVersion - enabled"
+      path: "public/version"
       port: 1111
       enabled: true
-    - id: 'myVersion - disabled'
-      path: 'public/version'
+    - id: "myVersion - disabled"
+      path: "public/version"
       port: 2222
       enabled: false
-    - id: 'myVersionUI - enabled'
-      path: 'public/ui'
+    - id: "myVersionUI - enabled"
+      path: "public/ui"
       port: 3333
       enabled: true
       type: UI
-    - id: 'myVersionUI - disabled'
-      path: 'public/ui'
+    - id: "myVersionUI - disabled"
+      path: "public/ui"
       port: 4444
       enabled: false
       type: UI

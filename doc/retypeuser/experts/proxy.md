@@ -90,11 +90,11 @@ A sample UI endpoint definition may look something like this in the [app-info.ya
 ```yaml app-info.yaml
 endpoints:
   http:
-    - id: 'appUi'
-      enabled: '{{V:port-param}}'
-      path: '/'
-      contextPath: '/appUi'
-      port: '8080'
+    - id: "appUi"
+      enabled: "{{V:port-param}}"
+      path: "/"
+      contextPath: "/appUi"
+      port: "8080"
       secure: false
       authType: NONE
       type: UI

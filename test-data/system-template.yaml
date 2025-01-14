@@ -1,74 +1,74 @@
 # yaml-language-server: $schema= https://localhost:7701/api/public/v1/schema/systemTemplateYaml
 
 name: Test System
-description: 'A test system with both demo and chat product'
+description: "A test system with both demo and chat product"
 
 templateVariables:
   - id: node-id
-    name: 'The Node Number'
-    description: 'The Node ID Base'
+    name: "The Node Number"
+    description: "The Node ID Base"
     defaultValue: 0
     type: NUMERIC
   - id: cell-base-name
-    name: 'The Node Base Name'
-    defaultValue: 'Node'
+    name: "The Node Base Name"
+    defaultValue: "Node"
   - id: system-password
-    name: 'System Password'
+    name: "System Password"
     type: PASSWORD
 
 systemVariables:
   - id: test.system.var
-    description: 'A test system variable'
+    description: "A test system variable"
     value: testValue
   - id: system.variable.password
-    name: 'System Password Variable Definition'
-    longDescription: 'The system variable of type PASSWORD'
-    type: 'PASSWORD'
-    defaultValue: '{{T:system-password}}'
-    groupName: 'System Variable Definitions'
+    name: "System Password Variable Definition"
+    longDescription: "The system variable of type PASSWORD"
+    type: "PASSWORD"
+    defaultValue: "{{T:system-password}}"
+    groupName: "System Variable Definitions"
   - id: system.variable.numeric
-    name: 'Numeric System Variable Definition'
-    longDescription: 'The system variable of type NUMERIC'
-    type: 'NUMERIC'
+    name: "Numeric System Variable Definition"
+    longDescription: "The system variable of type NUMERIC"
+    type: "NUMERIC"
     defaultValue: 1020
-    groupName: 'System Variable Definitions'
+    groupName: "System Variable Definitions"
   - id: system.variable.count
-    name: 'System Variable Definition Count'
-    description: 'Count of system variable definitions'
-    type: 'NUMERIC'
+    name: "System Variable Definition Count"
+    description: "Count of system variable definitions"
+    type: "NUMERIC"
     value: 3
-    groupName: 'System Meta Information'
+    groupName: "System Meta Information"
 
 instances:
-  - name: 'Demo Instance'
+  - name: "Demo Instance"
     description: "The Test System's Demo Instance"
-    productId: 'io.bdeploy/demo'
+    productId: "io.bdeploy/demo"
     productVersionRegex: "2\\..*"
-    templateName: 'Default Configuration'
-  - name: 'Chat Node {{T:node-id:+1}}'
+    templateName: "Default Configuration"
+  - name: "Chat Node {{T:node-id:+1}}"
     description: "The Test System's first Chat Instance"
-    productId: 'io.bdeploy/chat-app'
+    productId: "io.bdeploy/chat-app"
     fixedVariables:
       - id: app-name
-        value: '{{T:cell-base-name}}{{T:node-id:+1}}'
-    templateName: 'Default Configuration'
+        value: "{{T:cell-base-name}}{{T:node-id:+1}}"
+    templateName: "Default Configuration"
     defaultMappings:
-      - group: 'Chat App'
-        node: '{{T:cell-base-name}}'
-  - name: 'Chat Node {{T:node-id:+2}}'
+      - group: "Chat App"
+        node: "{{T:cell-base-name}}"
+  - name: "Chat Node {{T:node-id:+2}}"
     description: "The Test System's second Chat Instance"
-    productId: 'io.bdeploy/chat-app'
+    productId: "io.bdeploy/chat-app"
     fixedVariables:
       - id: app-name
-        value: '{{T:cell-base-name}}{{T:node-id:+2}}'
-    templateName: 'Default Configuration'
+        value: "{{T:cell-base-name}}{{T:node-id:+2}}"
+    templateName: "Default Configuration"
     defaultMappings:
-      - group: 'Chat App'
-        node: '{{T:cell-base-name}}'
-  - name: 'Chat Master'
+      - group: "Chat App"
+        node: "{{T:cell-base-name}}"
+  - name: "Chat Master"
     description: "The Test System's third (master) Chat Instance"
-    productId: 'io.bdeploy/chat-app'
-    templateName: 'Default Configuration'
+    productId: "io.bdeploy/chat-app"
+    templateName: "Default Configuration"
     defaultMappings:
-      - group: 'Chat App'
-        node: 'master'
+      - group: "Chat App"
+        node: "master"

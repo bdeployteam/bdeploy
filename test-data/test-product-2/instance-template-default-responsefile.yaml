@@ -1,17 +1,17 @@
 name: "Demo Instance"
 description: "The Test System's Demo Instance"
-productId: 'io.bdeploy/demo'
+productId: "io.bdeploy/demo"
 productVersionRegex: "2\\..*"
 templateName: "Default Configuration"
 defaultMappings:
-  - group: 'Server Apps'
-    node: 'master'
-  - group: 'Client Apps'
-    node: 'Client Applications'
+  - group: "Server Apps"
+    node: "master"
+  - group: "Client Apps"
+    node: "Client Applications"
 fixedVariables:
-  - id: 'text-param'
-    value: 'XX'
-  - id: 'sleep-timeout'
+  - id: "text-param"
+    value: "XX"
+  - id: "sleep-timeout"
     value: 10
-  - id: 'licensed-param'
+  - id: "licensed-param"
     value: false

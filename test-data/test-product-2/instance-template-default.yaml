@@ -1,90 +1,90 @@
 # yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
 
 name: Default Configuration
-description: 'Creates an instance with the default server and client configuration'
+description: "Creates an instance with the default server and client configuration"
 
 templateVariables:
   - uid: text-param
-    name: 'Text Value'
-    description: 'A text to set'
+    name: "Text Value"
+    description: "A text to set"
     suggestedValues:
-      - 'Test Value'
-      - 'Another Suggested Value'
+      - "Test Value"
+      - "Another Suggested Value"
   - uid: sleep-timeout
-    name: 'Sleep Timeout'
-    description: 'The amount of time the server application should sleep'
-    type: 'NUMERIC'
+    name: "Sleep Timeout"
+    description: "The amount of time the server application should sleep"
+    type: "NUMERIC"
     defaultValue: 60
   - uid: licensed-param
-    name: 'Product License'
-    description: 'Is product licensed?'
-    type: 'BOOLEAN'
+    name: "Product License"
+    description: "Is product licensed?"
+    type: "BOOLEAN"
 
 instanceVariables:
   - id: param.global
-    value: '{{T:text-param}}'
+    value: "{{T:text-param}}"
     description: "The global parameter's global value"
-    type: 'STRING'
+    type: "STRING"
   - template: shared.vars
 
 instanceVariableValues:
   - id: instance.variable.v1
-    value: 'value-v1'
+    value: "value-v1"
   - id: instance.variable.v2
-    value: '{{T:text-param}}'
+    value: "{{T:text-param}}"
   - id: product.instance.licensed
-    value: '{{T:licensed-param}}'
+    value: "{{T:licensed-param}}"
 
 instanceVariableDefaults:
   - id: param.xshared
-    value: '{{T:sleep-timeout}}'
+    value: "{{T:sleep-timeout}}"
 
 processControlGroups:
-  - name: 'First Group'
-    startType: 'PARALLEL'
-    startWait: 'WAIT'
-  - name: 'Second Group'
-    stopType: 'PARALLEL'
+  - name: "First Group"
+    startType: "PARALLEL"
+    startWait: "WAIT"
+  - name: "Second Group"
+    stopType: "PARALLEL"
 
 groups:
-  - name: 'Server Apps'
-    description: 'All server applications'
+  - name: "Server Apps"
+    description: "All server applications"
 
     applications:
       - application: server-app
-        name: 'Server No Sleep'
-        description: 'Server application which immediately exits'
-        preferredProcessControlGroup: 'First Group'
+        name: "Server No Sleep"
+        description: "Server application which immediately exits"
+        preferredProcessControlGroup: "First Group"
         processControl:
-          startType: 'MANUAL_CONFIRM'
+          startType: "MANUAL_CONFIRM"
         startParameters:
           - uid: param.text
-            value: '{{T:text-param}}'
+            value: "{{T:text-param}}"
       - template: server-with-sleep
         fixedVariables:
           - id: sleep-timeout
             value: 10
         startParameters:
           - uid: param.text
-            value: '{{X:param.global}}'
+            value: "{{X:param.global}}"
       - template: server-with-sleep
-        name: 'Another Server With Sleep'
-        preferredProcessControlGroup: 'Second Group'
+        name: "Another Server With Sleep"
+        preferredProcessControlGroup: "Second Group"
         processControl:
-          startType: 'INSTANCE'
+          startType: "INSTANCE"
           gracePeriod: 6000
           attachStdin: true
         startParameters:
           - uid: param.text
-            value: '{{V:Server No Sleep:param.text}}'
+            value: "{{V:Server No Sleep:param.text}}"
           - uid: param.sleep
-            value: '{{X:param.shared.exp}}'
+            value: "{{X:param.shared.exp}}"
 
-  - name: 'Client Apps'
+  - name: "Client Apps"
     type: CLIENT
-    description: 'All client applications'
+    description: "All client applications"
 
     applications:
       - application: client-app
-        name: 'Client {{T:text-param}}'
-        description: 'A default client application.'
+        name: "Client {{T:text-param}}"
+        description: "A default client application."

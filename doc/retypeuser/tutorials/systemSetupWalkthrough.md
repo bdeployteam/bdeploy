@@ -142,21 +142,21 @@ In order to use an instance template via the CLI you must have a so-called "resp
 This is an example of such a response file:
 
 ```yaml response-file.yaml
-name: 'Demo Instance'
-description: 'The Test System's Demo Instance'
-productId: 'io.bdeploy/demo'
-productVersionRegex: '2\\..*'
-templateName: 'Default Configuration'
+name: "Demo Instance"
+description: "The Test System's Demo Instance"
+productId: "io.bdeploy/demo"
+productVersionRegex: "2\\..*"
+templateName: "Default Configuration"
 fixedVariables:
-  - id: 'text-param'
-    value: 'XX'
-  - id: 'sleep-timeout'
+  - id: "text-param"
+    value: "XX"
+  - id: "sleep-timeout"
     value: 10
 defaultMappings:
-  - group: 'Server Apps'
-    node: 'master'
-  - group: 'Client Apps'
-    node: 'Client Applications'
+  - group: "Server Apps"
+    node: "master"
+  - group: "Client Apps"
+    node: "Client Applications"
 ```
 
 Note: The node of all client applications must be _exactly_ "Client Applications".

@@ -2,44 +2,44 @@
 
 definitions:
   - id: instance.variable.v1
-    name: 'Instance Variable Definition 1'
-    longDescription: 'The instance variable definition for variable instance.variable.v1'
-    type: 'STRING'
-    defaultValue: 'defaultDefinedV1'
-    groupName: 'Instance Variable Definitions'
+    name: "Instance Variable Definition 1"
+    longDescription: "The instance variable definition for variable instance.variable.v1"
+    type: "STRING"
+    defaultValue: "defaultDefinedV1"
+    groupName: "Instance Variable Definitions"
   - id: instance.variable.v2
-    name: 'Instance Variable Definition 2'
-    longDescription: 'The instance variable definition for variable instance.variable.v2'
-    type: 'STRING'
-    defaultValue: 'defaultDefinedV2'
-    groupName: 'Instance Variable Definitions'
+    name: "Instance Variable Definition 2"
+    longDescription: "The instance variable definition for variable instance.variable.v2"
+    type: "STRING"
+    defaultValue: "defaultDefinedV2"
+    groupName: "Instance Variable Definitions"
   - id: product.instance.variable1
-    name: 'Product Version'
-    longDescription: 'Product Version Number'
-    type: 'STRING'
-    defaultValue: '2.0.0'
+    name: "Product Version"
+    longDescription: "Product Version Number"
+    type: "STRING"
+    defaultValue: "2.0.0"
     fixed: true
-    groupName: 'Product Description Variables'
+    groupName: "Product Description Variables"
   - id: product.instance.variable2
-    name: 'Product User'
-    longDescription: 'Product User Name'
-    type: 'STRING'
-    defaultValue: 'admin'
-    groupName: 'Product Description Variables'
+    name: "Product User"
+    longDescription: "Product User Name"
+    type: "STRING"
+    defaultValue: "admin"
+    groupName: "Product Description Variables"
   - id: product.instance.licensed
-    name: 'Product License'
-    longDescription: 'Is product licensed'
-    type: 'BOOLEAN'
+    name: "Product License"
+    longDescription: "Is product licensed"
+    type: "BOOLEAN"
     defaultValue: false
-    groupName: 'Product Description Variables'
+    groupName: "Product Description Variables"
   - id: product.instance.ungrouped.variable1
-    name: 'Product Created At'
-    longDescription: 'Date when product was created'
-    type: 'STRING'
+    name: "Product Created At"
+    longDescription: "Date when product was created"
+    type: "STRING"
     fixed: true
-    defaultValue: '26.7.2024'
+    defaultValue: "26.7.2024"
   - id: product.instance.ungrouped.variable2
-    name: 'Product Updated At'
-    longDescription: 'Date when product was updated'
-    type: 'STRING'
-    defaultValue: '27.7.2024'
+    name: "Product Updated At"
+    longDescription: "Date when product was updated"
+    type: "STRING"
+    defaultValue: "27.7.2024"
