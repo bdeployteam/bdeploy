@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/productValidationYaml
 
-product: 'product-info.yaml'
+product: "product-info.yaml"
 
 applications:
-  server-app: 'server-app/app-info.yaml'
-  client-app: 'client-app/app-info.yaml'
+  server-app: "server-app/app-info.yaml"
+  client-app: "client-app/app-info.yaml"

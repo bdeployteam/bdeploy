@@ -1,62 +1,62 @@
 # yaml-language-server: $schema= https://localhost:7701/api/public/v1/schema/systemTemplateYaml
 
 name: Test System
-description: 'A test system with both demo and chat product'
+description: "A test system with both demo and chat product"
 
 systemVariables:
   - id: test.system.var
-    description: 'A test system variable'
+    description: "A test system variable"
     value: testValue
   - id: system.variable.string
-    name: 'String System Variable Definition'
-    longDescription: 'The system variable of type STRING'
-    type: 'STRING'
-    defaultValue: 'defaultDefinedV1'
-    groupName: 'System Variable Definitions'
+    name: "String System Variable Definition"
+    longDescription: "The system variable of type STRING"
+    type: "STRING"
+    defaultValue: "defaultDefinedV1"
+    groupName: "System Variable Definitions"
   - id: system.variable.numeric
-    name: 'Numeric System Variable Definition'
-    longDescription: 'The system variable of type NUMERIC'
-    type: 'NUMERIC'
+    name: "Numeric System Variable Definition"
+    longDescription: "The system variable of type NUMERIC"
+    type: "NUMERIC"
     defaultValue: 1020
-    groupName: 'System Variable Definitions'
+    groupName: "System Variable Definitions"
   - id: system.variable.count
-    name: 'System Variable Definition Count'
-    description: 'Count of system variable definitions'
-    type: 'NUMERIC'
+    name: "System Variable Definition Count"
+    description: "Count of system variable definitions"
+    type: "NUMERIC"
     value: 3
-    groupName: 'System Meta Information'
+    groupName: "System Meta Information"
 
 templateVariables:
   - id: node-id
-    name: 'The Node Number'
-    description: 'The Node ID Base'
+    name: "The Node Number"
+    description: "The Node ID Base"
     defaultValue: 0
   - id: cell-base-name
-    name: 'The Node Base Name'
-    defaultValue: 'Node'
+    name: "The Node Base Name"
+    defaultValue: "Node"
 
 instances:
-  - name: 'Demo Instance'
+  - name: "Demo Instance"
     description: "The Test System's Demo Instance"
-    productId: 'io.bdeploy/demo'
+    productId: "io.bdeploy/demo"
     productVersionRegex: "2\\..*"
-    templateName: 'Default Configuration'
+    templateName: "Default Configuration"
     fixedVariables:
-      - id: 'text-param'
-        value: 'XX'
-      - id: 'sleep-timeout'
+      - id: "text-param"
+        value: "XX"
+      - id: "sleep-timeout"
         value: 10
-      - id: 'licensed-param'
+      - id: "licensed-param"
         value: true
     defaultMappings:
-      - group: 'Server Apps'
-        node: 'master'
-      - group: 'Client Apps'
-        node: 'Client Applications'
-  - name: 'Chat Master'
+      - group: "Server Apps"
+        node: "master"
+      - group: "Client Apps"
+        node: "Client Applications"
+  - name: "Chat Master"
     description: "The Test System's third (master) Chat Instance"
-    productId: 'io.bdeploy/chat-app'
-    templateName: 'Default Configuration'
+    productId: "io.bdeploy/chat-app"
+    templateName: "Default Configuration"
     defaultMappings:
-      - group: 'Chat App'
-        node: 'master'
+      - group: "Chat App"
+        node: "master"
