@@ -96,7 +96,7 @@ class MasterCliTest extends BaseMinionCliTest {
         // test certificate update with the same certificate
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
             Path newKs = tmp.resolve("test.ks");
-            char[] passphrase = new char[] { 'a' };
+            char[] passphrase = { 'a' };
             BCX509Helper.createKeyStore(newKs, passphrase);
 
             Path pem = tmp.resolve("test.pem");

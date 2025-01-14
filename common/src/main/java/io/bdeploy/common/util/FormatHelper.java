@@ -18,7 +18,7 @@ public class FormatHelper {
 
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("#,##0.#");
     private static final DecimalFormat TRANSFER_FORMAT = new DecimalFormat("#0.0");
-    private static final String[] SIZE_UNITS = new String[] { "B", "kB", "MB", "GB", "TB" };
+    private static final String[] SIZE_UNITS = { "B", "kB", "MB", "GB", "TB" };
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
             .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
 

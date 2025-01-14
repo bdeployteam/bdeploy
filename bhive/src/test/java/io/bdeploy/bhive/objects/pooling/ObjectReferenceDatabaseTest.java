@@ -20,8 +20,8 @@ class ObjectReferenceDatabaseTest {
     void testReferences(@TempDir Path tmp, ActivityReporter reporter) {
         ObjectReferenceDatabase ord = new ObjectReferenceDatabase(tmp, reporter);
 
-        byte[] a = new byte[] { 0xC, 0x0, 0xF, 0xF, 0xE };
-        byte[] b = new byte[] { 0xB, 0xA, 0xB, 0xE };
+        byte[] a = { 0xC, 0x0, 0xF, 0xF, 0xE };
+        byte[] b = { 0xB, 0xA, 0xB, 0xE };
 
         ObjectId idA = ObjectId.create(a, 0, a.length);
         ObjectId idB = ObjectId.create(b, 0, b.length);
