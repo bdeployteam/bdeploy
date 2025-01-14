@@ -170,7 +170,7 @@ public class InstanceImportExportHelper {
             reAssignAppIds(idPool, nodeCfg);
 
             String minionName = node.getKey();
-            if (!minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
+            if (!InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
                 MinionDto minionDto = minions.get(minionName);
                 reAssignApplications(target, nodeCfg, minionName, minionDto);
                 inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, cfgId);
@@ -194,7 +194,7 @@ public class InstanceImportExportHelper {
     }
 
     private static void reAssignApplications(BHive hive, InstanceNodeConfiguration nodeCfg, String minionName, MinionDto minion) {
-        if (minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
+        if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
             return;
         }
         for (ApplicationConfiguration app : nodeCfg.applications) {

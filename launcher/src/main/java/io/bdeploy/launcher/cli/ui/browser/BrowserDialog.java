@@ -670,7 +670,7 @@ public class BrowserDialog extends BaseDialog {
         if ("progress".equals(e.getPropertyName())) {
             progressBar.setValue((int) e.getNewValue());
         }
-        if (e.getPropertyName().equals(PropertyChangeActivityReporter.ACTIVITY_NAME)) {
+        if (PropertyChangeActivityReporter.ACTIVITY_NAME.equals(e.getPropertyName())) {
             progressBar.setString((String) e.getNewValue());
         }
         doUpdateButtonState();

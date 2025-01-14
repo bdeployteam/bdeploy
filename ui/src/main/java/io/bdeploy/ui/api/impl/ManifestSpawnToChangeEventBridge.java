@@ -50,7 +50,7 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
         // most of the things are not interesting in the default hive, only some global meta-data
         if (JerseyRemoteBHive.DEFAULT_NAME.equals(hiveName)) {
             for (Manifest.Key key : keys) {
-                if (key.getName().equals(MinionManifest.MANIFEST_NAME)) {
+                if (MinionManifest.MANIFEST_NAME.equals(key.getName())) {
                     if (log.isDebugEnabled()) {
                         log.debug("Node configuration change, new version: {}", key.getTag());
                     }

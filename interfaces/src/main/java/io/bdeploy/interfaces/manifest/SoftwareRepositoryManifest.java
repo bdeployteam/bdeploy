@@ -32,7 +32,7 @@ public class SoftwareRepositoryManifest {
     }
 
     public static boolean isSoftwareRepositoryManifest(Manifest.Key key) {
-        return key.getName().equals(MANIFEST_NAME);
+        return MANIFEST_NAME.equals(key.getName());
     }
 
     public Manifest.Key getKey() {

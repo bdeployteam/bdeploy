@@ -446,7 +446,7 @@ public class ProductUpdateService {
 
                 // check unique process names
                 var conflictUid = processNames.put(process.name, process.id);
-                if (conflictUid != null && !node.nodeName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
+                if (conflictUid != null && !InstanceManifest.CLIENT_NODE_NAME.equals(node.nodeName)) {
                     result.add(new ApplicationValidationDto(process.id, null,
                             "The process name " + process.name + " is not unique."));
                     result.add(new ApplicationValidationDto(conflictUid, null,

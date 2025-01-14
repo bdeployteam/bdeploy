@@ -98,9 +98,9 @@ class ConfigFileResourceTest {
         List<ConfigFileDto> mixed = cfr.listConfigFiles(updatedTag2, im.getConfiguration().product.getName(),
                 im.getConfiguration().product.getTag());
         assertEquals(2, mixed.size());
-        assertNotNull(mixed.stream().filter(f -> f.instanceId == null && f.productId != null && f.path.equals("myconfig.json")));
+        assertNotNull(mixed.stream().filter(f -> f.instanceId == null && f.productId != null && "myconfig.json".equals(f.path)));
         assertNotNull(
-                mixed.stream().filter(f -> f.instanceId != null && f.productId == null && f.path.equals("path/to/new.txt")));
+                mixed.stream().filter(f -> f.instanceId != null && f.productId == null && "path/to/new.txt".equals(f.path)));
 
         assertThrows(ClientErrorException.class, () -> {
             // wrong tag.

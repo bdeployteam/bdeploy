@@ -540,7 +540,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             inmb.setKey(new Manifest.Key(config.id + '/' + entry.getKey(), target.getTag()));
 
             // create dedicated configuration trees for client applications where required.
-            if (entry.getKey().equals(InstanceManifest.CLIENT_NODE_NAME)) {
+            if (InstanceManifest.CLIENT_NODE_NAME.equals(entry.getKey())) {
                 List<ObjectId> configTrees = new ArrayList<>();
                 // client applications *may* specify config directories.
                 for (var app : inc.applications) {
@@ -816,7 +816,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         .filter(g -> g.processOrder.contains(app.id)).findAny();
                 if (group.isEmpty()) {
                     ProcessControlGroupConfiguration defGrp = nodeConfiguration.controlGroups.stream()
-                            .filter(g -> g.name.equals(ProcessControlGroupConfiguration.DEFAULT_GROUP)).findAny()
+                            .filter(g -> ProcessControlGroupConfiguration.DEFAULT_GROUP.equals(g.name)).findAny()
                             .orElseGet(() -> {
                                 ProcessControlGroupConfiguration newDefGrp = new ProcessControlGroupConfiguration();
                                 nodeConfiguration.controlGroups.add(0, newDefGrp); // default should be in front.
