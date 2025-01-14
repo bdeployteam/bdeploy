@@ -1464,17 +1464,19 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     // some apps are transitioning -> indeterminate
                     if (overallStatus != OverallStatus.WARNING) {
                         overallStatus = OverallStatus.INDETERMINATE;
-                        overallStatusMessages.add(transitioningApps + " instance type applications are in indeterminate state");
+                        overallStatusMessages.add(transitioningApps + " instance type application"
+                                + (transitioningApps == 1 ? " is" : "s are") + " in indeterminate state");
                     }
                 } else {
                     // not ok, some apps started, some stopped, or a failed liveness probe -> warning.
                     overallStatus = OverallStatus.WARNING;
                     if (hasRunningWithoutProbeApps) {
-                        overallStatusMessages
-                                .add(runningWithoutProbeApps + " instance type applications failed their liveness probe check");
+                        overallStatusMessages.add(runningWithoutProbeApps + " instance type application"
+                                + (runningWithoutProbeApps == 1 ? " has" : "s have") + " failed their liveness probe check");
                     }
                     if (hasStoppedApps) {
-                        overallStatusMessages.add(stoppedApps + " instance type applications are not running");
+                        overallStatusMessages.add(stoppedApps + " instance type application"
+                                + (stoppedApps == 1 ? " is" : "s are") + " not running");
                     }
                 }
 
