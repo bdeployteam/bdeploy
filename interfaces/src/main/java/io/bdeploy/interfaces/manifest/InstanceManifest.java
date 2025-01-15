@@ -139,7 +139,7 @@ public class InstanceManifest {
         for (Entry<Key, ObjectId> entry : root.getChildren().entrySet()) {
             // only manifest refs to minion config is allowed here.
             if (entry.getKey().getType() != Tree.EntryType.MANIFEST) {
-                if (!entry.getKey().getName().equals(InstanceConfiguration.FILE_NAME)
+                if (!InstanceConfiguration.FILE_NAME.equals(entry.getKey().getName())
                         && !entry.getKey().getName().contentEquals("config")) {
                     log.warn("Unsupported entry in instance manifest: {}", entry.getKey());
                 }

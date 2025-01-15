@@ -153,8 +153,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 continue; // ignored
             }
 
-            if (!nodes.contains(mapping.node) && !mapping.node.equals(InstanceManifest.CLIENT_NODE_NAME)
-                    && !mapping.node.equals(InstanceManifest.CLIENT_NODE_LABEL)) {
+            if (!nodes.contains(mapping.node) && !InstanceManifest.CLIENT_NODE_NAME.equals(mapping.node)
+                    && !InstanceManifest.CLIENT_NODE_LABEL.equals(mapping.node)) {
                 throw new WebApplicationException(
                         "Group " + grp.name + " is mapped to node " + mapping.node + " but that node cannot be found",
                         Status.EXPECTATION_FAILED);
@@ -245,7 +245,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                         if (o != null) {
                             // need to check OS as well.
                             var smk = ScopedManifestKey.parse(a.getKey());
-                            return o == smk.getOperatingSystem() && smk.getName().equals(pmf.getProduct() + "/" + n);
+                            return o == smk.getOperatingSystem() && (pmf.getProduct() + "/" + n).equals(smk.getName());
                         } else {
                             return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
                         }

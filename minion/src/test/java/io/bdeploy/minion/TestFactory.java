@@ -312,7 +312,7 @@ public class TestFactory {
     public static SortedMap<Key, ObjectId> getFilteredManifests(SortedMap<Key, ObjectId> sortedMap) {
         var result = new TreeMap<Key, ObjectId>();
         for (var entry : sortedMap.entrySet()) {
-            if (entry.getKey().getName().equals(MinionManifest.MANIFEST_NAME)) {
+            if (MinionManifest.MANIFEST_NAME.equals(entry.getKey().getName())) {
                 continue;
             }
             result.put(entry.getKey(), entry.getValue());

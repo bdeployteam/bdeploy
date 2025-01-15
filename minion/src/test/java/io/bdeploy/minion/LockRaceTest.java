@@ -54,7 +54,7 @@ class LockRaceTest {
 
         // trigger cleanup once to force new schedule
         for (var x : root.listJobs()) {
-            if (x.name.equals("PoolReorgJob")) {
+            if ("PoolReorgJob".equals(x.name)) {
                 root.runJob(x);
             }
         }

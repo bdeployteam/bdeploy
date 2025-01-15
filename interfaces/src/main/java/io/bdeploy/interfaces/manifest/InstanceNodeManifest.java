@@ -126,7 +126,7 @@ public class InstanceNodeManifest {
         Map<String, ObjectId> result = new TreeMap<>();
 
         Optional<Entry<Tree.Key, ObjectId>> namedEntry = tree.getChildren().entrySet().stream()
-                .filter(e -> e.getKey().getName().equals(CONFIG_TREE_NAME) && e.getKey().getType() == EntryType.TREE).findFirst();
+                .filter(e -> CONFIG_TREE_NAME.equals(e.getKey().getName()) && e.getKey().getType() == EntryType.TREE).findFirst();
 
         if (namedEntry.isPresent()) {
             // yay, we have a config tree - populate the map.
