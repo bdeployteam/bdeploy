@@ -51,7 +51,7 @@ public class MdcLogger {
     public static final String MDC_NAME = "BDEPLOY";
 
     private final Logger log;
-    private Object[] mdcData = new Object[0];
+    private Object[] mdcData = {};
 
     /**
      * Creates a new instance using the given logger.

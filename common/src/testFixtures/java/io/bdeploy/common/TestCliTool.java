@@ -64,7 +64,7 @@ public class TestCliTool implements ParameterResolver {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
         Optional<CliArgs> args = parameterContext.findAnnotation(CliArgs.class);
-        String[] arr = new String[0];
+        String[] arr = {};
         if (args.isPresent()) {
             arr = args.get().value();
         }

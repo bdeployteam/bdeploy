@@ -27,9 +27,9 @@ class ReadOnlyObjectDatabaseTest {
     void testReadOnly(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
         ObjectDatabase odb = new ObjectDatabase(tmp, tmp.resolve("tmp"), reporter, null);
 
-        byte[] a = new byte[] { 0xD, 0xE, 0xA, 0xD };
-        byte[] b = new byte[] { 0xC, 0x0, 0xF, 0xE };
-        byte[] c = new byte[] { 0xB, 0xA, 0xB, 0xE };
+        byte[] a = { 0xD, 0xE, 0xA, 0xD };
+        byte[] b = { 0xC, 0x0, 0xF, 0xE };
+        byte[] c = { 0xB, 0xA, 0xB, 0xE };
 
         ObjectId idA = odb.addObject(a);
         ObjectId idB = odb.addObject(b);
