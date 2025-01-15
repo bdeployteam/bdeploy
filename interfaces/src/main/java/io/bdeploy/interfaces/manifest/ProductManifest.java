@@ -454,6 +454,13 @@ public class ProductManifest {
         SCAN_CACHE.invalidate(hive);
     }
 
+    /**
+     * For testing: invalidate *all* scan caches so we don't have to wait for spawn listeners.
+     */
+    public static void invalidateAllScanCaches() {
+        SCAN_CACHE.invalidateAll();
+    }
+
     public static final class ProductClassification {
 
         public final boolean isProduct;
