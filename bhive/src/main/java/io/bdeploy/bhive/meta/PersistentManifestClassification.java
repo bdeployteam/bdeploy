@@ -84,8 +84,6 @@ public class PersistentManifestClassification<T> {
                 }
             }
 
-            boolean modified = false;
-
             // we *never* want to classify any classification manifests - ever.
             Set<Manifest.Key> filtered = keys.stream().filter(k -> !k.getName().startsWith(CLASSIFICATION_PREFIX))
                     .collect(Collectors.toSet());
@@ -95,7 +93,7 @@ public class PersistentManifestClassification<T> {
             // first clean out the stored list of all keys not in the list.
             classifications = classifications.entrySet().stream().filter(e -> filtered.contains(e.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new));
-            modified = classifications.size() != sz;
+            boolean modified = classifications.size() != sz;
 
             // now use classifier to classify whatever is not yet in the list.
             sz = classifications.size();
