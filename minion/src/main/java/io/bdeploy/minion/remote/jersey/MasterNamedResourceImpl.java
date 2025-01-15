@@ -1414,21 +1414,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         // instance application, check status
                         ProcessStatusDto status = statusOnNode.getStatus(app.id);
                         switch (status.processState) {
-                            case RUNNING:
-                            case RUNNING_UNSTABLE:
+                            case RUNNING, RUNNING_UNSTABLE:
                                 runningWithProbeApps++;
                                 break;
                             case RUNNING_NOT_ALIVE:
                                 runningWithoutProbeApps++;
                                 break;
-                            case STOPPED:
-                            case CRASHED_PERMANENTLY:
+                            case STOPPED, CRASHED_PERMANENTLY:
                                 stoppedApps++;
                                 break;
-                            case RUNNING_STOP_PLANNED:
-                            case RUNNING_NOT_STARTED:
-                            case CRASHED_WAITING:
-                            case STOPPED_START_PLANNED:
+                            case RUNNING_STOP_PLANNED, RUNNING_NOT_STARTED, CRASHED_WAITING, STOPPED_START_PLANNED:
                                 transitioningApps++;
                                 break;
                         }
