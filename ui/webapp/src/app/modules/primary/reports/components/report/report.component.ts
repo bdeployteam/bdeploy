@@ -23,6 +23,7 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly router = inject(Router);
   private readonly search = inject(SearchService);
   private readonly reports = inject(ReportsService);
+  private readonly search$ = new BehaviorSubject<string>(null);
 
   protected report: ReportDescriptor;
   protected columns: BdDataColumn<GeneratedReportRow>[] = [];
@@ -31,8 +32,6 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   protected definitions: BdDataGroupingDefinition<GeneratedReportRow>[] = [];
   protected grouping: BdDataGrouping<GeneratedReportRow>[] = [];
   protected header: string;
-
-  private search$ = new BehaviorSubject<string>(null);
 
   private subscription: Subscription;
 

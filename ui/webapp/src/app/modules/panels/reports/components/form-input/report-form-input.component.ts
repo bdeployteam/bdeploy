@@ -35,7 +35,7 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
   protected values: string[] = [];
   protected labels: string[] = [];
 
-  private subscriptions: Subscription[] = [];
+  private readonly subscriptions: Subscription[] = [];
 
   ngOnInit(): void {
     if (!this.param.parameterOptionsPath) {
