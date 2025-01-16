@@ -138,7 +138,6 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     }
 
     private RemoteService createServiceFromCli(RemoteConfig rc, boolean optional) {
-        RemoteService svc;
         URI r = null;
         if (rc.remote() != null) {
             r = UriBuilder.fromUri(rc.remote()).build();
@@ -149,8 +148,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                     "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
         }
 
-        svc = createRemoteService(rc, optional, r);
-        return svc;
+        return createRemoteService(rc, optional, r);
     }
 
     private RemoteService createRemoteService(RemoteConfig rc, boolean optional, URI r) {
