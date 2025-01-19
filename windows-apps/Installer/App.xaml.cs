@@ -17,10 +17,11 @@ namespace Bdeploy.Installer {
             // Whether or not to perform an unattended installation
             bool unattended = Utils.HasArgument(e.Args, "/Unattended");
             bool forAllUsers = Utils.HasArgument(e.Args, "/ForAllUsers");
+            bool allowSystemChanges = !Utils.HasArgument(e.Args, "/NoSystemChanges");
 
             // Read configuration and create installer
             Config config = ConfigStorage.GetConfig(e);
-            AppInstaller installer = new AppInstaller(config, forAllUsers);
+            AppInstaller installer = new AppInstaller(config, forAllUsers, allowSystemChanges);
 
             // Download and install application without user interaction
             if (unattended) {
@@ -33,7 +34,7 @@ namespace Bdeploy.Installer {
             }
 
             // Open the installer window
-            MainWindow mainWindow = new MainWindow(installer);
+            MainWindow mainWindow = new MainWindow(installer, allowSystemChanges);
             mainWindow.Show();
         }
     }

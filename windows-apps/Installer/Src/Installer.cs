@@ -25,6 +25,11 @@ namespace Bdeploy.Installer {
         private readonly bool forAllUsers;
 
         /// <summary>
+        /// Flag to allow persisting any changes to the operating sytem
+        /// </summary>
+        private readonly bool allowSystemChanges;
+
+        /// <summary>
         /// Directory where BDeploy stores all files 
         /// </summary>
         public readonly string bdeployHome;
@@ -112,9 +117,10 @@ namespace Bdeploy.Installer {
         /// <summary>
         /// Creates a new installer instance.
         /// </summary>
-        public AppInstaller(Config config, bool forAllUsers) {
+        public AppInstaller(Config config, bool forAllUsers, bool allowSystemChanges) {
             this.config = config;
             this.forAllUsers = forAllUsers;
+            this.allowSystemChanges = allowSystemChanges;
             this.bdeployHome = PathProvider.GetBdeployHome(forAllUsers);
             this.launcherHome = PathProvider.GetLauncherDir(bdeployHome);
             this.appsHome = PathProvider.GetApplicationsDir(bdeployHome);
@@ -242,28 +248,31 @@ namespace Bdeploy.Installer {
                     }
                 }
 
-                // Add the laucher to autostart
-                RegistryKey baseKey = forAllUsers ? Registry.LocalMachine : Registry.CurrentUser;
-                RegistryKey autorunKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                autorunKey?.SetValue("BDeploy Launcher Autostart", '"' + launcherExe + "\" /autostart");
+                // Handle system changes
+                if (allowSystemChanges) {
+                    // Add the laucher to autostart
+                    RegistryKey baseKey = forAllUsers ? Registry.LocalMachine : Registry.CurrentUser;
+                    RegistryKey autorunKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                    autorunKey?.SetValue("BDeploy Launcher Autostart", '"' + launcherExe + "\" /autostart");
 
-                // Create the path directory and insert it into the PATH environment variable
-                Directory.CreateDirectory(pathDir);
-                string pathVariableName = "PATH";
-                EnvironmentVariableTarget scope = forAllUsers ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.User;
-                string currentValue = Environment.GetEnvironmentVariable(pathVariableName, scope);
-                if (!currentValue.Split(';').Contains(pathDir)) {
-                    string newValue = currentValue + ';' + pathDir;
-                    Environment.SetEnvironmentVariable(pathVariableName, newValue, scope);
-                }
+                    // Create the path directory and insert it into the PATH environment variable
+                    Directory.CreateDirectory(pathDir);
+                    string pathVariableName = "PATH";
+                    EnvironmentVariableTarget scope = forAllUsers ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.User;
+                    string currentValue = Environment.GetEnvironmentVariable(pathVariableName, scope);
+                    if (!currentValue.Split(';').Contains(pathDir)) {
+                        string newValue = currentValue + ';' + pathDir;
+                        Environment.SetEnvironmentVariable(pathVariableName, newValue, scope);
+                    }
 
-                // Associate bdeploy files with the launcher
-                Utils.LAUNCHER_FILE_ASSOC.CreateBDeployLauncherAssociaton(forAllUsers, launcherExe);
+                    // Associate bdeploy files with the launcher
+                    Utils.LAUNCHER_FILE_ASSOC.CreateBDeployLauncherAssociaton(forAllUsers, launcherExe);
 
-                // Create start menu shortcut for the launcher
-                if (createShortcuts) {
-                    Shortcut shortcut = new Shortcut(launcherExe, launcherHome, "BDeploy Launcher", null);
-                    shortcut.CreateStartMenuLink("BDeploy Launcher", "BDeploy", forAllUsers);
+                    // Create start menu shortcut for the launcher
+                    if (createShortcuts) {
+                        Shortcut shortcut = new Shortcut(launcherExe, launcherHome, "BDeploy Launcher", null);
+                        shortcut.CreateStartMenuLink("BDeploy Launcher", "BDeploy", forAllUsers);
+                    }
                 }
 
                 // Store embedded application information
@@ -297,38 +306,42 @@ namespace Bdeploy.Installer {
             string icon = Path.Combine(appsHome, appUid, "icon.ico");
 
             // Always write file as it might be outdated
-            bool createDesktopShortcut = !File.Exists(appDescriptor) && createShortcuts;
             File.WriteAllText(appDescriptor, config.ClickAndStartDescriptor);
 
-            // Read existing registry entry
-            SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid, forAllUsers) ?? new SoftwareEntryData();
+            // Handle system changes
+            if (allowSystemChanges) {
+                // Read existing registry entry
+                SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid, forAllUsers) ?? new SoftwareEntryData();
 
-            // Only create desktop shortcut if we just have written the descriptor
-            Shortcut shortcut = new Shortcut(appDescriptor, launcherHome, appName, icon);
-            string linkName = appName + " (" + instanceGroup + " - " + instance + ")";
-            if (createDesktopShortcut) {
-                data.DesktopShortcut = shortcut.CreateDesktopLink(linkName, forAllUsers);
+                // Handle shortcuts
+                if (createShortcuts) {
+                    Shortcut shortcut = new Shortcut(appDescriptor, launcherHome, appName, icon);
+                    string linkName = appName + " (" + instanceGroup + " - " + instance + ")";
+
+                    // Ensure that start-menu shortcut is always up-2-date
+                    string startMenuPath = Path.Combine(productVendor, instanceGroup, instance);
+                    data.StartMenuShortcut = shortcut.CreateStartMenuLink(linkName, startMenuPath, forAllUsers);
+
+                    // Only create desktop shortcut if we just have written the descriptor
+                    if (!File.Exists(appDescriptor)) {
+                        data.DesktopShortcut = shortcut.CreateDesktopLink(linkName, forAllUsers);
+                    }
+                }
+
+                // A hint for the uninstaller which registry key should be deleted
+                string uninstallHint = forAllUsers ? "/ForAllUsers" : "";
+
+                // Create or update registry entry
+                data.noModifyAndRepair = true;
+                data.Publisher = productVendor;
+                data.DisplayIcon = icon;
+                data.DisplayName = string.Format("{0} ({1} - {2})", appName, instanceGroup, instance);
+                data.InstallDate = DateTime.Now.ToString("yyyyMMdd");
+                data.InstallLocation = string.Format("\"{0}\"", Path.Combine(appsHome, appUid));
+                data.UninstallString = string.Format("\"{0}\" {1} /Uninstall \"{2}\"", launcherExe, uninstallHint, appDescriptor);
+                data.QuietUninstallString = string.Format("\"{0}\" /Unattended {1} /Uninstall \"{2}\"", launcherExe, uninstallHint, appDescriptor);
+                SoftwareEntry.Create(appUid, data, forAllUsers);
             }
-
-            // Ensure that start-menu shortcut is always up-2-date
-            if (createShortcuts) {
-                string startMenuPath = Path.Combine(productVendor, instanceGroup, instance);
-                data.StartMenuShortcut = shortcut.CreateStartMenuLink(linkName, startMenuPath, forAllUsers);
-            }
-
-            // A hint for the uninstaller which registry key should be deleted
-            string uninstallHint = forAllUsers ? "/ForAllUsers" : "";
-
-            // Create or update registry entry
-            data.noModifyAndRepair = true;
-            data.Publisher = productVendor;
-            data.DisplayIcon = icon;
-            data.DisplayName = string.Format("{0} ({1} - {2})", appName, instanceGroup, instance);
-            data.InstallDate = DateTime.Now.ToString("yyyyMMdd");
-            data.InstallLocation = string.Format("\"{0}\"", Path.Combine(appsHome, appUid));
-            data.UninstallString = string.Format("\"{0}\" {1} /Uninstall \"{2}\"", launcherExe, uninstallHint, appDescriptor);
-            data.QuietUninstallString = string.Format("\"{0}\" /Unattended {1} /Uninstall \"{2}\"", launcherExe, uninstallHint, appDescriptor);
-            SoftwareEntry.Create(appUid, data, forAllUsers);
         }
 
         /// <summary>

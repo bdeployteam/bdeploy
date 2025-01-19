@@ -39,7 +39,8 @@
                     <Hyperlink Foreground="Black" Click="CloseHyperlink_Click">here</Hyperlink> to close the installer.
                 </TextBlock>
             </Label>
-            <CheckBox Name="CreateShortcuts" Content="Create Start Menu and Desktop Shortcuts" IsChecked="True" HorizontalAlignment="Center"  Margin="0 25 0 0" FontSize="11" Click="CreateShortcuts_Click" />
+            <CheckBox Name="CreateShortcuts" Content="Create Start Menu and Desktop Shortcuts" HorizontalAlignment="Center"  Margin="0 25 0 0" FontSize="11" Click="CreateShortcuts_Click" />
+            <Label Name="NoSystemChangesInfoLabel" HorizontalAlignment="Center" FontSize="8">Shortcut creation is disabled because installer was instructed to disallow changes to the operating system</Label>
         </StackPanel>
         <Grid Grid.Row="2" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>

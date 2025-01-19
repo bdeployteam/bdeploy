@@ -15,12 +15,12 @@ namespace Bdeploy.Installer {
         private readonly ErrorView errorView;
         private readonly LaunchView launchView;
 
-        public MainWindow(AppInstaller installer) {
+        public MainWindow(AppInstaller installer, bool allowSystemChanges) {
             InitializeComponent();
             this.installer = installer;
 
             // Create all views
-            installNowView = new InstallNowView(this, installer);
+            installNowView = new InstallNowView(this, installer, allowSystemChanges);
             progressView = new ProgressView(installer);
             errorView = new ErrorView(this);
             launchView = new LaunchView(this);
