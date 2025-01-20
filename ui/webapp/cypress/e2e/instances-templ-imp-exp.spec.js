@@ -151,6 +151,11 @@ describe('Instance Settings Tests', () => {
 
         cy.get('app-bd-form-input[name="instance.variable.v1_val"]').within(() => {
           cy.get('input[name="instance.variable.v1_val"]').should('have.value', 'value-v1');
+          cy.get('mat-error')
+            .contains('Instance Variable Definition 1 value does not match regex: ^[a-zA-Z]+$')
+            .should('exist');
+          cy.get('input[name="instance.variable.v1_val"]').clear().type('valuevone');
+          cy.get('mat-error').should('not.exist');
         });
         cy.get('app-bd-form-input[name="instance.variable.v2_val"]').within(() => {
           cy.get('input[name="instance.variable.v2_val"]').should('have.value', 'TestText');

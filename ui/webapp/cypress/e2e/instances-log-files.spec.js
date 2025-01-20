@@ -51,6 +51,31 @@ describe('Instance log files tests', () => {
       cy.get('button[data-cy^="Configure Parameters"]').click();
     });
 
+    // check validateRegex
+    cy.inMainNavFlyin('app-configure-process', () => {
+      cy.contains('mat-expansion-panel', 'Test Parameters').within(() => {
+        cy.get('mat-panel-title').click();
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+
+        cy.get('button[data-cy^="Select Parameters"]').click();
+
+        cy.get('[data-cy="param.server.port"]').within(() => {
+          cy.contains('mat-icon', 'add').click();
+          cy.contains('mat-icon', 'delete').should('exist');
+        });
+        cy.get('button[data-cy^="Confirm"]').click();
+
+        cy.get('[data-cy="param.server.port"]').within(() => {
+          cy.get('mat-error').contains('Test Server Port value does not match regex: ^\\d+$').should('exist');
+          cy.get('input[name="param.server.port_val"]').should('be.enabled').should('have.value', '');
+          cy.get('input[name="param.server.port_val"]').clear().type('9000');
+          cy.get('mat-error').should('not.exist');
+        });
+
+        cy.get('mat-panel-title').click();
+      });
+    });
+
     cy.inMainNavFlyin('app-configure-process', () => {
       // add optional output parameter with default value
       cy.contains('mat-expansion-panel', 'Test Parameters').within(() => {

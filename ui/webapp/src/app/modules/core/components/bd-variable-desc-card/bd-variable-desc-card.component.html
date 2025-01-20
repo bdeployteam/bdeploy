@@ -27,6 +27,10 @@
         >
       </ng-template>
     </div>
+    <ng-container *ngIf="descriptor?.validateRegex">
+      <strong><div>Validation:</div></strong>
+      <code>{{ descriptor.validateRegex }}</code>
+    </ng-container>
   </div>
 </mat-card>
 <mat-card *ngIf="!descriptor" appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">

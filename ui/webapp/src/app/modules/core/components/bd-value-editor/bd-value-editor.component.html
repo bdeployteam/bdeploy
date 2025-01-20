@@ -48,6 +48,7 @@
   [appPortValueValidator]="isPort()"
   [prefix]="linkToggle"
   [appLinkExpressionInputValidator]="false"
+  [appVariableRegexValidator]="variableRegexValidationContext"
   [errorFallback]="getErrorMessage()"
 >
   <div class="local-form-input-actions flex">
@@ -114,6 +115,7 @@
   [appLinkExpressionInputValidatorInstance]="instance"
   [appLinkExpressionInputValidatorSystem]="system"
   [appLinkExpressionInputValidatorType]="type"
+  [appVariableRegexValidator]="variableRegexValidationContext"
   [assistValues]="completions"
   [assistPrefixes]="completionPrefixes"
   [errorFallback]="getErrorMessage()"

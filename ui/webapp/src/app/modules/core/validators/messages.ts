@@ -4,6 +4,7 @@ import { PASSWORD_VALIDATION } from './password-verification.directive';
 import { PORT_VALIDATION } from './port-value.directive';
 import { URL_VALIDATION } from './server-connection-url-syntax-validator.directive';
 import { TRIM_VALIDATION } from './trimmed.directive';
+import { VARIABLE_REGEX_VALIDATION } from './variable-regex-validator.directive';
 
 export type BdValidationMessageExtractor = (label: string, errors: ValidationErrors) => string;
 
@@ -63,6 +64,10 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
 
   if (errors[PORT_VALIDATION]) {
     return `${label} is out of range: ${errors[PORT_VALIDATION].value}`;
+  }
+
+  if (errors[VARIABLE_REGEX_VALIDATION]) {
+    return `${label} value does not match regex: ${errors[VARIABLE_REGEX_VALIDATION].value}`;
   }
 
   for (const x of msgExtractors) {

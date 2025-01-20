@@ -129,6 +129,7 @@ import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
 import { ServerConnectionUrlSyntaxValidator } from './validators/server-connection-url-syntax-validator.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
+import { VariableRegexValidator } from './validators/variable-regex-validator.directive';
 
 function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -224,15 +225,16 @@ function loadAppConfig(cfgService: ConfigService) {
     BdBHiveBrowserComponent,
     BdVariableGroupsComponent,
     BdVariableDescCardComponent,
+    VariableRegexValidator,
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
     httpInterceptorProviders,
     /* make sure that ConfigService and HistoryService are initialize always on startup */
     provideAppInitializer(() => {
-        const initializerFn = (loadAppConfig)(inject(ConfigService));
-        return initializerFn();
-      }),
+      const initializerFn = loadAppConfig(inject(ConfigService));
+      return initializerFn();
+    }),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],
   imports: [
@@ -363,6 +365,7 @@ function loadAppConfig(cfgService: ConfigService) {
     EditItemInListValidatorDirective,
     LinkExpressionInputValidatorDirective,
     RevalidateOnDirective,
+    VariableRegexValidator,
   ],
 })
 export class CoreModule {}
