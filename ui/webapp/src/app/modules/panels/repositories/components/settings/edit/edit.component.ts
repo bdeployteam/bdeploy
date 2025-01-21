@@ -1,8 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -10,10 +12,16 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { RepositoryDetailsService } from '../../../services/repository-details.service';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { FormsModule } from '@angular/forms';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, BdButtonComponent]
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { Subscription, combineLatest } from 'rxjs';
-import { BdDataColumn, BdDataGroupingDefinition, bdDataDefaultSearch } from 'src/app/models/data';
+import { combineLatest, Subscription } from 'rxjs';
+import { BdDataColumn, bdDataDefaultSearch, BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceGroupConfigurationDto, MinionMode } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -10,10 +10,21 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { GroupsColumnsService } from '../../services/groups-columns.service';
 import { GroupsService } from '../../services/groups.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDataSortingComponent } from '../../../../core/components/bd-data-sorting/bd-data-sorting.component';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-groups-browser',
     templateUrl: './groups-browser.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDataSortingComponent, BdDataGroupingComponent, BdButtonComponent, MatDivider, BdPanelButtonComponent, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent, AsyncPipe]
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
   private readonly cardViewService = inject(CardViewService);

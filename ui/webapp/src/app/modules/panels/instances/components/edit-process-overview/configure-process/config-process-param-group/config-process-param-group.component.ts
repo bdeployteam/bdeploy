@@ -13,8 +13,8 @@ import {
   ViewChildren,
   ViewEncapsulation
 } from '@angular/core';
-import { NgControl, NgForm } from '@angular/forms';
-import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { FormsModule, NgControl, NgForm } from '@angular/forms';
+import { MatButtonToggle, MatButtonToggleChange, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, map, skipWhile } from 'rxjs/operators';
@@ -48,6 +48,29 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
 import { HistoryProcessConfigComponent } from '../../../history-process-config/history-process-config.component';
+import { BdFormInputComponent } from '../../../../../../core/components/bd-form-input/bd-form-input.component';
+import { EditCustomIdValidatorDirective } from '../../../../validators/edit-custom-id-validator.directive';
+import { EditUniqueValueValidatorDirective } from '../../../../../../core/validators/edit-unique-value.directive';
+import { TrimmedValidator } from '../../../../../../core/validators/trimmed.directive';
+import { BdFormSelectComponent } from '../../../../../../core/components/bd-form-select/bd-form-select.component';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelDescription,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
+import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { ClickStopPropagationDirective } from '../../../../../../core/directives/click-stop-propagation.directive';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { ParamDescCardComponent } from '../../../param-desc-card/param-desc-card.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdValueEditorComponent } from '../../../../../../core/components/bd-value-editor/bd-value-editor.component';
+
+import { EditServerIssuesValidatorDirective } from '../../../../validators/edit-server-issues-validator.directive';
+import { MatDivider } from '@angular/material/divider';
 
 const UNGROUPED = 'Ungrouped Parameters';
 const CUSTOM = 'Custom Parameters';
@@ -68,11 +91,38 @@ interface ParameterGroup {
 }
 
 @Component({
-  selector: 'app-config-process-param-group',
-  templateUrl: './config-process-param-group.component.html',
-  styleUrls: ['./config-process-param-group.component.css'],
-  encapsulation: ViewEncapsulation.None,
-  standalone: false,
+    selector: 'app-config-process-param-group',
+    templateUrl: './config-process-param-group.component.html',
+    styleUrls: ['./config-process-param-group.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    imports: [
+        BdFormInputComponent,
+        EditCustomIdValidatorDirective,
+        EditUniqueValueValidatorDirective,
+        FormsModule,
+        TrimmedValidator,
+        BdFormSelectComponent,
+        MatAccordion,
+        MatExpansionPanel,
+        MatExpansionPanelHeader,
+        MatExpansionPanelTitle,
+        MatExpansionPanelDescription,
+        BdButtonComponent,
+        ClickStopPropagationDirective,
+        MatIcon,
+        NgClass,
+        ParamDescCardComponent,
+        MatCheckbox,
+        MatTooltip,
+        BdValueEditorComponent,
+      BdPopupDirective,
+        EditServerIssuesValidatorDirective,
+        MatDivider,
+        MatButtonToggleGroup,
+        MatButtonToggle,
+        HistoryProcessConfigComponent,
+        AsyncPipe,
+    ],
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly bop = inject(BreakpointObserver);

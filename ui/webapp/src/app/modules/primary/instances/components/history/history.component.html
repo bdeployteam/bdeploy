@@ -3,15 +3,15 @@
   (scrollTo)="onScrollContent($event)"
   [restoreScrollAfterLoad]="true"
   [hideContentWhenLoading]="false"
->
+  >
   <app-bd-dialog-toolbar header="History">
     <div class="flex-auto"></div>
-    <ng-container *ngIf="isCentral">
-      <ng-container *ngIf="instances.current$ | async as instance">
+    @if (isCentral) {
+      @if (instances.current$ | async; as instance) {
         <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
-      </ng-container>
-    </ng-container>
+      }
+    }
     <app-bd-button
       [isToggle]="true"
       [toggle]="showCreate$.value"

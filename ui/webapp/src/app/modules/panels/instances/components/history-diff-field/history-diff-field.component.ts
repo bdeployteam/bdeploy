@@ -1,11 +1,13 @@
 import { Component, Input, OnInit, TemplateRef } from '@angular/core';
 import { DiffType, Difference } from '../../services/history-diff.service';
+import { NgClass } from '@angular/common';
+import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
 
 @Component({
     selector: 'app-history-diff-field',
     templateUrl: './history-diff-field.component.html',
     styleUrls: ['./history-diff-field.component.css'],
-    standalone: false
+    imports: [NgClass, BdPopupDirective]
 })
 export class HistoryDiffFieldComponent implements OnInit {
   @Input() diff: Difference;

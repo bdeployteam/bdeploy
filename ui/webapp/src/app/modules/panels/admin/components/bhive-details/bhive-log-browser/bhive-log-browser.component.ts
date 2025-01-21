@@ -6,11 +6,18 @@ import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { LogColumnsService } from 'src/app/modules/primary/admin/services/log-columns.service';
 import { HiveLoggingService } from '../../../services/hive-logging.service';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bhive-log-browser',
     templateUrl: './bhive-log-browser.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, MatTabGroup, MatTab, BdDataTableComponent, AsyncPipe]
 })
 export class BhiveLogBrowserComponent implements OnInit {
   private readonly cols = inject(LogColumnsService);

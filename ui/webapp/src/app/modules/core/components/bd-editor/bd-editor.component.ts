@@ -15,11 +15,14 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { MonacoCompletionsService } from '../../services/monaco-completions.service';
 import { ThemeService } from '../../services/theme.service';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-bd-editor',
-  templateUrl: './bd-editor.component.html',
-  standalone: false
+    selector: 'app-bd-editor',
+    templateUrl: './bd-editor.component.html',
+    imports: [MonacoEditorModule, FormsModule, AsyncPipe]
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private readonly themeService = inject(ThemeService);

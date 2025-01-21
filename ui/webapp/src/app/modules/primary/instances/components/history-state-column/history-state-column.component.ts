@@ -2,12 +2,15 @@ import { Component, inject, Input, OnChanges, OnDestroy, OnInit } from '@angular
 import { Subscription } from 'rxjs';
 import { HistoryEntryDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { InstanceStateService } from '../../services/instance-state.service';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'app-history-state-column',
-  templateUrl: './history-state-column.component.html',
-  styleUrls: ['./history-state-column.component.css'],
-  standalone: false
+    selector: 'app-history-state-column',
+    templateUrl: './history-state-column.component.html',
+    styleUrls: ['./history-state-column.component.css'],
+    imports: [MatIcon, NgClass, MatTooltip]
 })
 export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy {
   private readonly state = inject(InstanceStateService);

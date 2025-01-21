@@ -24,11 +24,14 @@ import {
 } from 'src/app/models/data';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { BdDataCardComponent } from '../bd-data-card/bd-data-card.component';
+import { NgClass, NgTemplateOutlet, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-bd-data-grid',
-  templateUrl: './bd-data-grid.component.html',
-  standalone: false
+    selector: 'app-bd-data-grid',
+    templateUrl: './bd-data-grid.component.html',
+    imports: [MatTabGroup, MatTab, BdDataCardComponent, NgClass, NgTemplateOutlet, AsyncPipe]
 })
 export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
   private readonly searchService = inject(SearchService);

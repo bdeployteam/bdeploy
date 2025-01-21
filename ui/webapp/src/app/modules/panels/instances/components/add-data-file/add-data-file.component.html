@@ -15,8 +15,12 @@
         (fileAdded)="doAddFileContent($event)"
         hintText="Drop file to add initial content"
       ></app-bd-file-drop>
-      <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
-      <div *ngIf="tempFileError" class="bd-warning-text">{{ tempFileError }}</div>
+      @if (tempFileContentLoading$ | async) {
+        <div>Loading...</div>
+      }
+      @if (tempFileError) {
+        <div class="bd-warning-text">{{ tempFileError }}</div>
+      }
       <app-bd-button
         color="primary"
         [collapsed]="false"

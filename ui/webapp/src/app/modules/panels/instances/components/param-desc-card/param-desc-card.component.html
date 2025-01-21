@@ -1,5 +1,8 @@
-<mat-card appearance="outlined" *ngIf="!!descriptor" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
-  <div>Parameter <strong>{{ descriptor.name }}</strong><em *ngIf="descriptor.fixed"> (fixed)</em></div>
+@if (!!descriptor) {
+  <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
+    <div>Parameter <strong>{{ descriptor.name }}</strong>@if (descriptor.fixed) {
+      <em> (fixed)</em>
+    }</div>
   <div class="grid grid-cols-[100px_auto] gap-1 p-2.5">
     <strong><div>Name:</div></strong>
     <div>{{ descriptor?.name }}</div>
@@ -19,40 +22,54 @@
     </div>
     <strong><div>Default Value:</div></strong>
     <div class="local-break">
-      <code *ngIf="!!descriptor?.defaultValue?.value; else defaultIsExpression"
-        >{{ descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
-        '*'.repeat(descriptor?.defaultValue?.value?.length) : descriptor?.defaultValue?.value) : '(none)' }}</code
-      >
-      <ng-template #defaultIsExpression>
+      @if (!!descriptor?.defaultValue?.value) {
         <code
-          >{{ descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
-          '*'.repeat(descriptor?.defaultValue?.linkExpression?.length) : descriptor?.defaultValue?.linkExpression) :
-          '(none)' }}</code
+        >{{
+            descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
+              '*'.repeat(descriptor?.defaultValue?.value?.length) : descriptor?.defaultValue?.value) : '(none)'
+          }}</code
         >
-      </ng-template>
+      } @else {
+        <code
+        >{{
+            descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
+                '*'.repeat(descriptor?.defaultValue?.linkExpression?.length) : descriptor?.defaultValue?.linkExpression) :
+              '(none)'
+          }}</code
+        >
+      }
     </div>
-    <ng-container *ngIf="!!descriptor.condition?.parameter || !!descriptor.condition?.expression">
-      <strong><div>Condition:</div></strong>
+    @if (!!descriptor.condition?.parameter || !!descriptor.condition?.expression) {
+      <strong>
+        <div>Condition:</div>
+      </strong>
       <div class="local-break">
-        <ng-container *ngIf="descriptor.condition.parameter"
-          >Parameter <code>{{ descriptor.condition.parameter }}</code> must</ng-container
-        >
-        <ng-container *ngIf="descriptor.condition.expression"
-          >Resolved Expression <code>{{ descriptor.condition.expression }}</code> must</ng-container
-        >
+        @if (descriptor.condition.parameter) {
+          Parameter <code>{{ descriptor.condition.parameter }}</code> must
+        }
+        @if (descriptor.condition.expression) {
+          Resolved Expression <code>{{ descriptor.condition.expression }}</code> must
+        }
         <code>{{ descriptor.condition.must }} {{ descriptor.condition.value }}</code>
       </div>
-    </ng-container>
-    <ng-container *ngIf="descriptor?.mandatory">
-      <strong><div>Mandatory:</div></strong>
+    }
+    @if (descriptor?.mandatory) {
+      <strong>
+        <div>Mandatory:</div>
+      </strong>
       <div class="local-break">This parameter cannot be removed</div>
-    </ng-container>
-    <ng-container *ngIf="descriptor?.validateRegex">
-      <strong><div>Validation:</div></strong>
+    }
+    @if (descriptor?.validateRegex) {
+      <strong>
+        <div>Validation:</div>
+      </strong>
       <code>{{ descriptor.validateRegex }}</code>
-    </ng-container>
+    }
   </div>
-</mat-card>
-<mat-card appearance="outlined" *ngIf="!descriptor" class="flex flex-col gap-1 p-2.5 max-w-[450px]">
-  No further information about this parameter available.
-</mat-card>
+  </mat-card>
+}
+@if (!descriptor) {
+  <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[450px]">
+    No further information about this parameter available.
+  </mat-card>
+}

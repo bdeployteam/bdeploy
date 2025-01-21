@@ -1,29 +1,42 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, combineLatest, of, tap } from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription, tap } from 'rxjs';
 import {
   ApplicationDto,
   InstanceConfigurationDto,
   SystemConfiguration,
-  VariableConfiguration,
+  VariableConfiguration
 } from 'src/app/models/gen.dtos';
-import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  ContentCompletion
+} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { VariableGroup, groupVariables } from 'src/app/modules/core/utils/variable-utils';
+import { groupVariables, VariableGroup } from 'src/app/modules/core/utils/variable-utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
+
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdVariableGroupsComponent
+} from '../../../../../core/components/bd-variable-groups/bd-variable-groups.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-instance-variables',
     templateUrl: './instance-variables.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdVariableGroupsComponent, AsyncPipe]
 })
 export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly systems = inject(SystemsService);

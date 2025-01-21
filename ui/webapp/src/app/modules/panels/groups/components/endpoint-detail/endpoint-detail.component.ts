@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   BehaviorSubject,
   catchError,
@@ -20,11 +20,20 @@ import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/servic
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { MatIcon } from '@angular/material/icon';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-endpoint-detail',
-  templateUrl: './endpoint-detail.component.html',
-  standalone: false
+    selector: 'app-endpoint-detail',
+    templateUrl: './endpoint-detail.component.html',
+    imports: [BdDialogComponent, BdDialogToolbarComponent, MatIcon, BdDialogContentComponent, BdIdentifierComponent, MatDivider, BdButtonComponent, RouterLink, MatTooltip, AsyncPipe]
 })
 export class EndpointDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);

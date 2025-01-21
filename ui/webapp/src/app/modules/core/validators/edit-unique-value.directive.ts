@@ -13,8 +13,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: EditUniqueValueValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class EditUniqueValueValidatorDirective implements Validator {
   @Input() disallowedValues: string[];

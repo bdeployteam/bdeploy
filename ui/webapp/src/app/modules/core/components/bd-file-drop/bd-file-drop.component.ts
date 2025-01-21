@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { FileDropDirective } from '../../directives/file-drop.directive';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-bd-file-drop',
     templateUrl: './bd-file-drop.component.html',
     styleUrls: ['./bd-file-drop.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [FileDropDirective, NgClass, MatIcon, AsyncPipe]
 })
 export class BdFileDropComponent {
   /** Whether the control is disabled. */

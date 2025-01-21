@@ -7,7 +7,7 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <form #form="ngForm" class="flex flex-col gap-1">
-        <ng-container *ngIf="!(loading$ | async)">
+        @if (!(loading$ | async)) {
           <app-bd-form-input
             name="name"
             label="User Group Name"
@@ -21,7 +21,7 @@
             [(ngModel)]="tempGroup.description"
             required
           ></app-bd-form-input>
-        </ng-container>
+        }
       </form>
       <app-bd-button
         color="primary"

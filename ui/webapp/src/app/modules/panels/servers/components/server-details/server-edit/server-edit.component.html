@@ -3,25 +3,26 @@
 
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
-      <div *ngIf="server" class="flex flex-col gap-2.5">
-        <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
-        <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri" appTrimmed></app-bd-form-input>
-        <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
-        <app-bd-form-input
-          name="token"
-          label="Authorization Token"
-          [(ngModel)]="server.auth"
-          appTrimmed
-        ></app-bd-form-input>
-
-        <app-bd-button
-          text="Save"
-          icon="save"
-          [collapsed]="false"
-          color="primary"
-          [disabled]="form.invalid || !disableSave"
-        ></app-bd-button>
-      </div>
+      @if (server) {
+        <div class="flex flex-col gap-2.5">
+          <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
+          <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri" appTrimmed></app-bd-form-input>
+          <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
+          <app-bd-form-input
+            name="token"
+            label="Authorization Token"
+            [(ngModel)]="server.auth"
+            appTrimmed
+          ></app-bd-form-input>
+          <app-bd-button
+            text="Save"
+            icon="save"
+            [collapsed]="false"
+            color="primary"
+            [disabled]="form.invalid || !disableSave"
+          ></app-bd-button>
+        </div>
+      }
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

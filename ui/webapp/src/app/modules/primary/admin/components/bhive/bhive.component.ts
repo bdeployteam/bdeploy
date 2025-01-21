@@ -6,6 +6,12 @@ import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { HiveService } from '../../services/hive.service';
 import { PoolingStatusCellComponent } from './pooling-status-cell/pooling-status-cell.component';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 const colAvatar: BdDataColumn<HiveInfoDto> = {
   id: 'avatar',
@@ -41,7 +47,7 @@ const colPerm: BdDataColumn<HiveInfoDto> = {
 @Component({
     selector: 'app-bhive',
     templateUrl: './bhive.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class BHiveComponent implements OnInit {
   protected readonly hives = inject(HiveService);

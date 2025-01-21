@@ -10,15 +10,21 @@
       type="button"
       [disabled]="disabled"
       (click)="resetImage(); fileInput.value = null"
-    >
+      >
       <mat-icon>delete</mat-icon>
     </button>
     <input type="file" hidden (change)="onImageChange($event)" #fileInput />
   </div>
 
   <div class="local-preview-container flex-auto">
-    <img class="logo" [src]="image" alt="logo" *ngIf="image" />
-    <img class="logo-dummy" src="/assets/no-image.svg" alt="logo" *ngIf="!image" />
-    <p *ngIf="!image">No logo defined</p>
+    @if (image) {
+      <img class="logo" [src]="image" alt="logo" />
+    }
+    @if (!image) {
+      <img class="logo-dummy" src="/assets/no-image.svg" alt="logo" />
+    }
+    @if (!image) {
+      <p>No logo defined</p>
+    }
   </div>
 </div>

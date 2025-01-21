@@ -3,79 +3,81 @@
 
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
-      <app-bd-notification-card
-        *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-        icon="history"
-        [type]="'warning'"
-        [dismissable]="false"
-        header="Server Not Synchronized"
-      >
-        <div class="text-justify">
-          The managed server responsible for this instance is not synchronized, details are unavailable. Please
-          synchronize the server to enable editing.
+      @if (!(servers.isCurrentInstanceSynchronized$ | async)) {
+        <app-bd-notification-card
+          icon="history"
+          [type]="'warning'"
+          [dismissable]="false"
+          header="Server Not Synchronized"
+          >
+          <div class="text-justify">
+            The managed server responsible for this instance is not synchronized, details are unavailable. Please
+            synchronize the server to enable editing.
+          </div>
+        </app-bd-notification-card>
+      }
+      @if (edit.state$ | async; as state) {
+        <div class="flex flex-col gap-2.5">
+          <div>Edit instance: <strong>{{ state.config.config.id }}</strong></div>
+          <app-bd-form-input
+            label="Name"
+            name="name"
+            [(ngModel)]="state.config.config.name"
+            required
+            appTrimmed
+          ></app-bd-form-input>
+          <app-bd-form-input
+            label="Description"
+            name="description"
+            [(ngModel)]="state.config.config.description"
+            required
+          ></app-bd-form-input>
+          <app-bd-form-select
+            label="Purpose"
+            name="purpose"
+            [(ngModel)]="state.config.config.purpose"
+            [values]="purposes"
+            required
+          ></app-bd-form-select>
+          <app-bd-form-select
+            #system
+            label="System"
+            name="system"
+            [(ngModel)]="systemSel"
+            [values]="systemKeys"
+            [labels]="systemLabels"
+            [allowNone]="true"
+            (ngModelChange)="onSystemChange(state, system.value)"
+            [appSystemOnServerValidator]="(edit.current$ | async)?.managedServer?.hostName"
+          ></app-bd-form-select>
+          <app-bd-form-toggle
+            label="Automatic Startup"
+            name="autoStart"
+            matTooltip="If enabled, all server applications of start type 'Instance' will be automatically started on server startup."
+            [(ngModel)]="state.config.config.autoStart"
+          ></app-bd-form-toggle>
+          <app-bd-form-toggle
+            label="Automatic Uninstallation"
+            name="autoUninstall"
+            [(ngModel)]="state.config.config.autoUninstall"
+          ></app-bd-form-toggle>
+          <app-bd-form-input
+            label="Product Version Regular Expression"
+            matTooltip="Only product versions matching this regular expression will be presented when updating the product version"
+            matTooltipPosition="above"
+            name="productFilterRegex"
+            [(ngModel)]="state.config.config.productFilterRegex"
+          ></app-bd-form-input>
+          <app-bd-button
+            type="submit"
+            text="Apply"
+            icon="done"
+            [collapsed]="false"
+            color="primary"
+            [disabled]="!hasPendingChanges || !(servers.isCurrentInstanceSynchronized$ | async) || form.invalid"
+          ></app-bd-button>
         </div>
-      </app-bd-notification-card>
-      <div class="flex flex-col gap-2.5" *ngIf="edit.state$ | async as state">
-        <div>Edit instance: <strong>{{ state.config.config.id }}</strong></div>
-        <app-bd-form-input
-          label="Name"
-          name="name"
-          [(ngModel)]="state.config.config.name"
-          required
-          appTrimmed
-        ></app-bd-form-input>
-        <app-bd-form-input
-          label="Description"
-          name="description"
-          [(ngModel)]="state.config.config.description"
-          required
-        ></app-bd-form-input>
-        <app-bd-form-select
-          label="Purpose"
-          name="purpose"
-          [(ngModel)]="state.config.config.purpose"
-          [values]="purposes"
-          required
-        ></app-bd-form-select>
-        <app-bd-form-select
-          #system
-          label="System"
-          name="system"
-          [(ngModel)]="systemSel"
-          [values]="systemKeys"
-          [labels]="systemLabels"
-          [allowNone]="true"
-          (ngModelChange)="onSystemChange(state, system.value)"
-          [appSystemOnServerValidator]="(edit.current$ | async)?.managedServer?.hostName"
-        ></app-bd-form-select>
-        <app-bd-form-toggle
-          label="Automatic Startup"
-          name="autoStart"
-          matTooltip="If enabled, all server applications of start type 'Instance' will be automatically started on server startup."
-          [(ngModel)]="state.config.config.autoStart"
-        ></app-bd-form-toggle>
-        <app-bd-form-toggle
-          label="Automatic Uninstallation"
-          name="autoUninstall"
-          [(ngModel)]="state.config.config.autoUninstall"
-        ></app-bd-form-toggle>
-        <app-bd-form-input
-          label="Product Version Regular Expression"
-          matTooltip="Only product versions matching this regular expression will be presented when updating the product version"
-          matTooltipPosition="above"
-          name="productFilterRegex"
-          [(ngModel)]="state.config.config.productFilterRegex"
-        ></app-bd-form-input>
-
-        <app-bd-button
-          type="submit"
-          text="Apply"
-          icon="done"
-          [collapsed]="false"
-          color="primary"
-          [disabled]="!hasPendingChanges || !(servers.isCurrentInstanceSynchronized$ | async) || form.invalid"
-        ></app-bd-button>
-      </div>
+      }
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

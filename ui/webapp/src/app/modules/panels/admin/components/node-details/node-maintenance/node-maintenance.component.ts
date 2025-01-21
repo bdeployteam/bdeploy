@@ -6,10 +6,15 @@ import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
-  selector: 'app-node-maintenance',
-  templateUrl: './node-maintenance.component.html',
-  standalone: false
+    selector: 'app-node-maintenance',
+    templateUrl: './node-maintenance.component.html',
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdButtonComponent, AsyncPipe]
 })
 export class NodeMaintenanceComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

@@ -1,9 +1,11 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { Observable, Subscription, combineLatest, of } from 'rxjs';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 import { InstancePurpose, ManifestKey } from 'src/app/models/gen.dtos';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -12,10 +14,24 @@ import { GlobalEditState, InstanceEditService } from 'src/app/modules/primary/in
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../../core/validators/trimmed.directive';
+import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
+import { SystemOnServerValidatorDirective } from '../../../validators/system-on-server-validator.directive';
+import { BdFormToggleComponent } from '../../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-edit-config',
     templateUrl: './edit-config.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdNotificationCardComponent, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, SystemOnServerValidatorDirective, BdFormToggleComponent, MatTooltip, BdButtonComponent, AsyncPipe]
 })
 export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly areas = inject(NavAreasService);

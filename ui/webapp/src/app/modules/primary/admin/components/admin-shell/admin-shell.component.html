@@ -4,55 +4,56 @@
       <div class="menu-group flex-auto">Configuration</div>
       <a mat-list-item [routerLink]="[{ outlets: { admin: ['general'] } }]" routerLinkActive="active-setting"
         ><div class="flex justify-start items-center"><mat-icon class="nav-icon">settings</mat-icon>Settings</div></a
-      >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['users'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center">
+        >
+        <a mat-list-item [routerLink]="[{ outlets: { admin: ['users'] } }]" routerLinkActive="active-setting"
+          ><div class="flex justify-start items-center">
           <mat-icon class="nav-icon">account_circle</mat-icon>User Accounts
         </div></a
-      >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['user-groups'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center">
+        >
+        <a mat-list-item [routerLink]="[{ outlets: { admin: ['user-groups'] } }]" routerLinkActive="active-setting"
+          ><div class="flex justify-start items-center">
           <mat-icon class="nav-icon">supervised_user_circle</mat-icon>User Groups
         </div></a
-      >
+        >
 
-      <a
-        *ngIf="!(cfg.isCentral$ | async)"
-        mat-list-item
-        [routerLink]="[{ outlets: { admin: ['nodes'] } }]"
-        routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center"><mat-icon class="nav-icon">dns</mat-icon>Nodes</div></a
-      >
+        @if (!(cfg.isCentral$ | async)) {
+          <a
+            mat-list-item
+            [routerLink]="[{ outlets: { admin: ['nodes'] } }]"
+            routerLinkActive="active-setting"
+            ><div class="flex justify-start items-center"><mat-icon class="nav-icon">dns</mat-icon>Nodes</div></a
+            >
+          }
 
-      <div class="menu-group flex-auto">Housekeeping</div>
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['manualjobs'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center"><mat-icon class="nav-icon">task</mat-icon>Jobs</div></a
-      >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['manualcleanup'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center">
-          <mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup
-        </div></a
-      >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['hive'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center"><mat-icon class="nav-icon">sd_storage</mat-icon>BHives</div></a
-      >
+          <div class="menu-group flex-auto">Housekeeping</div>
+          <a mat-list-item [routerLink]="[{ outlets: { admin: ['manualjobs'] } }]" routerLinkActive="active-setting"
+            ><div class="flex justify-start items-center"><mat-icon class="nav-icon">task</mat-icon>Jobs</div></a
+            >
+            <a mat-list-item [routerLink]="[{ outlets: { admin: ['manualcleanup'] } }]" routerLinkActive="active-setting"
+              ><div class="flex justify-start items-center">
+              <mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup
+            </div></a
+            >
+            <a mat-list-item [routerLink]="[{ outlets: { admin: ['hive'] } }]" routerLinkActive="active-setting"
+              ><div class="flex justify-start items-center"><mat-icon class="nav-icon">sd_storage</mat-icon>BHives</div></a
+              >
 
-      <div class="menu-group flex-auto">Maintenance</div>
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['metrics'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center"><mat-icon class="nav-icon">timeline</mat-icon>Metrics</div></a
-      >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['logFiles'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center"><mat-icon class="nav-icon">subject</mat-icon>Logging</div></a
-      >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['systemsoftware'] } }]" routerLinkActive="active-setting"
-        ><div class="flex justify-start items-center">
-          <mat-icon class="nav-icon">system_update</mat-icon>BDeploy Update
-        </div></a
-      >
-    </mat-nav-list>
-  </mat-sidenav>
+              <div class="menu-group flex-auto">Maintenance</div>
+              <a mat-list-item [routerLink]="[{ outlets: { admin: ['metrics'] } }]" routerLinkActive="active-setting"
+                ><div class="flex justify-start items-center"><mat-icon class="nav-icon">timeline</mat-icon>Metrics</div></a
+                >
+                <a mat-list-item [routerLink]="[{ outlets: { admin: ['logFiles'] } }]" routerLinkActive="active-setting"
+                  ><div class="flex justify-start items-center"><mat-icon class="nav-icon">subject</mat-icon>Logging</div></a
+                  >
+                  <a mat-list-item [routerLink]="[{ outlets: { admin: ['systemsoftware'] } }]" routerLinkActive="active-setting"
+                    ><div class="flex justify-start items-center">
+                    <mat-icon class="nav-icon">system_update</mat-icon>BDeploy Update
+                  </div></a
+                  >
+                </mat-nav-list>
+              </mat-sidenav>
 
-  <mat-sidenav-content class="admin-shell-content">
-    <router-outlet name="admin"></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+              <mat-sidenav-content class="admin-shell-content">
+                <router-outlet name="admin"></router-outlet>
+              </mat-sidenav-content>
+            </mat-sidenav-container>

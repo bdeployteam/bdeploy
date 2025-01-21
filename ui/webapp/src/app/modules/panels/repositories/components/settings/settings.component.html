@@ -31,15 +31,16 @@
         [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-panel-button>
 
-      <app-bd-button
-        *ngIf="repositories.current$ | async as repository"
-        text="Delete Software Repository"
-        icon="delete"
-        [collapsed]="false"
-        (click)="onDelete(repository)"
-        [disabled]="!(auth.isGlobalAdmin$ | async) || (deleting$ | async)"
-        [loadingWhen$]="deleting$"
-      ></app-bd-button>
+      @if (repositories.current$ | async; as repository) {
+        <app-bd-button
+          text="Delete Software Repository"
+          icon="delete"
+          [collapsed]="false"
+          (click)="onDelete(repository)"
+          [disabled]="!(auth.isGlobalAdmin$ | async) || (deleting$ | async)"
+          [loadingWhen$]="deleting$"
+        ></app-bd-button>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

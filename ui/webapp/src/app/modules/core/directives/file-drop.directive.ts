@@ -4,10 +4,7 @@ import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
  * The purpose of this directive is to receive the raw files as a JavaScript FileList.
  * Then emit them to the parent component. It will also emit a custom event when files are hovered on the drop zone area.
  */
-@Directive({
-    selector: '[appFileDrop]',
-    standalone: false
-})
+@Directive({ selector: '[appFileDrop]' })
 export class FileDropDirective {
   @Output() filesDropped = new EventEmitter<FileList>();
   @Output() filesHovered = new EventEmitter<boolean>();

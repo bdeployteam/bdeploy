@@ -1,12 +1,18 @@
 <div #navRoot class="flex w-full h-full overflow-hidden">
-  <app-main-nav-menu class="flex-none" *ngIf="isAuth$ | async"></app-main-nav-menu>
+  @if (isAuth$ | async) {
+    <app-main-nav-menu class="flex-none"></app-main-nav-menu>
+  }
   <div class="flex-auto flex flex-col">
-    <app-main-nav-top class="flex-none" *ngIf="isAuth$ | async"></app-main-nav-top>
+    @if (isAuth$ | async) {
+      <app-main-nav-top class="flex-none"></app-main-nav-top>
+    }
     <div class="local-content-sizing flex flex-auto">
       <app-main-nav-content class="flex-auto" [ngClass]="!(isAuth$ | async) ? 'local-unauth-content' : null">
         <ng-content></ng-content>
       </app-main-nav-content>
-      <app-main-nav-flyin class="flex-none" *ngIf="isAuth$ | async"></app-main-nav-flyin>
+      @if (isAuth$ | async) {
+        <app-main-nav-flyin class="flex-none"></app-main-nav-flyin>
+      }
     </div>
   </div>
 </div>

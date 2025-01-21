@@ -4,16 +4,21 @@
   [disabled]="processing$ | async"
   [type]="(failed$ | async) ? 'warning' : 'generic'"
   (dismiss)="onDismiss()"
->
-  <mat-progress-bar
-    *ngIf="(processing$ | async) || (uploading$ | async)"
-    [mode]="(uploading$ | async) ? 'determinate' : 'indeterminate'"
-    [value]="status.progressObservable | async"
-  ></mat-progress-bar>
-  <div *ngIf="(uploading$ | async) || (processing$ | async)" class="break-all bd-description-text">
-    Working on it...
-  </div>
-  <div *ngIf="(failed$ | async) || (finished$ | async)" class="break-all bd-description-text">
-    {{ (failed$ | async) ? status.detail : this.resultEvaluator(status) }}
-  </div>
+  >
+  @if ((processing$ | async) || (uploading$ | async)) {
+    <mat-progress-bar
+      [mode]="(uploading$ | async) ? 'determinate' : 'indeterminate'"
+      [value]="status.progressObservable | async"
+    ></mat-progress-bar>
+  }
+  @if ((uploading$ | async) || (processing$ | async)) {
+    <div class="break-all bd-description-text">
+      Working on it...
+    </div>
+  }
+  @if ((failed$ | async) || (finished$ | async)) {
+    <div class="break-all bd-description-text">
+      {{ (failed$ | async) ? status.detail : this.resultEvaluator(status) }}
+    </div>
+  }
 </app-bd-notification-card>

@@ -1,10 +1,12 @@
 import { Component, HostBinding, Input, OnChanges, OnInit } from '@angular/core';
 import { ApplicationConfiguration, ApplicationStartType } from 'src/app/models/gen.dtos';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-process-starttype-icon',
     templateUrl: './process-starttype-icon.component.html',
-    standalone: false
+    imports: [MatIcon, MatTooltip],
 })
 export class ProcessStarttypeIconComponent implements OnInit, OnChanges {
   @Input() record: ApplicationConfiguration;

@@ -2,6 +2,12 @@ import { Component, HostListener, OnDestroy, OnInit, TemplateRef } from '@angula
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
+import { BdNotificationCardComponent } from '../bd-notification-card/bd-notification-card.component';
+import { NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
+import { FormsModule } from '@angular/forms';
+import { BdActionRowComponent } from '../bd-action-row/bd-action-row.component';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 export interface BdDialogMessageAction<T> {
   /** The name of the action is usually rendered as button text */
@@ -97,7 +103,7 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
     selector: 'app-bd-dialog-message',
     templateUrl: './bd-dialog-message.component.html',
     animations: [delayedFadeIn],
-    standalone: false
+    imports: [BdNotificationCardComponent, NgTemplateOutlet, BdFormInputComponent, FormsModule, BdActionRowComponent, BdButtonComponent, AsyncPipe]
 })
 export class BdDialogMessageComponent implements OnInit, OnDestroy {
   public message$ = new BehaviorSubject<BdDialogMessage<unknown>>(null);

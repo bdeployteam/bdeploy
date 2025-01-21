@@ -15,6 +15,14 @@ import {
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ClientApp, ClientsService } from '../../services/clients.service';
 import { GroupsService } from '../../services/groups.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
 
 const clientNameColumn: BdDataColumn<ClientApp> = {
   id: 'name',
@@ -56,9 +64,9 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
 };
 
 @Component({
-  selector: 'app-client-applications',
-  templateUrl: './client-applications.component.html',
-  standalone: false
+    selector: 'app-client-applications',
+    templateUrl: './client-applications.component.html',
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDataGroupingComponent, BdButtonComponent, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent, AsyncPipe]
 })
 export class ClientApplicationsComponent implements OnInit {
   private readonly dd = inject(DeviceDetectorService);

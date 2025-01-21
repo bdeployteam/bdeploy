@@ -16,6 +16,15 @@ import { HiveService } from 'src/app/modules/primary/admin/services/hive.service
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { DownloadService } from '../../services/download.service';
 import { BdManifestDeleteActionComponent } from './bd-manifest-delete-action/bd-manifest-delete-action.component';
+import { BdEditorComponent } from '../bd-editor/bd-editor.component';
+
+import { BdDialogToolbarComponent } from '../bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDialogContentComponent } from '../bd-dialog-content/bd-dialog-content.component';
+import { BdBreadcrumbsComponent } from '../bd-breadcrumbs/bd-breadcrumbs.component';
+import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 interface PathIdName {
   name: string;
@@ -26,9 +35,9 @@ interface PathIdName {
 type BHivePathSegment = PathIdName;
 
 @Component({
-  selector: 'app-bd-bhive-browser',
-  templateUrl: './bd-bhive-browser.component.html',
-  standalone: false
+    selector: 'app-bd-bhive-browser',
+    templateUrl: './bd-bhive-browser.component.html',
+  imports: [BdEditorComponent, BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdBreadcrumbsComponent, BdDataTableComponent, AsyncPipe]
 })
 export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);

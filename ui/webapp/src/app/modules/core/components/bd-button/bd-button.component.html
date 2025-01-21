@@ -11,44 +11,48 @@
   [disabled]="disabled"
   [type]="isSubmit ? 'submit' : 'button'"
   [attr.aria-label]="text"
->
+  >
   <div class="flex" [class.local-wrapper-expanded]="!collapsed" [class.local-wrapper-collapsed]="collapsed">
-    <mat-icon
-      *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
-      aria-hidden="false"
-      class="local-icon-position"
-      [matBadge]="badge"
-      [matBadgeHidden]="!badge"
-      matBadgeSize="small"
-      [matBadgeColor]="badgeColor"
-      >{{ icon }}</mat-icon
-    >
-    <mat-icon
-      *ngIf="svgIcon && !(loadingWhen$ | async)"
-      aria-hidden="false"
-      class="local-icon-position"
-      [svgIcon]="svgIcon"
-      [matBadge]="badge"
-      [matBadgeHidden]="!badge"
-      matBadgeSize="small"
-      [matBadgeColor]="badgeColor"
-    ></mat-icon>
-    <mat-spinner
-      *ngIf="loadingWhen$ | async"
-      [diameter]="24"
-      class="bd-inherited-spinner pointer-events-auto"
-      [class.local-spinner]="!collapsed"
-      matTooltip="This action is already running locally or on the server on one or more of the selected elements."
-      matTooltipPosition="below"
-      matTooltipShowDelay="500"
-    ></mat-spinner>
-    <span
-      *ngIf="text && !collapsed"
-      [ngClass]="(!!icon || !!svgIcon) && !(loadingWhen$ | async) ? 'local-label-position' : []"
-      [class.flex-auto]="!icon && !svgIcon"
-      [class.flex-none]="icon || svgIcon"
-      >{{ text }}</span
-    >
-    <ng-content></ng-content>
-  </div>
-</button>
+    @if (icon && !svgIcon && !(loadingWhen$ | async)) {
+      <mat-icon
+        aria-hidden="false"
+        class="local-icon-position"
+        [matBadge]="badge"
+        [matBadgeHidden]="!badge"
+        matBadgeSize="small"
+        [matBadgeColor]="badgeColor"
+        >{{ icon }}</mat-icon
+        >
+      }
+      @if (svgIcon && !(loadingWhen$ | async)) {
+        <mat-icon
+          aria-hidden="false"
+          class="local-icon-position"
+          [svgIcon]="svgIcon"
+          [matBadge]="badge"
+          [matBadgeHidden]="!badge"
+          matBadgeSize="small"
+          [matBadgeColor]="badgeColor"
+        ></mat-icon>
+      }
+      @if (loadingWhen$ | async) {
+        <mat-spinner
+          [diameter]="24"
+          class="bd-inherited-spinner pointer-events-auto"
+          [class.local-spinner]="!collapsed"
+          matTooltip="This action is already running locally or on the server on one or more of the selected elements."
+          matTooltipPosition="below"
+          matTooltipShowDelay="500"
+        ></mat-spinner>
+      }
+      @if (text && !collapsed) {
+        <span
+          [ngClass]="(!!icon || !!svgIcon) && !(loadingWhen$ | async) ? 'local-label-position' : []"
+          [class.flex-auto]="!icon && !svgIcon"
+          [class.flex-none]="icon || svgIcon"
+          >{{ text }}</span
+          >
+        }
+        <ng-content></ng-content>
+      </div>
+    </button>

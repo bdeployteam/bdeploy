@@ -2,10 +2,7 @@ import { ChangeDetectorRef, Directive, Input, OnDestroy, OnInit, inject } from '
 import { NgControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 
-@Directive({
-    selector: '[appRevalidateOn]',
-    standalone: false
-})
+@Directive({ selector: '[appRevalidateOn]' })
 export class RevalidateOnDirective implements OnInit, OnDestroy {
   @Input() appRevalidateOn: Observable<unknown>;
   private readonly host = inject(NgControl);

@@ -2,11 +2,13 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { Actions, LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
+import { BdPanelButtonComponent } from '../../../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-ldap-import-action',
     templateUrl: './ldap-import-action.component.html',
-    standalone: false
+    imports: [BdPanelButtonComponent, AsyncPipe]
 })
 export class LdapImportActionComponent implements OnInit {
   @Input() record: LDAPSettingsDto;

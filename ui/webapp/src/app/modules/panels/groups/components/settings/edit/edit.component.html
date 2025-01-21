@@ -4,28 +4,29 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <form #form="ngForm" (ngSubmit)="onSave()">
-        <div class="flex flex-col gap-2.5" *ngIf="group">
-          <app-bd-image-upload
-            (imageSelected)="onSelectImage($event)"
-            [image]="origImage$ | async"
-            (unsupportedDrop)="onUnsupportedFile($event)"
-          ></app-bd-image-upload>
-          <app-bd-form-input label="Title" name="title" [(ngModel)]="group.title" required></app-bd-form-input>
-          <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
-          <app-bd-form-toggle
-            label="Automatic Cleanup"
-            name="autoDelete"
-            [(ngModel)]="group.autoDelete"
-          ></app-bd-form-toggle>
-
-          <app-bd-button
-            color="primary"
-            [collapsed]="false"
-            text="Save"
-            icon="save"
-            [disabled]="form.invalid || !disableSave"
-          ></app-bd-button>
-        </div>
+        @if (group) {
+          <div class="flex flex-col gap-2.5">
+            <app-bd-image-upload
+              (imageSelected)="onSelectImage($event)"
+              [image]="origImage$ | async"
+              (unsupportedDrop)="onUnsupportedFile($event)"
+            ></app-bd-image-upload>
+            <app-bd-form-input label="Title" name="title" [(ngModel)]="group.title" required></app-bd-form-input>
+            <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
+            <app-bd-form-toggle
+              label="Automatic Cleanup"
+              name="autoDelete"
+              [(ngModel)]="group.autoDelete"
+            ></app-bd-form-toggle>
+            <app-bd-button
+              color="primary"
+              [collapsed]="false"
+              text="Save"
+              icon="save"
+              [disabled]="form.invalid || !disableSave"
+            ></app-bd-button>
+          </div>
+        }
       </form>
     </div>
   </app-bd-dialog-content>

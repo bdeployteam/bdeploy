@@ -11,10 +11,21 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
+
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatDivider } from '@angular/material/divider';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+
 @Component({
-  selector: 'app-node-details',
-  templateUrl: './node-details.component.html',
-  standalone: false
+    selector: 'app-node-details',
+    templateUrl: './node-details.component.html',
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, MatTooltip, MatDivider, BdPanelButtonComponent, BdButtonComponent, AsyncPipe, DatePipe]
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
   private readonly nodeAdmin = inject(NodesAdminService);

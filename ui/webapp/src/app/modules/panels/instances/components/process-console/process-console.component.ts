@@ -5,6 +5,16 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
 import { ServersService } from './../../../../primary/servers/services/servers.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdTerminalComponent } from '../../../../core/components/bd-terminal/bd-terminal.component';
+import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
+import { BdServerSyncButtonComponent } from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
 
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
@@ -12,7 +22,7 @@ const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
     selector: 'app-process-console',
     templateUrl: './process-console.component.html',
     styleUrls: ['./process-console.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, NgClass, MatTooltip, MatDivider, BdButtonComponent, BdDialogContentComponent, BdTerminalComponent, BdNoDataComponent, BdServerSyncButtonComponent, AsyncPipe]
 })
 export class ProcessConsoleComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthenticationService);

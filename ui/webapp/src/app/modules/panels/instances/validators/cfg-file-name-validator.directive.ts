@@ -17,8 +17,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: CfgFileNameValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class CfgFileNameValidatorDirective implements Validator {
   private readonly cfgFiles = inject(ConfigFilesService);

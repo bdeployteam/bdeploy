@@ -1,96 +1,104 @@
-<ng-container *ngIf="diff$ | async as diff">
-  <div [ngClass]="getBorderClass(diff.type)" *ngIf="diff.type !== 'not-in-base'">
-    <div class="local-padding local-header flex flex-col" *ngIf="!onlyCommand">
-      <div class="flex flex-wrap gap-1 justify-start items-center">
-        <mat-icon [svgIcon]="diff.os"></mat-icon>
-        <div class="flex justify-start items-center">
-          <ng-template #namePopup>
-            <app-config-desc-cards field="cfg.name"></app-config-desc-cards>
-          </ng-template>
-          <div class="mr-1">Process:</div>
-          <strong>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.name"
-              [popup]="namePopup"
-            ></app-history-diff-field>
-          </strong>
-          <div class="bd-description-text" *ngIf="hasProcessControl">,</div>
+@if (diff$ | async; as diff) {
+  @if (diff.type !== 'not-in-base') {
+    <div [ngClass]="getBorderClass(diff.type)">
+      @if (!onlyCommand) {
+        <div class="local-padding local-header flex flex-col">
+          <div class="flex flex-wrap gap-1 justify-start items-center">
+            <mat-icon [svgIcon]="diff.os"></mat-icon>
+            <div class="flex justify-start items-center">
+              <ng-template #namePopup>
+                <app-config-desc-cards field="cfg.name"></app-config-desc-cards>
+              </ng-template>
+              <div class="mr-1">Process:</div>
+              <strong>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="diff.name"
+                  [popup]="namePopup"
+                ></app-history-diff-field>
+              </strong>
+              @if (hasProcessControl) {
+                <div class="bd-description-text">,</div>
+              }
+            </div>
+            @if (hasProcessControl) {
+              <div class="bd-description-text flex justify-start items-center">
+                <ng-template #idPopup>
+                  <app-config-desc-cards field="cfg.id"></app-config-desc-cards>
+                </ng-template>
+                <div class="mr-1">ID:</div>
+                <app-history-diff-field [diffSide]="diffSide" [diff]="diff.id"
+                                        [popup]="idPopup"></app-history-diff-field>
+                <div>,</div>
+              </div>
+              <div class="bd-description-text flex justify-start items-center">
+                <ng-template #ctrlStartTypePopup>
+                  <app-config-desc-cards field="cfg.control.startType"></app-config-desc-cards>
+                </ng-template>
+                <div class="mr-1">Start Type:</div>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="diff.processControl.startType"
+                  [popup]="ctrlStartTypePopup"
+                ></app-history-diff-field>
+                <div>,</div>
+              </div>
+              <div class="bd-description-text flex justify-start items-center">
+                <ng-template #ctrlKeepAlivePopup>
+                  <app-config-desc-cards field="cfg.control.keepAlive"></app-config-desc-cards>
+                </ng-template>
+                <div class="mr-1">Keep Alive:</div>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="diff.processControl.keepAlive"
+                  [popup]="ctrlKeepAlivePopup"
+                ></app-history-diff-field>
+                <div>,</div>
+              </div>
+              <div class="bd-description-text flex justify-start items-center">
+                <ng-template #ctrlNoRetriesPopup>
+                  <app-config-desc-cards field="cfg.control.noRetries"></app-config-desc-cards>
+                </ng-template>
+                <div class="mr-1">Keep Alive Retries:</div>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="diff.processControl.noOfRetries"
+                  [popup]="ctrlNoRetriesPopup"
+                ></app-history-diff-field>
+                <div>,</div>
+              </div>
+              <div class="bd-description-text flex justify-start items-center">
+                <ng-template #ctrlGracePopup>
+                  <app-config-desc-cards field="cfg.control.gracePeriod"></app-config-desc-cards>
+                </ng-template>
+                <div class="mr-1">Stop Grace Period:</div>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="diff.processControl.gracePeriod"
+                  [popup]="ctrlGracePopup"
+                ></app-history-diff-field>
+                <div>,</div>
+              </div>
+              <div class="bd-description-text flex justify-start items-center">
+                <ng-template #ctrlAttachPopup>
+                  <app-config-desc-cards field="cfg.control.attachStdin"></app-config-desc-cards>
+                </ng-template>
+                <div class="mr-1">Attach Console:</div>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="diff.processControl.attachStdin"
+                  [popup]="ctrlAttachPopup"
+                ></app-history-diff-field>
+              </div>
+            }
+          </div>
         </div>
-        <ng-container *ngIf="hasProcessControl">
-          <div class="bd-description-text flex justify-start items-center">
-            <ng-template #idPopup>
-              <app-config-desc-cards field="cfg.id"></app-config-desc-cards>
-            </ng-template>
-            <div class="mr-1">ID:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.id" [popup]="idPopup"></app-history-diff-field>
-            <div>,</div>
-          </div>
-          <div class="bd-description-text flex justify-start items-center">
-            <ng-template #ctrlStartTypePopup>
-              <app-config-desc-cards field="cfg.control.startType"></app-config-desc-cards>
-            </ng-template>
-            <div class="mr-1">Start Type:</div>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.processControl.startType"
-              [popup]="ctrlStartTypePopup"
-            ></app-history-diff-field>
-            <div>,</div>
-          </div>
-          <div class="bd-description-text flex justify-start items-center">
-            <ng-template #ctrlKeepAlivePopup>
-              <app-config-desc-cards field="cfg.control.keepAlive"></app-config-desc-cards>
-            </ng-template>
-            <div class="mr-1">Keep Alive:</div>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.processControl.keepAlive"
-              [popup]="ctrlKeepAlivePopup"
-            ></app-history-diff-field>
-            <div>,</div>
-          </div>
-          <div class="bd-description-text flex justify-start items-center">
-            <ng-template #ctrlNoRetriesPopup>
-              <app-config-desc-cards field="cfg.control.noRetries"></app-config-desc-cards>
-            </ng-template>
-            <div class="mr-1">Keep Alive Retries:</div>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.processControl.noOfRetries"
-              [popup]="ctrlNoRetriesPopup"
-            ></app-history-diff-field>
-            <div>,</div>
-          </div>
-          <div class="bd-description-text flex justify-start items-center">
-            <ng-template #ctrlGracePopup>
-              <app-config-desc-cards field="cfg.control.gracePeriod"></app-config-desc-cards>
-            </ng-template>
-            <div class="mr-1">Stop Grace Period:</div>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.processControl.gracePeriod"
-              [popup]="ctrlGracePopup"
-            ></app-history-diff-field>
-            <div>,</div>
-          </div>
-          <div class="bd-description-text flex justify-start items-center">
-            <ng-template #ctrlAttachPopup>
-              <app-config-desc-cards field="cfg.control.attachStdin"></app-config-desc-cards>
-            </ng-template>
-            <div class="mr-1">Attach Console:</div>
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              [diff]="diff.processControl.attachStdin"
-              [popup]="ctrlAttachPopup"
-            ></app-history-diff-field>
-          </div>
-        </ng-container>
-      </div>
-    </div>
+      }
 
     <div [class.local-padding]="!onlyCommand" class="flex flex-col">
-      <div class="bd-description-text" *ngIf="!onlyCommand">Start Command:</div>
+      @if (!onlyCommand) {
+        <div class="bd-description-text">Start Command:</div>
+      }
       <div class="flex flex-wrap gap-1 justify-start items-center">
         <ng-template #exePopup>
           <app-config-desc-cards field="cfg.executable"></app-config-desc-cards>
@@ -100,157 +108,166 @@
           [diff]="diff.start.executable"
           [popup]="exePopup"
         ></app-history-diff-field>
-        <ng-container *ngFor="let param of diff.start.parameters">
+        @for (param of diff.start.parameters; track $index) {
           <ng-template #paramPopup>
             <app-param-desc-card [descriptor]="param.descriptor"></app-param-desc-card>
           </ng-template>
           <!-- Don't set masking by the field, as parameters are partially pre-masked in case of passwords. -->
-          <app-history-diff-field
-            [diffSide]="diffSide"
-            *ngFor="let val of param.values"
-            [diff]="val"
-            [popup]="paramPopup"
-          ></app-history-diff-field>
-        </ng-container>
+          @for (val of param.values; track $index) {
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="val"
+              [popup]="paramPopup"
+            ></app-history-diff-field>
+          }
+        }
       </div>
-      <ng-container *ngIf="diff.start.environment?.length">
+
+      @if (diff.start.environment?.length) {
         <div class="bd-description-text mt-2.5">Start Environment:</div>
         <div class="flex flex-wrap gap-1 justify-start items-center">
-          <ng-container *ngFor="let param of diff.start.environment">
+          @for (param of diff.start.environment; track $index) {
             <ng-template #paramPopup>
               <app-param-desc-card [descriptor]="param.descriptor"></app-param-desc-card>
             </ng-template>
             <!-- Don't set masking by the field, as parameters are partially pre-masked in case of passwords. -->
-            <app-history-diff-field
-              [diffSide]="diffSide"
-              *ngFor="let val of param.values"
-              [diff]="val"
-              [popup]="paramPopup"
-            ></app-history-diff-field>
-          </ng-container>
+            @for (val of param.values; track $index) {
+              <app-history-diff-field
+                [diffSide]="diffSide"
+                [diff]="val"
+                [popup]="paramPopup"
+              ></app-history-diff-field>
+            }
+          }
         </div>
-      </ng-container>
-      <ng-container *ngIf="diff.endpoints?.http?.length && !onlyCommand">
+      }
+
+      @if (diff.endpoints?.http?.length && !onlyCommand) {
         <div class="bd-description-text mt-2.5">Endpoints:</div>
-        <div *ngFor="let epdiff of diff.endpoints.http" class="flex flex-col gap-1">
-          <div [ngClass]="getBorderClass(epdiff.type)" *ngIf="epdiff.type !== 'not-in-base'" class="pl-1">
-            <div class="flex flex-wrap gap-1 justify-start items-center">
-              <div class="flex justify-start items-center">
-                <ng-template #pathPopup>
-                  <app-config-desc-cards field="cfg.ep.path"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Path:</div>
-                <strong>
-                  <app-history-diff-field
-                    [diffSide]="diffSide"
-                    [diff]="epdiff.path"
-                    [popup]="pathPopup"
-                  ></app-history-diff-field>
-                </strong>
-                <div class="bd-description-text">,</div>
+        @for (epdiff of diff.endpoints.http; track $index) {
+          <div class="flex flex-col gap-1">
+            @if (epdiff.type !== 'not-in-base') {
+              <div [ngClass]="getBorderClass(epdiff.type)" class="pl-1">
+                <div class="flex flex-wrap gap-1 justify-start items-center">
+                  <div class="flex justify-start items-center">
+                    <ng-template #pathPopup>
+                      <app-config-desc-cards field="cfg.ep.path"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Path:</div>
+                    <strong>
+                      <app-history-diff-field
+                        [diffSide]="diffSide"
+                        [diff]="epdiff.path"
+                        [popup]="pathPopup"
+                      ></app-history-diff-field>
+                    </strong>
+                    <div class="bd-description-text">,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epPortPopup>
+                      <app-config-desc-cards field="cfg.ep.port"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Port:</div>
+                    <app-history-diff-field
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.port"
+                      [popup]="epPortPopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epSecurePopup>
+                      <app-config-desc-cards field="cfg.ep.secure"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Secure:</div>
+                    <app-history-diff-field
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.secure"
+                      [popup]="epSecurePopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epTrustAllPopup>
+                      <app-config-desc-cards field="cfg.ep.trustAll"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Trust All:</div>
+                    <app-history-diff-field
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.trustAll"
+                      [popup]="epTrustAllPopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epTrustStorePopup>
+                      <app-config-desc-cards field="cfg.ep.trustStore"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Trust Store:</div>
+                    <app-history-diff-field
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.trustStore"
+                      [popup]="epTrustStorePopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epTrustStorePassPopup>
+                      <app-config-desc-cards field="cfg.ep.trustStorePass"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Trust Store PW:</div>
+                    <app-history-diff-field
+                      [maskValue]="true"
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.trustStorePass"
+                      [popup]="epTrustStorePassPopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epAuthTypePopup>
+                      <app-config-desc-cards field="cfg.ep.authType"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Auth. Type:</div>
+                    <app-history-diff-field
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.authType"
+                      [popup]="epAuthTypePopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epAuthUserPopup>
+                      <app-config-desc-cards field="cfg.ep.authUser"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Auth. User:</div>
+                    <app-history-diff-field
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.authUser"
+                      [popup]="epAuthUserPopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                  <div class="bd-description-text flex justify-start items-center">
+                    <ng-template #epAuthPassPopup>
+                      <app-config-desc-cards field="cfg.ep.authPass"></app-config-desc-cards>
+                    </ng-template>
+                    <div class="mr-1">Auth. PW:</div>
+                    <app-history-diff-field
+                      [maskValue]="true"
+                      [diffSide]="diffSide"
+                      [diff]="epdiff.authPass"
+                      [popup]="epAuthPassPopup"
+                    ></app-history-diff-field>
+                    <div>,</div>
+                  </div>
+                </div>
               </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epPortPopup>
-                  <app-config-desc-cards field="cfg.ep.port"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Port:</div>
-                <app-history-diff-field
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.port"
-                  [popup]="epPortPopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epSecurePopup>
-                  <app-config-desc-cards field="cfg.ep.secure"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Secure:</div>
-                <app-history-diff-field
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.secure"
-                  [popup]="epSecurePopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epTrustAllPopup>
-                  <app-config-desc-cards field="cfg.ep.trustAll"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Trust All:</div>
-                <app-history-diff-field
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.trustAll"
-                  [popup]="epTrustAllPopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epTrustStorePopup>
-                  <app-config-desc-cards field="cfg.ep.trustStore"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Trust Store:</div>
-                <app-history-diff-field
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.trustStore"
-                  [popup]="epTrustStorePopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epTrustStorePassPopup>
-                  <app-config-desc-cards field="cfg.ep.trustStorePass"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Trust Store PW:</div>
-                <app-history-diff-field
-                  [maskValue]="true"
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.trustStorePass"
-                  [popup]="epTrustStorePassPopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epAuthTypePopup>
-                  <app-config-desc-cards field="cfg.ep.authType"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Auth. Type:</div>
-                <app-history-diff-field
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.authType"
-                  [popup]="epAuthTypePopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epAuthUserPopup>
-                  <app-config-desc-cards field="cfg.ep.authUser"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Auth. User:</div>
-                <app-history-diff-field
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.authUser"
-                  [popup]="epAuthUserPopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-              <div class="bd-description-text flex justify-start items-center">
-                <ng-template #epAuthPassPopup>
-                  <app-config-desc-cards field="cfg.ep.authPass"></app-config-desc-cards>
-                </ng-template>
-                <div class="mr-1">Auth. PW:</div>
-                <app-history-diff-field
-                  [maskValue]="true"
-                  [diffSide]="diffSide"
-                  [diff]="epdiff.authPass"
-                  [popup]="epAuthPassPopup"
-                ></app-history-diff-field>
-                <div>,</div>
-              </div>
-            </div>
+            }
           </div>
-        </div>
-      </ng-container>
+        }
+      }
     </div>
   </div>
-</ng-container>
+  }
+}

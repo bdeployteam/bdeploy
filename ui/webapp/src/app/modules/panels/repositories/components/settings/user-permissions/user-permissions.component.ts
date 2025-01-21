@@ -19,11 +19,15 @@ import {
 } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
 import { RepositoryUsersService } from '../../../services/repository-users.service';
+import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-software-repository-user-permissions',
-  templateUrl: './user-permissions.component.html',
-  standalone: false
+    selector: 'app-software-repository-user-permissions',
+    templateUrl: './user-permissions.component.html',
+    imports: [BdFormSelectComponent, FormsModule, BdDataTableComponent, AsyncPipe]
 })
 export class UserPermissionsComponent {
   public readonly repos = inject(RepositoriesService);

@@ -4,13 +4,20 @@ import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file-viewer.utils';
 import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logging-admin.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdTerminalComponent } from '../../../../core/components/bd-terminal/bd-terminal.component';
+import { AsyncPipe } from '@angular/common';
 
 const MAX_TAIL = 512 * 1024; // 512KiB max initial fetch.
 
 @Component({
     selector: 'app-log-file-viewer',
     templateUrl: './log-file-viewer.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdTerminalComponent, AsyncPipe]
 })
 export class LogFileViewerComponent implements OnInit, OnDestroy {
   private readonly loggingAdmin = inject(LoggingAdminService);

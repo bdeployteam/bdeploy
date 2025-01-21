@@ -4,12 +4,16 @@ import { ActionBroadcastDto, ActionExecution, ActionScope } from 'src/app/models
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ActionsService } from '../../services/actions.service';
+import { BdNotificationCardComponent } from '../bd-notification-card/bd-notification-card.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { BdNoDataComponent } from '../bd-no-data/bd-no-data.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-actions',
     templateUrl: './bd-actions.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdNotificationCardComponent, MatProgressBar, BdNoDataComponent, AsyncPipe]
 })
 export class BdActionsComponent {
   private readonly instances = inject(InstancesService);

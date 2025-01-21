@@ -11,11 +11,15 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { UserGroupsColumnsService } from 'src/app/modules/core/services/user-groups-columns.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { RepositoryUsersService } from '../../../services/repository-users.service';
+import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
+import { FormsModule } from '@angular/forms';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-software-repository-user-group-permissions',
     templateUrl: './user-group-permissions.component.html',
-    standalone: false
+    imports: [BdFormSelectComponent, FormsModule, BdDataTableComponent, AsyncPipe]
 })
 export class UserGroupPermissionsComponent {
   private readonly groupCols = inject(UserGroupsColumnsService);

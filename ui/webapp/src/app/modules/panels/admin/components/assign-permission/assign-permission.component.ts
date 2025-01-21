@@ -6,12 +6,19 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { FormsModule } from '@angular/forms';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-user-assign-permission',
     templateUrl: './assign-permission.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormSelectComponent, BdButtonComponent, AsyncPipe]
 })
 export class AssignPermissionComponent implements OnInit, OnDestroy {
   private readonly authAdmin = inject(AuthAdminService);

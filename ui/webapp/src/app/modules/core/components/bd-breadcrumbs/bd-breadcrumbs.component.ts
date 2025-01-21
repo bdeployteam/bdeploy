@@ -6,11 +6,10 @@ export interface CrumbInfo {
 }
 
 @Component({
-  selector: 'app-bd-breadcrumbs',
-  templateUrl: './bd-breadcrumbs.component.html',
-  styleUrls: ['./bd-breadcrumbs.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+    selector: 'app-bd-breadcrumbs',
+    templateUrl: './bd-breadcrumbs.component.html',
+    styleUrls: ['./bd-breadcrumbs.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BdBreadcrumbsComponent {
   @Input() crumbs: CrumbInfo[];

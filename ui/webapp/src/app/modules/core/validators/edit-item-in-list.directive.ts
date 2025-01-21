@@ -16,8 +16,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: EditItemInListValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class EditItemInListValidatorDirective implements Validator {
   @Input() allowedValues: string[];

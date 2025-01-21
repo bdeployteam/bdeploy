@@ -1,22 +1,24 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Cleanup">
     <div class="flex-auto"></div>
-    <app-bd-button
-      *ngIf="cleanup.cleanup$ | async"
-      [collapsed]="false"
-      icon="clear"
-      text="Abort Cleanup"
-      (click)="cleanup.cancelCleanup()"
-    ></app-bd-button>
-    <app-bd-button
-      *ngIf="cleanup.cleanup$ | async as clean"
-      [collapsed]="false"
-      icon="cleaning_services"
-      [text]="(cleanup.performing$ | async) ? 'Performing...' : 'Perform (' + (cleanup.countdown$ | async) + 's.)'"
-      (click)="cleanup.performCleanup(clean)"
-      [loadingWhen$]="cleanup.performing$"
-      [disabled]="cleanup.performing$ | async"
-    ></app-bd-button>
+    @if (cleanup.cleanup$ | async) {
+      <app-bd-button
+        [collapsed]="false"
+        icon="clear"
+        text="Abort Cleanup"
+        (click)="cleanup.cancelCleanup()"
+      ></app-bd-button>
+    }
+    @if (cleanup.cleanup$ | async; as clean) {
+      <app-bd-button
+        [collapsed]="false"
+        icon="cleaning_services"
+        [text]="(cleanup.performing$ | async) ? 'Performing...' : 'Perform (' + (cleanup.countdown$ | async) + 's.)'"
+        (click)="cleanup.performCleanup(clean)"
+        [loadingWhen$]="cleanup.performing$"
+        [disabled]="cleanup.performing$ | async"
+      ></app-bd-button>
+    }
     <app-bd-button
       [collapsed]="false"
       color="primary"
@@ -29,18 +31,24 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">
-      <mat-tab-group dynamicHeight *ngIf="cleanup.cleanup$ | async as groups" animationDuration="0ms">
-        <mat-tab *ngFor="let group of groups">
-          <ng-template mat-tab-label>{{ group.name }}</ng-template>
-          <ng-template matTabContent>
-            <app-bd-data-table [records]="group.actions" [columns]="columns"></app-bd-data-table>
-          </ng-template>
-        </mat-tab>
-      </mat-tab-group>
+      @if (cleanup.cleanup$ | async; as groups) {
+        <mat-tab-group dynamicHeight animationDuration="0ms">
+          @for (group of groups; track group) {
+            <mat-tab>
+              <ng-template mat-tab-label>{{ group.name }}</ng-template>
+              <ng-template matTabContent>
+                <app-bd-data-table [records]="group.actions" [columns]="columns"></app-bd-data-table>
+              </ng-template>
+            </mat-tab>
+          }
+        </mat-tab-group>
+      }
 
-      <app-bd-no-data *ngIf="!(cleanup.cleanup$ | async)">
-        <p class="bd-hint-text">No actions to be performed.</p>
-      </app-bd-no-data>
+      @if (!(cleanup.cleanup$ | async)) {
+        <app-bd-no-data>
+          <p class="bd-hint-text">No actions to be performed.</p>
+        </app-bd-no-data>
+      }
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

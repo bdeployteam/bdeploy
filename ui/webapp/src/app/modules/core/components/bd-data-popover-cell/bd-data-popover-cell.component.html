@@ -1,16 +1,18 @@
-<div class="flex justify-start" *ngIf="column.data(record) as item">
-  <div
-    class="truncate"
-    [appBdPopup]="popup"
-    appBdPopupTrigger="hover"
-    [appBdPopupDelay]="500"
-    [appBdPopupPosition]="'above-right'"
-  >
-    {{ item }}
-    <ng-template #popup>
-      <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[400px]">
-        <p class="break-words">{{ item }}</p>
-      </mat-card>
-    </ng-template>
+@if (column.data(record); as item) {
+  <div class="flex justify-start">
+    <div
+      class="truncate"
+      [appBdPopup]="popup"
+      appBdPopupTrigger="hover"
+      [appBdPopupDelay]="500"
+      [appBdPopupPosition]="'above-right'"
+      >
+      {{ item }}
+      <ng-template #popup>
+        <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[400px]">
+          <p class="break-words">{{ item }}</p>
+        </mat-card>
+      </ng-template>
+    </div>
   </div>
-</div>
+}

@@ -9,11 +9,19 @@ import { ServersService } from '../../../servers/services/servers.service';
 import { HistoryColumnsService } from '../../services/history-columns.service';
 import { HistoryService } from '../../services/history.service';
 import { InstancesService } from '../../services/instances.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdServerSyncButtonComponent } from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-history',
     templateUrl: './history.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdServerSyncButtonComponent, MatDivider, BdButtonComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
   private readonly cfg = inject(ConfigService);

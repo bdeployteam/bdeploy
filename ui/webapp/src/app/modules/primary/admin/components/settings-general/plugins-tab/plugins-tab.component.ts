@@ -6,11 +6,14 @@ import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data
 import { PluginAdminService } from '../../../services/plugin-admin.service';
 import { PluginDeleteActionComponent } from './plugin-delete-action/plugin-delete-action.component';
 import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-action.component';
+import { BdLoadingOverlayComponent } from '../../../../../core/components/bd-loading-overlay/bd-loading-overlay.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-plugins-tab',
     templateUrl: './plugins-tab.component.html',
-    standalone: false
+    imports: [BdLoadingOverlayComponent, BdDataTableComponent, AsyncPipe]
 })
 export class PluginsTabComponent {
   protected readonly plugins = inject(PluginAdminService);

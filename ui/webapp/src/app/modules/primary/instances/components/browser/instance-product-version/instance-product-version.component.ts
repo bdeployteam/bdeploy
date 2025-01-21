@@ -2,12 +2,14 @@ import { Component, Input, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-instance-product-version',
     templateUrl: './instance-product-version.component.html',
     styleUrls: ['./instance-product-version.component.css'],
-    standalone: false
+    imports: [MatTooltip, AsyncPipe]
 })
 export class InstanceProductVersionComponent {
   private readonly products = inject(ProductsService);

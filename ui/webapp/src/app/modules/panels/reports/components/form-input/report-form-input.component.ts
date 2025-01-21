@@ -7,6 +7,11 @@ import {
   ReportRequestDto
 } from 'src/app/models/gen.dtos';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
 
 export interface ReportInputChange {
   key: string;
@@ -14,10 +19,10 @@ export interface ReportInputChange {
 }
 
 @Component({
-  selector: 'app-report-form-input',
-  templateUrl: './report-form-input.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+    selector: 'app-report-form-input',
+    templateUrl: './report-form-input.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [BdFormInputComponent, MatTooltip, FormsModule, BdFormToggleComponent, BdFormSelectComponent]
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
   protected readonly reports = inject(ReportsService);

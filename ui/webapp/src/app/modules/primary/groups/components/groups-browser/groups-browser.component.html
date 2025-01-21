@@ -22,15 +22,15 @@
       tooltip="below"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-panel-button
-      *ngIf="!isManaged; else managed"
-      icon="add"
-      text="Add Instance Group..."
-      [route]="['panels', 'groups', 'add']"
-      [disabled]="!isAddAllowed"
-      tooltip="below"
-    ></app-bd-panel-button>
-    <ng-template #managed>
+    @if (!isManaged) {
+      <app-bd-panel-button
+        icon="add"
+        text="Add Instance Group..."
+        [route]="['panels', 'groups', 'add']"
+        [disabled]="!isAddAllowed"
+        tooltip="below"
+      ></app-bd-panel-button>
+    } @else {
       <app-bd-panel-button
         icon="link"
         text="Link Instance Group..."
@@ -38,7 +38,7 @@
         [disabled]="!isAttachAllowed"
         tooltip="below"
       ></app-bd-panel-button>
-    </ng-template>
+    }
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
@@ -51,35 +51,35 @@
       [presetKey]="presetKeyValue"
       [grid]="isCardView"
       (recordClick)="onRecordClick($event)"
-    >
+      >
       <app-bd-no-data header="Welcome to BDeploy!">
         <p class="text-center">
           To get you started quickly, consider reading our
           <a rel="noreferrer" href="https://bdeploy.io/user/index.html#_getting_started" target="_blank"
             >documentation</a
-          >!
-        </p>
-        <ng-container *ngIf="isAddAllowed">
-          <p class="text-center">No instance groups have been created yet. Start by creating a new one.</p>
-          <app-bd-panel-button
-            icon="add"
-            text="Add Instance Group..."
-            [collapsed]="false"
-            [route]="['panels', 'groups', 'add']"
-          ></app-bd-panel-button>
-        </ng-container>
-        <ng-container *ngIf="isAttachAllowed">
-          <p class="text-center">
-            No instance groups have been linked yet. Start by linking one from a central server.
+            >!
           </p>
-          <app-bd-panel-button
-            icon="link"
-            text="Link Instance Group..."
-            [collapsed]="false"
-            [route]="['panels', 'servers', 'link', 'central']"
-          ></app-bd-panel-button>
-        </ng-container>
-      </app-bd-no-data>
-    </app-bd-data-display>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+          @if (isAddAllowed) {
+            <p class="text-center">No instance groups have been created yet. Start by creating a new one.</p>
+            <app-bd-panel-button
+              icon="add"
+              text="Add Instance Group..."
+              [collapsed]="false"
+              [route]="['panels', 'groups', 'add']"
+            ></app-bd-panel-button>
+          }
+          @if (isAttachAllowed) {
+            <p class="text-center">
+              No instance groups have been linked yet. Start by linking one from a central server.
+            </p>
+            <app-bd-panel-button
+              icon="link"
+              text="Link Instance Group..."
+              [collapsed]="false"
+              [route]="['panels', 'servers', 'link', 'central']"
+            ></app-bd-panel-button>
+          }
+        </app-bd-no-data>
+      </app-bd-data-display>
+    </app-bd-dialog-content>
+  </app-bd-dialog>

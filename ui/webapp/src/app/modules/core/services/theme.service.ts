@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 // keep in sync with app-theme.scss
@@ -16,9 +16,11 @@ THEME_DESC[Theme.DARK] = 'Dark Theme';
   providedIn: 'root',
 })
 export class ThemeService {
+  private readonly document = inject<Document>(DOCUMENT);
+
   activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject(Theme.DEFAULT);
 
-  constructor(@Inject(DOCUMENT) private readonly document: Document) {
+  constructor() {
     const themeName = localStorage.getItem('theme');
     if (!themeName || (themeName !== Theme.DARK && themeName !== Theme.DEFAULT)) {
       localStorage.setItem('theme', Theme.DEFAULT);

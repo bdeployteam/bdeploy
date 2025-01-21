@@ -2,112 +2,108 @@
   <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="singleProduct.product$ | async as prod">
-      <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
-        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
-        <div class="bd-secondary-text">ID:</div>
-        <div class="bd-secondary-text">
-          <app-bd-identifier [showCopyButton]="true" [id]="prod.product"></app-bd-identifier>
+    @if (singleProduct.product$ | async; as prod) {
+      <div class="flex flex-col gap-2.5">
+        <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
+          <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+          <div class="bd-secondary-text">ID:</div>
+          <div class="bd-secondary-text">
+            <app-bd-identifier [showCopyButton]="true" [id]="prod.product"></app-bd-identifier>
+          </div>
+          <mat-icon>badge</mat-icon>
+          <div>Name:</div>
+          <div>{{ prod.name }}</div>
+          <mat-icon>apps</mat-icon>
+          <div>Version:</div>
+          <div>{{ prod.key.tag }}</div>
+          <mat-icon>factory</mat-icon>
+          <div>Vendor:</div>
+          <div>{{ prod.vendor }}</div>
         </div>
-        <mat-icon>badge</mat-icon>
-        <div>Name:</div>
-        <div>{{ prod.name }}</div>
-        <mat-icon>apps</mat-icon>
-        <div>Version:</div>
-        <div>{{ prod.key.tag }}</div>
-        <mat-icon>factory</mat-icon>
-        <div>Vendor:</div>
-        <div>{{ prod.vendor }}</div>
-      </div>
-      <app-bd-expand-button [text]="'Used In'" icon="settings_system_daydream">
-        <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="instanceColumns">
-          <app-bd-no-data>
-            <div
-              *ngIf="singleProduct.usedInLoading$ | async; else notUsed"
-              class="flex justify-center items-center gap-2.5"
-            >
-              <mat-spinner [diameter]="24"></mat-spinner>
-              <div>Calculating...</div>
-            </div>
-            <ng-template #notUsed>
-              <div>This version is not used in any instance.</div>
-            </ng-template>
-          </app-bd-no-data>
-        </app-bd-data-display>
-      </app-bd-expand-button>
-      <ng-container *ngIf="singleProduct.product$ | async as prod">
-        <app-bd-expand-button [text]="'Labels'" icon="label">
-          <app-bd-data-display
-            [records]="singleProduct.labels$ | async"
-            [columns]="productActionColumns.defaultLabelsColumns"
-          >
+        <app-bd-expand-button [text]="'Used In'" icon="settings_system_daydream">
+          <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="instanceColumns">
             <app-bd-no-data>
-              <div>This product has no labels.</div>
+              @if (singleProduct.usedInLoading$ | async) {
+                <div
+                  class="flex justify-center items-center gap-2.5"
+                  >
+                  <mat-spinner [diameter]="24"></mat-spinner>
+                  <div>Calculating...</div>
+                </div>
+              } @else {
+                <div>This version is not used in any instance.</div>
+              }
             </app-bd-no-data>
           </app-bd-data-display>
         </app-bd-expand-button>
-
-        <app-bd-expand-button text="Application Templates" icon="bookmark_border">
-          <app-bd-data-display
-            [records]="prod.applicationTemplates"
-            [columns]="productActionColumns.defaultApplicationTemplatesColumns"
-          >
-            <app-bd-no-data>
-              <div>This product has no application templates.</div>
-            </app-bd-no-data>
-          </app-bd-data-display>
-        </app-bd-expand-button>
-
-        <app-bd-expand-button text="Instance Templates" icon="bookmarks">
-          <app-bd-data-display
-            [records]="productActionColumns.mapToAppTemplateColumnData(prod, doDownloadResponseFile)"
-            [columns]="productActionColumns.defaultInstanceTemplatesColumns"
-          >
-            <app-bd-no-data>
-              <div>This product has no instance templates.</div>
-            </app-bd-no-data>
-          </app-bd-data-display>
-        </app-bd-expand-button>
-
-        <app-bd-expand-button text="Plugins" icon="extension">
-          <app-bd-data-display
-            [records]="singleProductPlugins$ | async"
-            [columns]="productActionColumns.defaultPluginsColumns"
-          >
-            <app-bd-no-data>
-              <div>This product has no plugins.</div>
-            </app-bd-no-data>
-          </app-bd-data-display>
-        </app-bd-expand-button>
-
-        <app-bd-expand-button text="Dependencies" icon="lan">
-          <app-bd-data-display [records]="prod.references" [columns]="refColumns">
-            <app-bd-no-data>
-              <div>This product has no dependencies.</div>
-            </app-bd-no-data>
-          </app-bd-data-display>
-        </app-bd-expand-button>
-      </ng-container>
-
-      <app-bd-button
-        [collapsed]="false"
-        text="Download"
-        icon="cloud_download"
-        (click)="doDownload()"
-        [loadingWhen$]="preparingBHive$"
-        [disabled]="preparingBHive$ | async"
-      ></app-bd-button>
-      <app-bd-panel-button
-        icon="folder_special"
-        text="View Content"
-        [collapsed]="false"
-        [relative]="true"
-        [route]="['browse', 'product']"
-      ></app-bd-panel-button>
-      <app-bd-button
-        [collapsed]="false"
-        text="Create new Instance..."
-        icon="settings_system_daydream"
+        @if (singleProduct.product$ | async; as prod) {
+          <app-bd-expand-button [text]="'Labels'" icon="label">
+            <app-bd-data-display
+              [records]="singleProduct.labels$ | async"
+              [columns]="productActionColumns.defaultLabelsColumns"
+              >
+              <app-bd-no-data>
+                <div>This product has no labels.</div>
+              </app-bd-no-data>
+            </app-bd-data-display>
+          </app-bd-expand-button>
+          <app-bd-expand-button text="Application Templates" icon="bookmark_border">
+            <app-bd-data-display
+              [records]="prod.applicationTemplates"
+              [columns]="productActionColumns.defaultApplicationTemplatesColumns"
+              >
+              <app-bd-no-data>
+                <div>This product has no application templates.</div>
+              </app-bd-no-data>
+            </app-bd-data-display>
+          </app-bd-expand-button>
+          <app-bd-expand-button text="Instance Templates" icon="bookmarks">
+            <app-bd-data-display
+              [records]="productActionColumns.mapToAppTemplateColumnData(prod, doDownloadResponseFile)"
+              [columns]="productActionColumns.defaultInstanceTemplatesColumns"
+              >
+              <app-bd-no-data>
+                <div>This product has no instance templates.</div>
+              </app-bd-no-data>
+            </app-bd-data-display>
+          </app-bd-expand-button>
+          <app-bd-expand-button text="Plugins" icon="extension">
+            <app-bd-data-display
+              [records]="singleProductPlugins$ | async"
+              [columns]="productActionColumns.defaultPluginsColumns"
+              >
+              <app-bd-no-data>
+                <div>This product has no plugins.</div>
+              </app-bd-no-data>
+            </app-bd-data-display>
+          </app-bd-expand-button>
+          <app-bd-expand-button text="Dependencies" icon="lan">
+            <app-bd-data-display [records]="prod.references" [columns]="refColumns">
+              <app-bd-no-data>
+                <div>This product has no dependencies.</div>
+              </app-bd-no-data>
+            </app-bd-data-display>
+          </app-bd-expand-button>
+        }
+        <app-bd-button
+          [collapsed]="false"
+          text="Download"
+          icon="cloud_download"
+          (click)="doDownload()"
+          [loadingWhen$]="preparingBHive$"
+          [disabled]="preparingBHive$ | async"
+        ></app-bd-button>
+        <app-bd-panel-button
+          icon="folder_special"
+          text="View Content"
+          [collapsed]="false"
+          [relative]="true"
+          [route]="['browse', 'product']"
+        ></app-bd-panel-button>
+        <app-bd-button
+          [collapsed]="false"
+          text="Create new Instance..."
+          icon="settings_system_daydream"
         (click)="
           areas.navigateBoth(
             ['instances', 'browser', areas.groupContext$.value],
@@ -116,18 +112,19 @@
             { queryParams: { productKey: prod.key.name, productTag: prod.key.tag } }
           )
         "
-        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
-      ></app-bd-button>
-      <div matTooltip="{{deletionButtonDisabledReason$ | async}}" [matTooltipDisabled]="allowDeletion$ | async">
-        <app-bd-button
-          [collapsed]="false"
-          text="Delete"
-          icon="delete"
-          (click)="doDelete(prod)"
-          [loadingWhen$]="singleProduct.usedInLoading$"
-          [disabled]="!(allowDeletion$ | async)"
+          [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
         ></app-bd-button>
+        <div matTooltip="{{deletionButtonDisabledReason$ | async}}" [matTooltipDisabled]="allowDeletion$ | async">
+          <app-bd-button
+            [collapsed]="false"
+            text="Delete"
+            icon="delete"
+            (click)="doDelete(prod)"
+            [loadingWhen$]="singleProduct.usedInLoading$"
+            [disabled]="!(allowDeletion$ | async)"
+          ></app-bd-button>
+        </div>
       </div>
-    </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

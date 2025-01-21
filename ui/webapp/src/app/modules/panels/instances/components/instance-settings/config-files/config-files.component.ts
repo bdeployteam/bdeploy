@@ -12,10 +12,21 @@ import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-in
 import { ConfigFilesColumnsService } from '../../../services/config-files-columns.service';
 import { ConfigFile, ConfigFilesService } from '../../../services/config-files.service';
 
+import { FormsModule } from '@angular/forms';
+import { CfgFileNameValidatorDirective } from '../../../validators/cfg-file-name-validator.directive';
+import { BdFileDropComponent } from '../../../../../core/components/bd-file-drop/bd-file-drop.component';
+
+import { BdDialogToolbarComponent } from '../../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
-  selector: 'app-config-files',
-  templateUrl: './config-files.component.html',
-  standalone: false
+    selector: 'app-config-files',
+    templateUrl: './config-files.component.html',
+  imports: [BdFormInputComponent, FormsModule, CfgFileNameValidatorDirective, BdFileDropComponent, BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class ConfigFilesComponent implements OnInit, OnDestroy {
   protected readonly cfgFiles = inject(ConfigFilesService);

@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { combineLatest, debounceTime, Observable, of, Subscription, tap } from 'rxjs';
 import {
@@ -17,6 +17,19 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { MatCard } from '@angular/material/card';
+
+
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { BdFormSelectComponent } from '../../../../core/components/bd-form-select/bd-form-select.component';
+import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 const GROUP_TEMPLATE = {
   name: '',
@@ -27,9 +40,9 @@ const GROUP_TEMPLATE = {
 };
 
 @Component({
-  selector: 'app-add-control-group',
-  templateUrl: './add-control-group.component.html',
-  standalone: false
+    selector: 'app-add-control-group',
+    templateUrl: './add-control-group.component.html',
+  imports: [MatCard, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdNotificationCardComponent, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, BdPopupDirective, BdButtonComponent, AsyncPipe]
 })
 export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly areas = inject(NavAreasService);

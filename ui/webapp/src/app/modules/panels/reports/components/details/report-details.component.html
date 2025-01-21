@@ -2,14 +2,14 @@
   <app-bd-dialog-toolbar header="Report Details" [panel]="true"> </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <ng-container *ngIf="reports.generatedReport$ | async as generated">
+    @if (reports.generatedReport$ | async; as generated) {
       <div>Generated at <strong>{{ generated.generatedAt }}</strong></div>
       <div class="p-5 grid grid-cols-[120px_auto] gap-2.5 items-center">
-        <ng-container *ngFor="let param of (reports.current$ | async).parameters">
+        @for (param of (reports.current$ | async).parameters; track param) {
           <div>{{ param.label }}:</div>
           <div>{{ generated.requestParams[param.key] || '-' }}</div>
-        </ng-container>
+        }
       </div>
-    </ng-container>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

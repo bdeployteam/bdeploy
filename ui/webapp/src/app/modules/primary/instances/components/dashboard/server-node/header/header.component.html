@@ -5,92 +5,109 @@
     <!-- Outside of the graph using percent values later on without distortion. -->
     <!-- Each element must use vector-effect="non-scaling-stroke" to keep the strokes from scaling. -->
     <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <g *ngIf="hasVisiblePoint">
-        <!-- The actual curve -->
-        <path
-          *ngIf="!!pathInfo"
-          [attr.d]="pathInfo"
-          class="local-graph-curve"
-          fill="none"
-          vector-effect="non-scaling-stroke"
-        ></path>
-
-        <!-- The "end marker" in case there are not a full 15 data points. -->
-        <g *ngIf="endMarker">
-          <line
-            [attr.x1]="pathPoints[pathPoints.length - 1].x"
-            x2="0"
-            [attr.y1]="pathPoints[pathPoints.length - 1].y"
-            [attr.y2]="pathPoints[pathPoints.length - 1].y"
-            class="local-graph-end"
-            stroke-dasharray="4 2"
-            vector-effect="non-scaling-stroke"
-          ></line>
+      @if (hasVisiblePoint) {
+        <g>
+          <!-- The actual curve -->
+          @if (!!pathInfo) {
+            <path
+              [attr.d]="pathInfo"
+              class="local-graph-curve"
+              fill="none"
+              vector-effect="non-scaling-stroke"
+            ></path>
+          }
+          <!-- The "end marker" in case there are not a full 15 data points. -->
+          @if (endMarker) {
+            <g>
+              <line
+                [attr.x1]="pathPoints[pathPoints.length - 1].x"
+                x2="0"
+                [attr.y1]="pathPoints[pathPoints.length - 1].y"
+                [attr.y2]="pathPoints[pathPoints.length - 1].y"
+                class="local-graph-end"
+                stroke-dasharray="4 2"
+                vector-effect="non-scaling-stroke"
+              ></line>
+            </g>
+          }
         </g>
-      </g>
+      }
     </svg>
 
     <!-- These do *not* use the scaled viewBox, to be able to render text without distortion. -->
-    <g *ngIf="!!maxLabel && !!maxValue && !!this.curve">
-      <line
-        [attr.y1]="getMaxLineY()"
-        x1="0"
-        [attr.y2]="getMaxLineY()"
-        x2="100%"
-        class="local-max-line"
-        stroke-dasharray="4 2"
-      ></line>
-      <text
-        text-anchor="end"
-        [attr.y]="getMaxLineY() + 16"
-        class="local-max-label"
-        [ngClass]="getMaxLineY() > 45 || !hasAction ? [] : 'local-max-label-padded'"
-      >
-        <tspan x="100%" dy="0">{{ maxLabel }}</tspan>
-      </text>
-    </g>
-
-    <g *ngIf="hasVisiblePoint">
-      <!-- Draw points for each data point -->
-      <circle
-        *ngFor="let point of pathPoints; let i = index"
-        [attr.cx]="point.x + '%'"
-        [attr.cy]="point.y + '%'"
-        r="3"
-        class="local-graph-point"
-        [matTooltip]="curveLabel + ': ' + this.formatter(this.curve[i])"
-        [matTooltipPosition]="point.y > 50 ? 'above' : 'below'"
-        [matTooltipShowDelay]="300"
-      ></circle>
-    </g>
-
-    <g *ngIf="!!events?.length">
-      <!-- Events drawn as hoverable line per event -->
-      <g *ngFor="let event of events">
+    @if (!!maxLabel && !!maxValue && !!this.curve) {
+      <g>
         <line
-          *ngIf="getEventX(event) as X"
-          y1="-5"
-          y2="110"
-          [attr.x1]="X + '%'"
-          [attr.x2]="X + '%'"
-          [ngClass]="['local-event', 'local-event-' + event.type]"
-          [matTooltip]="event.description + ' @ ' + (event.time | date: 'dd.MM HH:mm:ss')"
-          [matTooltipPosition]="X > 50 ? 'left' : 'right'"
-          [matTooltipShowDelay]="300"
-          vector-effect="non-scaling-stroke"
+          [attr.y1]="getMaxLineY()"
+          x1="0"
+          [attr.y2]="getMaxLineY()"
+          x2="100%"
+          class="local-max-line"
+          stroke-dasharray="4 2"
         ></line>
+        <text
+          text-anchor="end"
+          [attr.y]="getMaxLineY() + 16"
+          class="local-max-label"
+          [ngClass]="getMaxLineY() > 45 || !hasAction ? [] : 'local-max-label-padded'"
+          >
+          <tspan x="100%" dy="0">{{ maxLabel }}</tspan>
+        </text>
       </g>
-    </g>
+    }
+
+    @if (hasVisiblePoint) {
+      <g>
+        <!-- Draw points for each data point -->
+        @for (point of pathPoints; track point; let i = $index) {
+          <circle
+            [attr.cx]="point.x + '%'"
+            [attr.cy]="point.y + '%'"
+            r="3"
+            class="local-graph-point"
+            [matTooltip]="curveLabel + ': ' + this.formatter(this.curve[i])"
+            [matTooltipPosition]="point.y > 50 ? 'above' : 'below'"
+            [matTooltipShowDelay]="300"
+          ></circle>
+        }
+      </g>
+    }
+
+    @if (!!events?.length) {
+      <g>
+        <!-- Events drawn as hoverable line per event -->
+        @for (event of events; track event) {
+          <g>
+            @if (getEventX(event); as X) {
+              <line
+                y1="-5"
+                y2="110"
+                [attr.x1]="X + '%'"
+                [attr.x2]="X + '%'"
+                [ngClass]="['local-event', 'local-event-' + event.type]"
+                [matTooltip]="event.description + ' @ ' + (event.time | date: 'dd.MM HH:mm:ss')"
+                [matTooltipPosition]="X > 50 ? 'left' : 'right'"
+                [matTooltipShowDelay]="300"
+                vector-effect="non-scaling-stroke"
+              ></line>
+            }
+          </g>
+        }
+      </g>
+    }
   </svg>
-  <div
-    class="local-no-data-overlay bd-description-text flex flex-col justify-center items-center"
-    *ngIf="!hasVisiblePoint"
-  >
-    <div><strong>No data available.</strong></div>
-    <div *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)">
-      The server is not synchronized. Please synchronize first.
+  @if (!hasVisiblePoint) {
+    <div
+      class="local-no-data-overlay bd-description-text flex flex-col justify-center items-center"
+      >
+      <div><strong>No data available.</strong></div>
+      @if (!(servers.isCurrentInstanceSynchronized$ | async)) {
+        <div>
+          The server is not synchronized. Please synchronize first.
+        </div>
+      }
     </div>
-  </div>
+  }
   <div class="local-content-sizing flex flex-col">
     <ng-content></ng-content>
   </div>

@@ -1,8 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, HostBinding, OnInit, inject } from '@angular/core';
+import { Component, HostBinding, inject, OnInit } from '@angular/core';
 import { routerAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
     selector: 'app-main-nav-flyin',
@@ -24,7 +25,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
             transition('* => *', animate('0.2s ease')),
         ]),
     ],
-    standalone: false
+    imports: [RouterOutlet],
 })
 export class MainNavFlyinComponent implements OnInit {
   private readonly areas = inject(NavAreasService);

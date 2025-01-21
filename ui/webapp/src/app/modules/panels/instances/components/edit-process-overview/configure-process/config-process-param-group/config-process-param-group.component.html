@@ -33,237 +33,261 @@
   </div>
 </ng-template>
 
-<div class="bd-default-padding flex flex-col gap-2.5" *ngIf="process && app">
-  <!-- Single parameter group -->
-  <mat-accordion [multi]="true" class="local-headers-align">
-    <ng-container *ngFor="let group of groups$ | async; let i = index">
-      <mat-expansion-panel #panel *ngIf="hasGroupSearchMatch(group)">
-        <mat-expansion-panel-header>
-          <mat-panel-title> {{ group.name }} </mat-panel-title>
-          <mat-panel-description *ngIf="!(narrow$ | async)">
-            <span *ngIf="!search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
-            <span *ngIf="!!search">Configured or optional parameters match search.</span>
-            <span
-              *ngIf="(groupForm.invalid || hasMissingRequired(group) || hasExistingForbidden(group)) && !panel.expanded"
-              class="bd-warning-text text-xs"
-              >Validation Failed</span
-            >
-            <div *ngIf="panel.expanded" class="flex gap-1">
-              <app-bd-button
-                *ngIf="group.isCustom"
-                text="Copy Selected"
-                icon="content_copy"
-                (click)="doCopy()"
-                [disabled]="!checked?.length || !group.isSelectMode"
-                appClickStopPropagation
-              ></app-bd-button>
-              <app-bd-button
-                *ngIf="group.isCustom"
-                text="Paste"
-                icon="content_paste_go"
-                [disabled]="!clipboardParams?.length"
-                (click)="doPaste()"
-                appClickStopPropagation
-              ></app-bd-button>
-              <app-bd-button
-                *ngIf="group.isCustom"
-                text="Add Custom Parameter"
-                icon="add"
-                (click)="onAddCustomParameter(addCustom)"
-                appClickStopPropagation
-              ></app-bd-button>
-              <app-bd-button
-                [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
-                [icon]="group.isSelectMode ? 'check' : 'tune'"
-                tooltip="below"
-                [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !hasExistingForbidden(group) && !group.isSelectMode"
-                [isToggle]="true"
-                [(toggle)]="group.isSelectMode"
-                appClickStopPropagation
-              ></app-bd-button>
-            </div>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <form #groupForm="ngForm" class="flex flex-col">
-          <div *ngIf="group.isSelectMode" class="flex justify-start items-center pt-5 self-center bd-hint-text">
-            <span class="local-edit-desc">
-              Use the <mat-icon>add</mat-icon> and <mat-icon>delete</mat-icon> buttons in front of each optional
-              parameter to add or remove them. Mandatory parameters cannot be removed. When you are done, press the
-              <mat-icon>check</mat-icon> button to confirm.
-            </span>
-          </div>
-          <span
-            class="bd-hint-text bd-warning-text"
-            *ngIf="hasMissingRequired(group) && !group.isSelectMode && groupForm.valid"
-          >
-            <div class="flex justify-center items-center gap-1">
-              Use the <mat-icon>tune</mat-icon> button to add missing mandatory parameter(s).
-            </div>
-          </span>
-          <span
-            class="bd-hint-text bd-warning-text"
-            *ngIf="hasExistingForbidden(group) && !group.isSelectMode && groupForm.valid"
-          >
-            <div class="flex justify-center items-center gap-1">
-              Use the <mat-icon>tune</mat-icon> button to remove forbidden mandatory parameter(s).
-            </div>
-          </span>
-          <div
-            class="pt-5 grid grid-cols-1 gap-x-2.5 gap-y-1"
-            [ngClass]="getValueCount(group) <= 1 && !group.isSelectMode ? [] : ['md:grid-cols-2']"
-          >
-            <!-- Empty group hint -->
-            <div *ngIf="getValueCount(group) === 0 && !group.isSelectMode" class="bd-hint-text">
-              No parameters are currently configured in this group.
-            </div>
-
-            <!-- Single parameter -->
-            <ng-container *ngFor="let p of sortPairs(group.pairs)">
-              <div
-                [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
-                class="flex"
-                *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
-              >
-                <ng-template #popup>
-                  <app-param-desc-card [descriptor]="p.descriptor"></app-param-desc-card>
-                </ng-template>
-
-                <!-- Checkbox for select mode... -->
+@if (process && app) {
+  <div class="bd-default-padding flex flex-col gap-2.5">
+    <!-- Single parameter group -->
+    <mat-accordion [multi]="true" class="local-headers-align">
+      @for (group of groups$ | async; track group; let i = $index) {
+        @if (hasGroupSearchMatch(group)) {
+          <mat-expansion-panel #panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title> {{ group.name }} </mat-panel-title>
+              @if (!(narrow$ | async)) {
+                <mat-panel-description>
+                  @if (!search) {
+                    <span>{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
+                  }
+                  @if (!!search) {
+                    <span>Configured or optional parameters match search.</span>
+                  }
+                  @if ((groupForm.invalid || hasMissingRequired(group) || hasExistingForbidden(group)) && !panel.expanded) {
+                    <span
+                      class="bd-warning-text text-xs"
+                      >Validation Failed</span
+                      >
+                    }
+                    @if (panel.expanded) {
+                      <div class="flex gap-1">
+                        @if (group.isCustom) {
+                          <app-bd-button
+                            text="Copy Selected"
+                            icon="content_copy"
+                            (click)="doCopy()"
+                            [disabled]="!checked?.length || !group.isSelectMode"
+                            appClickStopPropagation
+                          ></app-bd-button>
+                        }
+                        @if (group.isCustom) {
+                          <app-bd-button
+                            text="Paste"
+                            icon="content_paste_go"
+                            [disabled]="!clipboardParams?.length"
+                            (click)="doPaste()"
+                            appClickStopPropagation
+                          ></app-bd-button>
+                        }
+                        @if (group.isCustom) {
+                          <app-bd-button
+                            text="Add Custom Parameter"
+                            icon="add"
+                            (click)="onAddCustomParameter(addCustom)"
+                            appClickStopPropagation
+                          ></app-bd-button>
+                        }
+                        <app-bd-button
+                          [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
+                          [icon]="group.isSelectMode ? 'check' : 'tune'"
+                          tooltip="below"
+                          [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !hasExistingForbidden(group) && !group.isSelectMode"
+                          [isToggle]="true"
+                          [(toggle)]="group.isSelectMode"
+                          appClickStopPropagation
+                        ></app-bd-button>
+                      </div>
+                    }
+                  </mat-panel-description>
+                }
+              </mat-expansion-panel-header>
+              <form #groupForm="ngForm" class="flex flex-col">
+                @if (group.isSelectMode) {
+                  <div class="flex justify-start items-center pt-5 self-center bd-hint-text">
+                    <span class="local-edit-desc">
+                      Use the <mat-icon>add</mat-icon> and <mat-icon>delete</mat-icon> buttons in front of each optional
+                      parameter to add or remove them. Mandatory parameters cannot be removed. When you are done, press the
+                      <mat-icon>check</mat-icon> button to confirm.
+                    </span>
+                  </div>
+                }
+                @if (hasMissingRequired(group) && !group.isSelectMode && groupForm.valid) {
+                  <span
+                    class="bd-hint-text bd-warning-text"
+                    >
+                    <div class="flex justify-center items-center gap-1">
+                      Use the <mat-icon>tune</mat-icon> button to add missing mandatory parameter(s).
+                    </div>
+                  </span>
+                }
+                @if (hasExistingForbidden(group) && !group.isSelectMode && groupForm.valid) {
+                  <span
+                    class="bd-hint-text bd-warning-text"
+                    >
+                    <div class="flex justify-center items-center gap-1">
+                      Use the <mat-icon>tune</mat-icon> button to remove forbidden mandatory parameter(s).
+                    </div>
+                  </span>
+                }
                 <div
-                  class="flex flex-col justify-center items-center"
-                  *ngIf="group.isSelectMode"
-                  [class.local-select-wrapper]="group.isCustom"
-                  [class.local-toggle-wrapper]="!group.isCustom"
-                >
-                  <mat-checkbox
-                    *ngIf="group.isCustom"
-                    [checked]="isChecked(p)"
-                    (change)="toggleCheck(p)"
-                    appClickStopPropagation
-                    class="truncate local-table-checkbox"
-                  ></mat-checkbox>
-                  <mat-icon
-                    *ngFor="let canToggle of [canAddRemove(p) | async]"
-                    (click)="!canToggle ? null : doAddRemoveParameter(group, p)"
-                    [class.bd-disabled-text]="!canToggle"
-                    [matTooltip]="!canToggle ? 'Parameter cannot be added or removed, see description.' : 'Click to add or remove this optional parameter'"
-                    [matTooltipShowDelay]="500"
-                    matRipple
-                    class="local-add-remove cursor-pointer"
-                    [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value && edit.meetsConditionOnGiven(p.descriptor, app.descriptor.startCommand, process)"
-                    >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add' }}</mat-icon
+                  class="pt-5 grid grid-cols-1 gap-x-2.5 gap-y-1"
+                  [ngClass]="getValueCount(group) <= 1 && !group.isSelectMode ? [] : ['md:grid-cols-2']"
                   >
+                  <!-- Empty group hint -->
+                  @if (getValueCount(group) === 0 && !group.isSelectMode) {
+                    <div class="bd-hint-text">
+                      No parameters are currently configured in this group.
+                    </div>
+                  }
+                  <!-- Single parameter -->
+                  @for (p of sortPairs(group.pairs); track p) {
+                    @if ((!!p.value || group.isSelectMode) && hasPairSearchMatch(p)) {
+                      <div
+                        [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
+                        class="flex"
+                        >
+                        <ng-template #popup>
+                          <app-param-desc-card [descriptor]="p.descriptor"></app-param-desc-card>
+                        </ng-template>
+                        <!-- Checkbox for select mode... -->
+                        @if (group.isSelectMode) {
+                          <div
+                            class="flex flex-col justify-center items-center"
+                            [class.local-select-wrapper]="group.isCustom"
+                            [class.local-toggle-wrapper]="!group.isCustom"
+                            >
+                            @if (group.isCustom) {
+                              <mat-checkbox
+                                [checked]="isChecked(p)"
+                                (change)="toggleCheck(p)"
+                                appClickStopPropagation
+                                class="truncate local-table-checkbox"
+                              ></mat-checkbox>
+                            }
+                            @for (canToggle of [canAddRemove(p) | async]; track canToggle) {
+                              <mat-icon
+                                (click)="!canToggle ? null : doAddRemoveParameter(group, p)"
+                                [class.bd-disabled-text]="!canToggle"
+                                [matTooltip]="!canToggle ? 'Parameter cannot be added or removed, see description.' : 'Click to add or remove this optional parameter'"
+                                [matTooltipShowDelay]="500"
+                                matRipple
+                                class="local-add-remove cursor-pointer"
+                                [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value && edit.meetsConditionOnGiven(p.descriptor, app.descriptor.startCommand, process)"
+                                >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add' }}</mat-icon
+                                >
+                              }
+                            </div>
+                          }
+                          <ng-template #actions>
+                            @if (!group.isSelectMode) {
+                              <!-- hidden input so that pinning is part of the form (validation, enablement, etc.) -->
+                              <input
+                                #pin
+                                [name]="'pin-' + (p.value ? p.value.id : p.descriptor.id)"
+                                type="checkbox"
+                                [(ngModel)]="p.value.pinned"
+                                class="hidden"
+                                />
+                              <mat-icon
+                                class="local-hover-button cursor-pointer"
+                                [class.local-pin-inactive]="!p.value.pinned"
+                                [class.local-pin-active]="p.value.pinned"
+                                matTooltip="Click to pin the parameter to the process details panel."
+                                [matTooltipShowDelay]="500"
+                                (click)="doTogglePin(p)"
+                                appClickStopPropagation
+                                >push_pin</mat-icon
+                                >
+                                @if (group.isCustom) {
+                                  <mat-icon
+                                    class="local-hover-button cursor-pointer"
+                                    matTooltip="Click to edit the parameter"
+                                    [matTooltipShowDelay]="500"
+                                    (click)="onEditCustomParameter(p, addCustom)"
+                                    appClickStopPropagation
+                                    >edit</mat-icon
+                                    >
+                                  }
+                                }
+                                @if (p.descriptor?.global) {
+                                  <mat-icon
+                                    class="bd-secondary-text"
+                                    matTooltip="Global parameters are the same on all processes."
+                                    [matTooltipShowDelay]="500"
+                                    >public</mat-icon
+                                    >
+                                  }
+                                </ng-template>
+                                <!-- editor for the linked value, including custom editor plugins, etc. -->
+                                <app-bd-value-editor
+                                  [label]="!!p.descriptor ? p.descriptor.name : p.value.id"
+                                  [name]="p.value ? p.value.id : p.descriptor.id"
+                                  [ngModel]="p.value?.value"
+                                  (ngModelChange)="doChangeParam(p, $event)"
+                                  [defaultValue]="p.descriptor?.defaultValue"
+                                  errorDisplay="immediate"
+                                  [required]="p.descriptor?.mandatory"
+                                  [appBdPopup]="popup"
+                                  appBdPopupTrigger="hover"
+                                  [appBdPopupDelay]="1000"
+                                  appBdPopupPosition="above-right"
+                                  [disabled]="group.isSelectMode || p.descriptor?.fixed"
+                                  [editorDisabled]="!p.editorEnabled"
+                                  [suggested]="p.descriptor?.suggestedValues"
+                                  class="local-form-input flex-auto"
+                                  [process]="process"
+                                  [instance]="instance$ | async"
+                                  [system]="system$ | async"
+                                  [applications]="instances.stateApplications$ | async"
+                                  [type]="p.descriptor?.type"
+                                  [completionPrefixes]="completionPrefixes"
+                                  [completions]="completions"
+                                  [customEditor]="p.descriptor?.customEditor"
+                                  (customEditorLoaded)="doSetCustomEditorState(p, $event)"
+                                  [product]="(edit.product$ | async)?.key"
+                                  [group]="(groups.current$ | async)?.name"
+                                  [appServerIssuesValidator]="p.value ? p.value.id : p.descriptor.id"
+                                  [actions]="actions"
+                                  [validateRegex]="p.descriptor?.validateRegex"
+                                  >
+                                </app-bd-value-editor>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </form>
+                    </mat-expansion-panel>
+                  }
+                }
+              </mat-accordion>
+              <!-- CLI Preview -->
+              <mat-divider></mat-divider>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Command Line Preview
+                    <mat-button-toggle-group
+                      class="local-toggle-group ml-2"
+                      [value]="expandPreview ? '1' : '2'"
+                      (change)="toggleExpandPreview($event)"
+                      appClickStopPropagation
+                      >
+                      <mat-button-toggle value="1" matTooltip="Expand linked expressions" matTooltipShowDelay="1000">
+                        <mat-icon>visibility</mat-icon></mat-button-toggle
+                        >
+                        <mat-button-toggle value="2" matTooltip="Show linked expresssions" matTooltipShowDelay="1000"
+                          ><mat-icon>data_object</mat-icon></mat-button-toggle
+                          >
+                        </mat-button-toggle-group>
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="pt-5">
+                      @if (previewProcess$ | async; as process) {
+                        <app-history-process-config
+                          [baseConfig]="process"
+                          [baseDescriptor]="(edit.application$ | async).descriptor"
+                          [compareConfig]="process"
+                          [onlyCommand]="true"
+                        ></app-history-process-config>
+                      }
+                    </div>
+                  </mat-expansion-panel>
                 </div>
-
-                <ng-template #actions>
-                  <ng-container *ngIf="!group.isSelectMode">
-                    <!-- hidden input so that pinning is part of the form (validation, enablement, etc.) -->
-                    <input
-                      #pin
-                      [name]="'pin-' + (p.value ? p.value.id : p.descriptor.id)"
-                      type="checkbox"
-                      [(ngModel)]="p.value.pinned"
-                      class="hidden"
-                    />
-                    <mat-icon
-                      class="local-hover-button cursor-pointer"
-                      [class.local-pin-inactive]="!p.value.pinned"
-                      [class.local-pin-active]="p.value.pinned"
-                      matTooltip="Click to pin the parameter to the process details panel."
-                      [matTooltipShowDelay]="500"
-                      (click)="doTogglePin(p)"
-                      appClickStopPropagation
-                      >push_pin</mat-icon
-                    >
-                    <mat-icon
-                      *ngIf="group.isCustom"
-                      class="local-hover-button cursor-pointer"
-                      matTooltip="Click to edit the parameter"
-                      [matTooltipShowDelay]="500"
-                      (click)="onEditCustomParameter(p, addCustom)"
-                      appClickStopPropagation
-                      >edit</mat-icon
-                    >
-                  </ng-container>
-                  <mat-icon
-                    *ngIf="p.descriptor?.global"
-                    class="bd-secondary-text"
-                    matTooltip="Global parameters are the same on all processes."
-                    [matTooltipShowDelay]="500"
-                    >public</mat-icon
-                  >
-                </ng-template>
-
-                <!-- editor for the linked value, including custom editor plugins, etc. -->
-                <app-bd-value-editor
-                  [label]="!!p.descriptor ? p.descriptor.name : p.value.id"
-                  [name]="p.value ? p.value.id : p.descriptor.id"
-                  [ngModel]="p.value?.value"
-                  (ngModelChange)="doChangeParam(p, $event)"
-                  [defaultValue]="p.descriptor?.defaultValue"
-                  errorDisplay="immediate"
-                  [required]="p.descriptor?.mandatory"
-                  [appBdPopup]="popup"
-                  appBdPopupTrigger="hover"
-                  [appBdPopupDelay]="1000"
-                  appBdPopupPosition="above-right"
-                  [disabled]="group.isSelectMode || p.descriptor?.fixed"
-                  [editorDisabled]="!p.editorEnabled"
-                  [suggested]="p.descriptor?.suggestedValues"
-                  class="local-form-input flex-auto"
-                  [process]="process"
-                  [instance]="instance$ | async"
-                  [system]="system$ | async"
-                  [applications]="instances.stateApplications$ | async"
-                  [type]="p.descriptor?.type"
-                  [completionPrefixes]="completionPrefixes"
-                  [completions]="completions"
-                  [customEditor]="p.descriptor?.customEditor"
-                  (customEditorLoaded)="doSetCustomEditorState(p, $event)"
-                  [product]="(edit.product$ | async)?.key"
-                  [group]="(groups.current$ | async)?.name"
-                  [appServerIssuesValidator]="p.value ? p.value.id : p.descriptor.id"
-                  [actions]="actions"
-                  [validateRegex]="p.descriptor?.validateRegex"
-                >
-                </app-bd-value-editor>
-              </div>
-            </ng-container>
-          </div>
-        </form>
-      </mat-expansion-panel>
-    </ng-container>
-  </mat-accordion>
-
-  <!-- CLI Preview -->
-  <mat-divider></mat-divider>
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Command Line Preview
-        <mat-button-toggle-group
-          class="local-toggle-group ml-2"
-          [value]="expandPreview ? '1' : '2'"
-          (change)="toggleExpandPreview($event)"
-          appClickStopPropagation
-        >
-          <mat-button-toggle value="1" matTooltip="Expand linked expressions" matTooltipShowDelay="1000">
-            <mat-icon>visibility</mat-icon></mat-button-toggle
-          >
-          <mat-button-toggle value="2" matTooltip="Show linked expresssions" matTooltipShowDelay="1000"
-            ><mat-icon>data_object</mat-icon></mat-button-toggle
-          >
-        </mat-button-toggle-group>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <div class="pt-5">
-      <app-history-process-config
-        *ngIf="previewProcess$ | async as process"
-        [baseConfig]="process"
-        [baseDescriptor]="(edit.application$ | async).descriptor"
-        [compareConfig]="process"
-        [onlyCommand]="true"
-      ></app-history-process-config>
-    </div>
-  </mat-expansion-panel>
-</div>
+              }

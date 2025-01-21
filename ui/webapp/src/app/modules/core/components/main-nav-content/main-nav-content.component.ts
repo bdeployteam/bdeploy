@@ -39,8 +39,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
             })),
             transition('* => *', animate('0.2s ease')),
         ]),
-    ],
-    standalone: false
+    ]
 })
 export class MainNavContentComponent implements OnInit {
   private readonly media = inject(BreakpointObserver);

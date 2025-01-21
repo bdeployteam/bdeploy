@@ -8,12 +8,18 @@ import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/servic
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { MatDivider } from '@angular/material/divider';
+import { MatTooltip } from '@angular/material/tooltip';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 
 @Component({
-  selector: 'app-process-ui-inline',
-  templateUrl: './process-ui-inline.component.html',
-  styleUrls: ['./process-ui-inline.component.css'],
-  standalone: false
+    selector: 'app-process-ui-inline',
+    templateUrl: './process-ui-inline.component.html',
+    styleUrls: ['./process-ui-inline.component.css'],
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, MatTooltip, BdDialogContentComponent]
 })
 export class ProcessUiInlineComponent implements OnInit, OnDestroy {
   private readonly clients = inject(ClientsService);

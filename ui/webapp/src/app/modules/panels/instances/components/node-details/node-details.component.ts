@@ -4,11 +4,17 @@ import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { InstanceNodeConfigurationDto, MinionStatusDto } from 'src/app/models/gen.dtos';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { NodeHeaderComponent } from '../../../../primary/instances/components/dashboard/server-node/header/header.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-node-details',
     templateUrl: './node-details.component.html',
-    standalone: false
+    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, NodeHeaderComponent, AsyncPipe, DatePipe]
 })
 export class NodeDetailsComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);

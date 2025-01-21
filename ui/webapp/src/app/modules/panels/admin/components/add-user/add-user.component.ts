@@ -1,16 +1,25 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
+import { IdentifierValidator } from '../../../../core/validators/identifier.directive';
+import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
+import { PasswordVerificationValidator } from '../../../../core/validators/password-verification.directive';
+import { PasswordStrengthMeterComponent } from 'angular-password-strength-meter';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+
 @Component({
     selector: 'app-add-user',
     templateUrl: './add-user.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, IdentifierValidator, TrimmedValidator, PasswordVerificationValidator, PasswordStrengthMeterComponent, BdButtonComponent]
 })
 export class AddUserComponent implements OnInit, OnDestroy {
   private readonly authAdmin = inject(AuthAdminService);

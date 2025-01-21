@@ -18,8 +18,7 @@ bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
             useExisting: VariableServerValidatorDirective,
             multi: true,
         },
-    ],
-    standalone: false
+    ]
 })
 export class VariableServerValidatorDirective implements Validator {
   validate(control: AbstractControl): ValidationErrors | null {

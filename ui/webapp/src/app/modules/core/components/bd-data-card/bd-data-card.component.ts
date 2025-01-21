@@ -12,12 +12,20 @@ import {
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { BdDataComponentCellComponent } from '../bd-data-component-cell/bd-data-component-cell.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
+import { MatCard } from '@angular/material/card';
+import { RouterLinkActive, RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-bd-data-card',
-  templateUrl: './bd-data-card.component.html',
-  styleUrls: ['./bd-data-card.component.css'],
-  standalone: false
+    selector: 'app-bd-data-card',
+    templateUrl: './bd-data-card.component.html',
+    styleUrls: ['./bd-data-card.component.css'],
+    imports: [NgClass, BdDataComponentCellComponent, MatTooltip, MatIcon, NgTemplateOutlet, BdButtonComponent, ClickStopPropagationDirective, MatCard, RouterLinkActive, RouterLink]
 })
 export class BdDataCardComponent<T> implements OnInit, OnChanges {
   private readonly sanitizer = inject(DomSanitizer);

@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import {
@@ -19,7 +19,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatSort, Sort, SortDirection } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection, MatSortHeader } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject, debounceTime, Observable, of, Subject, Subscription } from 'rxjs';
@@ -34,6 +34,15 @@ import {
   UNMATCHED_GROUP
 } from 'src/app/models/data';
 import { BdSearchable, SearchService } from '../../services/search.service';
+import { MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatFooterRowDef, MatFooterRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatFooterCellDef, MatFooterCell, MatCellDef, MatCell } from '@angular/material/table';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { BdDataComponentCellComponent } from '../bd-data-component-cell/bd-data-component-cell.component';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 // member ordering due to default implementation for callbacks.
 // tslint:disable: member-ordering
@@ -77,12 +86,12 @@ const MAX_ROWS_PER_GROUP = 500;
  *  * Filtering (Searching, BdSearchable) with automatic SearchService registration
  */
 @Component({
-  selector: 'app-bd-data-table',
-  templateUrl: './bd-data-table.component.html',
-  styleUrls: ['./bd-data-table.component.css'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+    selector: 'app-bd-data-table',
+    templateUrl: './bd-data-table.component.html',
+    styleUrls: ['./bd-data-table.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatTable, MatSort, CdkDropList, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, CdkDrag, RouterLink, RouterLinkActive, MatNoDataRow, MatFooterRowDef, MatFooterRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatTooltip, MatCheckbox, ClickStopPropagationDirective, MatFooterCellDef, MatFooterCell, MatCellDef, MatCell, NgClass, MatIconButton, MatIcon, CdkDragHandle, BdDataComponentCellComponent, BdButtonComponent, AsyncPipe]
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
   private readonly searchService = inject(SearchService);

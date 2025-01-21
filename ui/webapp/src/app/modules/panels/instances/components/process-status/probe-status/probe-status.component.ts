@@ -2,12 +2,19 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, Input, OnChanges, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { BdButtonPopupComponent } from '../../../../../core/components/bd-button-popup/bd-button-popup.component';
+import { MatCard } from '@angular/material/card';
+import { MatDivider } from '@angular/material/divider';
+import { BdEditorComponent } from '../../../../../core/components/bd-editor/bd-editor.component';
 
 @Component({
     selector: 'app-probe-status',
     templateUrl: './probe-status.component.html',
     styleUrls: ['./probe-status.component.css'],
-    standalone: false
+    imports: [MatIcon, MatTooltip, NgClass, BdButtonPopupComponent, MatCard, MatDivider, BdEditorComponent, AsyncPipe, DatePipe]
 })
 export class ProbeStatusComponent implements OnInit, OnChanges, OnDestroy {
   private readonly bop = inject(BreakpointObserver);

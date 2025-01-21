@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
@@ -7,10 +7,12 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { AttributeDeleteActionComponent } from './attribute-delete-action/attribute-delete-action.component';
 import { AttributeEditActionComponent } from './attribute-edit-action/attribute-edit-action.component';
 
+import { AsyncPipe } from '@angular/common';
+
 @Component({
-  selector: 'app-attributes-tab',
-  templateUrl: './attributes-tab.component.html',
-  standalone: false,
+    selector: 'app-attributes-tab',
+    templateUrl: './attributes-tab.component.html',
+  imports: [BdDataTableComponent, AsyncPipe]
 })
 export class AttributesTabComponent implements OnInit, OnDestroy {
   protected readonly settings = inject(SettingsService);

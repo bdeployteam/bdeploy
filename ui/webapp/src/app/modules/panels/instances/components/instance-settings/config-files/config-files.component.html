@@ -12,22 +12,29 @@
       (fileAdded)="doAddFileContent($event)"
       hintText="Optionally drop file to add initial content"
     ></app-bd-file-drop>
-    <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
-    <div *ngIf="tempFileError" class="bd-warning-text">{{ tempFileError }}</div>
-    <div *ngIf="tempFileContent">Loaded {{tempFileContent.length}} bytes</div>
+    @if (tempFileContentLoading$ | async) {
+      <div>Loading...</div>
+    }
+    @if (tempFileError) {
+      <div class="bd-warning-text">{{ tempFileError }}</div>
+    }
+    @if (tempFileContent) {
+      <div>Loaded {{tempFileContent.length}} bytes</div>
+    }
   </div>
 </ng-template>
 
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Configuration Files" [panel]="true" [route]="['..']">
     <div class="flex-auto"></div>
-    <app-bd-button
-      *ngIf="bulkMode && (bulkSelection$ | async).length"
-      text="Delete Selected Files"
-      icon="delete"
-      (click)="bulkDelete()"
-      tooltip="below"
-    ></app-bd-button>
+    @if (bulkMode && (bulkSelection$ | async).length) {
+      <app-bd-button
+        text="Delete Selected Files"
+        icon="delete"
+        (click)="bulkDelete()"
+        tooltip="below"
+      ></app-bd-button>
+    }
     <app-bd-button
       icon="library_add_check"
       text="Bulk Manipulation"

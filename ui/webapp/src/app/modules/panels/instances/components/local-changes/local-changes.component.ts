@@ -1,9 +1,16 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { Edit, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+
+import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
+import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
+import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 interface InstanceEditRow {
   edit: Edit;
@@ -38,7 +45,7 @@ const redoColumn: BdDataColumn<InstanceEditRow> = {
 @Component({
     selector: 'app-local-changes',
     templateUrl: './local-changes.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, BdPanelButtonComponent, BdButtonComponent, AsyncPipe]
 })
 export class LocalChangesComponent implements OnInit, OnDestroy {
   protected readonly edit = inject(InstanceEditService);

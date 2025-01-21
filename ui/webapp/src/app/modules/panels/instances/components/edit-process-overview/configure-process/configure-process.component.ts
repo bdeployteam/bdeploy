@@ -1,17 +1,26 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { Observable, Subscription, of } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import {
+  BdDialogToolbarComponent
+} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
 
+
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { ConfigProcessHeaderComponent } from './config-process-header/config-process-header.component';
+import { ConfigProcessParamGroupComponent } from './config-process-param-group/config-process-param-group.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
     selector: 'app-configure-process',
     templateUrl: './configure-process.component.html',
-    standalone: false
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, ConfigProcessHeaderComponent, ConfigProcessParamGroupComponent, AsyncPipe]
 })
 export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly instanceEdit = inject(InstanceEditService);

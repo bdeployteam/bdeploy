@@ -1,16 +1,18 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Bulk Software Manipulation" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div class="flex flex-col gap-2.5" *ngIf="selections">
-      <div><strong>{{ selections.length }}</strong> system versions selected.</div>
-      <app-bd-button
-        [collapsed]="false"
-        [disabled]="!selections.length || (mappedDelete$ | async)"
-        [loadingWhen$]="mappedDelete$"
-        text="Delete Selected Software Versions"
-        icon="delete"
-        (click)="onDelete()"
-      ></app-bd-button>
-    </div>
+    @if (selections) {
+      <div class="flex flex-col gap-2.5">
+        <div><strong>{{ selections.length }}</strong> system versions selected.</div>
+        <app-bd-button
+          [collapsed]="false"
+          [disabled]="!selections.length || (mappedDelete$ | async)"
+          [loadingWhen$]="mappedDelete$"
+          text="Delete Selected Software Versions"
+          icon="delete"
+          (click)="onDelete()"
+        ></app-bd-button>
+      </div>
+    }
   </app-bd-dialog-content>
 </app-bd-dialog>

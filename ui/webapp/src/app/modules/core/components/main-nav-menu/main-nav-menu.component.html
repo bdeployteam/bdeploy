@@ -4,236 +4,239 @@
   </mat-card>
 </ng-template>
 
-<div
-  class="bd-rect-card local-sizing local-nav-bar flex flex-col gap-1"
-  *ngIf="{ expanded: areas.menuMaximized$ | async } as scope"
->
-  <!-- Logo & Expand Button -->
-  <div class="flex justify-center items-center pb-4 min-h-[100px] h-[100px]">
-    <div class="local-hamburger-button">
-      <div
-        class="hamburger hamburger--arrow"
-        [ngClass]="{ 'is-active': scope.expanded }"
-        (click)="areas.menuMaximized$.next(!scope.expanded)"
-      >
-        <span class="hamburger-box">
-          <span class="hamburger-inner"></span>
-        </span>
+@if ({ expanded: areas.menuMaximized$ | async }; as scope) {
+  <div
+    class="bd-rect-card local-sizing local-nav-bar flex flex-col gap-1"
+    >
+    <!-- Logo & Expand Button -->
+    <div class="flex justify-center items-center pb-4 min-h-[100px] h-[100px]">
+      <div class="local-hamburger-button">
+        <div
+          class="hamburger hamburger--arrow"
+          [ngClass]="{ 'is-active': scope.expanded }"
+          (click)="areas.menuMaximized$.next(!scope.expanded)"
+          >
+          <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+          </span>
+        </div>
       </div>
+      @if (scope.expanded) {
+        <h2
+          class="local-header"
+          [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+          [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+          >
+          BDeploy
+        </h2>
+      }
     </div>
-    <h2
-      *ngIf="scope.expanded"
-      class="local-header"
-      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-      [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-    >
-      BDeploy
-    </h2>
-  </div>
-
-  <!-- Groups -->
-  <app-main-nav-button
-    icon="view_carousel"
-    text="Instance Groups"
-    [collapsed]="!scope.expanded"
-    [route]="['/groups/browser']"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    icon="storage"
-    *ngIf="!(authService.isGlobalExclusiveReadClient$ | async)"
-    text="Software Repositories"
-    [collapsed]="!scope.expanded"
-    [route]="['/repositories/browser']"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    *ngIf="(reports.reports$ | async).length"
-    icon="assignment"
-    text="Reports"
-    [collapsed]="!scope.expanded"
-    [route]="['/reports/browser']"
-  ></app-main-nav-button>
-
-  <mat-divider class="local-divider"></mat-divider>
-  <app-main-nav-button
-    *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
-    [visible]="!!(areas.groupContext$ | async)"
-    icon="settings_system_daydream"
-    text="Instances"
-    [collapsed]="!scope.expanded"
-    [route]="['/instances', 'browser', areas.groupContext$.value]"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
-    [visible]="!!(areas.groupContext$ | async)"
-    icon="apps"
-    text="Products"
-    [collapsed]="!scope.expanded"
-    [route]="['/products', 'browser', areas.groupContext$.value]"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    [visible]="!!(areas.groupContext$ | async)"
-    icon="computer"
-    text="Client Applications"
-    [collapsed]="!scope.expanded"
-    [route]="['/groups', 'clients', areas.groupContext$.value]"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    *ngIf="(cfgService.isCentral$ | async) && !(authService.isCurrentScopedExclusiveReadClient$ | async)"
-    [visible]="!!(areas.groupContext$ | async)"
-    icon="dns"
-    text="Managed Servers"
-    [collapsed]="!scope.expanded"
-    [route]="['/servers', 'browser', areas.groupContext$.value]"
-    [disabled]="!(authService.isCurrentScopeAdmin$ | async)"
-    [matTooltip]="(authService.isCurrentScopeAdmin$ | async) ? null : 'Only administrators can maintain managed server configuration'"
-    matTooltipPosition="right"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
-    [visible]="!!(areas.groupContext$ | async)"
-    icon="inventory_2"
-    text="Systems"
-    [collapsed]="!scope.expanded"
-    [route]="['/systems', 'browser', areas.groupContext$.value]"
-  ></app-main-nav-button>
-
-  <!-- Instance -->
-
-  <mat-divider
-    class="local-divider"
-    *ngIf="areas.groupContext$ | async"
-    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
-    [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-  ></mat-divider>
-
-  <app-main-nav-button
-    [visible]="!!(areas.instanceContext$ | async)"
-    icon="dashboard"
-    text="Instance Dashboard"
-    [collapsed]="!scope.expanded"
-    [route]="['/instances', 'dashboard', areas.groupContext$.value, areas.instanceContext$.value]"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    [visible]="!!(areas.instanceContext$ | async)"
-    svgIcon="instance-settings"
-    text="Instance Configuration"
-    [collapsed]="!scope.expanded"
-    (click)="goToInstanceConfiguration()"
-    [disabled]="!(authService.isCurrentScopeWrite$ | async)"
-    [matTooltip]="(authService.isCurrentScopeWrite$ | async) ? null : 'Insufficient permissions to change configuration'"
-    matTooltipPosition="right"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    [visible]="!!(areas.instanceContext$ | async)"
-    icon="source"
-    text="Data Files"
-    [collapsed]="!scope.expanded"
-    [route]="['/instances', 'data-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    [visible]="!!(areas.instanceContext$ | async)"
-    icon="folder_special"
-    text="Log Files"
-    [collapsed]="!scope.expanded"
-    [route]="['/instances', 'log-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
-    [visible]="!!(areas.instanceContext$ | async)"
-    icon="deployed_code_history"
-    text="Instance History"
-    [collapsed]="!scope.expanded"
-    [route]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]"
-  ></app-main-nav-button>
-
-  <!-- Footer -->
-  <div class="flex-auto"></div>
-  <div class="local-server-type-wrapper-expanded" *ngIf="scope.expanded">
-    <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-      >{{ cfgService.config.mode }}</span
-    >
-  </div>
-  <div
-    *ngIf="scope.expanded"
-    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    [appBdPopup]="actionsPopup"
-    appBdPopupPosition="right-above"
-    [class.bd-disabled-text]="!(actions.actions$ | async)?.length"
-    [class.bd-accent-text]="!!(actions.actions$ | async)?.length"
-    class="cursor-pointer flex justify-start items-center pb-2.5"
-  >
-    <mat-spinner
-      class="bd-inherited-spinner"
-      [mode]="!!(actions.actions$ | async)?.length ? 'indeterminate' : 'determinate'"
-      [value]="!(actions.actions$ | async)?.length ? 100 : 0"
-      [diameter]="24"
-    ></mat-spinner>
-    <div *ngIf="!!(actions.actions$ | async)?.length" class="bd-text pl-2.5">
-      {{ (actions.actions$ | async)?.length }} Actions.
-    </div>
-    <div *ngIf="!(actions.actions$ | async)?.length" class="bd-disabled-text pl-2.5">No Actions.</div>
-  </div>
-
-  <div
-    *ngIf="!scope.expanded && !!(actions.actions$ | async)?.length"
-    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    [appBdPopup]="actionsPopup"
-    appBdPopupPosition="right-above"
-    class="bd-accent-text cursor-pointer flex pl-1.5"
-  >
-    <mat-spinner class="bd-inherited-spinner" [diameter]="24"></mat-spinner>
-  </div>
-
-  <div *ngIf="!scope.expanded" class="local-short-version">
-    <div class="w-9" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
-      {{ cfgService.config.version | formatVersionShort }}
-    </div>
-  </div>
-  <div
-    *ngIf="scope.expanded"
-    class="local-footer flex flex-col gap-1"
-    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-  >
-    <div class="grid grid-cols-[50px_auto] gap-1">
-      <span>Version:</span>
-      <span>{{ cfgService?.config?.version | formatVersion }}</span>
-    </div>
-  </div>
-  <app-bd-button
-    *ngIf="cfgService.isNewGitHubReleaseAvailable$ | async"
-    icon="system_update"
-    text="New Release"
-    color="toolbar"
-    [collapsed]="!scope.expanded"
-    tooltip="right"
-    [isToggle]="true"
-    [toggleOnClick]="false"
-    (click)="goToGitHub()"
-  ></app-bd-button>
-  <mat-divider class="local-divider"></mat-divider>
-  <app-main-nav-button
-    icon="settings"
-    text="Administration"
-    [collapsed]="!scope.expanded"
-    [route]="['/admin/']"
-    [disabled]="!(authService.isGlobalAdmin$ | async)"
-  ></app-main-nav-button>
-  <a href="/assets/doc/index.html" target="_blank" class="bd-button-link" aria-label="Help" class="">
-    <app-bd-button
-      class="flex"
-      icon="help_outline"
-      text="Help"
-      color="toolbar"
+    <!-- Groups -->
+    <app-main-nav-button
+      icon="view_carousel"
+      text="Instance Groups"
       [collapsed]="!scope.expanded"
-    ></app-bd-button>
-  </a>
-</div>
+      [route]="['/groups/browser']"
+    ></app-main-nav-button>
+    @if (!(authService.isGlobalExclusiveReadClient$ | async)) {
+      <app-main-nav-button
+        icon="storage"
+        text="Software Repositories"
+        [collapsed]="!scope.expanded"
+        [route]="['/repositories/browser']"
+      ></app-main-nav-button>
+    }
+    @if ((reports.reports$ | async).length) {
+      <app-main-nav-button
+        icon="assignment"
+        text="Reports"
+        [collapsed]="!scope.expanded"
+        [route]="['/reports/browser']"
+      ></app-main-nav-button>
+    }
+    <mat-divider class="local-divider"></mat-divider>
+    @if (!(authService.isCurrentScopedExclusiveReadClient$ | async)) {
+      <app-main-nav-button
+        [visible]="!!(areas.groupContext$ | async)"
+        icon="settings_system_daydream"
+        text="Instances"
+        [collapsed]="!scope.expanded"
+        [route]="['/instances', 'browser', areas.groupContext$.value]"
+      ></app-main-nav-button>
+    }
+    @if (!(authService.isCurrentScopedExclusiveReadClient$ | async)) {
+      <app-main-nav-button
+        [visible]="!!(areas.groupContext$ | async)"
+        icon="apps"
+        text="Products"
+        [collapsed]="!scope.expanded"
+        [route]="['/products', 'browser', areas.groupContext$.value]"
+      ></app-main-nav-button>
+    }
+    <app-main-nav-button
+      [visible]="!!(areas.groupContext$ | async)"
+      icon="computer"
+      text="Client Applications"
+      [collapsed]="!scope.expanded"
+      [route]="['/groups', 'clients', areas.groupContext$.value]"
+    ></app-main-nav-button>
+    @if ((cfgService.isCentral$ | async) && !(authService.isCurrentScopedExclusiveReadClient$ | async)) {
+      <app-main-nav-button
+        [visible]="!!(areas.groupContext$ | async)"
+        icon="dns"
+        text="Managed Servers"
+        [collapsed]="!scope.expanded"
+        [route]="['/servers', 'browser', areas.groupContext$.value]"
+        [disabled]="!(authService.isCurrentScopeAdmin$ | async)"
+        [matTooltip]="(authService.isCurrentScopeAdmin$ | async) ? null : 'Only administrators can maintain managed server configuration'"
+        matTooltipPosition="right"
+      ></app-main-nav-button>
+    }
+    @if (!(authService.isCurrentScopedExclusiveReadClient$ | async)) {
+      <app-main-nav-button
+        [visible]="!!(areas.groupContext$ | async)"
+        icon="inventory_2"
+        text="Systems"
+        [collapsed]="!scope.expanded"
+        [route]="['/systems', 'browser', areas.groupContext$.value]"
+      ></app-main-nav-button>
+    }
+    <!-- Instance -->
+    @if (areas.groupContext$ | async) {
+      <mat-divider
+        class="local-divider"
+        [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
+        [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+      ></mat-divider>
+    }
+    <app-main-nav-button
+      [visible]="!!(areas.instanceContext$ | async)"
+      icon="dashboard"
+      text="Instance Dashboard"
+      [collapsed]="!scope.expanded"
+      [route]="['/instances', 'dashboard', areas.groupContext$.value, areas.instanceContext$.value]"
+    ></app-main-nav-button>
+    <app-main-nav-button
+      [visible]="!!(areas.instanceContext$ | async)"
+      svgIcon="instance-settings"
+      text="Instance Configuration"
+      [collapsed]="!scope.expanded"
+      (click)="goToInstanceConfiguration()"
+      [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+      [matTooltip]="(authService.isCurrentScopeWrite$ | async) ? null : 'Insufficient permissions to change configuration'"
+      matTooltipPosition="right"
+    ></app-main-nav-button>
+    <app-main-nav-button
+      [visible]="!!(areas.instanceContext$ | async)"
+      icon="source"
+      text="Data Files"
+      [collapsed]="!scope.expanded"
+      [route]="['/instances', 'data-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
+    ></app-main-nav-button>
+    <app-main-nav-button
+      [visible]="!!(areas.instanceContext$ | async)"
+      icon="folder_special"
+      text="Log Files"
+      [collapsed]="!scope.expanded"
+      [route]="['/instances', 'log-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
+    ></app-main-nav-button>
+    <app-main-nav-button
+      [visible]="!!(areas.instanceContext$ | async)"
+      icon="deployed_code_history"
+      text="Instance History"
+      [collapsed]="!scope.expanded"
+      [route]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]"
+    ></app-main-nav-button>
+    <!-- Footer -->
+    <div class="flex-auto"></div>
+    @if (scope.expanded) {
+      <div class="local-server-type-wrapper-expanded">
+        <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+          >{{ cfgService.config.mode }}</span
+          >
+        </div>
+      }
+      @if (scope.expanded) {
+        <div
+          [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+          [appBdPopup]="actionsPopup"
+          appBdPopupPosition="right-above"
+          [class.bd-disabled-text]="!(actions.actions$ | async)?.length"
+          [class.bd-accent-text]="!!(actions.actions$ | async)?.length"
+          class="cursor-pointer flex justify-start items-center pb-2.5"
+          >
+          <mat-spinner
+            class="bd-inherited-spinner"
+            [mode]="!!(actions.actions$ | async)?.length ? 'indeterminate' : 'determinate'"
+            [value]="!(actions.actions$ | async)?.length ? 100 : 0"
+            [diameter]="24"
+          ></mat-spinner>
+          @if (!!(actions.actions$ | async)?.length) {
+            <div class="bd-text pl-2.5">
+              {{ (actions.actions$ | async)?.length }} Actions.
+            </div>
+          }
+          @if (!(actions.actions$ | async)?.length) {
+            <div class="bd-disabled-text pl-2.5">No Actions.</div>
+          }
+        </div>
+      }
+      @if (!scope.expanded && !!(actions.actions$ | async)?.length) {
+        <div
+          [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+          [appBdPopup]="actionsPopup"
+          appBdPopupPosition="right-above"
+          class="bd-accent-text cursor-pointer flex pl-1.5"
+          >
+          <mat-spinner class="bd-inherited-spinner" [diameter]="24"></mat-spinner>
+        </div>
+      }
+      @if (!scope.expanded) {
+        <div class="local-short-version">
+          <div class="w-9" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
+            {{ cfgService.config.version | formatVersionShort }}
+          </div>
+        </div>
+      }
+      @if (scope.expanded) {
+        <div
+          class="local-footer flex flex-col gap-1"
+          [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+          >
+          <div class="grid grid-cols-[50px_auto] gap-1">
+            <span>Version:</span>
+            <span>{{ cfgService?.config?.version | formatVersion }}</span>
+          </div>
+        </div>
+      }
+      @if (cfgService.isNewGitHubReleaseAvailable$ | async) {
+        <app-bd-button
+          icon="system_update"
+          text="New Release"
+          color="toolbar"
+          [collapsed]="!scope.expanded"
+          tooltip="right"
+          [isToggle]="true"
+          [toggleOnClick]="false"
+          (click)="goToGitHub()"
+        ></app-bd-button>
+      }
+      <mat-divider class="local-divider"></mat-divider>
+      <app-main-nav-button
+        icon="settings"
+        text="Administration"
+        [collapsed]="!scope.expanded"
+        [route]="['/admin/']"
+        [disabled]="!(authService.isGlobalAdmin$ | async)"
+      ></app-main-nav-button>
+      <a href="/assets/doc/index.html" target="_blank" class="bd-button-link" aria-label="Help" class="">
+        <app-bd-button
+          class="flex"
+          icon="help_outline"
+          text="Help"
+          color="toolbar"
+          [collapsed]="!scope.expanded"
+        ></app-bd-button>
+      </a>
+    </div>
+  }

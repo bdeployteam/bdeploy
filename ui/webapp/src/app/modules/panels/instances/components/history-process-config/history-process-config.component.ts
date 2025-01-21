@@ -2,12 +2,17 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ApplicationConfiguration, ApplicationDescriptor } from 'src/app/models/gen.dtos';
 import { ApplicationConfigurationDiff, DiffType, HistoryDiffService } from '../../services/history-diff.service';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { ConfigDescCardsComponent } from '../config-desc-cards/config-desc-cards.component';
+import { HistoryDiffFieldComponent } from '../history-diff-field/history-diff-field.component';
+import { ParamDescCardComponent } from '../param-desc-card/param-desc-card.component';
 
 @Component({
-  selector: 'app-history-process-config',
-  templateUrl: './history-process-config.component.html',
-  styleUrls: ['./history-process-config.component.css'],
-  standalone: false
+    selector: 'app-history-process-config',
+    templateUrl: './history-process-config.component.html',
+    styleUrls: ['./history-process-config.component.css'],
+    imports: [NgClass, MatIcon, ConfigDescCardsComponent, HistoryDiffFieldComponent, ParamDescCardComponent, AsyncPipe]
 })
 export class HistoryProcessConfigComponent implements OnInit {
   private readonly diffService = inject(HistoryDiffService);

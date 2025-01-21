@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output
 import { BehaviorSubject } from 'rxjs';
 import { ManifestKey } from 'src/app/models/gen.dtos';
 import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
+import { BdNotificationCardComponent } from '../bd-notification-card/bd-notification-card.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-bd-file-upload',
     templateUrl: './bd-file-upload.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [BdNotificationCardComponent, MatProgressBar, AsyncPipe]
 })
 export class BdFileUploadComponent implements OnInit {
   @Input() file: File;

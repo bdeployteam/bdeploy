@@ -1,43 +1,46 @@
 <ng-template #varTemplate>
   <div>Please provide required values for the selected template.</div>
-  <ng-container *ngFor="let v of selectedTemplate.templateVariables">
+  @for (v of selectedTemplate.templateVariables; track v) {
     <app-bd-form-template-variable [templateVariable]="v" [(ngModel)]="response[v.id]"></app-bd-form-template-variable>
-  </ng-container>
+  }
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Add Process Configuration" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      class="flex flex-col gap-2.5"
-      *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized"
-    >
-      <div>Click an application or application template from the list below to add it to the selected node.</div>
-      <div *ngIf="clipBoardCfg$ | async as cfg">
-        <app-bd-button
-          [text]="'Paste ' + cfg.name"
-          color="accent"
-          icon="content_paste"
-          [collapsed]="false"
-          (click)="doPaste(cfg)"
-        ></app-bd-button>
-      </div>
-      <app-bd-notification-card
-        header="Clipboard Permission"
-        [dismissable]="false"
-        icon="content_paste"
-        *ngIf="clipBoardError$ | async as error"
-        >{{ error }}</app-bd-notification-card
-      >
-      <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
-    </div>
-    <ng-template #currentInstanceIsNotSynchronized>
-      <app-bd-notification-card icon="sync" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
-        <div class="text-justify">
-          The managed server responsible for the selected node is not synchronized. Please synchronize the server to
-          continue editing.
+    @if (servers.isCurrentInstanceSynchronized$ | async) {
+      <div
+        class="flex flex-col gap-2.5"
+        >
+        <div>Click an application or application template from the list below to add it to the selected node.</div>
+        @if (clipBoardCfg$ | async; as cfg) {
+          <div>
+            <app-bd-button
+              [text]="'Paste ' + cfg.name"
+              color="accent"
+              icon="content_paste"
+              [collapsed]="false"
+              (click)="doPaste(cfg)"
+            ></app-bd-button>
+          </div>
+        }
+        @if (clipBoardError$ | async; as error) {
+          <app-bd-notification-card
+            header="Clipboard Permission"
+            [dismissable]="false"
+            icon="content_paste"
+            >{{ error }}</app-bd-notification-card
+            >
+          }
+          <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
         </div>
-      </app-bd-notification-card>
-    </ng-template>
-  </app-bd-dialog-content>
-</app-bd-dialog>
+      } @else {
+        <app-bd-notification-card icon="sync" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
+          <div class="text-justify">
+            The managed server responsible for the selected node is not synchronized. Please synchronize the server to
+            continue editing.
+          </div>
+        </app-bd-notification-card>
+      }
+    </app-bd-dialog-content>
+  </app-bd-dialog>

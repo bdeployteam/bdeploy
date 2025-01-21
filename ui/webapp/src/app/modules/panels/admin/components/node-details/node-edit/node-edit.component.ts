@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, finalize, Observable, Subscription } from 'rxjs';
@@ -15,11 +15,18 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdFileDropComponent } from '../../../../../core/components/bd-file-drop/bd-file-drop.component';
+import { BdFormInputComponent } from '../../../../../core/components/bd-form-input/bd-form-input.component';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
-  selector: 'app-node-edit',
-  templateUrl: './node-edit.component.html',
-  styleUrls: ['./node-edit.component.css'],
-  standalone: false
+    selector: 'app-node-edit',
+    templateUrl: './node-edit.component.html',
+    styleUrls: ['./node-edit.component.css'],
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFileDropComponent, BdFormInputComponent, BdButtonComponent, AsyncPipe]
 })
 export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);

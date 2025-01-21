@@ -12,7 +12,7 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { NgForm, FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -35,6 +35,22 @@ import { BdSearchable, SearchService } from 'src/app/modules/core/services/searc
 import { VariableGroup, VariablePair } from 'src/app/modules/core/utils/variable-utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { ClipboardService } from '../../services/clipboard.service';
+import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
+import { TrimmedValidator } from '../../validators/trimmed.directive';
+import { EditUniqueValueValidatorDirective } from '../../validators/edit-unique-value.directive';
+import { BdValueEditorComponent } from '../bd-value-editor/bd-value-editor.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdFormSelectComponent } from '../bd-form-select/bd-form-select.component';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { BdVariableDescCardComponent } from '../bd-variable-desc-card/bd-variable-desc-card.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatRipple } from '@angular/material/core';
+import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
 
 interface ConfigVariable {
   name: string;
@@ -46,7 +62,7 @@ interface ConfigVariable {
     templateUrl: './bd-variable-groups.component.html',
     styleUrl: './bd-variable-groups.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [FormsModule, BdFormInputComponent, TrimmedValidator, EditUniqueValueValidatorDirective, BdValueEditorComponent, MatDivider, BdFormSelectComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, BdButtonComponent, ClickStopPropagationDirective, MatIcon, NgClass, BdVariableDescCardComponent, MatCheckbox, MatTooltip, MatRipple, BdPopupDirective, AsyncPipe]
 })
 export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly cd = inject(ChangeDetectorRef);

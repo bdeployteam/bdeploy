@@ -8,12 +8,21 @@ import { catchError } from 'rxjs/operators';
 import { SpecialAuthenticators } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
+import { BdDialogComponent } from '../bd-dialog/bd-dialog.component';
+import { BdDialogContentComponent } from '../bd-dialog-content/bd-dialog-content.component';
+import { BdLogoComponent } from '../bd-logo/bd-logo.component';
+import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
+import { MatError } from '@angular/material/form-field';
+import { MatButton } from '@angular/material/button';
+import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    standalone: false
+    imports: [BdDialogComponent, BdDialogContentComponent, BdLogoComponent, NgClass, FormsModule, BdFormInputComponent, MatError, MatButton, BdButtonComponent]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);

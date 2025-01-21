@@ -11,11 +11,20 @@ import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { MinionRecord, NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
+import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
+
+import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { MatDivider } from '@angular/material/divider';
+import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-node-update',
-  templateUrl: './node-update.component.html',
-  standalone: false
+    selector: 'app-node-update',
+    templateUrl: './node-update.component.html',
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, MatDivider, BdButtonComponent, AsyncPipe]
 })
 export class NodeUpdateComponent implements OnDestroy {
   private readonly cfg = inject(ConfigService);
@@ -36,7 +45,9 @@ export class NodeUpdateComponent implements OnDestroy {
 
   private readonly subscription: Subscription;
 
-  constructor(areas: NavAreasService) {
+  constructor() {
+    const areas = inject(NavAreasService);
+
     this.subscription = combineLatest([areas.panelRoute$, this.nodesAdmin.nodes$, this.software.software$]).subscribe(
       ([r, n, s]) => {
         if (!n || !s || !r?.params?.['node']) {
