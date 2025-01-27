@@ -33,7 +33,7 @@ export class MainNavFlyinComponent implements OnInit {
 
   protected panelContent = '';
 
-  @HostBinding('attr.data-cy')
+  @HostBinding('attr.data-testid')
   @HostBinding('@openClose')
   get animationState() {
     return this.areas.panelVisible$.value ? 'open' : 'closed';

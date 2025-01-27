@@ -25,7 +25,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   private readonly actions = inject(ActionsService);
 
   @Input() record: ApplicationConfiguration;
-  @HostBinding('attr.data-cy') dataCy: string;
+  @HostBinding('attr.data-testid') dataCy: string;
 
   protected icon$ = new BehaviorSubject<string>('help');
   protected svgIcon$ = new BehaviorSubject<string>(null);

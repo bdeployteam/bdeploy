@@ -58,7 +58,6 @@ evaluationDependsOn(':test-data')
 
 task updateFixtureProducts(type: Copy) {
     def prj = project(':test-data')
-    /*
     from prj.product1Zip.outputs
     from prj.product2Zip.outputs
     from prj.product3Zip.outputs
@@ -67,14 +66,10 @@ task updateFixtureProducts(type: Copy) {
 
     from new File(prj.projectDir, "/system-template.yaml")
 
-    into "${webappDir}/cypress/fixtures"
+    into "${webappDir}/playwright/fixtures"
 
     doFirst {
-        delete fileTree("${webappDir}/cypress/fixtures").matching { include "*.zip" }
-    }
-    */
-    doLast {
-        println "FIXME: provide test data"
+        delete fileTree("${webappDir}/playwright/fixtures").matching { include "*.zip" }
     }
 }
 
@@ -146,6 +141,9 @@ task runUitests(type: Exec, dependsOn: [installBrowsers, updateFixtures, runServ
     if(project.hasProperty("ui")) {
         opts.add("--ui");
     }
+    if(project.hasProperty("debug")) {
+        opts.add("--debug");
+    }
 
     def target = "test";
     if(project.hasProperty("codegen")) {
@@ -155,7 +153,7 @@ task runUitests(type: Exec, dependsOn: [installBrowsers, updateFixtures, runServ
     sharedNpmLogic(t, ["run", "--", "playwright", target] + opts)
 }
 
-task runUitestInfra(dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) {
+task runUitestsInfra(dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) {
     doLast() {
         // no println will work in doLast, it will appear only AFTER the question is answered.
         def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
@@ -165,7 +163,7 @@ task runUitestInfra(dependsOn: [installBrowsers, updateFixtures, runServerStanda
 
 
 task updateDocuScreenshots(type: Copy, dependsOn: runUitests) {
-    from file("${webappDir}/screenshots/")
+    from file("${webappDir}/playwright/results/screenshots/")
     into new File(project(":doc").projectDir, "retypeuser/images")
 
     include "**/*.png"
