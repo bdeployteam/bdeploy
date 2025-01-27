@@ -122,8 +122,8 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         SortedSet<Key> scan = ProductManifest.scan(hive);
-        List<ProductDto> result = scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).map(ProductDto::create)
-                .collect(Collectors.toList());
+        List<ProductDto> result = scan.stream().map(k -> getProductManifest(k)).filter(pm -> pm != null).filter(filter)
+                .map(ProductDto::create).collect(Collectors.toList());
         if (!result.isEmpty()) {
             Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
             result.sort((a, b) -> {
@@ -135,6 +135,14 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         return result;
+    }
+
+    private ProductManifest getProductManifest(Key k) {
+        try {
+            return ProductManifest.of(hive, k);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
