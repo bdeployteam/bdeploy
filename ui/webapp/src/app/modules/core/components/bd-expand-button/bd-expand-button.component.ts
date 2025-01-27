@@ -17,6 +17,6 @@ import { MatIcon } from '@angular/material/icon';
 })
 export class BdExpandButtonComponent {
   @Input() icon: string;
-  @HostBinding('attr.data-cy') @Input() text: string;
+  @HostBinding('attr.data-testid') @Input() text: string;
   @Input() expanded = false;
 }

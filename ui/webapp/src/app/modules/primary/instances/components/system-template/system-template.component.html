@@ -20,7 +20,7 @@
         animationDuration="200"
         >
         <mat-step label="Target Server" [completed]="serverSelectionCompleted" [editable]="!serverSelectionCompleted">
-          <div [attr.data-cy]="'step-server'" class="flex flex-col gap-2.5 p-2.5">
+          <div [attr.data-testid]="'step-server'" class="flex flex-col gap-2.5 p-2.5">
             @if (!isCentral) {
               <div>Choosing a target server is not required for your setup.</div>
             } @else {
@@ -46,7 +46,7 @@
           </div>
         </mat-step>
         <mat-step label="System Template" [completed]="!!this.template">
-          <div [attr.data-cy]="'step-template-upload'" class="flex flex-col gap-2.5 p-2.5">
+          <div [attr.data-testid]="'step-template-upload'" class="flex flex-col gap-2.5 p-2.5">
             @if (!file) {
               <app-bd-file-drop
                 [types]="['.yaml']"
@@ -75,7 +75,7 @@
           </div>
         </mat-step>
         <mat-step label="Missing Products" [completed]="importProductsState.completed">
-          <div [attr.data-cy]="'step-import-missing-products'" class="flex flex-col gap-2.5 p-2.5">
+          <div [attr.data-testid]="'step-import-missing-products'" class="flex flex-col gap-2.5 p-2.5">
             @if (importProductsState.error) {
               <app-bd-notification-card
                 icon="warning"
@@ -108,7 +108,7 @@
           </div>
         </mat-step>
         <mat-step label="Name and Purpose" [completed]="name && purpose">
-          <div [attr.data-cy]="'step-name-purpose'" class="flex flex-col gap-2.5 p-2.5">
+          <div [attr.data-testid]="'step-name-purpose'" class="flex flex-col gap-2.5 p-2.5">
             <form #namePurposeForm="ngForm">
               <app-bd-form-input
                 errorDisplay="immediate"
@@ -140,7 +140,7 @@
           </div>
         </mat-step>
         <mat-step label="System Template Variables" [completed]="isAllSystemVariablesSet">
-          <div [attr.data-cy]="'step-system-variables'" class="flex flex-col gap-2.5 p-2.5">
+          <div [attr.data-testid]="'step-system-variables'" class="flex flex-col gap-2.5 p-2.5">
             @for (v of requiredSystemVariables; track v) {
               <app-bd-form-template-variable
                 [templateVariable]="v"
@@ -163,7 +163,7 @@
           </div>
         </mat-step>
         <mat-step label="Instance Templates" [completed]="isAllTemplateGroupsSelected && isAllVariablesSet">
-          <div [attr.data-cy]="'step-instance-templates'" class="flex flex-col gap-2.5 p-2.5">
+          <div [attr.data-testid]="'step-instance-templates'" class="flex flex-col gap-2.5 p-2.5">
             <mat-tab-group #tabGroup animationDuration="0ms">
               @for (tpl of templates; track tpl) {
                 <mat-tab>
@@ -174,7 +174,7 @@
                       {{ tpl.expandedName }}
                     </div>
                   </ng-template>
-                  <div [attr.data-cy]="'tab-' + tpl.expandedName" class="flex gap-1">
+                  <div [attr.data-testid]="'tab-' + tpl.expandedName" class="flex gap-1">
                     <div class="flex-auto flex flex-col gap-2.5 p-2.5">
                       <app-bd-form-toggle
                         label="Apply this instance"
@@ -229,7 +229,7 @@
           </div>
         </mat-step>
         <mat-step label="Application">
-          <div [attr.data-cy]="'step-applying'" class="flex flex-col gap-2.5 p-5">
+          <div [attr.data-testid]="'step-applying'" class="flex flex-col gap-2.5 p-5">
             <div class="flex gap-2.5 justify-start items-center">
               <mat-spinner [diameter]="24"></mat-spinner>
               <div>Working on it...</div>
@@ -238,7 +238,7 @@
         </mat-step>
         <mat-step label="Result">
           @if (result) {
-            <div [attr.data-cy]="'step-done'" class="flex flex-col gap-2.5 p-5">
+            <div [attr.data-testid]="'step-done'" class="flex flex-col gap-2.5 p-5">
               @if (resultIsSuccess) {
                 <div>
                   <app-bd-notification-card

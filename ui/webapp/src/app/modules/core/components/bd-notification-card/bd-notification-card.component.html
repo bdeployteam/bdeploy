@@ -46,7 +46,7 @@
   </div>
   @if (dismissable) {
     <div class="local-dismiss-area flex-none flex justify-center items-center">
-      <app-bd-micro-icon-button data-cy="notification-dismiss" (click)="dismiss.emit(null)" [disabled]="disabled"
+      <app-bd-micro-icon-button data-testid="notification-dismiss" (click)="dismiss.emit(null)" [disabled]="disabled"
         >close</app-bd-micro-icon-button
         >
       </div>

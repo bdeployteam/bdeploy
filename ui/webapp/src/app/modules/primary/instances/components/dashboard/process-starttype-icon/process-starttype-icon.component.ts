@@ -10,7 +10,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 })
 export class ProcessStarttypeIconComponent implements OnInit, OnChanges {
   @Input() record: ApplicationConfiguration;
-  @HostBinding('attr.data-cy') dataCy: string;
+  @HostBinding('attr.data-testid') dataCy: string;
 
   protected data: {
     icon: string;

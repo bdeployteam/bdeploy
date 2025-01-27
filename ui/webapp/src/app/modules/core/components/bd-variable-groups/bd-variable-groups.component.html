@@ -171,7 +171,7 @@
                   @for (p of group.pairs; track p) {
                     @if (hasPairSearchMatch(p)) {
                       <div
-                        [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
+                        [attr.data-testid]="p.descriptor ? p.descriptor.id : p.value.id"
                         class="flex"
                         >
                         <ng-template #popup>
