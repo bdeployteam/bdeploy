@@ -1,6 +1,6 @@
 <button
   mat-raised-button
-  [attr.data-cy]="text"
+  [attr.data-testid]="text"
   class="flex-auto shrink-0 cursor-pointer"
   [ngClass]="disabled ? 'bd-button-disabled' : isToggle && toggle ? 'bd-toggle-highlight' : color ? 'local-button-color-' + color : 'local-button-no-color'"
   [class.local-button-expanded]="!collapsed"

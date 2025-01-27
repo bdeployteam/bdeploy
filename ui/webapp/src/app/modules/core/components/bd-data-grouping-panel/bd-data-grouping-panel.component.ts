@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
 import {
   BdDataGrouping,
   BdDataGroupingDefinition,
-  UNMATCHED_GROUP,
   bdExtractGroups,
   bdSortGroups,
+  UNMATCHED_GROUP
 } from 'src/app/models/data';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -56,7 +56,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
     return this.groupingValues.filter((gv) => gv?.toLowerCase().includes(this.filter.toLowerCase()));
   }
   protected get selectGroupingLabel(): string {
-    return this.grouping?.definition?.name ? 'Grouping' : 'Select Grouping';
+    return 'Grouping';
   }
   protected get filterPlaceholder(): string {
     return this.grouping?.definition?.name || 'Filter Options Below';

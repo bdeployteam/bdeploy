@@ -49,7 +49,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly edit = inject(InstanceEditService);
   protected readonly columns = inject(ProcessesColumnsService);
 
-  @HostBinding('attr.data-cy') @Input() nodeName: string;
+  @HostBinding('attr.data-testid') @Input() nodeName: string;
 
   private readonly processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',

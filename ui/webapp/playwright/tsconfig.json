@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@bdeploy-pom/*": [
+        "framework/page-model/*"
+      ],
+      "@bdeploy-elements/*": [
+        "framework/elements/*"
+      ],
+      "@bdeploy-backend": [
+        "framework/backend/backend.api"
+      ],
+      "@bdeploy-setup": [
+        "framework/setup/test-setup"
+      ],
+      "@bdeploy/*": [
+        "../src/app/*"
+      ]
+    }
+  }
+}

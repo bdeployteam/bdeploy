@@ -1,6 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -11,7 +11,7 @@ import {
   InstanceNodeConfigurationDto,
   InstanceStateRecord,
   ProcessControlGroupHandlingType,
-  ProcessControlGroupWaitType,
+  ProcessControlGroupWaitType
 } from 'src/app/models/gen.dtos';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -20,7 +20,7 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import {
   getNodeOfApplication,
-  getProcessControlGroupOfApplication,
+  getProcessControlGroupOfApplication
 } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { ProductsService } from '../../../products/services/products.service';
 import { ServersService } from '../../../servers/services/servers.service';
@@ -33,7 +33,9 @@ import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { MatDivider } from '@angular/material/divider';
-import { BdServerSyncButtonComponent } from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import {
+  BdServerSyncButtonComponent
+} from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
 import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
 import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
@@ -105,8 +107,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   protected currentInstance: InstanceDto;
   protected activeInstance: InstanceDto;
-  protected isInstalled: boolean;
-  protected hasProduct: boolean;
+
+  protected isInstalled = signal(false);
+  protected hasProduct = signal(false);
 
   protected isCentral = false;
 
@@ -147,7 +150,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.states.state$.subscribe((s) => {
         this.states$.next(s);
-        this.isInstalled = !!s?.installedTags?.find((c) => c === this.currentInstance?.instance.tag);
+        this.isInstalled.set(!!s?.installedTags?.find((c) => c === this.currentInstance?.instance.tag));
       }),
     );
     this.subscription.add(
@@ -163,7 +166,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       combineLatest([this.instances.current$, this.products.products$]).subscribe(([currentInstance, products]) => {
         const product = currentInstance?.instanceConfiguration?.product;
-        this.hasProduct = !!products?.find((p) => p.key.name === product?.name && p.key.tag === product?.tag);
+        this.hasProduct.set(!!products?.find((p) => p.key.name === product?.name && p.key.tag === product?.tag));
       }),
     );
 

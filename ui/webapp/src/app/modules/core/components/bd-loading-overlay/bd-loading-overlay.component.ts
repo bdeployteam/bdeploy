@@ -12,7 +12,7 @@ export class BdLoadingOverlayComponent {
   @Input() show: boolean;
   @Input() mode: 'dim' | 'hide' = 'dim';
 
-  @HostBinding('attr.data-cy') get dataCy() {
+  @HostBinding('attr.data-testid') get dataCy() {
     return this.show ? 'loading' : 'loaded';
   }
 }

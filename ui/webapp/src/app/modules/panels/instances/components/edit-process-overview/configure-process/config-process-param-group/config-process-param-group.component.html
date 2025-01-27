@@ -140,7 +140,7 @@
                   @for (p of sortPairs(group.pairs); track p) {
                     @if ((!!p.value || group.isSelectMode) && hasPairSearchMatch(p)) {
                       <div
-                        [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
+                        [attr.data-testid]="p.descriptor ? p.descriptor.id : p.value.id"
                         class="flex"
                         >
                         <ng-template #popup>

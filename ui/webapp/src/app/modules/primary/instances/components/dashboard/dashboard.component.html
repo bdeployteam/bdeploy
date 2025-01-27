@@ -76,7 +76,7 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container>
-      @if (hasProduct) {
+      @if (hasProduct()) {
         @if (currentInstance.instance.tag !== currentInstance.activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)) {
           <div
             class="bd-rect-card flex flex-col mb-2.5"
@@ -108,8 +108,8 @@
                     text="Install"
                     icon="deployed_code_update"
                     (click)="doInstall(currentInstance.instance.tag)"
-                    [collapsed]="isInstalled"
-                    [disabled]="(mappedInstall$ | async) || isInstalled || !(auth.isCurrentScopeWrite$ | async) || !hasProduct"
+                    [collapsed]="isInstalled()"
+                    [disabled]="(mappedInstall$ | async) || isInstalled() || !(auth.isCurrentScopeWrite$ | async) || !hasProduct()"
                     [loadingWhen$]="mappedInstall$"
                     tooltip="below"
                   ></app-bd-button>
@@ -118,8 +118,8 @@
                     text="Activate"
                     icon="deployed_code_alert"
                     (click)="doActivate(currentInstance.instance.tag)"
-                    [collapsed]="!isInstalled"
-                    [disabled]="(mappedActivate$ | async) || !isInstalled || !(auth.isCurrentScopeWrite$ | async)"
+                    [collapsed]="!isInstalled()"
+                    [disabled]="(mappedActivate$ | async) || !isInstalled() || !(auth.isCurrentScopeWrite$ | async)"
                     [loadingWhen$]="mappedActivate$"
                     tooltip="below"
                   ></app-bd-button>

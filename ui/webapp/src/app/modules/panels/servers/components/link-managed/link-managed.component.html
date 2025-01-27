@@ -6,7 +6,7 @@
         Visit the managed server you want to link in a separate window now, and drag the
         <em>link information card</em> from the <strong>Link Instance Group</strong> panel to the zone below.
       </div>
-      <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident" />
+      <input type="file" hidden (change)="onUpload($event)" data-testid="managed-ident" />
       <app-bd-file-drop
         hintText="Drop managed server information here"
         (drop)="onDrop($event)"

@@ -4,7 +4,7 @@
       @if (!panel || (areas.panelMaximized$ | async)) {
         <app-bd-current-scope></app-bd-current-scope>
       }
-      <span [matTooltip]="header" [matTooltipShowDelay]="1000" class="truncate" data-cy="dialog-title"
+      <span [matTooltip]="header" [matTooltipShowDelay]="1000" class="truncate" data-testid="dialog-title"
         >{{ header }}</span
         >
       </div>
