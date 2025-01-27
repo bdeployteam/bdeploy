@@ -20,6 +20,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
@@ -487,8 +488,12 @@ public class ProductResourceImpl implements ProductResource {
             mapping.node = node;
             return mapping;
         }).toList();
-        dataHolder.fixedVariables = selectedInstanceTemplate.directlyUsedTemplateVars.stream()
-                .map(x -> new TemplateVariableFixedValueOverride(x.id, "<" + x.type + " VALUE>")).toList();
+        dataHolder.fixedVariables = Stream
+                .concat(selectedInstanceTemplate.directlyUsedTemplateVars.stream(),
+                        selectedInstanceTemplate.groups.stream().flatMap(group -> group.groupVariables.stream()))//
+                .filter(var -> var.defaultValue == null)//
+                .map(var -> new TemplateVariableFixedValueOverride(var.id, "<" + var.type + " VALUE>"))//
+                .toList();
 
         ObjectMapper mapper = JacksonHelper.getDefaultYamlObjectMapper();
         String yamlOutput;
