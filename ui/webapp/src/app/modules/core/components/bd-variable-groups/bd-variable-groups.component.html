@@ -201,7 +201,7 @@
                   <app-bd-value-editor
                     [label]="!!p.descriptor ? p.descriptor.name : p.value.id"
                     [name]="p.value.id"
-                    [ngModel]="p.value?.value"
+                    [ngModel]="p.value.value"
                     (ngModelChange)="doChangeVariable(p, $event)"
                     [defaultValue]="p.descriptor?.defaultValue"
                     errorDisplay="immediate"
@@ -224,6 +224,7 @@
                     [product]="instance?.config?.product"
                     [group]="(instanceGroups.current$ | async)?.name"
                     [actions]="actions"
+                    [validateRegex]="p.descriptor?.validateRegex"
                   >
                   </app-bd-value-editor>
                 </div>

@@ -130,6 +130,7 @@ startCommand: <10>
       parameter: "--number"
       defaultValue: "{{X:instance-number}}"  <11>
       type: NUMERIC
+      validateRegex: ^\d+$ <12>
     - id: "my.param.2"
       name: "My textual parameter"
       longDescription: "This is a textual parameter"
@@ -144,33 +145,33 @@ startCommand: <10>
       longDescription: "This is only visible and configurable if my.param.2 has value 'Value 1'"
       parameter: "--conditional"
       mandatory: true
-      condition: <12>
+      condition: <13>
         parameter: "my.param.2"
         must: EQUAL
         value: "Value 1"
-    - template: param.template <13>
+    - template: param.template <14>
 
-stopCommand: <14>
+stopCommand: <15>
   ...
 
-endpoints: <15>
+endpoints: <16>
   http:
-    - id: "my-endpoint" <16>
+    - id: "my-endpoint" <17>
       path: "path/to/the/endpoint"
-      port: "{{V:port-param}}" <17>
+      port: "{{V:port-param}}" <18>
       secure: false
     - id: "Startup Endpoint"
-      type: PROBE_STARTUP <18>
+      type: PROBE_STARTUP <19>
       path: "startup/endpoint"
       port: "{{V:port-param}}"
       secure: false
     - id: "Liveness Endpoint"
-      type: PROBE_ALIVE <18>
+      type: PROBE_ALIVE <19>
       path: "liveness/endpoint"
       port: "{{V:port-param}}"
       secure: false
 
-runtimeDependencies: <19>
+runtimeDependencies: <20>
   - "adoptium/jre:1.8.0_202-b08"
 ```
 
@@ -185,14 +186,15 @@ runtimeDependencies: <19>
 9. Allowed configuration directories preset - only valid for `CLIENT` applications. These relative sub-directories of the configuration files directory tree will be made available to this application when run on a client PC. This can later also be configured per process using the [Allowable Configuration Directories](/user/instance/#allowable-configuration-directories) configuration.
 10. The start command of the **Application**. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of [parameter](#supported-parameters-attributes) attributes. To apply e.g. instance-specific values, [Variable Expansion](/power/variables/#variable-expansions) is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
 11. [Variable Expansion](/power/variables/#variable-expansions) can also be used to expand to [Instance Variables](/user/instance/#instance-variables) in default values. These instance variables are required to exist once the application is configured in an instance. They can either be pre-provided using [Instance Templates](/user/instance/#instance-templates) or need to be manually created when required.
-12. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter of the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
-13. A product can provide [parameter templates](#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
-14. The optional stop command can be specified to provide a mechanism for a clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
-15. Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. **BDeploy** can later on call these endpoints when instructed to do so by a third-party application.
-16. The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of **BDeploy** servers.
-17. [Variable Expansion](/power/variables/#variable-expansions) can be used on most of the endpoint properties.
-18. The type of the endpoint can be used to control how the endpoint is handled by **BDeploy**.
-19. Optional runtime dependencies. These dependencies are included in the **Product** when building it. Dependencies are fetched from [**Software Repositories**](/power/runtimedependencies/#software-repositories). `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptium/jre}}` [Variable Expansion](/power/variables/#variable-expansions), e.g. `launcherPath: {{M:adoptium/jre}}/bin/java`. Note that the declared _dependency_ does not need to specify an operating system, but **must** specify a _version_. This will be resolved by **BDeploy** to either an exact match if available, or a operating system specific match, e.g. `adoptium/jre/linux:1.8.0_202-b08` on `LINUX`. When _referencing_ the dependency in a [Variable Expansion](/power/variables/#variable-expansions), neither an operating system nor a version is required - in fact it must not be specified.
+12. An optional regular expression that will be used to validate input on UI parameter configuration form (not applicable to `BOOLEAN` type).
+13. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter of the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
+14. A product can provide [parameter templates](#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
+15. The optional stop command can be specified to provide a mechanism for a clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
+16. Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. **BDeploy** can later on call these endpoints when instructed to do so by a third-party application.
+17. The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of **BDeploy** servers.
+18. [Variable Expansion](/power/variables/#variable-expansions) can be used on most of the endpoint properties.
+19. The type of the endpoint can be used to control how the endpoint is handled by **BDeploy**.
+20. Optional runtime dependencies. These dependencies are included in the **Product** when building it. Dependencies are fetched from [**Software Repositories**](/power/runtimedependencies/#software-repositories). `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptium/jre}}` [Variable Expansion](/power/variables/#variable-expansions), e.g. `launcherPath: {{M:adoptium/jre}}/bin/java`. Note that the declared _dependency_ does not need to specify an operating system, but **must** specify a _version_. This will be resolved by **BDeploy** to either an exact match if available, or a operating system specific match, e.g. `adoptium/jre/linux:1.8.0_202-b08` on `LINUX`. When _referencing_ the dependency in a [Variable Expansion](/power/variables/#variable-expansions), neither an operating system nor a version is required - in fact it must not be specified.
 
 ### Supported `processControl` attributes
 
@@ -837,6 +839,7 @@ definitions: <1>
     type: "STRING"
     defaultValue: "someDefaultValue"
     groupName: "Instance Variable Definitions Group"
+    validateRegex: ^[a-zA-Z]+$
 ```
 
 1. File consists of a single list of `definitions` containing an arbitrary amount of instance variable definitions.
@@ -856,6 +859,7 @@ Instance variable definitions support a subset of [supported parameters attribut
 | `fixed`           | Whether the instance variable is fixed. This means that the variable can **not** be changed by the user.                                                                           |
 | `suggestedValues` | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                 |
 | `customEditor`    | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable.                                                             |
+| `validateRegex`   | An optional regular expression that will be used to validate input on UI instance variables configuration form (not applicable to `BOOLEAN` type).                                 |
 
 ## system-template.yaml
 
@@ -869,6 +873,7 @@ systemVariables: <1>
   - id: test.system.var
     description: "A test system variable"
     value: testValue
+    validateRegex: ^[a-zA-Z]+$
 
 templateVariables: <2>
   - id: node-base-name
@@ -915,6 +920,7 @@ When applying a **System Template** from the CLI, all mappings need to be provid
 | `fixed`           | Whether the system variable is fixed. This means that the variable can **not** be changed by the user.                                                                            |
 | `suggestedValues` | An optional list of suggested values for variable of type STRING (the default). The Web UI will present this list when editing the variable value.                                |
 | `customEditor`    | Reserved, currently not supported.                                                                                                                                                |
+| `validateRegex`   | An optional regular expression that will be used to validate input on UI system variables configuration form (not applicable to `BOOLEAN` type).                                  |
 
 ### Supported `templateVariables` Attributes
 

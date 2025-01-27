@@ -224,6 +224,7 @@
                   [group]="(groups.current$ | async)?.name"
                   [appServerIssuesValidator]="p.value ? p.value.id : p.descriptor.id"
                   [actions]="actions"
+                  [validateRegex]="p.descriptor?.validateRegex"
                 >
                 </app-bd-value-editor>
               </div>

@@ -66,6 +66,9 @@ public class VariableDescriptor {
     @JsonPropertyDescription("The ID of a custom editor which is provided through a BDeploy plugin. If available, this editor will be provided to the user instead of (or in addition to) the default one.")
     public String customEditor;
 
+    @JsonPropertyDescription("Regular expression used to validate the variable's value on the UI, if provided.")
+    public String validateRegex;
+
     @Generated("Eclipse")
     @Override
     public int hashCode() {

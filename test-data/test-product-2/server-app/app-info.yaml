@@ -70,6 +70,7 @@ startCommand:
       groupName: "Test Parameters"
       parameter: "--subprocesses"
       type: NUMERIC
+      validateRegex: ^\d+$
     - uid: "param.out"
       name: "Output"
       longDescription: "A data file parameter"
@@ -102,12 +103,14 @@ startCommand:
       groupName: "Test Parameters"
       parameter: "--server"
       type: SERVER_PORT
+      validateRegex: "^\\d+$"
     - uid: "param.client.port"
       name: "Test Client Port"
       longDescription: "A client port"
       groupName: "Test Parameters"
       parameter: "--client"
       type: CLIENT_PORT
+      validateRegex: '^\d+$'
     - uid: "param.testboolean"
       name: "Boolean"
       longDescription: "A boolean parameter"

@@ -5,7 +5,8 @@ definitions:
     name: "Instance Variable Definition 1"
     longDescription: "The instance variable definition for variable instance.variable.v1"
     type: "STRING"
-    defaultValue: "defaultDefinedV1"
+    defaultValue: "defaultDefinedVone"
+    validateRegex: ^[a-zA-Z]+$
     groupName: "Instance Variable Definitions"
   - id: instance.variable.v2
     name: "Instance Variable Definition 2"

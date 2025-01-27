@@ -151,6 +151,11 @@ describe('System Template Tests', () => {
           .should('exist')
           .within(() => {
             cy.get('input[name="test.system.var_val"]').should('have.value', 'testValue');
+            cy.get('mat-error').should('not.exist');
+            cy.get('input[name="test.system.var_val"]').clear().type('testValue1');
+            cy.get('mat-error')
+              .contains('Test System Variable Definition value does not match regex: ^[a-zA-Z]+$')
+              .should('exist');
           });
         cy.get('mat-panel-title').click();
       });
@@ -242,11 +247,18 @@ describe('System Template Tests', () => {
       cy.get('mat-panel-title').click();
       cy.get('app-bd-form-input[name="instance.variable.v1_val"]').within(() => {
         cy.get('input[name="instance.variable.v1_val"]').should('have.value', 'value-v1');
+        cy.get('mat-error')
+          .contains('Instance Variable Definition 1 value does not match regex: ^[a-zA-Z]+$')
+          .should('exist');
+        cy.get('input[name="instance.variable.v1_val"]').clear().type('valuevone');
+        cy.get('mat-error').should('not.exist');
       });
       cy.get('app-bd-form-input[name="instance.variable.v2_val"]').within(() => {
         cy.get('input[name="instance.variable.v2_val"]').should('have.value', 'demo');
       });
       cy.get('mat-panel-title').click();
     });
+
+    cy.get('button[data-cy^="Apply"]').click();
   });
 });

@@ -25,6 +25,7 @@ import {
 } from 'src/app/models/gen.dtos';
 import { getRenderPreview } from '../../utils/linked-values.utils';
 import { bdValidationMessage } from '../../validators/messages';
+import { VariableRegexValidationContext } from '../../validators/variable-regex-validator.directive';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
 import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
@@ -69,6 +70,8 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
   @Input() completionPrefixes: ContentCompletion[];
 
   @Input() actions: TemplateRef<unknown>;
+  @Input() validateRegex: string;
+  protected variableRegexValidationContext: VariableRegexValidationContext;
 
   @Output() customEditorLoaded = new EventEmitter<CustomEditor>();
 
@@ -119,6 +122,13 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     if (this.type !== VariableType.PASSWORD || this.customEditor) {
       this.passwordLock = false;
     }
+
+    this.variableRegexValidationContext = {
+      regex: this.validateRegex,
+      system: this.system,
+      instance: this.instance,
+      process: this.process,
+    };
   }
 
   onBlur() {

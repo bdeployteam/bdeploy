@@ -47,6 +47,10 @@
       <strong><div>Mandatory:</div></strong>
       <div class="local-break">This parameter cannot be removed</div>
     </ng-container>
+    <ng-container *ngIf="descriptor?.validateRegex">
+      <strong><div>Validation:</div></strong>
+      <code>{{ descriptor.validateRegex }}</code>
+    </ng-container>
   </div>
 </mat-card>
 <mat-card appearance="outlined" *ngIf="!descriptor" class="flex flex-col gap-1 p-2.5 max-w-[450px]">

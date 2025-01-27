@@ -18,8 +18,10 @@ templateVariables:
 
 systemVariables:
   - id: test.system.var
+    name: "Test System Variable Definition"
     description: "A test system variable"
     value: testValue
+    validateRegex: ^[a-zA-Z]+$
   - id: system.variable.password
     name: "System Password Variable Definition"
     longDescription: "The system variable of type PASSWORD"
