@@ -7,7 +7,7 @@
         <app-bd-banner [banner]="banner"></app-bd-banner>
         <mat-form-field appearance="fill">
           <mat-label>Banner Text</mat-label>
-          <textarea matInput [(ngModel)]="banner.text" class="!h-28" (ngModelChange)="onChange()"></textarea>
+          <textarea matInput [(ngModel)]="banner.text" class="h-28!" (ngModelChange)="onChange()"></textarea>
         </mat-form-field>
         <app-color-select-group (colorChanged)="doChangeColor($event)"></app-color-select-group>
         <mat-divider></mat-divider>

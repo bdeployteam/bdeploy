@@ -26,6 +26,7 @@ export const stopCoverage = async (browser: Browser, page: Page) => {
       page.coverage.stopJSCoverage(),
       page.coverage.stopCSSCoverage(),
     ]);
+
     const coverageList = [...jsCoverage, ...cssCoverage];
 
     if (coverageList?.length) {

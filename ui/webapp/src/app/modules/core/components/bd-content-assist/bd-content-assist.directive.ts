@@ -28,7 +28,7 @@ export class BdContentAssistDirective implements OnInit {
     this.appBdContentAssist.show(this.getWordInfo().word);
   }
 
-  @HostListener('blur') onBlur() {
+  @HostListener('blur-sm') onBlur() {
     this.appBdContentAssist.hide();
   }
 

@@ -1,7 +1,7 @@
 <div [class.bd-editor-initializing]="!(inited$ | async)" class="max-w-full flex-auto flex flex-col w-full h-full">
   <ngx-monaco-editor
     name="content"
-    class="!h-full"
+    class="h-full!"
     [(ngModel)]="editorContent"
     (ngModelChange)="onModelChange($event)"
     [options]="editorOptions"
