@@ -106,11 +106,11 @@ export class SoftwareDetailsService implements OnDestroy {
     });
   }
 
-  public downloadResponseFile(data: InstTemplateData) {
+  public downloadResponseFile(data: InstTemplateData, version: string) {
     const instanceTemplate = data.config.name;
     this.http
       .get(`${this.baseProductApiPath()}/get-response-file`, {
-        params: { productId: data.productId, instanceTemplate },
+        params: { productId: data.productId, version, instanceTemplate },
         responseType: 'text',
       })
       .subscribe((yaml) => {

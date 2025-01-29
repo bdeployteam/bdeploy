@@ -84,6 +84,6 @@ export class SoftwareDetailsComponent implements OnInit {
   }
 
   protected doDownloadResponseFile = (data: InstTemplateData) => {
-    this.detailsService.downloadResponseFile(data);
+    this.detailsService.downloadResponseFile(data, this.asProduct(this.detailsService.softwarePackage$.value).key.tag);
   };
 }

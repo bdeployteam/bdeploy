@@ -176,6 +176,6 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   protected doDownloadResponseFile = (data: InstTemplateData) => {
-    this.products.downloadResponseFile(data);
+    this.products.downloadResponseFile(data, this.singleProduct.productTag$.value);
   };
 }
