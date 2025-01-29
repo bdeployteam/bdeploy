@@ -69,7 +69,7 @@ public interface ProductResource {
     @GET
     @Path("/get-response-file")
     public String getResponseFile(@QueryParam("productId") String productId, @QueryParam("version") String version,
-            @QueryParam("instanceTemplate") String instanceTemplate);
+            @QueryParam("instanceTemplate") String instanceTemplate, @QueryParam("includeDefaults") Boolean includeDefaults);
 
     @Path("/bulk")
     public ProductBulkResource getBulkResource();

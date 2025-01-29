@@ -57,6 +57,7 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -423,7 +424,7 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public String getResponseFile(String productId, String version, String instanceTemplate) {
+    public String getResponseFile(String productId, String version, String instanceTemplate, Boolean includeDefaults) {
         List<ProductDto> versions = list(productId + ProductManifestBuilder.PRODUCT_KEY_SUFFIX);
         if (versions.isEmpty()) {
             throw new WebApplicationException("Product with ID " + productId + " could not be found");
@@ -470,6 +471,29 @@ public class ProductResourceImpl implements ProductResource {
                 break;
         }
 
+        Stream<TemplateVariable> tempVarStream = Stream.concat(selectedInstanceTemplate.directlyUsedTemplateVars.stream(),
+                selectedInstanceTemplate.groups.stream().flatMap(group -> group.groupVariables.stream()));
+        List<TemplateVariableFixedValueOverride> tempVars;
+        if (includeDefaults != null && includeDefaults) {
+            tempVars = tempVarStream//
+                    .sorted((a, b) -> {
+                        boolean aHasDefault = a.defaultValue != null;
+                        boolean bHasDefault = b.defaultValue != null;
+                        if (aHasDefault == bHasDefault) {
+                            return 0;
+                        }
+                        return aHasDefault ? 1 : -1;
+                    })//
+                    .map(var -> new TemplateVariableFixedValueOverride(var.id,
+                            var.defaultValue != null ? var.defaultValue : "<" + var.type + " VALUE>"))//
+                    .toList();
+        } else {
+            tempVars = tempVarStream//
+                    .filter(var -> var.defaultValue == null)
+                    .map(var -> new TemplateVariableFixedValueOverride(var.id, "<" + var.type + " VALUE>"))//
+                    .toList();
+        }
+
         InstanceTemplateReferenceDescriptor dataHolder = new InstanceTemplateReferenceDescriptor();
         dataHolder.name = "Instance of " + selectedVersion.name;
         dataHolder.description = "This is an instance containing " + selectedVersion.name + (versionSet ? ":" + version : "");
@@ -488,12 +512,7 @@ public class ProductResourceImpl implements ProductResource {
             mapping.node = node;
             return mapping;
         }).toList();
-        dataHolder.fixedVariables = Stream
-                .concat(selectedInstanceTemplate.directlyUsedTemplateVars.stream(),
-                        selectedInstanceTemplate.groups.stream().flatMap(group -> group.groupVariables.stream()))//
-                .filter(var -> var.defaultValue == null)//
-                .map(var -> new TemplateVariableFixedValueOverride(var.id, "<" + var.type + " VALUE>"))//
-                .toList();
+        dataHolder.fixedVariables = tempVars;
 
         ObjectMapper mapper = JacksonHelper.getDefaultYamlObjectMapper();
         String yamlOutput;

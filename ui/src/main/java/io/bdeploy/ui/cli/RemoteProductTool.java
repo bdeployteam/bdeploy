@@ -83,6 +83,10 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         @Validator(NonExistingPathValidator.class)
         String createResponseFile();
 
+        @Help(value = "If this flag is set, the response file will include entries for all variables that have default values.",
+              arg = false)
+        boolean includeDefaults() default false;
+
         @Help(value = "The name of the instance template that a response file shall be created for. This parameter is optional if the product only has a single instance template.")
         String instanceTemplate();
     }
@@ -293,7 +297,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     private DataResult createResponseFile(RemoteService remote, ProductConfig config) {
         String yamlOutput = getProductRsrc(remote, config).getResponseFile(config.product(), config.version(),
-                config.instanceTemplate());
+                config.instanceTemplate(), config.includeDefaults());
 
         String fileExtension = ".yaml";
         String responseFilePath = config.createResponseFile();

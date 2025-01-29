@@ -84,6 +84,14 @@ export class SoftwareDetailsComponent implements OnInit {
   }
 
   protected doDownloadResponseFile = (data: InstTemplateData) => {
-    this.detailsService.downloadResponseFile(data, this.asProduct(this.detailsService.softwarePackage$.value).key.tag);
+    this.dialog
+      .confirm('Include defaults?', 'Do you want to include variables that have a default value in the response file?')
+      .subscribe((result) =>
+        this.detailsService.downloadResponseFile(
+          data,
+          this.asProduct(this.detailsService.softwarePackage$.value).key.tag,
+          result,
+        ),
+      );
   };
 }
