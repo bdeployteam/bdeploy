@@ -58,11 +58,11 @@ export class ProductsService {
     return this.http.get<ProductDto[]>(`${this.apiPath(group)}/list`);
   }
 
-  public downloadResponseFile(data: InstTemplateData) {
+  public downloadResponseFile(data: InstTemplateData, version: string, includeDefaults: boolean) {
     const instanceTemplate = data.config.name;
     this.http
       .get(`${this.apiPath(this.group)}/get-response-file`, {
-        params: { productId: data.productId, instanceTemplate },
+        params: { productId: data.productId, version, instanceTemplate, includeDefaults },
         responseType: 'text',
       })
       .subscribe((yaml) => {

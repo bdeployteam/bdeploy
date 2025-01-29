@@ -176,6 +176,8 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   protected doDownloadResponseFile = (data: InstTemplateData) => {
-    this.products.downloadResponseFile(data);
+    this.dialog
+      .confirm('Include defaults?', 'Do you want to include variables that have a default value in the response file?')
+      .subscribe((result) => this.products.downloadResponseFile(data, this.singleProduct.productTag$.value, result));
   };
 }
