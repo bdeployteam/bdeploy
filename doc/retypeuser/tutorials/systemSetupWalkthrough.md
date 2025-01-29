@@ -161,6 +161,12 @@ defaultMappings:
 
 Note: The node of all client applications must be _exactly_ "Client Applications".
 
+A response file may also be created via the CLI by using
+
+```
+bdeploy remote-product --instanceGroup=<GROUP_NAME> --createResponseFile=<PATH/TO/RESPONSE_FILE>.yaml --product=<PRODUCT_ID>
+```
+
 First we want to create an empty system. The following command can be used for this.<br>
 Note that the return value of this operation will contain the `SYSTEM_ID` (which is not the same thing as the `SYSTEM_NAME`), which will be required in the next step.
 
