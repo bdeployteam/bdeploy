@@ -17,7 +17,8 @@ public enum BrowserDialogTableColumn {
     SERVER_VERSION("Server Version", String.class),
     AUTOSTART("Autostart", Boolean.class),
     START_SCRIPT("Start Script", String.class),
-    FILE_ASSOC_EXTENSION("File Association", String.class);
+    FILE_ASSOC_EXTENSION("File Association", String.class),
+    OFFLINE_LAUNCHABLE("Supports Offline", Boolean.class);
 
     private final String columnName;
     private final Class<?> columnClass;

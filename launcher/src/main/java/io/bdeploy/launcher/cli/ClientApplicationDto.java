@@ -72,6 +72,11 @@ public class ClientApplicationDto {
     public String fileAssocExtension;
 
     /**
+     * Whether the application may be launched without contacting the BDeploy minion first
+     */
+    public boolean offlineStartAllowed;
+
+    /**
      * Creates a new instance using the given configuration
      */
     public static ClientApplicationDto create(ClickAndStartDescriptor desc, ClientApplicationConfiguration cfg,
@@ -93,6 +98,7 @@ public class ClientApplicationDto {
         dto.supportsAutostart = processControlDescr.supportsAutostart;
         dto.startScriptName = processControlDescr.startScriptName;
         dto.fileAssocExtension = processControlDescr.fileAssocExtension;
+        dto.offlineStartAllowed = processControlDescr.offlineStartAllowed;
 
         ApplicationConfiguration appConfig = cfg.appConfig;
         dto.id = appConfig.id;
