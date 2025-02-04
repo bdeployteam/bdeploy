@@ -91,13 +91,17 @@ public class BrowserDialogTableModel extends AbstractTableModel {
     }
 
     @Override
-    public String getColumnName(int columnIndex) {
-        return BrowserDialogTableColumn.fromIndex(columnIndex).getColumnName();
+    public Class<?> getColumnClass(int columnIndex) {
+        return BrowserDialogTableColumn.fromIndex(columnIndex).columnClass;
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return BrowserDialogTableColumn.fromIndex(columnIndex).getColumnClass();
+    public String getColumnName(int columnIndex) {
+        return BrowserDialogTableColumn.fromIndex(columnIndex).columnName;
+    }
+
+    public String getColumnHint(int columnIndex) {
+        return BrowserDialogTableColumn.fromIndex(columnIndex).columnHint;
     }
 
     @Override

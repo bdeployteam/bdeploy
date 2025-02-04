@@ -298,7 +298,7 @@ public class BrowserDialog extends BaseDialog {
         columnR.setPreferredWidth(150);
 
         TableColumn columnA = columnModel.getColumn(BrowserDialogTableColumn.AUTOSTART.ordinal());
-        columnA.setPreferredWidth(40);
+        columnA.setPreferredWidth(10);
         columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(bhiveDir, auditor, sortModel));
 
         TableColumn columnS = columnModel.getColumn(BrowserDialogTableColumn.START_SCRIPT.ordinal());
@@ -308,6 +308,9 @@ public class BrowserDialog extends BaseDialog {
         TableColumn columnF = columnModel.getColumn(BrowserDialogTableColumn.FILE_ASSOC_EXTENSION.ordinal());
         columnF.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
                 .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, metadata.fileAssocExtension))));
+
+        TableColumn columnO = columnModel.getColumn(BrowserDialogTableColumn.OFFLINE_LAUNCHABLE.ordinal());
+        columnO.setPreferredWidth(10);
 
         // Add MouseAdapter
         table.addMouseListener(new MouseAdapter() {

@@ -42,6 +42,11 @@ public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCel
             setText(v.toString());
         }
 
+        // Apply tooltip
+        if (t.getModel() instanceof BrowserDialogTableModel bdTableModel) {
+            setToolTipText(bdTableModel.getColumnHint(colIdx));
+        }
+
         // Apply sort icon
         SortOrder sortOrder = getSortOrder(t, colIdx);
         switch (sortOrder) {
