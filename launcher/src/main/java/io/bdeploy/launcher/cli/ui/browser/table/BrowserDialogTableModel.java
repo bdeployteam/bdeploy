@@ -91,13 +91,17 @@ public class BrowserDialogTableModel extends AbstractTableModel {
     }
 
     @Override
-    public String getColumnName(int columnIndex) {
-        return BrowserDialogTableColumn.fromIndex(columnIndex).getColumnName();
+    public Class<?> getColumnClass(int columnIndex) {
+        return BrowserDialogTableColumn.fromIndex(columnIndex).columnClass;
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return BrowserDialogTableColumn.fromIndex(columnIndex).getColumnClass();
+    public String getColumnName(int columnIndex) {
+        return BrowserDialogTableColumn.fromIndex(columnIndex).columnName;
+    }
+
+    public String getColumnHint(int columnIndex) {
+        return BrowserDialogTableColumn.fromIndex(columnIndex).columnHint;
     }
 
     @Override
@@ -155,6 +159,8 @@ public class BrowserDialogTableModel extends AbstractTableModel {
                 return metadata != null ? metadata.startScriptName : "";
             case FILE_ASSOC_EXTENSION:
                 return metadata != null ? metadata.fileAssocExtension : "";
+            case OFFLINE_LAUNCHABLE:
+                return metadata.offlineStartAllowed;
         }
         return null;
     }

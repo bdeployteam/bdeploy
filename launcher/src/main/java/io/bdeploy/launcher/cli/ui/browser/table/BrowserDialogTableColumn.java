@@ -8,31 +8,37 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.Instan
  */
 public enum BrowserDialogTableColumn {
 
-    APP("Application", String.class),
-    IG("Instance Group", String.class),
-    INSTANCE("Instance", String.class),
-    PURPOSE("Purpose", InstancePurpose.class),
-    PRODUCT("Product", String.class),
-    REMOTE("Remote", String.class),
-    SERVER_VERSION("Server Version", String.class),
-    AUTOSTART("Autostart", Boolean.class),
-    START_SCRIPT("Start Script", String.class),
-    FILE_ASSOC_EXTENSION("File Association", String.class);
+    APP(String.class, "Application",//
+            "The name of the client application"),
+    IG(String.class, "Instance Group",//
+            "The name of the instance group on the BDeploy minion"),
+    INSTANCE(String.class, "Instance",//
+            "The name of the instance on the BDeploy minion"),
+    PURPOSE(InstancePurpose.class, "Purpose",//
+            "The purpose of this application"),
+    PRODUCT(String.class, "Product",//
+            "The version number of the product"),
+    REMOTE(String.class, "Remote",//
+            "The URL to the BDeploy minion"),
+    SERVER_VERSION(String.class, "Server Version",//
+            "The version number of the BDeploy minion"),
+    AUTOSTART(Boolean.class, "Auto.",//
+            "Whether the application will be launched whenever the underlying OS is started"),
+    START_SCRIPT(String.class, "Start Script",//
+            "The name of the start script of this application"),
+    FILE_ASSOC_EXTENSION(String.class, "File Association",//
+            "The file ending that this application is associated with"),
+    OFFLINE_LAUNCHABLE(Boolean.class, "Offl.",//
+            "Whether this application supports launching without contacting the BDeploy minion first");
 
-    private final String columnName;
-    private final Class<?> columnClass;
+    public final Class<?> columnClass;
+    public final String columnName;
+    public final String columnHint;
 
-    private BrowserDialogTableColumn(String columnName, Class<?> columnClass) {
-        this.columnName = columnName;
+    private BrowserDialogTableColumn(Class<?> columnClass, String columnName, String columnHint) {
         this.columnClass = columnClass;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public Class<?> getColumnClass() {
-        return columnClass;
+        this.columnName = columnName;
+        this.columnHint = columnHint;
     }
 
     public static BrowserDialogTableColumn fromIndex(int i) {
