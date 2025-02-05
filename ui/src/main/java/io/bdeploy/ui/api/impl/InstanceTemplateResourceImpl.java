@@ -261,15 +261,22 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         // We cannot simply set the tree ID, since the product on the target may not be available (yet).
         List<FileStatusDto> cfgFiles = InstanceResourceImpl.getUpdatesFromTree(hive, "", new ArrayList<>(),
                 pmf.getConfigTemplateTreeId());
-        InstanceUpdateDto iud = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, nodes), cfgFiles);
+        InstanceConfigurationDto configDto = new InstanceConfigurationDto(cfg, nodes);
 
         try {
-            List<ApplicationValidationDto> validation = pus.validate(iud, apps, system, Collections.emptyList());
+            // since the config files are grabbed from the product tree, we validate them as "existing" files.
+            // this way the behavior is consistent, since the user did not "change" any file. further down we
+            // then need to pass those files as per usual (update), as the target server may not have the product
+            // and thus cannot load those "existing" files.
+            List<ApplicationValidationDto> validation = pus.validate(new InstanceUpdateDto(configDto, null), apps, system,
+                    cfgFiles);
             if (!validation.isEmpty()) {
                 validation.forEach(v -> log.warn("Validation problem in instance: {}, app: {}, param: {}: {}", cfg.name, v.appId,
                         v.paramId, v.message));
+                ApplicationValidationDto firstMessage = validation.getFirst();
                 return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
-                        "Failed to validate instance, first message: " + validation.get(0).message);
+                        "Failed to validate instance, first message: " + firstMessage.message + " (" + firstMessage.appId + ", "
+                                + firstMessage.paramId + ")");
             }
         } catch (Exception e) {
             log.warn("Exception validating instance {} created from system template", cfg.name, e);
@@ -278,7 +285,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         }
 
         try {
-            ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNamedMaster(group).update(iud,
+            ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNamedMaster(group)
+                    .update(new InstanceUpdateDto(configDto, cfgFiles),
                     null);
         } catch (Exception e) {
             log.warn("Cannot create instance {} for system template.", cfg.name, e);
