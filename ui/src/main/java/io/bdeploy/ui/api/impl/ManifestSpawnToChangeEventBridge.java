@@ -22,6 +22,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
+import io.bdeploy.ui.GroupLockService;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 
@@ -32,6 +33,9 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
 
     @Inject
     private ChangeEventManager events;
+
+    @Inject
+    private GroupLockService gls;
 
     private final BHiveRegistry reg;
 
@@ -71,7 +75,13 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
                 continue; // not interested.
             }
 
-            processKeySpawn(hiveName, hive, igmKey, swrKey, key);
+            var lock = gls.getLock(hiveName);
+            lock.readLock().lock();
+            try {
+                processKeySpawn(hiveName, hive, igmKey, swrKey, key);
+            } finally {
+                lock.readLock().unlock();
+            }
         }
     }
 
