@@ -371,6 +371,7 @@ export function gatherSpecialExpansions(
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
+  // Manifest
   result.push({
     name: 'M',
     description: 'The resolved path to a specified manifest.',
@@ -379,6 +380,8 @@ export function gatherSpecialExpansions(
     group: null,
     matches: (s) => s.startsWith('{{M:') && s.endsWith('}}'),
   });
+
+  // Environment
   result.push({
     name: 'ENV',
     description: 'The resolved environment variable value.',
@@ -397,17 +400,18 @@ export function gatherSpecialExpansions(
     matches: (s) => s.startsWith('{{DELAYED:') && s.endsWith('}}'),
   });
 
+  // Instance
   result.push({
     name: 'I:SYSTEM_PURPOSE',
     description: `The instance's configured purpose`,
-    preview: instance?.config?.purpose,
+    preview: instance?.config?.purpose ? instance.config.purpose : '<system-purpose>',
     link: '{{I:SYSTEM_PURPOSE}}',
     group: null,
   });
   result.push({
     name: 'I:NAME',
     description: `The instance name`,
-    preview: instance?.config?.name,
+    preview: instance?.config?.name ? instance.config.name : '<instance-name>',
     link: '{{I:NAME}}',
     group: null,
   });
@@ -428,14 +432,14 @@ export function gatherSpecialExpansions(
   result.push({
     name: 'I:PRODUCT_ID',
     description: `The instance's configured product ID`,
-    preview: instance?.config?.product?.name,
+    preview: instance?.config?.product?.name ? instance.config.product.name : '<product-id>',
     link: '{{I:PRODUCT_ID}}',
     group: null,
   });
   result.push({
     name: 'I:PRODUCT_TAG',
     description: `The instance's configured product version`,
-    preview: instance?.config?.product?.tag,
+    preview: instance?.config?.product?.tag ? instance.config.product.tag : '<product-tag>',
     link: '{{I:PRODUCT_TAG}}',
     group: null,
   });
@@ -446,22 +450,24 @@ export function gatherSpecialExpansions(
     link: '{{I:DEPLOYMENT_INFO_FILE}}',
     group: null,
   });
-  if (process) {
-    result.push({
-      name: 'A:NAME',
-      description: `The application name`,
-      preview: process.name,
-      link: '{{A:NAME}}',
-      group: null,
-    });
-    result.push({
-      name: 'A:UUID',
-      description: `The application ID`,
-      preview: process.id,
-      link: '{{A:UUID}}',
-      group: null,
-    });
-  }
+
+  // Application
+  result.push({
+    name: 'A:NAME',
+    description: `The application name`,
+    preview: process ? process.name : '<application-name>',
+    link: '{{A:NAME}}',
+    group: null,
+  });
+  result.push({
+    name: 'A:UUID',
+    description: `The application ID`,
+    preview: process ? process.id : '<application-id>',
+    link: '{{A:UUID}}',
+    group: null,
+  });
+
+  // Minion
   result.push({
     name: 'H:HOSTNAME',
     description:
@@ -471,6 +477,7 @@ export function gatherSpecialExpansions(
     group: null,
   });
 
+  // Operating System
   result.push({
     name: 'WINDOWS',
     description: 'Expands to the provided value only in case of the target node running Windows.',
@@ -485,7 +492,6 @@ export function gatherSpecialExpansions(
           : ''
         : '',
   });
-
   result.push({
     name: 'LINUX',
     description: 'Expands to the provided value only in case of the target node running Linux.',
@@ -501,6 +507,7 @@ export function gatherSpecialExpansions(
         : '',
   });
 
+  // Logical
   result.push({
     name: 'IF',
     description:
@@ -513,6 +520,7 @@ export function gatherSpecialExpansions(
     expand: (s) => expandCondition(s, instance, process, system),
   });
 
+  // Escaping
   result.push({
     name: 'XML',
     description: 'Escapes special XML characters',
@@ -522,7 +530,6 @@ export function gatherSpecialExpansions(
     matches: (s) => s.startsWith('{{XML:') && s.endsWith('}}'),
     expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.XML, s, instance, process, system),
   });
-
   result.push({
     name: 'JSON',
     description: 'Escapes special JSON characters',
@@ -532,7 +539,6 @@ export function gatherSpecialExpansions(
     matches: (s) => s.startsWith('{{JSON:') && s.endsWith('}}'),
     expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.JSON, s, instance, process, system),
   });
-
   result.push({
     name: 'YAML',
     description: 'Escapes special YAML characters',
