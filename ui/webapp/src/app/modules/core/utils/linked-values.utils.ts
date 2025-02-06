@@ -311,21 +311,21 @@ export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVa
   result.push({
     name: 'P:CONFIG',
     description: 'Resolved path to the configuration folder.',
-    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/N/config`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/<tag>/config`,
     link: '{{P:CONFIG}}',
     group: null,
   });
   result.push({
     name: 'P:RUNTIME',
     description: 'The directory where version specific runtime information is stored.',
-    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/N/runtime`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/<tag>/runtime`,
     link: '{{P:RUNTIME}}',
     group: null,
   });
   result.push({
     name: 'P:BIN',
     description: 'The directory where binaries are installed without pooling (per instance version).',
-    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/N`,
+    preview: `/deploy/${getInstanceIdOrMock(instance)}/bin/<tag>`,
     link: '{{P:BIN}}',
     group: null,
   });
