@@ -43,13 +43,16 @@ Used to expand to one of the special directories that are defined.
 {{P:<PATH_ID>}}
 ```
 
-| Variable       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| {{P:CONFIG}}   | Directory where all configuration files are stored.                                                                                                                                                                                                                                                                                                                                                                                            |
-| {{P:BIN}}      | Directory where all binaries are stored.                                                                                                                                                                                                                                                                                                                                                                                                       |
-| {{P:RUNTIME}}  | Directory with runtime data (e.g. stdout/stderr capture files) is stored.                                                                                                                                                                                                                                                                                                                                                                      |
-| {{P:DATA}}     | Directory shared by multiple deployments of the same instance.                                                                                                                                                                                                                                                                                                                                                                                 |
-| {{P:LOG_DATA}} | Configurable directory for log files on the server. The log data directory is shared by all instances, however, each instance has its own subdirectory therein. This expansion references the unique subdirectory applicable for the current instance. Configuration can be done via the [cli](/experts/cli/#initialization-and-local-configuration-management-commands). If not configured, the expansion defaults to be equal to {{P:DATA}}. |
+| Variable                      | Description |
+| ----------------------------- | --- |
+| {{P:ROOT}}                    | Root directory of the application. This is the parent directory of DATA and BIN. |
+| {{P:DATA}}                    | Directory shared by multiple deployments of the same instance. |
+| {{P:BIN}}                     | Directory where all binaries are stored. |
+| {{P:CONFIG}}                  | Directory where all configuration files are stored. |
+| {{P:RUNTIME}}                 | Directory with runtime data (e.g. stdout/stderr capture files) is stored. |
+| {{P:INSTANCE_MANIFEST_POOL}}  | Directory where applications that cannot be pooled over multiple instances are pooled. |
+| {{P:MANIFEST_POOL}}           | Directory where applications that can be pooled over multiple instances are pooled. |
+| {{P:LOG_DATA}}                | Configurable directory for log files on the server. The log data directory is shared by all instances, however, each instance has its own subdirectory therein. This expansion references the unique subdirectory applicable for the current instance. Configuration can be done via the [cli](/experts/cli/#initialization-and-local-configuration-management-commands). If not configured, the expansion defaults to be equal to {{P:DATA}}. |
 
 ## V: Parameter Value
 
@@ -77,13 +80,15 @@ Used to expand to values related to the instance containing the parameter's proc
 {{I:<VAR>}}
 ```
 
-| Variable             | Description                                                                       |
-| -------------------- | --------------------------------------------------------------------------------- |
-| {{I:SYSTEM_PURPOSE}} | The purpose of the instance. Allowed values: `PRODUCTIVE`, `TEST`, `DEVELOPMENT`. |
-| {{I:ID}}             | The ID of the instance.                                                           |
-| {{I:NAME}}           | The name of the instance.                                                         |
-| {{I:PRODUCT_ID}}     | The name of the 'MANIFEST' keys name of the configured product.                   |
-| {{I:PRODUCT_TAG}}    | The tag (i.e. 'version') of the configured product.                               |
+| Variable                      | Description                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| {{I:SYSTEM_PURPOSE}}          | The purpose of the instance. Allowed values: `PRODUCTIVE`, `TEST`, `DEVELOPMENT`. |
+| {{I:ID}}                      | The ID of the instance.                                                           |
+| {{I:TAG}}                     | The tag (i.e. 'version') of the instance.                                         |
+| {{I:NAME}}                    | The name of the instance.                                                         |
+| {{I:PRODUCT_ID}}              | The name of the 'MANIFEST' keys name of the configured product.                   |
+| {{I:PRODUCT_TAG}}             | The tag (i.e. 'version') of the configured product.                               |
+| {{I:DEPLOYMENT_INFO_FILE}}    | The path to the deployment info file.                                             |
 
 ## A: Application Value
 
@@ -117,7 +122,8 @@ Beware that due to the nature of variable expansion (the point in time this happ
 ## Operating System
 
 Enables conditional output of text based on the current operating system. The name of the variable refers to the name of the operating system. Using
-this variable allows the usage of different arguments for different operating systems while still using a single YAML file.
+this variable allows the usage of different arguments for different operating systems while still using a single YAML file.  
+Accepted values are: WINDOWS, LINUX, AIX, MACOS
 
 ```
 {{OSNAME:<conditional output>}}
@@ -129,24 +135,15 @@ this variable allows the usage of different arguments for different operating sy
 | {{WINDOWS:java.exe}} | Expands to _java.exe_ on _Windows_.                     |
 | java{{WINDOWS:.exe}} | Expands to _java_ on Linux and _java.exe_ on _Windows_. |
 
-## Environmental Values
+## ENV: Environmental Values
 
 Enables access to environmental variables defined in the operating system. The name of the variable refers to the name of the environmental variable.
 
-```
-{{ENV:NAME}}
-{{DELAYED:ENV:NAME}}
-```
+| Variable            | Description                                                                                                     |
+| ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| {{ENV:MY_VARIABLE}} | Expands to the value of the environmental variable when the application is **installed** on the node or client. |
 
-| Variable                    | Description                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| {{ENV:MY_VARIABLE}}         | Expands to the value of the environmental variable when the application is **installed** on the node or client. |
-| {{DELAYED:ENV:MY_VARIABLE}} | Expands to the value of the environmental variable when the application is **launched** on the node or client.  |
-
-Variables are replaced with their actual values when the process is installed on the target minion node. This might not always be desired.
-Especially for client applications it can be useful to do the actual replacing when the process is launched. This is can be achieved by prefixing
-the actual variable with the **DELAYED** prefix. This enables that different users of the client application are getting different parameter values
-depending on the value of the environmental variable.
+Variables are replaced with their actual values when the process is installed on the target minion node. This might not always be desired. Especially for client applications it can be useful to do the actual replacing when the process is launched. This is can be achieved by prefixing the actual variable with the [DELAYED](#DELAYED:-Delaying-Evaluation) prefix. This enables that different users of the client application are getting different parameter values depending on the value of the environmental variable.
 
 ## X: Instance and System Variables
 
@@ -174,3 +171,26 @@ Some examples:
 {{IF:V:use-auth?SchemeBasic:SchemeNone}}
 {{IF:X:instance-bool?ValueIfTrue:ValueIfFalse}}
 ```
+
+## DELAYED: Delaying Evaluation
+
+| Variable               | Description                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| {{DELAYED:<variable>}} | Expands to the value of the variable when the application is **launched** on the node or client. |
+
+For example:
+
+| Variable                    | Description                                                                                                     |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| {{ENV:MY_VARIABLE}}         | Expands to the value of the environmental variable when the application is **installed** on the node or client. |
+| {{DELAYED:ENV:MY_VARIABLE}} | Expands to the value of the environmental variable when the application is **launched** on the node or client.  |
+
+## Escaping Special Characters
+
+Allows escaping of special characters.
+
+| Variable  | Description                                       |
+| --------- | ------------------------------------------------- |
+| {{XML:}}  | Escapes characters that could corrupt XML files.  |
+| {{JSON:}} | Escapes characters that could corrupt JSON files. |
+| {{YAML:}} | Escapes characters that could corrupt YAML files. |
