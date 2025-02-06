@@ -129,7 +129,8 @@ public class StorageHelper {
     }
 
     private static ObjectMapper createMapper(MapperType type) {
-        ObjectMapper dm = JacksonHelper.createObjectMapper(type);
+        // we can use blackbird, since these mappers are long lived.
+        ObjectMapper dm = JacksonHelper.createObjectMapper(type, true);
 
         dm.registerModule(new BHiveJacksonModule());
 

@@ -25,8 +25,8 @@ public class JacksonHelper {
     private static final Logger log = LoggerFactory.getLogger(JacksonHelper.class);
     private static final LongAdder globalMapperCount = new LongAdder();
 
-    private static final ObjectMapper DEF_JSON_MAPPER = createObjectMapper(MapperType.JSON);
-    private static final ObjectMapper DEF_YAML_MAPPER = createObjectMapper(MapperType.YAML);
+    private static final ObjectMapper DEF_JSON_MAPPER = createObjectMapper(MapperType.JSON, true);
+    private static final ObjectMapper DEF_YAML_MAPPER = createObjectMapper(MapperType.YAML, true);
 
     public enum MapperType {
         JSON,
@@ -36,7 +36,7 @@ public class JacksonHelper {
     private JacksonHelper() {
     }
 
-    private static ObjectMapper createObjectMapper(JsonFactory factory) {
+    private static ObjectMapper createObjectMapper(JsonFactory factory, boolean useBlackbird) {
         final ObjectMapper result = new ObjectMapper(factory);
 
         // never ever generate system dependent content (line endings).
@@ -57,7 +57,10 @@ public class JacksonHelper {
         result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         result.registerModule(new Jdk8Module());
         result.registerModule(new JavaTimeModule());
-        result.registerModule(new BlackbirdModule());
+
+        if (useBlackbird) {
+            result.registerModule(new BlackbirdModule());
+        }
 
         globalMapperCount.increment();
         if (log.isDebugEnabled()) {
@@ -67,14 +70,15 @@ public class JacksonHelper {
         return result;
     }
 
-    public static ObjectMapper createObjectMapper(MapperType type) {
+    public static ObjectMapper createObjectMapper(MapperType type, boolean useBlackbird) {
         switch (type) {
             case JSON:
-                return createObjectMapper((JsonFactory) null);
+                return createObjectMapper((JsonFactory) null, useBlackbird);
             case YAML:
-                return createObjectMapper(new YAMLFactory().enable(Feature.INDENT_ARRAYS_WITH_INDICATOR))
-                        .setSerializationInclusion(Include.NON_NULL);
+                return createObjectMapper(new YAMLFactory().enable(Feature.INDENT_ARRAYS_WITH_INDICATOR),
+                        useBlackbird).setSerializationInclusion(Include.NON_NULL);
         }
+
         throw new IllegalArgumentException("Unsupported mapper type: " + type);
     }
 

@@ -1,5 +1,6 @@
 package io.bdeploy.jersey;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import com.fasterxml.jackson.databind.Module;
@@ -7,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 
@@ -18,9 +18,7 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class JerseyObjectMapper implements ContextResolver<ObjectMapper> {
 
-    @Inject
-    private Iterable<Module> additionalModules;
-
+    private final Collection<Module> additionalModules;
     private final ObjectMapper mapper;
 
     /**
@@ -33,14 +31,30 @@ public class JerseyObjectMapper implements ContextResolver<ObjectMapper> {
     /**
      * Injection not available in the same way on the client - manual workaround.
      */
-    public JerseyObjectMapper(Iterable<Module> additional) {
+    public JerseyObjectMapper(Collection<Module> additional) {
         additionalModules = additional;
-        mapper = JacksonHelper.createObjectMapper(MapperType.JSON);
-        additionalModules.forEach(mapper::registerModule);
+        mapper = createMapper();
     }
 
     @Override
     public ObjectMapper getContext(Class<?> type) {
         return mapper;
+    }
+
+    private ObjectMapper createMapper() {
+        if (additionalModules.isEmpty()) {
+            return JacksonHelper.getDefaultJsonObjectMapper();
+        }
+
+        // don't use blackbird here. we're creating objectmappers "rather" frequently, and blackbird
+        // uses anonymous lambdas to speed up serialization/deserialization. With short-lived mappers
+        // this does not hold a performance benefit at all. only long-lived mappers profit.
+        final ObjectMapper result = JacksonHelper.createObjectMapper(MapperType.JSON, false);
+
+        for (Module m : additionalModules) {
+            result.registerModule(m);
+        }
+
+        return result;
     }
 }
