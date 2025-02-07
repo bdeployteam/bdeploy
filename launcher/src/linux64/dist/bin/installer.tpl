@@ -22,6 +22,17 @@ cat > "${T_BDEPLOY_FILE}" <<EOF
 {{BDEPLOY_FILE}}
 EOF
 
+X_UNATTENDED=false
+X_NO_SYS_CHANGES=false
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --unattended) X_UNATTENDED=true ;;
+        --noSystemChanges) X_NO_SYS_CHANGES=true ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
 # Check tooling
 require_tool() {
    type "$1" > /dev/null 2>&1
@@ -47,6 +58,16 @@ type xdg-desktop-menu > /dev/null
 HAVE_XDG_DESKTOP_MENU=$?
 type xdg-desktop-icon > /dev/null
 HAVE_XDG_DESKTOP_ICON=$?
+
+CREATE_DESKTOP_MENU=1
+CREATE_DESKTOP_ICON=1
+
+if [[ $X_NO_SYS_CHANGES == false && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+CREATE_DESKTOP_MENU=0
+fi
+if [[ $X_NO_SYS_CHANGES == false && ${HAVE_XDG_DESKTOP_ICON} == 0 ]]; then
+CREATE_DESKTOP_ICON=0
+fi
 
 dl() {
   # find certificate from embedded JSON
@@ -122,7 +143,7 @@ else
         rm -f ${T_DL}
     )
 
-    if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+    if [[ ${CREATE_DESKTOP_MENU} == 0 ]]; then
         echo "Creating file association and autostart entry..."
         ${L_HOME}/bin/file-assoc.sh
         ${L_HOME}/bin/autostart-launcher.sh
@@ -130,6 +151,7 @@ else
 fi
 
 # make sure the launcher start scripts directory is in the PATH
+if [[ ${X_NO_SYS_CHANGES} == false ]]; then
 (
     . ~/.bashrc
     if [[ "${PATH}" != *"${B_HOME}/apps/start_scripts"* ]]; then
@@ -141,6 +163,7 @@ export PATH="\${PATH}:${B_HOME}/apps/start_scripts"
 EOF
     fi
 )
+fi
 
 # stop here if only launcher install is requested
 if [[ -z "${BDEPLOY_APP_UID}" ]]; then
@@ -154,7 +177,7 @@ if [[ -z "${SKIP_ICON}" ]]; then
     B_ICONS="${B_HOME}/apps/${BDEPLOY_APP_UID}"
     APP_ICON="${B_ICONS}/app.ico"
     APP_ICON_PNG="${B_ICONS}/app.png"
-    if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+    if [[ -n "${BDEPLOY_ICON_URL}" && ${CREATE_DESKTOP_MENU} == 0 ]]; then
         require_tool convert "convert is part of the ImageMagick suite."
         require_tool identify "convert is part of the ImageMagick suite."
 
@@ -193,12 +216,12 @@ B_UNINSTALLER="${B_APP_HOME}/uninstall.run"
 
 echo '#!/usr/bin/env bash' > "${B_UNINSTALLER}"
 # remove menu entry
-if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+if [[ ${CREATE_DESKTOP_MENU} == 0 ]]; then
     echo "xdg-desktop-menu uninstall ${B_DESKTOP_FILE}" >> "${B_UNINSTALLER}"
     echo "xdg-desktop-menu uninstall ${B_DESKTOP_UNINSTALL_FILE}" >> "${B_UNINSTALLER}"
 fi
 # remove desktop icon
-if [[ ${HAVE_XDG_DESKTOP_ICON} == 0 ]]; then
+if [[ ${CREATE_DESKTOP_ICON} == 0 ]]; then
     echo "xdg-desktop-icon uninstall ${B_DESKTOP_FILE}" >> "${B_UNINSTALLER}"
 fi
 
@@ -247,28 +270,20 @@ Icon=${L_HOME}/bin/logo128.png
 Terminal=false
 EOF
 
-if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+if [[ ${CREATE_DESKTOP_MENU} == 0 ]]; then
     xdg-desktop-menu install "${T_BDEPLOY_LINK}" "${T_LINK}"
     xdg-desktop-menu install "${T_BDEPLOY_LINK}" "${T_UNINSTALL_LINK}"
-    if [[ ${HAVE_XDG_DESKTOP_ICON} == 0 ]]; then
+    if [[ ${CREATE_DESKTOP_ICON} == 0 ]]; then
         xdg-desktop-icon install "${T_LINK}"
     fi
 fi
 
 # STEP 6: Launch
-unatt=false
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --unattended) unatt=true ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
-    esac
-    shift
-done
-
-if [[ "$unatt" != true ]]; then
-	echo "Launching ${BDEPLOY_APP_NAME}"
-	${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy"
-else
-	echo "Updating ${BDEPLOY_APP_NAME} in unattended mode"
-	${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy" "--updateOnly" "--unattended"
+params=()
+if [[ "$X_UNATTENDED" == true ]]; then
+	params+=("--updateOnly" "--unattended")
 fi
+if [[ "$X_NO_SYS_CHANGES" == true ]]; then
+	params+=("--noSystemChanges")
+fi
+${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy" "${params[@]}"
