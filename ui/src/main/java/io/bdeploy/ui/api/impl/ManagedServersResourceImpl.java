@@ -76,6 +76,7 @@ import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.FormDataHelper;
+import io.bdeploy.ui.GroupLockService;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -130,6 +131,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Inject
     private TaskSynchronizer tasks;
+
+    @Inject
+    private GroupLockService gls;
 
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
@@ -375,6 +379,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             return null;
         }
         return tasks.perform("Sync-" + groupName + "-" + serverName, () -> {
+            var lock = gls.getLock(groupName);
+            lock.writeLock().lock();
             try (ActionHandle h = af.run(Actions.SYNCHRONIZING, groupName, null, serverName)) {
                 BHive hive = getInstanceGroupHive(groupName);
                 try (Transaction t = hive.getTransactions().begin()) {
@@ -392,6 +398,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
                     throw new WebApplicationException("Cannot synchronize " + serverName, e);
                 }
+            } finally {
+                lock.writeLock().unlock();
             }
         });
     }
