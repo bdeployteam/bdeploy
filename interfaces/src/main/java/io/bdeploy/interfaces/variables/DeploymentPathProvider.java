@@ -14,14 +14,27 @@ public class DeploymentPathProvider {
 
     public enum SpecialDirectory {
 
+        /** <i>[BDEPLOY_HOME]/apps/[applicationId]</i> */
         ROOT("root"),
-        CONFIG("config"),
-        RUNTIME("runtime"),
-        BIN("bin"),
+
+        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/data</i> */
         DATA("data"),
-        LOG_DATA("log_data"),
+
+        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/[tag]</i> */
+        BIN("bin"),
+        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/[tag]/config</i> */
+        CONFIG("config"),
+        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/[tag]/runtime</i> */
+        RUNTIME("runtime"),
+
+        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/pool</i> */
+        INSTANCE_MANIFEST_POOL("pool"),
+
+        /** <i>[BDEPLOY_HOME]/../pool/</i> */
         MANIFEST_POOL("pool"),
-        INSTANCE_MANIFEST_POOL("pool");
+
+        /** Either specifically set in the constructor or equal to {@link #DATA} */
+        LOG_DATA("log_data");
 
         private final String dirName;
 
@@ -79,9 +92,9 @@ public class DeploymentPathProvider {
             case ROOT -> rootDir;
             case DATA -> get(SpecialDirectory.ROOT).resolve(dir.dirName);
             case BIN -> get(SpecialDirectory.ROOT).resolve(dir.dirName).resolve(tagId);
-            case MANIFEST_POOL -> get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName); // Reaches outside of the given "root" deploymentDir - assumes that the parent is shared by all instances
-            case INSTANCE_MANIFEST_POOL -> get(SpecialDirectory.ROOT).resolve(dir.dirName);
             case CONFIG, RUNTIME -> get(SpecialDirectory.BIN).resolve(dir.dirName);
+            case INSTANCE_MANIFEST_POOL -> get(SpecialDirectory.ROOT).resolve(dir.dirName);
+            case MANIFEST_POOL -> get(SpecialDirectory.ROOT).getParent().resolve(dir.dirName); // Reaches outside of the given "root" deploymentDir - assumes that the parent is shared by all instances
             case LOG_DATA -> logDataDir != null ? logDataDir : get(SpecialDirectory.DATA); // Default path of logData is equal to DATA for compatibility with older versions
             default -> throw new IllegalArgumentException("Unhandled special directory: " + dir);
         };
