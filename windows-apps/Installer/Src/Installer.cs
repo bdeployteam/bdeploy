@@ -27,7 +27,7 @@ namespace Bdeploy.Installer {
         /// <summary>
         /// Flag to allow persisting any changes to the operating sytem
         /// </summary>
-        private readonly bool allowSystemChanges;
+        private readonly bool noSystemChanges;
 
         /// <summary>
         /// Directory where BDeploy stores all files 
@@ -117,10 +117,10 @@ namespace Bdeploy.Installer {
         /// <summary>
         /// Creates a new installer instance.
         /// </summary>
-        public AppInstaller(Config config, bool forAllUsers, bool allowSystemChanges) {
+        public AppInstaller(Config config, bool forAllUsers, bool noSystemChanges) {
             this.config = config;
             this.forAllUsers = forAllUsers;
-            this.allowSystemChanges = allowSystemChanges;
+            this.noSystemChanges = noSystemChanges;
             this.bdeployHome = PathProvider.GetBdeployHome(forAllUsers);
             this.launcherHome = PathProvider.GetLauncherDir(bdeployHome);
             this.appsHome = PathProvider.GetApplicationsDir(bdeployHome);
@@ -249,7 +249,7 @@ namespace Bdeploy.Installer {
                 }
 
                 // Handle system changes
-                if (allowSystemChanges) {
+                if (!noSystemChanges) {
                     // Add the laucher to autostart
                     RegistryKey baseKey = forAllUsers ? Registry.LocalMachine : Registry.CurrentUser;
                     RegistryKey autorunKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
@@ -309,7 +309,7 @@ namespace Bdeploy.Installer {
             File.WriteAllText(appDescriptor, config.ClickAndStartDescriptor);
 
             // Handle system changes
-            if (allowSystemChanges) {
+            if (!noSystemChanges) {
                 // Read existing registry entry
                 SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid, forAllUsers) ?? new SoftwareEntryData();
 

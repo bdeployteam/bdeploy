@@ -12,14 +12,14 @@ namespace Bdeploy.Installer.Views {
         private readonly Window window;
         private readonly AppInstaller installer;
 
-        public InstallNowView(Window window, AppInstaller installer, bool allowSystemChanges) {
+        public InstallNowView(Window window, AppInstaller installer, bool noSystemChanges) {
             InitializeComponent();
             this.installer = installer;
             this.window = window;
 
-            CreateShortcuts.IsChecked = allowSystemChanges;
-            CreateShortcuts.IsEnabled = allowSystemChanges;
-            NoSystemChangesInfoLabel.Visibility = allowSystemChanges ? Visibility.Hidden : Visibility.Visible;
+            CreateShortcuts.IsChecked = !noSystemChanges;
+            CreateShortcuts.IsEnabled = !noSystemChanges;
+            NoSystemChangesInfoLabel.Visibility = noSystemChanges ? Visibility.Visible : Visibility.Hidden;
 
             Config config = installer.config;
             if (installer.IsConfigValid()) {

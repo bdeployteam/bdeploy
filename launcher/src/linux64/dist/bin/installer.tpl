@@ -235,7 +235,6 @@ echo "rm -rf ${B_APP_HOME};" >> "${B_UNINSTALLER}"
 chmod +x "${B_UNINSTALLER}"
 
 # STEP 5: create desktop entries
-echo "Creating menu entries and desktop icon..."
 T_BDEPLOY_LINK="${T}/bdeploy-folder.directory"
 cat > "${T_BDEPLOY_LINK}" <<EOF
 [Desktop Entry]
@@ -271,6 +270,7 @@ Terminal=false
 EOF
 
 if [[ ${CREATE_DESKTOP_MENU} == 0 ]]; then
+    echo "Creating menu entries and desktop icon..."
     xdg-desktop-menu install "${T_BDEPLOY_LINK}" "${T_LINK}"
     xdg-desktop-menu install "${T_BDEPLOY_LINK}" "${T_UNINSTALL_LINK}"
     if [[ ${CREATE_DESKTOP_ICON} == 0 ]]; then

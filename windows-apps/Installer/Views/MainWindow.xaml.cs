@@ -1,5 +1,6 @@
 ﻿using Bdeploy.Installer.Views;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -14,13 +15,15 @@ namespace Bdeploy.Installer {
         private readonly ProgressView progressView;
         private readonly ErrorView errorView;
         private readonly LaunchView launchView;
+        private readonly bool noSystemChanges;
 
-        public MainWindow(AppInstaller installer, bool allowSystemChanges) {
+        public MainWindow(AppInstaller installer, bool noSystemChanges) {
             InitializeComponent();
             this.installer = installer;
+            this.noSystemChanges = noSystemChanges;
 
             // Create all views
-            installNowView = new InstallNowView(this, installer, allowSystemChanges);
+            installNowView = new InstallNowView(this, installer, noSystemChanges);
             progressView = new ProgressView(installer);
             errorView = new ErrorView(this);
             launchView = new LaunchView(this);
@@ -54,7 +57,11 @@ namespace Bdeploy.Installer {
                 // If we installed an application then we automically close the window
                 // If we just installed the launcher we show the success view.
                 if (installer.config.CanInstallApp()) {
-                    installer.Launch(new string[0], false);
+                    List<string> args = new List<string> { };
+                    if (noSystemChanges) {
+                        args.Add("--noSystemChanges");
+                    }
+                    installer.Launch(args.ToArray(), false);
                     Close();
                 } else {
                     WindowContent.Content = launchView;

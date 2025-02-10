@@ -163,6 +163,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help(value = "Run the launcher in unattended mode where no splash screen and error dialog is shown.", arg = false)
         boolean unattended() default false;
 
+        @Help(value = "Disables all system changes during application installation")
+        boolean noSystemChanges() default false;
+
         @Help(value = "Run the launcher without showing a splash screen. Error messages however are still shown.", arg = false)
         boolean noSplash() default false;
 
@@ -234,7 +237,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
 
             // Update and launch
-            doLaunch(auditor, splash);
+            doLaunch(auditor, splash, config.noSystemChanges());
         } catch (CancellationException ex) {
             log.info("Launching has been canceled by the user.", ex);
             doExit(-1);
@@ -344,7 +347,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Launches an application after installing updates. */
-    private void doLaunch(Auditor auditor, LauncherSplash splash) {
+    private void doLaunch(Auditor auditor, LauncherSplash splash, boolean noSystemChanges) {
         log.info("Launcher version '{}' started.", VersionHelper.getVersionAsString());
         log.info("Home directory: {}", homeDir);
         if (readOnlyHomeDir) {
@@ -419,7 +422,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     }
                 }
 
-                doInstall(hive, reporter, splash, auditor, serverVersion);
+                doInstall(hive, reporter, splash, auditor, serverVersion, noSystemChanges);
             }
 
             // Launch the application
@@ -655,7 +658,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor,
-            Version serverVersion) {
+            Version serverVersion, boolean noSystemChanges) {
         // Update splash with the fetched branding information.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding == null) {
@@ -672,18 +675,21 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if necessary.
         doExecuteLocked(hive, reporter, () -> {
-            installApplication(hive, splash, reporter, auditor, serverVersion);
+            installApplication(hive, splash, reporter, auditor, serverVersion, noSystemChanges);
             return null;
         });
     }
 
     /** Installs the application with all requirements if necessary. */
     private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter, Auditor auditor,
-            Version serverVersion) {
+            Version serverVersion, boolean noSystemChanges) {
         // Update scripts
-        OperatingSystem os = OsHelper.getRunningOs();
-        updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
-        updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association", fileAssocScriptsDir);
+        if (!noSystemChanges) {
+            OperatingSystem os = OsHelper.getRunningOs();
+            updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
+            updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association",
+                    fileAssocScriptsDir);
+        }
 
         // Check if the application has any missing artifacts
         Collection<String> missing = getMissingArtifacts(hive);
