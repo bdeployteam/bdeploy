@@ -1,32 +1,32 @@
 <app-bd-dialog [loadingWhen$]="instances.loading$">
   <app-bd-dialog-toolbar header="Dashboard">
     <div class="flex-auto"></div>
-    @if (activeInstance) {
+    @if (activeInstance()) {
       <div
         class="local-version-text"
-        [matTooltip]="!activeInstance.managedServer?.hostName ? null : 'On ' + activeInstance.managedServer.hostName"
+        [matTooltip]="!activeInstance().managedServer?.hostName ? null : 'On ' + activeInstance().managedServer.hostName"
         >
         @if (!(narrow$ | async)) {
-          Showing Active Version: {{ activeInstance.activeVersion.tag }}@if (!!activeInstance.managedServer?.hostName) {
+          Showing Active Version: {{ activeInstance().activeVersion.tag }}@if (!!activeInstance().managedServer?.hostName) {
           <span
             >
-            on {{ activeInstance.managedServer.hostName }}</span
+            on {{ activeInstance().managedServer.hostName }}</span
             >
           }
         }
         @if (narrow$ | async) {
-          Ver.: {{ activeInstance.activeVersion.tag }}
+          Ver.: {{ activeInstance().activeVersion.tag }}
         }
       </div>
     }
-    @if (activeInstance?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)) {
+    @if (activeInstance()?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)) {
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
         [collapsed]="narrow$ | async"
         color="accent"
         (click)="
-          areas.navigateBoth(['/servers', 'browser', areas.groupContext$.value], ['panels', 'servers', 'details', activeInstance?.managedServer?.hostName])
+          areas.navigateBoth(['/servers', 'browser', areas.groupContext$.value], ['panels', 'servers', 'details', activeInstance()?.managedServer?.hostName])
         "
       ></app-bd-button>
       @if (isCentral) {
@@ -34,8 +34,8 @@
       }
     }
     @if (isCentral) {
-      @if (currentInstance) {
-        <app-bd-server-sync-button [server]="currentInstance.managedServer"></app-bd-server-sync-button>
+      @if (currentInstance()) {
+        <app-bd-server-sync-button [server]="currentInstance().managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
       }
     }
@@ -77,20 +77,21 @@
   <app-bd-dialog-content>
     <ng-container>
       @if (hasProduct()) {
-        @if (currentInstance.instance.tag !== currentInstance.activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)) {
+        @if (currentInstance().instance.tag !== currentInstance().activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)) {
           <div
             class="bd-rect-card flex flex-col mb-2.5"
             >
             <div class="bd-default-padding flex gap-1">
               <div class="flex-auto flex flex-col">
-                @if (!!currentInstance.activeVersion?.tag) {
+                @if (!!currentInstance().activeVersion?.tag) {
                   <div>
                     This instance has a newer configuration version available to be activated ({{
-                    currentInstance.instance.tag }}). You can
+                      currentInstance().instance.tag
+                    }}). You can
                     <strong>install and activate</strong> this version now.
                   </div>
                 }
-                @if (!currentInstance.activeVersion?.tag) {
+                @if (!currentInstance().activeVersion?.tag) {
                   <div>
                     This instance has no active version. You can install and activate the current version now.
                   </div>
@@ -107,7 +108,7 @@
                     color="primary"
                     text="Install"
                     icon="deployed_code_update"
-                    (click)="doInstall(currentInstance.instance.tag)"
+                    (click)="doInstall(currentInstance().instance.tag)"
                     [collapsed]="isInstalled()"
                     [disabled]="(mappedInstall$ | async) || isInstalled() || !(auth.isCurrentScopeWrite$ | async) || !hasProduct()"
                     [loadingWhen$]="mappedInstall$"
@@ -117,7 +118,7 @@
                     color="primary"
                     text="Activate"
                     icon="deployed_code_alert"
-                    (click)="doActivate(currentInstance.instance.tag)"
+                    (click)="doActivate(currentInstance().instance.tag)"
                     [collapsed]="!isInstalled()"
                     [disabled]="(mappedActivate$ | async) || !isInstalled() || !(auth.isCurrentScopeWrite$ | async)"
                     [loadingWhen$]="mappedActivate$"
@@ -129,11 +130,11 @@
           }
         }
 
-        @if (activeInstance) {
+      @if (activeInstance()) {
           <div class="flex flex-col gap-2.5">
-            @if (activeInstance.banner && activeInstance.banner.text) {
+            @if (activeInstance().banner && activeInstance().banner.text) {
               <app-bd-banner
-                [banner]="activeInstance.banner"
+                [banner]="activeInstance().banner"
               ></app-bd-banner>
             }
             <!-- Each node in the instance (the ones containing applications only) -->
@@ -141,7 +142,7 @@
               @if (!nodes?.nodeConfigDtos?.length) {
                 <app-bd-no-data>
                   <p class="text-center">
-                    <strong>{{ currentInstance?.instanceConfiguration.name }}</strong>
+                    <strong>{{ currentInstance()?.instanceConfiguration.name }}</strong>
                     does not have any configured applications in the current instance version. Dashboard not available.
                   </p>
                   <p class="text-center">Configure, install and activate instance version first.</p>
@@ -178,10 +179,10 @@
         }
 
         <!-- Show hint if there is no active version. -->
-        @if (!activeInstance) {
+      @if (!activeInstance()) {
           <app-bd-no-data>
             <p class="text-center">
-              <strong>{{ currentInstance?.instanceConfiguration.name }}</strong>
+              <strong>{{ currentInstance()?.instanceConfiguration.name }}</strong>
               does not have an active version. Dashboard not yet available.
             </p>
             <p class="text-center">Configure, install and activate instance version first.</p>

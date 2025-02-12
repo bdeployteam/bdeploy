@@ -81,7 +81,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   protected gridMode$ = new BehaviorSubject<boolean>(false);
   protected grouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
-  protected defaultGrouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
 
   protected groupingDefinitions: BdDataGroupingDefinition<ApplicationConfiguration>[] = [
     {
@@ -105,8 +104,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   protected states$ = new BehaviorSubject<InstanceStateRecord>(null);
 
-  protected currentInstance: InstanceDto;
-  protected activeInstance: InstanceDto;
+  protected currentInstance = signal<InstanceDto>(null);
+  protected activeInstance = signal<InstanceDto>(null);
 
   protected isInstalled = signal(false);
   protected hasProduct = signal(false);
@@ -150,17 +149,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.states.state$.subscribe((s) => {
         this.states$.next(s);
-        this.isInstalled.set(!!s?.installedTags?.find((c) => c === this.currentInstance?.instance.tag));
+        this.isInstalled.set(!!s?.installedTags?.find((c) => c === this.currentInstance()?.instance.tag));
       }),
     );
     this.subscription.add(
       this.instances.current$.subscribe((currentInstance) => {
-        this.currentInstance = currentInstance;
+        this.currentInstance.set(currentInstance);
       }),
     );
     this.subscription.add(
       this.instances.active$.subscribe((activeInstance) => {
-        this.activeInstance = activeInstance;
+        this.activeInstance.set(activeInstance);
       }),
     );
     this.subscription.add(

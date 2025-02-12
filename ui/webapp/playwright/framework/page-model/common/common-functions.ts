@@ -7,3 +7,10 @@ export async function createPanel<T extends BasePanel>(buttonHost: Locator, labe
   await panel.expectOpen();
   return Promise.resolve(panel);
 }
+
+export async function createPanelFromRow<T extends BasePanel>(row: Locator, factory: (p: Page) => T): Promise<T> {
+  await row.click();
+  const panel = factory(row.page());
+  await panel.expectOpen();
+  return Promise.resolve(panel);
+}
