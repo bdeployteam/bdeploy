@@ -2,9 +2,9 @@ package io.bdeploy.interfaces.variables;
 
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
-public class DeploymentPathValidationDummyResolver extends PrefixResolver {
+public class DeploymentPathDummyResolver extends PrefixResolver {
 
-    public DeploymentPathValidationDummyResolver() {
+    public DeploymentPathDummyResolver() {
         super(Variables.DEPLOYMENT_PATH);
     }
 

@@ -7,11 +7,11 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-class DeploymentPathValidationDummyResolverTest {
+class DeploymentPathDummyResolverTest {
 
     @Test
     void testDeploymentPathValidationDummyResolver() {
-        var resolver = new DeploymentPathValidationDummyResolver();
+        var resolver = new DeploymentPathDummyResolver();
 
         // Check error cases
         assertThrows(IllegalArgumentException.class, () -> resolver.doResolve(""));
