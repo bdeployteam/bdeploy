@@ -56,9 +56,8 @@ public abstract class PrefixResolver implements VariableResolver {
     /**
      * Resolves the given variable to their actual value.
      *
-     * @param variable
-     *            the unpacked variable to resolve
-     * @return the resolved value
+     * @param variable The unpacked variable to resolve
+     * @return The resolved value, or <code>null</code> if the value could not be resolved
      */
     protected abstract String doResolve(String variable);
 }

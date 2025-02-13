@@ -16,7 +16,10 @@ public class DeploymentPathResolver extends PrefixResolver {
 
     @Override
     protected String doResolve(String variable) {
-        return provider.get(SpecialDirectory.valueOf(variable)).toString();
+        try {
+            return provider.get(SpecialDirectory.valueOf(variable)).toString();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
-
 }

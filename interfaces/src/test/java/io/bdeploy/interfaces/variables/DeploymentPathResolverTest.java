@@ -1,7 +1,7 @@
 package io.bdeploy.interfaces.variables;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.file.Path;
 
@@ -36,7 +36,7 @@ class DeploymentPathResolverTest {
         var resolver = new DeploymentPathResolver(dpp);
 
         // Check error cases
-        assertThrows(IllegalArgumentException.class, () -> resolver.doResolve("UNKNOWN_DIRECTORY"));
+        assertNull(resolver.doResolve("UNKNOWN_DIRECTORY"));
 
         // Check happy cases
         assertEquals(ROOT_DIR_STRING, resolver.doResolve("ROOT"));
@@ -55,7 +55,7 @@ class DeploymentPathResolverTest {
         var resolver = new DeploymentPathResolver(dpp);
 
         // Check error cases
-        assertThrows(IllegalArgumentException.class, () -> resolver.doResolve("UNKNOWN_DIRECTORY"));
+        assertNull(resolver.doResolve("UNKNOWN_DIRECTORY"));
 
         // Check happy cases
         assertEquals(ROOT_DIR_STRING, resolver.doResolve("ROOT"));

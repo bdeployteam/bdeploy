@@ -7,4 +7,10 @@ import java.util.function.UnaryOperator;
  */
 public interface VariableResolver extends UnaryOperator<String> {
 
+    /**
+     * Resolves the given parameter and returns the expanded value. Return <code>null</code> to signal that the current
+     * {@link VariableResolver} cannot handle the value.
+     */
+    @Override
+    String apply(String s);
 }

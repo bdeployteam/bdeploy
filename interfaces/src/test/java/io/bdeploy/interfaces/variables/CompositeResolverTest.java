@@ -2,7 +2,6 @@ package io.bdeploy.interfaces.variables;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -135,18 +134,15 @@ class CompositeResolverTest {
         // Test parameters without prefix
         testParametersWithoutPrefix(resolvers);
 
-        //TODO enable this once DeploymentPathResolver no longer throws upon encountering an unknown parameter
-        /*
-         * // Test unknown parameters
-         * Arrays.stream(Variables.values()).map(Variables::getPrefix).map(prefix -> prefix + "unknown.param").forEach(param -> {
-         * assertNull(resolver1.apply(param));
-         * assertNull(resolver2.apply(param));
-         * assertNull(resolver3.apply(param));
-         * assertNull(resolver4.apply(param));
-         * assertNull(resolver5.apply(param));
-         * assertNull(resolver6.apply(param));
-         * });
-         */
+        // Test unknown parameters
+        Arrays.stream(Variables.values()).map(Variables::getPrefix).map(prefix -> prefix + "unknown.param").forEach(param -> {
+            assertNull(resolver1.apply(param));
+            assertNull(resolver2.apply(param));
+            assertNull(resolver3.apply(param));
+            assertNull(resolver4.apply(param));
+            assertNull(resolver5.apply(param));
+            assertNull(resolver6.apply(param));
+        });
 
         // Test resolving parameters that exist only in other applications of the same node
         testResolvingParamsWithoutProperReference(paramSet1, resolver1, resolver3, resolver4, resolver5, resolver6);
@@ -205,8 +201,7 @@ class CompositeResolverTest {
         });
 
         // Test deployment path resolution error cases
-        Arrays.stream(resolvers)
-                .forEach(resolver -> assertThrows(IllegalArgumentException.class, () -> resolver.apply("P:UNKNOWN_DIRECTORY")));
+        Arrays.stream(resolvers).forEach(resolver -> assertNull(resolver.apply("P:UNKNOWN_DIRECTORY")));
 
         // Test deployment path resolution happy cases
         Arrays.stream(resolvers).forEach(resolver -> {
