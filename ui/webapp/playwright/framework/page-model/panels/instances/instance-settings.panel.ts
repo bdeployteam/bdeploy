@@ -4,6 +4,7 @@ import { createPanel } from '@bdeploy-pom/common/common-functions';
 import { InstanceTemplatesPanel } from '@bdeploy-pom/panels/instances/settings/instance-templates.panel';
 import { ManageNodesPanel } from '@bdeploy-pom/panels/instances/settings/manage-nodes.panel';
 import { InstanceVariablePanel } from '@bdeploy-pom/panels/instances/settings/instance-variable.panel';
+import { ConfigFilesPanel } from '@bdeploy-pom/panels/instances/settings/config-files.panel';
 
 export class InstanceSettingsPanel extends BasePanel {
   constructor(page: Page) {
@@ -20,5 +21,9 @@ export class InstanceSettingsPanel extends BasePanel {
 
   async getInstanceVariablePanel() {
     return createPanel(this.getDialog(), 'Instance Variables...', p => new InstanceVariablePanel(p));
+  }
+
+  async getConfigurationFilesPanel() {
+    return createPanel(this.getDialog(), 'Configuration Files', p => new ConfigFilesPanel(p));
   }
 }

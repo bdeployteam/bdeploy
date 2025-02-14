@@ -1,5 +1,5 @@
 import { APIRequestContext, Page, Response } from '@playwright/test';
-import { InstanceGroupConfiguration, InstanceGroupConfigurationDto } from '@bdeploy/models/gen.dtos';
+import { InstanceGroupConfiguration, InstanceGroupConfigurationDto, ObjectChangeDto } from '@bdeploy/models/gen.dtos';
 
 export class BackendApi {
   private readonly _page: Page;
@@ -51,6 +51,20 @@ export class BackendApi {
           json: filtered
         });
       }
+    });
+
+    await this._page.context().routeWebSocket('**/ws', async ws => {
+      const server = ws.connectToServer();
+      server.onMessage(m => {
+        const dto = JSON.parse(m.toString()) as ObjectChangeDto;
+        if (dto.scope.scope.length < 1) {
+          ws.send(m);
+        }
+        if (groups.includes(dto.scope.scope[0])) {
+          ws.send(m);
+        }
+        // otherwise swallow the message - it is meant for filtered instance groups.
+      });
     });
   }
 }

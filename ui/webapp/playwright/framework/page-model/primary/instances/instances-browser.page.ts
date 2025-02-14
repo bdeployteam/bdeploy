@@ -4,7 +4,7 @@ import { InstanceGroupsBrowserPage } from '@bdeploy-pom/primary/groups/groups-br
 import { InstanceGroupSettingsPanel } from '@bdeploy-pom/panels/groups/instance-group-settings.panel';
 import { AddInstancePanel } from '@bdeploy-pom/panels/instances/add-instance.panel';
 import { BulkInstancesPanel } from '@bdeploy-pom/panels/instances/bulk-instances.panel';
-import { createPanel } from '@bdeploy-pom/common/common-functions';
+import { createPanel, waitForInstanceGroup } from '@bdeploy-pom/common/common-functions';
 
 export class InstancesBrowserPage extends BaseDialog {
   constructor(page: Page, private readonly group: string) {
@@ -14,6 +14,9 @@ export class InstancesBrowserPage extends BaseDialog {
   async goto() {
     const groupBrowser = new InstanceGroupsBrowserPage(this.page);
     await groupBrowser.goto();
+
+    await waitForInstanceGroup(groupBrowser, this.group);
+
     await groupBrowser.getTableRowContaining(this.group).click();
     await this.page.waitForURL(`/#/instances/browser/${this.group}`);
     await this.expectOpen();

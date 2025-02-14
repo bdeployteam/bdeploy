@@ -6,8 +6,6 @@ import { TestInfo } from '@playwright/test';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 
-test.slow();
-
 function groupId(testInfo: TestInfo) {
   return `InstGroup-${testInfo.workerIndex}`;
 }
@@ -186,4 +184,26 @@ test('Instance Variables', async ({ standalone }, testInfo) => {
   await customVarDialog.fill('custom.var', '4711', 'This is a custom numeric variable', 'NUMERIC');
 
   await varPanel.screenshot('Doc_InstVar_Plain');
+
+  await customVarDialog.fillLink('{{A:UUID}}');
+
+  await varPanel.screenshot('Doc_InstVar_Link');
+});
+
+test('Instance Configuration Files', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Config File Instance', 'Instance for configuration file documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Config File Instance');
+  await config.goto();
+
+  const settings = await config.getSettingsPanel();
+  const configFiles = await settings.getConfigurationFilesPanel();
+  await configFiles.screenshot('Doc_InstanceConfigFiles');
+
+  await configFiles.addFile('test.json');
+  const editor = await configFiles.editFile('test.json');
+  await editor.fill('{\n    "json": "content"');
+
+  await editor.screenshot('Doc_InstanceConfigFilesEdit');
 });

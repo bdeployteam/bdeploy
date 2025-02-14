@@ -29,6 +29,12 @@ export class CustomVariablePopup extends BaseArea {
     }
   }
 
+  async fillLink(value: string) {
+    const input = this._dialog.locator('app-bd-form-input', { hasText: 'Value' });
+    await input.getByRole('radio').nth(1).click();
+    await input.locator('input').fill(value);
+  }
+
   async ok() {
     await this._dialog.locator('button', { hasText: 'OK' }).click();
   }

@@ -5,7 +5,6 @@ import { SystemTemplatePage } from '@bdeploy-pom/primary/system/system-template.
 import { FormSelectElement } from '@bdeploy-elements/form-select.elements';
 
 const sysTplGroupId = `SystemTemplateGroup`;
-test.slow();
 
 // clean out any left-over instance group from the tests
 test.afterAll(async ({ standalone }) => {

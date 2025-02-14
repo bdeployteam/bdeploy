@@ -5,13 +5,13 @@ import { BackendApi } from '@bdeploy-backend';
 import { AdminPage } from '@bdeploy-pom/primary/admin/admin.page';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { createInstanceGroup } from '@bdeploy-pom/common/common-tasks';
+import { waitForInstanceGroup } from '@bdeploy-pom/common/common-functions';
 
 const groupId = `DemoGroup`;
 const groupIdTwo = `DemoGroupTwo`;
 
 // tests build upon each other in this file
 test.describe.configure({ mode: 'serial' });
-test.slow();
 
 // clean out any left-over instance group from the tests
 test.afterAll(async ({ standalone }) => {
@@ -41,13 +41,7 @@ test('Create Instance Group', async ({ standalone }) => {
   await expect(panel.getDialog()).not.toBeAttached();
   await saveRq;
 
-  // TODO: see common-tasks.ts - why is this required?
-  try {
-    await expect(groups.getTableRowContaining(groupId)).toBeVisible({ timeout: 1000 });
-  } catch (e) {
-    await standalone.reload();
-    await expect(groups.getTableRowContaining(groupId)).toBeVisible();
-  }
+  await waitForInstanceGroup(groups, groupId);
 });
 
 test('Card View', async ({ standalone }) => {
@@ -55,7 +49,7 @@ test('Card View', async ({ standalone }) => {
   const groups = new InstanceGroupsBrowserPage(standalone);
   await groups.goto();
 
-  await expect(groups.getTableRowContaining(groupId)).toBeVisible();
+  await waitForInstanceGroup(groups, groupId);
   await groups.screenshot('Doc_ModeTable');
 
   const cardBtn = groups.getToolbar().getByLabel('Toggle Card Mode');
