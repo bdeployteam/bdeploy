@@ -51,6 +51,7 @@
       [appLinkExpressionInputValidator]="false"
       [appVariableRegexValidator]="variableRegexValidationContext"
       [errorFallback]="getErrorMessage()"
+      [warningMessage]="warningMessage"
       >
       <div class="local-form-input-actions flex">
         @if (!disabled) {
@@ -91,6 +92,7 @@
         (ngModelChange)="doChangeBooleanValue()"
         [disabled]="disabled"
         [prefix]="linkToggle"
+        [warningMessage]="warningMessage"
         >
         <div class="local-form-input-actions flex">
           <ng-container *ngTemplateOutlet="actions"></ng-container>
@@ -125,6 +127,7 @@
         [assistPrefixes]="completionPrefixes"
         [errorFallback]="getErrorMessage()"
         [statusMessage]="'Preview: ' + preview"
+        [warningMessage]="warningMessage"
         (focus)="onFocus()"
         >
         <div class="local-form-input-actions flex">

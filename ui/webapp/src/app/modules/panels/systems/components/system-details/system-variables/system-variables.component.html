@@ -13,7 +13,7 @@
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <bd-variable-groups
+    <app-bd-variable-groups
       [groups]="groups$ | async"
       [completionPrefixes]="completionPrefixes"
       [completions]="completions"
@@ -21,6 +21,7 @@
       [dialog]="dialog"
       [variableList]="(edit.current$ | async).config.systemVariables"
       (variableListChanged)="onVariableListChange($event)"
-    ></bd-variable-groups>
+      [suggestedIds]="suggestedIds"
+    ></app-bd-variable-groups>
   </app-bd-dialog-content>
 </app-bd-dialog>

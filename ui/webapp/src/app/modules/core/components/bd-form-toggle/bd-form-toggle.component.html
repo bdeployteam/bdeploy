@@ -37,5 +37,11 @@
       <span class="bd-form-toggle-ripple"></span>
     </div>
   </div>
-  <div class="h-[1.34em]"></div>
+  @if (warningMessage) {
+    <mat-hint class="toggle-warning">
+      {{ warningMessage }}
+    </mat-hint>
+  } @else {
+    <div class="h-[1.34em]"></div>
+  }
 </div>

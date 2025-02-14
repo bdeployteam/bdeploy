@@ -8,7 +8,11 @@
   color: var(--bd-primary);
 }
 
-.bd-form-input-form-field:not(.mat-focused) mat-hint {
+.bd-form-input-form-field mat-hint.warning {
+  color: var(--bd-warn);
+}
+
+.bd-form-input-form-field:not(.mat-focused) mat-hint:not(.warning) {
   transform: translateY(-5px);
   opacity: 0;
 

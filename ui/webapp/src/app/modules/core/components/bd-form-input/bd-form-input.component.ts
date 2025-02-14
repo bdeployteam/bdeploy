@@ -54,6 +54,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   @Input() assistPrefixes: ContentCompletion[];
   @Input() errorFallback: string;
   @Input() statusMessage: string;
+  @Input() warningMessage: string;
   @Input() passwordShowable = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-native
@@ -141,6 +142,10 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
 
   public isInvalid() {
     return this.ngControl?.invalid;
+  }
+
+  public hasErrorMessage(): boolean {
+    return !!this.errorFallback || (this.ngControl && this.ngControl.invalid);
   }
 
   public getErrorMessage() {

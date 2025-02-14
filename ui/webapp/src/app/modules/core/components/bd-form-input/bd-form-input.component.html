@@ -47,25 +47,28 @@
         <mat-icon (click)="showPassword = !showPassword" class="cursor-pointer"
           >{{ showPassword ? 'visibility_off' : 'visibility'}}</mat-icon
           >
-        </div>
-      }
-      @if (errorFallback || (ngControl && ngControl.invalid)) {
-        <mat-error>{{ getErrorMessage() }}</mat-error>
-      }
-      <ng-template #statusPopup>
-        <mat-card appearance="outlined" class="flex flex-col gap-2.5 p-2.5 break-all">
-          <div class="flex">{{statusMessage}}</div>
-        </mat-card>
-      </ng-template>
-      @if (statusMessage) {
+      </div>
+    }
+    @if (hasErrorMessage()) {
+      <mat-error>{{ getErrorMessage() }}</mat-error>
+    }
+    @if (!hasErrorMessage() && warningMessage) {
+      <mat-hint class="warning">{{ warningMessage }}</mat-hint>
+    }
+    <ng-template #statusPopup>
+      <mat-card appearance="outlined" class="flex flex-col gap-2.5 p-2.5 break-all">
+        <div class="flex">{{statusMessage}}</div>
+      </mat-card>
+    </ng-template>
+    @if (!hasErrorMessage() && !warningMessage && statusMessage) {
         <mat-hint
-          class="truncate"
-          [appBdPopup]="statusPopup"
-          [appBdPopupDelay]="750"
-          appBdPopupTrigger="hover"
-          >
-          {{statusMessage}}
-        </mat-hint>
-      }
-    </mat-form-field>
-  </div>
+        class="truncate"
+        [appBdPopup]="statusPopup"
+        [appBdPopupDelay]="750"
+        appBdPopupTrigger="hover"
+        >
+        {{statusMessage}}
+      </mat-hint>
+    }
+  </mat-form-field>
+</div>

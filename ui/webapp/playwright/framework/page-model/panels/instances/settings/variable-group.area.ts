@@ -25,4 +25,18 @@ export class VariableGroupArea extends BaseArea {
     await this._group.locator('mat-expansion-panel-header').getByRole('button', { name: 'Add Custom Variable' }).click();
     return Promise.resolve(new CustomVariablePopup(this._group));
   }
+
+  async createCustomVariable(id: string, value: string, description?: string, type?: string, editor?: string) {
+    const customVarDialog = await this.addCustomVariable();
+    await customVarDialog.fill(id, value, description, type, editor);
+    if (value.startsWith('{{')) {
+      await customVarDialog.fillLink(value);
+    }
+    await customVarDialog.ok();
+  }
+
+  async checkPreview(name: string, preview: string) {
+    await this.getArea().getByRole('textbox', { name }).click();
+    await expect(this.getArea().getByText('Preview')).toContainText(preview);
+  }
 }

@@ -86,6 +86,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
   @Input() actions: TemplateRef<unknown>;
   @Input() validateRegex: string;
+  @Input() warningMessage: string;
   protected variableRegexValidationContext: VariableRegexValidationContext;
 
   @Output() customEditorLoaded = new EventEmitter<CustomEditor>();

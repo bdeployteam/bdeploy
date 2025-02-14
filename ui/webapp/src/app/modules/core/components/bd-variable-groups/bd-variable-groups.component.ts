@@ -58,7 +58,7 @@ interface ConfigVariable {
 }
 
 @Component({
-    selector: 'bd-variable-groups',
+    selector: 'app-bd-variable-groups',
     templateUrl: './bd-variable-groups.component.html',
     styleUrl: './bd-variable-groups.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,6 +80,8 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   @Input() system: SystemConfiguration;
   @Input() apps: ApplicationDto[];
   @Input() editorValues: string[];
+  @Input() suggestedIds: string[]; // passed instance variable ids for system variables to overwrite
+  @Input() overwriteIds: string[]; // ids that might overwrite variables in this variable group
 
   @Input() dialog: BdDialogComponent;
 
@@ -116,6 +118,16 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+  }
+
+  protected isOverwritten(p: VariablePair): boolean {
+    const id = p.descriptor?.id || p.value.id;
+    return this.overwriteIds?.some((i) => i === id);
+  }
+
+  protected getOverwrittenWarningMessage(p: VariablePair): string {
+    const id = p.descriptor?.id || p.value.id;
+    return `Variable ${id} is set through system variable`;
   }
 
   public bdOnSearch(s: string) {
