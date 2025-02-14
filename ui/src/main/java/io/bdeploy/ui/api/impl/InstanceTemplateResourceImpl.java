@@ -153,13 +153,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 continue; // ignored
             }
 
-            if (!nodes.contains(mapping.node) && !InstanceManifest.CLIENT_NODE_NAME.equals(mapping.node)
-                    && !InstanceManifest.CLIENT_NODE_LABEL.equals(mapping.node)) {
-                throw new WebApplicationException(
-                        "Group " + grp.name + " is mapped to node " + mapping.node + " but that node cannot be found",
-                        Status.EXPECTATION_FAILED);
-            }
-
             groupToNode.put(grp.name, mapping.node);
 
             // otherwise check variables.
@@ -286,8 +279,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         try {
             ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNamedMaster(group)
-                    .update(new InstanceUpdateDto(configDto, cfgFiles),
-                    null);
+                    .update(new InstanceUpdateDto(configDto, cfgFiles), null);
         } catch (Exception e) {
             log.warn("Cannot create instance {} for system template.", cfg.name, e);
             return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
@@ -318,13 +310,21 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         };
 
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
+        Set<String> nodes = nodeStates.keySet();
         for (var tgroup : tpl.groups) {
             String targetNode = groupToNode.get(tgroup.name);
             if (targetNode == null || targetNode.isBlank()) {
                 continue; // nope
             }
+            targetNode = TemplateHelper.process(targetNode, tvr, Variables.TEMPLATE.shouldResolve());
             if (InstanceManifest.CLIENT_NODE_LABEL.equals(targetNode)) {
                 targetNode = InstanceManifest.CLIENT_NODE_NAME;
+            }
+            if (!nodes.contains(targetNode) && !InstanceManifest.CLIENT_NODE_NAME.equals(targetNode)
+                    && !InstanceManifest.CLIENT_NODE_LABEL.equals(targetNode)) {
+                throw new WebApplicationException(
+                        "Group " + tgroup.name + " is mapped to node " + targetNode + " but that node cannot be found",
+                        Status.EXPECTATION_FAILED);
             }
 
             String mappedToNode = targetNode;
