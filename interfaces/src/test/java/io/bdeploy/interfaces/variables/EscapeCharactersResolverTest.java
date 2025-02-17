@@ -40,21 +40,23 @@ class EscapeCharactersResolverTest {
         assertEquals("test", resolver1.doResolve("test"));
         assertEquals("&lt;tag&gt;&amp;quot;fish &amp; chips&amp;quot;&lt;/tag&gt;",
                 resolver1.doResolve("<tag>\"fish & chips\"</tag>"));
-        assertEquals("&lt;tag&gt;&amp;apos;apostrophe&amp;apos;&lt;/tag&gt;", resolver1.doResolve("<tag>'apostrophe'</tag>"));
+        assertEquals("&lt;tag&gt;&amp;apos;apostrophe&amp;apos;&lt;/tag&gt;",//
+                resolver1.doResolve("<tag>'apostrophe'</tag>"));
 
         var resolver2 = new EscapeXmlCharactersResolver(PARENT2);
         assertEquals("1", resolver2.doResolve("1"));
         assertEquals("TEST", resolver2.doResolve("test"));
         assertEquals("&lt;TAG&gt;&amp;quot;FISH &amp; CHIPS&amp;quot;&lt;/TAG&gt;",
                 resolver2.doResolve("<tag>\"fish & chips\"</tag>"));
-        assertEquals("&lt;TAG&gt;&amp;apos;APOSTROPHE&amp;apos;&lt;/TAG&gt;", resolver2.doResolve("<tag>'apostrophe'</tag>"));
+        assertEquals("&lt;TAG&gt;&amp;apos;APOSTROPHE&amp;apos;&lt;/TAG&gt;",//
+                resolver2.doResolve("<tag>'apostrophe'</tag>"));
 
         var resolver3 = new EscapeXmlCharactersResolver(PARENT3);
         assertEquals("###1###", resolver3.doResolve("1"));
         assertEquals("###test###", resolver3.doResolve("test"));
         assertEquals("###&lt;tag&gt;&amp;quot;fish &amp; chips&amp;quot;&lt;/tag&gt;###",
                 resolver3.doResolve("<tag>\"fish & chips\"</tag>"));
-        assertEquals("###&lt;tag&gt;&amp;apos;apostrophe&amp;apos;&lt;/tag&gt;###",
+        assertEquals("###&lt;tag&gt;&amp;apos;apostrophe&amp;apos;&lt;/tag&gt;###",//
                 resolver3.doResolve("<tag>'apostrophe'</tag>"));
     }
 
