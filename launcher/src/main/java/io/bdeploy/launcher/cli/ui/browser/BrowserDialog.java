@@ -563,8 +563,9 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setIndeterminate(true);
         progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
 
-        AppUpdater task = new AppUpdater(lpp, app, args);
+        AppUpdater task = new AppUpdater(lpp, auditor, app, args);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
     }
 
