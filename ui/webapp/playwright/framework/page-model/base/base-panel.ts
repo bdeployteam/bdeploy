@@ -7,6 +7,10 @@ export class BasePanel extends BaseDialog {
   }
 
   getCloseButton() {
-    return this.getToolbar().getByLabel('Close');
+    return this.getToolbar().getByRole('button', { name: 'Close' });
+  }
+
+  getBackToOverviewButton() {
+    return this.getToolbar().getByRole('button', { name: 'Back to Overview' });
   }
 }

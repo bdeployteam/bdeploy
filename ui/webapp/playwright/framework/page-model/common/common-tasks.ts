@@ -5,6 +5,7 @@ import { ProductsPage } from '@bdeploy-pom/primary/products/products.page';
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { BackendApi } from '@bdeploy-backend';
+import { waitForInstanceGroup } from '@bdeploy-pom/common/common-functions';
 
 export async function createInstanceGroup(page: Page, groupId: string, image: string = null) {
   const groups = new InstanceGroupsBrowserPage(page);
@@ -29,13 +30,7 @@ export async function createInstanceGroup(page: Page, groupId: string, image: st
   await expect(panel.getDialog()).not.toBeAttached();
   await saveRq;
 
-  // TODO: why? this should not be necessary, since the page should be updated by a websocket push. almost always that works, but *sometimes* it does not.
-  try {
-    await expect(groups.getTableRowContaining(groupId)).toBeVisible({ timeout: 1000 });
-  } catch (e) {
-    await page.reload();
-    await expect(groups.getTableRowContaining(groupId)).toBeVisible();
-  }
+  await waitForInstanceGroup(groups, groupId);
 }
 
 export async function uploadProduct(page: Page, groupId: string, product: string) {

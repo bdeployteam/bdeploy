@@ -5,7 +5,6 @@ import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 
 const bulkGroupId = `BulkGroup`;
-test.slow();
 
 // clean out any left-over instance group from the tests
 test.afterAll(async ({ standalone }) => {

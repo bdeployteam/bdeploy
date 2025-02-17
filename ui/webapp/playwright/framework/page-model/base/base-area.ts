@@ -28,5 +28,9 @@ export abstract class BaseArea {
     await this.getOverlayContainer().locator('.cdk-overlay-backdrop').click({ position: { x: 0, y: 0 } });
   }
 
+  async scrollIntoView() {
+    await this.getArea().scrollIntoViewIfNeeded();
+  }
+
   protected abstract getArea(): Locator;
 }

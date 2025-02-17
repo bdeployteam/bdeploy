@@ -1,6 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, ElementRef, Input, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { Component, ElementRef, inject, Input, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { getRecursivePrefix } from '../../utils/completion.utils';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
@@ -99,7 +99,7 @@ export class BdContentAssistMenuComponent {
             overlayX: 'end',
             overlayY: 'top',
             offsetY: -17,
-            offsetX: -10,
+            offsetX: 0
           },
           {
             originX: 'end',
@@ -107,7 +107,7 @@ export class BdContentAssistMenuComponent {
             overlayX: 'end',
             overlayY: 'bottom',
             offsetY: -5,
-            offsetX: -10,
+            offsetX: 0
           },
         ])
         .withPush(false)

@@ -6,8 +6,6 @@ import { TestInfo } from '@playwright/test';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 
-test.slow();
-
 function groupId(testInfo: TestInfo) {
   return `InstGroup-${testInfo.workerIndex}`;
 }
@@ -59,12 +57,153 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
   //        * a 'state' request is fired and the server reports instance version 1 as installed.
   //        * this remains, even when the page is reloaded (?!?!)
   //       I thought this was due to not using observable/signal, but this seems not to be
-  //       the root cause.
-  await standalone.waitForTimeout(100);
+  //       the root cause. Also the install button seems to "flicker" once in real world as
+  //       well when loading the page (sometimes).
+  await standalone.waitForTimeout(200);
 
   await instance.install();
   await instance.activate();
 
   await expect(instance.getServerNode('master').locator('tr', { hasText: 'Server No Sleep' })).toBeVisible();
   await instance.screenshot('Doc_InstanceDashboardActive');
+});
+
+test('Instance Configuration', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Configure Instance', 'Instance for configuration documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Configure Instance');
+  await config.goto();
+
+  const settings = await config.getSettingsPanel();
+
+  const nodes = await settings.getManageNodesPanel();
+  await nodes.screenshot('Doc_InstanceManageNodes');
+  await nodes.getBackToOverviewButton().click();
+
+  const process = await config.getAddProcessPanel('master');
+  await process.screenshot('Doc_InstanceAddProcessPanel');
+  await process.addProcess('Server Application');
+  await config.waitForValidation();
+
+  await expect(config.getConfigNode('master').getByRole('row', { name: 'Server Application' })).toBeVisible();
+  await config.screenshot('Doc_InstanceNewProcess');
+
+  await process.addProcess('Server Application');
+  await config.waitForValidation();
+  await expect(config.getConfigNode('master').getByRole('row', { name: 'Server Application' })).toHaveCount(2);
+  await config.screenshot('Doc_InstanceConfigValidation');
+
+  const changes = await config.getLocalChangesPanel();
+  await config.undo();
+  await config.waitForValidation();
+
+  await config.screenshot('Doc_InstanceConfigLocalChanges');
+
+  const compare = await changes.getCompareWithBasePanel();
+  await compare.screenshot('Doc_InstanceConfigCompareChanges');
+  await compare.getBackToOverviewButton().click();
+
+  const processSettings = await config.getProcessSettingsPanel('master', 'Server Application');
+  await processSettings.screenshot('Doc_InstanceConfigProcessSettings');
+
+  const paramPanel = await processSettings.getConfigureParametersPanel();
+  await paramPanel.screenshot('Doc_InstanceConfigParams');
+
+  const sleepConfig = await paramPanel.getParameterGroup('Sleep Configuration');
+  await sleepConfig.toggle();
+  await sleepConfig.selectParameters();
+
+  await sleepConfig.screenshot('Doc_InstanceConfigOptionalParams');
+
+  await sleepConfig.getParameter('param.sleep').locator('mat-icon', { hasText: 'add' }).click();
+  await expect(sleepConfig.getParameter('param.sleep').locator('mat-icon', { hasText: 'delete' })).toBeVisible();
+  await sleepConfig.finishSelectParameters();
+
+  const customParam = await paramPanel.getParameterGroup('Custom Parameters');
+  await customParam.toggle();
+  const customPopup = await customParam.addCustomParameter();
+  await customPopup.fill('custom.param', '--text=Custom', 'Sleep Timeout');
+
+  await customPopup.screenshot('Doc_InstanceConfigAddCustomParam');
+  await customPopup.cancel();
+
+  const testParams = await paramPanel.getParameterGroup('Test Parameters');
+  await sleepConfig.toggle();
+  await testParams.toggle();
+  await testParams.selectParameters();
+  await testParams.getParameter('param.text').locator('mat-icon', { hasText: 'add' }).click();
+  await testParams.finishSelectParameters();
+
+  // scroll down a little so we can get the content assist below the input.
+  await customParam.scrollIntoView();
+
+  // click the "link expression" toggle
+  await testParams.getParameter('param.text').getByRole('radio').nth(1).click();
+  const paramText = testParams.getParameter('param.text').locator('id=param.text_link');
+  await paramText.focus();
+  await paramText.pressSequentially('{{A:');
+  await testParams.screenshot('Doc_InstVar_InParameter');
+  await paramText.pressSequentially('UUID}}');
+
+  await paramPanel.showCommandPreview();
+  await paramPanel.screenshot('Doc_InstanceConfigPreview');
+
+  await paramPanel.getBackToOverviewButton().click();
+  await paramPanel.getSavePopup().getByRole('button', { name: 'Discard' }).click();
+
+  // TODO: reload to get rid of possible remaining artifacts - why necessary?
+  //       seems like a parameter tooltip is reproducibly stuck in the test.
+  await standalone.reload();
+
+  const addClientProcess = await config.getAddProcessPanel('__ClientApplications');
+  await addClientProcess.addProcess('Client Application');
+  await config.waitForValidation();
+
+  await expect(config.getConfigNode('__ClientApplications').getByRole('row', { name: 'Client Application' })).toHaveCount(2);
+  const clientSettings = await config.getProcessSettingsPanel('__ClientApplications', 'Client Application');
+  const clientParams = await clientSettings.getConfigureParametersPanel();
+
+  await clientParams.getAllowedConfigDirPaths().locator('input').focus();
+  await clientParams.getAllowedConfigDirPaths().locator('mat-icon', { hasText: /file/ }).click();
+  await clientParams.screenshot('Doc_InstanceConfig_ClientConfigDirs');
+});
+
+test('Instance Variables', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Variable Instance', 'Instance for variable documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Variable Instance');
+  await config.goto();
+
+  const settings = await config.getSettingsPanel();
+  const varPanel = await settings.getInstanceVariablePanel();
+  const customVarGroup = await varPanel.getVariableGroup('Custom Variables');
+  await customVarGroup.toggle();
+  const customVarDialog = await customVarGroup.addCustomVariable();
+  await customVarDialog.fill('custom.var', '4711', 'This is a custom numeric variable', 'NUMERIC');
+
+  await varPanel.screenshot('Doc_InstVar_Plain');
+
+  await customVarDialog.fillLink('{{A:UUID}}');
+
+  await varPanel.screenshot('Doc_InstVar_Link');
+});
+
+test('Instance Configuration Files', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Config File Instance', 'Instance for configuration file documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Config File Instance');
+  await config.goto();
+
+  const settings = await config.getSettingsPanel();
+  const configFiles = await settings.getConfigurationFilesPanel();
+  await configFiles.screenshot('Doc_InstanceConfigFiles');
+
+  await configFiles.addFile('test.json');
+  const editor = await configFiles.editFile('test.json');
+  await editor.fill('{\n    "json": "content"');
+
+  await editor.screenshot('Doc_InstanceConfigFilesEdit');
 });
