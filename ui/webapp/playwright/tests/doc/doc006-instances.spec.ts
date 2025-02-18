@@ -36,18 +36,26 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
 
   const settings = await config.getSettingsPanel();
   const templates = await settings.getInstanceTemplatesPanel();
+  await templates.screenshot('Doc_InstanceTemplates');
 
   await templates.selectTemplate('Default Configuration');
   await templates.selectGroup('Server Apps', 'master');
   await templates.selectGroup('Client Apps', 'Client Applications');
+  await templates.screenshot('Doc_InstanceTemplatesNodes');
   await templates.finishGroupSelection();
 
+  await templates.screenshot('Doc_InstanceTemplatesVars');
   await templates.fillLiteralVariable('Text Value', 'Demo Text');
   await templates.fillBooleanVariable('Product License', true);
   await templates.finishTemplate();
 
   await expect(templates.getDialog()).not.toBeAttached();
   await expect(config.getConfigNode('master').locator('tr', { hasText: 'Server No Sleep' })).toBeVisible();
+  await config.waitForValidation();
+  await config.screenshot('Doc_InstanceTemplatesDone');
+
+  const editPanel = await config.getProcessControlGroupArea('master', 'First Group').getEditPanel();
+  await editPanel.screenshot('Doc_InstanceConfigEditProcessControlGroup');
 
   await config.save();
 
@@ -83,7 +91,10 @@ test('Instance Configuration', async ({ standalone }, testInfo) => {
   await nodes.screenshot('Doc_InstanceManageNodes');
   await nodes.getBackToOverviewButton().click();
 
-  const process = await config.getAddProcessPanel('master');
+  const addPcgPanel = await config.getAddProcessControlGroupPanel('master');
+  await addPcgPanel.screenshot('Doc_InstanceConfigAddProcessControlGroup');
+
+  let process = await config.getAddProcessPanel('master');
   await process.screenshot('Doc_InstanceAddProcessPanel');
   await process.addProcess('Server Application');
   await config.waitForValidation();
@@ -158,6 +169,16 @@ test('Instance Configuration', async ({ standalone }, testInfo) => {
   //       seems like a parameter tooltip is reproducibly stuck in the test.
   await standalone.reload();
 
+  // show application template
+  process = await config.getAddProcessPanel('master');
+  await process.addProcessTemplate('Server With Sleep');
+  // that opened the variable input dialog.
+  const varDlg = process.getVariableTemplatePopup();
+  await varDlg.fillTextVariable('Sleep Timeout', '40');
+  await varDlg.screenshot('Doc_InstanceAddProcessTemplVars');
+  await varDlg.cancel();
+
+  // show client application config file filter
   const addClientProcess = await config.getAddProcessPanel('__ClientApplications');
   await addClientProcess.addProcess('Client Application');
   await config.waitForValidation();

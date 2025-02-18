@@ -7,6 +7,10 @@ import { InstanceSettingsPanel } from '@bdeploy-pom/panels/instances/instance-se
 import { AddProcessPanel } from '@bdeploy-pom/panels/instances/add-process.panel';
 import { LocalChangesPanel } from '@bdeploy-pom/panels/instances/local-changes.panel';
 import { ProcessSettingsPanel } from '@bdeploy-pom/panels/instances/process-settings.panel';
+import {
+  AddProcessControlGroupPanel
+} from '@bdeploy-pom/panels/instances/process-settings/add-process-control-group.panel';
+import { ProcessControlGroupArea } from '@bdeploy-pom/panels/instances/process-settings/process-control-group.area';
 
 export class InstanceConfigurationPage extends BaseDialog {
   constructor(page: Page, private readonly group: string, private readonly instance: string) {
@@ -53,6 +57,14 @@ export class InstanceConfigurationPage extends BaseDialog {
 
   async getAddProcessPanel(node: string) {
     return createPanel(this.getConfigNode(node), 'Add Process Configuration', (p) => new AddProcessPanel(p));
+  }
+
+  async getAddProcessControlGroupPanel(node: string) {
+    return createPanel(this.getConfigNode(node), 'Add Process Control Group', (p) => new AddProcessControlGroupPanel(p));
+  }
+
+  getProcessControlGroupArea(node: string, name: string) {
+    return new ProcessControlGroupArea(this.getConfigNode(node), name);
   }
 
   async getLocalChangesPanel() {
