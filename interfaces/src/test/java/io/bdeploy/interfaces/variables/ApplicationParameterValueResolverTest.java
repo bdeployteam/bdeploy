@@ -22,14 +22,14 @@ class ApplicationParameterValueResolverTest {
         paramSet1.add(ResolverTestHelper.getParamConfig("set1.id4", "set1_value4"));
 
         var paramSet2 = new ArrayList<ParameterConfiguration>();
-        paramSet1.add(ResolverTestHelper.getParamConfig("set2.id1", "set2_value1"));
-        paramSet1.add(ResolverTestHelper.getParamConfig("set2.id2", "set2_value2"));
-        paramSet1.add(ResolverTestHelper.getParamConfig("set2.id3", "set2_value3"));
-        paramSet1.add(ResolverTestHelper.getParamConfig("set2.id4", "set2_value4"));
+        paramSet2.add(ResolverTestHelper.getParamConfig("set2.id1", "set2_value1"));
+        paramSet2.add(ResolverTestHelper.getParamConfig("set2.id2", "set2_value2"));
+        paramSet2.add(ResolverTestHelper.getParamConfig("set2.id3", "set2_value3"));
+        paramSet2.add(ResolverTestHelper.getParamConfig("set2.id4", "set2_value4"));
 
         var paramSet3 = new ArrayList<ParameterConfiguration>();
-        paramSet1.add(ResolverTestHelper.getParamConfig("set3.id1", "set3_value1"));
-        paramSet1.add(ResolverTestHelper.getParamConfig("set3.id2", "set3_value2"));
+        paramSet3.add(ResolverTestHelper.getParamConfig("set3.id1", "set3_value1"));
+        paramSet3.add(ResolverTestHelper.getParamConfig("set3.id2", "set3_value2"));
 
         var paramSet4 = new ArrayList<ParameterConfiguration>();
         paramSet4.add(ResolverTestHelper.getParamConfig("set4.id1", "set4_value1"));
@@ -100,9 +100,9 @@ class ApplicationParameterValueResolverTest {
         // Test normal value retrieval
         assertEquals("set1_value1", resolver3.doResolve("set1.id1"));
         assertEquals("set1_value4", resolver3.doResolve("set1.id4"));
-        paramSet2.forEach(param -> assertEquals(resolver4.doResolve(param.id), param.value));
-        paramSet2.forEach(param -> assertEquals(resolver5.doResolve(param.id), param.value));
-        paramSet3.forEach(param -> assertEquals(resolver6.doResolve(param.id), param.value));
+        paramSet2.forEach(param -> assertEquals(param.value.getPreRenderable(), resolver4.doResolve(param.id)));
+        paramSet2.forEach(param -> assertEquals(param.value.getPreRenderable(), resolver5.doResolve(param.id)));
+        paramSet3.forEach(param -> assertEquals(param.value.getPreRenderable(), resolver6.doResolve(param.id)));
         assertEquals("set4_value1", resolver7.doResolve("set4.id1"));
         assertEquals("set4_value2", resolver7.doResolve("set4.id4"));
 
