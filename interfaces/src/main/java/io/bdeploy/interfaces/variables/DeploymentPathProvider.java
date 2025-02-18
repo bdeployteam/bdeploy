@@ -14,23 +14,23 @@ public class DeploymentPathProvider {
 
     public enum SpecialDirectory {
 
-        /** <i>[BDEPLOY_HOME]/apps/[applicationId]</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/[instanceId]</i> */
         ROOT("root"),
 
-        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/data</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/[instanceId]/data</i> */
         DATA("data"),
 
-        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/[tag]</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/[instanceId]/bin/[tag]</i> */
         BIN("bin"),
-        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/[tag]/config</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/[instanceId]/bin/[tag]/config</i> */
         CONFIG("config"),
-        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/bin/[tag]/runtime</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/[instanceId]/bin/[tag]/runtime</i> */
         RUNTIME("runtime"),
 
-        /** <i>[BDEPLOY_HOME]/apps/[applicationId]/pool</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/[instanceId]/pool</i> */
         INSTANCE_MANIFEST_POOL("pool"),
 
-        /** <i>[BDEPLOY_HOME]/../pool/</i> */
+        /** <i>[BDEPLOY_HOME]/deploy/pool/</i> */
         MANIFEST_POOL("pool"),
 
         /** Either specifically set in the constructor or equal to {@link #DATA} */
