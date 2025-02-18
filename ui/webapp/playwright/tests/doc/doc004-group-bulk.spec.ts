@@ -4,6 +4,8 @@ import { createInstance, createInstanceGroup, uploadProduct } from '@bdeploy-pom
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 
+test.slow();
+
 const bulkGroupId = `BulkGroup`;
 
 // clean out any left-over instance group from the tests

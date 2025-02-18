@@ -68,4 +68,8 @@ export class InstanceConfigurationPage extends BaseDialog {
     return this.getDialog().getByTestId(name);
   }
 
+  getBanner() {
+    return this.getDialog().locator('app-bd-banner');
+  }
+
 }

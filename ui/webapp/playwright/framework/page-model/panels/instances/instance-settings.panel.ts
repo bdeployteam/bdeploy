@@ -5,6 +5,8 @@ import { InstanceTemplatesPanel } from '@bdeploy-pom/panels/instances/settings/i
 import { ManageNodesPanel } from '@bdeploy-pom/panels/instances/settings/manage-nodes.panel';
 import { InstanceVariablePanel } from '@bdeploy-pom/panels/instances/settings/instance-variable.panel';
 import { ConfigFilesPanel } from '@bdeploy-pom/panels/instances/settings/config-files.panel';
+import { ProductVersionPanel } from '@bdeploy-pom/panels/instances/settings/product-version.panel';
+import { BannerPanel } from '@bdeploy-pom/panels/instances/settings/banner.panel';
 
 export class InstanceSettingsPanel extends BasePanel {
   constructor(page: Page) {
@@ -25,5 +27,13 @@ export class InstanceSettingsPanel extends BasePanel {
 
   async getConfigurationFilesPanel() {
     return createPanel(this.getDialog(), 'Configuration Files', p => new ConfigFilesPanel(p));
+  }
+
+  async getProductVersionPanel() {
+    return createPanel(this.getDialog(), 'Update Product Version', p => new ProductVersionPanel(p));
+  }
+
+  async getBannerPanel() {
+    return createPanel(this.getDialog(), 'Banner...', p => new BannerPanel(p));
   }
 }

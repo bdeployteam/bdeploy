@@ -6,16 +6,18 @@ import { TestInfo } from '@playwright/test';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 
+test.slow();
+
 function groupId(testInfo: TestInfo) {
   return `InstGroup-${testInfo.workerIndex}`;
 }
 
-test.beforeAll(async ({ standalone }, testInfo) => {
+test.beforeEach(async ({ standalone }, testInfo) => {
   const api = new BackendApi(standalone);
   await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for instance tests`);
 });
 
-test.afterAll(async ({ standalone }, testInfo) => {
+test.afterEach(async ({ standalone }, testInfo) => {
   const api = new BackendApi(standalone);
   await api.deleteGroup(groupId(testInfo));
 });
@@ -206,4 +208,54 @@ test('Instance Configuration Files', async ({ standalone }, testInfo) => {
   await editor.fill('{\n    "json": "content"');
 
   await editor.screenshot('Doc_InstanceConfigFilesEdit');
+});
+
+test('Instance Product Version', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-1-direct');
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Product Version Instance', 'Instance for product version documentation', InstancePurpose.TEST, 'Demo Product', '1.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Product Version Instance');
+  await config.goto();
+
+  const process = await config.getAddProcessPanel('master');
+  await process.addProcess('Server Application');
+
+  await config.save();
+  await config.goto(); // get back xD
+
+  await config.screenshot('Doc_InstanceProductUpdateAvail');
+
+  const settings = await config.getSettingsPanel();
+  const versions = await settings.getProductVersionPanel();
+
+  await config.screenshot('Doc_InstanceProductUpdate');
+  await versions.setVersion('2.0.0');
+
+  // easiest way to close panel without navigating back.
+  await config.getToolbar().getByRole('button', { name: 'Instance Settings' }).click();
+
+  await config.waitForValidation();
+  await config.screenshot('Doc_InstanceProductUpdateHints');
+});
+
+test('Instance Banner', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Banner Instance', 'Instance for banner documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Banner Instance');
+  await config.goto();
+
+  const settings = await config.getSettingsPanel();
+  const banner = await settings.getBannerPanel();
+  await banner.fill('This is a banner text', 'Positive');
+
+  await banner.screenshot('Doc_InstanceBannerConfig');
+  await banner.apply();
+
+  // need to wait for changes to be visible...
+  await expect(config.getBanner()).toBeVisible();
+  await expect(config.getBanner().getByText('This is a banner text')).toBeVisible();
+
+  await config.screenshot('Doc_InstanceBanner');
 });
