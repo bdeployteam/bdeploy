@@ -3,9 +3,9 @@ package io.bdeploy.interfaces.variables;
 /**
  * Resolves references to manifests. Always resolves to allow validation of expansions.
  */
-public class ManifestVariableValidationDummyResolver extends PrefixResolver {
+public class ManifestVariableDummyResolver extends PrefixResolver {
 
-    public ManifestVariableValidationDummyResolver() {
+    public ManifestVariableDummyResolver() {
         super(Variables.MANIFEST_REFERENCE);
     }
 

@@ -53,7 +53,7 @@ import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
-import io.bdeploy.interfaces.variables.DeploymentPathValidationDummyResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathDummyResolver;
 import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
 import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
@@ -63,7 +63,7 @@ import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.LocalHostnameResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
-import io.bdeploy.interfaces.variables.ManifestVariableValidationDummyResolver;
+import io.bdeploy.interfaces.variables.ManifestVariableDummyResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
 
@@ -521,12 +521,12 @@ public class ProductUpdateService {
         if (process != null) {
             res.add(new ApplicationVariableResolver(process));
             res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
-            ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
+            ManifestVariableDummyResolver dummy = new ManifestVariableDummyResolver();
             res.add(new ManifestSelfResolver(process.application, dummy));
             res.add(dummy);
             res.add(new DelayedVariableResolver(res));
         }
-        res.add(new DeploymentPathValidationDummyResolver());
+        res.add(new DeploymentPathDummyResolver());
         res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
         res.add(new OsVariableResolver());
         res.add(new LocalHostnameResolver(false));
