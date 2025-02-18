@@ -10,8 +10,11 @@ public class DeploymentPathDummyResolver extends PrefixResolver {
 
     @Override
     protected String doResolve(String variable) {
-        // just *any* value which is not an expression for validation.
-        return "<" + SpecialDirectory.valueOf(variable).getDirName() + ">";
+        try {
+            // just *any* value which is not an expression for validation.
+            return "<" + SpecialDirectory.valueOf(variable).getDirName() + '>';
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
-
 }
