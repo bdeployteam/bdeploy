@@ -54,6 +54,9 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
   await config.waitForValidation();
   await config.screenshot('Doc_InstanceTemplatesDone');
 
+  const editPanel = await config.getProcessControlGroupArea('master', 'First Group').getEditPanel();
+  await editPanel.screenshot('Doc_InstanceConfigEditProcessControlGroup');
+
   await config.save();
 
   await standalone.waitForURL(`/#/instances/dashboard/${groupId(testInfo)}/**`);
@@ -87,6 +90,9 @@ test('Instance Configuration', async ({ standalone }, testInfo) => {
   const nodes = await settings.getManageNodesPanel();
   await nodes.screenshot('Doc_InstanceManageNodes');
   await nodes.getBackToOverviewButton().click();
+
+  const addPcgPanel = await config.getAddProcessControlGroupPanel('master');
+  await addPcgPanel.screenshot('Doc_InstanceConfigAddProcessControlGroup');
 
   let process = await config.getAddProcessPanel('master');
   await process.screenshot('Doc_InstanceAddProcessPanel');
