@@ -42,7 +42,7 @@ public class ClientApplicationDto {
     public InstancePurpose purpose;
 
     /**
-     * The product version
+     * The product version that the remote server had during the last sync operation
      */
     public Manifest.Key product;
 

@@ -16,8 +16,8 @@ public enum BrowserDialogTableColumn {
             "The name of the instance on the BDeploy minion"),
     PURPOSE(InstancePurpose.class, "Purpose",//
             "The purpose of this application"),
-    PRODUCT(String.class, "Product",//
-            "The version number of the product"),
+    PRODUCT(String.class, "Product V.",//
+            "The product version number of the instance on the remote BDeploy server"),
     REMOTE(String.class, "Remote",//
             "The URL to the BDeploy minion"),
     SERVER_VERSION(String.class, "Server Version",//
