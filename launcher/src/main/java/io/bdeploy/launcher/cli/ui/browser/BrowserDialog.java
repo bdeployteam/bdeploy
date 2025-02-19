@@ -291,7 +291,7 @@ public class BrowserDialog extends BaseDialog {
         TableColumnModel columnModel = table.getColumnModel();
 
         TableColumn columnP = columnModel.getColumn(BrowserDialogTableColumn.PURPOSE.ordinal());
-        columnP.setPreferredWidth(25);
+        columnP.setPreferredWidth(35);
         columnP.setCellRenderer(new BrowserDialogPurposeCellRenderer());
 
         TableColumn columnR = columnModel.getColumn(BrowserDialogTableColumn.REMOTE.ordinal());
