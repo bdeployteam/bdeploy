@@ -77,6 +77,32 @@ curl -k -H "Accept: application/json" \
 2. `MyGroup` is the name of one of the instance groups as obtained by the first API. You can fetch the `ID` of each instance from the returned JSON.
 3. `xxxx-111-xxxx` is the `instance ID` as obtained by the second API. The returned JSON will include the `application ID` hosting the endpoint along with the actual specific configuration of that endpoint (including its `ID`).
 
+## Authentication
+
+There are several different ways to authenticate the application at the endpoint. Those authentication methods are explained below.
+
+### NONE
+
+No authentication information will be provided.
+
+### BASIC
+
+Authentication is done by sending a username and a password to the endpoint in plain text. The username and password must be provided by the user.
+
+### DIGEST
+
+Authentication is done by sending a digest workflow. The username and password must be provided by the user.
+
+### OIDC
+
+Allows configuration of an Open ID Connect workflow. Selecting this authentication method displays these new input fields:
+
+| Field         | Description                            |
+| ------------- | -------------------------------------- |
+| Token URL     | The URL of the OpenID Connect token    |
+| Client ID     | The ID of the OpenID Connect client    |
+| Client Secret | he secret of the OpenID COnnect client |
+
 ## UI Endpoints
 
 UI Endpoints can be defined to allow simple access to hosted web applications in a similar manner to client applications. This means that **BDeploy** will provide a link to the web application in much the same way as it provides access to client applications in its own UI, both on the (server) process status panel, as well as on the client applications page.
