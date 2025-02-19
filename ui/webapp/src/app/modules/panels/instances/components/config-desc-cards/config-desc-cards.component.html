@@ -4,167 +4,130 @@
   <!-- AppBaseFields -->
 
   @if (field === 'cfg.name') {
-    <div>
-      The name of the process configuration, not to be confused with the name of the application launched by the process.
-    </div>
-  }
-  @if (field === 'cfg.id') {
-    <div>The ID of the process, which is unique within the instance.</div>
+  <div>
+    The name of the process configuration, not to be confused with the name of the application launched by the process.
+  </div>
+  } @if (field === 'cfg.id') {
+  <div>The ID of the process, which is unique within the instance.</div>
   }
 
   <!-- AppCommandFields -->
 
   @if (field === 'cfg.executable') {
-    <div>The main command executed by BDeploy when running the process.</div>
+  <div>The main command executed by BDeploy when running the process.</div>
   }
 
   <!-- AppProcessCtrlFields -->
 
   @if (field === 'cfg.control.startType') {
-    <div>
-      The start type of the process. This controls how a process can be started and whether it is considered
-      <em>vital</em> for the instance.
-      <ul class="list-disc list-inside">
-        <li>
-          <strong>INSTANCE</strong>: The process will be started/stopped when bulk controlling the instance, and is
-          considered <em>vital</em>, i.e. the instance receives a warning marker if the process is not running.
-        </li>
-        <li>
-          <strong>MANUAL</strong>: The process will never be started automatically. A user needs to manually start the
-          process.
-        </li>
-        <li>
-          <strong>MANUAL_CONFIRM</strong>: Same as <strong>MANUAL</strong>, except that the user will additionally be
-          prompted to confirm starting the application.
-        </li>
-      </ul>
-    </div>
-  }
-  @if (field === 'cfg.control.keepAlive') {
-    <div>
-      Determines whether BDeploy tries to keep the process alive upon exit, restarting it after an increasing back-off
-      period.
-    </div>
-  }
-  @if (field === 'cfg.control.noRetries') {
-    <div>
-      The amount of times BDeploy will try to restart a process which has
-      <em>Keep Alive</em> enabled after the processes exited. The number of retries is reset once the process has been
-      running for a certain amount of time.
-    </div>
-  }
-  @if (field === 'cfg.control.gracePeriod') {
-    <div>
-      The time that BDeploy will wait for the process to shut down once instructed to do so. If the process does not exit
-      within this time, BDeploy will start to apply more force.
-    </div>
-  }
-  @if (field === 'cfg.control.attachStdin') {
-    <div>
-      Determines whether the console in the UI should be attached remotely to the processes <em>stdin</em> stream. This
-      allows to send commands to the process if the process supports this.
-    </div>
-  }
-  @if (field === 'cfg.control.autostart') {
-    <div>
-      Determines whether the application automatically starts upon system bootup.
-    </div>
+  <div>
+    The start type of the process. This controls how a process can be started and whether it is considered
+    <em>vital</em> for the instance.
+    <ul class="list-disc list-inside">
+      <li>
+        <strong>INSTANCE</strong>: The process will be started/stopped when bulk controlling the instance, and is
+        considered <em>vital</em>, i.e. the instance receives a warning marker if the process is not running.
+      </li>
+      <li>
+        <strong>MANUAL</strong>: The process will never be started automatically. A user needs to manually start the
+        process.
+      </li>
+      <li>
+        <strong>MANUAL_CONFIRM</strong>: Same as <strong>MANUAL</strong>, except that the user will additionally be
+        prompted to confirm starting the application.
+      </li>
+    </ul>
+  </div>
+  } @if (field === 'cfg.control.keepAlive') {
+  <div>
+    Determines whether BDeploy tries to keep the process alive upon exit, restarting it after an increasing back-off
+    period.
+  </div>
+  } @if (field === 'cfg.control.noRetries') {
+  <div>
+    The amount of times BDeploy will try to restart a process which has
+    <em>Keep Alive</em> enabled after the processes exited. The number of retries is reset once the process has been
+    running for a certain amount of time.
+  </div>
+  } @if (field === 'cfg.control.gracePeriod') {
+  <div>
+    The time that BDeploy will wait for the process to shut down once instructed to do so. If the process does not exit
+    within this time, BDeploy will start to apply more force.
+  </div>
+  } @if (field === 'cfg.control.attachStdin') {
+  <div>
+    Determines whether the console in the UI should be attached remotely to the processes <em>stdin</em> stream. This
+    allows to send commands to the process if the process supports this.
+  </div>
+  } @if (field === 'cfg.control.autostart') {
+  <div>Determines whether the application automatically starts upon system bootup.</div>
   }
 
   <!-- AppEndpointFields -->
 
   @if (field === 'cfg.ep.path') {
-    <div>
-      The endpoints path. The final <em>URI</em> is constructed using by appending this path to the constructed base
-      <em>URI</em> calculated from the rest of the endpoint configuration.
-    </div>
-  }
-  @if (field === 'cfg.ep.port') {
-    <div>The port this endpoint is hosted on.</div>
-  }
-  @if (field === 'cfg.ep.secure') {
-    <div>Whether to use HTTPS instead of HTTP.</div>
-  }
-  @if (field === 'cfg.ep.trustAll') {
-    <div>Whether to trust all certificates.</div>
-  }
-  @if (field === 'cfg.ep.trustStore') {
-    <div>
-      If not trusting all certificates, gives an optional path on the server file system to a Java TrustStore holding
-      required certificates to trust.
-    </div>
-  }
-  @if (field === 'cfg.ep.trustStorePass') {
-    <div>A passphrase for the configured Java TrustStore.</div>
-  }
-  @if (field === 'cfg.ep.authType') {
-    <div>
-      The authentication type to use when opening a connection to the endpoint.
-    </div>
-  }
-  @if (field === 'cfg.ep.authUser') {
-    <div>
-      If authentication is required, the user to send to the endpoint for authentication.
-    </div>
-  }
-  @if (field === 'cfg.ep.authPass') {
-    <div>
-      If authentication is required, the password to send to the endpoint for authentication.
-    </div>
-  }
-  @if (field === 'cfg.ep.tokenUrl') {
-    <div>The URL of the OpenID Connect token.</div>
-  }
-  @if (field === 'cfg.ep.clientId') {
-    <div>The ID of the OpenID Connect client.</div>
-  }
-  @if (field === 'cfg.ep.clientSecret') {
-    <div>The secret of the OpenID COnnect client.</div>
+  <div>
+    The endpoints path. The final <em>URI</em> is constructed using by appending this path to the constructed base
+    <em>URI</em> calculated from the rest of the endpoint configuration.
+  </div>
+  } @if (field === 'cfg.ep.port') {
+  <div>The port this endpoint is hosted on.</div>
+  } @if (field === 'cfg.ep.secure') {
+  <div>Whether to use HTTPS instead of HTTP.</div>
+  } @if (field === 'cfg.ep.trustAll') {
+  <div>Whether to trust all certificates.</div>
+  } @if (field === 'cfg.ep.trustStore') {
+  <div>
+    If not trusting all certificates, gives an optional path on the server file system to a Java TrustStore holding
+    required certificates to trust.
+  </div>
+  } @if (field === 'cfg.ep.trustStorePass') {
+  <div>A passphrase for the configured Java TrustStore.</div>
+  } @if (field === 'cfg.ep.authType') {
+  <div>The authentication type to use when opening a connection to the endpoint.</div>
+  } @if (field === 'cfg.ep.authUser') {
+  <div>If authentication is required, the user to send to the endpoint for authentication.</div>
+  } @if (field === 'cfg.ep.authPass') {
+  <div>If authentication is required, the password to send to the endpoint for authentication.</div>
+  } @if (field === 'cfg.ep.tokenUrl') {
+  <div>The URL of the OpenID Connect token.</div>
+  } @if (field === 'cfg.ep.clientId') {
+  <div>The ID of the OpenID Connect client.</div>
+  } @if (field === 'cfg.ep.clientSecret') {
+  <div>The secret of the OpenID Connect client.</div>
   }
 
   <!-- InstFields -->
 
   @if (field === 'inst.name') {
-    <div>The name of the instance.</div>
-  }
-  @if (field === 'inst.description') {
-    <div>A descriptive text for humans.</div>
-  }
-  @if (field === 'inst.purpose') {
-    <div>
-      The intended purpose of the instance, hinting how <em>critical</em> changes to the instance can be.
-    </div>
-  }
-  @if (field === 'inst.productTag') {
-    <div>
-      The configured version of the product in use by this instance. The version dictates which applications are
-      available, how to configure them, as well as the final binaries installed on the target system.
-    </div>
-  }
-  @if (field === 'inst.autoStart') {
-    <div>
-      Whether all processes of start type <strong>INSTANCE</strong> will be started automatically when the BDeploy server
-      starts.
-    </div>
-  }
-  @if (field === 'inst.autoUninstall') {
-    <div>
-      Whether old versions of the instance will be uninstalled automatically. Versions older than the currently
-      <em>active</em> version are eligible.
-    </div>
-  }
-  @if (field === 'inst.configTree') {
-    <div>
-      The internal ID of the configuration files. A change in this ID will show that <em>any</em> configuration file has
-      changed.
-    </div>
-  }
-  @if (field === 'inst.systemId') {
-    <div>The internal ID of the system used by this instance.</div>
-  }
-  @if (field === 'inst.systemTag') {
-    <div>
-      The version of the system in use. This changes when the system is modified.
-    </div>
+  <div>The name of the instance.</div>
+  } @if (field === 'inst.description') {
+  <div>A descriptive text for humans.</div>
+  } @if (field === 'inst.purpose') {
+  <div>The intended purpose of the instance, hinting how <em>critical</em> changes to the instance can be.</div>
+  } @if (field === 'inst.productTag') {
+  <div>
+    The configured version of the product in use by this instance. The version dictates which applications are
+    available, how to configure them, as well as the final binaries installed on the target system.
+  </div>
+  } @if (field === 'inst.autoStart') {
+  <div>
+    Whether all processes of start type <strong>INSTANCE</strong> will be started automatically when the BDeploy server
+    starts.
+  </div>
+  } @if (field === 'inst.autoUninstall') {
+  <div>
+    Whether old versions of the instance will be uninstalled automatically. Versions older than the currently
+    <em>active</em> version are eligible.
+  </div>
+  } @if (field === 'inst.configTree') {
+  <div>
+    The internal ID of the configuration files. A change in this ID will show that <em>any</em> configuration file has
+    changed.
+  </div>
+  } @if (field === 'inst.systemId') {
+  <div>The internal ID of the system used by this instance.</div>
+  } @if (field === 'inst.systemTag') {
+  <div>The version of the system in use. This changes when the system is modified.</div>
   }
 </mat-card>
