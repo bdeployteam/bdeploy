@@ -28,7 +28,7 @@ public class InstanceTemplateReferenceDescriptor {
     @JsonProperty(required = true)
     public String templateName;
 
-    @JsonPropertyDescription("A list of proposed default mappings from groups to nodes. If a node does not exist, the mapping is disregarded and the user needs to choose.")
+    @JsonPropertyDescription("A list of proposed default mappings from groups to nodes. If a node does not exist, UI disregards the mapping and the user needs to choose, while CLI will throw an exception.")
     public List<SystemTemplateInstanceTemplateGroupMapping> defaultMappings;
 
     @JsonPropertyDescription("A list of fixed values which should be used instead of querying values from the user.")
