@@ -49,7 +49,8 @@ public class LocalClientApplicationSettingsManifest {
     }
 
     /**
-     * @return The current version of the {@link LocalClientApplicationSettings}, or <code>null</code> if not present
+     * @return The current version of the {@link LocalClientApplicationSettings}, or a new instance if no existing one could be
+     *         found.
      */
     public LocalClientApplicationSettings read() {
         Optional<Long> currentlyActiveTag = hive.execute(new ManifestMaxIdOperation().setManifestName(MANIFEST_NAME));
@@ -63,7 +64,7 @@ public class LocalClientApplicationSettingsManifest {
         try (InputStream is = hive.execute(new TreeEntryLoadOperation().setRootTree(mf.getRoot()).setRelativePath(FILE_NAME))) {
             return StorageHelper.fromStream(is, LocalClientApplicationSettings.class);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot load software repository descriptor from: " + mf.getKey(), e);
+            throw new IllegalStateException("Cannot load local client application settings " + mf.getKey(), e);
         }
     }
 }
