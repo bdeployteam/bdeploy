@@ -20,6 +20,8 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingDirectoryValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
@@ -47,8 +49,9 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     public @interface UninstallerConfig {
 
-        @Help("Directory where the launcher stores the hive as well as all applications. ") //
+        @Help("Directory where the launcher stores the hive as well as all applications.") //
         @EnvironmentFallback("BDEPLOY_INTERNAL_HOMEDIR")
+        @Validator(ExistingDirectoryValidator.class)
         String homeDir();
 
         @Help("The unique identifier of the application to uninstall.")
