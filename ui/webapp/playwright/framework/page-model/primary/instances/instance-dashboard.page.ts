@@ -1,6 +1,8 @@
 import { BaseDialog } from '@bdeploy-pom/base/base-dialog';
 import { expect, Page } from '@playwright/test';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
+import { createPanelFromRow } from '@bdeploy-pom/common/common-functions';
+import { ProcessStatusPanel } from '@bdeploy-pom/panels/instances/process-status.panel';
 
 export class InstanceDashboardPage extends BaseDialog {
   constructor(page: Page, private readonly group: string, private readonly instance: string) {
@@ -27,6 +29,14 @@ export class InstanceDashboardPage extends BaseDialog {
     const activateBtn = this.getDialog().getByRole('button', { name: 'Activate' });
     await activateBtn.click();
     await expect(activateBtn.locator('mat-spinner')).not.toBeVisible();
+  }
+
+  async getProcessStatus(node: string, process: string) {
+    return createPanelFromRow(this.getServerNode(node).getByRole('row', { name: process }), (p) => new ProcessStatusPanel(p));
+  }
+
+  async toggleBulkControl() {
+    await this.getToolbar().getByRole('button', { name: 'Bulk Control' }).click();
   }
 
   getServerNode(name: string) {

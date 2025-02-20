@@ -119,6 +119,7 @@
           [disabled]="startDisabled$ | async"
           (click)="start()"
           matTooltip="Start Process"
+          data-testid="start-process"
           >
           @if (!(mappedStart$ | async)) {
             <mat-icon class="material-symbols-filled flex-auto">play_arrow</mat-icon>
@@ -135,6 +136,7 @@
           [disabled]="stopDisabled$ | async"
           (click)="stop()"
           matTooltip="Stop Process"
+          data-testid="stop-process"
           >
           @if (!(mappedStop$ | async)) {
             <mat-icon class="material-symbols-filled flex-auto">stop</mat-icon>
@@ -151,6 +153,7 @@
           [disabled]="restartDisabled$ | async"
           (click)="restart()"
           matTooltip="Restart Process"
+          data-testid="restart-process"
           >
           @if (!(mappedRestart$ | async)) {
             <mat-icon class="material-symbols-filled flex-auto">replay</mat-icon>

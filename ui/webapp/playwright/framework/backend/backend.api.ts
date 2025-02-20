@@ -1,5 +1,10 @@
-import { APIRequestContext, Page, Response } from '@playwright/test';
-import { InstanceGroupConfiguration, InstanceGroupConfigurationDto, ObjectChangeDto } from '@bdeploy/models/gen.dtos';
+import { APIRequestContext, BrowserContext, Page, Response } from '@playwright/test';
+import {
+  InstanceGroupConfiguration,
+  InstanceGroupConfigurationDto,
+  ObjectChangeDto,
+  ObjectChangeType
+} from '@bdeploy/models/gen.dtos';
 
 export class BackendApi {
   private readonly _page: Page;
@@ -53,7 +58,7 @@ export class BackendApi {
       }
     });
 
-    await this._page.context().routeWebSocket('**/ws', async ws => {
+    await this._page.context().routeWebSocket('**/ws/object-changes', async ws => {
       const server = ws.connectToServer();
       server.onMessage(m => {
         const dto = JSON.parse(m.toString()) as ObjectChangeDto;
@@ -64,6 +69,34 @@ export class BackendApi {
           ws.send(m);
         }
         // otherwise swallow the message - it is meant for filtered instance groups.
+      });
+    });
+  }
+
+  /**
+   * Prevents any server actions to reach the webapp. this causes the webapp to solely act/react
+   * on things it started itself (i.e. the REST requests) instead of waiting for the server to
+   * notify that actions actually finished.
+   * <p>
+   * The main purpose of actions is to keep *other* frontend instances informed on what is going
+   * on. There are timeouts and debounces attached to this. For the user it feels natural and fast,
+   * however UI tests are faster. Waiting for actions on the server to be properly closed and then
+   * sent via websocket to the frontends introduces extensive wait times in areas where they might
+   * be not only undesirable but also hindering fast tests.
+   * <p>
+   * As positive side effect this will also get rid of the main menu action spinner that is on the
+   * screenshots randomly depending on timing.
+   */
+  static async mockRemoveActions(context: BrowserContext) {
+    await context.routeWebSocket('**/ws/object-changes', async ws => {
+      const server = ws.connectToServer();
+      server.onMessage(m => {
+        const dto = JSON.parse(m.toString()) as ObjectChangeDto;
+        if (dto.type === ObjectChangeType.SERVER_ACTIONS) {
+          // swallow :)
+          return;
+        }
+        ws.send(m);
       });
     });
   }

@@ -68,7 +68,7 @@ groups:
           - uid: param.text
             value: "{{X:param.global}}"
       - template: server-with-sleep
-        name: "Another Server With Sleep"
+        name: "Another Server"
         preferredProcessControlGroup: "Second Group"
         processControl:
           startType: "INSTANCE"

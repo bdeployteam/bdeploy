@@ -42,7 +42,9 @@
         @if (refreshingWhen$ | async) {
           <mat-spinner [diameter]="16"></mat-spinner>
         } @else {
-          <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)">refresh</app-bd-micro-icon-button>
+          <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)" data-testid="refresh-processes">
+            refresh
+          </app-bd-micro-icon-button>
         }
       </div>
     }

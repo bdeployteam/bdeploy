@@ -1,5 +1,6 @@
 import { Browser, expect, Page, test as testBase } from '@playwright/test';
 import { startCoverage, stopCoverage } from './coverage-setup';
+import { BackendApi } from '@bdeploy-backend';
 
 interface BDeployFixtures {
   standalone: Page;
@@ -7,8 +8,13 @@ interface BDeployFixtures {
   managed: Page;
 }
 
-const useAuthAndCoverage = async (url: string, browser: Browser, use: (p: Page) => Promise<void>) => {
+const useAuthAndCoverage = async (url: string, browser: Browser, use: (p: Page) => Promise<void>, disableActions = false) => {
   const context = await browser.newContext({ baseURL: url });
+
+  if (disableActions) {
+    await BackendApi.mockRemoveActions(context);
+  }
+
   const page = await context.newPage();
 
   // authenticate
@@ -31,7 +37,7 @@ const useAuthAndCoverage = async (url: string, browser: Browser, use: (p: Page) 
 
 const test = testBase.extend<BDeployFixtures>({
   standalone: async ({ browser }, use) => {
-    await useAuthAndCoverage('http://localhost:4210', browser, use);
+    await useAuthAndCoverage('http://localhost:4210', browser, use, true);
   },
   central: async ({ browser }, use) => {
     await useAuthAndCoverage('http://localhost:4211', browser, use);

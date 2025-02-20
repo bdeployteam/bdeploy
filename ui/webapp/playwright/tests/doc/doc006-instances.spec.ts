@@ -46,6 +46,7 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
 
   await templates.screenshot('Doc_InstanceTemplatesVars');
   await templates.fillLiteralVariable('Text Value', 'Demo Text');
+  await templates.fillLiteralVariable('Sleep Timeout', '1');
   await templates.fillBooleanVariable('Product License', true);
   await templates.finishTemplate();
 
@@ -76,6 +77,41 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
 
   await expect(instance.getServerNode('master').locator('tr', { hasText: 'Server No Sleep' })).toBeVisible();
   await instance.screenshot('Doc_InstanceDashboardActive');
+
+  await instance.getProcessStatus('master', 'Server With Sleep');
+  await instance.screenshot('Doc_DashboardProcessControlGroup');
+
+  await instance.toggleBulkControl();
+  await instance.getServerNode('master').locator('tr', { hasText: 'Second Group' }).getByRole('checkbox').click();
+  await instance.screenshot('Doc_DashboardBulkProcessControl');
+
+  const manualStatus = await instance.getProcessStatus('master', 'Server No Sleep');
+  await manualStatus.start();
+  await manualStatus.screenshot('Doc_DashboardProcessManualConfirm');
+  await manualStatus.getConfirmationPopup().cancel();
+
+  const keepAliveStatus = await instance.getProcessStatus('master', 'Another Server');
+  await keepAliveStatus.start();
+
+  // actually need to wait for the process to fail - timeout is set to 1 second during template setup.
+  // we wait 2 seconds; 1 seconds for the first "crash" to happen (then it restarts immediately, we could
+  // do a screenshot of the "red heart" (running recently crashed) as well, but it is not currently in the
+  // documentation. We wait a little longer on all waits to accommodate for any delays in the backend.
+  await standalone.waitForTimeout(1000 * 1.2); // first run
+  await standalone.waitForTimeout(1000 * 1.2); // second run
+  await instance.getServerNode('master').getByTestId('refresh-processes').click();
+  await expect(instance.getServerNode('master').locator('tr', { hasText: 'Another Server' }).locator('mat-icon', { hasText: 'report_problem' })).toBeVisible();
+  await instance.screenshot('Doc_DashboardProcessCrash');
+
+  // now there is a restart-back-off of 10 seconds on the server, we also need to wait for that.
+  await standalone.waitForTimeout(10500); // backoff
+
+  // now the process is running again. we set retries for this process to 2, so it should enter failed
+  // permanently state after another 3 seconds.
+  await standalone.waitForTimeout(1000 * 1.2); // third run
+  await instance.getServerNode('master').getByTestId('refresh-processes').click();
+  await expect(instance.getServerNode('master').locator('tr', { hasText: 'Another Server' }).locator('mat-icon', { hasText: 'error' })).toBeVisible();
+  await instance.screenshot('Doc_DashboardProcessCrashPermanent');
 });
 
 test('Instance Configuration', async ({ standalone }, testInfo) => {

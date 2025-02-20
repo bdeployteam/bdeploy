@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable, Subscription, combineLatest, of, startWith } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, startWith, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skipWhile, take } from 'rxjs/operators';
 import {
   Action,
@@ -11,7 +11,7 @@ import {
   ObjectChangeDetails,
   ObjectChangeType,
   ObjectEvent,
-  ObjectScope,
+  ObjectScope
 } from '../../../models/gen.dtos';
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
@@ -34,6 +34,8 @@ export class ActionsService {
   private changesSubscription: Subscription;
 
   constructor() {
+    this.actions$.subscribe((a) => console.log('Actions: ' + JSON.stringify(a, null, 2), new Error()));
+
     combineLatest([
       this.areas.groupContext$,
       this.areas.repositoryContext$,
