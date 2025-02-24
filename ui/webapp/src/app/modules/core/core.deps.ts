@@ -48,6 +48,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { httpInterceptorProviders } from './interceptors';
 import { ConfigService } from './services/config.service';
+import { provideZxvbnServiceForPSM } from 'angular-password-strength-meter/zxcvbn';
 
 function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -62,6 +63,7 @@ export function provideCoreDependencies(): (EnvironmentProviders | Provider)[] {
             const initializerFn = (loadAppConfig)(inject(ConfigService));
             return initializerFn();
         }),
+        provideZxvbnServiceForPSM(),
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         importProvidersFrom([
             CommonModule,

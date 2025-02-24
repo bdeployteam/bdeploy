@@ -46,6 +46,10 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
     return `${label} must be at maximum ${errors['maxlength'].requiredLength} characters.`;
   }
 
+  if (errors['email']) {
+    return `The format is invalid for an e-mail address.`;
+  }
+
   // our own validators
   if (errors[ID_VALIDATION]) {
     return `${label} contains invalid characters`;
