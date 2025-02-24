@@ -53,7 +53,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         @Help("ID of the instance to query/control")
         String uuid();
 
-        @Help("The name of the application to control, controls all applications of the instance if missing")
+        @Help("The ID of the application to control, controls all applications of the instance if missing")
         String application();
 
         @Help("The name of the process control group. Must be specified along with --controlGroupNodeName")
