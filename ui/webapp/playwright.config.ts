@@ -25,7 +25,6 @@ const cro: CoverageReportOptions = {
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './playwright/tests',
   outputDir: './playwright/results/results',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -78,6 +77,7 @@ export default defineConfig({
     {
       name: 'chrome-all',
       use: { ...devices['Desktop Chrome'] },
+      testDir: './playwright/tests'
     },
     {
       name: 'firefox-features',
