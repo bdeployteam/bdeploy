@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.template;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,4 +26,23 @@ public class TemplateVariableFixedValueOverride {
         this.value = value;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        TemplateVariableFixedValueOverride other = (TemplateVariableFixedValueOverride) obj;
+        return Objects.equals(id, other.id) && Objects.equals(value, other.value);
+    }
 }

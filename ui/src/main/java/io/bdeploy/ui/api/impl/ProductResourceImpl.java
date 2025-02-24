@@ -473,7 +473,7 @@ public class ProductResourceImpl implements ProductResource {
 
         Stream<TemplateVariable> tempVarStream = Stream.concat(selectedInstanceTemplate.directlyUsedTemplateVars.stream(),
                 selectedInstanceTemplate.groups.stream().flatMap(group -> group.groupVariables.stream()));
-        List<TemplateVariableFixedValueOverride> tempVars;
+        Set<TemplateVariableFixedValueOverride> tempVars;
         if (includeDefaults != null && includeDefaults) {
             tempVars = tempVarStream//
                     .sorted((a, b) -> {
@@ -485,13 +485,13 @@ public class ProductResourceImpl implements ProductResource {
                         return aHasDefault ? 1 : -1;
                     })//
                     .map(var -> new TemplateVariableFixedValueOverride(var.id,
-                            var.defaultValue != null ? var.defaultValue : "<" + var.type + " VALUE>"))//
-                    .toList();
+                            var.defaultValue != null ? var.defaultValue : "<" + var.type + " VALUE>"))
+                    .collect(Collectors.toUnmodifiableSet());
         } else {
             tempVars = tempVarStream//
                     .filter(var -> var.defaultValue == null)
                     .map(var -> new TemplateVariableFixedValueOverride(var.id, "<" + var.type + " VALUE>"))//
-                    .toList();
+                    .collect(Collectors.toUnmodifiableSet());
         }
 
         InstanceTemplateReferenceDescriptor dataHolder = new InstanceTemplateReferenceDescriptor();
@@ -512,7 +512,7 @@ public class ProductResourceImpl implements ProductResource {
             mapping.node = node;
             return mapping;
         }).toList();
-        dataHolder.fixedVariables = tempVars;
+        dataHolder.fixedVariables = new ArrayList<>(tempVars);
 
         ObjectMapper mapper = JacksonHelper.getDefaultYamlObjectMapper();
         String yamlOutput;
