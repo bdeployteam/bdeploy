@@ -19,6 +19,10 @@ export class ConfigureParametersPanel extends BasePanel {
     await this.page.mouse.wheel(0, 10);
   }
 
+  async apply() {
+    await this.getToolbar().getByRole('button', { name: 'Apply' }).click();
+  }
+
   getSavePopup() {
     return this.getDialog().locator('app-bd-dialog-message').locator('app-bd-notification-card', { hasText: 'Save Changes?' });
   }
