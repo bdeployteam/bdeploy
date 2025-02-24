@@ -1,0 +1,114 @@
+<app-bd-dialog [loadingWhen$]="saving$">
+  <app-bd-dialog-toolbar header="Mail Sending{{ isDirty() ? '*' : '' }}" [panel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <p>Configuring a mail server will allow BDeploy to send e-mails to the master BDeploy server.</p>
+    <app-bd-form-toggle
+      [(ngModel)]="mailSenderSettings.enabled"
+      label="Enable Mail Sending"
+      (ngModelChange)="clearMessages()"
+    ></app-bd-form-toggle>
+    <p [class.bd-disabled-text]="!mailSenderSettings.enabled">
+      Configure the SMTP/SMTPS server:
+    </p>
+    <form #smtpConnectionData="ngForm">
+      <app-bd-form-input
+        [(ngModel)]="mailSenderSettings.url"
+        [disabled]="!mailSenderSettings.enabled"
+        [required]="true"
+        [errorDisplay]="'immediate'"
+        label="URL"
+        name="url"
+        placeholder="smtp(s)://host:port/folder"
+        appTrimmed
+        appServerConnectionUrlSyntaxValid
+      ></app-bd-form-input>
+      <app-bd-form-input
+        [(ngModel)]="mailSenderSettings.username"
+        [disabled]="!mailSenderSettings.enabled"
+        [errorDisplay]="'immediate'"
+        label="Username"
+        name="username"
+        appTrimmed
+      ></app-bd-form-input>
+      <app-bd-form-input
+        [ngModel]="mailSenderSettings.password"
+        (ngModelChange)="onPasswordChange($event)"
+        [disabled]="!mailSenderSettings.enabled"
+        [errorDisplay]="'immediate'"
+        label="Password"
+        placeholder="Leave empty to use stored password"
+        name="password"
+        type="password"
+        [passwordShowable]="true"
+      ></app-bd-form-input>
+    </form>
+    <div class="flex justify-start items-center bd-success-text">
+      <app-bd-button
+        [disabled]="!mailSenderSettings.enabled || smtpConnectionData.invalid"
+        icon="send"
+        text="Test SMTP Server Connection"
+        [collapsed]="false"
+        (click)="testConnection()"
+      ></app-bd-button>
+      <div class="text-center pl-4">{{ (connectionTestStatusMsg$ | async) }}</div>
+    </div>
+    <br />
+    <p [class.bd-disabled-text]="!mailSenderSettings.enabled">
+      Configure an optional sender address. This might be ignored by the SMTP server:
+    </p>
+    <app-bd-form-input
+      [(ngModel)]="mailSenderSettings.senderAddress"
+      [disabled]="!mailSenderSettings.enabled"
+      [errorDisplay]="'immediate'"
+      label="Sender Address"
+      type="email"
+      email
+      appTrimmed
+    ></app-bd-form-input>
+    <p [class.bd-disabled-text]="!mailSenderSettings.enabled">
+      Configure the receiver. This address will be sent configuration changes from this server:
+    </p>
+    <form #receiver="ngForm">
+      <app-bd-form-input
+        name="receiverAddress"
+        [(ngModel)]="mailSenderSettings.receiverAddress"
+        [disabled]="!mailSenderSettings.enabled"
+        [errorDisplay]="'immediate'"
+        [required]="true"
+        label="Receiver Address"
+        type="email"
+        email
+        appTrimmed
+      ></app-bd-form-input>
+      <app-bd-form-input
+        name="managedServerName"
+        [(ngModel)]="mailSenderSettings.managedServerName"
+        [disabled]="!mailSenderSettings.enabled"
+        [errorDisplay]="'immediate'"
+        [required]="true"
+        label="Managed Server Name"
+        appTrimmed
+      ></app-bd-form-input>
+    </form>
+    <div class="flex justify-start items-center bd-success-text">
+      <app-bd-button
+        [disabled]="!mailSenderSettings.enabled || smtpConnectionData.invalid || receiver.invalid"
+        icon="send"
+        text="Send Test Mail"
+        [collapsed]="false"
+        (click)="sendTestMail()"
+      ></app-bd-button>
+      <div class="text-center pl-4 bd-success-text">{{ (mailSendingTestStatusMsg$ | async) }}</div>
+    </div>
+    <br/>
+    <app-bd-button
+      color="primary"
+      [collapsed]="false"
+      text="Apply"
+      icon="save"
+      [disabled]="!isDirty() || !canSave()"
+      (click)="onSave()"
+    ></app-bd-button>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -1,0 +1,66 @@
+<app-bd-dialog [loadingWhen$]="saving$">
+  <app-bd-dialog-toolbar header="Mail Receiving{{ imapConnectionData.dirty ? '*' : '' }}" [panel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <form #imapConnectionData="ngForm">
+      <app-bd-form-toggle
+        [(ngModel)]="mailReceiverSettings.enabled"
+        label="Enable Mail Receiving"
+        name="enabled"
+        (ngModelChange)="clearMessages()"
+      ></app-bd-form-toggle>
+      <p [class.bd-disabled-text]="!mailReceiverSettings.enabled">
+        Configure the IMAP/IMAPS server below if enabled.
+      </p>
+      <app-bd-form-input
+        [(ngModel)]="mailReceiverSettings.url"
+        [disabled]="!mailReceiverSettings.enabled"
+        [required]="true"
+        [errorDisplay]="'immediate'"
+        label="URL"
+        name="url"
+        placeholder="imap(s)://host:port"
+        appTrimmed
+        appServerConnectionUrlSyntaxValid
+      ></app-bd-form-input>
+      <app-bd-form-input
+        [(ngModel)]="mailReceiverSettings.username"
+        [disabled]="!mailReceiverSettings.enabled"
+        [errorDisplay]="'immediate'"
+        label="Username"
+        name="username"
+        appTrimmed
+      ></app-bd-form-input>
+      <app-bd-form-input
+        [ngModel]="mailReceiverSettings.password"
+        (ngModelChange)="onPasswordChange($event)"
+        [disabled]="!mailReceiverSettings.enabled"
+        [errorDisplay]="'immediate'"
+        label="Password"
+        placeholder="Leave empty to use stored password"
+        name="password"
+        type="password"
+        [passwordShowable]="true"
+      ></app-bd-form-input>
+    </form>
+    <div class="flex justify-start items-center bd-success-text">
+      <app-bd-button
+        [disabled]="!(mailReceiverSettings.enabled && imapConnectionData.valid)"
+        icon="send"
+        text="Test IMAP Server Connection"
+        [collapsed]="false"
+        (click)="testConnection()"
+      ></app-bd-button>
+      <div class="text-center pl-4">{{ (connectionTestStatusMsg$ | async) }}</div>
+    </div>
+    <br/>
+    <app-bd-button
+      color="primary"
+      [collapsed]="false"
+      text="Apply"
+      icon="save"
+      [disabled]="!(imapConnectionData.valid && imapConnectionData.dirty)"
+      (click)="onSave()"
+    ></app-bd-button>
+  </app-bd-dialog-content>
+</app-bd-dialog>
