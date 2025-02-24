@@ -20,13 +20,15 @@ public class LauncherCli extends ToolBase {
 
     @Override
     public void toolMain(String... args) throws Exception {
-        // Arguments starting with a single dash (-) are options for the tool
-        // Arguments starting with a double dash (--) are options for the application
         List<String> noOpt = new ArrayList<>();
         List<String> appArgs = new ArrayList<>();
         List<String> toolArgs = new ArrayList<>();
         for (String arg : args) {
             if (arg.startsWith("--")) {
+                if ("--help".equals(arg)) {
+                    super.toolMain(args);
+                    return;
+                }
                 appArgs.add(arg);
             } else if (arg.startsWith("-")) {
                 toolArgs.add(arg);
@@ -46,7 +48,7 @@ public class LauncherCli extends ToolBase {
             argumentList.add("--launch=" + noOpt.get(0));
             argumentList.addAll(appArgs);
             args = argumentList.toArray(new String[argumentList.size()]);
-        } else if (noOpt.isEmpty()) {
+        } else if (noOpt.isEmpty() && !appArgs.contains("--help")) {
             List<String> argumentList = new ArrayList<>();
             argumentList.addAll(toolArgs);
             argumentList.add("browser");
