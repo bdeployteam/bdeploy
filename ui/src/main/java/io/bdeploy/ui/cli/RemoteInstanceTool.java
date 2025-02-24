@@ -116,7 +116,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Validator(ExistingPathValidator.class)
         String template();
 
-        @Help("Update the given instances")
+        @Help(value = "Update the given instances", arg = false)
         boolean update() default false;
 
         @Help("The name to set for the created/updated instance")
