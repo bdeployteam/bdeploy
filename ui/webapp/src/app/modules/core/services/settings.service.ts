@@ -116,6 +116,20 @@ export class SettingsService {
     this.settingsUpdated$.next(true);
   }
 
+  public updateMailReceiverSettings(mailReceiverSettings: MailReceiverSettingsDto) {
+    this.settings$.value.mailReceiverSettings = cloneDeep(mailReceiverSettings);
+    this.settingsUpdated$.next(true);
+  }
+
+  public updateMailSenderSettings(mailSenderSettings: MailSenderSettingsDto) {
+    this.settings$.value.mailSenderSettings = cloneDeep(mailSenderSettings);
+    this.settingsUpdated$.next(true);
+  }
+
+  public isMailSenderSettingsEqualToOriginal(mailSenderSettings: MailSenderSettingsDto): boolean {
+    return isEqual(this.settings$.value.mailSenderSettings, mailSenderSettings);
+  }
+
   /**
    * Prompts the backend to attempt to send a mail with the parameters defined within the given mail sender settings.
    *
@@ -142,4 +156,5 @@ export class SettingsService {
   public testReceiverConnection(dto: MailReceiverSettingsDto): Observable<boolean> {
     return this.http.post<boolean>(this.config.config.api + '/master/settings/mail/receiving/connectionTest', dto);
   }
+
 }

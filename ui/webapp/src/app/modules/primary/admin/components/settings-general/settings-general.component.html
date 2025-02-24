@@ -1,6 +1,26 @@
 <app-bd-dialog [loadingWhen$]="settings.loading$">
   <app-bd-dialog-toolbar header="Settings">
     <div class="flex-auto"></div>
+    @if (mailSendingTab.isActive) {
+      <app-bd-panel-button
+        [collapsed]="false"
+        color="primary"
+        text="Edit"
+        icon="edit"
+        [route]="['panels', 'admin', 'mail-sending']"
+      ></app-bd-panel-button>
+      <mat-divider [vertical]="true"></mat-divider>
+    }
+    @if (mailReceivingTab.isActive) {
+      <app-bd-panel-button
+        [collapsed]="false"
+        color="primary"
+        text="Edit"
+        icon="edit"
+        [route]="['panels', 'admin', 'mail-receiving']"
+      ></app-bd-panel-button>
+      <mat-divider [vertical]="true"></mat-divider>
+    }
     @if (ldapTab.isActive) {
       <app-bd-panel-button
         [collapsed]="false"
@@ -69,13 +89,13 @@
             >
             <app-general-tab></app-general-tab>
           </mat-tab>
-          <mat-tab #mailTab class="flex flex-col">
+          <mat-tab #mailSendingTab class="flex flex-col">
             <ng-template mat-tab-label
               ><div class="flex justify-start items-center gap-1"><mat-icon>mail</mat-icon>Mail Sending</div></ng-template
               >
               <app-mail-sending-tab></app-mail-sending-tab>
             </mat-tab>
-            <mat-tab #mailTab class="flex flex-col">
+            <mat-tab #mailReceivingTab class="flex flex-col">
               <ng-template mat-tab-label
                 ><div class="flex justify-start items-center gap-1">
                 <mat-icon>mail</mat-icon>Mail Receiving

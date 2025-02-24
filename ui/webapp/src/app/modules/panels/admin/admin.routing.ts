@@ -170,6 +170,18 @@ export const ADMIN_PANEL_ROUTES: Routes = [
     data: { max: true },
   },
   {
+    path: 'mail-receiving',
+    loadComponent: () => import('./components/mail-receiving/mail-receiving.component').then(m => m.MailReceivingComponent),
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'mail-sending',
+    loadComponent: () => import('./components/mail-sending/mail-sending.component').then(m => m.MailSendingComponent),
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
     path: 'auth-test',
     loadComponent: () => import('./components/auth-test/auth-test.component').then(m => m.AuthTestComponent),
     canActivate: [AdminGuard],

@@ -1,95 +1,30 @@
 <div class="bd-default-padding">
   <p>Configuring a mail server will allow BDeploy to send e-mails to the master BDeploy server.</p>
-  <app-bd-form-toggle
-    [(ngModel)]="settings.settings$.value.mailSenderSettings.enabled"
-    label="Enable Mail Sending"
-    (ngModelChange)="clearMessages()"
-  ></app-bd-form-toggle>
-  <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
-    Configure the SMTP/SMTPS server:
-  </p>
-  <form #smtpConnectionData="ngForm">
-    <app-bd-form-input
-      [(ngModel)]="settings.settings$.value.mailSenderSettings.url"
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
-      [required]="true"
-      label="URL"
-      name="url"
-      placeholder="smtp(s)://host:port/folder"
-      appTrimmed
-      appServerConnectionUrlSyntaxValid
-    ></app-bd-form-input>
-    <app-bd-form-input
-      [(ngModel)]="settings.settings$.value.mailSenderSettings.username"
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
-      label="Username"
-      name="username"
-      appTrimmed
-    ></app-bd-form-input>
-    <app-bd-form-input
-      [ngModel]="settings.settings$.value.mailSenderSettings.password"
-      (ngModelChange)="onPasswordChange($event)"
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
-      label="Password"
-      placeholder="Leave empty to use stored password"
-      name="password"
-      type="password"
-      [passwordShowable]="true"
-    ></app-bd-form-input>
-  </form>
-  <div class="flex justify-start items-center bd-success-text">
-    <app-bd-button
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled || smtpConnectionData.invalid"
-      icon="send"
-      text="Test SMTP Server Connection"
-      [collapsed]="false"
-      (click)="testConnection()"
-    ></app-bd-button>
-    <div class="text-center pl-4">{{ (connectionTestStatusMsg$ | async) }}</div>
-  </div>
-  <br />
-  <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
-    Configure an optional sender address. This might be ignored by the SMTP server:
-  </p>
-  <app-bd-form-input
-    [(ngModel)]="settings.settings$.value.mailSenderSettings.senderAddress"
-    [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
-    label="Sender Address"
-    type="email"
-    email
-    appTrimmed
-  ></app-bd-form-input>
-  <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
-    Configure the receiver. This address will be sent configuration changes from this server:
-  </p>
-  <form #receiver="ngForm">
-    <app-bd-form-input
-      name="receiverAddress"
-      [(ngModel)]="settings.settings$.value.mailSenderSettings.receiverAddress"
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
-      [required]="true"
-      label="Receiver Address"
-      type="email"
-      email
-      appTrimmed
-    ></app-bd-form-input>
-    <app-bd-form-input
-      name="managedServerName"
-      [(ngModel)]="settings.settings$.value.mailSenderSettings.managedServerName"
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
-      [required]="true"
-      label="Managed Server Name"
-      appTrimmed
-    ></app-bd-form-input>
-  </form>
-  <div class="flex justify-start items-center bd-success-text">
-    <app-bd-button
-      [disabled]="!settings.settings$.value.mailSenderSettings.enabled || smtpConnectionData.invalid || receiver.invalid"
-      icon="send"
-      text="Send Test Mail"
-      [collapsed]="false"
-      (click)="sendTestMail()"
-    ></app-bd-button>
-    <div class="text-center pl-4 bd-success-text">{{ (mailSendingTestStatusMsg$ | async) }}</div>
+
+  <div class="grid grid-cols-[32px_150px_auto] gap-2.5 items-center"
+       [class.bd-secondary-text]="!settings.settings$.value.mailSenderSettings.enabled">
+    <mat-icon></mat-icon>
+    <div>Current state:</div>
+    <div> {{settings.settings$.value.mailSenderSettings.enabled ? 'Enabled' : 'Disabled'}}</div>
+
+    <mat-icon>link</mat-icon>
+    <div>URL:</div>
+    <div>{{ settings.settings$.value.mailSenderSettings.url }}</div>
+
+    <mat-icon>account_circle</mat-icon>
+    <div>Username:</div>
+    <div>{{ settings.settings$.value.mailSenderSettings.username }}</div>
+
+    <mat-icon>outgoing_mail</mat-icon>
+    <div>Sender Address:</div>
+    <div>{{ settings.settings$.value.mailSenderSettings.senderAddress }}</div>
+
+    <mat-icon>inbox</mat-icon>
+    <div>Receiver Address:</div>
+    <div>{{ settings.settings$.value.mailSenderSettings.receiverAddress }}</div>
+
+    <mat-icon>settings_system_daydream</mat-icon>
+    <div>Managed Server Name:</div>
+    <div>{{ settings.settings$.value.mailSenderSettings.managedServerName }}</div>
   </div>
 </div>
