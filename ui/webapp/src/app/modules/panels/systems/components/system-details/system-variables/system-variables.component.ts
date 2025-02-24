@@ -57,9 +57,10 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   protected groups$ = new BehaviorSubject<VariableGroup[]>([]);
   protected completionPrefixes = buildCompletionPrefixes();
   protected completions: ContentCompletion[];
+  protected suggestedIds: string[];
 
   private subscription: Subscription;
-  private instancesUsing: InstanceDto[];
+  private instancesUsing$ = new BehaviorSubject<InstanceDto[]>([]);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) tb: BdDialogToolbarComponent;
@@ -82,15 +83,21 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
     this.subscription.add(
       combineLatest([this.edit.current$, this.instances.instances$]).subscribe(([systemConfigDto, instanceDto]) => {
         if (!systemConfigDto || !instanceDto) {
-          this.instancesUsing = [];
+          this.instancesUsing$.next([]);
           return;
         }
 
-        this.instancesUsing = instanceDto.filter(
+        this.instancesUsing$.next(instanceDto.filter(
           (i) => i.instanceConfiguration?.system?.name === systemConfigDto.key?.name,
-        );
+        ));
       }),
     );
+
+    this.subscription.add(combineLatest([this.groups$, this.instancesUsing$]).subscribe(([groups, instances]) => {
+      const instanceVariableIds = [...new Set(instances.flatMap((i) => i.instanceConfiguration.instanceVariables).map((iv) => iv.id))];
+      const systemVariableIds = groups.flatMap((g) => g.pairs).map((p) => p.descriptor?.id || p.value.id);
+      this.suggestedIds = instanceVariableIds.filter((id) => !systemVariableIds.includes(id));
+    }));
 
     this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
   }
@@ -117,12 +124,13 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
     this.saving$.next(true);
 
     const save = this.edit.update(this.system).pipe(finalize(() => this.saving$.next(false)));
+    const instancesUsingCount = this.instancesUsing$.value.length;
 
-    if (this.instancesUsing?.length) {
+    if (instancesUsingCount > 0) {
       return this.dialog
         .confirm(
-          `Saving ${this.instancesUsing.length} instances`,
-          `Affected <strong>${this.instancesUsing.length}</strong> will be updated with the new system version. This needs to be installed and activated on all affected instances.`,
+          `Saving ${instancesUsingCount} instances`,
+          `Affected <strong>${instancesUsingCount}</strong> will be updated with the new system version. This needs to be installed and activated on all affected instances.`,
           'warning',
         )
         .pipe(

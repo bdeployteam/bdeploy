@@ -1,7 +1,7 @@
 import { BackendApi } from '@bdeploy-backend';
 import { expect, test } from '@bdeploy-setup';
 import { createInstanceGroup, uploadProduct } from '@bdeploy-pom/common/common-tasks';
-import { SystemTemplatePage } from '@bdeploy-pom/primary/system/system-template.page';
+import { SystemTemplatePage } from '@bdeploy-pom/primary/systems/system-template.page';
 import { FormSelectElement } from '@bdeploy-elements/form-select.elements';
 
 const sysTplGroupId = `SystemTemplateGroup`;

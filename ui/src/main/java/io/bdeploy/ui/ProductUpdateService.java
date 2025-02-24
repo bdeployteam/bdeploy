@@ -114,13 +114,13 @@ public class ProductUpdateService {
                     "Product version has updated configuration files. Please make sure to synchronize configuration files."));
         }
 
-        recalculateInstanceVariables(instance, targetProduct, currentProduct, system);
+        recalculateInstanceVariables(instance, targetProduct, currentProduct);
 
         return instance;
     }
 
     private static void recalculateInstanceVariables(InstanceUpdateDto instance, ProductManifest targetProduct,
-            ProductManifest currentProduct, SystemConfiguration system) {
+            ProductManifest currentProduct) {
         Set<String> currentProductVarIds = new HashSet<>();
         if (currentProduct != null) {
             for (VariableDescriptor instVar : currentProduct.getInstanceVariables()) {
@@ -133,18 +133,11 @@ public class ProductUpdateService {
             targetProductVarIds.add(instVar.id);
         }
 
-        Set<String> systemVarIds = new HashSet<>();
-        if (system != null) {
-            for (VariableConfiguration sysVar : system.systemVariables) {
-                systemVarIds.add(sysVar.id);
-            }
-        }
-
         List<VariableConfiguration> instanceVariables = new ArrayList<>();
         for (VariableConfiguration instanceVariable : instance.config.config.instanceVariables) {
             String id = instanceVariable.id;
-            // remove (skip) all variables defined in current product and not in system or target product variables (outdated)
-            if (currentProductVarIds.contains(id) && !systemVarIds.contains(id) && !targetProductVarIds.contains(id)) {
+            // remove (skip) all variables defined in current product and not in target product (outdated)
+            if (currentProductVarIds.contains(id) && !targetProductVarIds.contains(id)) {
                 continue;
             }
             // if existing variable is defined in target product then keep the variable

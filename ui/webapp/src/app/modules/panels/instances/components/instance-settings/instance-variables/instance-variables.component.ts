@@ -3,8 +3,10 @@ import { BehaviorSubject, combineLatest, Observable, of, Subscription, tap } fro
 import {
   ApplicationDto,
   InstanceConfigurationDto,
+  InstanceDto,
   SystemConfiguration,
-  VariableConfiguration
+  VariableConfiguration,
+  Version
 } from 'src/app/models/gen.dtos';
 import {
   ContentCompletion
@@ -17,7 +19,7 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { groupVariables, VariableGroup } from 'src/app/modules/core/utils/variable-utils';
+import { groupVariables, VariableGroup, VariablePair } from 'src/app/modules/core/utils/variable-utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
@@ -31,6 +33,16 @@ import {
   BdVariableGroupsComponent
 } from '../../../../../core/components/bd-variable-groups/bd-variable-groups.component';
 import { AsyncPipe } from '@angular/common';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { compareVersions } from 'src/app/modules/core/utils/version.utils';
+
+const SYSTEM_VARIABLE_OVERWRITE_VERSION: Version = {
+  major: 7,
+  minor: 6,
+  micro: 0,
+  qualifier: null
+}
 
 @Component({
     selector: 'app-instance-variables',
@@ -39,17 +51,19 @@ import { AsyncPipe } from '@angular/common';
   imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdVariableGroupsComponent, AsyncPipe]
 })
 export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
+  private readonly cfg = inject(ConfigService);
   private readonly systems = inject(SystemsService);
   private readonly areas = inject(NavAreasService);
   private readonly plugins = inject(PluginService);
   private readonly products = inject(ProductsService);
+  private readonly instances = inject(InstancesService);
   protected readonly edit = inject(InstanceEditService);
   protected readonly groups = inject(GroupsService);
 
   protected search: string;
 
   protected instance: InstanceConfigurationDto;
-  protected system: SystemConfiguration;
+  protected system$ = new BehaviorSubject<SystemConfiguration>(null);
   protected apps: ApplicationDto[];
   protected editorValues: string[];
 
@@ -57,6 +71,8 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   protected completionPrefixes = buildCompletionPrefixes();
 
   protected groups$ = new BehaviorSubject<VariableGroup[]>([]);
+
+  protected overwriteIds: string[];
 
   private subscription: Subscription;
 
@@ -75,7 +91,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
         this.apps = apps;
 
         if (instance?.config?.config?.system && systems?.length) {
-          this.system = systems.find((s) => s.key.name === instance.config.config.system.name)?.config;
+          this.system$.next(systems.find((s) => s.key.name === instance.config.config.system.name)?.config);
         }
 
         this.plugins
@@ -93,7 +109,32 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
       }
     });
 
+    this.subscription.add(combineLatest([this.system$, this.cfg.isCentral$, this.instances.current$]).subscribe(([system, isCentral, current]) => {
+      const systemVariableIds = system?.systemVariables?.map((sv) => sv.id);
+      this.overwriteIds = this.canSystemOverwrite(isCentral, current) ? systemVariableIds : null;
+    }));
+
     this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
+  }
+
+  // system variable overwrite is not supported if managed server is older than 7.6.0
+  private canSystemOverwrite(isCentral: boolean, current: InstanceDto): boolean {
+    if (!isCentral || !current) {
+      return true;
+    }
+    const minions = current.managedServer?.minions?.minions;
+    if (!minions) {
+      return true;
+    }
+    const hasOldMinion = Object.keys(minions).map((key) => minions[key]).some((minion) => {
+      try {
+        return compareVersions(minion.version, SYSTEM_VARIABLE_OVERWRITE_VERSION) < 0;
+      } catch (e) {
+        console.error('Failed to parse minion version', e);
+        return false;
+      }
+    });
+    return !hasOldMinion;
   }
 
   ngOnDestroy(): void {
@@ -101,7 +142,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
   }
 
   private buildCompletions() {
-    this.completions = buildCompletions(this.completionPrefixes, this.instance, this.system, null, this.apps);
+    this.completions = buildCompletions(this.completionPrefixes, this.instance, this.system$.value, null, this.apps);
   }
 
   public isDirty(): boolean {

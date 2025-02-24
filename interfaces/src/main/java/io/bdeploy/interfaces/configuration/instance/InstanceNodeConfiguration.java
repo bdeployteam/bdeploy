@@ -154,18 +154,18 @@ public class InstanceNodeConfiguration {
             Consumer<VariableResolver> cfgResolver) {
         variables.clear();
 
-        // pick system first, so instance can overrule values later on.
-        if (system != null && system.systemVariables != null) {
-            system.systemVariables.forEach(v -> {
+        // pick instance first, so system can overrule values later on.
+        if (instance != null && instance.instanceVariables != null) {
+            instance.instanceVariables.forEach(v -> {
                 if (v.value != null) {
                     variables.put(v.id, v.value.getPreRenderable());
                 }
             });
         }
 
-        // now potentially overwrite system variables with instance ones.
-        if (instance != null && instance.instanceVariables != null) {
-            instance.instanceVariables.forEach(v -> {
+        // now potentially overwrite instance variables with system ones.
+        if (system != null && system.systemVariables != null) {
+            system.systemVariables.forEach(v -> {
                 if (v.value != null) {
                     variables.put(v.id, v.value.getPreRenderable());
                 }

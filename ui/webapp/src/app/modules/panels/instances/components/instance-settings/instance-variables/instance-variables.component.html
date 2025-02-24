@@ -12,17 +12,18 @@
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <bd-variable-groups
+    <app-bd-variable-groups
       [groups]="groups$ | async"
       [completionPrefixes]="completionPrefixes"
       [completions]="completions"
       [instance]="instance"
-      [system]="system"
+      [system]="system$ | async"
       [apps]="apps"
       [editorValues]="editorValues"
       [dialog]="dialog"
+      [overwriteIds]="overwriteIds"
       [variableList]="(edit.state$ | async)?.config?.config?.instanceVariables"
       (variableListChanged)="onVariableListChange($event)"
-    ></bd-variable-groups>
+    ></app-bd-variable-groups>
   </app-bd-dialog-content>
 </app-bd-dialog>

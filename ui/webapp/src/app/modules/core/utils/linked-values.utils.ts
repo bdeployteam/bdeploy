@@ -106,12 +106,12 @@ export function gatherVariableExpansions(
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
-  if (instance?.config?.instanceVariables?.length) {
-    instance?.config.instanceVariables
+  if (system?.systemVariables?.length) {
+    system.systemVariables
       .map((v) => {
         return {
           name: v.id,
-          description: `Instance Variable - ${instance?.config?.name}`,
+          description: `System Variable - ${system?.name}`,
           preview: getPreRenderable(v.value, v.type), // explicitly the non-expanded value.
           link: `{{X:${v.id}}}`,
           group: null,
@@ -124,12 +124,12 @@ export function gatherVariableExpansions(
       });
   }
 
-  if (system?.systemVariables?.length) {
-    system.systemVariables
+  if (instance?.config?.instanceVariables?.length) {
+    instance?.config.instanceVariables
       .map((v) => {
         return {
           name: v.id,
-          description: `System Variable - ${system?.name}`,
+          description: `Instance Variable - ${instance?.config?.name}`,
           preview: getPreRenderable(v.value, v.type), // explicitly the non-expanded value.
           link: `{{X:${v.id}}}`,
           group: null,

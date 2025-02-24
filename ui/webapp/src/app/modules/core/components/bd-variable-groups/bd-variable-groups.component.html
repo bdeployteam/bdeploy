@@ -10,6 +10,7 @@
       appEditUniqueValueValidator
       [disallowedValues]="newUsedIds"
       errorDisplay="immediate"
+      [suggested]="suggestedIds"
     ></app-bd-form-input>
     <app-bd-value-editor
       [(ngModel)]="newValue.value"
@@ -222,7 +223,7 @@
                               appBdPopupTrigger="hover"
                               [appBdPopupDelay]="1000"
                               appBdPopupPosition="above-right"
-                              [disabled]="(group.isCustom && isCustomGroupSelected) || p.descriptor?.fixed"
+                              [disabled]="(group.isCustom && isCustomGroupSelected) || p.descriptor?.fixed || isOverwritten(p)"
                               [editorDisabled]="!p.editorEnabled"
                               [suggested]="p.descriptor?.suggestedValues"
                               class="local-form-input flex-auto"
@@ -238,6 +239,7 @@
                               [group]="(instanceGroups.current$ | async)?.name"
                               [actions]="actions"
                               [validateRegex]="p.descriptor?.validateRegex"
+                              [warningMessage]="isOverwritten(p) ? getOverwrittenWarningMessage(p) : ''"
                               >
                             </app-bd-value-editor>
                           </div>
