@@ -160,7 +160,7 @@ public class BrowserDialogTableModel extends AbstractTableModel {
             case FILE_ASSOC_EXTENSION:
                 return metadata != null ? metadata.fileAssocExtension : "";
             case OFFLINE_LAUNCHABLE:
-                return metadata.offlineStartAllowed;
+                return metadata != null ? metadata.offlineStartAllowed : null;
         }
         return null;
     }
