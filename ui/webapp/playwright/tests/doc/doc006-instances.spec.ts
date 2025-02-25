@@ -5,6 +5,7 @@ import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { TestInfo } from '@playwright/test';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
+import { InstanceDataFilesPage } from '@bdeploy-pom/primary/instances/instance-data-files.page';
 
 test.slow();
 
@@ -90,7 +91,7 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
   await manualStatus.screenshot('Doc_DashboardProcessManualConfirm');
   await manualStatus.getConfirmationPopup().cancel();
 
-  const keepAliveStatus = await instance.getProcessStatus('master', 'Another Server');
+  let keepAliveStatus = await instance.getProcessStatus('master', 'Another Server');
   await keepAliveStatus.start();
 
   // actually need to wait for the process to fail - timeout is set to 1 second during template setup.
@@ -112,6 +113,37 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
   await instance.getServerNode('master').getByTestId('refresh-processes').click();
   await expect(instance.getServerNode('master').locator('tr', { hasText: 'Another Server' }).locator('mat-icon', { hasText: 'error' })).toBeVisible();
   await instance.screenshot('Doc_DashboardProcessCrashPermanent');
+
+  const outputPanel = await keepAliveStatus.getProcessConsole();
+
+  // TODO: better way to wait for output? it is drawn in a canvas, so we *could* wait for the API request to return
+  //       but I don't think there is a much better way without disabling hardware acceleration.
+  await standalone.waitForTimeout(500);
+  await outputPanel.screenshot('Doc_DashboardProcessConsole');
+
+  // pin a parameter, install & activate to screenshot the process details panel.
+  await config.goto();
+  const anotherServerSettings = await config.getProcessSettingsPanel('master', 'Another Server');
+  const anotherServerCfg = await anotherServerSettings.getConfigureParametersPanel();
+  const sleepCfgGroup = await anotherServerCfg.getParameterGroup('Sleep Configuration');
+  await sleepCfgGroup.toggle();
+  const param = sleepCfgGroup.getParameter('param.sleep');
+  await param.hover();
+  await param.locator('mat-icon', { hasText: 'pin' }).click();
+  await standalone.mouse.move(0, 0);
+  await anotherServerCfg.screenshot('Doc_InstanceConfigParameterPin');
+  await anotherServerCfg.apply();
+  await config.waitForValidation();
+  await config.save();
+
+  await instance.expectOpen();
+  // TODO: same as before - why we need to wait? something is off on the page!
+  await standalone.waitForTimeout(200);
+  await instance.install();
+  await instance.activate();
+
+  keepAliveStatus = await instance.getProcessStatus('master', 'Another Server');
+  await keepAliveStatus.screenshot('Doc_DashboardPinnedParameter');
 });
 
 test('Instance Configuration', async ({ standalone }, testInfo) => {
@@ -315,4 +347,49 @@ test('Instance Banner', async ({ standalone }, testInfo) => {
   await expect(config.getBanner().getByText('This is a banner text')).toBeVisible();
 
   await config.screenshot('Doc_InstanceBanner');
+});
+
+test('Instance Data Files', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Data Files Instance', 'Instance for data files documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Data Files Instance');
+  await config.goto();
+  const addPanel = await config.getAddProcessPanel('master');
+  await addPanel.addProcess('Server Application');
+
+  await config.waitForValidation();
+  await config.save();
+
+  const dashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Data Files Instance');
+
+  // TODO: sigh.. again that sleep required.
+  await standalone.waitForTimeout(200);
+  await dashboard.install();
+  await dashboard.activate();
+
+  // we have an empty instance active, so we can now use the data files browser.
+  const df = new InstanceDataFilesPage(standalone, groupId(testInfo), 'Data Files Instance');
+  await df.goto();
+
+  const addDf = await df.getAddFilePanel();
+  await addDf.fill('application.log', 'application-test.log');
+  await addDf.save();
+
+  await df.screenshot('Doc_DataFiles');
+  const dfView = await df.getFileViewer('application.log');
+  // TODO: wait for terminal to initialize... there is a TODO for this already further up.
+  await standalone.waitForTimeout(500);
+
+  await dfView.screenshot('Doc_DataFilesView');
+  await dfView.getCloseButton().click();
+
+  await df.getAddFilePanel();
+  await addDf.fill('manual.txt');
+  await addDf.save();
+
+  await df.getFileViewer('manual.txt');
+  const dfEditor = await dfView.getFileEditorPanel();
+  await dfEditor.fill('This is a sample text file.\n');
+  await dfEditor.screenshot('Doc_DataFilesEdit');
 });

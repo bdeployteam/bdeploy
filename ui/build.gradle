@@ -50,7 +50,7 @@ ext.sharedUitestServeLogic = { task, List<String> target ->
             executable "npm.cmd"
         }
 
-        args = ["run", "--", "ng", "serve"] + target
+        args = ["run", "--", "ng", "serve", "--no-hmr"] + target
     }
 }
 
