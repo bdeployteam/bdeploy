@@ -4,15 +4,15 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
-  Output,
   inject,
+  Input,
+  Output
 } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
-import { TooltipPosition, MatTooltip } from '@angular/material/tooltip';
-import { BehaviorSubject, Observable, fromEvent } from 'rxjs';
+import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
+import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { MatButton } from '@angular/material/button';
-import { NgClass, AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';

@@ -63,17 +63,7 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
 
   await standalone.waitForURL(`/#/instances/dashboard/${groupId(testInfo)}/**`);
   await instance.expectOpen();
-
-  // TODO: if we click the install button too fast, strange things happen:
-  //        * The install button remains active.
-  //        * a 'state' request is fired and the server reports instance version 1 as installed.
-  //        * this remains, even when the page is reloaded (?!?!)
-  //       I thought this was due to not using observable/signal, but this seems not to be
-  //       the root cause. Also the install button seems to "flicker" once in real world as
-  //       well when loading the page (sometimes).
-  await standalone.waitForTimeout(200);
-
-  await instance.install();
+  await instance.install('2');
   await instance.activate();
 
   await expect(instance.getServerNode('master').locator('tr', { hasText: 'Server No Sleep' })).toBeVisible();
@@ -137,9 +127,7 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
   await config.save();
 
   await instance.expectOpen();
-  // TODO: same as before - why we need to wait? something is off on the page!
-  await standalone.waitForTimeout(200);
-  await instance.install();
+  await instance.install('3');
   await instance.activate();
 
   keepAliveStatus = await instance.getProcessStatus('master', 'Another Server');
@@ -362,10 +350,7 @@ test('Instance Data Files', async ({ standalone }, testInfo) => {
   await config.save();
 
   const dashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Data Files Instance');
-
-  // TODO: sigh.. again that sleep required.
-  await standalone.waitForTimeout(200);
-  await dashboard.install();
+  await dashboard.install('2');
   await dashboard.activate();
 
   // we have an empty instance active, so we can now use the data files browser.

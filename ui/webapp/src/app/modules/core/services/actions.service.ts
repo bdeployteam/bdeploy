@@ -34,8 +34,6 @@ export class ActionsService {
   private changesSubscription: Subscription;
 
   constructor() {
-    this.actions$.subscribe((a) => console.log('Actions: ' + JSON.stringify(a, null, 2), new Error()));
-
     combineLatest([
       this.areas.groupContext$,
       this.areas.repositoryContext$,
