@@ -1,25 +1,29 @@
 import { expect, test } from '@bdeploy-setup';
-import { LoginPage } from '@bdeploy-pom/primary/login.page';
-import { createInstance, createInstanceGroup, uploadProduct } from '@bdeploy-pom/common/common-tasks';
+import { createInstance, uploadProduct } from '@bdeploy-pom/common/common-tasks';
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 import { SystemBrowserPage } from '@bdeploy-pom/primary/systems/system-browser.page';
-import { randomUUID } from 'crypto';
+import { TestInfo } from '@playwright/test';
+import { BackendApi } from '@bdeploy-backend';
 
-function groupId(id: string) {
-  return `InstGroup-${id}`;
+function groupId(testInfo: TestInfo) {
+    return `S002Group-${testInfo.workerIndex}`;
 }
 
-test('S002 Instance variables are overwritten by system variables', async ({ standalone }) => {
+test.beforeEach(async ({ standalone }, testInfo) => {
+    const api = new BackendApi(standalone);
+    await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for S002`);
+});
+
+test.afterEach(async ({ standalone }, testInfo) => {
+    const api = new BackendApi(standalone);
+    await api.deleteGroup(groupId(testInfo));
+});
+
+test('S002 Instance variables are overwritten by system variables', async ({ standalone }, testInfo) => {
     const page = standalone;
-    const group = groupId(randomUUID().toString());
-
-    const login = new LoginPage(page);
-    await login.goto();
-    await login.login('admin', 'adminadminadmin');
-
-    await createInstanceGroup(page, group);
+    const group = groupId(testInfo);
 
     await uploadProduct(page, group, 'test-product-2-direct');
 
