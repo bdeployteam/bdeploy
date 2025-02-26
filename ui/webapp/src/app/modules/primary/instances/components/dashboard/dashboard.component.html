@@ -85,7 +85,7 @@
               <div class="flex-auto flex flex-col">
                 @if (!!currentInstance().activeVersion?.tag) {
                   <div>
-                    This instance has a newer configuration version available to be activated ({{
+                    This instance has a newer configuration version available to be activated (version {{
                       currentInstance().instance.tag
                     }}). You can
                     <strong>install and activate</strong> this version now.
@@ -93,7 +93,8 @@
                 }
                 @if (!currentInstance().activeVersion?.tag) {
                   <div>
-                    This instance has no active version. You can install and activate the current version now.
+                    This instance has no active version. You can install and activate the current version
+                    (version {{ currentInstance().instance.tag }}) now.
                   </div>
                 }
                 <div class="bd-description-text">
@@ -103,14 +104,13 @@
                     >.
                   </div>
                 </div>
-                @if (states$ | async; as state) {
                   <app-bd-button
                     color="primary"
                     text="Install"
                     icon="deployed_code_update"
                     (click)="doInstall(currentInstance().instance.tag)"
                     [collapsed]="isInstalled()"
-                    [disabled]="(mappedInstall$ | async) || isInstalled() || !(auth.isCurrentScopeWrite$ | async) || !hasProduct()"
+                    [disabled]="!(states$ | async) || (mappedInstall$ | async) || isInstalled() || !(auth.isCurrentScopeWrite$ | async) || !hasProduct()"
                     [loadingWhen$]="mappedInstall$"
                     tooltip="below"
                   ></app-bd-button>
@@ -120,11 +120,10 @@
                     icon="deployed_code_alert"
                     (click)="doActivate(currentInstance().instance.tag)"
                     [collapsed]="!isInstalled()"
-                    [disabled]="(mappedActivate$ | async) || !isInstalled() || !(auth.isCurrentScopeWrite$ | async)"
+                    [disabled]="!(states$ | async) || (mappedActivate$ | async) || !isInstalled() || !(auth.isCurrentScopeWrite$ | async)"
                     [loadingWhen$]="mappedActivate$"
                     tooltip="below"
                   ></app-bd-button>
-                }
               </div>
             </div>
           }

@@ -7,8 +7,6 @@ import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instan
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceHistoryPage } from '@bdeploy-pom/primary/instances/instance-history.page';
 
-test.slow();
-
 function groupId(testInfo: TestInfo) {
   return `HistGroup-${testInfo.workerIndex}`;
 }
@@ -50,10 +48,7 @@ test('Instance History', async ({ standalone }, testInfo) => {
   await config.save();
 
   const dashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Data Files Instance');
-
-  // TODO: sigh.. again that sleep required.
-  await standalone.waitForTimeout(200);
-  await dashboard.install();
+  await dashboard.install('3');
   await dashboard.activate();
 
   // run a process to fill the runtime history as well.
