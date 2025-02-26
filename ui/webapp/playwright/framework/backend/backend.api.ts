@@ -34,7 +34,10 @@ export class BackendApi {
   /** Delete a specified group from the backend */
   async deleteGroup(group: string) {
     await this._request.delete(`/api/group/${group}`);
-    // ignore response status, so we can simply fire & forget at the start of each test.
+  }
+
+  async deleteRepo(repo: string) {
+    await this._request.delete(`/api/softwarerepository/${repo}`);
   }
 
   async downloadManagedInfo() {

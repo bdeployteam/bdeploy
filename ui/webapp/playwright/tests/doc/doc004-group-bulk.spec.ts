@@ -1,22 +1,24 @@
 import { BackendApi } from '@bdeploy-backend';
 import { expect, test } from '@bdeploy-setup';
-import { createInstance, createInstanceGroup, uploadProduct } from '@bdeploy-pom/common/common-tasks';
+import { createInstance, uploadProduct } from '@bdeploy-pom/common/common-tasks';
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 
-test.slow();
-
 const bulkGroupId = `BulkGroup`;
 
-// clean out any left-over instance group from the tests
-test.afterAll(async ({ standalone }) => {
+test.beforeEach(async ({ standalone }) => {
+  const api = new BackendApi(standalone);
+  await api.deleteGroup(bulkGroupId);
+  await api.createGroup(bulkGroupId, `Group for bulk instance tests`);
+});
+
+test.afterEach(async ({ standalone }) => {
   const api = new BackendApi(standalone);
   await api.deleteGroup(bulkGroupId);
 });
 
 test('Bulk Instance Manipulation', async ({ standalone }) => {
   await new BackendApi(standalone).mockFilterGroups(bulkGroupId);
-  await createInstanceGroup(standalone, bulkGroupId);
   await uploadProduct(standalone, bulkGroupId, 'test-product-1-direct');
   await uploadProduct(standalone, bulkGroupId, 'test-product-2-direct');
 

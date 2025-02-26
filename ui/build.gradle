@@ -364,7 +364,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
 sonarqube {
     properties {
         properties["sonar.sources"] += "${webappDir}/src"
-        property "sonar.javascript.lcov.reportPaths", "${webappDir}/test-reports/monocart/lcov/coverage.lcov.info"
+        property "sonar.javascript.lcov.reportPaths", "${webappDir}/playwright/results/reports/monocart/lcov/coverage.lcov.info"
     }
 }
 

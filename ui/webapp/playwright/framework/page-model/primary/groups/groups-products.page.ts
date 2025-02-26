@@ -5,8 +5,9 @@ import { ProductUploadPanel } from '@bdeploy-pom/panels/products/product-upload.
 import { MainMenu } from '@bdeploy-pom/fragments/main-menu.fragment';
 import { createPanel } from '@bdeploy-pom/common/common-functions';
 import { ProductSyncPanel } from '@bdeploy-pom/panels/products/product-sync.panel';
+import { ProductImportPanel } from '@bdeploy-pom/panels/products/product-import.panel';
 
-export class ProductsPage extends BaseDialog {
+export class GroupsProductsPage extends BaseDialog {
   constructor(page: Page, private readonly group: string) {
     super(page, 'app-products-browser');
   }
@@ -28,6 +29,10 @@ export class ProductsPage extends BaseDialog {
 
   async openProductSyncPanel() {
     return createPanel(this.getToolbar(), 'Synchronize Product Versions', p => new ProductSyncPanel(p));
+  }
+
+  async openProductImportPanel() {
+    return createPanel(this.getToolbar(), 'Import Product...', p => new ProductImportPanel(p));
   }
 
   getProductRow(name: string) {

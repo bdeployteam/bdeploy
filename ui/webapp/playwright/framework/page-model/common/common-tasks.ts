@@ -1,7 +1,7 @@
 import { InstanceGroupsBrowserPage } from '@bdeploy-pom/primary/groups/groups-browser.page';
 import { expect } from '@bdeploy-setup';
 import { Page } from '@playwright/test';
-import { ProductsPage } from '@bdeploy-pom/primary/products/products.page';
+import { GroupsProductsPage } from '@bdeploy-pom/primary/groups/groups-products.page';
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { BackendApi } from '@bdeploy-backend';
@@ -34,7 +34,7 @@ export async function createInstanceGroup(page: Page, groupId: string, image: st
 }
 
 export async function uploadProduct(page: Page, groupId: string, product: string) {
-  const products = new ProductsPage(page, groupId);
+  const products = new GroupsProductsPage(page, groupId);
   await products.goto();
 
   const upload = await products.openUploadPanel();

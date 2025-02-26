@@ -13,7 +13,12 @@ const groupIdTwo = `DemoGroupTwo`;
 // tests build upon each other in this file
 test.describe.configure({ mode: 'serial' });
 
-// clean out any left-over instance group from the tests
+test.beforeAll(async ({ standalone }) => {
+  const api = new BackendApi(standalone);
+  await api.deleteGroup(groupId);
+  await api.deleteGroup(groupIdTwo);
+});
+
 test.afterAll(async ({ standalone }) => {
   const api = new BackendApi(standalone);
   await api.deleteGroup(groupId);

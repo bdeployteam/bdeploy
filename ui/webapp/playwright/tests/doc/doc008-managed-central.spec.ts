@@ -6,7 +6,7 @@ import { BackendApi } from '@bdeploy-backend';
 import { createInstance, uploadProduct } from '@bdeploy-pom/common/common-tasks';
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
-import { ProductsPage } from '@bdeploy-pom/primary/products/products.page';
+import { GroupsProductsPage } from '@bdeploy-pom/primary/groups/groups-products.page';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 
@@ -14,8 +14,13 @@ function groupId(testInfo: TestInfo) {
   return `ManagedGroup-${testInfo.workerIndex}`;
 }
 
-test.beforeEach(async ({ central }, testInfo) => {
+test.beforeEach(async ({ central, managed }, testInfo) => {
   const api = new BackendApi(central);
+  await api.deleteGroup(groupId(testInfo));
+
+  const managedApi = new BackendApi(managed);
+  await managedApi.deleteGroup(groupId(testInfo));
+
   await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for central/managed tests`);
 });
 
@@ -72,7 +77,7 @@ test('Managed Central Sync', async ({managed, central}, testInfo) => {
   await instances.syncAll();
   await instances.screenshot('Doc_CentralInstanceList');
 
-  const products = new ProductsPage(central, groupId(testInfo));
+  const products = new GroupsProductsPage(central, groupId(testInfo));
   await products.goto();
 
   const syncMode = await products.openProductSyncPanel();

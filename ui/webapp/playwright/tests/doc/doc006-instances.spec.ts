@@ -15,6 +15,7 @@ function groupId(testInfo: TestInfo) {
 
 test.beforeEach(async ({ standalone }, testInfo) => {
   const api = new BackendApi(standalone);
+  await api.deleteGroup(groupId(testInfo));
   await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for instance tests`);
 });
 

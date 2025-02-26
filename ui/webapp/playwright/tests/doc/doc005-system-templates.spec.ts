@@ -1,20 +1,24 @@
 import { BackendApi } from '@bdeploy-backend';
 import { expect, test } from '@bdeploy-setup';
-import { createInstanceGroup, uploadProduct } from '@bdeploy-pom/common/common-tasks';
+import { uploadProduct } from '@bdeploy-pom/common/common-tasks';
 import { SystemTemplatePage } from '@bdeploy-pom/primary/systems/system-template.page';
 import { FormSelectElement } from '@bdeploy-elements/form-select.elements';
 
 const sysTplGroupId = `SystemTemplateGroup`;
 
-// clean out any left-over instance group from the tests
-test.afterAll(async ({ standalone }) => {
+test.beforeEach(async ({ standalone }) => {
+  const api = new BackendApi(standalone);
+  await api.deleteGroup(sysTplGroupId);
+  await api.createGroup(sysTplGroupId, `Group for system template tests`);
+});
+
+test.afterEach(async ({ standalone }) => {
   const api = new BackendApi(standalone);
   await api.deleteGroup(sysTplGroupId);
 });
 
 test('System Template UI', async ({ standalone }) => {
   await new BackendApi(standalone).mockFilterGroups(sysTplGroupId);
-  await createInstanceGroup(standalone, sysTplGroupId);
   await uploadProduct(standalone, sysTplGroupId, 'test-product-1-direct');
   await uploadProduct(standalone, sysTplGroupId, 'test-product-2-direct');
   await uploadProduct(standalone, sysTplGroupId, 'chat-product-1-direct');
