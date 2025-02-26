@@ -3,6 +3,8 @@ import { expect, Page } from '@playwright/test';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { ProductUploadPanel } from '@bdeploy-pom/panels/products/product-upload.panel';
 import { MainMenu } from '@bdeploy-pom/fragments/main-menu.fragment';
+import { createPanel } from '@bdeploy-pom/common/common-functions';
+import { ProductSyncPanel } from '@bdeploy-pom/panels/products/product-sync.panel';
 
 export class ProductsPage extends BaseDialog {
   constructor(page: Page, private readonly group: string) {
@@ -21,13 +23,11 @@ export class ProductsPage extends BaseDialog {
   }
 
   async openUploadPanel() {
-    const upload = this.getToolbar().getByLabel('Upload Product...');
-    await upload.click();
+    return createPanel(this.getToolbar(), 'Upload Product...', (p) => new ProductUploadPanel(p));
+  }
 
-    const panel = new ProductUploadPanel(this.page);
-    await panel.expectOpen();
-
-    return Promise.resolve(panel);
+  async openProductSyncPanel() {
+    return createPanel(this.getToolbar(), 'Synchronize Product Versions', p => new ProductSyncPanel(p));
   }
 
   getProductRow(name: string) {

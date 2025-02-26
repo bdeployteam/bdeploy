@@ -34,4 +34,15 @@ export class InstancesBrowserPage extends BaseDialog {
   async bulkManipulation() {
     return createPanel(this.getToolbar(), 'Bulk Manipulation', (p) => new BulkInstancesPanel(p));
   }
+
+  async syncAll() {
+    const syncButton = this.getToolbar().getByRole('button', { name: 'Fetch instance states' });
+    await syncButton.click();
+
+    const popup = this.getDialog().locator('app-bd-dialog-message').locator('app-bd-notification-card', { hasText: 'Query all Instances' });
+    await expect(popup).toBeVisible();
+    await popup.getByRole('button', { name: 'Yes' }).click();
+
+    await expect(syncButton.locator('mat-spinner')).not.toBeVisible();
+  }
 }

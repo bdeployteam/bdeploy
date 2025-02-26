@@ -2,6 +2,7 @@ import { APIRequestContext, BrowserContext, Page, Response } from '@playwright/t
 import {
   InstanceGroupConfiguration,
   InstanceGroupConfigurationDto,
+  ManagedMasterDto,
   ObjectChangeDto,
   ObjectChangeType
 } from '@bdeploy/models/gen.dtos';
@@ -34,6 +35,18 @@ export class BackendApi {
   async deleteGroup(group: string) {
     await this._request.delete(`/api/group/${group}`);
     // ignore response status, so we can simply fire & forget at the start of each test.
+  }
+
+  async downloadManagedInfo() {
+    const ident = await this._request.get('/api/backend-info/managed-master');
+    return await ident.json() as ManagedMasterDto;
+  }
+
+  async attachManaged(group: string, managed: BackendApi, uriOverride: string) {
+    const dto = await managed.downloadManagedInfo();
+    dto.description = `Test Server for ${group}`;
+    dto.uri = uriOverride;
+    await this._request.put(`/api/managed-servers/auto-attach/${group}`, { data: dto });
   }
 
   /** Mock the instance group list request to behave as if there were no instance groups on the backend */

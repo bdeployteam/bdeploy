@@ -42,6 +42,12 @@ export class InstanceDashboardPage extends BaseDialog {
     await this.getToolbar().getByRole('button', { name: 'Bulk Control' }).click();
   }
 
+  async synchronize() {
+    const syncButton = this.getToolbar().getByRole('button', { name: 'Synchronize' });
+    await syncButton.click();
+    await expect(syncButton.locator('mat-spinner')).not.toBeVisible();
+  }
+
   getServerNode(name: string) {
     return this.getDialog().locator('app-instance-server-node', { hasText: name });
   }

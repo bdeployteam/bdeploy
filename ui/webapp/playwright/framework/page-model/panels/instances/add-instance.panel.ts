@@ -11,7 +11,7 @@ export class AddInstancePanel extends BasePanel {
   }
 
   async fill(name: string, description: string, purpose: InstancePurpose,
-             productName: string, productVersion: string, versionRegex: string = null, autoStart = false,
+             productName: string, productVersion: string, managedServer: string = null, versionRegex: string = null, autoStart = false,
              autoUninstall = true, system: string = null) {
     await this.getDialog().getByLabel('Name').fill(name);
     await this.getDialog().getByLabel('Description').fill(description);
@@ -29,6 +29,10 @@ export class AddInstancePanel extends BasePanel {
 
     if (versionRegex) {
       await this.getDialog().getByLabel('Product Version Regular Expression').fill(versionRegex);
+    }
+
+    if (managedServer) {
+      await new FormSelectElement(this.getDialog(), 'Managed Server').selectOption(managedServer);
     }
   }
 

@@ -3,6 +3,7 @@ import { BaseDialog } from '@bdeploy-pom/base/base-dialog';
 import { AddInstanceGroupPanel } from '@bdeploy-pom/panels/groups/add-group.panel';
 import { MainMenu } from '@bdeploy-pom/fragments/main-menu.fragment';
 import { createPanel } from '@bdeploy-pom/common/common-functions';
+import { LinkInstanceGroupPanel } from '@bdeploy-pom/panels/groups/link-instance-group.panel';
 
 export class InstanceGroupsBrowserPage extends BaseDialog {
 
@@ -16,7 +17,11 @@ export class InstanceGroupsBrowserPage extends BaseDialog {
     await this.expectOpen();
   }
 
-  async addInstanceGroup(): Promise<AddInstanceGroupPanel> {
+  async addInstanceGroup() {
     return createPanel(this.getToolbar(), 'Add Instance Group...', (p) => new AddInstanceGroupPanel(p));
+  }
+
+  async linkInstanceGroup() {
+    return createPanel(this.getToolbar(), 'Link Instance Group...', p => new LinkInstanceGroupPanel(p));
   }
 }

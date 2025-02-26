@@ -34,7 +34,7 @@ test('S002 Instance variables are overwritten by system variables', async ({ sta
     await addSystemPanel.save();
     await expect(systems.getTableRowContaining('system')).toBeAttached();
 
-    await createInstance(page, group, 'TestInstance', 'Test Instance', InstancePurpose.TEST, 'Demo Product', '2.0.0', null, null, null, 'system');
+    await createInstance(page, group, 'TestInstance', 'Test Instance', InstancePurpose.TEST, 'Demo Product', '2.0.0', null, null, null, null, 'system');
     const instance = new InstanceDashboardPage(page, group, 'TestInstance');
     await instance.goto();
     const config = new InstanceConfigurationPage(page, group, 'TestInstance');

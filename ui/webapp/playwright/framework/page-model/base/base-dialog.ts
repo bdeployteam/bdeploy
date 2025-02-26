@@ -19,6 +19,11 @@ export class BaseDialog extends BaseArea {
     await new MainMenu(this.page).scrollIntoView();
   }
 
+  async expectClosed() {
+    await expect(this._dialog).not.toBeAttached();
+    await expect(this.getTitle()).not.toBeVisible();
+  }
+
   protected override getArea(): Locator {
     return this.getDialog();
   }

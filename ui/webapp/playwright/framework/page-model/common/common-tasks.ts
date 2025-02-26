@@ -45,13 +45,13 @@ export async function uploadProduct(page: Page, groupId: string, product: string
 }
 
 export async function createInstance(page: Page, groupId: string, name: string, description: string, purpose: InstancePurpose,
-                                     productName: string, productVersion: string, versionRegex: string = null, autoStart = false,
+                                     productName: string, productVersion: string, managedServer: string = null, versionRegex: string = null, autoStart = false,
                                      autoUninstall = true, system: string = null) {
   const instances = new InstancesBrowserPage(page, groupId);
   await instances.goto();
 
   const panel = await instances.addInstance();
-  await panel.fill(name, description, purpose, productName, productVersion, versionRegex, autoStart, autoUninstall, system);
+  await panel.fill(name, description, purpose, productName, productVersion, managedServer, versionRegex, autoStart, autoUninstall, system);
 
   await panel.save();
   await expect(panel.getDialog()).not.toBeAttached();
