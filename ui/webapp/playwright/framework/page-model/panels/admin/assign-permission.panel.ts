@@ -2,8 +2,8 @@ import { BasePanel } from '@bdeploy-pom/base/base-panel';
 import { FormSelectElement } from '@bdeploy-elements/form-select.elements';
 
 export class AssignPermissionPanel extends BasePanel {
-  constructor(page: any) {
-    super(page, 'app-user-assign-permission');
+  constructor(page: any, group = false) {
+    super(page, group ? 'app-assign-user-group-permission' : 'app-user-assign-permission');
   }
 
   async fill(scope: string, permission: string) {

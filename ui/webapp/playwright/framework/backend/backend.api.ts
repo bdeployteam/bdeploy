@@ -49,6 +49,10 @@ export class BackendApi {
     await this._request.delete(`/api/softwarerepository/${repo}`);
   }
 
+  async deleteUser(user: string) {
+    await this._request.delete(`/api/auth/admin?name=${user}`);
+  }
+
   async downloadManagedInfo() {
     const ident = await this._request.get('/api/backend-info/managed-master');
     return await ident.json() as ManagedMasterDto;

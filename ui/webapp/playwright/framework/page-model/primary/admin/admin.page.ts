@@ -10,6 +10,8 @@ import { MailReceivingTab } from '@bdeploy-pom/primary/admin/tabs/mail-receiving
 import { BHivesPage } from '@bdeploy-pom/primary/admin/bhives.page';
 import { JobsPage } from '@bdeploy-pom/primary/admin/jobs.page';
 import { LDAPServersTab } from '@bdeploy-pom/primary/admin/tabs/ldap-servers.tab';
+import { PluginsTab } from '@bdeploy-pom/primary/admin/tabs/plugins.tab';
+import { UserGroupsPage } from '@bdeploy-pom/primary/admin/user-groups.page';
 
 export class AdminPage extends BaseDialog {
   readonly _adminMenu: Locator;
@@ -38,6 +40,13 @@ export class AdminPage extends BaseDialog {
     const accountsPage = new UserAccountsPage(this.page);
     await accountsPage.expectOpen();
     return Promise.resolve(accountsPage);
+  }
+
+  async gotoUserGroupsPage() {
+    await this._adminMenu.locator('a', { hasText: 'User Groups' }).click();
+    const groupsPage = new UserGroupsPage(this.page);
+    await groupsPage.expectOpen();
+    return Promise.resolve(groupsPage);
   }
 
   async gotoBHivesPage() {
@@ -72,6 +81,11 @@ export class AdminPage extends BaseDialog {
   async gotoLDAPServersTab() {
     const { generalDialog, tab } = await this.gotoTab('LDAP Auth.', 'app-ldap-tab');
     return Promise.resolve(new LDAPServersTab(tab, generalDialog.getToolbar()));
+  }
+
+  async gotoPluginsTab() {
+    const { generalDialog, tab } = await this.gotoTab('Plugins', 'app-plugins-tab');
+    return Promise.resolve(new PluginsTab(tab, generalDialog.getToolbar()));
   }
 
   private async gotoTab(name: string, selector: string) {

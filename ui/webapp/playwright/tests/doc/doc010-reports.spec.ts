@@ -29,7 +29,7 @@ test('Reports', async ({ standalone }, testInfo) => {
   const admin = new AdminPage(standalone);
   await admin.goto();
   const accounts = await admin.gotoUserAccountsPage();
-  const details = await accounts.getUserDetails('admin');
+  const details = await accounts.getUserDetailsPanel('admin');
   const assign = await details.getAssignPermissionPanel();
   await assign.fill('Report: Products In Use', 'READ');
   await assign.screenshot('Doc_Report_Assign_Permission');
