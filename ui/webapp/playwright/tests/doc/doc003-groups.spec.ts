@@ -105,7 +105,7 @@ test('Global Attributes', async ({ standalone }) => {
   await instances.goto();
 
   const settingsPanel = await instances.getGroupSettings();
-  const valuePanel = await settingsPanel.gotoAttributeValues();
+  const valuePanel = await settingsPanel.getAttributeValuesPanel();
   const dlg = await valuePanel.addAttributeValue();
   await valuePanel.fillAttributeValueDialog(dlg, 'This is a test attribute', 'Test Value');
   await valuePanel.screenshot('Doc_SetGlobalAttributeValue');

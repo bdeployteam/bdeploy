@@ -35,11 +35,12 @@ test('Software Repositories', async ({ standalone }, testInfo) => {
   await addPanel.save();
 
   await expect(browser.getTableRowContaining(repoId(testInfo))).toBeVisible();
+  await browser.screenshot('Doc_SoftwareRepo');
 
   const sw = new ReposSoftwarePage(standalone, repoId(testInfo));
   await sw.goto();
 
-  const upload = await sw.openUploadPanel();
+  const upload = await sw.getUploadPanel();
   await upload.upload('test-product-2-direct.zip');
 
   const state = upload.getUploadState('test-product-2-direct');
@@ -62,4 +63,38 @@ test('Software Repositories', async ({ standalone }, testInfo) => {
 
   await expect(groupProd.getProductRow('2.0.0')).toBeVisible();
   await groupProd.screenshot('Doc_ImportProduct_Success');
+});
+
+test('Runtime Dependencies', async ({ standalone }, testInfo) => {
+  await new BackendApi(standalone).createRepo(repoId(testInfo), 'Test Repository');
+
+  const sw = new ReposSoftwarePage(standalone, repoId(testInfo));
+  await sw.goto();
+
+  const upload = await sw.getUploadPanel();
+  await upload.upload('external-software-hive.zip');
+  await expect(upload.getUploadState('external-software-hive')).toContainText('Success');
+  await expect(sw.getSoftwareRow('external/software/linux').getByText('v1.0.0')).toBeVisible();
+  await expect(sw.getSoftwareRow('external/software/windows').getByText('v1.0.0')).toBeVisible();
+  await upload.upload('external-software-2-raw-direct.zip');
+
+  const details = upload.getUploadDetailsArea('external-software-2-raw-direct');
+  await details.fill('external/software/two', 'v2.0.1', true, false, false);
+  await upload.screenshot('Doc_SoftwareRepoFillInfo');
+  await details.import();
+  await expect(sw.getSoftwareRow('external/software/two').getByText('v2.0.1')).toBeVisible();
+
+  await upload.screenshot('Doc_SoftwareRepoUploadSuccess');
+
+  await upload.upload('test-product-2-direct.zip');
+  await expect(upload.getUploadState('test-product-2-direct')).toContainText('Success');
+  await expect(sw.getSoftwareRow('io.bdeploy/demo/product')).toBeVisible();
+
+  await sw.getSoftwareDetailsPanel('io.bdeploy/demo/product');
+  await sw.screenshot('Doc_SoftwareRepoDetails');
+
+  const settings = await sw.getRepoSettingsPanel();
+  const perm = await settings.getRepoPermissionsPanel();
+
+  await perm.screenshot('Doc_SoftwareRepoPermissions');
 });

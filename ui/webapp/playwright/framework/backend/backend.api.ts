@@ -4,7 +4,8 @@ import {
   InstanceGroupConfigurationDto,
   ManagedMasterDto,
   ObjectChangeDto,
-  ObjectChangeType
+  ObjectChangeType,
+  SoftwareRepositoryConfiguration
 } from '@bdeploy/models/gen.dtos';
 
 export class BackendApi {
@@ -29,6 +30,14 @@ export class BackendApi {
       autoDelete: false
     };
     return this._request.put(`/api/group/`, { data: grp });
+  }
+
+  async createRepo(repo: string, description: string) {
+    const cfg: Partial<SoftwareRepositoryConfiguration> = {
+      name: repo,
+      description: description
+    };
+    return this._request.put(`/api/softwarerepository/`, { data: cfg });
   }
 
   /** Delete a specified group from the backend */

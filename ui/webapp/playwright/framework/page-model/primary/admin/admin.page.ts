@@ -4,6 +4,7 @@ import { NodeAdminPage } from '@bdeploy-pom/primary/admin/node-admin.page';
 import { MainMenu } from '@bdeploy-pom/fragments/main-menu.fragment';
 import { expect } from '@bdeploy-setup';
 import { GlobalAttributesTab } from '@bdeploy-pom/primary/admin/tabs/global-attributes.tab';
+import { UserAccountsPage } from '@bdeploy-pom/primary/admin/user-accounts.page';
 
 export class AdminPage extends BaseDialog {
   readonly _adminMenu: Locator;
@@ -25,6 +26,13 @@ export class AdminPage extends BaseDialog {
     const nodesPage = new NodeAdminPage(this.page);
     await nodesPage.expectOpen();
     return Promise.resolve(nodesPage);
+  }
+
+  async gotoUserAccountsPage() {
+    await this._adminMenu.locator('a', { hasText: 'User Accounts' }).click();
+    const accountsPage = new UserAccountsPage(this.page);
+    await accountsPage.expectOpen();
+    return Promise.resolve(accountsPage);
   }
 
   async gotoGlobalAttributesTab() {
