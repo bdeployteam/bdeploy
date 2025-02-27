@@ -5,6 +5,8 @@ import { MainMenu } from '@bdeploy-pom/fragments/main-menu.fragment';
 import { expect } from '@bdeploy-setup';
 import { GlobalAttributesTab } from '@bdeploy-pom/primary/admin/tabs/global-attributes.tab';
 import { UserAccountsPage } from '@bdeploy-pom/primary/admin/user-accounts.page';
+import { MailSendingTab } from '@bdeploy-pom/primary/admin/tabs/mail-sending.tab';
+import { MailReceivingTab } from '@bdeploy-pom/primary/admin/tabs/mail-receiving.tab';
 
 export class AdminPage extends BaseDialog {
   readonly _adminMenu: Locator;
@@ -36,15 +38,30 @@ export class AdminPage extends BaseDialog {
   }
 
   async gotoGlobalAttributesTab() {
+    const { generalDialog, mailTab } = await this.gotoTab('Global Attributes', 'app-attributes-tab');
+    return Promise.resolve(new GlobalAttributesTab(mailTab, generalDialog.getToolbar()));
+  }
+
+  async gotoMailSendingTab() {
+    const { generalDialog, mailTab } = await this.gotoTab('Mail Sending', 'app-mail-sending-tab');
+    return Promise.resolve(new MailSendingTab(mailTab, generalDialog.getToolbar()));
+  }
+
+  async gotoMailReceivingTab() {
+    const { generalDialog, mailTab } = await this.gotoTab('Mail Receiving', 'app-mail-receiving-tab');
+    return Promise.resolve(new MailReceivingTab(mailTab, generalDialog.getToolbar()));
+  }
+
+  private async gotoTab(name: string, selector: string) {
     await this._adminMenu.locator('a', { hasText: 'Settings' }).click();
     const generalDialog = new BaseDialog(this.page, 'app-settings-general');
     await generalDialog.expectOpen();
 
     const generalTabs = generalDialog.getDialog().locator('mat-tab-header');
-    await generalTabs.getByRole('tab').getByText('Global Attributes').click();
-    const attributesTab = generalDialog.getDialog().locator('app-attributes-tab');
+    await generalTabs.getByRole('tab').getByText(name).click();
+    const attributesTab = generalDialog.getDialog().locator(selector);
 
     await expect(attributesTab).toBeVisible();
-    return Promise.resolve(new GlobalAttributesTab(attributesTab, generalDialog.getToolbar()));
+    return { generalDialog, mailTab: attributesTab };
   }
 }

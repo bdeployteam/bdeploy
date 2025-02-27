@@ -31,3 +31,16 @@ test('Convert Node', async ({ standalone }) => {
 
   await admin.screenshot('Doc_Admin_Nodes_Conversion');
 });
+
+test('Mail Settings', async ({ standalone }) => {
+  const admin = new AdminPage(standalone);
+  await admin.goto();
+
+  const sending = await admin.gotoMailSendingTab();
+  await sending.edit();
+  await sending.screenshot('Doc_Admin_Mail_Sending');
+
+  const receiving = await admin.gotoMailReceivingTab();
+  await receiving.edit();
+  await receiving.screenshot('Doc_Admin_Mail_Receiving');
+});
