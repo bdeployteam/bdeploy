@@ -1,8 +1,9 @@
 import { BasePanel } from '@bdeploy-pom/base/base-panel';
 import { ParameterGroupArea } from '@bdeploy-pom/panels/instances/process-settings/parameter-group.area';
+import { Page } from '@playwright/test';
 
 export class ConfigureParametersPanel extends BasePanel {
-  constructor(page: any) {
+  constructor(page: Page) {
     super(page, 'app-configure-process');
   }
 

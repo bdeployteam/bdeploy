@@ -176,6 +176,11 @@ test('Instance Configuration', async ({ standalone }, testInfo) => {
 
   const processSettings = await config.getProcessSettingsPanel('master', 'Server Application');
   await processSettings.screenshot('Doc_InstanceConfigProcessSettings');
+  await processSettings.screenshot('Doc_InstanceConfig_Endpoints'); // TODO: rework documentation to use the screenshot above or rework the screenshot to not be the same.
+
+  const eps = await processSettings.getConfigureEndpointsPanel();
+  await eps.screenshot('Doc_InstanceConfig_EndpointsConfig');
+  await eps.getBackToOverviewButton().click();
 
   const paramPanel = await processSettings.getConfigureParametersPanel();
   await paramPanel.screenshot('Doc_InstanceConfigParams');

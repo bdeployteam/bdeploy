@@ -36,4 +36,11 @@ export class InstanceSettingsPanel extends BasePanel {
   async getBannerPanel() {
     return createPanel(this.getDialog(), 'Banner...', p => new BannerPanel(p));
   }
+
+  async delete() {
+    await this.getDialog().getByRole('button', { name: 'Delete Instance' }).click();
+    const dlg = await this.getLocalMessageDialog('Delete');
+    await dlg.getByRole('button', { name: 'Yes' }).click();
+    await this.page.waitForURL('/#/instances/browser/**');
+  }
 }

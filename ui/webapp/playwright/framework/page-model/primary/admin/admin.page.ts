@@ -12,6 +12,8 @@ import { JobsPage } from '@bdeploy-pom/primary/admin/jobs.page';
 import { LDAPServersTab } from '@bdeploy-pom/primary/admin/tabs/ldap-servers.tab';
 import { PluginsTab } from '@bdeploy-pom/primary/admin/tabs/plugins.tab';
 import { UserGroupsPage } from '@bdeploy-pom/primary/admin/user-groups.page';
+import { ManualCleanupPage } from '@bdeploy-pom/primary/admin/manual-cleanup.page';
+import { BDeployUpdatePage } from '@bdeploy-pom/primary/admin/bdeploy-update.page';
 
 export class AdminPage extends BaseDialog {
   readonly _adminMenu: Locator;
@@ -61,6 +63,20 @@ export class AdminPage extends BaseDialog {
     const jobsPage = new JobsPage(this.page);
     await jobsPage.expectOpen();
     return Promise.resolve(jobsPage);
+  }
+
+  async gotoManualCleanupPage() {
+    await this._adminMenu.locator('a', { hasText: 'Manual Cleanup' }).click();
+    const cleanupPage = new ManualCleanupPage(this.page);
+    await cleanupPage.expectOpen();
+    return Promise.resolve(cleanupPage);
+  }
+
+  async gotoBDeployUpdatePage() {
+    await this._adminMenu.locator('a', { hasText: 'BDeploy Update' }).click();
+    const updatePage = new BDeployUpdatePage(this.page);
+    await updatePage.expectOpen();
+    return Promise.resolve(updatePage);
   }
 
   async gotoGlobalAttributesTab() {

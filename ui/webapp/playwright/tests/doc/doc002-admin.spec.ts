@@ -1,10 +1,29 @@
 import { expect, test } from '@bdeploy-setup';
 import { AdminPage } from '@bdeploy-pom/primary/admin/admin.page';
 import { BackendApi } from '@bdeploy-backend';
+import { TestInfo } from '@playwright/test';
+import { createInstance, uploadProduct } from '@bdeploy-pom/common/common-tasks';
+import { InstancePurpose } from '@bdeploy/models/gen.dtos';
+import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 
-test.beforeEach(async ({ standalone }) => {
+function groupId(testInfo: TestInfo) {
+  return `AdmGroup-${testInfo.workerIndex}`;
+}
+
+test.beforeAll(async ({ standalone }) => {
   const api = new BackendApi(standalone);
   await api.deleteUser('test');
+});
+
+test.beforeEach(async ({ standalone }, testInfo) => {
+  const api = new BackendApi(standalone);
+  await api.deleteGroup(groupId(testInfo));
+  await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for admin tests`);
+});
+
+test.afterEach(async ({ standalone }, testInfo) => {
+  const api = new BackendApi(standalone);
+  await api.deleteGroup(groupId(testInfo));
 });
 
 test('General Settings', async ({ standalone }) => {
@@ -146,3 +165,36 @@ test('User Groups', async ({ standalone }) => {
   await perms.getBackToOverviewButton().click();
   await details.delete();
 });
+
+test('Manual Cleanup', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Admin Instance', 'Test for cleanup', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Admin Instance');
+  await config.goto();
+  const settings = await config.getSettingsPanel();
+  await settings.delete();
+
+  // we do this here although it is an admin topic to have "something" to clean up...
+  const admin = new AdminPage(standalone);
+  await admin.goto();
+  await standalone.reload(); // depending on timing a snackbar MAY show up.
+
+  const cleanup = await admin.gotoManualCleanupPage();
+  await cleanup.screenshot('Doc_Cleanup');
+
+  await cleanup.calculate();
+  await expect(cleanup.getDialog().locator('mat-tab-header')).toBeVisible();
+  await cleanup.screenshot('Doc_Cleanup_Actions');
+});
+
+test('BDeploy Update', async ({ standalone }) => {
+  const admin = new AdminPage(standalone);
+  await admin.goto();
+
+  const updates = await admin.gotoBDeployUpdatePage();
+  const details = await updates.getUpdateDetailPanel('installed');
+
+  await details.screenshot('Doc_System_BDeploy_Update');
+});
+
