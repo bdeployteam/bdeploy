@@ -7,6 +7,9 @@ import { GlobalAttributesTab } from '@bdeploy-pom/primary/admin/tabs/global-attr
 import { UserAccountsPage } from '@bdeploy-pom/primary/admin/user-accounts.page';
 import { MailSendingTab } from '@bdeploy-pom/primary/admin/tabs/mail-sending.tab';
 import { MailReceivingTab } from '@bdeploy-pom/primary/admin/tabs/mail-receiving.tab';
+import { BHivesPage } from '@bdeploy-pom/primary/admin/bhives.page';
+import { JobsPage } from '@bdeploy-pom/primary/admin/jobs.page';
+import { LDAPServersTab } from '@bdeploy-pom/primary/admin/tabs/ldap-servers.tab';
 
 export class AdminPage extends BaseDialog {
   readonly _adminMenu: Locator;
@@ -37,19 +40,38 @@ export class AdminPage extends BaseDialog {
     return Promise.resolve(accountsPage);
   }
 
+  async gotoBHivesPage() {
+    await this._adminMenu.locator('a', { hasText: 'BHives' }).click();
+    const bhivePage = new BHivesPage(this.page);
+    await bhivePage.expectOpen();
+    return Promise.resolve(bhivePage);
+  }
+
+  async gotoJobsPage() {
+    await this._adminMenu.locator('a', { hasText: 'Jobs' }).click();
+    const jobsPage = new JobsPage(this.page);
+    await jobsPage.expectOpen();
+    return Promise.resolve(jobsPage);
+  }
+
   async gotoGlobalAttributesTab() {
-    const { generalDialog, mailTab } = await this.gotoTab('Global Attributes', 'app-attributes-tab');
-    return Promise.resolve(new GlobalAttributesTab(mailTab, generalDialog.getToolbar()));
+    const { generalDialog, tab } = await this.gotoTab('Global Attributes', 'app-attributes-tab');
+    return Promise.resolve(new GlobalAttributesTab(tab, generalDialog.getToolbar()));
   }
 
   async gotoMailSendingTab() {
-    const { generalDialog, mailTab } = await this.gotoTab('Mail Sending', 'app-mail-sending-tab');
-    return Promise.resolve(new MailSendingTab(mailTab, generalDialog.getToolbar()));
+    const { generalDialog, tab } = await this.gotoTab('Mail Sending', 'app-mail-sending-tab');
+    return Promise.resolve(new MailSendingTab(tab, generalDialog.getToolbar()));
   }
 
   async gotoMailReceivingTab() {
-    const { generalDialog, mailTab } = await this.gotoTab('Mail Receiving', 'app-mail-receiving-tab');
-    return Promise.resolve(new MailReceivingTab(mailTab, generalDialog.getToolbar()));
+    const { generalDialog, tab } = await this.gotoTab('Mail Receiving', 'app-mail-receiving-tab');
+    return Promise.resolve(new MailReceivingTab(tab, generalDialog.getToolbar()));
+  }
+
+  async gotoLDAPServersTab() {
+    const { generalDialog, tab } = await this.gotoTab('LDAP Auth.', 'app-ldap-tab');
+    return Promise.resolve(new LDAPServersTab(tab, generalDialog.getToolbar()));
   }
 
   private async gotoTab(name: string, selector: string) {
@@ -59,9 +81,9 @@ export class AdminPage extends BaseDialog {
 
     const generalTabs = generalDialog.getDialog().locator('mat-tab-header');
     await generalTabs.getByRole('tab').getByText(name).click();
-    const attributesTab = generalDialog.getDialog().locator(selector);
+    const tab = generalDialog.getDialog().locator(selector);
 
-    await expect(attributesTab).toBeVisible();
-    return { generalDialog, mailTab: attributesTab };
+    await expect(tab).toBeVisible();
+    return { generalDialog, tab };
   }
 }
