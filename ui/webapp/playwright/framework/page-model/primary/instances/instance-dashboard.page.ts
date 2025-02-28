@@ -19,17 +19,25 @@ export class InstanceDashboardPage extends BaseDialog {
     await expect(this.getScope()).toContainText(this.instance);
   }
 
+  getInstallButton() {
+    return this.getDialog().getByRole('button', { name: 'Install' });
+  }
+
+  getActivateButton() {
+    return this.getDialog().getByRole('button', { name: 'Activate' });
+  }
+
   async install(expectedVersion: string) {
     // need to check for the expected version to be on screen as this will make sure that the
     // expected version has already loaded from the backend!
     await expect(this.getDialog().locator('.bd-rect-card').getByText(`(version ${expectedVersion})`)).toBeVisible();
-    const installBtn = this.getDialog().getByRole('button', { name: 'Install' });
+    const installBtn = this.getInstallButton();
     await installBtn.click();
     await expect(installBtn.locator('mat-spinner')).not.toBeVisible();
   }
 
   async activate() {
-    const activateBtn = this.getDialog().getByRole('button', { name: 'Activate' });
+    const activateBtn = this.getActivateButton();
     await activateBtn.click();
     await expect(activateBtn.locator('mat-spinner')).not.toBeVisible();
   }
