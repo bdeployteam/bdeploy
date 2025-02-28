@@ -97,11 +97,11 @@ test('LDAP Settings', async ({ standalone }) => {
   const ldap = await admin.gotoLDAPServersTab();
   const addPanel = await ldap.addServer();
   await addPanel.fill('ldap://localhost:389', 'Company LDAP', 'user', 'password', 'dc=example,dc=com');
-  await addPanel.screenshot('Doc_Admin_LDAP_Server_Config');
+  await addPanel.screenshot('Doc_Admin_Ldap_Server_Config');
 
   await addPanel.apply();
   await expect(ldap.getTableRowContaining('Company LDAP')).toBeVisible();
-  await ldap.screenshot('Doc_Admin_LDAP_Servers');
+  await ldap.screenshot('Doc_Admin_Ldap_Servers');
 });
 
 test('Plugins', async ({ standalone }) => {
@@ -132,7 +132,7 @@ test('User Accounts', async ({ standalone }) => {
 
   await details.activate();
   const perms = await details.getAssignPermissionPanel();
-  await perms.screenshot('Doc_Admin_User_Accounts_Permissions');
+  await perms.screenshot('Doc_Admin_User_Accounts_Permissions_Add');
   await perms.getBackToOverviewButton().click();
 
   const edit = await details.getEditPanel();
@@ -157,7 +157,7 @@ test('User Groups', async ({ standalone }) => {
   await expect(groups.getTableRowContaining('TestGroup')).toBeVisible();
   const details = await groups.getGroupDetailsPanel('TestGroup');
   await details.fillAddUser('adm');
-  await details.screenshot('Doc_Admin_User_Groups_Details');
+  await details.screenshot('Doc_Admin_User_Groups_Add_Test_User');
 
   const perms = await details.getAssignPermissionPanel();
   await perms.screenshot('Doc_Admin_User_Groups_Permissions_Add');

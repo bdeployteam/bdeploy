@@ -6,9 +6,11 @@ import { AdminPage } from '@bdeploy-pom/primary/admin/admin.page';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { createInstanceGroup } from '@bdeploy-pom/common/common-tasks';
 import { waitForInstanceGroup } from '@bdeploy-pom/common/common-functions';
+import { GroupsProductsPage } from '@bdeploy-pom/primary/groups/groups-products.page';
 
 const groupId = `DemoGroup`;
 const groupIdTwo = `DemoGroupTwo`;
+const groupUser = 'groupUser';
 
 // tests build upon each other in this file
 test.describe.configure({ mode: 'serial' });
@@ -17,12 +19,14 @@ test.beforeAll(async ({ standalone }) => {
   const api = new BackendApi(standalone);
   await api.deleteGroup(groupId);
   await api.deleteGroup(groupIdTwo);
+  await api.deleteUser(groupUser);
 });
 
 test.afterAll(async ({ standalone }) => {
   const api = new BackendApi(standalone);
   await api.deleteGroup(groupId);
   await api.deleteGroup(groupIdTwo);
+  await api.deleteUser(groupUser);
 });
 
 test('Create Instance Group', async ({ standalone }) => {
@@ -32,13 +36,14 @@ test('Create Instance Group', async ({ standalone }) => {
 
   const groups = new InstanceGroupsBrowserPage(standalone);
   await groups.goto();
+  await groups.screenshot('Doc_EmptyGroups');
 
   const panel = await groups.addInstanceGroup();
   await expect(panel.getTitle()).toContainText('Add Instance Group');
 
   await groups.screenshot('Doc_AddGroupPanelEmpty');
-
   await panel.fill(groupId, groupId, 'This is a demo instance group', true, 'bdeploy.png');
+  await groups.screenshot('Doc_AddGroupPanelFilled');
 
   const saveRq = api.waitForGroupPut();
   await panel.save();
@@ -47,6 +52,37 @@ test('Create Instance Group', async ({ standalone }) => {
   await saveRq;
 
   await waitForInstanceGroup(groups, groupId);
+});
+
+test('Group Permissions', async ({ standalone }) => {
+  const groups = new InstanceGroupsBrowserPage(standalone);
+  await groups.goto();
+  await groups.screenshot('Doc_DemoGroup');
+
+  // need to create a temp user for those.
+  const admin = new AdminPage(standalone);
+  await admin.goto();
+  const acc = await admin.gotoUserAccountsPage();
+  const add = await acc.getAddUserPanel();
+  await add.fill(groupUser, 'Group User', 'group@example.com', 'pass!123123!', 'pass!123123!');
+  await add.save();
+
+  const instances = new InstancesBrowserPage(standalone, groupId);
+  await instances.goto();
+
+  const settings = await instances.getGroupSettings();
+  await settings.screenshot('Doc_GroupSettings');
+
+  const perm = await settings.getPermissionsPanel();
+  await perm.screenshot('Doc_GroupPermGlobalOnly');
+
+  const popup = await perm.getModifyPopup(groupUser);
+  await popup.selectPermission('WRITE');
+  await popup.screenshot('Doc_GroupPermSetWrite');
+  await popup.ok();
+
+  await expect(perm.getTableRowContaining(groupUser).getByText('WRITE')).toBeVisible();
+  await perm.screenshot('Doc_GroupPermAssigned');
 });
 
 test('Card View', async ({ standalone }) => {
@@ -67,6 +103,7 @@ test('Card View', async ({ standalone }) => {
   await expect(groupCard).toBeVisible();
 
   await groups.screenshot('Doc_ModeCards');
+  await cardBtn.click();
 });
 
 test('Global Attributes', async ({ standalone }) => {
@@ -127,4 +164,38 @@ test('Grouping Panel', async ({ standalone }) => {
   await groups.screenshot('Doc_GroupingPanel');
 
   await grouping.closeGroupingPanel();
+});
+
+test('Product Upload', async ({ standalone }) => {
+  await new BackendApi(standalone).mockFilterGroups(groupId);
+
+  const instances = new InstancesBrowserPage(standalone, groupId);
+  await instances.goto();
+  await instances.screenshot('Doc_DemoInstancesEmpty');
+
+  const products = new GroupsProductsPage(standalone, groupId);
+  await products.goto();
+  await products.screenshot('Doc_ProductsEmpty');
+
+  const upload = await products.openUploadPanel();
+  await upload.screenshot('Doc_ProductsUploadPanel');
+  await upload.upload('test-product-2-direct.zip');
+
+  const state = upload.getUploadState('test-product-2-direct');
+  await expect(state).toContainText('Success');
+  await products.screenshot('Doc_ProductsUploadSuccess');
+
+  await products.getProductDetailsPanel('Demo Product');
+  await products.screenshot('Doc_ProductDetailsPanel');
+});
+
+test('Create Instance Panel', async ({ standalone }) => {
+  await new BackendApi(standalone).mockFilterGroups(groupId);
+
+  const instances = new InstancesBrowserPage(standalone, groupId);
+  await instances.goto();
+  await instances.screenshot('Doc_DemoInstancesNoInstance');
+
+  await instances.addInstance();
+  await instances.screenshot('Doc_InstanceAdd');
 });

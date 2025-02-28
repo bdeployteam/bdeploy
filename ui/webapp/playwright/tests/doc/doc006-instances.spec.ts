@@ -6,6 +6,8 @@ import { TestInfo } from '@playwright/test';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 import { InstanceDataFilesPage } from '@bdeploy-pom/primary/instances/instance-data-files.page';
+import { ClientAppsPage } from '@bdeploy-pom/primary/groups/client-apps.page';
+import { InstanceLogFilesPage } from '@bdeploy-pom/primary/instances/instance-log-files.page';
 
 test.slow();
 
@@ -69,9 +71,10 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
 
   await expect(instance.getServerNode('master').locator('tr', { hasText: 'Server No Sleep' })).toBeVisible();
   await instance.screenshot('Doc_InstanceDashboardActive');
+  await instance.screenshot('Doc_DemoInstance'); // TODO: duplicate screenshots in docu with different names.
 
   await instance.getProcessStatus('master', 'Server With Sleep');
-  await instance.screenshot('Doc_DashboardProcessControlGroup');
+  await instance.screenshot('Doc_DashboardProcessControl');
 
   await instance.toggleBulkControl();
   await instance.getServerNode('master').locator('tr', { hasText: 'Second Group' }).getByRole('checkbox').click();
@@ -133,6 +136,11 @@ test('Instance Dashboard', async ({ standalone }, testInfo) => {
 
   keepAliveStatus = await instance.getProcessStatus('master', 'Another Server');
   await keepAliveStatus.screenshot('Doc_DashboardPinnedParameter');
+
+  // last use this test to screenshot the client apps page
+  const clients = new ClientAppsPage(standalone, groupId(testInfo));
+  await clients.goto();
+  await clients.screenshot('Doc_ClientApps');
 });
 
 test('Instance Configuration', async ({ standalone }, testInfo) => {
@@ -383,4 +391,41 @@ test('Instance Data Files', async ({ standalone }, testInfo) => {
   const dfEditor = await dfView.getFileEditorPanel();
   await dfEditor.fill('This is a sample text file.\n');
   await dfEditor.screenshot('Doc_DataFilesEdit');
+});
+
+test('Instance Log Files', async ({ standalone }, testInfo) => {
+  await uploadProduct(standalone, groupId(testInfo), 'test-product-2-direct');
+  await createInstance(standalone, groupId(testInfo), 'Log Files Instance', 'Instance for log files documentation', InstancePurpose.TEST, 'Demo Product', '2.0.0');
+
+  const config = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Log Files Instance');
+  await config.goto();
+  const addPanel = await config.getAddProcessPanel('master');
+  await addPanel.addProcess('Server Application');
+  const settings = await config.getProcessSettingsPanel('master', 'Server Application');
+  const params = await settings.getConfigureParametersPanel();
+  const testParams = await params.getParameterGroup('Test Parameters');
+  await testParams.toggle();
+  await testParams.selectParameters();
+  await testParams.getParameter('param.out').locator('mat-icon', { hasText: 'add' }).click();
+  await testParams.finishSelectParameters();
+  await testParams.getParameter('param.out').locator('id=param.out_link').fill('{{P:LOG_DATA}}/out.log');
+  await params.apply();
+
+  await config.waitForValidation();
+  await config.save();
+
+  const dashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Log Files Instance');
+  await dashboard.install('2');
+  await dashboard.activate();
+
+  const status = await dashboard.getProcessStatus('master', 'Server Application');
+  await status.start();
+
+  const logs = new InstanceLogFilesPage(standalone, groupId(testInfo), 'Log Files Instance');
+  await logs.goto();
+  await expect(logs.getTableRowContaining('out.log')).toBeVisible();
+
+  await logs.screenshot('Doc_LogFiles');
+  const viewer = await logs.getFileViewer('out.log');
+  await viewer.screenshot('Doc_LogFilesView');
 });

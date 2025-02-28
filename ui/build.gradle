@@ -134,6 +134,10 @@ task installBrowsers(type: Exec) { t ->
 }
 
 task runUitests(type: Exec, dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) { t ->
+    doFirst() {
+	delete "$webappDir/playwright/results/screenshots"
+    }
+
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP;
 
@@ -161,8 +165,16 @@ task runUitestsInfra(dependsOn: [installBrowsers, updateFixtures, runServerStand
     }
 }
 
+// this one is required to stop the server and accumulate coverage data
+task doneWithUitest(dependsOn: [':test-data:triggerStopBDeploy', triggerStopStandalone, triggerStopCentral, triggerStopManaged]) {
+    doLast {
+        println('UI Testing done...')
+    }
 
-task updateDocuScreenshots(type: Copy, dependsOn: runUitests) {
+    dependsOn runUitests
+}
+
+task updateDocuScreenshots(type: Copy, dependsOn: doneWithUitest) {
     from file("${webappDir}/playwright/results/screenshots/")
     into new File(project(":doc").projectDir, "retypeuser/images")
 
@@ -179,15 +191,6 @@ task updateDocuScreenshots(type: Copy, dependsOn: runUitests) {
     doLast {
         println('Updating screenshots of user documentation done.')
     }
-}
-
-// this one is required to stop the server and accumulate coverage data
-task doneWithUitest(dependsOn: [':test-data:triggerStopBDeploy', triggerStopStandalone, triggerStopCentral, triggerStopManaged]) {
-    doLast {
-        println('UI Testing done...')
-    }
-
-    dependsOn runUitests
 }
 
 project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runUitests

@@ -3,9 +3,10 @@ import { expect, Page } from '@playwright/test';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { ProductUploadPanel } from '@bdeploy-pom/panels/products/product-upload.panel';
 import { MainMenu } from '@bdeploy-pom/fragments/main-menu.fragment';
-import { createPanel } from '@bdeploy-pom/common/common-functions';
+import { createPanel, createPanelFromRow } from '@bdeploy-pom/common/common-functions';
 import { ProductSyncPanel } from '@bdeploy-pom/panels/products/product-sync.panel';
 import { ProductImportPanel } from '@bdeploy-pom/panels/products/product-import.panel';
+import { ProductDetailsPanel } from '@bdeploy-pom/panels/groups/product-details.panel';
 
 export class GroupsProductsPage extends BaseDialog {
   constructor(page: Page, private readonly group: string) {
@@ -33,6 +34,10 @@ export class GroupsProductsPage extends BaseDialog {
 
   async openProductImportPanel() {
     return createPanel(this.getToolbar(), 'Import Product...', p => new ProductImportPanel(p));
+  }
+
+  async getProductDetailsPanel(name: string) {
+    return createPanelFromRow(this.getTableRowContaining(name), p => new ProductDetailsPanel(p));
   }
 
   getProductRow(name: string) {
