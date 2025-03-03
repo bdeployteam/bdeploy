@@ -561,10 +561,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 }
                 inc.mergeVariables(config, system, v -> processConfigFilesInMemory(configTrees, v));
             } else {
-                if (config.configTree != null) {
-                    inc.mergeVariables(config, system,
-                            v -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v));
-                }
+                Consumer<VariableResolver> cfgResolver =  null != config.configTree ?
+                            v -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v)
+                            : null;
+                inc.mergeVariables(config, system, cfgResolver);
             }
 
             builder.addInstanceNodeManifest(entry.getKey(), inmb.insert(hive));
