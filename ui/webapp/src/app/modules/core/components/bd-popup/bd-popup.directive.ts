@@ -131,7 +131,7 @@ export class BdPopupDirective implements OnDestroy {
 
   @Output() appBdPopupOpened = new EventEmitter<BdPopupDirective>();
 
-  private delayTimer;
+  private delayTimer: ReturnType<typeof setInterval>;
   private overlayRef: OverlayRef;
 
   private mouseOverElement = false;
@@ -255,9 +255,9 @@ export class BdPopupDirective implements OnDestroy {
 
   private fixupPanelClasses(pos: ConnectedPosition[]) {
     const name = this.appBdPopupChevronColor ? this.appBdPopupChevronColor : 'default';
-    const result = [];
+    const result: ConnectedPosition[] = [];
     pos.forEach((p) => {
-      const x = cloneDeep(p);
+      const x: ConnectedPosition = cloneDeep(p);
       x.panelClass = x.panelClass + '-' + name;
       result.push(x);
     });

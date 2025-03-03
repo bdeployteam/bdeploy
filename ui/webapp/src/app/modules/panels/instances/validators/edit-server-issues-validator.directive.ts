@@ -38,7 +38,7 @@ export class EditServerIssuesValidatorDirective implements AsyncValidator {
           return null;
         }
 
-        const errors = {};
+        const errors: ValidationErrors = {};
         errors[ID] = validation[0].message; // we can only show one message per parameter.
         return errors;
       }),

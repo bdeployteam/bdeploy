@@ -69,12 +69,12 @@ export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewI
   }
 
   ngAfterViewInit(): void {
-    this.subscription = this.editorPanels.changes.subscribe((p) => {
+    this.subscription = this.editorPanels.changes.subscribe((panels: QueryList<ElementRef>) => {
       if (!this.editor) {
         return;
       }
 
-      p.forEach((elem) => {
+      panels.forEach((elem) => {
         setTimeout(() =>
           elem.nativeElement.appendChild(
             this.editor.bind(

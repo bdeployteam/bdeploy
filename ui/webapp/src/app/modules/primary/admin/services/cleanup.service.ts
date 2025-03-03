@@ -24,7 +24,7 @@ export class CleanupService {
   public performing$ = this.actions.action([Actions.CLEANUP_PERFORM], this.internalPerforming$);
 
   private readonly apiPath = () => `${this.cfg.config.api}/cleanUi`;
-  private cdHandle;
+  private cdHandle: ReturnType<typeof setInterval>;
 
   public calculateCleanup() {
     clearInterval(this.cdHandle);

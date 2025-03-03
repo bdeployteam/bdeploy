@@ -21,5 +21,5 @@ const colPermission: BdDataColumn<ScopedPermission> = {
   providedIn: 'root',
 })
 export class PermissionColumnsService {
-  public defaultPermissionColumns = [colScope, colPermission];
+  public defaultPermissionColumns: BdDataColumn<ScopedPermission>[] = [colScope, colPermission];
 }

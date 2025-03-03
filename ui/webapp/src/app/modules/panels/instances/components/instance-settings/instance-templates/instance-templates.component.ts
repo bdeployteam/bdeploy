@@ -88,8 +88,8 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected recordsLabel: string[];
 
   protected template: FlattenedInstanceTemplateConfiguration;
-  protected variables: { [key: string]: string }; // key is var name, value is value.
-  protected groups: { [key: string]: string }; // key is group name, value is target node name.
+  protected variables: Record<string, string>; // key is var name, value is value.
+  protected groups: Record<string, string>; // key is group name, value is target node name.
   protected messages: TemplateMessage[];
   protected readonly msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
   protected isAnyGroupSelected = false;
@@ -98,8 +98,8 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected secondStepCompleted = false;
   protected requiredVariables: TemplateVariable[] = [];
 
-  protected groupNodes: { [key: string]: string[] };
-  protected groupLabels: { [key: string]: string[] };
+  protected groupNodes: Record<string, string[]>;
+  protected groupLabels: Record<string, string[]>;
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
@@ -359,7 +359,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     for (const template of group.applications) {
       // need to find all apps in the product which match the key name...
       const searchKey = this.product.product + '/' + template.application;
-      const status = [];
+      const status: StatusMessage[] = [];
       for (const app of this.instanceEdit.stateApplications$.value) {
         const appKey = getAppKeyName(app.key);
         if (searchKey === appKey) {
@@ -430,7 +430,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
               });
               return of<string>(null);
             } else {
-              const status = [];
+              const status: StatusMessage[] = [];
               return this.edit.addProcess(nodeCfg, appDto, app, this.variables, status).pipe(
                 finalize(() => {
                   status.forEach((e) =>

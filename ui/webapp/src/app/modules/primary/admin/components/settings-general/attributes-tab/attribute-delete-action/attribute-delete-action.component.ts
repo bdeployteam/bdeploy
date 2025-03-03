@@ -7,6 +7,10 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
+import { BdDataColumn } from '../../../../../../../models/data';
+import {
+  TableCellDisplay
+} from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-attribute-delete-action',
@@ -17,12 +21,13 @@ import { AsyncPipe } from '@angular/common';
         AsyncPipe,
     ],
 })
-export class AttributeDeleteActionComponent {
+export class AttributeDeleteActionComponent implements TableCellDisplay<CustomAttributeDescriptor> {
   private readonly areas = inject(NavAreasService);
   private readonly groups = inject(GroupsService);
   protected readonly settings = inject(SettingsService);
 
   @Input() record: CustomAttributeDescriptor;
+  @Input() column: BdDataColumn<CustomAttributeDescriptor>;
 
   protected state$ = combineLatest([this.areas.panelRoute$, this.groups.attributeValues$]).pipe(
     map(([route, attributeValues]) => {

@@ -11,7 +11,7 @@ import { BdMicroIconButtonComponent } from '../bd-micro-icon-button/bd-micro-ico
 })
 export class BdIdentifierComponent {
   @Input() id: string;
-  @Input() showCopyButton: boolean = false;
+  @Input() showCopyButton = false;
 
   private readonly snackbar = inject(MatSnackBar);
 

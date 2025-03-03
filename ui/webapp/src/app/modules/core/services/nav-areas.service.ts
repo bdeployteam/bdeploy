@@ -33,7 +33,7 @@ export class NavAreasService {
   public _tempNavGroupContext$ = new BehaviorSubject<string>(null);
   public _tempNavRepoContext$ = new BehaviorSubject<string>(null);
 
-  private dirtyables: { [P in DirtyableKey]: DirtyableDialog } = {
+  private dirtyables: Record<DirtyableKey, DirtyableDialog> = {
     panel: null,
     primary: null,
     admin: null

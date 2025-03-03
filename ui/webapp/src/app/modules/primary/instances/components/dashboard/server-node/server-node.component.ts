@@ -173,7 +173,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     this.instances.reloadActiveStates(this.instances.active$.value);
   }
 
-  private updateAllProcesses(states: { [key: string]: ProcessStatusDto }) {
+  private updateAllProcesses(states: Record<string, ProcessStatusDto>) {
     if (!states || Object.keys(states).length === 0) {
       this.processesState.next('unknown');
       this.processesTooltip.next('No information available');
@@ -216,7 +216,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     );
   }
 
-  private updateAllPortsRating(ports: NodeApplicationPort[], states: { [key: string]: ProcessStatusDto }) {
+  private updateAllPortsRating(ports: NodeApplicationPort[], states: Record<string, ProcessStatusDto>) {
     if (!ports || !states) {
       this.portsState.next('unknown');
       this.portsTooltip.next('No information available');

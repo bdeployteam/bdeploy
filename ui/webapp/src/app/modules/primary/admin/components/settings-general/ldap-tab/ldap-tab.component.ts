@@ -114,7 +114,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     this.settings.serversReordered();
   }
 
-  private isEditMode(r) {
+  private isEditMode(r: LDAPSettingsDto) {
     return this.selectedServerId === r.id;
   }
 }

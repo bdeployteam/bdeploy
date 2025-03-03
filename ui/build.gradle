@@ -222,6 +222,13 @@ task installAngular(type:Exec) { t ->
     sharedNpmLogic(t, ["ci", "--legacy-peer-deps"])
 }
 
+task checkLintAfterInstall(type:Exec) { t ->
+    inputs.dir "$webappDir/src"
+    outputs.dir "$webappDir/dist/webapp"
+    sharedNpmLogic(t, ["run", "--", "ng", "lint"])
+    mustRunAfter 'buildAngularInternal'
+}
+
 evaluationDependsOn(':doc')
 task copyUserDoc(type:Copy, dependsOn:':doc:retypeUserDoc') {
     from tasks.getByPath(':doc:retypeUserDoc').outputs
@@ -332,14 +339,18 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
     ]
     excludeClasses = [
         'java.lang.Comparable',
+        'java.util.Comparator',
         'java.io.Serializable',
     ]
     outputFileType = 'implementationFile'
     outputKind = 'module'
     mapEnum = 'asEnum'
+    mapMap = 'asRecord'
     nonConstEnums = true
     jsonLibrary = 'jackson2'
     noFileComment = true
+    noEslintDisable = true
+    noTslintDisable = true
 
     def cfg = new cz.habarta.typescript.generator.Jackson2Configuration();
     cfg.fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;

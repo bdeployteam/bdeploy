@@ -11,7 +11,7 @@ export class RepositoryDetailsService {
   private readonly cfg = inject(ConfigService);
   private readonly http = inject(HttpClient);
 
-  private readonly apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
+  private readonly apiPath = (r: string) => `${this.cfg.config.api}/softwarerepository/${r}`;
 
   public delete(repository: SoftwareRepositoryConfiguration): Observable<unknown> {
     return this.http.delete(`${this.apiPath(repository.name)}`);

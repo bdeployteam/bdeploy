@@ -37,7 +37,7 @@ export class ClientsUsageService {
   public loading$ = new BehaviorSubject<boolean>(true);
   public clientUsage$ = new BehaviorSubject<ClientUsagePerApp[]>(null);
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/instance`;
 
   public load(id: string): Observable<ClientUsagePerApp[]> {
     this.loading$.next(true);

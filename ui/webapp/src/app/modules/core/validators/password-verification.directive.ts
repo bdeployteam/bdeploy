@@ -14,7 +14,7 @@ export const PASSWORD_VALIDATION = 'passwordMismatch';
     ],
 })
 export class PasswordVerificationValidator implements Validator {
-  private validateCb: () => void = () => {};
+  private validateCb: () => void = () => undefined;
 
   private _referencePass: string;
   @Input('appPasswordVerification')

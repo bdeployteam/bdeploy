@@ -3,10 +3,8 @@ import { ConfigService } from './config.service';
 
 // defined in index.html directly to be as global as possible.
 declare let downloadLocation: {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  assign: (url: string) => {};
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  click: (link: HTMLAnchorElement) => {};
+  assign: (url: string) => undefined;
+  click: (link: HTMLAnchorElement) => undefined;
 };
 
 const CSV_DELIMITER = ';';

@@ -15,7 +15,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 
-const INIT_REPOSITORIES = [];
+const INIT_REPOSITORIES: SoftwareRepositoryConfiguration[] = [];
 
 @Injectable({
   providedIn: 'root',

@@ -34,14 +34,14 @@ export class NodeStatePanelComponent implements OnChanges {
   @Input() lastRefreshAt$: BehaviorSubject<number>;
   @Input() refreshingWhen$: BehaviorSubject<boolean>;
 
-  @Output() manualRefresh = new EventEmitter<unknown>();
+  @Output() manualRefresh = new EventEmitter<boolean>();
 
   protected itemsToDisplay: StateItemToDisplay[];
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['items']) {
       this.itemsToDisplay = [];
-      changes['items'].currentValue.forEach((item) => {
+      changes['items'].currentValue.forEach((item: StateItemToDisplay) => {
         this.itemsToDisplay.push({
           name: this.makeObservable(item.name),
           type: this.makeObservable(item.type),

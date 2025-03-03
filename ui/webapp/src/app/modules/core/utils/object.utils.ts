@@ -7,7 +7,7 @@ export interface SimpleEntry<V> {
 }
 
 /** Converts a map as sent by the backend to a easier usable array */
-export function mapObjToArray<V>(obj: { [key: string]: V }): SimpleEntry<V>[] {
+export function mapObjToArray<V>(obj: Record<string, V>): SimpleEntry<V>[] {
   const result = [];
 
   for (const key of Object.keys(obj)) {
@@ -32,7 +32,7 @@ export function randomString(length: number, allowNumbers = false): string {
   return result;
 }
 
-export function expandVar(variable: string, variables: { [key: string]: string }, status: StatusMessage[]): string {
+export function expandVar(variable: string, variables: Record<string, string>, status: StatusMessage[]): string {
   let varName = variable;
   const colIndex = varName.indexOf(':');
   if (colIndex !== -1) {
@@ -60,7 +60,7 @@ export function expandVar(variable: string, variables: { [key: string]: string }
 
 export function performTemplateVariableSubst(
   value: string,
-  variables: { [key: string]: string },
+  variables: Record<string, string>,
   status: StatusMessage[],
 ): string {
   if (!!value && value.indexOf('{{T:') !== -1) {
@@ -77,11 +77,11 @@ export function performTemplateVariableSubst(
   return value;
 }
 
-export function removeNullValues(obj) {
+export function removeNullValues(obj: object) {
   return (function prune(current) {
     forOwn(current, function (value, key) {
       if (isUndefined(value) || isNull(value) || (isObject(value) && isEmpty(prune(value)))) {
-        delete current[key];
+        delete (current as Record<string, unknown>)[key];
       }
     });
     // remove any leftover undefined values from the delete

@@ -5,7 +5,7 @@ import { CardViewService } from 'src/app/modules/core/services/card-view.service
 import { SoftwareDetailsBulkService } from 'src/app/modules/panels/repositories/services/software-details-bulk.service';
 import { RepositoriesService } from '../../services/repositories.service';
 import { RepositoryColumnsService } from '../../services/repository-columns.service';
-import { RepositoryService, SwDtoWithType, SwPkgCompound, SwPkgType } from '../../services/repository.service';
+import { RepositoryService, SwRepositoryEntry } from '../../services/repository.service';
 import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
 import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
@@ -51,7 +51,7 @@ export class RepositoryComponent implements OnInit {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
   }
 
-  protected checkChangeForbidden(software: SwPkgCompound): boolean {
-    return software.type === SwPkgType.EXTERNAL_SOFTWARE && (software as SwDtoWithType).requiredByProduct;
+  protected checkChangeForbidden(software: SwRepositoryEntry): boolean {
+    return software.requiredByProduct;
   }
 }

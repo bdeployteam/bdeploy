@@ -137,7 +137,8 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
       return; // empty - nothing to select.
     }
 
-    const toSelect = dirs === '/' ? ['/'] : (dirs || '').split(',').map((d) => d.trim().split('/'));
+    const toSelect: string[][] = dirs === '/' ? [['/']]:
+      (dirs || '').split(',').map((d) => d.trim().split('/'));
     toSelect.forEach((n) => this.selectLeaf(n));
   }
 
@@ -216,9 +217,11 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
   protected dirItemSelectionToggle(node: DirTreeNode): void {
     this.dirSelection.toggle(node);
     const descendants = this.dirTreeControl.getDescendants(node);
-    this.dirSelection.isSelected(node)
-      ? this.dirSelection.select(...descendants)
-      : this.dirSelection.deselect(...descendants);
+    if(this.dirSelection.isSelected(node)) {
+      this.dirSelection.select(...descendants);
+    } else {
+      this.dirSelection.deselect(...descendants);
+    }
   }
 
   private getStartTypes(app: ApplicationDto): ApplicationStartType[] {

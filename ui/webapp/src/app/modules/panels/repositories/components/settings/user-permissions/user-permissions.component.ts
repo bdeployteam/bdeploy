@@ -106,7 +106,7 @@ export class UserPermissionsComponent {
             sort: (a, b) => this.groupNames.indexOf(b) - this.groupNames.indexOf(a)
           },
           selected: []
-        }
+        } as BdDataGrouping<UserInfo>
       ];
     })
   );

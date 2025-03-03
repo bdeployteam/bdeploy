@@ -35,7 +35,7 @@ export class RepositoryUsersService {
   public userGroups$ = new BehaviorSubject<UserGroupInfo[]>([]);
 
   private repo: SoftwareRepositoryConfiguration;
-  private readonly apiPath = (g) => `${this.cfg.config.api}/softwarerepository/${g}`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/softwarerepository/${g}`;
 
   constructor() {
     this.repos.current$.subscribe((r) => {

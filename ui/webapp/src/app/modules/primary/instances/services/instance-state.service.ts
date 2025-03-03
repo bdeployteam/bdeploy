@@ -18,7 +18,7 @@ export class InstanceStateService {
   private readonly instances = inject(InstancesService);
 
   public state$: Observable<InstanceStateRecord>;
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/instance`;
 
   constructor() {
     this.state$ = combineLatest([

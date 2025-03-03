@@ -43,7 +43,7 @@ export class NodesAdminService {
   public reload() {
     this.loading$.next(true);
     this.http
-      .get<{ [name: string]: MinionStatusDto }>(`${this.apiPath()}/nodes`)
+      .get<Record<string, MinionStatusDto>>(`${this.apiPath()}/nodes`)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((nodes) => {
         const minions = Object.keys(nodes).map((name) => ({

@@ -10,14 +10,34 @@ import {
   Output,
   SimpleChanges
 } from '@angular/core';
-import { editor } from 'monaco-editor';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { MonacoCompletionsService } from '../../services/monaco-completions.service';
+import {
+  MonacoCompletionsService,
+  GlobalMonacoModule,
+  WindowWithMonacoLoaded
+} from '../../services/monaco-completions.service';
 import { ThemeService } from '../../services/theme.service';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
+import { editor, languages, Position} from 'monaco-editor';
+import IStandaloneDiffEditor = editor.IStandaloneDiffEditor;
+import ITextModel = editor.ITextModel;
+import IEditor = editor.IEditor;
+import CompletionItemProvider = languages.CompletionItemProvider;
+import ProviderResult = languages.ProviderResult;
+import CompletionList = languages.CompletionList;
+
+
+interface EditorOptions {
+  theme: string;
+  language:  string;
+  readOnly: boolean;
+  minimap: { enabled: boolean };
+  autoClosingBrackets: boolean;
+  automaticLayout: boolean;
+}
 
 @Component({
     selector: 'app-bd-editor',
@@ -29,8 +49,8 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private readonly editorCompletions = inject(MonacoCompletionsService);
   private readonly cd = inject(ChangeDetectorRef);
 
-  private globalMonaco;
-  private monaco;
+  private globalMonaco: GlobalMonacoModule;
+  private monaco: IEditor;
   private subscription: Subscription;
   private editorPath = '';
 
@@ -54,14 +74,12 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   @Output() contentChange = new EventEmitter<string>();
 
   protected editorContent = '';
-  protected editorOptions;
+  protected editorOptions: EditorOptions;
   protected inited$ = new BehaviorSubject<boolean>(false);
 
   ngOnInit(): void {
     this.subscription = this.themeService.getThemeSubject().subscribe(() => {
-      if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
-      }
+      this.globalMonaco?.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
     });
 
     this.editorOptions = {
@@ -87,16 +105,16 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.subscription?.unsubscribe();
   }
 
-  protected onMonacoInit(monaco) {
+  protected onMonacoInit(monaco: IStandaloneDiffEditor) {
     this.monaco = monaco;
-    this.globalMonaco = window['monaco'];
+    this.globalMonaco = (window as unknown as WindowWithMonacoLoaded).monaco;
     // only do this once!
-    if (!this.globalMonaco['__providerRegistered']) {
+    if (!this.globalMonaco.__providerRegistered) {
       // register completion provider.
       const provider = this.createCompletionProvider(this.editorCompletions);
       this.globalMonaco.languages.getLanguages().forEach((l) => {
         this.globalMonaco.languages.registerCompletionItemProvider(l.id, provider);
-        this.globalMonaco['__providerRegistered'] = true;
+        this.globalMonaco.__providerRegistered = true;
       });
     }
 
@@ -135,7 +153,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
     this.globalMonaco.editor.getModels().forEach((m) => m.dispose());
 
-    const model = this.globalMonaco.editor.createModel(
+    const model: ITextModel = this.globalMonaco.editor.createModel(
       this.editorContent,
       undefined,
       this.globalMonaco.Uri.parse(this.editorPath)
@@ -144,13 +162,12 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.setModelMarkers();
   }
 
-  private createCompletionProvider(editorCompletions: MonacoCompletionsService): unknown {
+  private createCompletionProvider(editorCompletions: MonacoCompletionsService): CompletionItemProvider {
     // ATTENTION: the provider may NOT use ANYTHING from this component, as it will live globally, longer than this component.
     // Thus we're using a global service which will hold the currently valid completions. This also implies that ther cannot be
     // more than one set of completions at a time - thus IF there would be more than one editor, they'd share those.
     return {
-      triggerCharacter: ['{'],
-      provideCompletionItems: (model, position) => {
+      provideCompletionItems: (model: ITextModel, position: Position): ProviderResult<CompletionList> => {
         const searchString = model.getValueInRange({
           startLineNumber: position.lineNumber,
           startColumn: 1,
@@ -177,31 +194,8 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
           endColumn: position.column
         };
 
-        const kindByIcon = (icon: string) => {
-          // see completion.utils.ts!
-          switch (icon) {
-            case 'data_object': // instance & system variable.
-              return this.globalMonaco.languages.CompletionItemKind.Variable;
-            case 'build': // process parameters
-              return this.globalMonaco.languages.CompletionItemKind.Keword;
-            case 'folder': // deployment folders
-              return this.globalMonaco.languages.CompletionItemKind.Folder;
-            case 'dns': // host and environment
-              return this.globalMonaco.languages.CompletionItemKind.User;
-            case 'settings_system_daydream': // instance properties
-              return this.globalMonaco.languages.CompletionItemKind.Class;
-            case 'folder_special': // manifest reference
-              return this.globalMonaco.languages.CompletionItemKind.Reference;
-            case 'schedule': // delayed
-              return this.globalMonaco.languages.CompletionItemKind.Operator;
-            case 'devices_other': // os expansion
-              return this.globalMonaco.languages.CompletionItemKind.Interface;
-          }
-          return this.globalMonaco.languages.CompletionItemKind.Constant; // should not happen
-        };
-
         return {
-          suggestions: editorCompletions.getCompletions(word, range).map((c) => ({ ...c, kind: kindByIcon(c.icon) }))
+          suggestions: editorCompletions.getCompletions(this.globalMonaco, word, range)
         };
       }
     };

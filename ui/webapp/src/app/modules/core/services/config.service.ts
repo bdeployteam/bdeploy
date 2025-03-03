@@ -51,7 +51,7 @@ export class ConfigService {
   public isNewGitHubReleaseAvailable$ = new BehaviorSubject<boolean>(false);
   public isUpdateInstallSucceeded$ = new BehaviorSubject<boolean>(false);
 
-  private checkInterval;
+  private checkInterval: ReturnType<typeof setInterval>;
   private overlayRef: OverlayRef;
   private versionLock = false;
 

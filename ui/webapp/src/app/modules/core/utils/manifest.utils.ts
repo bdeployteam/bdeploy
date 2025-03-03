@@ -31,14 +31,14 @@ export function getAppOs(appKey: ManifestKey): OperatingSystem {
   const fullName = appKey.name;
   const lastSlashIdx = fullName.lastIndexOf('/') + 1;
   const osName = fullName.substring(lastSlashIdx).toUpperCase();
-  return OperatingSystem[osName];
+  return OperatingSystem[osName as keyof typeof OperatingSystem];
 }
 
 export function updateAppOs(appKey: ManifestKey, os: OperatingSystem): ManifestKey {
   const fullName = appKey.name;
   const lastSlashIdx = fullName.lastIndexOf('/') + 1;
   const osName = fullName.substring(lastSlashIdx).toUpperCase();
-  const oldOs = OperatingSystem[osName];
+  const oldOs: OperatingSystem = OperatingSystem[osName as keyof typeof OperatingSystem];
   if (oldOs === os) {
     return appKey;
   } else {

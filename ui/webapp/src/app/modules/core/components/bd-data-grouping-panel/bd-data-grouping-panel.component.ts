@@ -16,6 +16,7 @@ import { MatOption } from '@angular/material/core';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatDivider } from '@angular/material/divider';
+import { BdButtonPopupComponent } from '../bd-button-popup/bd-button-popup.component';
 
 /**
  * A single grouping panel, providing a drop dow to choose the definition,
@@ -34,7 +35,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
   /** The records currently available for grouping */
   @Input() records: T[];
   /** Binds the emitter for the popup-open event, so this panel can refresh values */
-  @Input() popupEmitter: EventEmitter<unknown>;
+  @Input() popupEmitter: EventEmitter<BdButtonPopupComponent>;
   /** The panel's index, this is used to show a hint to the user. */
   @Input() index: number;
   /** The actual grouping bound to the controls */
@@ -45,6 +46,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
   @Output() groupingChange = new EventEmitter<BdDataGrouping<T>>();
   /** Emitted whenever remove button is clicked by the user */
   @Output() removeClicked = new EventEmitter<BdDataGrouping<T>>();
+  protected readonly selectGroupingLabel = "Grouping";
 
   protected noGroup = UNMATCHED_GROUP;
   protected groupingValues: string[];
@@ -55,9 +57,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
     }
     return this.groupingValues.filter((gv) => gv?.toLowerCase().includes(this.filter.toLowerCase()));
   }
-  protected get selectGroupingLabel(): string {
-    return 'Grouping';
-  }
+
   protected get filterPlaceholder(): string {
     return this.grouping?.definition?.name || 'Filter Options Below';
   }

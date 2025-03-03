@@ -54,7 +54,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   protected badge$ = new BehaviorSubject<number>(null);
   protected noPerm$ = new BehaviorSubject<boolean>(false);
 
-  private interval;
+  private interval: ReturnType<typeof setInterval>;
   private sub: Subscription;
 
   ngOnInit(): void {

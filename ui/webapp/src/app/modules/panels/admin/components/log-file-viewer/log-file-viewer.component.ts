@@ -29,7 +29,7 @@ export class LogFileViewerComponent implements OnInit, OnDestroy {
   protected content$ = new Subject<string>();
   protected follow$ = new BehaviorSubject<boolean>(false);
 
-  private followInterval;
+  private followInterval: ReturnType<typeof  setInterval>;
   private offset = 0;
   private subscription: Subscription;
 

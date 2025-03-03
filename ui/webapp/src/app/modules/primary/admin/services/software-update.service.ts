@@ -37,7 +37,7 @@ export class SoftwareUpdateService {
         measure('Load Available Software'),
       )
       .subscribe(([b, l]) => {
-        const tags: { [key: string]: SoftwareVersion } = {};
+        const tags: Record<string, SoftwareVersion> = {};
         b.forEach((key) => {
           const k = tags[key.tag] || {
             version: key.tag,

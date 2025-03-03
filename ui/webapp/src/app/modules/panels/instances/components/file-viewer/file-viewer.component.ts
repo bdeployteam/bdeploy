@@ -33,7 +33,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
 
   private offset = 0;
   private readonly subscription: Subscription;
-  private followInterval;
+  private followInterval: ReturnType<typeof  setInterval>;
 
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
   protected file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);

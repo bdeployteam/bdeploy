@@ -134,7 +134,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)),
         );
 
-        const allApps = [];
+        const allApps: ApplicationConfiguration[] = [];
         nodes.nodeConfigDtos.forEach((x) =>
           allApps.push(...(x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [])),
         );

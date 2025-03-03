@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   protected logoClass: string;
 
   public loginFailed = false;
-  public loginFailedMessage;
+  public loginFailedMessage: string;
 
   ngOnInit(): void {
     this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
@@ -159,6 +159,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   protected onLogoClick() {
     this.logoClass = 'local-hinge';
-    setTimeout(() => (this.logoClass = null), 2000);
+    setTimeout((): void  => (this.logoClass = null), 2000);
   }
 }

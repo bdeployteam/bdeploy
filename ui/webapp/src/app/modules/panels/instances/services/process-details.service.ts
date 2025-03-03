@@ -35,7 +35,7 @@ export class ProcessDetailsService implements OnDestroy {
   private readonly subscription: Subscription;
   private detailsCall: Subscription;
 
-  private readonly apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
+  private readonly apiPath = (group: string, instance: string) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
 
   constructor() {
     this.subscription = combineLatest([

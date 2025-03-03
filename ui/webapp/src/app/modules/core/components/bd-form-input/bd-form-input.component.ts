@@ -57,8 +57,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   @Input() warningMessage: string;
   @Input() passwordShowable = false;
 
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  @Output() focus = new EventEmitter<boolean>();
+  @Output() focusIn = new EventEmitter<boolean>();
 
   @ViewChild(MatAutocompleteTrigger) private readonly trigger: MatAutocompleteTrigger;
 

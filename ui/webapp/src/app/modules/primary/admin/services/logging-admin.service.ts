@@ -43,9 +43,9 @@ export class LoggingAdminService {
       );
   }
 
-  public downloadLogFileContent(rd, rde) {
+  public downloadLogFileContent(remoteDirectory: RemoteDirectory, remoteDirectoryEntry: RemoteDirectoryEntry) {
     this.http
-      .post(`${this.apiPath()}/request/${rd.minion}`, rde, {
+      .post(`${this.apiPath()}/request/${remoteDirectory.minion}`, remoteDirectoryEntry, {
         responseType: 'text',
       })
       .subscribe((token) => {
@@ -60,14 +60,12 @@ export class LoggingAdminService {
     limit: number,
     silent: boolean,
   ): Observable<StringEntryChunkDto> {
-    const options = {
-      headers: null,
-      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
-    };
-    if (silent) {
-      options.headers = { ignoreLoadingBar: '' };
-    }
-    return this.http.post<StringEntryChunkDto>(`${this.apiPath()}/content/${rd.minion}`, rde, options);
+    return this.http.post<StringEntryChunkDto>(
+      `${this.apiPath()}/content/${rd.minion}`, rde, {
+        headers: silent ? { ignoreLoadingBar: '' } : null,
+        params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
+      }
+    );
   }
 
   public getLogConfig(): Observable<string> {

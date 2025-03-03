@@ -98,8 +98,13 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);
   protected mappedDelete$ = this.actions.action([Actions.DELETE_PRODUCT], this.deleting$, null, null, this.p$);
   protected loading$ = combineLatest([this.mappedDelete$, this.products.loading$]).pipe(map(([a, b]) => a || b));
+  protected resetWhen$: Observable<boolean>;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+
+  constructor() {
+    this.resetWhen$ = this.singleProduct.product$.pipe(map((productDto) => !!productDto));
+  }
 
   ngOnInit(): void {
     this.singleProductPlugins$ = this.singleProduct.getPlugins();

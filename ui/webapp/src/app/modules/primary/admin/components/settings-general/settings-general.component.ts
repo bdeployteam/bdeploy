@@ -11,7 +11,7 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { MatDivider } from '@angular/material/divider';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
-import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
+import { MatTab, MatTabChangeEvent, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
 import { GeneralTabComponent } from './general-tab/general-tab.component';
 import { MailSendingTabComponent } from './mail-sending-tab/mail-sending-tab.component';
@@ -57,9 +57,9 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
     return this.settings.save();
   }
 
-  protected tabChanged(tab) {
+  protected tabChanged(tab: MatTabChangeEvent) {
     this.router.navigate([], { queryParams: { tabIndex: tab.index } });
-    this.tabIndex = parseInt(tab.index, 10);
+    this.tabIndex = tab.index;
     if (this.areas.panelVisible$.value) {
       setTimeout(() => this.areas.closePanel());
     }

@@ -28,7 +28,7 @@ export class CfgFileNameValidatorDirective implements Validator {
       return null; // "required" must be validated elsewhere.
     }
 
-    const errors = {};
+    const errors:ValidationErrors = {}
     for (const f of this.cfgFiles.files$.value || []) {
       const p = this.cfgFiles.getPath(f);
       if (!!f.persistent && !f.persistent.instanceId) {

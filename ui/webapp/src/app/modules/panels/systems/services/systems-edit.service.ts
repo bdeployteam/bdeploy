@@ -19,7 +19,7 @@ export class SystemsEditService {
   private readonly systems = inject(SystemsService);
 
   public current$ = new BehaviorSubject<SystemConfigurationDto>(null);
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/system`;
 
   constructor() {
     combineLatest([this.systems.systems$, this.nav.panelRoute$]).subscribe(([systems, panelRoute]) => {

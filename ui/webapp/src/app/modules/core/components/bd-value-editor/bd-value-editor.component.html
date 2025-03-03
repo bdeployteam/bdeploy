@@ -128,7 +128,7 @@
         [errorFallback]="getErrorMessage()"
         [statusMessage]="'Preview: ' + preview"
         [warningMessage]="warningMessage"
-        (focus)="onFocus()"
+        (focusIn)="onInputFocused()"
         >
         <div class="local-form-input-actions flex">
           <ng-container *ngTemplateOutlet="actions"></ng-container>

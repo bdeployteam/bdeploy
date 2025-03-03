@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, map, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { cloneDeep } from 'lodash-es';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
@@ -67,8 +67,8 @@ export class MailSendingComponent implements OnInit, DirtyableDialog, OnDestroy 
     });
   }
 
-  protected onPasswordChange(e) {
-    this.settings.settings$.value.mailSenderSettings.password = e || null;
+  protected onPasswordChange(newValue: string) {
+    this.settings.settings$.value.mailSenderSettings.password = newValue || null;
   }
 
   protected clearMessages() {

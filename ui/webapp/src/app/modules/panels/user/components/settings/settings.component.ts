@@ -17,7 +17,9 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 
 interface UserGroupPermission extends ScopedPermission {
-  userGroup: string;
+  // XXX: UserGroupPermission list also contains the default permissions
+  // so the root type has to be convertible to the child type
+  userGroup?: string;
 }
 
 const colUserGroupName: BdDataColumn<UserGroupPermission> = {
@@ -42,7 +44,7 @@ export class SettingsComponent implements OnInit {
   protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
   ];
-  protected readonly userGroupPermColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly userGroupPermColumns: BdDataColumn<UserGroupPermission>[] = [
     colUserGroupName,
     ...this.permissionColumnsService.defaultPermissionColumns,
   ];

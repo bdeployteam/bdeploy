@@ -27,7 +27,7 @@ export class ProductsService {
   private subscription: Subscription;
   private readonly delayLoad$ = new Subject<string>();
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/product`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
 
   constructor() {

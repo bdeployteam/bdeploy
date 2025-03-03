@@ -3,7 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { finalize, first, skipWhile, switchMap, tap } from 'rxjs/operators';
-import { MailReceiverSettingsDto, MailSenderSettingsDto, SettingsConfiguration } from 'src/app/models/gen.dtos';
+import {
+  CustomAttributeDescriptor,
+  LDAPSettingsDto,
+  MailReceiverSettingsDto,
+  MailSenderSettingsDto,
+  SettingsConfiguration
+} from 'src/app/models/gen.dtos';
 import { measure } from '../utils/performance.utils';
 import { ConfigService } from './config.service';
 
@@ -69,33 +75,33 @@ export class SettingsService {
       );
   }
 
-  public addLdapServer(server): Observable<boolean> {
-    this.settings$.value.auth.ldapSettings.push(server);
+  public addLdapServer(server: Partial<LDAPSettingsDto>): Observable<boolean> {
+    this.settings$.value.auth.ldapSettings.push(server as LDAPSettingsDto);
     this.settingsUpdated$.next(true);
     return of(true);
   }
 
-  public editLdapServer(server, initialServer) {
+  public editLdapServer(server: Partial<LDAPSettingsDto>, initialServer: Partial<LDAPSettingsDto>) {
     this.settings$.value.auth.ldapSettings.splice(
-      this.settings$.value.auth.ldapSettings.indexOf(initialServer),
+      this.settings$.value.auth.ldapSettings.indexOf(initialServer as LDAPSettingsDto),
       1,
-      server
+      server as LDAPSettingsDto
     );
     this.settingsUpdated$.next(true);
   }
 
-  public removeLdapServer(server) {
-    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(server), 1);
+  public removeLdapServer(server: Partial<LDAPSettingsDto>) {
+    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(server as LDAPSettingsDto), 1);
     this.settingsUpdated$.next(true);
   }
 
-  public addGlobalAttribute(attribute): Observable<boolean> {
+  public addGlobalAttribute(attribute: CustomAttributeDescriptor): Observable<boolean> {
     this.settings$.value.instanceGroup.attributes.push(attribute);
     this.settingsUpdated$.next(true);
     return of(true);
   }
 
-  public editGlobalAttribute(attribute, initialAttribute) {
+  public editGlobalAttribute(attribute: CustomAttributeDescriptor, initialAttribute: CustomAttributeDescriptor) {
     this.settings$.value.instanceGroup.attributes.splice(
       this.settings$.value.instanceGroup.attributes.indexOf(initialAttribute),
       1,
@@ -104,7 +110,7 @@ export class SettingsService {
     this.settingsUpdated$.next(true);
   }
 
-  public removeAttribute(attribute) {
+  public removeAttribute(attribute: CustomAttributeDescriptor) {
     this.settings$.value.instanceGroup.attributes.splice(
       this.settings$.value.instanceGroup.attributes.indexOf(attribute),
       1

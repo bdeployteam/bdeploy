@@ -39,7 +39,7 @@ export enum BdDialogScrollEvent {
 })
 export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
-  @Input() resetWhen$ = new BehaviorSubject<unknown>(false);
+  @Input() resetWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
   @Input() hideContentWhenLoading = true;
   @Input() restoreScrollAfterLoad = false;
   @Input() padding = true;
@@ -124,8 +124,8 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.messageComp;
   }
 
-  protected onScrollContent(event: any) {
-    const ele = event.target; // the scroll container;
+  protected onScrollContent(event: Event) {
+    const ele = event.target as HTMLElement; // the scroll container;
     const scrollTop = ele.scrollTop; // the offset within the scrollHeight of the currently top-most pixel.
     const contentHeight = ele.scrollHeight; // the height of all the content which can scroll.
     const containerHeight = ele.clientHeight; // the height of the container which displayes the scrolled content.

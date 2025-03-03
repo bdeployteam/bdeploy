@@ -9,9 +9,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 export class ProcessesBulkService {
   private readonly areas = inject(NavAreasService);
 
-  public selection$ = new BehaviorSubject<{
-    [key: string]: ApplicationConfiguration[];
-  }>({});
+  public selection$ = new BehaviorSubject<Record<string, ApplicationConfiguration[]>>({});
 
   constructor() {
     // clear selection when the primary route changes

@@ -2,17 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, ReplaySubject, share } from 'rxjs';
 
-interface ReplayCache {
-  [someUrl: string]: Observable<any>;
-}
-
 @Injectable({
   providedIn: 'root',
 })
 export class HttpReplayService {
   private readonly http = inject(HttpClient);
 
-  private cache: ReplayCache = {};
+  private cache: Record<string, Observable<any>> = {};
 
   public get<T>(url: string, resetTimeMs = 1000): Observable<T> {
     if (!this.cache[url]) {

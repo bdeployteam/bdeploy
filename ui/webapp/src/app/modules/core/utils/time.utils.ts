@@ -4,7 +4,7 @@ export function timeAgo(input: number) {
   }
   const date = new Date(input);
   const formatter = new Intl.RelativeTimeFormat('en');
-  const ranges = {
+  const ranges: Record<string, number> = {
     years: 3600 * 24 * 365,
     months: 3600 * 24 * 30,
     weeks: 3600 * 24 * 7,

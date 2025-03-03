@@ -90,7 +90,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  protected updateName(event: any) {
+  protected updateName(event: string) {
     this.data.name = event;
     this.nodeName$.next(event);
   }
@@ -168,7 +168,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
     return false;
   }
 
-  protected fileAdded(event: any) {
+  protected fileAdded(event: File) {
     this.readFile(event);
   }
 }

@@ -83,7 +83,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   protected readonly columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
 
   protected selectedTemplate: FlattenedApplicationTemplateConfiguration;
-  protected response: { [key: string]: string };
+  protected response: Record<string, string>;
 
   protected clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(null);
   protected clipBoardError$ = new BehaviorSubject<string>(null);
@@ -222,7 +222,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   }
 
   private addProcess(row: AppRow) {
-    let vars: Observable<{ [key: string]: string }> = of({});
+    let vars: Observable<Record<string, string>> = of({});
     if (!!row.template && !!row.template.templateVariables?.length) {
       this.response = {};
       for (const v of row.template.templateVariables) {
@@ -271,7 +271,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   private validateHasAllVariables(
     template: FlattenedApplicationTemplateConfiguration,
-    variables: { [key: string]: string },
+    variables: Record<string, string>,
   ) {
     for (const v of template.templateVariables) {
       if (!variables[v.id]) {

@@ -12,7 +12,7 @@ export class GroupDetailsService {
   private readonly http = inject(HttpClient);
 
   private readonly hiveApiPath = `${this.cfg.config.api}/hive`;
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}`;
 
   public delete(group: InstanceGroupConfiguration): Observable<unknown> {
     return this.http.delete(`${this.apiPath(group.name)}`);

@@ -3,17 +3,22 @@ import { ProductDto } from 'src/app/models/gen.dtos';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
+import { BdDataColumn } from '../../../../../../../models/data';
+import {
+  TableCellDisplay
+} from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-update-action',
     templateUrl: './update-action.component.html',
     imports: [BdButtonComponent]
 })
-export class UpdateActionComponent implements OnInit {
+export class UpdateActionComponent implements OnInit, TableCellDisplay<ProductDto> {
   private readonly products = inject(ProductsService);
   private readonly edit = inject(InstanceEditService);
 
   @Input() record: ProductDto;
+  @Input() column: BdDataColumn<ProductDto>;
 
   private index: number;
   private curIndex: number;

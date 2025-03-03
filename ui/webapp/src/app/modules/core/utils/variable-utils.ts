@@ -6,8 +6,11 @@ export const CUSTOM = 'Custom Variables';
 export interface VariableGroup {
   name: string;
   pairs: VariablePair[];
-
   isCustom: boolean;
+}
+
+export interface CustomVariableGroup extends VariableGroup {
+  isSelectMode: boolean;
 }
 
 export interface VariablePair {
@@ -63,7 +66,7 @@ export function groupVariables(descriptors: VariableDescriptor[], values: Variab
   });
 
   // find custom variables and add them
-  const custom = {
+  const custom: CustomVariableGroup = {
     name: CUSTOM,
     pairs: [],
     isCustom: true,

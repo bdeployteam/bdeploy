@@ -94,8 +94,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
           this.nodesAdmin
             .restartNode(this.nodeName$.value)
             .pipe(finalize(() => this.restarting$.next(false)))
-            .subscribe(() => {
-            });
+            .subscribe();
         }
       });
   }
@@ -112,8 +111,7 @@ export class NodeMaintenanceComponent implements OnInit, OnDestroy {
           this.nodesAdmin
             .shutdownNode(this.nodeName$.value)
             .pipe(finalize(() => this.shuttingDown$.next(false)))
-            .subscribe(() => {
-            });
+            .subscribe();
         }
       });
   }

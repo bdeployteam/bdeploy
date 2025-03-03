@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -7,8 +7,8 @@ import { MetricsService } from '../../services/metrics.service';
 import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
 import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
-import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
-import { LineChartModule, BarChartModule } from '@swimlane/ngx-charts';
+import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
+import { BarChartModule, LineChartModule } from '@swimlane/ngx-charts';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
 import { AsyncPipe } from '@angular/common';
@@ -16,6 +16,19 @@ import { AsyncPipe } from '@angular/common';
 export interface SeriesElement {
   name: any;
   value: number;
+}
+
+export interface Series {
+  name: any;
+  series: SeriesElement[];
+}
+
+export interface HistogramDetails {
+  min: number;
+  max: number;
+  median: number;
+  p75th: number;
+  p99th: number;
 }
 
 @Component({
@@ -32,31 +45,31 @@ export class MetricsOverviewComponent implements OnInit {
   private allMetrics: Map<MetricGroup, MetricBundle>;
 
   protected loading$ = new BehaviorSubject<boolean>(true);
-  protected keys$ = new BehaviorSubject<string[]>(['SERVER']);
+  protected keys$ = new BehaviorSubject<MetricGroup[]|string[]>(['SERVER']);
   protected tabIndex: number;
 
   protected selectedGroup: MetricGroup;
   protected groupCounts: SeriesElement[];
   protected selectedTimer: TimerMetric;
   protected selectedTimerName: string;
-  protected histogramDetails;
+  protected histogramDetails: HistogramDetails;
   protected serverStats: JerseyServerMonitoringDto;
 
   // converted data for serverstats
-  protected vmCpu = [];
-  protected vmCpuRef = [];
-  protected vmMem = [];
-  protected vmMemRef = [];
-  protected req = [];
-  protected reqAbs = [];
-  protected poolSize = [];
-  protected poolSizeRef = [];
-  protected poolTasks = [];
-  protected conBytes = [];
-  protected conBytesAbs = [];
-  protected activeSess = [];
+  protected vmCpu: Series[] = [];
+  protected vmCpuRef: SeriesElement[] = [];
+  protected vmMem: Series[] = [];
+  protected vmMemRef: SeriesElement[] = [];
+  protected req: Series[] = [];
+  protected reqAbs: Series[] = [];
+  protected poolSize: Series[] = [];
+  protected poolSizeRef: SeriesElement[] = [];
+  protected poolTasks: Series[] = [];
+  protected conBytes: Series[] = [];
+  protected conBytesAbs: Series[] = [];
+  protected activeSess: Series[] = [];
 
-  protected timerSeries: { name: string; series: SeriesElement[] }[];
+  protected timerSeries: Series[];
   protected referenceLines: SeriesElement[];
 
   protected countGraphHeight = 100;
@@ -65,15 +78,8 @@ export class MetricsOverviewComponent implements OnInit {
     this.metrics
       .getAllMetrics()
       .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((r) => {
-        // result is an object with a property per MetricGroup
-        this.allMetrics = new Map<MetricGroup, MetricBundle>();
-        for (const prop of Object.keys(r)) {
-          const group = prop as MetricGroup;
-          const item = r[prop] as MetricBundle;
-
-          this.allMetrics.set(group, item);
-        }
+      .subscribe((record: Map<MetricGroup, MetricBundle>) => {
+        this.allMetrics = record;
         this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
         const tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
         this.doSelect(isNaN(tabIndex) ? 0 : tabIndex);
@@ -91,7 +97,11 @@ export class MetricsOverviewComponent implements OnInit {
   protected doSelect(tabIndex: number) {
     this.router.navigate([], { queryParams: { tabIndex } });
     this.tabIndex = tabIndex;
-    this.tabIndex ? this.select(this.keys$.value[this.tabIndex]) : this.selectServer();
+    if(this.tabIndex) {
+      this.select(this.keys$.value[this.tabIndex])
+    } else {
+      this.selectServer()
+    }
   }
 
   private selectServer() {
@@ -325,7 +335,7 @@ export class MetricsOverviewComponent implements OnInit {
     });
   }
 
-  private select(selection) {
+  private select(selectedGroup: MetricGroup | string) {
     this.serverStats = null;
     this.selectedTimer = null;
     this.selectedTimerName = null;
@@ -333,7 +343,7 @@ export class MetricsOverviewComponent implements OnInit {
     this.timerSeries = null;
     this.referenceLines = null;
 
-    this.selectedGroup = MetricGroup[selection];
+    this.selectedGroup = MetricGroup[selectedGroup as keyof typeof MetricGroup];
 
     const x: SeriesElement[] = [];
 

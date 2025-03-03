@@ -47,7 +47,7 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  protected onDragStart($event) {
+  protected onDragStart($event: DragEvent) {
     $event.dataTransfer.effectAllowed = 'link';
     $event.dataTransfer.setData(ATTACH_MIME_TYPE, JSON.stringify(this.payload));
   }
@@ -79,8 +79,8 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
     reader.readAsText(file);
   }
 
-  protected fileAdded(event: any) {
-    this.readFile(event);
+  protected fileAdded(file: File) {
+    this.readFile(file);
   }
 
   private onManualAttach(ident: string) {

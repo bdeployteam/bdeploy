@@ -25,20 +25,20 @@ export class AuthenticationService {
   private readonly areas = inject(NavAreasService);
   private readonly injector = inject(Injector);
 
-  private readonly tokenSubject: BehaviorSubject<string> = new BehaviorSubject(null);
+  private readonly tokenSubject: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
-  private readonly userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject(1);
+  private readonly userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject<UserInfo>(1);
   private currentUserInfo: UserInfo = null; // possibly uninitialized value
   get firstUserInfo$(): Observable<UserInfo> {
     return this.userInfoSubject$.pipe(first());
   }
 
-  public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isCurrentScopeRead$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isCurrentScopeAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isGlobalAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isGlobalExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isCurrentScopeRead$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isCurrentScopeAdmin$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isGlobalAdmin$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isGlobalExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.cfg.initialSession.subscribe((v) => {

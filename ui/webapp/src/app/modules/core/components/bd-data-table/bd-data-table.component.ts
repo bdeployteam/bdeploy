@@ -44,9 +44,6 @@ import { MatIcon } from '@angular/material/icon';
 import { BdDataComponentCellComponent } from '../bd-data-component-cell/bd-data-component-cell.component';
 import { BdButtonComponent } from '../bd-button/bd-button.component';
 
-// member ordering due to default implementation for callbacks.
-// tslint:disable: member-ordering
-
 /** Represents the hirarchical presentation of the records after grouping/sorting/searching is applied. */
 interface Node<T> {
   nodeId: unknown;
@@ -490,7 +487,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       groupOrFirstColumn: this._columns[0].data(i),
       children: [],
       checkForbidden: this.checkChangeForbidden(i)
-    }));
+    } as Node<T>));
   }
 
   protected trackNode(index: number, node: FlatNode<T>) {
@@ -531,22 +528,34 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     } else {
       const isChecked = this.isChecked(node);
 
-      // if ALL are checked, we deselect all, otherwise we "upgrade" to all selected
-      isChecked ? this.checkSelection.deselect(node) : this.checkSelection.select(node);
+      if(isChecked) {
+        // if ALL are checked, we deselect all,
+        this.checkSelection.deselect(node);
+      } else {
+        // otherwise we "upgrade" to all selected
+        this.checkSelection.select(node);
+      }
 
       const children = this.treeControl.getDescendants(node);
-      this.checkSelection.isSelected(node)
-        ? this.checkSelection.select(...children)
-        : this.checkSelection.deselect(...children);
+
+      if(this.checkSelection.isSelected(node)) {
+        this.checkSelection.select(...children);
+      } else {
+        this.checkSelection.deselect(...children);
+      }
       this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
     }
   }
 
   protected toggleCheckAll(cb: MatCheckbox) {
     const isChecked = this.isAnyChecked();
-    isChecked
-      ? this.checkSelection.deselect(...this.treeControl.dataNodes)
-      : this.checkSelection.select(...this.treeControl.dataNodes);
+
+    if(isChecked) {
+      this.checkSelection.deselect(...this.treeControl.dataNodes);
+    } else {
+      this.checkSelection.select(...this.treeControl.dataNodes);
+    }
+
     this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
     cb.checked = !isChecked;
   }

@@ -23,11 +23,9 @@ export class UserAvatarComponent implements OnInit {
   @HostBinding('style.height.px')
   public hostSize = 40;
 
-  @Input()
-  public avatarSize = 26;
+  @Input() public avatarSize = 26;
 
-  @Input()
-  public mail;
+  @Input() public mail: string;
 
   protected hostStyle: StyleDef;
   protected avatarStyle: StyleDef;

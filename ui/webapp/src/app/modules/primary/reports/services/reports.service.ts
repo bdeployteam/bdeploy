@@ -30,7 +30,7 @@ export class ReportsService {
   public generatedReport$ = new BehaviorSubject<ReportResponseDto>(null);
 
   /** Selected row of generated report */
-  public selectedRow$ = new BehaviorSubject<{ [index: string]: string }>(null);
+  public selectedRow$ = new BehaviorSubject<Record<string, string>>(null);
 
   constructor() {
     this.http.get<ReportDescriptor[]>(this.apiPath).subscribe((reports) => this.reports$.next(reports));
@@ -51,7 +51,7 @@ export class ReportsService {
   public getParameterOptions(
     parameterOptionsPath: string,
     dependsOn: string[],
-    requestParams: { [index: string]: string },
+    requestParams: Record<string, string>,
   ): Observable<ReportParameterOptionDto[]> {
     let params = new HttpParams();
     dependsOn

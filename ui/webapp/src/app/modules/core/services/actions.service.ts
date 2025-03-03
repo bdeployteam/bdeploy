@@ -160,7 +160,7 @@ export class ActionsService {
      * If not given, the item field on events is ignored and any value will match.
      */
     item?: Observable<string | string[]>,
-  ) {
+  ): Observable<boolean> {
     // take into account all given observables of the request and provide defaults in case they are not set.
     const groupObs = groups || this.areas.groupContext$;
     const instObs = instance || this.areas.instanceContext$;

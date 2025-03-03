@@ -1,6 +1,42 @@
 import { Injectable } from '@angular/core';
 import { ContentCompletion } from '../components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { getRecursivePrefix } from '../utils/completion.utils';
+import { editor, languages, Uri } from 'monaco-editor';
+import CompletionItem = languages.CompletionItem;
+
+export interface GlobalMonacoModule {
+  __providerRegistered: boolean;
+  editor: typeof editor;
+  languages: typeof languages;
+  Uri: typeof Uri;
+}
+
+export interface WindowWithMonacoLoaded extends Window {
+  monaco?: GlobalMonacoModule;
+}
+
+const kindByIcon = (globalMonaco: GlobalMonacoModule, icon: string) => {
+  // see completion.utils.ts!
+  switch (icon) {
+    case 'data_object': // instance & system variable.
+      return globalMonaco.languages.CompletionItemKind.Variable;
+    case 'build': // process parameters
+      return globalMonaco.languages.CompletionItemKind.Keyword;
+    case 'folder': // deployment folders
+      return globalMonaco.languages.CompletionItemKind.Folder;
+    case 'dns': // host and environment
+      return globalMonaco.languages.CompletionItemKind.User;
+    case 'settings_system_daydream': // instance properties
+      return globalMonaco.languages.CompletionItemKind.Class;
+    case 'folder_special': // manifest reference
+      return globalMonaco.languages.CompletionItemKind.Reference;
+    case 'schedule': // delayed
+      return globalMonaco.languages.CompletionItemKind.Operator;
+    case 'devices_other': // os expansion
+      return globalMonaco.languages.CompletionItemKind.Interface;
+  }
+  return globalMonaco.languages.CompletionItemKind.Constant; // should not happen
+};
 
 @Injectable({
   providedIn: 'root',
@@ -9,8 +45,8 @@ export class MonacoCompletionsService {
   private completions: ContentCompletion[];
   private recursivePrefixes: string[];
 
-  public getCompletions(word: string, range: any): any[] {
-    const result = [];
+  public getCompletions(globalMonaco: GlobalMonacoModule, word: string, range: any): CompletionItem[] {
+    const result: CompletionItem[] = [];
 
     if (!this.completions?.length) {
       return result;
@@ -22,7 +58,8 @@ export class MonacoCompletionsService {
         insertText: c.value,
         detail: c.description,
         range: range,
-      }),
+        kind: kindByIcon(globalMonaco, c.icon),
+      } as CompletionItem),
     );
 
     if (!this.recursivePrefixes?.length) {
@@ -44,7 +81,8 @@ export class MonacoCompletionsService {
           ...range,
           startColumn: range.startColumn + recursivePrefix.length,
         },
-      });
+        kind: kindByIcon(globalMonaco, c.icon),
+      } as CompletionItem);
     });
 
     return result;

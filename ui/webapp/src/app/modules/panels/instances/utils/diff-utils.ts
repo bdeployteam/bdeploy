@@ -49,7 +49,7 @@ export class NodePair {
     const baseMatching = baseIds?.filter((e) => !!compIds.includes(e));
     this.isOrderChanged = !isEqual(compMatching, baseMatching);
 
-    const order = mergeOrdererd(compIds, baseIds, (x) => x);
+    const order = mergeOrdererd(compIds, baseIds, (x: string) => x);
 
     for (const appId of order) {
       const baseApp = baseApps.find((a) => a.id === appId);

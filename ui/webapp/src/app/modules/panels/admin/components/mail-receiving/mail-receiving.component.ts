@@ -66,8 +66,8 @@ export class MailReceivingComponent  implements OnInit, DirtyableDialog, OnDestr
     });
   }
 
-  protected onPasswordChange(e) {
-    this.settings.settings$.value.mailReceiverSettings.password = e || null;
+  protected onPasswordChange(newValue: string) {
+    this.settings.settings$.value.mailReceiverSettings.password = newValue || null;
   }
 
   protected clearMessages() {

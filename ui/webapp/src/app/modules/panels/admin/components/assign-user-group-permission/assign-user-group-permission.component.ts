@@ -32,7 +32,7 @@ export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
   protected assignScope: string = null;
   protected assignPerm: Permission;
   protected loading$ = new BehaviorSubject<boolean>(true);
-  protected allPerms: Permission[] = Object.keys(Permission).map((k) => Permission[k]);
+  protected allPerms: Permission[] = Object.values(Permission);
 
   private subscription: Subscription;
 

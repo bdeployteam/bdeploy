@@ -25,7 +25,7 @@ export class SystemsService {
   public systems$ = new BehaviorSubject<SystemConfigurationDto[]>([]);
   public loading$ = new BehaviorSubject<boolean>(true);
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/system`;
   private subscription: Subscription;
 
   constructor() {

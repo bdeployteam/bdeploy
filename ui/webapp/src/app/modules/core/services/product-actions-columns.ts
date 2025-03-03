@@ -6,6 +6,7 @@ import {
   PluginInfoDto,
   ProductDto,
 } from 'src/app/models/gen.dtos';
+import { SwRepositoryEntry } from '../../primary/repositories/services/repository.service';
 
 export interface LabelRecord {
   key: string;
@@ -95,14 +96,14 @@ export class ProductActionsColumnsService {
   public readonly defaultApplicationTemplatesColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = //
     [this.appTemplateNameColumn];
 
-  public readonly defaultInstanceTemplatesColumns: BdDataColumn<InstTemplateData>[] = //
+  public readonly defaultInstanceTemplatesColumns: BdDataColumn<InstTemplateColumnData>[] = //
     [this.instTemplateNameColumn, this.instTemplateResponseFileDownloadColumn];
 
   public readonly defaultPluginsColumns: BdDataColumn<PluginInfoDto>[] = //
     [this.pluginNameColumn, this.pluginVersionColumn, this.pluginOIDColumn];
 
   public mapToAppTemplateColumnData(
-    product: ProductDto,
+    product: ProductDto | SwRepositoryEntry,
     downloadHook: (data: InstTemplateData) => void,
   ): InstTemplateColumnData[] {
     return product.instanceTemplates.map((config) => ({

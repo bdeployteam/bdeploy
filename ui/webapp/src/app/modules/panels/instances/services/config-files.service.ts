@@ -26,12 +26,12 @@ export class ConfigFilesService {
   private readonly editSvc = inject(InstanceEditService);
 
   private readonly persistent$ = new BehaviorSubject<ConfigFileDto[]>(null);
-  private binCache: { [key: string]: boolean } = {};
-  private moveCache: { [key: string]: boolean } = {};
+  private binCache: Record<string, boolean> = {};
+  private moveCache: Record<string, boolean> = {};
 
   public files$ = new BehaviorSubject<ConfigFile[]>(null);
 
-  private readonly apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}/cfgFiles`;
+  private readonly apiPath = (g: string, i: string) => `${this.cfg.config.api}/group/${g}/instance/${i}/cfgFiles`;
 
   constructor() {
     combineLatest([this.persistent$, this.editSvc.state$]).subscribe(([pers, state]) => {

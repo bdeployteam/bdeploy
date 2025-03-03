@@ -31,7 +31,7 @@ import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { AsyncPipe } from '@angular/common';
 
-const GROUP_TEMPLATE = {
+const GROUP_TEMPLATE: ProcessControlGroupConfiguration = {
   name: '',
   processOrder: [],
   startType: ProcessControlGroupHandlingType.PARALLEL,

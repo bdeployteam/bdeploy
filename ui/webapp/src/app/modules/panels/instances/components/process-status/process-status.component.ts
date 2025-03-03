@@ -426,7 +426,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     ]);
   }
 
-  private doCalculateUptimeString(detail) {
+  private doCalculateUptimeString(detail: ProcessDetailDto) {
     this.uptimeCalculateHandle = null;
     if (this.isRunning) {
       const now = this.cfg.getCorrectedNow(); // server's 'now'

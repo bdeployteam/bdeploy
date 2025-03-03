@@ -6,7 +6,7 @@ export const NO_UNAUTH_DELAY_HDR = 'X-No-Unauth-Delay';
 export const CLIENT_NODE_NAME = '__ClientApplications';
 
 /** Sort callback for node names, putting 'master' in the first place */
-export const sortNodesMasterFirst = (a, b) => {
+export const sortNodesMasterFirst = (a: string, b: string): number => {
   if (a === 'master') {
     return -1;
   } else if (b === 'master') {
@@ -21,10 +21,10 @@ export const sortNodesMasterFirst = (a, b) => {
  *
  * See https://stackoverflow.com/questions/53720910/merge-arrays-and-keep-ordering
  */
-export function mergeOrdererd<T>(a: T[], b: T[], key: (ele) => unknown): T[] {
-  const result = [];
+export function mergeOrdererd<T>(a: T[], b: T[], key: (ele: T) => T): T[] {
+  const result:T[] = [];
   [a, b].forEach((array) => {
-    array.forEach((item, idx) => {
+    array.forEach((item: T, idx: number) => {
       // check if the item has already been added, if not, try to add
       if (!result.find((x) => key(x) === key(item))) {
         // if item is not first item, find position of its left sibling in result array

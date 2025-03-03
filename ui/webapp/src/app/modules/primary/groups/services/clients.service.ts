@@ -4,11 +4,11 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { debounceTime, finalize, skipWhile, take } from 'rxjs/operators';
 import {
   ClientApplicationDto,
-  InstanceAllClientsDto,
+  InstanceAllClientsDto, InstanceDto,
   LauncherDto,
   ObjectChangeType,
   OperatingSystem,
-  UiEndpointDto,
+  UiEndpointDto
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
@@ -21,8 +21,8 @@ import { GroupsService } from './groups.service';
 export interface ClientApp {
   instanceId: string;
   instanceName: string;
-  client: ClientApplicationDto;
-  endpoint: UiEndpointDto;
+  client?: ClientApplicationDto;
+  endpoint?: UiEndpointDto;
 }
 
 @Injectable({
@@ -45,8 +45,8 @@ export class ClientsService {
 
   private subscription: Subscription;
   private readonly apiSwupPath = `${this.cfg.config.api}/swup`;
-  private readonly apiGroupPath = (g) => `${this.cfg.config.api}/group/${g}`;
-  private readonly apiInstancePath = (g) => `${this.apiGroupPath(g)}/instance`;
+  private readonly apiGroupPath = (g: string) => `${this.cfg.config.api}/group/${g}`;
+  private readonly apiInstancePath = (g: string) => `${this.apiGroupPath(g)}/instance`;
 
   constructor() {
     this.groups.current$.subscribe((g) => this.updateChangeSubscription(g?.name));
@@ -71,42 +71,41 @@ export class ClientsService {
         finalize(() => this.loading$.next(false)),
         measure('Load all client apps and endpoints'),
       )
-      .subscribe((result) => {
+      .subscribe((result: InstanceAllClientsDto) => {
         this.launcher$.next(result.launchers);
 
         // immediate in most cases, but waits for initial load.
         this.instances.instances$
           .pipe(
-            skipWhile((i) => !i?.length),
+            skipWhile((instances: InstanceDto[]) => !instances?.length),
             take(1),
           )
-          .subscribe((insts) => {
-            const r: ClientApp[] = [];
-            for (const inst of result.clients) {
-              const iname = insts.find((i) => i.instanceConfiguration?.id === inst.instanceId)?.instanceConfiguration
-                ?.name;
-              r.push(
-                ...inst.applications.map((a) => ({
-                  instanceId: inst.instanceId,
-                  instanceName: iname,
-                  client: a,
+          .subscribe((instances: InstanceDto[]) => {
+            const clientApps: ClientApp[] = [];
+            for (const clientApp of result.clients) {
+              const matchingInstance = instances.find((i) =>
+                i.instanceConfiguration?.id === clientApp.instanceId);
+              clientApps.push(
+                ...clientApp.applications.map((clientApplication: ClientApplicationDto): ClientApp => ({
+                  instanceId: clientApp.instanceId,
+                  instanceName: matchingInstance?.instanceConfiguration?.name,
+                  client: clientApplication,
                   endpoint: null,
                 })),
               );
             }
-            for (const eps of result.endpoints) {
-              const iname = insts.find((i) => i.instanceConfiguration?.id === eps.instanceId)?.instanceConfiguration
-                ?.name;
-              r.push(
-                ...eps.endpoints.map((e) => ({
-                  instanceId: eps.instanceId,
-                  instanceName: iname,
+            for (const instanceEndpoint of result.endpoints) {
+              const matchingInstance = instances.find((i) => i.instanceConfiguration?.id === instanceEndpoint.instanceId);
+              clientApps.push(
+                ...instanceEndpoint.endpoints.map((uiEndpoint: UiEndpointDto): ClientApp => ({
+                  instanceId: instanceEndpoint.instanceId,
+                  instanceName: matchingInstance?.instanceConfiguration?.name,
                   client: null,
-                  endpoint: e,
+                  endpoint: uiEndpoint,
                 })),
               );
             }
-            this.apps$.next(r);
+            this.apps$.next(clientApps);
           });
       });
   }

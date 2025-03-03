@@ -1,4 +1,4 @@
-<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="detailsService.softwarePackage$">
+<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="resetWhen$">
   <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
@@ -9,17 +9,17 @@
             <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
             <div class="bd-secondary-text">ID:</div>
             <div class="bd-secondary-text">
-              <app-bd-identifier [showCopyButton]="true" [id]="asProduct(software).product"></app-bd-identifier>
+              <app-bd-identifier [showCopyButton]="true" [id]="software.product"></app-bd-identifier>
             </div>
             <mat-icon>badge</mat-icon>
             <div>Name:</div>
-            <div>{{ asProduct(software).name }}</div>
+            <div>{{ software.name }}</div>
             <mat-icon>apps</mat-icon>
             <div>Version:</div>
-            <div>{{ asProduct(software).key.tag }}</div>
+            <div>{{ software.key.tag }}</div>
             <mat-icon>factory</mat-icon>
             <div>Vendor:</div>
-            <div>{{ asProduct(software).vendor }}</div>
+            <div>{{ software.vendor }}</div>
           </div>
           <app-bd-expand-button [text]="'Labels'" icon="label">
             <app-bd-data-display
@@ -33,7 +33,7 @@
           </app-bd-expand-button>
           <app-bd-expand-button text="Application Templates" icon="bookmark_border">
             <app-bd-data-display
-              [records]="asProduct(software).applicationTemplates"
+              [records]="software.applicationTemplates"
               [columns]="productActionColumns.defaultApplicationTemplatesColumns"
               >
               <app-bd-no-data>
@@ -43,7 +43,7 @@
           </app-bd-expand-button>
           <app-bd-expand-button text="Instance Templates" icon="bookmarks">
             <app-bd-data-display
-              [records]="productActionColumns.mapToAppTemplateColumnData(asProduct(software), doDownloadResponseFile)"
+              [records]="productActionColumns.mapToAppTemplateColumnData(software, doDownloadResponseFile)"
               [columns]="productActionColumns.defaultInstanceTemplatesColumns"
               >
               <app-bd-no-data>

@@ -130,7 +130,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   protected records$ = new BehaviorSubject<FilePath[]>(null);
   protected noactive$ = new BehaviorSubject<boolean>(true);
   protected remoteDirs$ = new BehaviorSubject<FilePath[]>(null);
-  protected tabIndex: number = -1;
+  protected tabIndex = -1;
   protected selectedPath: FilePath;
   protected instance: InstanceDto;
   protected columns: BdDataColumn<FilePath>[];
@@ -169,7 +169,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
           }
 
           const remoteDirEntries: FileListEntry[] = remoteDirectory.entries.map(
-            (entry) => <FileListEntry>{ directory: remoteDirectory, entry },
+            (entry) => ({ directory: remoteDirectory, entry } as FileListEntry),
           );
           remoteDirs.push(constructFilePath(remoteDirectory.minion, remoteDirEntries, (p) => this.selectPath(p)));
         }

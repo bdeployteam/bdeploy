@@ -19,7 +19,7 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { groupVariables, VariableGroup, VariablePair } from 'src/app/modules/core/utils/variable-utils';
+import { groupVariables, VariableGroup } from 'src/app/modules/core/utils/variable-utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';

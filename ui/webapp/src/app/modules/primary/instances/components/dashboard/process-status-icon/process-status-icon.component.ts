@@ -7,6 +7,10 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe, NgClass } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import {
+  TableCellDisplay
+} from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { BdDataColumn } from '../../../../../../models/data';
 
 @Component({
     selector: 'app-process-status-icon',
@@ -20,11 +24,12 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
         AsyncPipe,
     ],
 })
-export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
+export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy, TableCellDisplay<ApplicationConfiguration> {
   private readonly processes = inject(ProcessesService);
   private readonly actions = inject(ActionsService);
 
   @Input() record: ApplicationConfiguration;
+  @Input() column: BdDataColumn<ApplicationConfiguration>;
   @HostBinding('attr.data-testid') dataCy: string;
 
   protected icon$ = new BehaviorSubject<string>('help');
@@ -48,7 +53,6 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
     this.subscription = combineLatest([
       this.processes.processStates$,
       this.change$,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ]).subscribe(([ps, _]) => {
       if (this.record) {
         this.id$.next(this.record.id);
@@ -67,7 +71,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
     this.subscription?.unsubscribe();
   }
 
-  private update(ps: { [key: string]: ProcessStatusDto }) {
+  private update(ps: Record<string, ProcessStatusDto>) {
     const state = ProcessesService.get(ps, this.record.id);
     if (!state) {
       this.next('help', null, 'Unknown', 'local-unknown');

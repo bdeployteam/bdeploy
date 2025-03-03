@@ -21,7 +21,7 @@ export class EditUniqueValueValidatorDirective implements Validator {
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
-    const errors = {};
+    const errors:ValidationErrors = {}
     const ok = !this.disallowedValues.includes(value);
 
     if (!ok) {

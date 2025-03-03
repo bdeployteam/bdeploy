@@ -30,7 +30,7 @@ export class BdMicroIconButtonComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     fromEvent<MouseEvent>(this._elementRef.nativeElement, 'click', {
       capture: true,
-    }).subscribe((event) => {
+    }).subscribe((event: MouseEvent) => {
       if (this.disabled) {
         event.stopPropagation();
       }

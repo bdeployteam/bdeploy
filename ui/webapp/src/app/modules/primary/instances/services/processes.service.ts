@@ -30,19 +30,19 @@ export class ProcessesService {
   private readonly zone = inject(NgZone);
 
   public loading$ = new BehaviorSubject<boolean>(true);
-  public processStates$ = new BehaviorSubject<{ [key: string]: ProcessStatusDto }>(null);
-  public processToNode$ = new BehaviorSubject<{ [key: string]: string }>({});
+  public processStates$ = new BehaviorSubject<Record<string, ProcessStatusDto>>(null);
+  public processToNode$ = new BehaviorSubject<Record<string, string>>({} as Record<string, string>);
   public processStatesLoadTime$ = new BehaviorSubject<number>(null);
 
   private instance: InstanceDto;
-  private loadInterval;
-  private checkInterval;
+  private loadInterval: ReturnType<typeof setInterval>;
+  private checkInterval: ReturnType<typeof setInterval>;
 
   private loadCall: Subscription;
   private loadCancelCount = 0;
   private loadWarnIssued = false;
 
-  public static get(states: { [key: string]: ProcessStatusDto }, processId: string): ProcessStatusDto {
+  public static get(states: Record<string, ProcessStatusDto>, processId: string): ProcessStatusDto {
     if (!states) {
       return null;
     }
@@ -60,14 +60,14 @@ export class ProcessesService {
     );
   }
 
-  public static getPort(states: { [key: number]: boolean }, port: number): boolean {
+  public static getPort(states: Record<number, boolean>, port: number): boolean {
     if (!states) {
       return false;
     }
     return states[port];
   }
 
-  private readonly apiPath = (group, instance) =>
+  private readonly apiPath = (group: string, instance: string) =>
     `${this.cfg.config.api}/group/${group}/instance/${instance}/processes`;
   private isCentral = false;
 
@@ -79,7 +79,6 @@ export class ProcessesService {
     combineLatest([this.servers.servers$, this.instances.active$])
       .pipe(debounceTime(100))
       .subscribe(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ([_, instance]) => {
           clearInterval(this.loadInterval);
           clearInterval(this.checkInterval);

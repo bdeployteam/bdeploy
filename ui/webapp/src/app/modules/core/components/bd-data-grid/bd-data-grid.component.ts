@@ -11,7 +11,7 @@ import {
   SimpleChanges,
   TemplateRef
 } from '@angular/core';
-import { SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import {
   BdDataColumn,
@@ -24,7 +24,7 @@ import {
 } from 'src/app/models/data';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatTabGroup, MatTab, MatTabChangeEvent } from '@angular/material/tabs';
 import { BdDataCardComponent } from '../bd-data-card/bd-data-card.component';
 import { NgClass, NgTemplateOutlet, AsyncPipe } from '@angular/common';
 
@@ -77,7 +77,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   /**
    * Which column to sort cards by
    */
-  @Input() sort;
+  @Input() sort: Sort;
 
   /**
    * A single grouping definition. The data will be grouped according to this definition.
@@ -157,7 +157,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
     }
   }
 
-  protected onTabChange(event) {
+  protected onTabChange(event: MatTabChangeEvent) {
     this.activeGroup = event.tab?.textLabel;
     this.calculateRecordsToDisplay();
   }

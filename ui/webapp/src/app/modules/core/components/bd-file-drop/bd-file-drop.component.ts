@@ -42,8 +42,7 @@ export class BdFileDropComponent {
     if (this.disabled) {
       return;
     }
-    for (let i = 0; i < files.length; i++) {
-      const file: File = files[i];
+    for (const file of files) {
       if (this.nameVerifier(file.name)) {
         this.fileAdded.emit(file);
       } else {

@@ -31,7 +31,7 @@ export class EditProcessNameValidatorDirective implements Validator {
       return null; // "required" must be validated elsewhere.
     }
 
-    const errors = {};
+    const errors: ValidationErrors = {};
     for (const n of this.edit.state$.value.config.nodeDtos) {
       if (n.nodeName === CLIENT_NODE_NAME) {
         // it is OK for client applications!

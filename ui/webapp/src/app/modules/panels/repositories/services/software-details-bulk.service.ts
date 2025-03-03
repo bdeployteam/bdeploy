@@ -6,9 +6,8 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import {
-  RepositoryService,
-  SwPkgCompound,
-  SwPkgType,
+  RepositoryService, SwPkgType,
+  SwRepositoryEntry
 } from 'src/app/modules/primary/repositories/services/repository.service';
 
 @Injectable({
@@ -21,10 +20,10 @@ export class SoftwareDetailsBulkService {
   private readonly repositories = inject(RepositoriesService);
   private readonly repository = inject(RepositoryService);
 
-  private readonly productApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/product/bulk`;
-  private readonly softwareApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/content/bulk`;
+  private readonly productApiPath = (r: string) => `${this.cfg.config.api}/softwarerepository/${r}/product/bulk`;
+  private readonly softwareApiPath = (r: string) => `${this.cfg.config.api}/softwarerepository/${r}/content/bulk`;
 
-  public selection$ = new BehaviorSubject<SwPkgCompound[]>([]);
+  public selection$ = new BehaviorSubject<SwRepositoryEntry[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
@@ -33,7 +32,7 @@ export class SoftwareDetailsBulkService {
 
     // find matching selected items if possible once repository data changes.
     this.repository.data$.subscribe((pkgs) => {
-      const newSelection: SwPkgCompound[] = [];
+      const newSelection: SwRepositoryEntry[] = [];
       this.selection$.value.forEach((s) => {
         const found = pkgs.find(
           (pkg) => pkg.key.name === s.key.name && pkg.key.tag === s.key.tag && pkg.type === s.type,

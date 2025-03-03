@@ -99,8 +99,8 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
   protected passwordLock = true;
   protected linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
-  protected booleanValue;
-  protected preview;
+  protected booleanValue: boolean;
+  protected preview: string;
 
   protected get value(): LinkedValueConfiguration {
     return this.internalValue;
@@ -168,7 +168,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     this.onTouchedCb = fn;
   }
 
-  onFocus() {
+  onInputFocused() {
     this.updatePreview(this.internalValue);
   }
 

@@ -8,11 +8,8 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstTemplateData, ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
 import {
-  ProdDtoWithType,
-  RepositoryService,
-  SwDtoWithType,
-  SwPkgCompound,
-  SwPkgType
+  SwPkgType,
+  RepositoryService
 } from 'src/app/modules/primary/repositories/services/repository.service';
 import { SoftwareDetailsService } from '../../services/software-details.service';
 
@@ -66,20 +63,18 @@ export class SoftwareDetailsComponent implements OnInit {
   protected loading$ = combineLatest([this.mappedDelete$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
 
   protected isRequiredByProduct$ = this.detailsService.softwarePackage$.pipe(
-    map((software) => software.type === SwPkgType.EXTERNAL_SOFTWARE && (software as SwDtoWithType).requiredByProduct),
+    map((software) => software.requiredByProduct),
   );
+  protected resetWhen$: Observable<boolean>;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  ngOnInit(): void {
-    this.softwareDetailsPlugins$ = this.detailsService.getPlugins();
+  constructor() {
+    this.resetWhen$ = this.detailsService.softwarePackage$.pipe(map((swPkgCompound) => !!swPkgCompound));
   }
 
-  protected asProduct(sw: SwPkgCompound): ProdDtoWithType {
-    if (sw.type === SwPkgType.PRODUCT) {
-      return sw as ProdDtoWithType;
-    }
-    throw new Error('Ooops');
+  ngOnInit(): void {
+    this.softwareDetailsPlugins$ = this.detailsService.getPlugins();
   }
 
   protected doDelete(software: any) {
@@ -112,7 +107,7 @@ export class SoftwareDetailsComponent implements OnInit {
       .subscribe((result) =>
         this.detailsService.downloadResponseFile(
           data,
-          this.asProduct(this.detailsService.softwarePackage$.value).key.tag,
+          this.detailsService.softwarePackage$.value.key.tag,
           result,
         ),
       );

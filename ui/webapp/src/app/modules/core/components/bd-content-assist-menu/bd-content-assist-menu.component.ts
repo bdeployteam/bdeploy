@@ -5,7 +5,7 @@ import { getRecursivePrefix } from '../../utils/completion.utils';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 
-export class ContentCompletion {
+export interface ContentCompletion {
   value: string;
   icon: string;
   description: string;
@@ -25,7 +25,7 @@ export class BdContentAssistMenuComponent {
   @Input() values: ContentCompletion[];
   @Input() prefixes: ContentCompletion[];
 
-  public onClickSelect: (s) => void;
+  public onClickSelect: (s: string) => void;
 
   protected matches: ContentCompletion[];
   protected selected: number;

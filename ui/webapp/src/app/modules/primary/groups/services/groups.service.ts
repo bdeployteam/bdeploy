@@ -25,7 +25,7 @@ import { ConfigService } from '../../../core/services/config.service';
 import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
-const INIT_GROUPS = [];
+const INIT_GROUPS: InstanceGroupConfigurationDto[] = [];
 
 @Injectable({
   providedIn: 'root',
@@ -58,9 +58,7 @@ export class GroupsService {
   public attributeDefinitions$ = new BehaviorSubject<CustomAttributeDescriptor[]>([]);
 
   /** All attribute values for all groups */
-  public attributeValues$ = new BehaviorSubject<{
-    [index: string]: CustomAttributesRecord;
-  }>({});
+  public attributeValues$ = new BehaviorSubject<Record<string, CustomAttributesRecord>>({});
 
   constructor() {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
@@ -184,7 +182,7 @@ export class GroupsService {
     this.loading$.next(true);
     forkJoin({
       groups: this.http.get<InstanceGroupConfigurationDto[]>(this.apiPath),
-      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(`${this.apiPath}/list-attributes`),
+      attributes: this.http.get<Record<string, CustomAttributesRecord>>(`${this.apiPath}/list-attributes`),
     })
       .pipe(
         finalize(() => this.loading$.next(false)),

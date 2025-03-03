@@ -33,7 +33,7 @@ export class ObjectChangesService {
   private readonly _change$ = new Subject<ObjectChangeDto>();
   private readonly _error$ = new Subject<ErrorEvent>();
   private readonly _open$ = new BehaviorSubject<boolean>(false);
-  private _refs: { [index: string]: RemoteRegistration } = {};
+  private _refs: Record<string, RemoteRegistration> = {};
   private _lastError = 0;
   private readonly ws = this.createWebSocket();
 

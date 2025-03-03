@@ -189,7 +189,7 @@ export class ProcessEditService {
     node: InstanceNodeConfigurationDto,
     application: ApplicationDto,
     template: FlattenedApplicationTemplateConfiguration,
-    variableValues: { [key: string]: string },
+    variableValues: Record<string, string>,
     status: StatusMessage[]
   ): Observable<string> {
     const start: CommandConfiguration = this.calculateInitialCommand(
@@ -311,7 +311,7 @@ export class ProcessEditService {
       return;
     }
 
-    const values: { [key: string]: LinkedValueConfiguration } = {};
+    const values: Record<string, LinkedValueConfiguration> = {};
     for (const g of globals) {
       const v = process.start.parameters.find((p) => p.id === g.id);
       if (v) {
@@ -352,7 +352,7 @@ export class ProcessEditService {
   private calculateInitialCommand(
     descriptor: ExecutableDescriptor,
     templates: TemplateParameter[],
-    values: { [key: string]: string },
+    values: Record<string, string>,
     status: StatusMessage[]
   ): CommandConfiguration {
     if (!descriptor) {

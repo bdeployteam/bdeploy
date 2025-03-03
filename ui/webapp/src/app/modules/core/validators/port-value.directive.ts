@@ -22,7 +22,7 @@ export class PortValueValidatorDirective implements Validator {
     }
 
     const value = control.value as number;
-    const errors = {};
+    const errors:ValidationErrors = {}
     const ok = !(value < 0 || value > 64535);
 
     if (!ok) {

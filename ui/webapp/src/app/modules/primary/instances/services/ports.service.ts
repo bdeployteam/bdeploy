@@ -40,7 +40,7 @@ export class PortsService {
   private readonly processes = inject(ProcessesService);
   private readonly systems = inject(SystemsService);
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/instance`;
 
   public activePortStates$ = new BehaviorSubject<NodeApplicationPort[]>(null);
 
@@ -75,7 +75,7 @@ export class PortsService {
   private loadActivePorts(
     instance: InstanceDto,
     cfgs: InstanceNodeConfigurationListDto,
-    nodeStates: { [key: string]: MinionStatusDto },
+    nodeStates: Record<string, MinionStatusDto>,
     system: SystemConfigurationDto,
   ) {
     if (!instance || !cfgs) {
@@ -135,7 +135,7 @@ export class PortsService {
         allQueries.push(
           new Observable((s) => {
             this.http
-              .post<{ [key: number]: boolean }>(
+              .post<Record<number, boolean>>(
                 `${this.apiPath(this.groups.current$.value.name)}/${instance.instanceConfiguration.id}/check-ports/${
                   node.nodeName
                 }`,

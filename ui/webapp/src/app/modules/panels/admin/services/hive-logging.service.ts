@@ -58,7 +58,7 @@ export class HiveLoggingService {
       });
   }
 
-  public downloadLogFileContent(rd, rde) {
+  public downloadLogFileContent(rd: RemoteDirectory, rde: RemoteDirectoryEntry) {
     this.http
       .post(`${this.apiPath(this.bhive$.value)}/request/${rd.minion}`, rde, {
         responseType: 'text',
@@ -75,13 +75,11 @@ export class HiveLoggingService {
     limit: number,
     silent: boolean,
   ): Observable<StringEntryChunkDto> {
-    const options = {
-      headers: null,
-      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
-    };
-    if (silent) {
-      options.headers = { ignoreLoadingBar: '' };
-    }
-    return this.http.post<StringEntryChunkDto>(`${this.apiPath(this.bhive$.value)}/content/${rd.minion}`, rde, options);
+    return this.http.post<StringEntryChunkDto>(`${this.apiPath(this.bhive$.value)}/content/${rd.minion}`, rde,
+      {
+        headers: silent ? { ignoreLoadingBar: '' } : null,
+        params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
+      }
+    );
   }
 }

@@ -29,10 +29,11 @@ export class BdImageUploadComponent implements OnInit {
     this.imageSelected.emit(null);
   }
 
-  protected onImageChange(event) {
+  protected onImageChange(event: Event) {
     const reader = new FileReader();
-    if (event.target.files && event.target.files.length > 0) {
-      const selLogoFile: File = event.target.files[0];
+    const target = (event.target as HTMLInputElement);
+    if (target.files && target.files.length > 0) {
+      const selLogoFile: File = target.files[0];
       reader.onload = () => {
         const selLogoUrl: string = reader.result.toString();
         if (

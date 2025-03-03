@@ -9,7 +9,7 @@ import { DownloadService } from 'src/app/modules/core/services/download.service'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import {
   RepositoryService,
-  SwPkgCompound,
+  SwRepositoryEntry,
   SwPkgType
 } from 'src/app/modules/primary/repositories/services/repository.service';
 import { InstTemplateData, LabelRecord } from '../../../core/services/product-actions-columns';
@@ -32,7 +32,7 @@ export class SoftwareDetailsService implements OnDestroy {
 
   public manifestKey$ = new BehaviorSubject<string>(null);
   public manifestTag$ = new BehaviorSubject<string>(null);
-  public softwarePackage$ = new BehaviorSubject<SwPkgCompound>(null);
+  public softwarePackage$ = new BehaviorSubject<SwRepositoryEntry>(null);
   public labels$ = new BehaviorSubject<LabelRecord[]>(null);
 
   private readonly plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);

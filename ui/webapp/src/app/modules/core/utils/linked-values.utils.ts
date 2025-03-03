@@ -13,8 +13,6 @@ import {
 import { escapeSpecialCharacters, SpecialCharacterType } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
 
-const ARITH_EXPR = `(\\+|-|)?[0-9]+`;
-
 export function createLinkedValue(val: string): LinkedValueConfiguration {
   return !!val && val.indexOf('{{') !== -1
     ? { linkExpression: val, value: null }
@@ -117,7 +115,7 @@ export function gatherVariableExpansions(
           group: null,
           matches: (s: string) => doMatchVariable(s, v),
           expand: (s: string) => doExpand(s, v.value, v.type)
-        };
+        } as LinkVariable;
       })
       .forEach((v) => {
         result.push(v);
@@ -135,7 +133,7 @@ export function gatherVariableExpansions(
           group: null,
           matches: (s: string) => doMatchVariable(s, v),
           expand: (s: string) => doExpand(s, v.value, v.type)
-        };
+        } as LinkVariable;
       })
       .forEach((v) => {
         if (result.findIndex((x) => x.name === v.name) < 0) {

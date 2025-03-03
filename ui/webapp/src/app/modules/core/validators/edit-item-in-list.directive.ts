@@ -26,8 +26,8 @@ export class EditItemInListValidatorDirective implements Validator {
       return {};
     }
 
-    const value = control.value.split(',').map((v) => v.trim());
-    const errors = {};
+    const value = control.value.split(',').map((v: string) => v.trim());
+    const errors:ValidationErrors = {}
 
     for (const v of value) {
       const ok = this.allowedValues.includes(v);

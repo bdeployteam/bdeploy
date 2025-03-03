@@ -26,13 +26,11 @@ import { BdBreadcrumbsComponent } from '../bd-breadcrumbs/bd-breadcrumbs.compone
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
-interface PathIdName {
+interface BHivePathSegment {
   name: string;
   tag?: string;
   id?: string;
 }
-
-type BHivePathSegment = PathIdName;
 
 @Component({
     selector: 'app-bd-bhive-browser',
@@ -144,7 +142,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  private getRootPath(panelRoute: ActivatedRouteSnapshot): PathIdName[] {
+  private getRootPath(panelRoute: ActivatedRouteSnapshot): BHivePathSegment[] {
     if (this.type === 'bhive') {
       return null;
     } else if (this.type === 'repo' || this.type === 'product') {
@@ -198,27 +196,27 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     }
   }
 
-  private encodePathForUrl(path: BHivePathSegment[]): string {
-    if (!path?.length) {
+  private encodePathForUrl(pathSegments: BHivePathSegment[]): string {
+    if (!pathSegments?.length) {
       return null;
     }
-    const allStrings = path.map((s) => `|[${s.name}|${s.tag ? s.tag : ''}|${s.id ? s.id : ''}]|`);
+    const allStrings: string[] = pathSegments
+      .map((s) => `|[${s.name}|${s.tag ? s.tag : ''}|${s.id ? s.id : ''}]|`);
     return Base64.encode(JSON.stringify(allStrings), true);
   }
 
   private decodePathForUrl(encodedPath: string): BHivePathSegment[] {
     const decoded = Base64.decode(encodedPath);
-    const allStrings = JSON.parse(decoded);
-    return allStrings.map((s) => {
-      if (s.startsWith('|[') && s.endsWith(']|')) {
-        const parts = s.substring(2, s.length - 2).split('|');
+    const allStrings: string[] = JSON.parse(decoded);
+    return allStrings
+      .filter((segmentAsString) =>(segmentAsString.startsWith('|[') && segmentAsString.endsWith(']|')))
+      .map((segmentAsString) => {
+        const parts = segmentAsString.substring(2, segmentAsString.length - 2).split('|');
         return {
           name: parts[0],
           tag: parts[1]?.length ? parts[1] : undefined,
           id: parts[2]?.length ? parts[2] : undefined
         };
-      }
-      return s;
     });
   }
 
@@ -289,9 +287,9 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
 
   protected get crumbs$(): Observable<CrumbInfo[]> {
     return this.path$.pipe(
-      map((segments) => {
-        const acc = [];
-        const crumbs = (segments || []).map((s) => {
+      map((segments: BHivePathSegment[]) => {
+        const acc: BHivePathSegment[] = [];
+        const crumbs = (segments || []).map((s: BHivePathSegment) => {
           acc.push(s);
           const path = [...acc];
           const label = `${s.name}${s.tag ? ':' + s.tag : ''}`;

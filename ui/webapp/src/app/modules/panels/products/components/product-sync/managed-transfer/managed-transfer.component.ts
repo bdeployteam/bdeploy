@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, finalize, map, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, map, Observable, of, Subscription } from 'rxjs';
 import { Actions, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import {
   BdDialogToolbarComponent
@@ -34,7 +34,7 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
   protected typeText$ = new BehaviorSubject<string>(null);
   protected selected$ = new BehaviorSubject<ProductDto[]>([]);
 
-  protected mappedTransfer$;
+  protected mappedTransfer$: Observable<boolean>;
 
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
 

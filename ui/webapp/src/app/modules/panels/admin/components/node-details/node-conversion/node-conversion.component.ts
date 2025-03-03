@@ -39,7 +39,7 @@ export class NodeConversionComponent implements OnInit {
     });
   }
 
-  protected onDragStart($event) {
+  protected onDragStart($event: DragEvent) {
     $event.dataTransfer.effectAllowed = 'link';
     $event.dataTransfer.setData(NODE_MIME_TYPE, JSON.stringify(this.data));
   }

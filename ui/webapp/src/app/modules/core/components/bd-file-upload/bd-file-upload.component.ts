@@ -19,7 +19,6 @@ export class BdFileUploadComponent implements OnInit {
   @Input() formDataParam = 'file';
   @Input() resultEvaluator: (status: UploadStatus) => string = this.defaultResultDetailsEvaluation;
 
-  // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() success = new EventEmitter<boolean>();
   @Output() dismiss = new EventEmitter<File>();
 

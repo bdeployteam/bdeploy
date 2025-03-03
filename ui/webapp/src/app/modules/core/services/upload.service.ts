@@ -101,7 +101,7 @@ export class UploadService {
     urlParameter: UrlParameter[][],
     formDataParam: string,
   ): Map<string, UploadStatus> {
-    const result: Map<string, UploadStatus> = new Map();
+    const result: Map<string, UploadStatus> = new Map<string, UploadStatus>();
 
     for (let i = 0; i < files.length; ++i) {
       const file = files[i];
@@ -139,12 +139,12 @@ export class UploadService {
     formData.append(formDataParam, file, file.name);
 
     // Suppress global error handling and enable progress reporting
-    const options = {
+    const options: Record<string, unknown> = {
       reportProgress: true,
       headers: suppressGlobalErrorHandling(
         // TODO: this is no longer supported.
         new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope }),
-      ),
+      )
     };
 
     // create and set additional HttpParams
@@ -220,9 +220,7 @@ export class UploadService {
 
   private uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      // tslint:disable-next-line:no-bitwise
       const r = (Math.random() * 16) | 0,
-        // tslint:disable-next-line:no-bitwise
         v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });

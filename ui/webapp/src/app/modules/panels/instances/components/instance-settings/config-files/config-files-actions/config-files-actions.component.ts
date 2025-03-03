@@ -20,18 +20,23 @@ import { BdButtonComponent } from '../../../../../../core/components/bd-button/b
 import { BdPanelButtonComponent } from '../../../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
+import { BdDataColumn } from '../../../../../../../models/data';
+import {
+  TableCellDisplay
+} from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-config-files-actions',
     templateUrl: './config-files-actions.component.html',
   imports: [BdFormInputComponent, CfgFileNameValidatorDirective, FormsModule, TrimmedValidator, BdFileDropComponent, BdButtonComponent, BdPanelButtonComponent, MatTooltip, AsyncPipe]
 })
-export class ConfigFilesActionsComponent implements OnInit {
+export class ConfigFilesActionsComponent implements OnInit, TableCellDisplay<ConfigFile> {
   private readonly cfgFiles = inject(ConfigFilesService);
   private readonly edit = inject(InstanceEditService);
   private readonly parent = inject(forwardRef(() => ConfigFilesComponent));
 
   @Input() record: ConfigFile;
+  @Input() column: BdDataColumn<ConfigFile>;
 
   protected isEditAllowed: boolean;
   protected path: string;
@@ -90,8 +95,8 @@ export class ConfigFilesActionsComponent implements OnInit {
         validation: () => (!this.renameInput ? false : !this.renameInput.isInvalid()),
         actions: [ACTION_CANCEL, ACTION_CONFIRM],
       })
-      .subscribe((r) => {
-        if (!r) {
+      .subscribe((record: object) => {
+        if (!record) {
           return;
         }
         this.cfgFiles.load(oldName).subscribe((content) => {
@@ -110,8 +115,8 @@ export class ConfigFilesActionsComponent implements OnInit {
         `Delete ${this.path}?`,
         `This will remove the file ${this.path} from the current set of configuration files.`,
       )
-      .subscribe((r) => {
-        if (r) {
+      .subscribe((record: object) => {
+        if (record) {
           this.cfgFiles.delete(this.path);
         }
       });
@@ -127,8 +132,8 @@ export class ConfigFilesActionsComponent implements OnInit {
         template: tpl,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
-      .subscribe((r) => {
-        if (!r) {
+      .subscribe((record: object) => {
+        if (!record) {
           return;
         }
         this.cfgFiles.edit(

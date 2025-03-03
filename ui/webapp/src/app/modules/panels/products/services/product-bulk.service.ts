@@ -19,7 +19,7 @@ export class ProductBulkService {
 
   public selection$ = new BehaviorSubject<ProductDto[]>([]);
 
-  private readonly apiPath = (group) => `${this.cfg.config.api}/group/${group}/product/bulk`;
+  private readonly apiPath = (group: string) => `${this.cfg.config.api}/group/${group}/product/bulk`;
 
   constructor() {
     // clear selection when the primary route changes

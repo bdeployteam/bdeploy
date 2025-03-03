@@ -23,7 +23,7 @@
       [placeholder]="placeholder"
       [errorStateMatcher]="this"
       [appBdContentAssist]="assistContent"
-      (focus)="focus.emit(true)"
+      (focus)="focusIn.emit(true)"
       />
     <mat-autocomplete #auto="matAutocomplete">
       @for (suggestedValue of filteredSuggested$ | async; track suggestedValue) {

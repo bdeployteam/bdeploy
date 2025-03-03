@@ -70,7 +70,7 @@ export class InstancesService {
   private readonly groups = inject(GroupsService);
   private readonly ngZone = inject(NgZone);
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/instance`;
 
   public listLoading$ = new BehaviorSubject<boolean>(true);
   public activeLoading$ = new BehaviorSubject<boolean>(false);
@@ -90,15 +90,15 @@ export class InstancesService {
   /** the *active* instance version */
   public active$ = new BehaviorSubject<InstanceDto>(null);
   public activeNodeCfgs$ = new BehaviorSubject<InstanceNodeConfigurationListDto>(null);
-  public activeNodeStates$ = new BehaviorSubject<{ [key: string]: MinionStatusDto }>(null);
+  public activeNodeStates$ = new BehaviorSubject<Record<string, MinionStatusDto>>(null);
   /** the history for the *active* instance. this may not be fully complete history, it is meant for a brief overview of events on the instance. */
   public activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
 
   private activeStateCall: Subscription;
   private activeHistoryCall: Subscription;
 
-  private activeLoadInterval;
-  private activeCheckInterval;
+  private activeLoadInterval: ReturnType<typeof setInterval>;
+  private activeCheckInterval: ReturnType<typeof setInterval>;
 
   public overallStates$ = new BehaviorSubject<InstanceOverallStatusDto[]>([]);
   public overallStatesLoading$ = new BehaviorSubject<boolean>(false);
@@ -555,7 +555,7 @@ export class InstancesService {
     this.activeStateCall =
       this.activeStateCall ||
       this.http
-        .get<{ [minionName: string]: MinionStatusDto }>(
+        .get<Record<string, MinionStatusDto>>(
           `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${act.activeVersion.tag}/minionState`
         )
         .pipe(

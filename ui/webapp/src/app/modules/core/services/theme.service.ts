@@ -8,7 +8,7 @@ enum Theme {
   DARK = 'app-dark-theme',
 }
 
-const THEME_DESC = {};
+const THEME_DESC: Record<string, string> = {};
 THEME_DESC[Theme.DEFAULT] = 'Light Theme (default)';
 THEME_DESC[Theme.DARK] = 'Dark Theme';
 
@@ -18,7 +18,7 @@ THEME_DESC[Theme.DARK] = 'Dark Theme';
 export class ThemeService {
   private readonly document = inject<Document>(DOCUMENT);
 
-  activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject(Theme.DEFAULT);
+  activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject<Theme>(Theme.DEFAULT);
 
   constructor() {
     const themeName = localStorage.getItem('theme');

@@ -139,7 +139,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     return false;
   }
 
-  protected fileAdded(event: any) {
+  protected fileAdded(event: File) {
     this.readFile(event);
   }
 }

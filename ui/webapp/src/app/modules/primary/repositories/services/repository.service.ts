@@ -2,23 +2,35 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
-import { ManifestKey, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
+import {
+  FlattenedApplicationTemplateConfiguration, FlattenedInstanceTemplateConfiguration,
+  ManifestKey,
+  ObjectChangeType, ObjectId,
+  ProductDto, VariableDescriptor
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { RepositoriesService } from './repositories.service';
 
-export interface ProdDtoWithType extends ProductDto {
-  type: SwPkgType;
+interface OptionalProductDto {
+  key: ManifestKey;
+
+  name?: string;
+  vendor?: string;
+  product?: string;
+  labels?: Record<string, string>;
+  configTree?: ObjectId;
+  instanceTemplates?: FlattenedInstanceTemplateConfiguration[];
+  applicationTemplates?: FlattenedApplicationTemplateConfiguration[];
+  references?: ManifestKey[];
+  instanceVariables?: VariableDescriptor[];
 }
 
-export interface SwDtoWithType {
+export interface SwRepositoryEntry extends OptionalProductDto {
   type: SwPkgType;
-  key: ManifestKey;
   requiredByProduct: boolean;
 }
-
-export type SwPkgCompound = ProdDtoWithType | SwDtoWithType;
 
 export enum SwPkgType {
   PRODUCT = 'Product',
@@ -37,8 +49,8 @@ export class RepositoryService {
   private repository: string;
   private subscription: Subscription;
 
-  private readonly productsApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/product`;
-  private readonly softwareRepositoryApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/content`;
+  private readonly productsApiPath = (r: string) => `${this.cfg.config.api}/softwarerepository/${r}/product`;
+  private readonly softwareRepositoryApiPath = (r: string) => `${this.cfg.config.api}/softwarerepository/${r}/content`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
   public importUrl$ = new BehaviorSubject<string>(null);
 
@@ -50,9 +62,9 @@ export class RepositoryService {
   public softwarePackages$ = new BehaviorSubject<ManifestKey[]>([]);
   public softwarePackagesLoading$ = new BehaviorSubject<boolean>(true);
 
-  public data$: Observable<SwPkgCompound[]> = combineLatest([this.products$, this.softwarePackages$]).pipe(
+  public data$: Observable<SwRepositoryEntry[]> = combineLatest([this.products$, this.softwarePackages$]).pipe(
     map(([products, softwarePackages]) => [
-      ...products.map((product) => ({ type: SwPkgType.PRODUCT, ...product })),
+      ...products.map((product) => ({ type: SwPkgType.PRODUCT, ...product, requiredByProduct: false })),
       ...softwarePackages.map((manifestKey) => ({
         type: SwPkgType.EXTERNAL_SOFTWARE,
         key: manifestKey,

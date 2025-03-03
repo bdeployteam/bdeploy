@@ -87,13 +87,14 @@ export class LinkManagedComponent {
     return false;
   }
 
-  protected fileAdded(event: any) {
+  protected fileAdded(event: File) {
     this.readFile(event);
   }
 
-  protected onUpload(event: any) {
-    if (event.target.files && event.target.files.length > 0) {
-      this.readFile(event.target.files[0]);
+  protected onUpload(event: Event) {
+    const element = event.target as HTMLInputElement;
+    if (element.files && element.files.length > 0) {
+      this.readFile(element.files[0]);
     }
   }
 

@@ -7,12 +7,12 @@ import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
     pure: false
 })
 export class NodeFilterPipe implements PipeTransform {
-  transform(items: ApplicationConfiguration[], args: string): any {
-    if (items) {
+  transform(appConfigs: ApplicationConfiguration[], args: string): any {
+    if (appConfigs) {
       if (args.length === 0) {
-        return items;
+        return appConfigs;
       } else {
-        return items.filter((obj) => searchThroughObject(obj, args));
+        return appConfigs.filter((appConfig) => searchThroughObject(appConfig, args));
       }
     }
   }
@@ -23,20 +23,20 @@ export class NodeFilterPipe implements PipeTransform {
     pure: false
 })
 export class CustomNodeFilterPipe implements PipeTransform {
-  transform(item: unknown, args: any): unknown {
+  transform(item: unknown, args: any): boolean {
     if (item) {
       if (args.length === 0) {
-        return item;
+        return true;
       } else {
-        return searchThroughObject(item, args);
+        return searchThroughObject(item as object, args);
       }
     }
     return null;
   }
 }
 
-export function searchThroughObject(obj, args) {
-  return Object.values(obj).some((val) => {
+export function searchThroughObject(obj: object, args: string): boolean {
+  return Object.values(obj).some((val: any) => {
     if (isObject(val)) {
       return searchThroughObject(val, args);
     }

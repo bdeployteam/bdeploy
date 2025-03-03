@@ -23,7 +23,7 @@ export class AllowedValuesValidatorDirective implements Validator {
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value?.value; // LinkedValue
-    const errors = {};
+    const errors:ValidationErrors = {}
 
     // we don't currently evaluate link expression...
     if (!value?.length) {

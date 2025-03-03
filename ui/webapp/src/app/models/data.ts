@@ -1,5 +1,8 @@
 import { Type } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
+import {
+  TableCellDisplay
+} from '../modules/core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 /**
  * A type hint for the colum which may (mostly in card mode) have influence on where and how information is rendered.
@@ -48,7 +51,7 @@ export interface BdDataColumn<T> {
   tooltip?: (record: T) => string;
 
   /** Provides a alternative rendering component for the cell, which has an Input named 'record', and an optional Input named 'column' */
-  component?: Type<unknown>;
+  component?: Type<TableCellDisplay<T>>;
 
   /** The description of the column, usually displayed as a tooltip somewhere */
   description?: string;

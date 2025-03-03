@@ -46,7 +46,7 @@ export class LinkExpressionInputValidatorDirective implements Validator {
   }
 
   private validateLink(value: string): ValidationErrors | null {
-    const errors = {};
+    const errors:ValidationErrors = {}
 
     if (value?.indexOf('{{') < 0) {
       errors[ID] = "Link expression should contain link specifiers '{{'.";
@@ -88,7 +88,7 @@ export class LinkExpressionInputValidatorDirective implements Validator {
   }
 
   private validatePlain(value: string): ValidationErrors | null {
-    const errors = {};
+    const errors:ValidationErrors = {}
 
     if (value?.indexOf('{{') > 0) {
       errors[ID] = "Plain value should not contain link specifiers '{{'.";

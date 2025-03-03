@@ -70,14 +70,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   protected node$ = new BehaviorSubject<MinionDto>(null);
   protected config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
-  protected groupedProcesses$ = new BehaviorSubject<{
-    [key: string]: ApplicationConfiguration[];
-  }>(null);
+  protected groupedProcesses$ = new BehaviorSubject<Record<string, ApplicationConfiguration[]>>(null);
   protected allowedSources$ = new BehaviorSubject<string[]>(null);
   protected isClientNode: boolean;
   protected nodeType: string;
   protected node: string;
-  protected groupExpansion: { [key: string]: boolean } = {};
+  protected groupExpansion: Record<string, boolean> = {};
   protected lastId: string;
   protected clientTableId = CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
 
@@ -143,7 +141,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
             this.lastId = nodeConfig.nodeConfiguration.id;
           }
 
-          const grouped = {};
+          const grouped: Record<string, ApplicationConfiguration[]> = {};
           for (const app of nodeConfig.nodeConfiguration.applications) {
             let group = this.getControlGroup(app);
             if (!group) {

@@ -3,6 +3,10 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { AsyncPipe } from '@angular/common';
+import { editor } from 'monaco-editor';
+import IStandaloneDiffEditor = editor.IStandaloneDiffEditor;
+import ITextModel = editor.ITextModel;
+import { GlobalMonacoModule, WindowWithMonacoLoaded } from '../../services/monaco-completions.service';
 
 @Component({
     selector: 'app-bd-editor-diff',
@@ -13,8 +17,8 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly cd = inject(ChangeDetectorRef);
 
-  private globalMonaco;
-  private monaco;
+  private globalMonaco: GlobalMonacoModule;
+  private monaco: IStandaloneDiffEditor;
   private subscription: Subscription;
 
   @Input() originalContent: string;
@@ -33,9 +37,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.themeService.getThemeSubject().subscribe(() => {
-      if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
-      }
+      this.globalMonaco?.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
     });
   }
 
@@ -43,9 +45,9 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     this.initMonaco();
   }
 
-  onMonacoInit(monaco) {
+  onMonacoInit(monaco: IStandaloneDiffEditor ) {
     this.monaco = monaco;
-    this.globalMonaco = window['monaco'];
+    this.globalMonaco = (window as unknown as WindowWithMonacoLoaded).monaco;
 
     // wait for init to complete, otherwise we leak models.
     setTimeout(() => this.initMonaco(), 0);
@@ -58,7 +60,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   }
 
   initMonaco() {
-    this.globalMonaco.editor.getModels().forEach((m) => m.dispose());
+    this.globalMonaco.editor.getModels().forEach((m: ITextModel) => m.dispose());
     const model = {
       original: this.globalMonaco.editor.createModel(
         this.originalContent,

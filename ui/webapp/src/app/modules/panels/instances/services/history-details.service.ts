@@ -23,7 +23,7 @@ export class HistoryDetailsService {
 
   private cache: InstanceConfigCache[] = [];
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/instance`;
 
   constructor() {
     combineLatest([this.instances.current$, this.groups.current$]).subscribe(([instance, group]) => {

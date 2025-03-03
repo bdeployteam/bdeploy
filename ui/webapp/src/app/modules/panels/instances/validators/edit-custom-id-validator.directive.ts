@@ -23,7 +23,7 @@ export class EditCustomIdValidatorDirective implements Validator {
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
-    const errors = {};
+    const errors:ValidationErrors = {}
     const ok = this.idRegExp.test(value);
 
     if (!ok) {

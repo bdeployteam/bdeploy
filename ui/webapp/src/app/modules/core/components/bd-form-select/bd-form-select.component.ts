@@ -4,7 +4,10 @@ import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
 import { MatFormField, MatLabel, MatPrefix, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { BdFormSelectComponentOptionComponent } from '../bd-form-select-component-option/bd-form-select-component-option.component';
+import {
+  BdFormSelectComponentOptionComponent,
+  ComponentWithSelectedOption
+} from '../bd-form-select-component-option/bd-form-select-component-option.component';
 import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
@@ -25,7 +28,7 @@ export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMa
   @Input() disabled: any;
   @Input() allowNone = false;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
-  @Input() component: Type<unknown>;
+  @Input() component: Type<ComponentWithSelectedOption<unknown>>;
   @Input() prefix: TemplateRef<unknown>;
 
   public get value() {

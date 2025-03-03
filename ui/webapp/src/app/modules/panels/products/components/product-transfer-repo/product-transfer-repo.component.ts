@@ -41,8 +41,7 @@ export class ProductTransferRepoComponent implements OnInit {
   protected selectedRepo: SoftwareRepositoryConfiguration;
   protected selectedProductId: string;
   protected productsLoading$ = new BehaviorSubject<boolean>(false);
-  protected allProducts = [];
-  protected prodsById: { [key: string]: ProductDto[] } = {};
+  protected prodsById: Record<string, ProductDto[]> = {};
   protected prodIds: string[];
   protected prodLabels: string[];
   protected selectedVersions$ = new BehaviorSubject<ProductDto[]>([]);

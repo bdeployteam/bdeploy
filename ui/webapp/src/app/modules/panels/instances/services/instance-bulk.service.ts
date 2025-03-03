@@ -22,7 +22,7 @@ export class InstanceBulkService {
   public selection$ = new BehaviorSubject<InstanceDto[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
-  private readonly bulkApiPath = (group) => `${this.cfg.config.api}/group/${group}/instance/bulk`;
+  private readonly bulkApiPath = (group: string) => `${this.cfg.config.api}/group/${group}/instance/bulk`;
 
   constructor() {
     // clear selection when the primary route changes

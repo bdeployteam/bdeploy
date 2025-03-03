@@ -153,7 +153,7 @@ export class InstanceEditService {
   public redo$ = new BehaviorSubject<Edit>(null);
 
   public state$ = new BehaviorSubject<GlobalEditState>(null);
-  public nodes$ = new BehaviorSubject<{ [key: string]: MinionDto }>(null);
+  public nodes$ = new BehaviorSubject<Record<string, MinionDto>>(null);
   public serverSupportsVariables$ = new BehaviorSubject<boolean>(true);
   public baseApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
   public stateApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
@@ -168,8 +168,8 @@ export class InstanceEditService {
   public hasSaveableChanges$ = new BehaviorSubject<boolean>(false);
   public hasCurrentProduct$ = new BehaviorSubject<boolean>(false);
 
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
-  private updateSaveableChangesHandle;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}/instance`;
+  private updateSaveableChangesHandle: ReturnType<typeof setTimeout>;
   private changeSubscription: Subscription;
 
   constructor() {
@@ -320,7 +320,7 @@ export class InstanceEditService {
       this.loading$.next(true);
       forkJoin({
         nodes: this.instances.loadNodes(inst.instanceConfiguration.id, inst.instance.tag),
-        minions: this.http.get<{ [key: string]: MinionDto }>(
+        minions: this.http.get<Record<string, MinionDto>>(
           `${this.apiPath(this.groups.current$.value.name)}/${inst.instanceConfiguration.id}/${
             inst.instance.tag
           }/minionConfiguration`,
@@ -682,7 +682,7 @@ export class InstanceEditService {
     return !this.incompatible$.value;
   }
 
-  private hasChanges(object: unknown, original: unknown) {
+  private hasChanges(object: object, original: object) {
     if (!object || !original) {
       return false;
     }

@@ -35,7 +35,7 @@ export class GroupUsersService {
   public userGroups$ = new BehaviorSubject<UserGroupInfo[]>([]);
 
   private group: InstanceGroupConfiguration;
-  private readonly apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
+  private readonly apiPath = (g: string) => `${this.cfg.config.api}/group/${g}`;
 
   constructor() {
     this.groups.current$.subscribe((g) => {

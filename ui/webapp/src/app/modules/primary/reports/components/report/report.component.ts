@@ -13,10 +13,6 @@ import { BdDataGroupingComponent } from '../../../../core/components/bd-data-gro
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 
-interface GeneratedReportRow {
-  [index: string]: string;
-}
-
 @Component({
     selector: 'app-report',
     templateUrl: './report.component.html',
@@ -40,11 +36,11 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly search$ = new BehaviorSubject<string>(null);
 
   protected report: ReportDescriptor;
-  protected columns: BdDataColumn<GeneratedReportRow>[] = [];
-  protected rows: GeneratedReportRow[] = [];
+  protected columns: BdDataColumn<Record<string, string>>[] = [];
+  protected rows: Record<string, string>[] = [];
   protected generated: ReportResponseDto;
-  protected definitions: BdDataGroupingDefinition<GeneratedReportRow>[] = [];
-  protected grouping: BdDataGrouping<GeneratedReportRow>[] = [];
+  protected definitions: BdDataGroupingDefinition<Record<string, string>>[] = [];
+  protected grouping: BdDataGrouping<Record<string, string>>[] = [];
   protected header: string;
 
   private subscription: Subscription;
@@ -86,9 +82,9 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
 
   private calculateRows(
     columns: ReportColumnDescriptor[],
-    rows: GeneratedReportRow[],
+    rows: Record<string, string>[],
     search: string,
-  ): GeneratedReportRow[] {
+  ): Record<string, string>[] {
     if (!search) {
       return rows;
     }
@@ -97,7 +93,7 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
     );
   }
 
-  protected showRowDetails(row: GeneratedReportRow) {
+  protected showRowDetails(row: Record<string, string>) {
     this.reports.selectedRow$.next(row);
     this.router.navigate(['', { outlets: { panel: ['panels', 'reports', 'row-details'] } }]);
   }

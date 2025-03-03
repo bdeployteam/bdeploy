@@ -12,7 +12,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { MatRipple } from '@angular/material/core';
-import { MatError, MatHint } from '@angular/material/form-field';
+import { MatHint } from '@angular/material/form-field';
 
 @Component({
     selector: 'app-bd-form-toggle',

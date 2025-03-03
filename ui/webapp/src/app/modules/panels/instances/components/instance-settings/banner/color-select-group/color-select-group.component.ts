@@ -25,7 +25,7 @@ export class ColorSelectGroupComponent {
     { name: 'Warning', fg: '#000000', bg: '#FF6D00' },
     { name: 'Critical', fg: '#FFFFFF', bg: '#EA000A' },
   ];
-  protected selected;
+  protected selected: string;
 
   public setDefault() {
     this.selected = this.colors[0].name;

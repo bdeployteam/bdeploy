@@ -66,14 +66,14 @@ export class TemplateSelection {
   public expandedName: string;
   public expandedDescription: string;
 
-  public groups: { [key: string]: string };
-  public nodeNames: { [key: string]: string[] };
-  public nodeLabels: { [key: string]: string[] };
+  public groups: Record<string, string>;
+  public nodeNames: Record<string, string[]>;
+  public nodeLabels: Record<string, string[]>;
 
   public isApplyInstance: boolean;
   public isAnyGroupSelected: boolean;
 
-  public variables: { [key: string]: string };
+  public variables: Record<string, string>;
   public requiredVariables: TemplateVariable[] = [];
   public isAllVariablesSet: boolean;
 }
@@ -140,7 +140,7 @@ export class SystemTemplateComponent implements OnInit {
   protected selectedServer: ManagedMasterDto;
   protected templates: TemplateSelection[];
 
-  protected systemVariables: { [key: string]: string };
+  protected systemVariables: Record<string, string>;
   protected requiredSystemVariables: TemplateVariable[] = [];
   protected isAllSystemVariablesSet = false;
 
@@ -346,9 +346,9 @@ export class SystemTemplateComponent implements OnInit {
       const expDesc = performTemplateVariableSubst(i.description, this.systemVariables, expStatus);
 
       const tpl = prod.instanceTemplates.find((t) => t.name === i.templateName);
-      const groups = {};
-      const nodes: { [key: string]: string[] } = {};
-      const nodeLabels = {};
+      const groups: Record<string, string> = {};
+      const nodes: Record<string, string[]> = {};
+      const nodeLabels: Record<string, string[]> = {};
 
       for (const grp of tpl.groups) {
         nodes[grp.name] = this.getNodesFor(grp);

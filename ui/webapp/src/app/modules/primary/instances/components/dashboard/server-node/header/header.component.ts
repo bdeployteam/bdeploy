@@ -44,11 +44,11 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   protected maxLabel: string;
   protected renderTime: number = Date.now(); // local time.
 
-  protected pathInfo;
-  protected pathPoints;
+  protected pathInfo: string;
+  protected pathPoints: { x: number; y: number }[];
   protected endMarker = false;
   protected hasVisiblePoint = false;
-  protected formatter: (number) => string;
+  protected formatter: (number: number) => string;
 
   private readonly changes$ = new BehaviorSubject<boolean>(false);
 

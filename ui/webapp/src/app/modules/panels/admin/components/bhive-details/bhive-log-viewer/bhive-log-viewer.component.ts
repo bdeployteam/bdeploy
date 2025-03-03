@@ -30,7 +30,7 @@ export class BhiveLogViewerComponent implements OnInit, OnDestroy {
   protected follow$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
-  private followInterval;
+  private followInterval: ReturnType<typeof  setInterval>;
   private offset = 0;
 
   ngOnInit() {
