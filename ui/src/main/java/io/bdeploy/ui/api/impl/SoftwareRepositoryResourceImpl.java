@@ -224,8 +224,10 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
             // ProductResource.list(key) already returns sorted list (latest version first), so we only need to filter and grab first
             ProductDto repoLatestProduct = resource.list(req.key).stream()
                     .filter(dto -> req.productId == null || req.productId.isBlank() || req.productId.equals(dto.product))
-                    .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex)).findFirst()
-                    .orElse(null);
+                    .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex))
+                    .filter(dto -> req.instanceTemplate == null
+                            || dto.instanceTemplates.stream().anyMatch(it -> req.instanceTemplate.equals(it.name)))
+                    .findFirst().orElse(null);
 
             if (repoLatestProduct == null) {
                 continue;
@@ -243,7 +245,8 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
         if (comparator == null || versions.isEmpty()) {
             throw new WebApplicationException("No product versions found for --key=" + req.key + " --productId=" + req.productId
-                    + " --version=" + req.version + " --repo=" + req.groupOrRepo + " --regex=" + req.regex, Status.NOT_FOUND);
+                    + " --version=" + req.version + " --repo=" + req.groupOrRepo + " --regex=" + req.regex
+                    + " --instanceTemplate=" + req.instanceTemplate, Status.NOT_FOUND);
         }
 
         // cannot use comparator in lambda (not effectively final)

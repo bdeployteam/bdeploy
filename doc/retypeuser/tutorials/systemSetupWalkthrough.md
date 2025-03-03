@@ -145,7 +145,8 @@ This is an example of such a response file:
 name: "Demo Instance"
 description: "The Test System's Demo Instance"
 productId: "io.bdeploy/demo"
-productVersionRegex: "2\\..*"
+productVersionRegex: "3\\..*"
+initialProductVersionRegex: "2\\..*"
 templateName: "Default Configuration"
 fixedVariables:
   - id: "text-param"

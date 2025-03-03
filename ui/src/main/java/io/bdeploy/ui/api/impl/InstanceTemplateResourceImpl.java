@@ -128,8 +128,9 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         } else {
             LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
             req.productId = instance.productId;
-            req.version = instance.productVersionRegex;
+            req.version = InstanceTemplateHelper.getInitialProductVersionRegex(instance);
             req.regex = true;
+            req.instanceTemplate = instance.templateName;
             SoftwareRepositoryResourceImpl srr = rc.initResource(new SoftwareRepositoryResourceImpl());
             ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
             pr.copyProduct(toImport.groupOrRepo, toImport.key.getName(), List.of(toImport.key.getTag()));

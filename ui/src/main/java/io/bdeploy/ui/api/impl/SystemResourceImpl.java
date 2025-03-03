@@ -172,8 +172,9 @@ public class SystemResourceImpl implements SystemResource {
             } else {
                 LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
                 req.productId = instance.productId;
-                req.version = instance.productVersionRegex;
+                req.version = InstanceTemplateHelper.getInitialProductVersionRegex(instance);
                 req.regex = true;
+                req.instanceTemplate = instance.templateName;
                 ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
                 if (result.productsToImport.stream().noneMatch(p -> p.key.equals(toImport.key))) {
                     result.productsToImport.add(toImport);

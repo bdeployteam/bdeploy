@@ -21,8 +21,11 @@ public class InstanceTemplateReferenceDescriptor {
     @JsonProperty(required = true)
     public String productId;
 
-    @JsonPropertyDescription("An optional regular expression which can be used to narrow down the allowed versions of the specified product to use when applying a system template.")
+    @JsonPropertyDescription("An optional regular expression which is used to filter newer product versions for product update suggestions. Serves as initialProductVersionRegex, if initialProductVersionRegex is not provided.")
     public String productVersionRegex = ".*";
+
+    @JsonPropertyDescription("An optional regular expression which can be used to narrow down the allowed versions of the specified product to use when applying a system template.")
+    public String initialProductVersionRegex;
 
     @JsonPropertyDescription("The name of the instance template to use when creating the instance of the product.")
     @JsonProperty(required = true)

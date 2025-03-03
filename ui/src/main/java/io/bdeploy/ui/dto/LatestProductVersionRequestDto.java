@@ -17,4 +17,6 @@ public class LatestProductVersionRequestDto {
     // whether version filter is a regular expression or direct match
     public boolean regex;
 
+    // if provided, a product must contain instance template with the same name
+    public String instanceTemplate;
 }
