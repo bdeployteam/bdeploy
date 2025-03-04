@@ -1,12 +1,13 @@
 package io.bdeploy.ui.cli;
 
-import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import io.bdeploy.api.validation.v1.ProductValidationHelper;
 import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi;
 import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidationSeverity;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingFileValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
@@ -25,6 +26,7 @@ public class RemoteProductValidationTool extends RemoteServiceTool<RemoteProduct
     public @interface RemoteProductValidationConfig {
 
         @Help("Descriptor file path")
+        @Validator(ExistingFileValidator.class)
         String descriptor();
     }
 
@@ -37,10 +39,6 @@ public class RemoteProductValidationTool extends RemoteServiceTool<RemoteProduct
         helpAndFailIfMissing(config.descriptor(), "--descriptor path missing");
 
         var descriptor = Paths.get(config.descriptor());
-        if (!Files.exists(descriptor)) {
-            throw new IllegalStateException("File " + descriptor + " does not exist");
-        }
-
         var result = ProductValidationHelper.validate(descriptor, remote);
 
         if (result.issues == null || result.issues.isEmpty()) {
@@ -61,5 +59,4 @@ public class RemoteProductValidationTool extends RemoteServiceTool<RemoteProduct
         }
         return table;
     }
-
 }
