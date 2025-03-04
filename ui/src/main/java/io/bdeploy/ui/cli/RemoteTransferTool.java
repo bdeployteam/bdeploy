@@ -84,7 +84,12 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
         RemoteService target = null;
 
         if (config.targetLogin() != null) {
-            target = new LocalLoginManager(config.loginStorage()).getNamedService(config.targetLogin());
+            String login = config.targetLogin();
+            target = new LocalLoginManager(config.loginStorage()).getNamedService(login);
+            if (target == null) {
+                helpAndFail("Login '" + login + "' does not exist");
+                return createNoOp();
+            }
         } else if (config.targetRemote() != null && config.targetToken() != null) {
             target = new RemoteService(UriBuilder.fromUri(config.targetRemote()).build(), config.targetToken());
         }
