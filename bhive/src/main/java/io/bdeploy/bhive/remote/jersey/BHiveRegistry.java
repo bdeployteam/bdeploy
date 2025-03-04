@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -51,7 +52,7 @@ public class BHiveRegistry implements AutoCloseable {
     }
 
     private final Set<Path> locations = new TreeSet<>();
-    private final Map<String, BHive> hives = new TreeMap<>();
+    private final Map<String, BHive> hives = new ConcurrentHashMap<>();
     private final ActivityReporter reporter;
     private final List<MultiManifestSpawnListener> listeners = new ArrayList<>();
     private final Map<String, ManifestSpawnListener> internalListeners = new TreeMap<>();
