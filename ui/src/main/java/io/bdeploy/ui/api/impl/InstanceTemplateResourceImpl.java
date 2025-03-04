@@ -2,9 +2,11 @@ package io.bdeploy.ui.api.impl;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -20,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -52,12 +55,12 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.Applic
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
-import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
 import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -68,10 +71,12 @@ import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.FixedParameterListValueResolver;
 import io.bdeploy.interfaces.variables.Variables;
 import io.bdeploy.ui.ProductUpdateService;
+import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.InstanceTemplateResource;
-import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SystemResource;
+import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
@@ -110,72 +115,137 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     @Override
-    public InstanceTemplateReferenceResultDto createFromTemplate(InstanceTemplateReferenceDescriptor instance,
-            InstancePurpose purpose, String server, String system) {
-        RemoteService remote = mp.getNamedMasterOrSelf(hive, server);
+    public InstanceTemplateReferenceResultDto updateWithTemplate(InstanceTemplateReferenceDescriptor responseFile, String server,
+            String uuid) {
+        // sanitize input
+        sanitizeInstanceTemplateReferenceDescriptor(responseFile);
 
-        // 0. normalize input
-        if (instance.fixedVariables == null) {
-            instance.fixedVariables = Collections.emptyList();
+        // find instance and load product
+        InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
+        InstanceResource ir = igr.getInstanceResource(group);
+        InstanceDto instanceDto = ir.read(uuid);
+        ProductDto productDto = igr.getProductResource(group).list(instanceDto.activeProduct.getName()).getFirst();
+
+        // find and verify all group mappings and whether all variables are set for each required group
+        FlattenedInstanceTemplateConfiguration tpl = getInstanceTemplateConfig(productDto.instanceTemplates,
+                responseFile.templateName, "product version " + productDto.key.getTag() + " of instance " + uuid);
+
+        // create the group to node mapping
+        Map<String, String> groupToNode = checkVariablesAndCreateGroupToNodeMapping(responseFile, tpl.directlyUsedTemplateVars,
+                tpl.groups);
+
+        // update the instance
+        InstanceTemplateReferenceResultDto result = updateInstanceWithTemplateRequest(mp.getNamedMasterOrSelf(hive, server),
+                responseFile, ir, instanceDto, tpl, groupToNode, uuid);
+
+        // sync in case of success
+        if (result.status != InstanceTemplateReferenceStatus.ERROR) {
+            rc.initResource(new ManagedServersResourceImpl()).synchronize(group, server);
         }
 
-        // 1. import, find and verify product.
+        return result;
+    }
+
+    private InstanceTemplateReferenceResultDto updateInstanceWithTemplateRequest(RemoteService remote,
+            InstanceTemplateReferenceDescriptor responseFile, InstanceResource ir, InstanceDto instanceDto,
+            FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, String uuid) {
+        ProductManifest pmf = ProductManifest.of(hive, instanceDto.activeProduct);
+
+        InstanceConfiguration cfg = instanceDto.instanceConfiguration;
+        TemplateVariableResolver tvr = new TemplateVariableResolver(tpl.directlyUsedTemplateVars, responseFile.fixedVariables,
+                null);
+        cfg.instanceVariables.addAll(createInstanceVariablesFromTemplate(tpl, tvr, pmf));
+
+        var nodeStates = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
+
+        // Apply existing nodes
+        String instanceTag = instanceDto.instance.getTag();
+        Map<String, InstanceNodeConfigurationDto> nodes = new TreeMap<>();
+        for (Entry<String, Key> entry : InstanceManifest.load(hive, uuid, null).getInstanceNodeManifests().entrySet()) {
+            InstanceNodeConfigurationDto instanceNodeConfigurationDto = new InstanceNodeConfigurationDto(entry.getKey(),
+                    InstanceNodeManifest.of(hive, entry.getValue()).getConfiguration());
+            nodes.put(instanceNodeConfigurationDto.nodeName, instanceNodeConfigurationDto);
+        }
+
+        // Add new applications
+        List<ApplicationManifest> apps = getApps(pmf);
+        try {
+            for (InstanceNodeConfigurationDto instanceNodeConfigDto : createInstanceNodesFromTemplate(cfg, tpl, groupToNode, apps,
+                    tvr, nodeStates, null, pmf.getProduct())) {
+                String nodeName = instanceNodeConfigDto.nodeName;
+                nodes.putIfAbsent(nodeName, instanceNodeConfigDto);
+                nodes.get(nodeName).nodeConfiguration.applications.addAll(instanceNodeConfigDto.nodeConfiguration.applications);
+            }
+        } catch (RuntimeException e) {
+            log.warn("Exception while updating instance {} with instance template {}", cfg.id, responseFile.templateName, e);
+            return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
+                    "Failed to update with template: " + e.toString());
+        }
+
+        // Create update from the current instance config template tree, this is the starting point.
+        // We cannot simply set the tree ID, since the product on the target may not be available (yet).
+        List<FileStatusDto> cfgFiles = InstanceResourceImpl.getUpdatesFromTree(hive, "", new ArrayList<>(),
+                instanceDto.instanceConfiguration.configTree);
+        InstanceUpdateDto updateDto = new InstanceUpdateDto(new InstanceConfigurationDto(cfg, new ArrayList<>(nodes.values())),
+                null);
+
+        try {
+            List<ApplicationValidationDto> validationDtos = pus.validate(updateDto, apps, null, cfgFiles);
+            if (!validationDtos.isEmpty()) {
+                validationDtos.forEach(v -> log.warn("Validation problem in instance: {}, app: {}, param: {}: {}", cfg.id,
+                        v.appId, v.paramId, v.message));
+                ApplicationValidationDto firstMessage = validationDtos.getFirst();
+                return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
+                        "Failed to validate instance " + cfg.id + ", first message: " + firstMessage.message + " ("
+                                + firstMessage.appId + ", " + firstMessage.paramId + ")");
+            }
+        } catch (RuntimeException e) {
+            log.warn("Exception while validating instance {}", cfg.id, e);
+            return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
+                    "Failed to validate instance " + cfg.id + ' ' + e.toString());
+        }
+
+        try {
+            ir.update(cfg.id, updateDto, null, instanceTag);
+        } catch (RuntimeException e) {
+            log.warn("Failed to update instance {}", cfg.id, e);
+            return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
+                    "Failed to update instance " + cfg.id + ' ' + e.toString());
+        }
+
+        return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.OK,
+                "Successfully updated instance " + cfg.id);
+    }
+
+    @Override
+    public InstanceTemplateReferenceResultDto createFromTemplate(InstanceTemplateReferenceDescriptor responseFile,
+            InstancePurpose purpose, String server, String system) {
+        // sanitize input
+        sanitizeInstanceTemplateReferenceDescriptor(responseFile);
+
+        // find, import and verify product
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
-        Optional<ProductDto> productOpt = InstanceTemplateHelper.findMatchingProduct(instance, pr.list(null));
-        ProductDto product;
-        if (productOpt.isPresent()) {
-            product = productOpt.get();
-        } else {
+        ProductDto productDto = InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(null)).orElseGet(() -> {
             LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
-            req.productId = instance.productId;
-            req.version = InstanceTemplateHelper.getInitialProductVersionRegex(instance);
+            req.productId = responseFile.productId;
+            req.version = InstanceTemplateHelper.getInitialProductVersionRegex(responseFile);
             req.regex = true;
-            req.instanceTemplate = instance.templateName;
+            req.instanceTemplate = responseFile.templateName;
             SoftwareRepositoryResourceImpl srr = rc.initResource(new SoftwareRepositoryResourceImpl());
             ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
             pr.copyProduct(toImport.groupOrRepo, toImport.key.getName(), List.of(toImport.key.getTag()));
-            product = InstanceTemplateHelper.findMatchingProduct(instance, pr.list(null)).get();
-        }
+            return InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(null)).get();
+        });
 
-        // 2. find and verify all group mappings and whether all variables are set for each required group.
-        FlattenedInstanceTemplateConfiguration tpl = product.instanceTemplates.stream()
-                .filter(t -> t.name.equals(instance.templateName)).findFirst()
-                .orElseThrow(() -> new WebApplicationException("Cannot find specified instance template: " + instance.templateName
-                        + " in best matching product version " + product.key, Status.EXPECTATION_FAILED));
+        // find and verify all group mappings and whether all variables are set for each required group
+        FlattenedInstanceTemplateConfiguration tpl = getInstanceTemplateConfig(productDto.instanceTemplates,
+                responseFile.templateName, "best matching product version " + productDto.key);
 
-        Map<String, String> groupToNode = new TreeMap<>();
-        for (FlattenedInstanceTemplateGroupConfiguration grp : tpl.groups) {
-            SystemTemplateInstanceTemplateGroupMapping mapping = instance.defaultMappings.stream()
-                    .filter(g -> g.group.equals(grp.name)).findFirst().orElse(null);
+        // create the group to node mapping
+        Map<String, String> groupToNode = checkVariablesAndCreateGroupToNodeMapping(responseFile, tpl.directlyUsedTemplateVars,
+                tpl.groups);
 
-            if (mapping == null || mapping.node == null) {
-                continue; // ignored
-            }
-
-            groupToNode.put(grp.name, mapping.node);
-
-            // otherwise check variables.
-            for (TemplateVariable tvar : grp.groupVariables) {
-                if (StringHelper.isNullOrBlank(tvar.defaultValue)
-                        && instance.fixedVariables.stream().noneMatch(v -> v.id.equals(tvar.id))) {
-                    throw new WebApplicationException(
-                            "Template Variable " + tvar.id + " not provided, required in group " + grp.name,
-                            Status.EXPECTATION_FAILED);
-                }
-            }
-        }
-
-        // 3. setup tracking for variables, and verify all variables are set.
-        for (TemplateVariable tvar : tpl.directlyUsedTemplateVars) {
-            if (StringHelper.isNullOrBlank(tvar.defaultValue)
-                    && instance.fixedVariables.stream().noneMatch(v -> v.id.equals(tvar.id))) {
-                throw new WebApplicationException(
-                        "Template Variable " + tvar.id + " not provided, required directly in the instance template",
-                        Status.EXPECTATION_FAILED);
-            }
-        }
-
-        // 4. figure out target system if given.
+        // figure out target system if given
         Optional<Manifest.Key> systemKey = Optional.empty();
         if (system != null) {
             SystemResource sr = rc.initResource(new SystemResourceImpl(group, hive));
@@ -185,14 +255,13 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             }
         }
 
-        // 5. finally create the instance on the target.
-        var result = createInstanceFromTemplateRequest(remote, systemKey.orElse(null), instance, product.key, groupToNode, null,
-                instance.fixedVariables, purpose);
+        // create the instance
+        var result = createInstanceFromTemplateRequest(mp.getNamedMasterOrSelf(hive, server), systemKey.orElse(null),
+                responseFile, productDto.key, groupToNode, null, responseFile.fixedVariables, purpose);
 
+        // sync in case of success
         if (result.status != InstanceTemplateReferenceStatus.ERROR) {
-            // sync in case of central and success... :)
-            ManagedServersResource msr = rc.initResource(new ManagedServersResourceImpl());
-            msr.synchronize(group, server);
+            rc.initResource(new ManagedServersResourceImpl()).synchronize(group, server);
         }
 
         return result;
@@ -229,19 +298,11 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.instanceVariables = createInstanceVariablesFromTemplate(instTemplate.get(), tvr, pmf);
 
         SystemConfiguration system = systemKey != null ? SystemManifest.of(hive, systemKey).getConfiguration() : null;
-        List<ApplicationManifest> apps = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
+        List<ApplicationManifest> apps = getApps(pmf);
         List<InstanceNodeConfigurationDto> nodes;
         try {
             nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), groupToNode, apps, tvr, nodeStates, system,
-                    (n, o) -> a -> {
-                        if (o != null) {
-                            // need to check OS as well.
-                            var smk = ScopedManifestKey.parse(a.getKey());
-                            return o == smk.getOperatingSystem() && (pmf.getProduct() + "/" + n).equals(smk.getName());
-                        } else {
-                            return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
-                        }
-                    });
+                    pmf.getProduct());
         } catch (Exception e) {
             log.warn("Exception while creating instance {} through instance template {} from system template", cfg.name,
                     inst.templateName, e);
@@ -289,10 +350,64 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 "Successfully created instance with ID " + cfg.id);
     }
 
+    private static void sanitizeInstanceTemplateReferenceDescriptor(InstanceTemplateReferenceDescriptor responseFile) {
+        if (responseFile.defaultMappings == null) {
+            responseFile.defaultMappings = Collections.emptyList();
+        }
+        if (responseFile.fixedVariables == null) {
+            responseFile.fixedVariables = Collections.emptyList();
+        }
+    }
+
+    private static FlattenedInstanceTemplateConfiguration getInstanceTemplateConfig(
+            Collection<FlattenedInstanceTemplateConfiguration> instanceTemplates, String templateName,
+            String exceptionMessageDetail) {
+        return instanceTemplates.stream().filter(t -> t.name.equals(templateName)).findFirst()
+                .orElseThrow(() -> new WebApplicationException(
+                        "Cannot find specified instance template: " + templateName + " in " + exceptionMessageDetail,
+                        Status.EXPECTATION_FAILED));
+    }
+
+    private static Map<String, String> checkVariablesAndCreateGroupToNodeMapping(InstanceTemplateReferenceDescriptor responseFile,
+            Collection<TemplateVariable> directlyUsedTemplateVars,
+            Collection<FlattenedInstanceTemplateGroupConfiguration> groups) {
+        // verify that all mandatory template variables are set
+        validateVariablesOrThrow(directlyUsedTemplateVars, responseFile.fixedVariables, "directly in the instance template");
+
+        // create group to node mapping
+        Map<String, String> groupToNode = new TreeMap<>();
+        for (FlattenedInstanceTemplateGroupConfiguration grp : groups) {
+            var mapping = responseFile.defaultMappings.stream().filter(g -> g.group.equals(grp.name)).findFirst().orElse(null);
+            if (mapping == null || mapping.node == null) {
+                continue; // ignored
+            }
+
+            // verify that all mandatory group variables are set
+            validateVariablesOrThrow(grp.groupVariables, responseFile.fixedVariables, "in group " + grp.name);
+
+            groupToNode.put(grp.name, mapping.node);
+        }
+        return groupToNode;
+    }
+
+    private static void validateVariablesOrThrow(Collection<TemplateVariable> tvars,
+            Collection<TemplateVariableFixedValueOverride> tvarOverrides, String msg) {
+        for (TemplateVariable tvar : tvars) {
+            if (StringHelper.isNullOrBlank(tvar.defaultValue) && tvarOverrides.stream().noneMatch(v -> v.id.equals(tvar.id))) {
+                throw new WebApplicationException("Template Variable " + tvar.id + " not provided, required " + msg,
+                        Status.EXPECTATION_FAILED);
+            }
+        }
+    }
+
+    private List<ApplicationManifest> getApps(ProductManifest pmf) {
+        return pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pmf)).toList();
+    }
+
     private static List<InstanceNodeConfigurationDto> createInstanceNodesFromTemplate(InstanceConfiguration config,
             FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, List<ApplicationManifest> apps,
             TemplateVariableResolver tvr, Map<String, MinionStatusDto> nodeStates, SystemConfiguration system,
-            BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter) {
+            String productName) {
         Function<String, LinkedValueConfiguration> globalLookup = id -> {
             LinkedValueConfiguration lv = null;
             for (var g : tpl.groups) {
@@ -306,6 +421,18 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 }
             }
             return lv;
+        };
+
+        String productNameWithDash = productName + '/';
+        BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter = (n, o) -> a -> {
+            String fullProductName = productNameWithDash + n;
+            Key applicationManifestKey = a.getKey();
+            if (o != null) {
+                // need to check OS as well.
+                var smk = ScopedManifestKey.parse(applicationManifestKey);
+                return o == smk.getOperatingSystem() && fullProductName.equals(smk.getName());
+            }
+            return applicationManifestKey.getName().startsWith(fullProductName); // may or may not have *any* OS in the key.
         };
 
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
@@ -580,5 +707,4 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         return result;
     }
-
 }

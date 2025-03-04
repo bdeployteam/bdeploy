@@ -26,4 +26,13 @@ public interface InstanceTemplateResource {
             @QueryParam("purpose") InstancePurpose purpose, @QueryParam("server") String server,
             @QueryParam("system") String system);
 
+    /**
+     * Apply a given instance template to an existing instance.
+     * <p>
+     * The template reference needs to provide all group mappings and variables, as user input is not possible.
+     */
+    @POST
+    @Path("/update")
+    public InstanceTemplateReferenceResultDto updateWithTemplate(InstanceTemplateReferenceDescriptor instanceTemplate,
+            @QueryParam("server") String server, @QueryParam("uuid") String uuid);
 }

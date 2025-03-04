@@ -183,17 +183,13 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                 .getInstanceResource(config.instanceGroup());
 
         if (config.create()) {
-            if (config.template() != null) {
-                return doCreateFromTemplate(remote, ir, config);
-            } else {
-                return doCreate(remote, ir, config);
-            }
+            return config.template() != null ? doCreateFromTemplate(remote, ir, config) : doCreate(remote, ir, config);
         }
 
         helpAndFailIfMissing(config.uuid(), "--uuid missing");
 
         if (config.update()) {
-            return doUpdate(remote, ir, config);
+            return config.template() != null ? doUpdateWithTemplate(remote, ir, config) : doUpdate(remote, ir, config);
         } else if (config.open()) {
             String uuid = parseUuid(config.uuid());
             if (uuid == null) {
@@ -329,6 +325,40 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         return result;
     }
 
+    private DataResult doUpdateWithTemplate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        String[] uuid = config.uuid();
+        if (uuid.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+        }
+
+        BackendInfoResource bir = ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, getLocalContext());
+        if (bir.getVersion().mode == MinionMode.CENTRAL) {
+            helpAndFailIfMissing(config.server(), "Missing --server");
+        }
+
+        Path template = Paths.get(config.template());
+        try (InputStream is = Files.newInputStream(template)) {
+            InstanceTemplateReferenceDescriptor desc = StorageHelper.fromYamlStream(is,
+                    InstanceTemplateReferenceDescriptor.class);
+
+            // verify that instance template has at least one template group mapping
+            if (desc.defaultMappings == null || desc.defaultMappings.isEmpty()) {
+                throw new IllegalArgumentException("Instance " + desc.name + " does not map to any nodes.");
+            }
+
+            InstanceTemplateReferenceResultDto result = ir.getTemplateResource().updateWithTemplate(desc, config.server(),
+                    config.uuid()[0]);
+
+            if (result.status != InstanceTemplateReferenceStatus.ERROR) {
+                return createSuccess().setMessage(result.status + ": " + result.message);
+            } else {
+                return createResultWithErrorMessage(result.status + ": " + result.message);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot process " + config.template(), e);
+        }
+    }
+
     private DataResult doCreate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
         helpAndFailIfMissing(config.name(), "Missing --name");
         helpAndFailIfMissing(config.purpose(), "Missing --purpose");
@@ -380,7 +410,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             InstanceTemplateReferenceDescriptor desc = StorageHelper.fromYamlStream(is,
                     InstanceTemplateReferenceDescriptor.class);
 
-            // verify that instance template has at least on template group mapping.
+            // verify that instance template has at least one template group mapping
             if (desc.defaultMappings == null || desc.defaultMappings.isEmpty()) {
                 throw new IllegalArgumentException("Instance " + desc.name + " does not map to any nodes.");
             }
