@@ -335,9 +335,10 @@ export class SystemTemplateComponent implements OnInit {
     this.nodeNames = Object.keys(this.template.nodes);
     this.templates = this.template.template.instances.map((i) => {
       // cannot be null, as the backend would otherwise reject.
+      const initialProductVersionRegex = i.initialProductVersionRegex || i.productVersionRegex; 
       const prod = this.template.products.find(
         (p) =>
-          p.product === i.productId && (!i.productVersionRegex || new RegExp(i.productVersionRegex).test(p.key.tag)),
+          p.product === i.productId && (!initialProductVersionRegex || new RegExp(initialProductVersionRegex).test(p.key.tag)),
       );
 
       const expStatus: StatusMessage[] = [];

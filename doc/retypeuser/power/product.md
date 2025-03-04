@@ -884,7 +884,8 @@ instances:
   - name: "Demo Instance" <3>
     description: "The Test System"s Demo Instance"
     productId: "io.bdeploy/demo"
-    productVersionRegex: "2\\..*"
+    productVersionRegex: "3\\..*"
+    initialProductVersionRegex: "2\\.."
     templateName: "Default Configuration"
   - name: "Chat Instance"
     description: "The Test System's first Chat Instance"
@@ -936,15 +937,16 @@ Defined `templateVariables` can be used in each `instances` `name`, `description
 
 Each element provides a description of an instance to be created from a specific product and a specific instance template.
 
-| Attribute             | Description                                                                                                                                                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                | The name of the instance to create. May use **Template Variables** from the **System Template**.                                                                                                                                                              |
-| `description`         | Describes the purpose or meaning of the to-be-created instance.                                                                                                                                                                                               |
-| `productId`           | The **ID** of the product to be used. Note that this is not the **Name**. It corresponds to the `product` field in [`product-info.yaml`](#product-infoyaml).                                                                                                  |
-| `productVersionRegex` | An optional regular expression which narrows down allowable versions of the specified product. Useful in case multiple major versions of a product exist on a server, and only a certain one is supported. Otherwise, the newest product version is selected. |
-| `templateName`        | The name of the **Instance Template** to apply to create this instance. This template must exist in the selected product version.                                                                                                                             |
-| `defaultMappings`     | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset by UI and an exception is thrown by CLI.       |
-| `fixedVariables`      | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.                                                                  |
+| Attribute                    | Description                                                                                                                                                                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                       | The name of the instance to create. May use **Template Variables** from the **System Template**.                                                                                                                                                              |
+| `description`                | Describes the purpose or meaning of the to-be-created instance.                                                                                                                                                                                               |
+| `productId`                  | The **ID** of the product to be used. Note that this is not the **Name**. It corresponds to the `product` field in [`product-info.yaml`](#product-infoyaml).                                                                                                  |
+| `productVersionRegex`        | An optional regular expression which is used to is used to filter newer product versions for product update suggestions. Serves as initialProductVersionRegex, if initialProductVersionRegex is not provided.                                                 |
+| `initialProductVersionRegex` | An optional regular expression which narrows down allowable versions of the specified product. Useful in case multiple major versions of a product exist on a server, and only a certain one is supported. Otherwise, the newest product version is selected. |
+| `templateName`               | The name of the **Instance Template** to apply to create this instance. This template must exist in the selected product version.                                                                                                                             |
+| `defaultMappings`            | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset by UI and an exception is thrown by CLI.       |
+| `fixedVariables`             | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.                                                                  |
 
 ## product-validation.yaml
 

@@ -498,7 +498,8 @@ public class ProductResourceImpl implements ProductResource {
         dataHolder.name = "Instance of " + selectedVersion.name;
         dataHolder.description = "This is an instance containing " + selectedVersion.name + (versionSet ? ":" + version : "");
         dataHolder.productId = productId;
-        dataHolder.productVersionRegex = versionSet ? version : "<OPTIONAL REGEX EXPRESSION>";
+        dataHolder.productVersionRegex = "<OPTIONAL REGEX EXPRESSION>";
+        dataHolder.initialProductVersionRegex = versionSet ? version : "<OPTIONAL REGEX EXPRESSION>";
         dataHolder.templateName = selectedInstanceTemplate.name;
         dataHolder.defaultMappings = selectedInstanceTemplate.groups.stream().map(x -> {
             String node = switch (x.type) {

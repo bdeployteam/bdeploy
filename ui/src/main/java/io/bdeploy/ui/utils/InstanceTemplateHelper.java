@@ -18,11 +18,11 @@ public class InstanceTemplateHelper {
         Optional<ProductDto> product = findMatchingProduct(instance, products);
 
         if (product.isEmpty()) {
-            boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
-                    || ".*".equals(instance.productVersionRegex));
+            String regex = getInitialProductVersionRegex(instance);
+            boolean hasRegex = regex != null && !".*".equals(regex);
             throw new WebApplicationException(
                     "Cannot find matching product with ID '" + instance.productId
-                            + (hasRegex ? ("' (with version matching: " + instance.productVersionRegex + ")") : "'")
+                            + (hasRegex ? ("' (with version matching: " + regex + ")") : "'")
                             + " or matching version does not have instance template named '" + instance.templateName + "'",
                     Status.NOT_ACCEPTABLE);
         }
@@ -32,8 +32,8 @@ public class InstanceTemplateHelper {
 
     public static Optional<ProductDto> findMatchingProduct(InstanceTemplateReferenceDescriptor instance,
             List<ProductDto> products) {
-        boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
-                || ".*".equals(instance.productVersionRegex));
+        String regex = getInitialProductVersionRegex(instance);
+        boolean hasRegex = regex != null && !".*".equals(regex);
 
         // the list is ordered - the first matching product is also the best matching version of that product.
         return products.stream().filter(p -> {
@@ -42,13 +42,19 @@ public class InstanceTemplateHelper {
             }
 
             // check whether the version pattern is fulfilled
-            if (hasRegex && !Pattern.matches(instance.productVersionRegex, p.key.getTag())) {
+            if (hasRegex && !Pattern.matches(regex, p.key.getTag())) {
                 return false;
             }
 
             // check whether requested template is in this version, otherwise reject.
             return p.instanceTemplates.stream().anyMatch(t -> t.name.equals(instance.templateName));
         }).findFirst();
+    }
+
+    public static String getInitialProductVersionRegex(InstanceTemplateReferenceDescriptor instance) {
+        return instance.initialProductVersionRegex != null && !instance.initialProductVersionRegex.isEmpty()
+                ? instance.initialProductVersionRegex
+                : instance.productVersionRegex;
     }
 
 }
