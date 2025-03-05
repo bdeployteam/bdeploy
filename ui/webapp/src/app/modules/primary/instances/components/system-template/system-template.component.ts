@@ -409,13 +409,11 @@ export class SystemTemplateComponent implements OnInit {
         continue;
       }
 
-      tpl.tpl.groups
-        .flatMap((g) => g.groupVariables)
-        .forEach((v) => {
-          if (tpl.requiredVariables.findIndex((x) => x.id === v.id) === -1) {
-            tpl.requiredVariables.push(v);
-          }
-        });
+      grp.groupVariables?.forEach((v) => {
+        if (tpl.requiredVariables.findIndex((x) => x.id === v.id) === -1) {
+          tpl.requiredVariables.push(v);
+        }
+      });
     }
 
     // according to the "new" requiredVariables list, clear out properties which should not be there (anymore)
