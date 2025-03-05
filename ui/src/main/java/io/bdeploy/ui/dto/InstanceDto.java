@@ -14,7 +14,6 @@ public class InstanceDto {
     public InstanceConfiguration instanceConfiguration;
 
     public Manifest.Key activeProduct;
-    public ProductDto activeProductDto;
 
     public Manifest.Key latestVersion;
     public Manifest.Key activeVersion;
@@ -27,10 +26,9 @@ public class InstanceDto {
     public ConfigDirDto configRoot;
 
     public static InstanceDto create(Manifest.Key instance, InstanceConfiguration instanceConfiguration,
-            Manifest.Key activeProduct,
-            ManagedMasterDto managedServer, CustomAttributesRecord attributes, InstanceBannerRecord banner,
-            Manifest.Key latestVersion, Manifest.Key activeVersion, InstanceOverallStateRecord overallState,
-            ConfigDirDto configRoot) {
+            Manifest.Key activeProduct, ManagedMasterDto managedServer, CustomAttributesRecord attributes,
+            InstanceBannerRecord banner, Manifest.Key latestVersion, Manifest.Key activeVersion,
+            InstanceOverallStateRecord overallState, ConfigDirDto configRoot) {
         InstanceDto dto = new InstanceDto();
         dto.instance = instance;
         dto.instanceConfiguration = instanceConfiguration;
