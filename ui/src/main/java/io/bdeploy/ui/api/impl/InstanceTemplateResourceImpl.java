@@ -138,8 +138,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         }
 
         // 2. find and verify all group mappings and whether all variables are set for each required group.
-        Set<String> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes().keySet();
-
         FlattenedInstanceTemplateConfiguration tpl = product.instanceTemplates.stream()
                 .filter(t -> t.name.equals(instance.templateName)).findFirst()
                 .orElseThrow(() -> new WebApplicationException("Cannot find specified instance template: " + instance.templateName
