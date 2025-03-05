@@ -2,7 +2,9 @@ package io.bdeploy.common.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
@@ -96,7 +98,7 @@ public class Threads {
             try (PrintWriter pw = new PrintWriter(Files.newOutputStream(outputName), false, StringHelper.DEFAULT_CHARSET)) {
                 ThreadMXBean mxb = ManagementFactory.getThreadMXBean();
                 for (ThreadInfo i : mxb.dumpAllThreads(true, true)) {
-                    pw.append(i.toString());
+                    pw.append(toString(i));
                 }
             } catch (Exception e) {
                 log.warn("Cannot create thread dump.", e);
@@ -111,5 +113,74 @@ public class Threads {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * This is a copy of {@link ThreadInfo#toString()}. The builtin method cuts off traces after 8 frames. This implementation
+     * does not (this is the only modification! keep this code as close to the original as possible!).
+     *
+     * @see <a href="https://bugs.openjdk.org/browse/JDK-8019366">this bug</a>
+     */
+    private static String toString(ThreadInfo info) {
+        StringBuilder sb = new StringBuilder(
+                "\"" + info.getThreadName() + "\"" + (info.isDaemon() ? " daemon" : "") + " prio=" + info.getPriority() + " Id="
+                        + info.getThreadId() + " " + info.getThreadState());
+        if (info.getLockName() != null) {
+            sb.append(" on " + info.getLockName());
+        }
+        if (info.getLockOwnerName() != null) {
+            sb.append(" owned by \"" + info.getLockOwnerName() + "\" Id=" + info.getLockOwnerId());
+        }
+        if (info.isSuspended()) {
+            sb.append(" (suspended)");
+        }
+        if (info.isInNative()) {
+            sb.append(" (in native)");
+        }
+        sb.append('\n');
+        StackTraceElement[] stackTrace = info.getStackTrace();
+        int i = 0;
+        for (; i < stackTrace.length; i++) {
+            StackTraceElement ste = stackTrace[i];
+            sb.append("\tat " + ste.toString());
+            sb.append('\n');
+            if (i == 0 && info.getLockInfo() != null) {
+                Thread.State ts = info.getThreadState();
+                switch (ts) {
+                    case BLOCKED:
+                        sb.append("\t-  blocked on " + info.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    case WAITING:
+                        sb.append("\t-  waiting on " + info.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    case TIMED_WAITING:
+                        sb.append("\t-  waiting on " + info.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    default:
+                }
+            }
+
+            for (MonitorInfo mi : info.getLockedMonitors()) {
+                if (mi.getLockedStackDepth() == i) {
+                    sb.append("\t-  locked " + mi);
+                    sb.append('\n');
+                }
+            }
+        }
+
+        LockInfo[] locks = info.getLockedSynchronizers();
+        if (locks.length > 0) {
+            sb.append("\n\tNumber of locked synchronizers = " + locks.length);
+            sb.append('\n');
+            for (LockInfo li : locks) {
+                sb.append("\t- " + li);
+                sb.append('\n');
+            }
+        }
+        sb.append('\n');
+        return sb.toString();
     }
 }
