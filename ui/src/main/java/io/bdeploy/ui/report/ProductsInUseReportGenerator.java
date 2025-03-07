@@ -68,8 +68,8 @@ public class ProductsInUseReportGenerator implements ReportGenerator {
                 ProductDto currentProduct = keyToProduct.get(instanceConfiguration.product);
                 boolean activeProductVersionMatch = activeProduct != null
                         && ProductVersionMatchHelper.matchesVersion(activeProduct, productVersion, regex);
-                boolean currentProductVersionMatch = ProductVersionMatchHelper.matchesVersion(currentProduct, productVersion,
-                        regex);
+                boolean currentProductVersionMatch = currentProduct != null
+                        && ProductVersionMatchHelper.matchesVersion(currentProduct, productVersion, regex);
                 if (!activeProductVersionMatch && !currentProductVersionMatch) {
                     continue;
                 }
