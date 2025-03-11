@@ -53,13 +53,13 @@
           icon="security"
           [route]="['panels', 'admin', 'user-group-detail', group.id, 'permission']"
         ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          text="Edit Group..."
-          icon="edit"
-          [route]="['panels', 'admin', 'user-group-detail', group.id, 'edit']"
-        ></app-bd-panel-button>
         @if (isNotAllUsersGroup$ | async) {
+          <app-bd-panel-button
+            [collapsed]="false"
+            text="Edit Group..."
+            icon="edit"
+            [route]="['panels', 'admin', 'user-group-detail', group.id, 'edit']"
+          ></app-bd-panel-button>
           <app-bd-button
             icon="delete"
             text="Delete Group"
