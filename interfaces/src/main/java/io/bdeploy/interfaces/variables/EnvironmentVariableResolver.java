@@ -11,7 +11,7 @@ public class EnvironmentVariableResolver extends PrefixResolver {
 
     @Override
     protected String doResolve(String variable) {
-        return System.getenv(variable);
+        String env = System.getenv(variable);
+        return env != null ? env : "";
     }
-
 }

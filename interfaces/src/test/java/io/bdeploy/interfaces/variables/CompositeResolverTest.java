@@ -135,14 +135,13 @@ class CompositeResolverTest {
         testParametersWithoutPrefix(resolvers);
 
         // Test unknown parameters
-        Arrays.stream(Variables.values()).map(Variables::getPrefix).map(prefix -> prefix + "unknown.param").forEach(param -> {
-            assertNull(resolver1.apply(param));
-            assertNull(resolver2.apply(param));
-            assertNull(resolver3.apply(param));
-            assertNull(resolver4.apply(param));
-            assertNull(resolver5.apply(param));
-            assertNull(resolver6.apply(param));
-        });
+        String envVar = Variables.ENVIRONMENT_VARIABLE.getPrefix() + "unknown.param";
+        Arrays.stream(resolvers).forEach(resolver -> assertEquals("", resolver.apply(envVar)));
+        Arrays.stream(Variables.values())//
+                .filter(var -> var != Variables.ENVIRONMENT_VARIABLE)//
+                .map(Variables::getPrefix)//
+                .map(prefix -> prefix + "unknown.param")//
+                .forEach(param -> Arrays.stream(resolvers).forEach(resolver -> assertNull(resolver.apply(param))));
 
         // Test resolving parameters that exist only in other applications of the same node
         testResolvingParamsWithoutProperReference(paramSet1, resolver1, resolver3, resolver4, resolver5, resolver6);
