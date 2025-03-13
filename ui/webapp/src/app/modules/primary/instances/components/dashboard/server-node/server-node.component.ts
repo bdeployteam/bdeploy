@@ -76,23 +76,31 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         const state = states[this.node.nodeName];
         this.nodeState$.next(state);
 
-        const updAvail = updates?.newerVersionAvailable;
-
         const items: StateItem[] = [];
+
+        const updAvail = updates?.newerVersionAvailable;
+        const updAvailInRepo = updates?.newerVersionAvailableInRepository;
+        const anyUpdAvail = updAvail || updAvailInRepo;
+
         items.push({
           name: this.node.nodeConfiguration.product.tag,
-          type: updAvail ? 'update' : 'product',
+          type: anyUpdAvail ? 'update' : 'product',
           tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${
-            updAvail ? ' - Newer version available' : ''
+            updAvail
+              ? '\n\nNewer version available'
+              : updAvailInRepo
+              ? '\n\nNewer version available for import from software repository'
+              : ''
           }`,
-          click: this.auth.isCurrentScopeWrite()
-            ? () => {
-                this.areas.navigateBoth(
-                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
-                  ['panels', 'instances', 'settings', 'product'],
-                );
-              }
-            : null,
+          click:
+            anyUpdAvail && this.auth.isCurrentScopeWrite()
+              ? () => {
+                  this.areas.navigateBoth(
+                    ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
+                    ['panels', 'instances', 'settings', 'product']
+                  );
+                }
+              : null,
         });
 
         items.push(this.getNodeStateItem(state));
