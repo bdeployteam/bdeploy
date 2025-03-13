@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, TemplateRef } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, TemplateRef } from '@angular/core';
 import { DiffType, Difference } from '../../services/history-diff.service';
 import { NgClass } from '@angular/common';
 import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
@@ -9,7 +9,7 @@ import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.
     styleUrls: ['./history-diff-field.component.css'],
     imports: [NgClass, BdPopupDirective]
 })
-export class HistoryDiffFieldComponent implements OnInit {
+export class HistoryDiffFieldComponent implements OnInit, OnChanges {
   @Input() diff: Difference;
   @Input() popup: TemplateRef<unknown>;
 
@@ -27,6 +27,14 @@ export class HistoryDiffFieldComponent implements OnInit {
     this.borderClass = this.getBorderClass();
     this.bgClass = this.getBgClass();
     this.value = this.getValue();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['diff']) {
+      this.borderClass = this.getBorderClass();
+      this.bgClass = this.getBgClass();
+      this.value = this.getValue();
+    }
   }
 
   private getBorderClass(): string {
