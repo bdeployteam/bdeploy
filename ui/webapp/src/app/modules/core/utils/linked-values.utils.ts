@@ -417,10 +417,10 @@ export function gatherSpecialExpansions(
     group: null
   });
   result.push({
-    name: 'I:UUID',
+    name: 'I:ID',
     description: `The instance ID`,
     preview: getInstanceIdOrMock(instance),
-    link: '{{I:UUID}}',
+    link: '{{I:ID}}',
     group: null
   });
   result.push({
