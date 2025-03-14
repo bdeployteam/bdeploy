@@ -15,12 +15,12 @@ import org.junit.jupiter.api.io.TempDir;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
+import io.bdeploy.interfaces.descriptor.template.SystemTemplateDescriptor;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
-import io.bdeploy.ui.cli.RemoteInstanceGroupTool;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
 import io.bdeploy.ui.cli.RemoteSystemTool;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -142,22 +142,11 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
     private void applyInstanceTemplate(RemoteService remote, Path tmp, String initialProductVersionRegex,
             String productVersionRegex) throws IOException {
         // Create the instance template
-        Path instanceTemplatePath = tmp.resolve("system-template.yaml");
-        String template = """
-                name: "Test Instance"
-                description: "Instance To Test Product Version Regex Functionality"
-                productId: "io.bdeploy/test"
-                <PRODUCT_VERSION_REGEX>
-                <INITIAL_PRODUCT_VERSION_REGEX>
-                templateName: "Default Test Configuration"
-                defaultMappings:
-                  - group: "Only Group"
-                    node: "master"
-                        """;
-        String ipvr = initialProductVersionRegex == null ? "" : "initialProductVersionRegex: " + initialProductVersionRegex;
-        String pvr = productVersionRegex == null ? "" : "productVersionRegex: " + productVersionRegex;
-        Files.writeString(instanceTemplatePath,
-                template.replace("<INITIAL_PRODUCT_VERSION_REGEX>", ipvr).replace("<PRODUCT_VERSION_REGEX>", pvr));
+        Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
+        InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();
+        instanceTemplate.initialProductVersionRegex = initialProductVersionRegex;
+        instanceTemplate.productVersionRegex = productVersionRegex;
+        TestProductFactory.writeToFile(instanceTemplatePath, instanceTemplate);
 
         // Import the instance template
         remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_NAME",
@@ -167,7 +156,7 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
         StructuredOutput output = remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list");
         assertEquals(1, output.size());
         assertEquals("INSTANCE_NAME", output.get(0).get("Name"));
-        assertEquals("Instance To Test Product Version Regex Functionality", output.get(0).get("Description"));
+        assertEquals("Instance From TestProductFactory", output.get(0).get("Description"));
         assertEquals("1", output.get(0).get("Version"));
         assertEquals("TEST", output.get(0).get("Purpose"));
         assertEquals("io.bdeploy/test/product", output.get(0).get("Product"));
@@ -179,24 +168,10 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
             String productVersionRegex) throws IOException {
         // Create the system template
         Path systemTemplatePath = tmp.resolve("system-template.yaml");
-        String template = """
-                name: Test System
-                description: SYSTEM_DESCRIPTION
-                instances:
-                  - name: "Test Instance"
-                    description: "The Test Instance of the Test System"
-                    productId: "io.bdeploy/test"
-                    <PRODUCT_VERSION_REGEX>
-                    <INITIAL_PRODUCT_VERSION_REGEX>
-                    templateName: "Default Test Configuration"
-                    defaultMappings:
-                      - group: "Only Group"
-                        node: "master"
-                        """;
-        String ipvr = initialProductVersionRegex == null ? "" : "initialProductVersionRegex: " + initialProductVersionRegex;
-        String pvr = productVersionRegex == null ? "" : "productVersionRegex: " + productVersionRegex;
-        Files.writeString(systemTemplatePath,
-                template.replace("<INITIAL_PRODUCT_VERSION_REGEX>", ipvr).replace("<PRODUCT_VERSION_REGEX>", pvr));
+        SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
+        systemTemplate.instances.get(0).productVersionRegex = productVersionRegex;
+        systemTemplate.instances.get(0).initialProductVersionRegex = initialProductVersionRegex;
+        TestProductFactory.writeToFile(systemTemplatePath, systemTemplate);
 
         // Import the system template
         remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=SYSTEM_NAME", "--purpose=TEST",
@@ -209,94 +184,10 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
         assertEquals("SYSTEM_DESCRIPTION", output.get(0).get("Description"));
     }
 
-    private void createInstanceGroup(RemoteService remote) {
-        StructuredOutput output = remote(remote, RemoteInstanceGroupTool.class, "--list");
-        assertEquals(0, output.size());
-
-        remote(remote, RemoteInstanceGroupTool.class, "--create=GROUP_NAME");
-
-        output = remote(remote, RemoteInstanceGroupTool.class, "--list");
-        assertEquals(1, output.size());
-        assertEquals("GROUP_NAME", output.get(0).get("Name"));
-    }
-
     private void createAndUploadProduct(RemoteService remote, Path tmp) throws IOException {
-        // Create necessary subdirectory
         Path productPath = Files.createDirectory(tmp.resolve("product"));
         Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
-
-        // Create the executeables
-        Files.writeString(productPath.resolve("launch.bat"), "echo \"Successfully launched on WINDOWS\"");
-        Files.writeString(productPath.resolve("launch.sh"), "echo \"Successfully launched on LINUX\"");
-
-        // Create the product metadata
-        Files.writeString(productPath.resolve("product-info.yaml"),//
-                """
-                        name: "Test Product"
-                        product: "io.bdeploy/test"
-                        vendor: BDeploy Team
-                        applications:
-                          - "test-app"
-                        instanceTemplates:
-                          - "instance-template.yaml"
-                        versionFile: "product-version.yaml"
-                        """);
-        Files.writeString(productPath.resolve("product-version.yaml"),//
-                """
-                        version: "1.0.0"
-                        appInfo:
-                          test-app:
-                            WINDOWS: "app-info.yaml"
-                            LINUX: "app-info.yaml"
-                            """);
-        Files.writeString(productPath.resolve("app-info.yaml"),//
-                """
-                        name: "Test Application"
-                        supportedOperatingSystems:
-                          - WINDOWS
-                          - LINUX
-                        processControl:
-                          gracePeriod: 3000
-                          supportedStartTypes:
-                            - MANUAL
-                            - MANUAL_CONFIRM
-                            - INSTANCE
-                          supportsKeepAlive: true
-                          noOfRetries: 2
-                        startCommand:
-                          launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
-                          """);
-        Files.writeString(productPath.resolve("instance-template.yaml"),//
-                """
-                        name: Default Test Configuration
-                        description: "Creates an instance with the default configuration"
-                        processControlGroups:
-                          - name: "First Group"
-                            startType: "PARALLEL"
-                            startWait: "WAIT"
-                          - name: "Second Group"
-                            stopType: "PARALLEL"
-                        groups:
-                          - name: "Only Group"
-                            description: "The one and only group"
-                            applications:
-                              - application: test-app
-                                name: "Test Application"
-                                description: "Test Application that prints a single line to the standard output"
-                                processControl:
-                                  startType: "MANUAL_CONFIRM"
-                                  """);
-
-        // Push the product
-        remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath, "--import=" + productPath,
-                "--push");
-
-        ProductManifest.invalidateAllScanCaches();
-
-        StructuredOutput output = remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath,
-                "--list");
-        assertEquals(1, output.size());
-        assertEquals("Test Product", output.get(0).get("Name"));
-        assertEquals("1", output.get(0).get("NoOfInstanceTemplates"));
+        TestProductFactory.writeProductToFile(productPath, TestProductFactory.generateProduct());
+        uploadProduct(remote, bhivePath, productPath);
     }
 }

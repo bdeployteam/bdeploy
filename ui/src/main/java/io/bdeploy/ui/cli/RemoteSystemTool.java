@@ -111,10 +111,10 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         @Help(value = "Delete the system with the given ID", arg = false)
         boolean delete() default false;
 
-        @Help("The name to set for the updated instance")
+        @Help("The name to set for the updated system")
         String name();
 
-        @Help("The description to set for the created/updated instance")
+        @Help("The description to set for the created/updated system")
         String description();
 
         @Help("The name of the managed server if the system is created on a target CENTRAL server.")
