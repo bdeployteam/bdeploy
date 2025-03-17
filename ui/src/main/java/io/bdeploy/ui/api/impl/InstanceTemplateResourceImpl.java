@@ -412,9 +412,10 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             LinkedValueConfiguration lv = null;
             for (var g : tpl.groups) {
                 for (var a : g.applications) {
+                    var atvr = new TemplateVariableResolver(a.templateVariables, Collections.emptyList(), tvr);
                     for (var p : a.startParameters) {
                         if (p.id.equals(id)) {
-                            String value = TemplateHelper.process(p.value, tvr, Variables.TEMPLATE.shouldResolve());
+                            String value = TemplateHelper.process(p.value, atvr, Variables.TEMPLATE.shouldResolve());
                             lv = new LinkedValueConfiguration(value);
                         }
                     }
@@ -535,10 +536,11 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
     }
 
     private static ApplicationConfiguration createApplicationFromTemplate(FlattenedApplicationTemplateConfiguration reqApp,
-            ApplicationManifest am, InstanceNodeConfigurationDto node, TemplateVariableResolver tvr,
+            ApplicationManifest am, InstanceNodeConfigurationDto node, TemplateVariableResolver parentTvr,
             Function<String, LinkedValueConfiguration> globalLookup) {
         ApplicationConfiguration cfg = new ApplicationConfiguration();
         ApplicationDescriptor appDesc = am.getDescriptor();
+        TemplateVariableResolver tvr = new TemplateVariableResolver(reqApp.templateVariables, Collections.emptyList(), parentTvr);
 
         cfg.id = UuidHelper.randomId();
         cfg.name = reqApp.name == null ? am.getDescriptor().name
