@@ -62,7 +62,7 @@ public class MinionState {
     public List<Path> storageLocations = new ArrayList<>();
 
     /**
-     * Minimum available disc space on working directories.
+     * Minimum available disc space (in bytes) on working directories.
      */
     public Long storageMinFree = 1L * 1024 * 1024 * 1024;
 
