@@ -76,7 +76,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help("Path to a ZIP file containing an export produced with this command. Requires exactly 1 uuid to be set.")
+        @Help("Path to a ZIP file containing an export produced with this tool. Requires exactly 1 uuid to be set.")
         @Validator(ExistingPathValidator.class)
         String importFrom();
 
@@ -234,8 +234,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         InstancePurpose purpose = config.purpose();
         String system = config.system();
         Boolean autoStartup = config.disableAutoStart() ? Boolean.FALSE : config.enableAutoStart() ? Boolean.TRUE : null;
-        Boolean autoUninstall = config.disableAutoUninstall()
-                ? Boolean.FALSE
+        Boolean autoUninstall = config.disableAutoUninstall() ? Boolean.FALSE
                 : config.enableAutoUninstall() ? Boolean.TRUE : null;
         String productRegEx = config.productVersionRegex();
 
