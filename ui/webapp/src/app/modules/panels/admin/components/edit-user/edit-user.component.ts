@@ -71,7 +71,7 @@ export class EditUserComponent implements OnInit, AfterViewInit, DirtyableDialog
     this.subscription?.unsubscribe();
   }
 
-  public isDirty() {
+  public isDirty(): boolean {
     return isDirty(this.tempUser, this.origUser);
   }
 

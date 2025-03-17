@@ -68,12 +68,8 @@ export class EditUserGroupComponent implements OnInit, AfterViewInit, DirtyableD
     this.subscription?.unsubscribe();
   }
 
-  public isDirty() {
+  public isDirty(): boolean {
     return isDirty(this.tempGroup, this.origGroup);
-  }
-
-  protected updateDirty() {
-    this.isDirty$.next(this.isDirty());
   }
 
   protected onSave() {

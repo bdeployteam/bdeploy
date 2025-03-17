@@ -70,7 +70,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
     this.subscription?.unsubscribe();
   }
 
-  public isDirty() {
+  public isDirty(): boolean {
     return isDirty(this.server, this.orig);
   }
 

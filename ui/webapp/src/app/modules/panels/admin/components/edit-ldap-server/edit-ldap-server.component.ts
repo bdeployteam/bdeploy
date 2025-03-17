@@ -64,7 +64,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription?.unsubscribe();
   }
 
-  public isDirty() {
+  public isDirty(): boolean {
     if (this.tempServer && this.initialServer) {
       return isDirty(this.tempServer, this.initialServer);
     }
