@@ -82,17 +82,17 @@ public class TestProductFactory {
 
     public static TestProductDescriptor generateProduct() {
         TestProductDescriptor product = new TestProductDescriptor();
-        product.descriptor = generateProductDescriptor();
-        product.version = generateProductVersionDescriptor();
-        product.applications = Map.of("app-info.yaml", generateApplicationDescriptor());
-        product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplateDescriptor());
-        product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplateDescriptor());
+        product.descriptor = generateProductInfo();
+        product.version = generateProductVersion();
+        product.applications = Map.of("app-info.yaml", generateApplication());
+        product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplate());
+        product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplate());
         product.launchBat = "echo \"Successfully launched on WINDOWS\"";
         product.launchSh = "echo \"Successfully launched on LINUX\"";
         return product;
     }
 
-    private static ProductDescriptor generateProductDescriptor() {
+    private static ProductDescriptor generateProductInfo() {
         ProductDescriptor productDescriptor = new ProductDescriptor();
         productDescriptor.name = "Test Product";
         productDescriptor.product = "io.bdeploy/test";
@@ -104,14 +104,14 @@ public class TestProductFactory {
         return productDescriptor;
     }
 
-    private static ProductVersionDescriptor generateProductVersionDescriptor() {
+    private static ProductVersionDescriptor generateProductVersion() {
         ProductVersionDescriptor productVersion = new ProductVersionDescriptor();
         productVersion.version = "1.0.0";
         productVersion.appInfo = Map.of("server-app", Map.of(WINDOWS, "app-info.yaml", LINUX, "app-info.yaml"));
         return productVersion;
     }
 
-    private static InstanceTemplateDescriptor generateInstanceTemplateDescriptor() {
+    private static InstanceTemplateDescriptor generateInstanceTemplate() {
         InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
         tpl.name = "Default Test Configuration";
         tpl.description = "Creates an instance with the default configuration";
@@ -143,7 +143,7 @@ public class TestProductFactory {
         return tpl;
     }
 
-    private static ApplicationTemplateDescriptor generateApplicationTemplateDescriptor() {
+    private static ApplicationTemplateDescriptor generateApplicationTemplate() {
         ApplicationTemplateDescriptor tpl = new ApplicationTemplateDescriptor();
         tpl.id = "server-with-sleep";
         tpl.application = "server-app";
@@ -169,7 +169,7 @@ public class TestProductFactory {
         return tpl;
     }
 
-    private static ApplicationDescriptor generateApplicationDescriptor() {
+    private static ApplicationDescriptor generateApplication() {
         ApplicationDescriptor app = new ApplicationDescriptor();
         app.name = "Server Application";
         app.supportedOperatingSystems = List.of(WINDOWS, LINUX);
