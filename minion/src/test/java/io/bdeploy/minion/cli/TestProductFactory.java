@@ -202,9 +202,9 @@ public class TestProductFactory {
         try {
             String text = YAML_MAPPER.writeValueAsString(obj);
             Files.writeString(path, text);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to write object to file");
+            throw new RuntimeException("Failed to write object to file", e);
         }
     }
 
@@ -218,9 +218,9 @@ public class TestProductFactory {
             Files.writeString(productPath.resolve("launch.bat"), product.launchBat);
             Files.writeString(productPath.resolve("launch.sh"), product.launchSh);
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to write product to file");
+            throw new RuntimeException("Failed to write product to file", e);
         }
     }
 
