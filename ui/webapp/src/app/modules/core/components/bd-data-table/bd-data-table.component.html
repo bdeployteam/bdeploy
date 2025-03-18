@@ -1,4 +1,5 @@
-<div class="flex-auto flex flex-col">
+<div [ngClass]="maxHeight == null ? 'flex-auto flex flex-col' : 'overflow-auto'"
+     [style]="{'max-height': maxHeight == null ? 'auto' : maxHeight}">
   <table
     [id]="id"
     mat-table

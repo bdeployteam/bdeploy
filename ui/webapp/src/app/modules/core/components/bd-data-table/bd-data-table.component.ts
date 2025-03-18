@@ -107,6 +107,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** Maximum amount of rows that will be displayed to the user (for performance reasons) */
   @Input() maxRows = MAX_ROWS_PER_GROUP;
 
+  /** If set the table will not exceed this height. It should also include a valid unit of measure. */
+  @Input() maxHeight?: string = null;
+
   /**
    * The columns to display
    */

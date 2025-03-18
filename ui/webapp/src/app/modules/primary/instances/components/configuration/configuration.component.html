@@ -131,7 +131,7 @@
             [dismissable]="true"
             header="Product Update"
             icon="lightbulb"
-            class="bd-rect-card max-h-[450px]"
+            class="bd-rect-card"
             background="dialog"
             (dismiss)="edit.dismissUpdateIssues()"
             >
@@ -140,6 +140,7 @@
               post-processing.
             </div>
             <app-bd-data-table
+              [maxHeight]="'300px'"
               [records]="(edit.state$ | async)?.warnings"
               [columns]="issuesColumns"
             ></app-bd-data-table>
@@ -152,10 +153,14 @@
             header="Validation Issues"
             icon="warning"
             [type]="'warning'"
-            class="bd-rect-card max-h-[450px]"
+            class="bd-rect-card"
             background="dialog"
             >
-            <app-bd-data-table [records]="issues" [columns]="validationColumns"></app-bd-data-table>
+            <app-bd-data-table
+              [maxHeight]="'300px'"
+              [records]="issues"
+              [columns]="validationColumns">
+            </app-bd-data-table>
           </app-bd-notification-card>
         }
         <!-- banner if set. -->
