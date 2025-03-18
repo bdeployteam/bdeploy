@@ -30,6 +30,7 @@ import { BdFormSelectComponent } from '../../../../core/components/bd-form-selec
 import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.directive';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { AsyncPipe } from '@angular/common';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 
 const GROUP_TEMPLATE: ProcessControlGroupConfiguration = {
   name: '',
@@ -44,7 +45,7 @@ const GROUP_TEMPLATE: ProcessControlGroupConfiguration = {
     templateUrl: './add-control-group.component.html',
   imports: [MatCard, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdNotificationCardComponent, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, BdPopupDirective, BdButtonComponent, AsyncPipe]
 })
-export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
   protected readonly cfg = inject(ConfigService);
   protected readonly edit = inject(InstanceEditService);
@@ -69,14 +70,17 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
   protected hasPendingChanges: boolean;
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-      if (!state || !route?.params?.['node']) {
-        this.node = null;
-        return;
-      }
-      this.nodeName = route.params['node'];
-      this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params['node'])?.nodeConfiguration;
-    });
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
+    this.subscription.add(
+      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
+        if (!state || !route?.params?.['node']) {
+          this.node = null;
+          return;
+        }
+        this.nodeName = route.params['node'];
+        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params['node'])?.nodeConfiguration;
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -94,6 +98,10 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
 
   public isDirty(): boolean {
     return isDirty(this.newGroup, GROUP_TEMPLATE);
+  }
+
+  public canSave(): boolean {
+    return this.form.valid;
   }
 
   protected onSave() {

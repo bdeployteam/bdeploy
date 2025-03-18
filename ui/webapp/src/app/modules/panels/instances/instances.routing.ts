@@ -165,11 +165,13 @@ export const INSTANCES_PANEL_ROUTES: Route[] = [
     path: 'config/add-control-group/:node',
     loadComponent: () => import('./components/add-control-group/add-control-group.component').then(m => m.AddControlGroupComponent),
     canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard]
   },
   {
     path: 'config/edit-control-group/:node/:cgrp',
     loadComponent: () => import('./components/edit-control-group/edit-control-group.component').then(m => m.EditControlGroupComponent),
     canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard]
   },
   {
     path: 'config/process/:node/:process',
