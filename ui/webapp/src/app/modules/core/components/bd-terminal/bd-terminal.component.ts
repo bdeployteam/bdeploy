@@ -93,12 +93,12 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.allowInput) {
-      this.stdinSubscription.unsubscribe();
+      this.stdinSubscription?.unsubscribe();
       this.stdinSubscription = null;
       this.stdinResize.dispose();
       this.stdinResize = null;
     }
-    this.searchSubscription.unsubscribe();
+    this.searchSubscription?.unsubscribe();
   }
 
   bdOnSearch(search: string): void {
