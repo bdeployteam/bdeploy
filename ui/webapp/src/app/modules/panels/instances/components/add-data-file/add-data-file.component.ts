@@ -83,7 +83,9 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
   }
 
   protected onSave() {
-    this.doSave().subscribe();
+    this.doSave().subscribe((r) => {
+      if (r) this.reset();
+    });
   }
 
   get filePath(): string {
@@ -120,15 +122,8 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     }
 
     return update.pipe(
-      finalize(() => this.saving$.next(false)),
-      tap((r) => {
-        if (r) this.reset();
-      }),
+      finalize(() => this.saving$.next(false))
     );
-  }
-
-  public doReplace(): Observable<unknown> {
-    return this.filesService.updateFile(this.directory, this.fileToSave);
   }
 
   private shouldReplace() {
@@ -155,6 +150,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
       // extract the base64 part of the data URL...
       this.tempFileContent = result.substr(result.indexOf(',') + 1);
       this.tempFileContentLoading$.next(false);
+      this.form.form.markAsDirty();
     };
     reader.readAsDataURL(file);
   }

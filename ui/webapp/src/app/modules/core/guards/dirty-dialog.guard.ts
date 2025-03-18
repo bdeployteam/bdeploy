@@ -51,16 +51,10 @@ export interface DirtyableDialog {
   /**
    * Saves the current state - may NOT perform ANY navigation!
    * <p>
-   * May return an observable which resolves to boolean 'true' value. In this case,
-   * and if a doReplace method is present, doReplace is called in addition to doSave.
+   * If observable from dirty side panel resolves to boolean 'false' value, then panel will not be closed
+   * and navigation will be cancelled.
    */
   doSave(): Observable<any>;
-
-  /**
-   * Optional method which can be provided. In this case, resolving an observable returned by doSave
-   * to the boolean value 'true' will make the guard call this method in addition.
-   */
-  doReplace?(): Observable<unknown>;
 }
 
 @Injectable({
@@ -139,14 +133,7 @@ export class DirtyDialogGuard {
         }
         if (x === DirtyActionType.SAVE) {
           return component.doSave().pipe(
-            switchMap((replace) => {
-              const closeDialog = replace === true || replace === null;
-              if (component.doReplace && replace) {
-                component.doReplace().subscribe();
-              }
-              this.areas.forcePanelClose$.next(closeDialog);
-              return of(closeDialog);
-            })
+            switchMap((result) => of (result !== false))
           );
         }
         return of(true);
