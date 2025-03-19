@@ -35,7 +35,7 @@ const actSave: BdDialogMessageAction<DirtyActionType> = {
  *
  * Note: There are three requirements for proper dirty handling:
  *  1) Implement the DirtyableDialog interface.
- *  2) Register the component in the constructur with NavAreasService#registerDirtyable.
+ *  2) Register the component in the constructor with NavAreasService#registerDirtyable.
  *  3) Add the DirtyDialogGuard to canDeactivate of the components route.
  */
 export interface DirtyableDialog {
