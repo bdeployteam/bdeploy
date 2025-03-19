@@ -3,7 +3,7 @@ import { VariableConfiguration, VariableDescriptor } from 'src/app/models/gen.dt
 import { MatCard } from '@angular/material/card';
 
 @Component({
-    selector: 'bd-variable-desc-card',
+    selector: 'app-bd-variable-desc-card',
     templateUrl: './bd-variable-desc-card.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatCard]
