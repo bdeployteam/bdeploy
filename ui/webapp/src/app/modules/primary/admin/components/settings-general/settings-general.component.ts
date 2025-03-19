@@ -58,10 +58,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
   }
 
   protected tabChanged(tab: MatTabChangeEvent) {
-    this.router.navigate([], { queryParams: { tabIndex: tab.index } });
+    this.router.navigate(['', { outlets: { panel: null } }], { queryParams: { tabIndex: tab.index } });
     this.tabIndex = tab.index;
-    if (this.areas.panelVisible$.value) {
-      setTimeout(() => this.areas.closePanel());
-    }
   }
 }
