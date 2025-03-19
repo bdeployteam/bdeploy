@@ -15,6 +15,6 @@ export class AddLdapServerPanel extends BasePanel {
   }
 
   async apply() {
-    await this.getDialog().getByRole('button', { name: 'Save' }).click();
+    await this.getDialog().getByRole('button', { name: 'Apply' }).click();
   }
 }

@@ -87,9 +87,9 @@
       }
       <app-bd-button
         color="primary"
-        [collapsed]="false"
-        text="Apply"
+        text="Save"
         icon="save"
+        [collapsed]="false"
         [disabled]="form.invalid || !(isDirty$ | async)"
         (click)="onSave()"
       ></app-bd-button>

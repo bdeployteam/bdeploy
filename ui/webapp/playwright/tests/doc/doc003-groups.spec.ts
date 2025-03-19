@@ -126,7 +126,7 @@ test('Global Attributes', async ({ standalone }) => {
 
   const addPanel = await tab.addAttribute();
   await addPanel.fill('Test Attribute', 'This is a test attribute');
-  await addPanel.save();
+  await addPanel.apply();
 
   await expect(tab.getTableRowContaining('Test Attribute')).toBeVisible();
   await admin.screenshot('Doc_Admin_Global_Attributes');
