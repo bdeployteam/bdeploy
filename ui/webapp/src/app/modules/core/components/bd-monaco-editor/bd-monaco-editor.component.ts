@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Component, forwardRef, inject, Input, NgZone } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { fromEvent } from 'rxjs';
-
 import { BdMonacoBaseEditorComponent } from './bd-monaco-base-editor.component';
+import { GlobalMonacoModule } from '../../services/monaco-completions.service';
+import { editor } from 'monaco-editor';
+import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
+import IStandaloneEditorConstructionOptions = editor.IStandaloneEditorConstructionOptions;
 
-declare let monaco: any;
+declare let monaco: GlobalMonacoModule;
 
 @Component({
   selector: 'app-bd-monaco-editor',
@@ -18,16 +20,20 @@ declare let monaco: any;
   }
   ]
 })
-export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent implements ControlValueAccessor {
+export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent<IStandaloneCodeEditor, IStandaloneEditorConstructionOptions> implements ControlValueAccessor {
   private zone = inject(NgZone);
 
   private _value = '';
 
-  propagateChange = (_: any) => {};
-  onTouched = () => {};
+  propagateChange: (_: unknown) => void = () => {
+    /* intentionally empty */
+  };
+  onTouched: () => void = () => {
+    /* intentionally empty */
+  };
 
   @Input()
-  set options(options: any) {
+  set options(options: IStandaloneEditorConstructionOptions) {
     this._options = Object.assign({}, options);
     if (this._editor) {
       this._editor.dispose();
@@ -35,13 +41,13 @@ export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent impleme
     }
   }
 
-  get options(): any {
+  get options(): IStandaloneEditorConstructionOptions {
     return this._options;
   }
 
-  writeValue(value: any): void {
+  writeValue(value: string): void {
     this._value = value || '';
-    // Fix for value change while dispose in process.
+    // Fix for value change while dispose in process
     setTimeout(() => {
       if (this._editor) {
         this._editor.setValue(this._value);
@@ -49,24 +55,23 @@ export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent impleme
     });
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (_: unknown) => void): void {
     this.propagateChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
-  protected initMonaco(options: any): void {
-
+  protected initMonaco(options: IStandaloneEditorConstructionOptions): void {
     this._editor = monaco.editor.create(this._editorContainer.nativeElement, options);
 
     this._editor.setValue(this._value);
 
-    this._editor.onDidChangeModelContent((e: any) => {
+    this._editor.onDidChangeModelContent((e: unknown) => {
       const value = this._editor.getValue();
 
-      // value is not propagated to parent when executing outside zone.
+      // value is not propagated to parent when executing outside zone
       this.zone.run(() => {
         this.propagateChange(value);
         this._value = value;
@@ -77,12 +82,11 @@ export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent impleme
       this.onTouched();
     });
 
-    // refresh layout on resize event.
+    // refresh layout on resize event
     if (this._windowResizeSubscription) {
       this._windowResizeSubscription.unsubscribe();
     }
     this._windowResizeSubscription = fromEvent(window, 'resize').subscribe(() => this._editor.layout());
-    this.onInit.emit(this._editor);
+    this.init.emit(this._editor);
   }
-
 }

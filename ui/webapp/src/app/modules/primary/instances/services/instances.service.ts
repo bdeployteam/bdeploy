@@ -184,8 +184,8 @@ export class InstancesService {
     });
   }
 
-  public create(instance: Partial<InstanceConfiguration>, managedServer: string): Observable<any> {
-    return this.http.put(`${this.apiPath(this.group)}`, instance, {
+  public create(instance: Partial<InstanceConfiguration>, managedServer: string): Observable<InstanceConfiguration> {
+    return this.http.put<InstanceConfiguration>(`${this.apiPath(this.group)}`, instance, {
       params: { managedServer }
     });
   }

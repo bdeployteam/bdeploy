@@ -1,4 +1,12 @@
-import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpEventType,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+  HttpResponse
+} from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { UploadInfoDto } from 'src/app/models/gen.dtos';
@@ -20,7 +28,7 @@ export enum UploadState {
 }
 
 /** Status of each file upload */
-export class UploadStatus {
+export class UploadStatus<T> {
   file: File;
 
   /** The upload progress in percent (0-100)  */
@@ -32,8 +40,11 @@ export class UploadStatus {
   /** Notification when the state changes */
   stateObservable: Observable<UploadState>;
 
-  /** The error message if failed. Or the response body if OK */
-  detail: any;
+  /** The response body if OK */
+  detail?: T;
+
+  /** The error if the request failed */
+  error?: string;
 
   /** Activity scope ID */
   scope: string;
@@ -52,7 +63,7 @@ export interface UrlParameter {
   id: string;
   name: string;
   type: string;
-  value: any;
+  value: string | number | boolean;
 }
 
 export enum ImportState {
@@ -95,13 +106,13 @@ export class UploadService {
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public upload(
+  public upload<T>(
     url: string,
     files: File[],
     urlParameter: UrlParameter[][],
     formDataParam: string,
-  ): Map<string, UploadStatus> {
-    const result: Map<string, UploadStatus> = new Map<string, UploadStatus>();
+  ): Map<string, UploadStatus<T>> {
+    const result: Map<string, UploadStatus<T>> = new Map<string, UploadStatus<T>>();
 
     for (let i = 0; i < files.length; ++i) {
       const file = files[i];
@@ -117,13 +128,13 @@ export class UploadService {
    *
    *  @param url the target URL to post the files to
    *  @param file the files to upload
-   *  @param urlParameter additional url parameter per file
+   *  @param urlParameters additional url parameter per file
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public uploadFile(url: string, file: File, urlParameter: UrlParameter[], formDataParam: string): UploadStatus {
+  public uploadFile<T>(url: string, file: File, urlParameters: UrlParameter[], formDataParam: string): UploadStatus<T> {
     // create a new progress-subject for every file
-    const uploadStatus = new UploadStatus();
+    const uploadStatus = new UploadStatus<T>();
     const progressSubject = new Subject<number>();
     const stateSubject = new BehaviorSubject<UploadState>(UploadState.UPLOADING);
     uploadStatus.file = file;
@@ -148,9 +159,9 @@ export class UploadService {
     };
 
     // create and set additional HttpParams
-    if (urlParameter) {
+    if (urlParameters) {
       let httpParams = new HttpParams();
-      urlParameter.forEach((p) => {
+      urlParameters.forEach((p) => {
         if (p.type === 'boolean') {
           httpParams = httpParams.set(p.id, p.value === true ? 'true' : 'false');
         } else {
@@ -162,7 +173,7 @@ export class UploadService {
 
     // create a http-post request and pass the form
     const req = new HttpRequest('POST', url, formData, options);
-    const sub = this.http.request(req).subscribe({
+    const sub = this.http.request<T>(req).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress) {
           const percentDone = Math.round((100 * event.loaded) / event.total);
@@ -179,8 +190,8 @@ export class UploadService {
           stateSubject.complete();
         }
       },
-      error: (error) => {
-        uploadStatus.detail = error.statusText + ' (Status ' + error.status + ')';
+      error: (error: HttpErrorResponse) => {
+        uploadStatus.error = error.statusText + ' (Status ' + error.status + ')';
         stateSubject.next(UploadState.FAILED);
         progressSubject.complete();
         stateSubject.complete();
@@ -204,12 +215,12 @@ export class UploadService {
         headers: suppressGlobalErrorHandling(new HttpHeaders()),
       })
       .subscribe({
-        next: (d) => {
+        next: (d: UploadInfoDto) => {
           importStatus.detail = d.details;
           stateSubject.next(ImportState.FINISHED);
           stateSubject.complete();
         },
-        error: (error) => {
+        error: (error: HttpErrorResponse) => {
           importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
           stateSubject.next(ImportState.FAILED);
           stateSubject.complete();

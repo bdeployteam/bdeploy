@@ -3,7 +3,7 @@ import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 import { BdPanelButtonComponent } from '../../../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -11,7 +11,7 @@ import {
     templateUrl: './attribute-edit-action.component.html',
     imports: [BdPanelButtonComponent],
 })
-export class AttributeEditActionComponent implements TableCellDisplay<CustomAttributeDescriptor> {
+export class AttributeEditActionComponent implements CellComponent<CustomAttributeDescriptor, string> {
   @Input() record: CustomAttributeDescriptor;
-  @Input() column: BdDataColumn<CustomAttributeDescriptor>;
+  @Input() column: BdDataColumn<CustomAttributeDescriptor, string>;
 }

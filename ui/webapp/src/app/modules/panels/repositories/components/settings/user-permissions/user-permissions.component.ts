@@ -34,7 +34,7 @@ export class UserPermissionsComponent {
   public readonly users = inject(RepositoryUsersService);
   public readonly userCols = inject(UsersColumnsService);
 
-  private readonly colInheritedPerm: BdDataColumn<UserInfo> = {
+  private readonly colInheritedPerm: BdDataColumn<UserInfo, Permission> = {
     id: 'inherited',
     name: 'Inherited Perm.',
     data: (r) => this.getInheritedPermissionLevel(r),
@@ -43,7 +43,7 @@ export class UserPermissionsComponent {
     component: BdDataPermissionLevelCellComponent
   };
 
-  private readonly colGlobalPerm: BdDataColumn<UserInfo> = {
+  private readonly colGlobalPerm: BdDataColumn<UserInfo, Permission> = {
     id: 'global',
     name: 'Global Perm.',
     data: (r) => this.getGlobalPermissionLevel(r),
@@ -51,7 +51,7 @@ export class UserPermissionsComponent {
     component: BdDataPermissionLevelCellComponent
   };
 
-  private readonly colLocalPerm: BdDataColumn<UserInfo> = {
+  private readonly colLocalPerm: BdDataColumn<UserInfo, Permission> = {
     id: 'local',
     name: 'Local Perm.',
     data: (r) => this.getLocalPermissionLevel(r),
@@ -59,7 +59,7 @@ export class UserPermissionsComponent {
     component: BdDataPermissionLevelCellComponent
   };
 
-  private readonly colModPerm: BdDataColumn<UserInfo> = {
+  private readonly colModPerm: BdDataColumn<UserInfo, string> = {
     id: 'modify',
     name: 'Modify',
     data: (r) => `Modify permissions for ${r.name}`,
@@ -76,7 +76,7 @@ export class UserPermissionsComponent {
     disabled: () => !this.getLocalPermissionLevel(this.modUser)
   };
 
-  protected readonly columns: BdDataColumn<UserInfo>[] = [
+  protected readonly columns: BdDataColumn<UserInfo, unknown>[] = [
     ...this.userCols.defaultUsersColumns,
     this.colInheritedPerm,
     this.colGlobalPerm,

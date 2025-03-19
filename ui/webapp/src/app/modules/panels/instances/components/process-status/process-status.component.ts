@@ -65,13 +65,13 @@ export interface PinnedParameter {
   type: VariableType;
 }
 
-const colPinnedName: BdDataColumn<PinnedParameter> = {
+const colPinnedName: BdDataColumn<PinnedParameter, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
 };
 
-const colPinnedValue: BdDataColumn<PinnedParameter> = {
+const colPinnedValue: BdDataColumn<PinnedParameter, string> = {
   id: 'value',
   name: 'Value',
   data: (r) => r.value,
@@ -126,7 +126,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected nodeCfg: InstanceNodeConfigurationDto;
   protected startType: 'Instance' | 'Manual' | 'Confirmed Manual';
   protected pinnedParameters: PinnedParameter[] = [];
-  protected readonly pinnedColumns: BdDataColumn<PinnedParameter>[] = [colPinnedName, colPinnedValue];
+  protected readonly pinnedColumns: BdDataColumn<PinnedParameter, unknown>[] = [colPinnedName, colPinnedValue];
   protected uiEndpoints: ProcessUiEndpoint[] = [];
 
   // we only show a loading spinner if loading takes longer than 200ms.
@@ -165,8 +165,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     this.startDisabled$,
   ]).pipe(map(([perm, verifying, startDisabled]) => !perm || verifying || startDisabled));
 
-  private restartProgressHandle: any;
-  private uptimeCalculateHandle: any;
+  private restartProgressHandle: ReturnType<typeof setTimeout>;
+  private uptimeCalculateHandle: ReturnType<typeof setTimeout>;
 
   private subscription: Subscription;
 

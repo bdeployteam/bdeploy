@@ -7,6 +7,7 @@ import IStandaloneDiffEditor = editor.IStandaloneDiffEditor;
 import ITextModel = editor.ITextModel;
 import { GlobalMonacoModule, WindowWithMonacoLoaded } from '../../services/monaco-completions.service';
 import { BdMonacoDiffEditorComponent } from '../bd-monaco-editor/bd-monaco-diff-editor.component';
+import IStandaloneDiffEditorConstructionOptions = editor.IStandaloneDiffEditorConstructionOptions;
 
 @Component({
     selector: 'app-bd-editor-diff',
@@ -26,9 +27,8 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   @Input() path = '';
   @Output() modifiedContentChange = new EventEmitter<string>();
 
-  protected editorOptions = {
+  protected editorOptions: IStandaloneDiffEditorConstructionOptions = {
     theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
-    language: 'plaintext',
     automaticLayout: true,
     glyphMargin: true,
   };

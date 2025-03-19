@@ -18,7 +18,7 @@
   }
   @if ((failed$ | async) || (finished$ | async)) {
     <div class="break-all bd-description-text">
-      {{ (failed$ | async) ? status.detail : this.resultEvaluator(status) }}
+      {{ (failed$ | async) ? status.error : this.resultEvaluator(status) }}
     </div>
   }
 </app-bd-notification-card>

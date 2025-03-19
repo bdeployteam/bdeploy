@@ -4,7 +4,7 @@ import { BdButtonPopupComponent } from '../../../../../../core/components/bd-but
 import { BdNotificationCardComponent } from '../../../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -12,7 +12,7 @@ import {
     templateUrl: './template-message-details.component.html',
     imports: [BdButtonPopupComponent, BdNotificationCardComponent]
 })
-export class TemplateMessageDetailsComponent implements TableCellDisplay<TemplateMessage> {
+export class TemplateMessageDetailsComponent implements CellComponent<TemplateMessage, string> {
   @Input() record: TemplateMessage;
-  @Input() column: BdDataColumn<TemplateMessage>;
+  @Input() column: BdDataColumn<TemplateMessage, string>;
 }

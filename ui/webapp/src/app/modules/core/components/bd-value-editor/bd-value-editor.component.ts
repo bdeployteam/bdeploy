@@ -56,7 +56,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
 
   @Input() label: string;
   @Input() name: string;
-  @Input() required: boolean;
+  @Input() required: boolean | string;
   @Input() suggested: string[];
   @Input() process: ApplicationConfiguration;
   @Input() instance: InstanceConfigurationDto;
@@ -152,7 +152,7 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     this.onTouchedCb();
   }
 
-  writeValue(v: any): void {
+  writeValue(v: LinkedValueConfiguration): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
       this.booleanValue = this.internalValue?.value === 'true';
@@ -160,11 +160,11 @@ export class BdValueEditorComponent implements OnInit, ControlValueAccessor, Err
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (_: unknown) => void): void {
     this.onChangedCb = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouchedCb = fn;
   }
 

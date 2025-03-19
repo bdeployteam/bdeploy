@@ -6,9 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdDataColumn } from '../../../../../models/data';
-import {
-  TableCellDisplay
-} from '../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { CellComponent } from '../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-history-state-column',
@@ -16,11 +14,11 @@ import {
     styleUrls: ['./history-state-column.component.css'],
     imports: [MatIcon, NgClass, MatTooltip]
 })
-export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy, TableCellDisplay<HistoryEntryDto> {
+export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy, CellComponent<HistoryEntryDto, string> {
   private readonly state = inject(InstanceStateService);
 
   @Input() record: HistoryEntryDto;
-  @Input() column: BdDataColumn<HistoryEntryDto>;
+  @Input() column: BdDataColumn<HistoryEntryDto, string>;
 
   private states: InstanceStateRecord;
   private subscription: Subscription;

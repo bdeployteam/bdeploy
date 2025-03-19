@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ContentCompletion } from '../components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { getRecursivePrefix } from '../utils/completion.utils';
-import { editor, languages, Uri } from 'monaco-editor';
+import { editor, languages, Uri, IRange} from 'monaco-editor';
 import CompletionItem = languages.CompletionItem;
 
 export interface GlobalMonacoModule {
@@ -45,7 +45,7 @@ export class MonacoCompletionsService {
   private completions: ContentCompletion[];
   private recursivePrefixes: string[];
 
-  public getCompletions(globalMonaco: GlobalMonacoModule, word: string, range: any): CompletionItem[] {
+  public getCompletions(globalMonaco: GlobalMonacoModule, word: string, range: IRange): CompletionItem[] {
     const result: CompletionItem[] = [];
 
     if (!this.completions?.length) {

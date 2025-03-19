@@ -7,7 +7,7 @@ import { ProductVersionDetailsCellComponent } from 'src/app/modules/panels/insta
   providedIn: 'root',
 })
 export class ProductsColumnsService {
-  private readonly productNameColumn: BdDataColumn<ProductDto> = {
+  private readonly productNameColumn: BdDataColumn<ProductDto, string> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -16,7 +16,7 @@ export class ProductsColumnsService {
     sortCard: true,
   };
 
-  public readonly productVersionColumn: BdDataColumn<ProductDto> = {
+  public readonly productVersionColumn: BdDataColumn<ProductDto, string> = {
     id: 'version',
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -27,14 +27,14 @@ export class ProductsColumnsService {
     sortCard: true,
   };
 
-  private readonly productVendorColumn: BdDataColumn<ProductDto> = {
+  private readonly productVendorColumn: BdDataColumn<ProductDto, string> = {
     id: 'vendor',
     name: 'Vendor',
     hint: BdDataColumnTypeHint.FOOTER,
     data: (r) => r.vendor,
   };
 
-  private readonly productLogoCardColumn: BdDataColumn<ProductDto> = {
+  private readonly productLogoCardColumn: BdDataColumn<ProductDto, string> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -42,14 +42,14 @@ export class ProductsColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  public readonly defaultProductsColumns: BdDataColumn<ProductDto>[] = [
+  public readonly defaultProductsColumns: BdDataColumn<ProductDto, unknown>[] = [
     this.productNameColumn,
     this.productVersionColumn,
     this.productVendorColumn,
     this.productLogoCardColumn,
   ];
 
-  public readonly defaultReducedProductsColumns: BdDataColumn<ProductDto>[] = [
+  public readonly defaultReducedProductsColumns: BdDataColumn<ProductDto, unknown>[] = [
     this.productNameColumn,
     this.productVersionColumn,
   ];

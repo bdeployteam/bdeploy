@@ -40,8 +40,8 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   /**
    * The columns to display
    */
-  protected _columns: BdDataColumn<T>[];
-  @Input() set columns(val: BdDataColumn<T>[]) {
+  protected _columns: BdDataColumn<T, unknown>[];
+  @Input() set columns(val: BdDataColumn<T, unknown>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
       (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH
@@ -53,7 +53,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
    * concatenate each value in each record object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T, unknown>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-grid should register itself as a BdSearchable with the global SearchService.
@@ -72,7 +72,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
+  @Input() sortData: (data: T[], column: BdDataColumn<T, unknown>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /**
    * Which column to sort cards by

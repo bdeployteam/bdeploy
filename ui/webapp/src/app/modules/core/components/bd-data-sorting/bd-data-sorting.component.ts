@@ -19,9 +19,9 @@ export class BdDataSortingComponent<T> {
   /**
    * The columns to select for sorting
    */
-  protected _columns: BdDataColumn<T>[];
+  protected _columns: BdDataColumn<T, unknown>[];
 
-  @Input() set columns(cols: BdDataColumn<T>[]) {
+  @Input() set columns(cols: BdDataColumn<T, unknown>[]) {
     this._columns = cols.filter((col) => col.sortCard);
   }
 
@@ -31,7 +31,7 @@ export class BdDataSortingComponent<T> {
   @Input() disabled = false;
 
   protected direction: SortDirection;
-  protected get selectedColumn(): BdDataColumn<T> {
+  protected get selectedColumn(): BdDataColumn<T, unknown> {
     return this._columns?.find((col) => col.id === this.sort?.active);
   }
 
@@ -44,7 +44,7 @@ export class BdDataSortingComponent<T> {
     return `Sort By: ${column} ${direction}`;
   }
 
-  updateSortColumn(col: BdDataColumn<T>): void {
+  updateSortColumn(col: BdDataColumn<T, unknown>): void {
     this.sort = { active: col.id, direction: this.sort?.direction };
     this.sortChange.emit(this.sort);
   }

@@ -34,13 +34,13 @@ export class UsersBrowserComponent {
   protected readonly settings = inject(SettingsService);
   protected readonly bulk = inject(UserBulkService);
 
-  private readonly colInGroups: BdDataColumn<UserInfo> = {
+  private readonly colInGroups: BdDataColumn<UserInfo, string> = {
     id: 'inGroups',
     name: 'In Groups',
     data: (r) => this.getInGroups(r),
   };
 
-  private readonly colPermLevel: BdDataColumn<UserInfo> = {
+  private readonly colPermLevel: BdDataColumn<UserInfo, Permission> = {
     id: 'permLevel',
     name: 'Global Permission',
     data: (r) => getGlobalPermission(r.permissions),
@@ -48,7 +48,7 @@ export class UsersBrowserComponent {
     width: '100px',
   };
 
-  private readonly colInheritedPermLevel: BdDataColumn<UserInfo> = {
+  private readonly colInheritedPermLevel: BdDataColumn<UserInfo, Permission> = {
     id: 'inheritedPermLevel',
     name: 'Inherited Global Permission',
     data: (r) => this.getInheritedGlobalPermission(r),
@@ -56,7 +56,7 @@ export class UsersBrowserComponent {
     width: '100px',
   };
 
-  private readonly colInact: BdDataColumn<UserInfo> = {
+  private readonly colInact: BdDataColumn<UserInfo, string> = {
     id: 'inactive',
     name: 'Inact.',
     data: (r) => (r.inactive ? 'check_box' : 'check_box_outline_blank'),
@@ -64,14 +64,14 @@ export class UsersBrowserComponent {
     width: '40px',
   };
 
-  private readonly colAuthBy: BdDataColumn<UserInfo> = {
+  private readonly colAuthBy: BdDataColumn<UserInfo, string> = {
     id: 'authBy',
     name: 'Authenticated By',
     data: (r) => this.getAuthenticatedBy(r),
     showWhen: '(min-width: 1500px)',
   };
 
-  private readonly colLastLogin: BdDataColumn<UserInfo> = {
+  private readonly colLastLogin: BdDataColumn<UserInfo, number> = {
     id: 'lastLogin',
     name: 'Last active login',
     data: (r) => r.lastActiveLogin,
@@ -83,7 +83,7 @@ export class UsersBrowserComponent {
   protected loading$ = combineLatest([this.settings.loading$, this.authAdmin.loadingUsers$]).pipe(
     map(([s, a]) => s || a),
   );
-  protected readonly columns: BdDataColumn<UserInfo>[] = [
+  protected readonly columns: BdDataColumn<UserInfo, unknown>[] = [
     ...this.userColumns.defaultUsersColumns,
     this.colPermLevel,
     this.colInGroups,

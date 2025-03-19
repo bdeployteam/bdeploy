@@ -18,7 +18,7 @@ import { AsyncPipe } from '@angular/common';
 export class PluginsTabComponent {
   protected readonly plugins = inject(PluginAdminService);
 
-  private readonly colId: BdDataColumn<PluginInfoDto> = {
+  private readonly colId: BdDataColumn<PluginInfoDto, string> = {
     id: 'id',
     name: 'ID',
     data: (r) => r.id.id,
@@ -26,20 +26,20 @@ export class PluginsTabComponent {
     showWhen: '(min-width: 1000px)',
   };
 
-  private readonly colName: BdDataColumn<PluginInfoDto> = {
+  private readonly colName: BdDataColumn<PluginInfoDto, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
   };
 
-  private readonly colVersion: BdDataColumn<PluginInfoDto> = {
+  private readonly colVersion: BdDataColumn<PluginInfoDto, string> = {
     id: 'version',
     name: 'Version',
     data: (r) => r.version,
     width: '100px',
   };
 
-  private readonly colLoaded: BdDataColumn<PluginInfoDto> = {
+  private readonly colLoaded: BdDataColumn<PluginInfoDto, string> = {
     id: 'loaded',
     name: 'Loaded',
     data: (r) => (r.loaded ? 'check_box' : 'check_box_outline_blank'),
@@ -47,7 +47,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  private readonly colGlobal: BdDataColumn<PluginInfoDto> = {
+  private readonly colGlobal: BdDataColumn<PluginInfoDto, string> = {
     id: 'global',
     name: 'Global',
     data: (r) => (r.global ? 'public' : null),
@@ -55,7 +55,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  private readonly colLoadUnload: BdDataColumn<PluginInfoDto> = {
+  private readonly colLoadUnload: BdDataColumn<PluginInfoDto, PluginInfoDto> = {
     id: 'loadUnload',
     name: 'Ctrl',
     data: (r) => r,
@@ -63,7 +63,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  private readonly colDelete: BdDataColumn<PluginInfoDto> = {
+  private readonly colDelete: BdDataColumn<PluginInfoDto, PluginInfoDto> = {
     id: 'delete',
     name: 'Del.',
     data: (r) => r,
@@ -71,7 +71,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  protected readonly columns: BdDataColumn<PluginInfoDto>[] = [
+  protected readonly columns: BdDataColumn<PluginInfoDto, unknown>[] = [
     this.colId,
     this.colName,
     this.colVersion,

@@ -56,13 +56,13 @@ export interface TemplateMessage {
   message: StatusMessage;
 }
 
-const tplColName: BdDataColumn<TemplateMessage> = {
+const tplColName: BdDataColumn<TemplateMessage, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => (r.appname ? r.appname : `${r.group}/${r.node}`),
 };
 
-const tplColDetails: BdDataColumn<TemplateMessage> = {
+const tplColDetails: BdDataColumn<TemplateMessage, string> = {
   id: 'details',
   name: 'Details',
   data: (r) => r.message.message,
@@ -91,7 +91,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected variables: Record<string, string>; // key is var name, value is value.
   protected groups: Record<string, string>; // key is group name, value is target node name.
   protected messages: TemplateMessage[];
-  protected readonly msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
+  protected readonly msgColumns: BdDataColumn<TemplateMessage, unknown>[] = [tplColName, tplColDetails];
   protected isAnyGroupSelected = false;
   protected hasAllVariables = false;
   protected firstStepCompleted = false;
@@ -210,7 +210,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected applyStageFinal() {
     this.loading$.next(true);
     this.messages = [];
-    const observables: Observable<any>[] = [];
+    const observables: Observable<string>[] = [];
 
     // prepare available process control groups
     const pcgs = this.template.processControlGroups.map(

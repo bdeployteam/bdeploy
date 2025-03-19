@@ -113,10 +113,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /**
    * The columns to display
    */
-  protected _columns: BdDataColumn<T>[] = [];
+  protected _columns: BdDataColumn<T, unknown>[] = [];
   protected _visibleColumns: string[] = [];
 
-  @Input() set columns(val: BdDataColumn<T>[]) {
+  @Input() set columns(val: BdDataColumn<T, unknown>[]) {
     if (!val) {
       return;
     }
@@ -135,14 +135,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
+  @Input() sortData: (data: T[], column: BdDataColumn<T, unknown>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T, unknown>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -504,7 +504,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     return (level - 1) * 24 + 40;
   }
 
-  protected getUnknownIcon(col: BdDataColumn<T>) {
+  protected getUnknownIcon(col: BdDataColumn<T, unknown>) {
     console.warn('No icon callback registered for column definition with action', col);
     return 'help'; // default fallback.
   }
@@ -586,13 +586,13 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     return selected.length > 0 && selected.length < children.length; // at least one but not all.
   }
 
-  protected isImageColumn(col: BdDataColumn<T>) {
+  protected isImageColumn(col: BdDataColumn<T, unknown>) {
     return col.hint === BdDataColumnTypeHint.AVATAR;
   }
 
-  protected getImageUrl(col: BdDataColumn<T>, record: T) {
+  protected getImageUrl(col: BdDataColumn<T, unknown>, record: T) {
     const url = col.data(record);
-    if (url) {
+    if (url && typeof url === 'string') {
       return this.sanitizer.bypassSecurityTrustUrl(url);
     }
     return null;
@@ -607,5 +607,21 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       sourceId: event.previousContainer.id,
       targetId: event.container.id
     });
+  }
+
+  protected getDataAsStringFor(col: BdDataColumn<T, unknown>, record: T) {
+    if(!!record && !!col.data(record)) {
+      return col.data(record).toString();
+    }
+
+    return '';
+  }
+
+  protected getTooltipTextFor(col: BdDataColumn<T, unknown>, record: T) {
+      if(!!record && !!col.tooltip) {
+        return col.tooltip(record);
+      }
+
+      return this.getDataAsStringFor(col, record);
   }
 }

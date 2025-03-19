@@ -6,7 +6,7 @@ import { ReportDescriptor } from 'src/app/models/gen.dtos';
   providedIn: 'root',
 })
 export class ReportsColumnsService {
-  private readonly reportNameColumn: BdDataColumn<ReportDescriptor> = {
+  private readonly reportNameColumn: BdDataColumn<ReportDescriptor, string> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -14,7 +14,7 @@ export class ReportsColumnsService {
     sortCard: true,
   };
 
-  private readonly reportDescriptionColumn: BdDataColumn<ReportDescriptor> = {
+  private readonly reportDescriptionColumn: BdDataColumn<ReportDescriptor, string> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -22,7 +22,7 @@ export class ReportsColumnsService {
     sortCard: true,
   };
 
-  private readonly reportTypeColumn: BdDataColumn<ReportDescriptor> = {
+  private readonly reportTypeColumn: BdDataColumn<ReportDescriptor, string> = {
     id: 'type',
     name: 'Report Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -30,7 +30,7 @@ export class ReportsColumnsService {
     sortCard: true,
   };
 
-  public readonly defaultReportColumns: BdDataColumn<ReportDescriptor>[] = [
+  public readonly defaultReportColumns: BdDataColumn<ReportDescriptor, unknown>[] = [
     this.reportNameColumn,
     this.reportDescriptionColumn,
     this.reportTypeColumn,

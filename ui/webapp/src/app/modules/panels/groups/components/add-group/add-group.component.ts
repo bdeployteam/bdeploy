@@ -96,7 +96,7 @@ export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription?.unsubscribe();
   }
 
-  public doSave(): Observable<void> {
+  public doSave(): Observable<InstanceGroupConfiguration> {
     this.saving$.next(true);
     return this.groups.create(this.group).pipe(
       finalize(() => {

@@ -54,7 +54,7 @@ export class MailSendingComponent implements OnInit, DirtyableDialog, OnDestroy 
       (this.receiverForm.valid && this.smtpConnectionDataForm.valid);
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     this.settings.updateMailSenderSettings(this.mailSenderSettings as MailSenderSettingsDto);
     return of(null);

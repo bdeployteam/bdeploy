@@ -58,7 +58,7 @@
               <app-bd-file-upload
                 [url]="systems.getTemplateUploadUrl()"
                 [file]="file"
-                [resultEvaluator]="onUploadResult"
+                [resultEvaluator]="$any(onUploadResult)"
                 [parameters]="[{id: 'server', name: 'server', type: 'string', value: selectedServer?.hostName}]"
                 (dismiss)="onDismiss()"
               ></app-bd-file-upload>

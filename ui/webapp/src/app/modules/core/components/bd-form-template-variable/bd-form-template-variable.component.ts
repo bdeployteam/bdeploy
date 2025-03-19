@@ -12,7 +12,7 @@ import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [BdFormToggleComponent, FormsModule, MatTooltip, BdFormInputComponent]
 })
-export class BdFormTemplateVariableComponent implements ControlValueAccessor {
+export class BdFormTemplateVariableComponent<T> implements ControlValueAccessor {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
   protected readonly TemplateVariableType = TemplateVariableType;
 
@@ -46,7 +46,7 @@ export class BdFormTemplateVariableComponent implements ControlValueAccessor {
     }
   }
 
-  private internalValue: any = null;
+  private internalValue: T = null;
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
@@ -54,17 +54,17 @@ export class BdFormTemplateVariableComponent implements ControlValueAccessor {
     /* intentionally empty */
   };
 
-  writeValue(v: unknown): void {
+  writeValue(v: T): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (_: unknown) => void): void {
     this.onChangedCb = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouchedCb = fn;
   }
 }

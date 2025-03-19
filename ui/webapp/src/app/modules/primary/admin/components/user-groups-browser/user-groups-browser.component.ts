@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
-import { UserGroupInfo } from 'src/app/models/gen.dtos';
+import { Permission, UserGroupInfo } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
@@ -31,14 +31,14 @@ export class UserGroupsBrowserComponent {
   protected readonly settings = inject(SettingsService);
   protected readonly bulk = inject(UserGroupBulkService);
 
-  private readonly colPermLevel: BdDataColumn<UserGroupInfo> = {
+  private readonly colPermLevel: BdDataColumn<UserGroupInfo, Permission> = {
     id: 'permLevel',
     name: 'Global Permission',
     data: (r) => getGlobalPermission(r.permissions),
     component: BdDataPermissionLevelCellComponent,
   };
 
-  private readonly colInact: BdDataColumn<UserGroupInfo> = {
+  private readonly colInact: BdDataColumn<UserGroupInfo, string> = {
     id: 'inactive',
     name: 'Inact.',
     data: (r) => (r.inactive ? 'check_box' : 'check_box_outline_blank'),
@@ -46,7 +46,7 @@ export class UserGroupsBrowserComponent {
     width: '40px',
   };
 
-  protected readonly columns: BdDataColumn<UserGroupInfo>[] = [
+  protected readonly columns: BdDataColumn<UserGroupInfo, unknown>[] = [
     ...this.groupCols.defaultColumns,
     this.colInact,
     this.colPermLevel,

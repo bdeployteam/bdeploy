@@ -17,19 +17,19 @@ import { NgTemplateOutlet } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatFormField, MatLabel, MatSelect, FormsModule, MatOption, BdFormSelectComponentOptionComponent, MatPrefix, NgTemplateOutlet, MatError]
 })
-export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMatcher {
+export class BdFormSelectComponent<T> implements ControlValueAccessor, ErrorStateMatcher {
   protected readonly ngControl = inject(NgControl, { self: true, optional: true });
 
   @Input() label: string;
   @Input() name: string;
-  @Input() values: unknown[] = [];
+  @Input() values: T[] = [];
   @Input() labels: string[];
-  @Input() required: any;
-  @Input() disabled: any;
+  @Input() required: boolean | string;
+  @Input() disabled: boolean | string;
   @Input() allowNone = false;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
-  @Input() component: Type<ComponentWithSelectedOption<unknown>>;
-  @Input() prefix: TemplateRef<unknown>;
+  @Input() component: Type<ComponentWithSelectedOption<T>>;
+  @Input() prefix: TemplateRef<T>;
 
   public get value() {
     return this.internalValue;
@@ -42,7 +42,7 @@ export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMa
     }
   }
 
-  private internalValue: any = null;
+  private internalValue: T = null;
   private onTouchedCb: () => void = () => {
     /* intentionally empty */
   };
@@ -56,17 +56,17 @@ export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMa
     }
   }
 
-  writeValue(v: unknown): void {
+  writeValue(v: T): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (_: unknown) => void): void {
     this.onChangedCb = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouchedCb = fn;
   }
 

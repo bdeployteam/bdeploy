@@ -77,7 +77,7 @@ export class InstanceBulkService {
     );
   }
 
-  public stop() {
+  public stop(): Observable<BulkOperationResultDto> {
     return this.selection$.pipe(
       take(1),
       map((i) => i.map((dto) => dto.instanceConfiguration.id)),
@@ -91,7 +91,7 @@ export class InstanceBulkService {
     );
   }
 
-  public update(targetVersion: string) {
+  public update(targetVersion: string): Observable<BulkOperationResultDto> {
     return this.selection$.pipe(
       take(1),
       map((i) => i.map((dto) => dto.instance)),
@@ -105,7 +105,7 @@ export class InstanceBulkService {
     );
   }
 
-  public delete() {
+  public delete(): Observable<BulkOperationResultDto> {
     return this.selection$.pipe(
       take(1),
       map((i) => i.map((dto) => dto.instanceConfiguration.id)),
@@ -119,7 +119,7 @@ export class InstanceBulkService {
     );
   }
 
-  public install(): Observable<any> {
+  public install(): Observable<BulkOperationResultDto> {
     return this.selection$.pipe(
       take(1),
       map((i) => i.map((dto) => dto.instanceConfiguration.id)),
@@ -133,7 +133,7 @@ export class InstanceBulkService {
     );
   }
 
-  public activate(): Observable<any> {
+  public activate(): Observable<BulkOperationResultDto> {
     return this.selection$.pipe(
       take(1),
       map((i) => i.map((dto) => dto.instanceConfiguration.id)),

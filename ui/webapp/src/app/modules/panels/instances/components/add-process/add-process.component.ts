@@ -48,7 +48,7 @@ interface AppGroup {
   templates: FlattenedApplicationTemplateConfiguration[];
 }
 
-const colAppName: BdDataColumn<AppRow> = {
+const colAppName: BdDataColumn<AppRow, string> = {
   id: 'name',
   name: 'Application',
   data: (r) => (!r.template ? r.app.appDisplayName : r.template.name),
@@ -69,7 +69,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   protected readonly instanceEdit = inject(InstanceEditService);
   protected readonly servers = inject(ServersService);
 
-  private readonly colAdd: BdDataColumn<AppRow> = {
+  private readonly colAdd: BdDataColumn<AppRow, string> = {
     id: 'add',
     name: 'Add',
     data: (r) => `Add ${r.template ? 'template ' + r.template.name : r.app.appDisplayName} to selected node.`,
@@ -80,7 +80,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected records$ = new BehaviorSubject<AppRow[]>([]);
-  protected readonly columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
+  protected readonly columns: BdDataColumn<AppRow, unknown>[] = [colAppName, this.colAdd];
 
   protected selectedTemplate: FlattenedApplicationTemplateConfiguration;
   protected response: Record<string, string>;

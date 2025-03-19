@@ -1,29 +1,32 @@
 import { Injectable, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
-import { RatingStatusColumnComponent } from '../components/rating-status-column/rating-status-column.component';
+import {
+  PortStatus,
+  RatingStatusColumnComponent
+} from '../components/rating-status-column/rating-status-column.component';
 import { StateStatusColumnComponent } from '../components/state-status-column/state-status-column.component';
 import { NodeApplicationPort } from './ports.service';
 import { ProcessesService } from './processes.service';
 
-const portAppCol: BdDataColumn<NodeApplicationPort> = {
+const portAppCol: BdDataColumn<NodeApplicationPort, string> = {
   id: 'app',
   name: 'Application',
   data: (r) => r.appName,
 };
 
-const portNameCol: BdDataColumn<NodeApplicationPort> = {
+const portNameCol: BdDataColumn<NodeApplicationPort, string> = {
   id: 'name',
   name: 'Parameter',
   data: (r) => r.paramName,
 };
 
-const portNumCol: BdDataColumn<NodeApplicationPort> = {
+const portNumCol: BdDataColumn<NodeApplicationPort, number> = {
   id: 'port',
   name: 'Port',
   data: (r) => r.port,
 };
 
-const portStateCol: BdDataColumn<NodeApplicationPort> = {
+const portStateCol: BdDataColumn<NodeApplicationPort, boolean> = {
   id: 'state',
   name: 'State',
   data: (r) => r.state,
@@ -37,7 +40,7 @@ const portStateCol: BdDataColumn<NodeApplicationPort> = {
 export class PortsColumnsService {
   private readonly processes = inject(ProcessesService);
 
-  private readonly portRatingCol: BdDataColumn<NodeApplicationPort> = {
+  private readonly portRatingCol: BdDataColumn<NodeApplicationPort, PortStatus> = {
     id: 'rating',
     name: 'Rating',
     data: (r) => this.getRating(r),
@@ -45,18 +48,18 @@ export class PortsColumnsService {
     width: '40px',
   };
 
-  public readonly defaultPortsColumns: BdDataColumn<NodeApplicationPort>[] = [
+  public readonly defaultPortsColumns: BdDataColumn<NodeApplicationPort, unknown>[] = [
     portNameCol,
     portNumCol,
     portStateCol,
     this.portRatingCol,
   ];
-  public readonly defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [
+  public readonly defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort, unknown>[] = [
     portAppCol,
     ...this.defaultPortsColumns,
   ];
 
-  private getRating(r: NodeApplicationPort) {
+  private getRating(r: NodeApplicationPort): PortStatus {
     const currentStates = this.processes.processStates$.value;
     const ps = ProcessesService.get(currentStates, r.appId);
     const isRunning = ProcessesService.isRunning(ps.processState);

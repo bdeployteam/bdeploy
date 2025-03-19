@@ -2,7 +2,12 @@ import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { CustomDataGrouping, InstanceDto, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
+import {
+  CustomDataGrouping,
+  InstanceDto,
+  InstanceGroupConfiguration,
+  InstanceOverallStatusDto
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -79,7 +84,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  private readonly colOverallStatus: BdDataColumn<InstanceDto> = {
+  private readonly colOverallStatus: BdDataColumn<InstanceDto, InstanceOverallStatusDto> = {
     id: 'status',
     name: 'Status',
     description: 'Status',
@@ -100,7 +105,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   protected isCardView: boolean;
   protected sort: Sort = { active: 'name', direction: 'asc' };
-  protected columns: BdDataColumn<InstanceDto>[] = [
+  protected columns: BdDataColumn<InstanceDto, unknown>[] = [
     this.instanceColumns.instanceNameColumn,
     this.instanceColumns.instanceIdColumn,
     this.instanceColumns.instanceDescriptionColumn,

@@ -12,14 +12,14 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
-const colTag: BdDataColumn<SoftwareVersion> = {
+const colTag: BdDataColumn<SoftwareVersion, string> = {
   id: 'tag',
   name: 'Version',
   data: (r) => `${r.version}${r.current ? ' - installed' : ''}`,
   classes: (r) => (r.current ? ['bd-text-bold'] : []),
 };
 
-const colSystem: BdDataColumn<SoftwareVersion> = {
+const colSystem: BdDataColumn<SoftwareVersion, string> = {
   id: 'system',
   name: 'Has System',
   data: (r) => (r.system?.length ? 'check_box' : 'check_box_outline_blank'),
@@ -27,7 +27,7 @@ const colSystem: BdDataColumn<SoftwareVersion> = {
   component: BdDataIconCellComponent,
 };
 
-const colLauncher: BdDataColumn<SoftwareVersion> = {
+const colLauncher: BdDataColumn<SoftwareVersion, string> = {
   id: 'launcher',
   name: 'Has Launcher',
   data: (r) => (r.launcher?.length ? 'check_box' : 'check_box_outline_blank'),
@@ -44,7 +44,7 @@ export class UpdateBrowserComponent implements OnInit {
   protected readonly software = inject(SoftwareUpdateService);
   protected readonly bulk = inject(SoftwareVersionBulkService);
 
-  protected readonly columns: BdDataColumn<SoftwareVersion>[] = [colTag, colSystem, colLauncher];
+  protected readonly columns: BdDataColumn<SoftwareVersion, unknown>[] = [colTag, colSystem, colLauncher];
   protected getRecordRoute = (r: SoftwareVersion) => {
     return [
       '',

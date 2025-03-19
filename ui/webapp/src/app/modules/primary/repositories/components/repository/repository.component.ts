@@ -30,10 +30,10 @@ export class RepositoryComponent implements OnInit {
   protected readonly auth = inject(AuthenticationService);
   protected readonly bulk = inject(SoftwareDetailsBulkService);
 
-  protected grouping: BdDataGroupingDefinition<any>[] = [{ name: 'Type', group: (r) => r.type }];
-  protected defaultGrouping: BdDataGrouping<unknown>[] = [{ definition: this.grouping[0], selected: [] }];
+  protected grouping: BdDataGroupingDefinition<SwRepositoryEntry>[] = [{ name: 'Type', group: (r) => r.type }];
+  protected defaultGrouping: BdDataGrouping<SwRepositoryEntry>[] = [{ definition: this.grouping[0], selected: [] }];
 
-  protected getRecordRoute = (row: any) => {
+  protected getRecordRoute = (row: SwRepositoryEntry) => {
     return [
       '',
       {

@@ -11,7 +11,7 @@ import { ConfigFile, ConfigFilesService } from './config-files.service';
 export class ConfigFilesColumnsService {
   private readonly cfgFiles = inject(ConfigFilesService);
 
-  private readonly colStatus: BdDataColumn<ConfigFile> = {
+  private readonly colStatus: BdDataColumn<ConfigFile, string> = {
     id: 'status',
     name: 'Status',
     data: (r) => this.getStatusIcon(r),
@@ -20,13 +20,13 @@ export class ConfigFilesColumnsService {
     showWhen: '(min-width: 500px)',
   };
 
-  private readonly colFileName: BdDataColumn<ConfigFile> = {
+  private readonly colFileName: BdDataColumn<ConfigFile, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => (r.persistent?.path ? r.persistent.path : r.modification.file),
   };
 
-  private readonly colProductState: BdDataColumn<ConfigFile> = {
+  private readonly colProductState: BdDataColumn<ConfigFile, string> = {
     id: 'prodState',
     name: 'Sync. State',
     data: (r) => this.getSyncStateText(r),
@@ -34,7 +34,7 @@ export class ConfigFilesColumnsService {
     showWhen: '(min-width: 800px)',
   };
 
-  private readonly colActions: BdDataColumn<ConfigFile> = {
+  private readonly colActions: BdDataColumn<ConfigFile, ConfigFile> = {
     id: 'actions',
     name: 'Actions',
     data: (r) => r,
@@ -42,14 +42,14 @@ export class ConfigFilesColumnsService {
     width: '230px',
   };
 
-  public readonly defaultColumns: BdDataColumn<ConfigFile>[] = [
+  public readonly defaultColumns: BdDataColumn<ConfigFile, unknown>[] = [
     this.colFileName,
     this.colStatus,
     this.colProductState,
     this.colActions,
   ];
 
-  private getStatusIcon(r: ConfigFile) {
+  private getStatusIcon(r: ConfigFile): string {
     if (!r.modification) {
       return null;
     }
@@ -67,7 +67,7 @@ export class ConfigFilesColumnsService {
     }
   }
 
-  private getSyncStateText(r: ConfigFile) {
+  private getSyncStateText(r: ConfigFile): string {
     const s = this.cfgFiles.getStatus(r);
     switch (s) {
       case 'local':

@@ -5,6 +5,7 @@ import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { Api } from '../plugins/plugin.api';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
+import { EditorPluginModule } from '../plugins/plugin.editor';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +28,7 @@ export class PluginService {
     return this.http.post<string[]>(`${this.config.config.api}/plugin-admin/list-editor-types/${group}`, product);
   }
 
-  public load(plugin: PluginInfoDto, modulePath: string): Promise<any> {
+  public load(plugin: PluginInfoDto, modulePath: string): Promise<EditorPluginModule> {
     // Note: webpackIgnore is extremely important, otherwise webpack tries to resolve the import locally at build time.
     return import(/* webpackIgnore: true */ /* @vite-ignore */ this.config.getPluginUrl(plugin) + modulePath);
   }
@@ -40,12 +41,11 @@ export class PluginService {
     // Note: it is very important to *NOT* use 'this' in the returned object, as 'this' will be a *very* different
     // object than expected when those methods are actually called. we need to alias this to a delegate.
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const delegate = this;
+    const getDelegate: () => PluginService = () => this;
     return {
       get(path, params?) {
         return firstValueFrom(
-          delegate.http.get(delegate.buildPluginUrl(plugin, path), {
+          getDelegate().http.get(getDelegate().buildPluginUrl(plugin, path), {
             params: params,
             responseType: 'text',
           }),
@@ -53,7 +53,7 @@ export class PluginService {
       },
       put(path, body, params?) {
         return firstValueFrom(
-          delegate.http.put(delegate.buildPluginUrl(plugin, path), body, {
+          getDelegate().http.put(getDelegate().buildPluginUrl(plugin, path), body, {
             params: params,
             responseType: 'text',
           }),
@@ -61,7 +61,7 @@ export class PluginService {
       },
       post(path, body, params?) {
         return firstValueFrom(
-          delegate.http.post(delegate.buildPluginUrl(plugin, path), body, {
+          getDelegate().http.post(getDelegate().buildPluginUrl(plugin, path), body, {
             params: params,
             responseType: 'text',
           }),
@@ -69,14 +69,14 @@ export class PluginService {
       },
       delete(path, params?) {
         return firstValueFrom(
-          delegate.http.delete(delegate.buildPluginUrl(plugin, path), {
+          getDelegate().http.delete(getDelegate().buildPluginUrl(plugin, path), {
             params: params,
             responseType: 'text',
           }),
         );
       },
       getResourceUrl() {
-        return delegate.config.getPluginUrl(plugin);
+        return getDelegate().config.getPluginUrl(plugin);
       },
     };
   }

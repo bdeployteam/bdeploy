@@ -24,7 +24,7 @@ export class BhiveLogBrowserComponent implements OnInit {
   protected readonly authService = inject(AuthenticationService);
   protected readonly hiveLogging = inject(HiveLoggingService);
 
-  private readonly colDownload: BdDataColumn<RemoteDirectoryEntry> = {
+  private readonly colDownload: BdDataColumn<RemoteDirectoryEntry, string> = {
     id: 'download',
     name: 'D/L',
     data: (r) => `Download ${r.path}`,
@@ -33,7 +33,7 @@ export class BhiveLogBrowserComponent implements OnInit {
     icon: () => 'cloud_download',
   };
 
-  protected readonly columns: BdDataColumn<RemoteDirectoryEntry>[] = [...this.cols.defaultColumns, this.colDownload];
+  protected readonly columns: BdDataColumn<RemoteDirectoryEntry, unknown>[] = [...this.cols.defaultColumns, this.colDownload];
   protected records$ = new BehaviorSubject<RemoteDirectoryEntry[]>([]);
   protected sort: Sort = { active: 'modified', direction: 'desc' };
   protected directory$ = new BehaviorSubject<RemoteDirectory>(null);

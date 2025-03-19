@@ -36,7 +36,7 @@ export class BdFileUploadRawComponent implements OnInit {
 
   private readonly uploads = inject(UploadService);
 
-  protected uploadStatus: UploadStatus;
+  protected uploadStatus: UploadStatus<UploadInfoDto>;
   protected importStatus: ImportStatus;
   protected isUploadFinished$ = new BehaviorSubject<boolean>(false);
   protected isUploadFailed$ = new BehaviorSubject<boolean>(false);

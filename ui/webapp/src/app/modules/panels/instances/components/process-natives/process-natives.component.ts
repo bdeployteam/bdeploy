@@ -12,7 +12,7 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
 import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
 
-const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
+const nativePidColumn: BdDataColumn<ProcessHandleDto, number> = {
   id: 'pid',
   name: 'PID',
   data: (r) => r.pid,
@@ -20,7 +20,7 @@ const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
   width: '90px',
 };
 
-const nativeCmdColumn: BdDataColumn<ProcessHandleDto> = {
+const nativeCmdColumn: BdDataColumn<ProcessHandleDto, string> = {
   id: 'cmd',
   name: 'Command',
   data: (r) => r.command,
@@ -28,7 +28,7 @@ const nativeCmdColumn: BdDataColumn<ProcessHandleDto> = {
 };
 
 /* only shows something on unix systems, windows cannot do it */
-const nativeArgsColumn: BdDataColumn<ProcessHandleDto> = {
+const nativeArgsColumn: BdDataColumn<ProcessHandleDto, string[]> = {
   id: 'args',
   name: 'Arguments',
   data: (r) => r.arguments,
@@ -36,7 +36,7 @@ const nativeArgsColumn: BdDataColumn<ProcessHandleDto> = {
   component: BdDataPopoverCellComponent,
 };
 
-const nativeCpuColumn: BdDataColumn<ProcessHandleDto> = {
+const nativeCpuColumn: BdDataColumn<ProcessHandleDto, number> = {
   id: 'cpu',
   name: 'CPU Seconds',
   data: (r) => r.totalCpuDuration,
@@ -44,7 +44,7 @@ const nativeCpuColumn: BdDataColumn<ProcessHandleDto> = {
   showWhen: '(min-width: 650px)',
 };
 
-const nativeUserColumn: BdDataColumn<ProcessHandleDto> = {
+const nativeUserColumn: BdDataColumn<ProcessHandleDto, string> = {
   id: 'user',
   name: 'Native User',
   data: (r) => r.user,
@@ -52,7 +52,7 @@ const nativeUserColumn: BdDataColumn<ProcessHandleDto> = {
   showWhen: '(min-width: 800px)',
 };
 
-const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
+const nativeTimeColumn: BdDataColumn<ProcessHandleDto, number> = {
   id: 'startTime',
   name: 'Started At',
   data: (r) => r.startTime,
@@ -68,7 +68,7 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
 export class ProcessNativesComponent implements OnInit, OnDestroy {
   protected readonly details = inject(ProcessDetailsService);
 
-  protected readonly columns: BdDataColumn<ProcessHandleDto>[] = [
+  protected readonly columns: BdDataColumn<ProcessHandleDto, unknown>[] = [
     nativePidColumn,
     nativeCmdColumn,
     nativeArgsColumn,

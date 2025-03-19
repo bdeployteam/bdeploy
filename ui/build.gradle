@@ -213,6 +213,7 @@ task buildAngularInternal(type:Exec) { t ->
 
 task buildAngular() {
     dependsOn 'buildAngularInternal'
+    dependsOn 'checkLintAfterBuild'
     dependsOn 'copyUserDoc'
 }
 
@@ -222,7 +223,7 @@ task installAngular(type:Exec) { t ->
     sharedNpmLogic(t, ["ci", "--legacy-peer-deps"])
 }
 
-task checkLintAfterInstall(type:Exec) { t ->
+task checkLintAfterBuild(type:Exec) { t ->
     inputs.dir "$webappDir/src"
     outputs.dir "$webappDir/dist/webapp"
     sharedNpmLogic(t, ["run", "--", "ng", "lint"])

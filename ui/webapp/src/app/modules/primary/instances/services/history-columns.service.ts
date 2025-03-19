@@ -6,7 +6,7 @@ import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data
 import { HistoryStateColumnComponent } from '../components/history-state-column/history-state-column.component';
 import { InstancesService } from './instances.service';
 
-const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
+const historyTimestampColumn: BdDataColumn<HistoryEntryDto, number> = {
   id: 'timestamp',
   name: 'Date/Time',
   data: (r) => r.timestamp,
@@ -15,14 +15,14 @@ const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
   component: BdDataDateCellComponent,
 };
 
-const historyUserColumn: BdDataColumn<HistoryEntryDto> = {
+const historyUserColumn: BdDataColumn<HistoryEntryDto, string> = {
   id: 'user',
   name: 'User',
   data: (r) => r.user,
   width: '25%',
 };
 
-const historyTypeColumn: BdDataColumn<HistoryEntryDto> = {
+const historyTypeColumn: BdDataColumn<HistoryEntryDto, string> = {
   id: 'type',
   name: 'Type',
   data: (r) => {
@@ -49,13 +49,13 @@ const historyTypeColumn: BdDataColumn<HistoryEntryDto> = {
   width: '40px',
 };
 
-const historyTitleColumn: BdDataColumn<HistoryEntryDto> = {
+const historyTitleColumn: BdDataColumn<HistoryEntryDto, string> = {
   id: 'title',
   name: 'Event',
   data: (r) => r.title,
 };
 
-const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
+const historyPidColumn: BdDataColumn<HistoryEntryDto, number> = {
   id: 'pid',
   name: 'PID',
   data: (r) => (!!r.runtimeEvent && !!r.runtimeEvent.pid ? r.runtimeEvent.pid : null),
@@ -69,7 +69,7 @@ const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
 export class HistoryColumnsService {
   private readonly instances = inject(InstancesService);
 
-  public readonly historyStateColumn: BdDataColumn<HistoryEntryDto> = {
+  public readonly historyStateColumn: BdDataColumn<HistoryEntryDto, string> = {
     id: 'state',
     name: 'State',
     data: (r) => r.instanceTag,
@@ -77,14 +77,14 @@ export class HistoryColumnsService {
     component: HistoryStateColumnComponent,
   };
 
-  public readonly historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
+  public readonly historyVersionColumn: BdDataColumn<HistoryEntryDto, string> = {
     id: 'version',
     name: 'Version',
     data: (r) => this.getVersionText(r),
     width: '100px',
   };
 
-  public readonly defaultHistoryColumns: BdDataColumn<HistoryEntryDto>[] = [
+  public readonly defaultHistoryColumns: BdDataColumn<HistoryEntryDto, unknown>[] = [
     historyTimestampColumn,
     historyUserColumn,
     historyTypeColumn,

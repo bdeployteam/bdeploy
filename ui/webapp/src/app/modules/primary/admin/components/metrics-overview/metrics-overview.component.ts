@@ -14,13 +14,23 @@ import { MatDivider } from '@angular/material/divider';
 import { AsyncPipe } from '@angular/common';
 
 export interface SeriesElement {
-  name: any;
+  name: string;
   value: number;
 }
 
 export interface Series {
-  name: any;
+  name: string;
   series: SeriesElement[];
+}
+
+export interface TimestampedElement {
+  name: Date;
+  value: number;
+}
+
+export interface ChronologicalSeries {
+  name: string;
+  series: TimestampedElement[];
 }
 
 export interface HistogramDetails {
@@ -56,18 +66,18 @@ export class MetricsOverviewComponent implements OnInit {
   protected serverStats: JerseyServerMonitoringDto;
 
   // converted data for serverstats
-  protected vmCpu: Series[] = [];
+  protected vmCpu: ChronologicalSeries[] = [];
   protected vmCpuRef: SeriesElement[] = [];
-  protected vmMem: Series[] = [];
+  protected vmMem: ChronologicalSeries[] = [];
   protected vmMemRef: SeriesElement[] = [];
-  protected req: Series[] = [];
-  protected reqAbs: Series[] = [];
-  protected poolSize: Series[] = [];
+  protected req: ChronologicalSeries[] = [];
+  protected reqAbs: ChronologicalSeries[] = [];
+  protected poolSize: ChronologicalSeries[] = [];
   protected poolSizeRef: SeriesElement[] = [];
-  protected poolTasks: Series[] = [];
-  protected conBytes: Series[] = [];
-  protected conBytesAbs: Series[] = [];
-  protected activeSess: Series[] = [];
+  protected poolTasks: ChronologicalSeries[] = [];
+  protected conBytes: ChronologicalSeries[] = [];
+  protected conBytesAbs: ChronologicalSeries[] = [];
+  protected activeSess: ChronologicalSeries[] = [];
 
   protected timerSeries: Series[];
   protected referenceLines: SeriesElement[];
@@ -132,22 +142,22 @@ export class MetricsOverviewComponent implements OnInit {
       this.serverStats = r;
 
       // calculate series for monitoring graphs.
-      const vmCpuThreadCount: SeriesElement[] = [];
+      const vmCpuThreadCount: TimestampedElement[] = [];
       let vmCpuCount = 0;
       let vmMemMax = 0;
 
-      const vmMemTotal: SeriesElement[] = [];
-      const vmMemUsed: SeriesElement[] = [];
+      const vmMemTotal: TimestampedElement[] = [];
+      const vmMemUsed: TimestampedElement[] = [];
 
-      const reqReceived: SeriesElement[] = [];
-      const reqCompleted: SeriesElement[] = [];
-      const reqTimedOut: SeriesElement[] = [];
-      const reqCancelled: SeriesElement[] = [];
+      const reqReceived: TimestampedElement[] = [];
+      const reqCompleted: TimestampedElement[] = [];
+      const reqTimedOut: TimestampedElement[] = [];
+      const reqCancelled: TimestampedElement[] = [];
 
-      const reqReceivedAbs: SeriesElement[] = [];
-      const reqCompletedAbs: SeriesElement[] = [];
-      const reqTimedOutAbs: SeriesElement[] = [];
-      const reqCancelledAbs: SeriesElement[] = [];
+      const reqReceivedAbs: TimestampedElement[] = [];
+      const reqCompletedAbs: TimestampedElement[] = [];
+      const reqTimedOutAbs: TimestampedElement[] = [];
+      const reqCancelledAbs: TimestampedElement[] = [];
 
       let lastReqReceived = this.serverStats?.snapshots[0]?.reqReceived;
       let lastReqCompleted = this.serverStats?.snapshots[0]?.reqCompleted;
@@ -157,28 +167,28 @@ export class MetricsOverviewComponent implements OnInit {
       let poolCoreSize = 0;
       let poolMaxSize = 0;
       let poolHighestCurrent = 0;
-      const poolCurrentSize: SeriesElement[] = [];
-      const poolExceeded: SeriesElement[] = [];
+      const poolCurrentSize: TimestampedElement[] = [];
+      const poolExceeded: TimestampedElement[] = [];
       let lastPoolExceeded = this.serverStats?.snapshots[0]?.poolExceeded;
 
-      const poolTasksQueued: SeriesElement[] = [];
-      const poolTasksFinished: SeriesElement[] = [];
-      const poolTasksCancelled: SeriesElement[] = [];
+      const poolTasksQueued: TimestampedElement[] = [];
+      const poolTasksFinished: TimestampedElement[] = [];
+      const poolTasksCancelled: TimestampedElement[] = [];
 
       let lastTasksQueued = this.serverStats?.snapshots[0]?.poolTasksQueued;
       let lastTasksFinished = this.serverStats?.snapshots[0]?.poolTasksFinished;
       let lastTasksCancelled = this.serverStats?.snapshots[0]?.poolTasksCancelled;
 
-      const conBytesRead: SeriesElement[] = [];
-      const conBytesWritten: SeriesElement[] = [];
+      const conBytesRead: TimestampedElement[] = [];
+      const conBytesWritten: TimestampedElement[] = [];
 
-      const conBytesReadAbs: SeriesElement[] = [];
-      const conBytesWrittenAbs: SeriesElement[] = [];
+      const conBytesReadAbs: TimestampedElement[] = [];
+      const conBytesWrittenAbs: TimestampedElement[] = [];
 
       let lastBytesRead = this.serverStats?.snapshots[0]?.conBytesRead;
       let lastBytesWritten = this.serverStats?.snapshots[0]?.conBytesWritten;
 
-      const activeSessions: SeriesElement[] = [];
+      const activeSessions: TimestampedElement[] = [];
 
       for (const snap of this.serverStats.snapshots) {
         if (vmCpuCount === 0) {

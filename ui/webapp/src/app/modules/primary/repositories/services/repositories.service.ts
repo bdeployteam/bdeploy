@@ -53,8 +53,8 @@ export class RepositoriesService {
     });
   }
 
-  public create(repository: Partial<SoftwareRepositoryConfiguration>): Observable<any> {
-    return this.http.put(this.apiPath, repository);
+  public create(repository: Partial<SoftwareRepositoryConfiguration>): Observable<SoftwareRepositoryConfiguration> {
+    return this.http.put<SoftwareRepositoryConfiguration>(this.apiPath, repository);
   }
 
   private reload() {

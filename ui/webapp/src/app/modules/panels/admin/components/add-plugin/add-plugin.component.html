@@ -9,7 +9,7 @@
           formDataParam="plugin"
           [url]="plugins.globalUploadUrl$ | async"
           (dismiss)="onDismiss(i)"
-          [resultEvaluator]="resultEvaluator"
+          [resultEvaluator]="$any(resultEvaluator)"
         ></app-bd-file-upload>
       }
     </div>

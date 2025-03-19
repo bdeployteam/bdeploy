@@ -9,7 +9,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -21,13 +21,13 @@ import {
         AsyncPipe,
     ],
 })
-export class AttributeDeleteActionComponent implements TableCellDisplay<CustomAttributeDescriptor> {
+export class AttributeDeleteActionComponent implements CellComponent<CustomAttributeDescriptor, string> {
   private readonly areas = inject(NavAreasService);
   private readonly groups = inject(GroupsService);
   protected readonly settings = inject(SettingsService);
 
   @Input() record: CustomAttributeDescriptor;
-  @Input() column: BdDataColumn<CustomAttributeDescriptor>;
+  @Input() column: BdDataColumn<CustomAttributeDescriptor, string>;
 
   protected state$ = combineLatest([this.areas.panelRoute$, this.groups.attributeValues$]).pipe(
     map(([route, attributeValues]) => {

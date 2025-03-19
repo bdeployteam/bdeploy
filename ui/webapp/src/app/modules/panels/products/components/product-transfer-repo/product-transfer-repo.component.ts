@@ -34,7 +34,7 @@ export class ProductTransferRepoComponent implements OnInit {
   private readonly areas = inject(NavAreasService);
   private readonly actions = inject(ActionsService);
 
-  protected readonly prodVersionColumns: BdDataColumn<ProductDto>[] = [this.prodCols.productVersionColumn];
+  protected readonly prodVersionColumns: BdDataColumn<ProductDto, unknown>[] = [this.prodCols.productVersionColumn];
 
   protected repos: SoftwareRepositoryConfiguration[];
   protected repoLabels: string[];

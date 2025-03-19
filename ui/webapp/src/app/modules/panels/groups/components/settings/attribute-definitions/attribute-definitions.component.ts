@@ -31,20 +31,20 @@ export class AttributeDefinitionsComponent {
   protected readonly groups = inject(GroupsService);
   protected readonly details = inject(GroupDetailsService);
 
-  private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'id',
     name: 'ID',
     data: (r) => r.name,
     isId: true,
   };
 
-  private readonly defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDescCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'desc',
     name: 'Description',
     data: (r) => r.description,
   };
 
-  private readonly defDelCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDelCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove definition ${r.name}`,
@@ -56,7 +56,7 @@ export class AttributeDefinitionsComponent {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   protected loading$ = new BehaviorSubject<boolean>(false);
-  protected readonly columns: BdDataColumn<CustomAttributeDescriptor>[] = [
+  protected readonly columns: BdDataColumn<CustomAttributeDescriptor, unknown>[] = [
     this.defIdCol,
     this.defDescCol,
     this.defDelCol,

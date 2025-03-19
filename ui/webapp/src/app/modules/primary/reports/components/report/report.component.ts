@@ -36,7 +36,7 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly search$ = new BehaviorSubject<string>(null);
 
   protected report: ReportDescriptor;
-  protected columns: BdDataColumn<Record<string, string>>[] = [];
+  protected columns: BdDataColumn<Record<string, string>, string>[] = [];
   protected rows: Record<string, string>[] = [];
   protected generated: ReportResponseDto;
   protected definitions: BdDataGroupingDefinition<Record<string, string>>[] = [];

@@ -13,21 +13,21 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
-const colName: BdDataColumn<JobDto> = {
+const colName: BdDataColumn<JobDto, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.description,
   width: '200px',
 };
 
-const colGroup: BdDataColumn<JobDto> = {
+const colGroup: BdDataColumn<JobDto, string> = {
   id: 'group',
   name: 'Group',
   data: (r) => r.group,
   width: '150px',
 };
 
-const colIsRunning: BdDataColumn<JobDto> = {
+const colIsRunning: BdDataColumn<JobDto, string> = {
   id: 'isRunning',
   name: 'Is Running',
   data: (r) => (r.isRunning ? 'play_arrow' : 'stop'),
@@ -35,14 +35,14 @@ const colIsRunning: BdDataColumn<JobDto> = {
   component: BdDataIconCellComponent,
 };
 
-const colLastRunTime: BdDataColumn<JobDto> = {
+const colLastRunTime: BdDataColumn<JobDto, string> = {
   id: 'lastRunTime',
   name: 'Last Run Time',
   data: (r) => timeAgo(r.lastRunTime),
   width: '155px',
 };
 
-const colNextRunTime: BdDataColumn<JobDto> = {
+const colNextRunTime: BdDataColumn<JobDto, number> = {
   id: 'nextRunTime',
   name: 'Next Run Time',
   data: (r) => r.nextRunTime,
@@ -57,7 +57,7 @@ const colNextRunTime: BdDataColumn<JobDto> = {
     imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
 })
 export class ManualJobsComponent implements OnInit, OnDestroy {
-  private readonly colRun: BdDataColumn<JobDto> = {
+  private readonly colRun: BdDataColumn<JobDto, unknown> = {
     id: 'run',
     name: 'Run',
     data: (r) => `Run ${r.name} Immediately`,
@@ -68,7 +68,7 @@ export class ManualJobsComponent implements OnInit, OnDestroy {
   };
 
   private readonly jobService = inject(JobService);
-  protected readonly columns: BdDataColumn<JobDto>[] = [
+  protected readonly columns: BdDataColumn<JobDto, unknown>[] = [
     colName,
     colGroup,
     colIsRunning,

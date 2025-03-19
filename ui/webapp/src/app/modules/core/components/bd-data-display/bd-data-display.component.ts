@@ -47,7 +47,7 @@ export class BdDataDisplayComponent<T> {
   /**
    * The columns to display
    */
-  @Input() columns: BdDataColumn<T>[];
+  @Input() columns: BdDataColumn<T, unknown>[];
 
   /**
    * A callback for sorting data by a certain column in a given direction.
@@ -56,7 +56,7 @@ export class BdDataDisplayComponent<T> {
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
+  @Input() sortData: (data: T[], column: BdDataColumn<T, unknown>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /** The current sort dicdated by the sortHeader if available (table only) */
   @Input() sort: Sort;
@@ -66,7 +66,7 @@ export class BdDataDisplayComponent<T> {
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T, unknown>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.

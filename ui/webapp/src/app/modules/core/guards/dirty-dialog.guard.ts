@@ -54,7 +54,7 @@ export interface DirtyableDialog {
    * If observable from dirty side panel resolves to boolean 'false' value, then panel will not be closed
    * and navigation will be cancelled.
    */
-  doSave(): Observable<any>;
+  doSave(): Observable<unknown | false>;
 }
 
 @Injectable({
@@ -87,7 +87,7 @@ export class DirtyDialogGuard {
             // to be able to see the prompt when the panel was maximised, we need to hide the panel.
             this.areas.panelVisible$.next(false);
 
-            let panelSave = of(true);
+            let panelSave: Observable<unknown> = of(true);
             if (r === DirtyActionType.SAVE) {
               // need to save!
               panelSave = this.areas.getDirtyable('panel').doSave();
@@ -142,7 +142,7 @@ export class DirtyDialogGuard {
   }
 
   private confirmAndSavePrimaryComponent(
-    panelSave: Observable<boolean>,
+    panelSave: Observable<unknown>,
     component: DirtyableDialog
   ): Observable<boolean> {
     return panelSave.pipe(
@@ -154,7 +154,7 @@ export class DirtyDialogGuard {
               // once the navigation is done.
               this.areas.forcePanelClose$.next(true);
 
-              let primarySave = of(true);
+              let primarySave: Observable<unknown> = of(true);
               if (x === DirtyActionType.SAVE) {
                 primarySave = component.doSave();
               }

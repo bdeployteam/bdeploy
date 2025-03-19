@@ -3,18 +3,16 @@ import { ApplicationConfiguration, ApplicationStartType } from 'src/app/models/g
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdDataColumn } from '../../../../../../models/data';
-import {
-  TableCellDisplay
-} from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { CellComponent } from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-process-starttype-icon',
     templateUrl: './process-starttype-icon.component.html',
     imports: [MatIcon, MatTooltip],
 })
-export class ProcessStarttypeIconComponent implements OnInit, OnChanges, TableCellDisplay<ApplicationConfiguration> {
+export class ProcessStarttypeIconComponent implements OnInit, OnChanges, CellComponent<ApplicationConfiguration, ApplicationStartType> {
   @Input() record: ApplicationConfiguration;
-  @Input() column: BdDataColumn<ApplicationConfiguration>;
+  @Input() column: BdDataColumn<ApplicationConfiguration, ApplicationStartType>;
   @HostBinding('attr.data-testid') dataCy: string;
 
   protected data: {

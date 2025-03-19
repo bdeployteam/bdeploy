@@ -52,7 +52,7 @@ export class MailReceivingComponent  implements OnInit, DirtyableDialog, OnDestr
     return !!this.form && this.form.valid;
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<unknown> {
     this.saving$.next(true);
     this.settings.updateMailReceiverSettings(this.mailReceiverSettings as MailReceiverSettingsDto);
     return of(null);

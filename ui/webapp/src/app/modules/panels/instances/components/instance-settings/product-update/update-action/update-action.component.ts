@@ -5,7 +5,7 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -13,12 +13,12 @@ import {
     templateUrl: './update-action.component.html',
     imports: [BdButtonComponent]
 })
-export class UpdateActionComponent implements OnInit, TableCellDisplay<ProductDto> {
+export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, string> {
   private readonly products = inject(ProductsService);
   private readonly edit = inject(InstanceEditService);
 
   @Input() record: ProductDto;
-  @Input() column: BdDataColumn<ProductDto>;
+  @Input() column: BdDataColumn<ProductDto, string>;
 
   private index: number;
   private curIndex: number;

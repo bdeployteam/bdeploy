@@ -153,7 +153,7 @@ export class ConfigService {
     );
   }
 
-  public loadSession(oneTimePassword: string): Observable<any> {
+  public loadSession(oneTimePassword: string): Observable<string | null> {
     const params = oneTimePassword
       ? {
         otp: oneTimePassword

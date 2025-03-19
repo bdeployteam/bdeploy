@@ -22,7 +22,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -30,13 +30,13 @@ import {
     templateUrl: './config-files-actions.component.html',
   imports: [BdFormInputComponent, CfgFileNameValidatorDirective, FormsModule, TrimmedValidator, BdFileDropComponent, BdButtonComponent, BdPanelButtonComponent, MatTooltip, AsyncPipe]
 })
-export class ConfigFilesActionsComponent implements OnInit, TableCellDisplay<ConfigFile> {
+export class ConfigFilesActionsComponent implements OnInit, CellComponent<ConfigFile, ConfigFile> {
   private readonly cfgFiles = inject(ConfigFilesService);
   private readonly edit = inject(InstanceEditService);
   private readonly parent = inject(forwardRef(() => ConfigFilesComponent));
 
   @Input() record: ConfigFile;
-  @Input() column: BdDataColumn<ConfigFile>;
+  @Input() column: BdDataColumn<ConfigFile, ConfigFile>;
 
   protected isEditAllowed: boolean;
   protected path: string;

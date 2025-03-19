@@ -8,7 +8,7 @@ import { Observable, ReplaySubject, share } from 'rxjs';
 export class HttpReplayService {
   private readonly http = inject(HttpClient);
 
-  private cache: Record<string, Observable<any>> = {};
+  private cache: Record<string, Observable<unknown>> = {};
 
   public get<T>(url: string, resetTimeMs = 1000): Observable<T> {
     if (!this.cache[url]) {
@@ -22,6 +22,6 @@ export class HttpReplayService {
       );
       setTimeout(() => delete this.cache[url], resetTimeMs);
     }
-    return this.cache[url];
+    return this.cache[url] as Observable<T>;
   }
 }

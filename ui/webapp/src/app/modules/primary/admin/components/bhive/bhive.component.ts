@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BdDataColumn } from 'src/app/models/data';
-import { HiveInfoDto, HiveType } from 'src/app/models/gen.dtos';
+import { HiveInfoDto, HiveType, Permission } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { HiveService } from '../../services/hive.service';
@@ -13,7 +13,7 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
-const colAvatar: BdDataColumn<HiveInfoDto> = {
+const colAvatar: BdDataColumn<HiveInfoDto, string> = {
   id: 'avatar',
   name: '',
   data: (r) =>
@@ -22,13 +22,13 @@ const colAvatar: BdDataColumn<HiveInfoDto> = {
   width: '30px',
 };
 
-const colId: BdDataColumn<HiveInfoDto> = {
+const colId: BdDataColumn<HiveInfoDto, string> = {
   id: 'id',
   name: 'BHive',
   data: (r) => r.name,
 };
 
-const colPoolEnabled: BdDataColumn<HiveInfoDto> = {
+const colPoolEnabled: BdDataColumn<HiveInfoDto, boolean> = {
   id: 'isPooling',
   name: 'Pool Enabled',
   data: (r) => r.pooling,
@@ -36,7 +36,7 @@ const colPoolEnabled: BdDataColumn<HiveInfoDto> = {
   width: '60px',
 };
 
-const colPerm: BdDataColumn<HiveInfoDto> = {
+const colPerm: BdDataColumn<HiveInfoDto, Permission> = {
   id: 'minPerm',
   name: 'Min. Perm.',
   data: (r) => r.minPermission,
@@ -52,7 +52,7 @@ const colPerm: BdDataColumn<HiveInfoDto> = {
 export class BHiveComponent implements OnInit {
   protected readonly hives = inject(HiveService);
 
-  protected readonly columns: BdDataColumn<HiveInfoDto>[] = [colAvatar, colId, colPoolEnabled, colPerm];
+  protected readonly columns: BdDataColumn<HiveInfoDto, unknown>[] = [colAvatar, colId, colPoolEnabled, colPerm];
   protected sort: Sort = { active: 'id', direction: 'asc' };
 
   protected getRecordRoute = (row: HiveInfoDto) => ['', { outlets: { panel: ['panels', 'admin', 'bhive', row.name] } }];

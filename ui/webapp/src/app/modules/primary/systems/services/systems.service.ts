@@ -42,15 +42,15 @@ export class SystemsService {
     });
   }
 
-  public create(system: SystemConfigurationDto): Observable<any> {
+  public create(system: SystemConfigurationDto): Observable<SystemConfigurationDto> {
     return this.http
-      .post(`${this.apiPath(this.groups.current$.value?.name)}`, system)
+      .post<SystemConfigurationDto>(`${this.apiPath(this.groups.current$.value?.name)}`, system)
       .pipe(measure(`Create system ${system.config.name}`));
   }
 
-  public delete(id: string): Observable<unknown> {
+  public delete(id: string): Observable<void> {
     return this.http
-      .delete(`${this.apiPath(this.groups.current$.value?.name)}/${id}`)
+      .delete<void>(`${this.apiPath(this.groups.current$.value?.name)}/${id}`)
       .pipe(measure(`Delete system ${id}`));
   }
 

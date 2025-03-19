@@ -51,7 +51,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @HostBinding('attr.data-testid') @Input() nodeName: string;
 
-  private readonly processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+  private readonly processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration, string> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -59,7 +59,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     classes: (r) => this.getStateClass(r),
   };
 
-  private readonly processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+  private readonly processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration, string> = {
     id: 'name',
     name: 'Name and OS',
     hint: BdDataColumnTypeHint.TITLE,
@@ -79,7 +79,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   protected lastId: string;
   protected clientTableId = CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
 
-  protected cols: BdDataColumn<ApplicationConfiguration>[] = [];
+  protected cols: BdDataColumn<ApplicationConfiguration, unknown>[] = [];
 
   @ViewChildren(BdDataTableComponent) private readonly data: QueryList<BdDataTableComponent<ApplicationConfiguration>>;
 

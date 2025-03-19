@@ -114,14 +114,10 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     return new Observable((s) => {
       this.messageComp.message$.next(msg);
       this.messageComp.result$.pipe(first()).subscribe((r) => {
-        s.next(r);
+        s.next(r as T);
         s.complete();
       });
     });
-  }
-
-  public getMessage(): BdDialogMessageComponent {
-    return this.messageComp;
   }
 
   protected onScrollContent(event: Event) {

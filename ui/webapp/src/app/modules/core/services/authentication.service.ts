@@ -122,7 +122,7 @@ export class AuthenticationService {
   }
 
   private getTokenPayload(): ApiAccessToken {
-    const payload: any = this.tokenSubject?.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
+    const payload: string = this.tokenSubject?.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
     return payload ? JSON.parse(atob(payload)) : null;
   }
 
@@ -327,7 +327,7 @@ export class AuthenticationService {
     return this.http.get<UserProfileInfo>(this.cfg.config.api + '/auth/user-profile');
   }
 
-  public updateUserInfo(info: UserInfo): Observable<unknown> {
+  public updateUserInfo(info: UserInfo): Observable<UserInfo> {
     this.userInfoSubject$.next(info);
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }

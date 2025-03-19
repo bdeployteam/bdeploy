@@ -18,7 +18,7 @@ import { MatCard } from '@angular/material/card';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 
-const colVarName: BdDataColumn<LinkVariable> = {
+const colVarName: BdDataColumn<LinkVariable, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
@@ -27,7 +27,7 @@ const colVarName: BdDataColumn<LinkVariable> = {
   width: '170px',
 };
 
-const colVarValue: BdDataColumn<LinkVariable> = {
+const colVarValue: BdDataColumn<LinkVariable, string> = {
   id: 'preview',
   name: 'Preview',
   data: (r) => r.preview,
@@ -35,7 +35,7 @@ const colVarValue: BdDataColumn<LinkVariable> = {
   width: '150px',
 };
 
-const colVarDesc: BdDataColumn<LinkVariable> = {
+const colVarDesc: BdDataColumn<LinkVariable, string> = {
   id: 'desc',
   name: 'Description',
   data: (r) => r.description,
@@ -62,7 +62,7 @@ export class BdExpressionPickerComponent implements OnChanges {
   protected pathRecords: LinkVariable[];
   protected specialRecords: LinkVariable[];
 
-  protected readonly varColumns: BdDataColumn<LinkVariable>[] = [colVarName, colVarValue, colVarDesc];
+  protected readonly varColumns: BdDataColumn<LinkVariable, unknown>[] = [colVarName, colVarValue, colVarDesc];
   /* temlpate */ paramGrouping: BdDataGrouping<LinkVariable>[] = [
     {
       definition: { group: (r) => r.group, name: 'Application' },

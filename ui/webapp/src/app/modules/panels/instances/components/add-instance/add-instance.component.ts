@@ -161,9 +161,10 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     });
   }
 
-  public doSave(): Observable<void> {
+  public doSave(): Observable<InstanceConfiguration> {
     this.loading$.next(true);
-    return this.instances.create(this.config, this.server?.hostName).pipe(finalize(() => this.loading$.next(false)));
+    return this.instances.create(this.config, this.server?.hostName)
+      .pipe(finalize(() => this.loading$.next(false)));
   }
 
   protected updateProduct() {

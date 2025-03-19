@@ -17,20 +17,20 @@ import { AsyncPipe } from '@angular/common';
 export class AttributesTabComponent implements OnInit, OnDestroy {
   protected readonly settings = inject(SettingsService);
 
-  private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defIdCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
     isId: true,
   };
 
-  private readonly defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDescCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'desc',
     name: 'Description',
     data: (r) => r.description,
   };
 
-  private readonly defEditCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defEditCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'edit',
     name: 'Edit',
     data: (r) => `Edit attribute definition ${r.name}`,
@@ -39,7 +39,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     width: '40px',
   };
 
-  private readonly defDelCol: BdDataColumn<CustomAttributeDescriptor> = {
+  private readonly defDelCol: BdDataColumn<CustomAttributeDescriptor, string> = {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove attribute definition ${r.name}`,
@@ -48,7 +48,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     width: '40px',
   };
 
-  protected readonly attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [
+  protected readonly attributeColumns: BdDataColumn<CustomAttributeDescriptor, unknown>[] = [
     this.defIdCol,
     this.defDescCol,
     this.defEditCol,

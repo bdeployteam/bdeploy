@@ -21,7 +21,7 @@
       </div>
     }
     @if (isUploadFailed$ | async) {
-      <div class="break-all bd-description-text">{{ uploadStatus.detail }}</div>
+      <div class="break-all bd-description-text">{{ uploadStatus.error }}</div>
     }
     @if (isUploadFinished$ | async) {
       <div class="break-all bd-description-text">

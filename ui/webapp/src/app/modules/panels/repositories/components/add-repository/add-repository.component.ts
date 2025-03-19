@@ -70,7 +70,7 @@ export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialo
     });
   }
 
-  public doSave(): Observable<void> {
+  public doSave(): Observable<SoftwareRepositoryConfiguration> {
     this.saving$.next(true);
     return this.repositories.create(this.repository).pipe(
       finalize(() => {

@@ -24,20 +24,20 @@ export class LdapTabComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
   protected readonly settings = inject(SettingsService);
 
-  private readonly colServer: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colServer: BdDataColumn<LDAPSettingsDto, string> = {
     id: 'server',
     name: 'Server',
     data: (r) => r.server,
     isId: true,
   };
 
-  private readonly colDescription: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colDescription: BdDataColumn<LDAPSettingsDto, string> = {
     id: 'description',
     name: 'Description',
     data: (r) => r.description,
   };
 
-  private readonly colCheck: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colCheck: BdDataColumn<LDAPSettingsDto, string> = {
     id: 'check',
     name: 'Check',
     data: (r) => `Check connection to ${r.server}`,
@@ -46,7 +46,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  private readonly colImport: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colImport: BdDataColumn<LDAPSettingsDto, string> = {
     id: 'import',
     name: 'Import',
     data: (r) => `Import accounts from ${r.server}`,
@@ -55,7 +55,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  private readonly colEdit: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colEdit: BdDataColumn<LDAPSettingsDto, string> = {
     id: 'edit',
     name: 'Edit',
     data: (r) => `Edit server ${r.server}`,
@@ -64,7 +64,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     width: '40px',
   };
 
-  private readonly colDelete: BdDataColumn<LDAPSettingsDto> = {
+  private readonly colDelete: BdDataColumn<LDAPSettingsDto, string> = {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove server ${r.server}`,
@@ -74,7 +74,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  protected readonly columns: BdDataColumn<LDAPSettingsDto>[] = [
+  protected readonly columns: BdDataColumn<LDAPSettingsDto, unknown>[] = [
     this.colServer,
     this.colDescription,
     this.colCheck,

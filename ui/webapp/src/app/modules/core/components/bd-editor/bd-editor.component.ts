@@ -13,31 +13,21 @@ import {
 import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   MonacoCompletionsService,
-  GlobalMonacoModule,
-  WindowWithMonacoLoaded
+  GlobalMonacoModule, WindowWithMonacoLoaded
 } from '../../services/monaco-completions.service';
 import { ThemeService } from '../../services/theme.service';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
-import { editor, languages, Position} from 'monaco-editor';
-import IStandaloneDiffEditor = editor.IStandaloneDiffEditor;
+import { editor, languages, Position } from 'monaco-editor';
 import ITextModel = editor.ITextModel;
 import IEditor = editor.IEditor;
 import CompletionItemProvider = languages.CompletionItemProvider;
 import ProviderResult = languages.ProviderResult;
 import CompletionList = languages.CompletionList;
 import { BdMonacoEditorComponent } from '../bd-monaco-editor/bd-monaco-editor.component';
-
-
-interface EditorOptions {
-  theme: string;
-  language:  string;
-  readOnly: boolean;
-  minimap: { enabled: boolean };
-  autoClosingBrackets: boolean;
-  automaticLayout: boolean;
-}
+import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
+import IStandaloneEditorConstructionOptions = editor.IStandaloneEditorConstructionOptions;
 
 @Component({
     selector: 'app-bd-editor',
@@ -74,7 +64,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   @Output() contentChange = new EventEmitter<string>();
 
   protected editorContent = '';
-  protected editorOptions: EditorOptions;
+  protected editorOptions: IStandaloneEditorConstructionOptions;
   protected inited$ = new BehaviorSubject<boolean>(false);
 
   ngOnInit(): void {
@@ -87,7 +77,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
       language: 'plaintext',
       readOnly: this.readonly,
       minimap: { enabled: false },
-      autoClosingBrackets: false,
+      autoClosingBrackets: 'never',
       automaticLayout: true
     };
   }
@@ -105,7 +95,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.subscription?.unsubscribe();
   }
 
-  protected onMonacoInit(monaco: IStandaloneDiffEditor) {
+  protected onMonacoInit(monaco: IStandaloneCodeEditor) {
     this.monaco = monaco;
     this.globalMonaco = (window as unknown as WindowWithMonacoLoaded).monaco;
     // only do this once!

@@ -78,26 +78,26 @@ export class TemplateSelection {
   public isAllVariablesSet: boolean;
 }
 
-const colImportRepo: BdDataColumn<ProductKeyWithSourceDto> = {
+const colImportRepo: BdDataColumn<ProductKeyWithSourceDto, string> = {
   id: 'repo',
   name: 'Repo',
   data: (r) => r.groupOrRepo,
 };
 
-const colImportProduct: BdDataColumn<ProductKeyWithSourceDto> = {
+const colImportProduct: BdDataColumn<ProductKeyWithSourceDto, string> = {
   id: 'product',
   name: 'Product',
   data: (r) => `${r.key.name}:${r.key.tag}`,
 };
 
-const colInstanceName: BdDataColumn<InstanceTemplateReferenceResultDto> = {
+const colInstanceName: BdDataColumn<InstanceTemplateReferenceResultDto, string> = {
   id: 'name',
   name: 'Instance',
   data: (r) => r.name,
   width: '200px',
 };
 
-const colInstResIcon: BdDataColumn<InstanceTemplateReferenceResultDto> = {
+const colInstResIcon: BdDataColumn<InstanceTemplateReferenceResultDto, string> = {
   id: 'status',
   name: 'Status',
   data: (r) =>
@@ -110,7 +110,7 @@ const colInstResIcon: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   width: '50px',
 };
 
-const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto> = {
+const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto, string> = {
   id: 'msg',
   name: 'Message',
   data: (r) => r.message,
@@ -149,7 +149,7 @@ export class SystemTemplateComponent implements OnInit {
   protected isAllVariablesSet = false;
   protected isAnyInstanceApplied = false;
   protected result: SystemTemplateResultDto;
-  protected readonly resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] = [
+  protected readonly resultCols: BdDataColumn<InstanceTemplateReferenceResultDto, unknown>[] = [
     colInstResIcon,
     colInstanceName,
     colInstanceMsg,
@@ -164,14 +164,14 @@ export class SystemTemplateComponent implements OnInit {
 
   protected systemNames$: Observable<string[]>;
   protected importProductsState: ImportProductsState = { completed: false };
-  protected readonly importProductCols: BdDataColumn<ProductKeyWithSourceDto>[] = [colImportRepo, colImportProduct];
+  protected readonly importProductCols: BdDataColumn<ProductKeyWithSourceDto, unknown>[] = [colImportRepo, colImportProduct];
 
-  protected onUploadResult: (status: UploadStatus) => string = (s) => {
+  protected onUploadResult: (status: UploadStatus<SystemTemplateDto>) => string = (s) => {
     if (s.state === UploadState.FAILED) {
-      return s.detail as string;
+      return s.error;
     }
 
-    this.template = s.detail as SystemTemplateDto;
+    this.template = s.detail;
 
     const templateDescriptor = this.template.template;
     const instanceCount = templateDescriptor.instances?.length;

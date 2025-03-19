@@ -7,10 +7,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe, NgClass } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import {
-  TableCellDisplay
-} from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataColumn } from '../../../../../../models/data';
+import { CellComponent } from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-process-status-icon',
@@ -24,12 +22,12 @@ import { BdDataColumn } from '../../../../../../models/data';
         AsyncPipe,
     ],
 })
-export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy, TableCellDisplay<ApplicationConfiguration> {
+export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy, CellComponent<ApplicationConfiguration, string> {
   private readonly processes = inject(ProcessesService);
   private readonly actions = inject(ActionsService);
 
   @Input() record: ApplicationConfiguration;
-  @Input() column: BdDataColumn<ApplicationConfiguration>;
+  @Input() column: BdDataColumn<ApplicationConfiguration, string>;
   @HostBinding('attr.data-testid') dataCy: string;
 
   protected icon$ = new BehaviorSubject<string>('help');

@@ -127,7 +127,7 @@ export class SoftwareDetailsService implements OnDestroy {
     throw new Error('Invalid software package type');
   }
 
-  private mapLabels(software: any) {
+  private mapLabels(software: SwRepositoryEntry) {
     const labels: LabelRecord[] = [];
     if (software?.labels) {
       for (const k of Object.keys(software.labels)) {

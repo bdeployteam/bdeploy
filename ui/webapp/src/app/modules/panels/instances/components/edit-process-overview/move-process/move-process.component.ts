@@ -21,7 +21,7 @@ interface NodeRow {
   node: InstanceNodeConfigurationDto;
 }
 
-const colNodeName: BdDataColumn<NodeRow> = {
+const colNodeName: BdDataColumn<NodeRow, string> = {
   id: 'name',
   name: 'Node',
   data: (r) => `${r.name}${r.current ? ' - Current' : ''}`,
@@ -39,7 +39,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
   public readonly edit = inject(ProcessEditService);
 
   protected records: NodeRow[] = [];
-  protected readonly columns: BdDataColumn<NodeRow>[] = [colNodeName];
+  protected readonly columns: BdDataColumn<NodeRow, unknown>[] = [colNodeName];
 
   private currentNode: InstanceNodeConfigurationDto;
   private subscription: Subscription;

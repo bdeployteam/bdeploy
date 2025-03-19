@@ -38,19 +38,19 @@ import { BdBreadcrumbsComponent } from '../../../../core/components/bd-breadcrum
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
-const colName: BdDataColumn<FilePath> = {
+const colName: BdDataColumn<FilePath, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
 };
 
-const colPath: BdDataColumn<FilePath> = {
+const colPath: BdDataColumn<FilePath, string> = {
   id: 'path',
   name: 'Path',
   data: (r) => r.path,
 };
 
-const colSize: BdDataColumn<FilePath> = {
+const colSize: BdDataColumn<FilePath, number> = {
   id: 'size',
   name: 'Size',
   data: (r) => r.size,
@@ -59,14 +59,14 @@ const colSize: BdDataColumn<FilePath> = {
   component: BdDataSizeCellComponent,
 };
 
-const colItems: BdDataColumn<FilePath> = {
+const colItems: BdDataColumn<FilePath, string> = {
   id: 'items',
   name: 'Items',
   data: (r) => (!r.children?.length ? '' : r.children.length === 1 ? '1 item' : `${r.children.length} items`),
   width: '100px',
 };
 
-const colModTime: BdDataColumn<FilePath> = {
+const colModTime: BdDataColumn<FilePath, number> = {
   id: 'lastMod',
   name: 'Last Modification',
   data: (r) => r.lastModified,
@@ -75,7 +75,7 @@ const colModTime: BdDataColumn<FilePath> = {
   component: BdDataDateCellComponent,
 };
 
-const colAvatar: BdDataColumn<FilePath> = {
+const colAvatar: BdDataColumn<FilePath, string> = {
   id: 'avatar',
   name: '',
   data: (r) => (!r.entry ? 'topic' : 'insert_drive_file'),
@@ -104,9 +104,9 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private searchTerm = '';
   private subscription: Subscription;
 
-  private readonly searchColumns: BdDataColumn<FilePath>[] = [colAvatar, colPath, colItems, colModTime, colSize];
-  private readonly defaultColumns: BdDataColumn<FilePath>[];
-  private readonly colDownload: BdDataColumn<FilePath> = {
+  private readonly searchColumns: BdDataColumn<FilePath, unknown>[] = [colAvatar, colPath, colItems, colModTime, colSize];
+  private readonly defaultColumns: BdDataColumn<FilePath, unknown>[];
+  private readonly colDownload: BdDataColumn<FilePath, string> = {
     id: 'download',
     name: 'Downl.',
     data: (r) => `Download ${r.children.length ? 'Folder' : 'File'}`,
@@ -114,7 +114,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
     icon: () => 'cloud_download',
     width: '50px',
   };
-  private readonly colDelete: BdDataColumn<FilePath> = {
+  private readonly colDelete: BdDataColumn<FilePath, string> = {
     id: 'delete',
     name: 'Delete',
     data: () => 'Delete File',
@@ -133,7 +133,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   protected tabIndex = -1;
   protected selectedPath: FilePath;
   protected instance: InstanceDto;
-  protected columns: BdDataColumn<FilePath>[];
+  protected columns: BdDataColumn<FilePath, unknown>[];
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 

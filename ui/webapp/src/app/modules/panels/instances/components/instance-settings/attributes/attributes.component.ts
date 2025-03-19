@@ -38,20 +38,20 @@ export class AttributesComponent implements OnInit {
   private readonly instances = inject(InstancesService);
   protected readonly servers = inject(ServersService);
 
-  private readonly attrNameCol: BdDataColumn<AttributeRow> = {
+  private readonly attrNameCol: BdDataColumn<AttributeRow, string> = {
     id: 'attribute',
     name: 'Attribute',
     data: (r) => r.name,
     isId: true,
   };
 
-  private readonly attrValCol: BdDataColumn<AttributeRow> = {
+  private readonly attrValCol: BdDataColumn<AttributeRow, string> = {
     id: 'value',
     name: 'Value',
     data: (r) => r.value,
   };
 
-  private readonly attrRemoveCol: BdDataColumn<AttributeRow> = {
+  private readonly attrRemoveCol: BdDataColumn<AttributeRow, string> = {
     id: 'remove',
     name: 'Rem.',
     data: (r) => `Remove value for ${r.name}`,
@@ -63,7 +63,7 @@ export class AttributesComponent implements OnInit {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   protected loading$ = new BehaviorSubject<boolean>(false);
-  protected readonly columns: BdDataColumn<AttributeRow>[] = [this.attrNameCol, this.attrValCol, this.attrRemoveCol];
+  protected readonly columns: BdDataColumn<AttributeRow, unknown>[] = [this.attrNameCol, this.attrValCol, this.attrRemoveCol];
   protected records: AttributeRow[] = [];
   protected defs: CustomAttributeDescriptor[];
 

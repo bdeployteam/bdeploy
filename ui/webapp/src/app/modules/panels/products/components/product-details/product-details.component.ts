@@ -24,14 +24,14 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
 
-const instanceNameColumn: BdDataColumn<InstanceUsageDto> = {
+const instanceNameColumn: BdDataColumn<InstanceUsageDto, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
   isId: true,
 };
 
-const instanceTagColumn: BdDataColumn<InstanceUsageDto> = {
+const instanceTagColumn: BdDataColumn<InstanceUsageDto, string> = {
   id: 'tag',
   name: 'Ver.',
   data: (r) => r.tag,
@@ -39,14 +39,14 @@ const instanceTagColumn: BdDataColumn<InstanceUsageDto> = {
   width: '30px',
 };
 
-const refNameColumn: BdDataColumn<ManifestKey> = {
+const refNameColumn: BdDataColumn<ManifestKey, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
   isId: true,
 };
 
-const refTagColumn: BdDataColumn<ManifestKey> = {
+const refTagColumn: BdDataColumn<ManifestKey, string> = {
   id: 'tag',
   name: 'Ver.',
   data: (r) => r.tag,
@@ -82,8 +82,8 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthenticationService);
   protected readonly productActionColumns = inject(ProductActionsColumnsService);
 
-  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto>[] = [instanceNameColumn, instanceTagColumn];
-  protected readonly refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
+  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto, unknown>[] = [instanceNameColumn, instanceTagColumn];
+  protected readonly refColumns: BdDataColumn<ManifestKey, unknown>[] = [refNameColumn, refTagColumn];
   protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
   private subscription: Subscription;

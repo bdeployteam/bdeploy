@@ -5,7 +5,7 @@ import { NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -14,9 +14,9 @@ import {
     styleUrls: ['./port-type-cell.component.css'],
     imports: [NgClass, MatTooltip]
 })
-export class PortTypeCellComponent implements OnInit, TableCellDisplay<PortParam> {
+export class PortTypeCellComponent implements OnInit, CellComponent<PortParam, string> {
   @Input() record: PortParam;
-  @Input() column: BdDataColumn<PortParam>;
+  @Input() column: BdDataColumn<PortParam, string>;
 
   protected shortType: string;
   protected shortDesc: string;

@@ -56,7 +56,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   protected readonly edit = inject(InstanceEditService);
   protected readonly auth = inject(AuthenticationService);
 
-  private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
+  private readonly issueColApp: BdDataColumn<ApplicationValidationDto, string> = {
     id: 'app',
     name: 'Application / File',
     data: (r) => this.getApplicationName(r.appId),
@@ -64,20 +64,20 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     classes: (r) => (!r.appId ? ['bd-hint-text'] : []),
   };
 
-  private readonly issueColParam: BdDataColumn<ApplicationValidationDto> = {
+  private readonly issueColParam: BdDataColumn<ApplicationValidationDto, string> = {
     id: 'param',
     name: 'Parameter',
     data: (r) => r.paramId,
     width: '200px',
   };
 
-  private readonly issueColMsg: BdDataColumn<ApplicationValidationDto> = {
+  private readonly issueColMsg: BdDataColumn<ApplicationValidationDto, string> = {
     id: 'msg',
     name: 'Message',
     data: (r) => r.message,
   };
 
-  private readonly issueColDismiss: BdDataColumn<ApplicationValidationDto> = {
+  private readonly issueColDismiss: BdDataColumn<ApplicationValidationDto, string> = {
     id: 'dismiss',
     name: 'Dismiss',
     data: () => 'Dismiss this update message',
@@ -86,13 +86,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     width: '40px',
   };
 
-  protected readonly issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [
+  protected readonly issuesColumns: BdDataColumn<ApplicationValidationDto, unknown>[] = [
     this.issueColApp,
     this.issueColParam,
     this.issueColMsg,
     this.issueColDismiss,
   ];
-  protected readonly validationColumns: BdDataColumn<ApplicationValidationDto>[] = [
+  protected readonly validationColumns: BdDataColumn<ApplicationValidationDto, unknown>[] = [
     this.issueColApp,
     this.issueColParam,
     this.issueColMsg,

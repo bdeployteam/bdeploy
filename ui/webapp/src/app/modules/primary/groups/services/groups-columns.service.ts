@@ -9,7 +9,7 @@ import { GroupsService } from './groups.service';
 export class GroupsColumnsService {
   private readonly groups = inject(GroupsService);
 
-  private readonly groupTypeColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupTypeColumn: BdDataColumn<InstanceGroupConfigurationDto, string> = {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -17,7 +17,7 @@ export class GroupsColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  private readonly groupNameColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupNameColumn: BdDataColumn<InstanceGroupConfigurationDto, string> = {
     id: 'name',
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -28,7 +28,7 @@ export class GroupsColumnsService {
     sortCard: true,
   };
 
-  private readonly groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto, string> = {
     id: 'title',
     name: 'Title',
     hint: BdDataColumnTypeHint.TITLE,
@@ -36,7 +36,7 @@ export class GroupsColumnsService {
     sortCard: true,
   };
 
-  private readonly groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto, string> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -44,7 +44,7 @@ export class GroupsColumnsService {
     showWhen: '(min-width: 1000px)',
   };
 
-  private readonly groupLogoTableColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupLogoTableColumn: BdDataColumn<InstanceGroupConfigurationDto, string> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -54,7 +54,7 @@ export class GroupsColumnsService {
     width: '150px',
   };
 
-  private readonly groupLogoCardColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private readonly groupLogoCardColumn: BdDataColumn<InstanceGroupConfigurationDto, string> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -67,7 +67,7 @@ export class GroupsColumnsService {
       ),
   };
 
-  public readonly defaultGroupColumns: BdDataColumn<InstanceGroupConfigurationDto>[] = [
+  public readonly defaultGroupColumns: BdDataColumn<InstanceGroupConfigurationDto, unknown>[] = [
     this.groupTypeColumn,
     this.groupNameColumn,
     this.groupTitleColumn,

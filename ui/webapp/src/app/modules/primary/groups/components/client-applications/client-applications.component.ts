@@ -24,14 +24,14 @@ import { BdDataDisplayComponent } from '../../../../core/components/bd-data-disp
 import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
 import { AsyncPipe } from '@angular/common';
 
-const clientNameColumn: BdDataColumn<ClientApp> = {
+const clientNameColumn: BdDataColumn<ClientApp, string> = {
   id: 'name',
   name: 'Client Name',
   data: (r) => (r.client ? r.client.description : `${r.endpoint.appName} - ${r.endpoint.endpoint.id}`),
   hint: BdDataColumnTypeHint.TITLE
 };
 
-const clientIdColumn: BdDataColumn<ClientApp> = {
+const clientIdColumn: BdDataColumn<ClientApp, string> = {
   id: 'id',
   name: 'App. ID',
   data: (r) => (r.client ? r.client.id : r.endpoint.id),
@@ -40,14 +40,14 @@ const clientIdColumn: BdDataColumn<ClientApp> = {
   icon: () => 'computer'
 };
 
-const clientInstanceColumn: BdDataColumn<ClientApp> = {
+const clientInstanceColumn: BdDataColumn<ClientApp, string> = {
   id: 'instance',
   name: 'Instance Name',
   data: (r) => r.instanceName,
   hint: BdDataColumnTypeHint.DESCRIPTION
 };
 
-const clientOsColumn: BdDataColumn<ClientApp> = {
+const clientOsColumn: BdDataColumn<ClientApp, string> = {
   id: 'os',
   name: 'OS',
   data: (r) => (r.client ? r.client.os : 'WEB'),
@@ -55,7 +55,7 @@ const clientOsColumn: BdDataColumn<ClientApp> = {
   component: BdDataSvgIconCellComponent
 };
 
-const clientAvatarColumn: BdDataColumn<ClientApp> = {
+const clientAvatarColumn: BdDataColumn<ClientApp, string> = {
   id: 'osAvatar',
   name: 'OS',
   hint: BdDataColumnTypeHint.AVATAR,
@@ -75,7 +75,7 @@ export class ClientApplicationsComponent implements OnInit {
   protected readonly clients = inject(ClientsService);
 
   protected currentOs: OperatingSystem;
-  protected readonly columns: BdDataColumn<ClientApp>[] = [
+  protected readonly columns: BdDataColumn<ClientApp, unknown>[] = [
     clientNameColumn,
     clientIdColumn,
     clientInstanceColumn,

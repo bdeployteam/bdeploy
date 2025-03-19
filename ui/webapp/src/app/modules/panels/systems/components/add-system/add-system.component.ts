@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
-import { ManagedMasterDto, SystemConfiguration } from 'src/app/models/gen.dtos';
+import { ManagedMasterDto, SystemConfiguration, SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -87,7 +87,7 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription?.unsubscribe();
   }
 
-  public doSave(): Observable<void> {
+  public doSave(): Observable<SystemConfigurationDto> {
     this.saving$.next(true);
     return this.systems
       .create({

@@ -39,7 +39,7 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
   private readonly systems = inject(SystemsService);
   protected readonly bulk = inject(ProcessesBulkService);
 
-  private readonly processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
+  private readonly processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration, string> = {
     id: CONTROL_GROUP_COL_ID,
     name: 'Control Group',
     data: (r) => this.getControlGroup(r),

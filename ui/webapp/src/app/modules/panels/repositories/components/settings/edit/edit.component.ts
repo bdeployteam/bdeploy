@@ -67,7 +67,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     });
   }
 
-  public doSave(): Observable<any> {
+  public doSave(): Observable<SoftwareRepositoryConfiguration> {
     return this.details.update(this.repository);
   }
 

@@ -30,9 +30,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
               // let 401 pass through for logout redirection in the other interceptor :)
               break;
             case 403:
-            // no break
-
-            // eslint-disable-next-line no-fallthrough
+              /* falls through */
             case 404:
               msg = `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`;
               this.snackbar.open(msg, 'DISMISS', {

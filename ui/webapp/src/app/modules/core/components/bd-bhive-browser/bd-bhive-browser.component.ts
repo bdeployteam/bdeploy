@@ -46,7 +46,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   protected readonly hives = inject(HiveService);
   protected readonly repositories = inject(RepositoriesService);
 
-  private readonly colAvatar: BdDataColumn<HiveEntryDto> = {
+  private readonly colAvatar: BdDataColumn<HiveEntryDto, string> = {
     id: 'avatar',
     name: '',
     data: (r) => this.getImage(r),
@@ -54,14 +54,14 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     component: BdDataIconCellComponent
   };
 
-  private readonly colName: BdDataColumn<HiveEntryDto> = {
+  private readonly colName: BdDataColumn<HiveEntryDto, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
     isId: true
   };
 
-  private readonly colSize: BdDataColumn<HiveEntryDto> = {
+  private readonly colSize: BdDataColumn<HiveEntryDto, number> = {
     id: 'size',
     name: 'Size',
     data: (r) => (r.size > 0 ? r.size : null),
@@ -69,7 +69,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     component: BdDataSizeCellComponent
   };
 
-  private readonly colDownload: BdDataColumn<HiveEntryDto> = {
+  private readonly colDownload: BdDataColumn<HiveEntryDto, string> = {
     id: 'download',
     name: 'Downl.',
     data: () => 'Download',
@@ -78,7 +78,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     width: '50px'
   };
 
-  private readonly colDelete: BdDataColumn<HiveEntryDto> = {
+  private readonly colDelete: BdDataColumn<HiveEntryDto, string> = {
     id: 'delete',
     name: 'Delete',
     data: (r) => `Delete ${r.name}`,

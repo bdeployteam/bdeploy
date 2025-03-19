@@ -21,7 +21,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);
   protected readonly details = inject(HistoryDetailsService);
 
-  private readonly versionColumn: BdDataColumn<InstanceVersionDto> = {
+  private readonly versionColumn: BdDataColumn<InstanceVersionDto, string> = {
     id: 'version',
     name: 'Instance Version',
     data: (r) => this.getVersionText(r),
@@ -29,7 +29,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
     classes: (r) => this.getVersionClass(r),
   };
 
-  private readonly productVersionColumn: BdDataColumn<InstanceVersionDto> = {
+  private readonly productVersionColumn: BdDataColumn<InstanceVersionDto, string> = {
     id: 'prodVersion',
     name: 'Product Version',
     data: (r) => r.product.tag,
@@ -40,7 +40,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
 
   protected records$ = new BehaviorSubject<InstanceVersionDto[]>(null);
   protected base: string;
-  protected columns: BdDataColumn<InstanceVersionDto>[] = [this.versionColumn, this.productVersionColumn];
+  protected columns: BdDataColumn<InstanceVersionDto, unknown>[] = [this.versionColumn, this.productVersionColumn];
   protected getRecordRoute = (row: InstanceVersionDto) => {
     if (row.key.tag === this.base) {
       return [];

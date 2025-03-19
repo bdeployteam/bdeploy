@@ -47,12 +47,12 @@ export class AuthAdminService {
       .subscribe((users) => this.users$.next(users));
   }
 
-  public createLocalUser(userInfo: UserInfo): Observable<any> {
-    return this.http.put(`${this.apiPath()}/local`, userInfo);
+  public createLocalUser(userInfo: UserInfo): Observable<UserInfo> {
+    return this.http.put<UserInfo>(`${this.apiPath()}/local`, userInfo);
   }
 
-  public updateUser(userInfo: UserInfo) {
-    return this.http.post(`${this.apiPath()}`, userInfo);
+  public updateUser(userInfo: UserInfo): Observable<UserInfo> {
+    return this.http.post<UserInfo>(`${this.apiPath()}`, userInfo);
   }
 
   public deleteUser(name: string) {
@@ -76,12 +76,12 @@ export class AuthAdminService {
       .subscribe((userGroups) => this.userGroups$.next(userGroups));
   }
 
-  public createUserGroup(userGroupInfo: UserGroupInfo): Observable<any> {
-    return this.http.put(`${this.apiPath()}/user-groups`, userGroupInfo);
+  public createUserGroup(userGroupInfo: UserGroupInfo): Observable<UserGroupInfo> {
+    return this.http.put<UserGroupInfo>(`${this.apiPath()}/user-groups`, userGroupInfo);
   }
 
-  public updateUserGroup(userGroupInfo: UserGroupInfo) {
-    return this.http.post(`${this.apiPath()}/user-groups`, userGroupInfo);
+  public updateUserGroup(userGroupInfo: UserGroupInfo): Observable<UserGroupInfo> {
+    return this.http.post<UserGroupInfo>(`${this.apiPath()}/user-groups`, userGroupInfo);
   }
 
   public deleteUserGroup(group: string) {

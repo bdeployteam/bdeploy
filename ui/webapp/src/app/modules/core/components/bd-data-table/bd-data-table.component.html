@@ -1,5 +1,5 @@
-<div [ngClass]="maxHeight == null ? 'flex-auto flex flex-col' : 'overflow-auto'"
-     [style]="{'max-height': maxHeight == null ? 'auto' : maxHeight}">
+<div [ngClass]="maxHeight === null ? 'flex-auto flex flex-col' : 'overflow-auto'"
+     [style]="{'max-height': maxHeight === null ? 'auto' : maxHeight}">
   <table
     [id]="id"
     mat-table
@@ -151,7 +151,6 @@
                       }
                       @if (!!col.component && !row.expandable) {
                         <app-bd-data-component-cell
-                          [componentType]="col.component"
                           [record]="row.node.item"
                           [column]="col"
                         ></app-bd-data-component-cell>
@@ -174,7 +173,6 @@
                         }
                         @if (!!col.component && !row.expandable) {
                           <app-bd-data-component-cell
-                            [componentType]="col.component"
                             [record]="row.node.item"
                             [column]="col"
                           ></app-bd-data-component-cell>
@@ -197,7 +195,7 @@
                       @if (!col.component) {
                         <div
                           class="truncate"
-                          [matTooltip]="!!row.node.item ? (!!col.tooltip ? col.tooltip(row.node.item) : col.data(row.node.item)) : null"
+                          [matTooltip]="getTooltipTextFor(col, row.node.item)"
                           [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
                           >
                           {{ col.data(row.node.item) }}
@@ -205,7 +203,6 @@
                       }
                       @if (!!col.component) {
                         <app-bd-data-component-cell
-                          [componentType]="col.component"
                           [record]="row.node.item"
                           [column]="col"
                         ></app-bd-data-component-cell>
@@ -237,7 +234,7 @@
                   <div class="flex justify-start items-center">
                     @if (row.node.item) {
                       <app-bd-button
-                        [text]="col.data(row.node.item)"
+                        [text]="getDataAsStringFor(col, row.node.item)"
                         tooltip="left"
                         [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
                         (click)="col.action(row.node.item)"

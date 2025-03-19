@@ -12,28 +12,28 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
-const nodeColName: BdDataColumn<MinionRecord> = {
+const nodeColName: BdDataColumn<MinionRecord, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
   width: '350px',
 };
 
-const nodeColStatus: BdDataColumn<MinionRecord> = {
+const nodeColStatus: BdDataColumn<MinionRecord, string> = {
   id: 'status',
   name: 'Status',
   data: (r) => (r.status.offline ? 'Offline' : 'Online'),
   width: '80px',
 };
 
-const nodeColInfo: BdDataColumn<MinionRecord> = {
+const nodeColInfo: BdDataColumn<MinionRecord, string> = {
   id: 'info',
   name: 'Additional Information',
   data: (r) => r.status.infoText,
   showWhen: '(min-width: 1280px)',
 };
 
-const nodeColVersion: BdDataColumn<MinionRecord> = {
+const nodeColVersion: BdDataColumn<MinionRecord, string> = {
   id: 'version',
   name: 'Version',
   data: (r) => (r.status.config?.version ? convert2String(r.status.config.version) : ''),
@@ -41,7 +41,7 @@ const nodeColVersion: BdDataColumn<MinionRecord> = {
   width: '140px',
 };
 
-const nodeColOs: BdDataColumn<MinionRecord> = {
+const nodeColOs: BdDataColumn<MinionRecord, string> = {
   id: 'os',
   name: 'OS',
   data: (r) => r.status.config?.os,
@@ -62,7 +62,7 @@ export class NodesComponent {
     '',
     { outlets: { panel: ['panels', 'admin', 'node-detail', row.name] } },
   ];
-  protected readonly columns: BdDataColumn<MinionRecord>[] = [
+  protected readonly columns: BdDataColumn<MinionRecord, unknown>[] = [
     nodeColName,
     nodeColStatus,
     nodeColInfo,

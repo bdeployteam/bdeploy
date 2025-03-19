@@ -22,7 +22,7 @@ interface UserGroupPermission extends ScopedPermission {
   userGroup?: string;
 }
 
-const colUserGroupName: BdDataColumn<UserGroupPermission> = {
+const colUserGroupName: BdDataColumn<UserGroupPermission, string> = {
   id: 'userGroup',
   name: 'User Group',
   data: (r) => r.userGroup,
@@ -41,10 +41,10 @@ export class SettingsComponent implements OnInit {
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected user: UserInfo;
   protected userGroupPermissions: UserGroupPermission[];
-  protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly permColumns: BdDataColumn<ScopedPermission, unknown>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
   ];
-  protected readonly userGroupPermColumns: BdDataColumn<UserGroupPermission>[] = [
+  protected readonly userGroupPermColumns: BdDataColumn<UserGroupPermission, unknown>[] = [
     colUserGroupName,
     ...this.permissionColumnsService.defaultPermissionColumns,
   ];

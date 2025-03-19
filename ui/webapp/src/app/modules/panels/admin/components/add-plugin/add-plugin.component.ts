@@ -19,7 +19,7 @@ export class AddPluginComponent {
 
   protected files: File[] = [];
 
-  protected resultEvaluator(result: UploadStatus): string {
+  protected resultEvaluator(result: UploadStatus<PluginInfoDto>): string {
     if (!result.detail) {
       return null;
     }

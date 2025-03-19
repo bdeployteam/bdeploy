@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
-import { InstanceDto, ManifestKey, MinionMode } from 'src/app/models/gen.dtos';
+import { InstanceDto, InstancePurpose, ManagedMasterDto, ManifestKey, MinionMode } from 'src/app/models/gen.dtos';
 import { BdIdentifierCellComponent } from 'src/app/modules/core/components/bd-identifier-cell/bd-identifier-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
@@ -19,7 +19,7 @@ export class InstancesColumnsService {
   private readonly products = inject(ProductsService);
   private readonly systems = inject(SystemsService);
 
-  public readonly instanceTypeColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceTypeColumn: BdDataColumn<InstanceDto, InstancePurpose> = {
     id: 'type',
     name: 'Purp.',
     description: 'Purpose',
@@ -30,7 +30,7 @@ export class InstancesColumnsService {
     component: InstancePurposeShortComponent,
   };
 
-  public readonly instanceNameColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceNameColumn: BdDataColumn<InstanceDto, string> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -38,7 +38,7 @@ export class InstancesColumnsService {
     sortCard: true,
   };
 
-  public readonly instanceIdColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceIdColumn: BdDataColumn<InstanceDto, string> = {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -48,7 +48,7 @@ export class InstancesColumnsService {
     component: BdIdentifierCellComponent,
   };
 
-  public readonly instanceDescriptionColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceDescriptionColumn: BdDataColumn<InstanceDto, string> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -57,7 +57,7 @@ export class InstancesColumnsService {
     sortCard: true,
   };
 
-  public readonly instanceSystemColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceSystemColumn: BdDataColumn<InstanceDto, string> = {
     id: 'system',
     name: 'System',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -65,7 +65,7 @@ export class InstancesColumnsService {
     showWhen: '(min-width: 1900px)',
   };
 
-  public readonly instanceProductColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceProductColumn: BdDataColumn<InstanceDto, string> = {
     id: 'product',
     name: 'Product',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -77,7 +77,7 @@ export class InstancesColumnsService {
     showWhen: '(min-width: 600px)',
   };
 
-  public readonly instanceProductVersionColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceProductVersionColumn: BdDataColumn<InstanceDto, string> = {
     id: 'productVersion',
     name: 'Product Version',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -86,7 +86,7 @@ export class InstancesColumnsService {
     icon: () => 'smartphone',
   };
 
-  public readonly instanceProductActiveColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceProductActiveColumn: BdDataColumn<InstanceDto, string> = {
     id: 'activeProductVersion',
     name: 'Active Version',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -96,7 +96,7 @@ export class InstancesColumnsService {
     sortCard: true,
   };
 
-  public readonly instanceBannerColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceBannerColumn: BdDataColumn<InstanceDto, string> = {
     id: 'bannerHint',
     name: 'Ban.',
     description: 'Banner',
@@ -105,7 +105,7 @@ export class InstancesColumnsService {
     width: '24px',
   };
 
-  public readonly instanceServerColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceServerColumn: BdDataColumn<InstanceDto, string> = {
     id: 'managedServer',
     name: 'Serv.',
     description: 'Managed Server',
@@ -116,7 +116,7 @@ export class InstancesColumnsService {
     width: '24px',
   };
 
-  public readonly instanceSyncColumn: BdDataColumn<InstanceDto> = {
+  public readonly instanceSyncColumn: BdDataColumn<InstanceDto, ManagedMasterDto> = {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,

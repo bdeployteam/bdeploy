@@ -33,7 +33,7 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   /**
    * The columns to display
    */
-  @Input() columns: BdDataColumn<T>[];
+  @Input() columns: BdDataColumn<T, unknown>[];
 
   /**
    * The actual data. Arbitrary data which can be handled by the column definitions.
@@ -55,14 +55,14 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
    */
   @Output() recordClick = new EventEmitter<T>();
 
-  colType: BdDataColumn<T>;
-  colTitle: BdDataColumn<T>;
-  colDescription: BdDataColumn<T>;
-  colStatus: BdDataColumn<T>;
-  colActions: BdDataColumn<T>[];
-  colDetails: BdDataColumn<T>[];
-  colAvatar: BdDataColumn<T>;
-  colFooter: BdDataColumn<T>;
+  colType: BdDataColumn<T, unknown>;
+  colTitle: BdDataColumn<T, unknown>;
+  colDescription: BdDataColumn<T, unknown>;
+  colStatus: BdDataColumn<T, unknown>;
+  colActions: BdDataColumn<T, unknown>[];
+  colDetails: BdDataColumn<T, unknown>[];
+  colAvatar: BdDataColumn<T, unknown>;
+  colFooter: BdDataColumn<T, unknown>;
 
   avatar: string;
 
@@ -98,5 +98,22 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
       }
     }
     return null;
+  }
+
+  protected getDataAsStringFor(col: BdDataColumn<T, unknown>) {
+    const data = col.data(this.record);
+    if(data) {
+      return data.toString();
+    }
+
+    return null;
+  }
+
+  protected getTooltipTextFor(col: BdDataColumn<T, unknown>) {
+    if(col.tooltip) {
+      return col.tooltip(this.record);
+    }
+
+    return this.getDataAsStringFor(col);
   }
 }

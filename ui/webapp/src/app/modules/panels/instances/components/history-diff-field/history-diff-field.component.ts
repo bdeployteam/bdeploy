@@ -10,7 +10,7 @@ import { BdPopupDirective } from '../../../../core/components/bd-popup/bd-popup.
     imports: [NgClass, BdPopupDirective]
 })
 export class HistoryDiffFieldComponent implements OnInit, OnChanges {
-  @Input() diff: Difference;
+  @Input() diff: Difference<unknown>;
   @Input() popup: TemplateRef<unknown>;
 
   @Input() maxWidthPx: number;
@@ -21,7 +21,7 @@ export class HistoryDiffFieldComponent implements OnInit, OnChanges {
 
   protected borderClass: string;
   protected bgClass: string;
-  protected value: string;
+  protected value: unknown;
 
   ngOnInit(): void {
     this.borderClass = this.getBorderClass();
@@ -56,11 +56,29 @@ export class HistoryDiffFieldComponent implements OnInit, OnChanges {
     return this.getBorderClass() + '-bg';
   }
 
-  private getValue(): string {
+  private getValue(): unknown {
     if (this.diff.value === null || this.diff.value === undefined) {
       return '-';
     }
 
-    return this.maskValue ? '*'.repeat(this.diff.value.length) : this.diff.value;
+    if(this.maskValue) {
+      return '*'.repeat(this.determineMaskLength(this.diff.value));
+    } else {
+      return this.diff.value;
+    }
   }
+
+  private determineMaskLength(value: unknown): number {
+    if(typeof value === 'string') {
+      return (value as string).length;
+    } else if(typeof value === 'object') {
+        const length = (value as Record<string, unknown>)['length'];
+        if(typeof length === 'number') {
+          return length as number;
+        }
+    }
+
+    return 1;
+  }
+
 }

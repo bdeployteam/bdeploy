@@ -1,8 +1,6 @@
 import { Type } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
-import {
-  TableCellDisplay
-} from '../modules/core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { CellComponent } from '../modules/core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 /**
  * A type hint for the colum which may (mostly in card mode) have influence on where and how information is rendered.
@@ -36,8 +34,11 @@ export enum BdDataColumnDisplay {
 
 /**
  * Defines a column of the data table.
+ *
+ * @param <T> Type of the input that the data is extracted from
+ * @param <R> Type of the data that will be displayed
  */
-export interface BdDataColumn<T> {
+export interface BdDataColumn<T, R> {
   /** internal ID of the column, used to keep track of columns */
   id: string;
 
@@ -45,13 +46,13 @@ export interface BdDataColumn<T> {
   name: string;
 
   /** Receives a record, extracts the data to display for this column. Provides data for searching even if custom rendering component is used. */
-  data: (record: T) => any;
+  data: (record: T) => R;
 
   /** Additional tooltip callback which will be queried if given instead of displaying the data as tooltip */
   tooltip?: (record: T) => string;
 
-  /** Provides a alternative rendering component for the cell, which has an Input named 'record', and an optional Input named 'column' */
-  component?: Type<TableCellDisplay<T>>;
+  /** Provides a alternative rendering component for the cell, which has a reference to the Record and the Column. */
+  component?: Type<CellComponent<T, R>>;
 
   /** The description of the column, usually displayed as a tooltip somewhere */
   description?: string;
@@ -145,7 +146,7 @@ export function bdSortGroups(a: string, b: string) {
 }
 
 /** The default sorting algorithm which should be fine for almost all cases */
-export function bdDataDefaultSort<T>(data: T[], column: BdDataColumn<T>, direction: SortDirection) {
+export function bdDataDefaultSort<T>(data: T[], column: BdDataColumn<T, unknown>, direction: SortDirection) {
   return data.sort((a, b) => {
     const dir = direction === 'asc' ? 1 : -1;
 
@@ -174,7 +175,7 @@ export function bdDataDefaultSort<T>(data: T[], column: BdDataColumn<T>, directi
 }
 
 /** The default search which uses case insensitive search in all fields of the record. */
-export function bdDataDefaultSearch<T>(search: string, records: T[], columns: BdDataColumn<T>[]): T[] {
+export function bdDataDefaultSearch<T>(search: string, records: T[], columns: BdDataColumn<T, unknown>[]): T[] {
   if (!search) {
     return records;
   }
@@ -187,7 +188,7 @@ export function bdDataDefaultSearch<T>(search: string, records: T[], columns: Bd
 }
 
 /** Takes any object and produces a "searchable" string by joining all field values into a space separated string */
-function createSearchString<T>(val: T, columns: BdDataColumn<T>[]): string {
+function createSearchString<T>(val: T, columns: BdDataColumn<T, unknown>[]): string {
   let result = '';
   if (!val) {
     return result;

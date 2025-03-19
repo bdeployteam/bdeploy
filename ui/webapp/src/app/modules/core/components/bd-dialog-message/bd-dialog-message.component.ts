@@ -107,7 +107,7 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
 })
 export class BdDialogMessageComponent implements OnInit, OnDestroy {
   public message$ = new BehaviorSubject<BdDialogMessage<unknown>>(null);
-  public result$ = new Subject<any>();
+  public result$ = new Subject<unknown>();
   public confirmed$ = new BehaviorSubject<boolean>(true);
 
   private subscription: Subscription;

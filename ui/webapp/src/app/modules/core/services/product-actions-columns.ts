@@ -27,7 +27,7 @@ export interface InstTemplateColumnData extends InstTemplateData {
   providedIn: 'root',
 })
 export class ProductActionsColumnsService {
-  private readonly labelKeyColumn: BdDataColumn<LabelRecord> = {
+  private readonly labelKeyColumn: BdDataColumn<LabelRecord, string> = {
     id: 'key',
     name: 'Label',
     data: (r) => r.key,
@@ -35,14 +35,14 @@ export class ProductActionsColumnsService {
     width: '90px',
   };
 
-  private readonly labelValueColumn: BdDataColumn<LabelRecord> = {
+  private readonly labelValueColumn: BdDataColumn<LabelRecord, string> = {
     id: 'value',
     name: 'Value',
     data: (r) => r.value,
     width: '190px',
   };
 
-  private readonly appTemplateNameColumn: BdDataColumn<FlattenedApplicationTemplateConfiguration> = {
+  private readonly appTemplateNameColumn: BdDataColumn<FlattenedApplicationTemplateConfiguration, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
@@ -50,7 +50,7 @@ export class ProductActionsColumnsService {
     tooltip: (r) => r.description,
   };
 
-  private readonly instTemplateNameColumn: BdDataColumn<InstTemplateColumnData> = {
+  private readonly instTemplateNameColumn: BdDataColumn<InstTemplateColumnData, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.config.name,
@@ -58,7 +58,7 @@ export class ProductActionsColumnsService {
     tooltip: (r) => r.config.description,
   };
 
-  private readonly instTemplateResponseFileDownloadColumn: BdDataColumn<InstTemplateColumnData> = {
+  private readonly instTemplateResponseFileDownloadColumn: BdDataColumn<InstTemplateColumnData, string> = {
     id: 'downloadResponseFile',
     name: 'Response File',
     data: () => 'Download a response file for this instance template',
@@ -68,21 +68,21 @@ export class ProductActionsColumnsService {
     classes: () => ['justify-items-center'],
   };
 
-  private readonly pluginNameColumn: BdDataColumn<PluginInfoDto> = {
+  private readonly pluginNameColumn: BdDataColumn<PluginInfoDto, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
     width: '130px',
   };
 
-  private readonly pluginVersionColumn: BdDataColumn<PluginInfoDto> = {
+  private readonly pluginVersionColumn: BdDataColumn<PluginInfoDto, string> = {
     id: 'description',
     name: 'Description',
     data: (r) => r.version,
     width: '100px',
   };
 
-  private readonly pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
+  private readonly pluginOIDColumn: BdDataColumn<PluginInfoDto, string> = {
     id: 'oid',
     name: 'OID',
     data: (r) => r.id.id,
@@ -90,16 +90,16 @@ export class ProductActionsColumnsService {
     width: '50px',
   };
 
-  public readonly defaultLabelsColumns: BdDataColumn<LabelRecord>[] = //
+  public readonly defaultLabelsColumns: BdDataColumn<LabelRecord, unknown>[] = //
     [this.labelKeyColumn, this.labelValueColumn];
 
-  public readonly defaultApplicationTemplatesColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = //
+  public readonly defaultApplicationTemplatesColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration, unknown>[] = //
     [this.appTemplateNameColumn];
 
-  public readonly defaultInstanceTemplatesColumns: BdDataColumn<InstTemplateColumnData>[] = //
+  public readonly defaultInstanceTemplatesColumns: BdDataColumn<InstTemplateColumnData, unknown>[] = //
     [this.instTemplateNameColumn, this.instTemplateResponseFileDownloadColumn];
 
-  public readonly defaultPluginsColumns: BdDataColumn<PluginInfoDto>[] = //
+  public readonly defaultPluginsColumns: BdDataColumn<PluginInfoDto, unknown>[] = //
     [this.pluginNameColumn, this.pluginVersionColumn, this.pluginOIDColumn];
 
   public mapToAppTemplateColumnData(

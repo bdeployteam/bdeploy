@@ -21,34 +21,34 @@ export interface MinionRow {
   url: string;
 }
 
-const detailNameCol: BdDataColumn<MinionRow> = {
+const detailNameCol: BdDataColumn<MinionRow, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
   component: ServerNodeNameCellComponent,
 };
 
-const detailUrlCol: BdDataColumn<MinionRow> = {
+const detailUrlCol: BdDataColumn<MinionRow, string> = {
   id: 'url',
   name: 'Local URL',
   data: (r) => r.url,
 };
 
-const detailMasterCol: BdDataColumn<MinionRow> = {
+const detailMasterCol: BdDataColumn<MinionRow, string> = {
   id: 'master',
   name: 'Master',
   data: (r) => (r.master ? 'Yes' : ''),
   width: '60px',
 };
 
-const detailVersionCol: BdDataColumn<MinionRow> = {
+const detailVersionCol: BdDataColumn<MinionRow, string> = {
   id: 'version',
   name: 'Version',
   data: (r) => r.version,
   width: '150px',
 };
 
-const detailOsCol: BdDataColumn<MinionRow> = {
+const detailOsCol: BdDataColumn<MinionRow, string> = {
   id: 'os',
   name: 'OS',
   data: (r) => r.os,

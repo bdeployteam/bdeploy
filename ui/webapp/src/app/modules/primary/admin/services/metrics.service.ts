@@ -12,10 +12,10 @@ export class MetricsService {
   private readonly config = inject(ConfigService);
 
   public getAllMetrics(): Observable<Record<MetricGroup, MetricBundle>> {
-    return this.http.get<any>(this.config.config.api + '/metrics');
+    return this.http.get<Record<MetricGroup, MetricBundle>>(this.config.config.api + '/metrics');
   }
 
   public getServerMetrics(): Observable<JerseyServerMonitoringDto> {
-    return this.http.get<any>(this.config.config.api + '/server-monitor');
+    return this.http.get<JerseyServerMonitoringDto>(this.config.config.api + '/server-monitor');
   }
 }

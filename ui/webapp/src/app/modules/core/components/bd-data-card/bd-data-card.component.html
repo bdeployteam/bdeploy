@@ -8,7 +8,6 @@
           }
           @if (!!colType.component) {
             <app-bd-data-component-cell
-              [componentType]="colType.component"
               [record]="record"
               [column]="colType"
             ></app-bd-data-component-cell>
@@ -19,7 +18,7 @@
         <div
           class="bd-title-text truncate"
           [ngClass]="colTitle.classes ? colTitle.classes(record) : []"
-          [matTooltip]="!!colTitle.tooltip ? colTitle.tooltip(record) : colTitle.data(record)"
+          [matTooltip]="getTooltipTextFor(colTitle)"
           [matTooltipShowDelay]="1000"
           >
           @if (!colTitle.component) {
@@ -27,7 +26,6 @@
           }
           @if (!!colTitle.component) {
             <app-bd-data-component-cell
-              [componentType]="colTitle.component"
               [record]="record"
               [column]="colTitle"
             ></app-bd-data-component-cell>
@@ -38,7 +36,7 @@
         <div
           class="bd-description-text h-4 truncate"
           [ngClass]="colDescription.classes ? colDescription.classes(record) : []"
-          [matTooltip]="!!colDescription.tooltip ? colDescription.tooltip(record) : colDescription.data(record)"
+          [matTooltip]="getTooltipTextFor(colDescription)"
           [matTooltipShowDelay]="1000"
           >
           @if (!colDescription.component) {
@@ -48,7 +46,6 @@
             }
             @if (!!colDescription.component) {
               <app-bd-data-component-cell
-                [componentType]="colDescription.component"
                 [record]="record"
                 [column]="colDescription"
               ></app-bd-data-component-cell>
@@ -64,7 +61,6 @@
           }
           @if (!!colStatus.component) {
             <app-bd-data-component-cell
-              [componentType]="colStatus.component"
               [record]="record"
               [column]="colStatus"
             ></app-bd-data-component-cell>
@@ -97,7 +93,6 @@
                     @if (!!detail.component) {
                       <div>
                         <app-bd-data-component-cell
-                          [componentType]="detail.component"
                           [record]="record"
                           [column]="detail"
                         ></app-bd-data-component-cell>
@@ -116,7 +111,7 @@
                   <app-bd-button
                     [ngClass]="action.classes ? action.classes(record) : []"
                     [icon]="action.icon(record)"
-                    [text]="action.data(record)"
+                    [text]="getDataAsStringFor(action)"
                     tooltip="below"
                     (click)="action.action(record)"
                     [disabled]="!action.actionDisabled ? false : action.actionDisabled(record)"
@@ -127,7 +122,6 @@
                 @if (!!action.component) {
                   <div>
                     <app-bd-data-component-cell
-                      [componentType]="action.component"
                       [record]="record"
                       [column]="action"
                     ></app-bd-data-component-cell>
@@ -142,7 +136,7 @@
         <div
           class="text-xs truncate"
           [ngClass]="colFooter.classes ? colFooter.classes(record) : []"
-          [matTooltip]="!!colFooter.tooltip ? colFooter.tooltip(record) : colFooter.data(record)"
+          [matTooltip]="getTooltipTextFor(colFooter)"
           [matTooltipShowDelay]="1000"
           >
           @if (!colFooter.component) {
@@ -150,7 +144,6 @@
           }
           @if (!!colFooter.component) {
             <app-bd-data-component-cell
-              [componentType]="colFooter.component"
               [record]="record"
               [column]="colFooter"
             ></app-bd-data-component-cell>

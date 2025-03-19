@@ -12,19 +12,26 @@ import { AsyncPipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [BdNotificationCardComponent, MatProgressBar, AsyncPipe]
 })
-export class BdFileUploadComponent implements OnInit {
+/**
+ * This is used to strongly type this.status and this.resultEvaluator.
+ *
+ * The resultEvaluator default implementation assumes the detail is of type 'ManifestKey[]',
+ * even if the signature is generic.
+ *
+ * @param <T> The type of UploadStatus.detail
+ */
+export class BdFileUploadComponent<T> implements OnInit {
   @Input() file: File;
   @Input() url: string;
   @Input() parameters: UrlParameter[];
   @Input() formDataParam = 'file';
-  @Input() resultEvaluator: (status: UploadStatus) => string = this.defaultResultDetailsEvaluation;
-
+  @Input() resultEvaluator: <T>(status: UploadStatus<T>) => string = this.defaultResultDetailsEvaluation;
   @Output() success = new EventEmitter<boolean>();
   @Output() dismiss = new EventEmitter<File>();
 
   private readonly uploads = inject(UploadService);
 
-  protected status: UploadStatus;
+  protected status: UploadStatus<T>;
   protected finished$ = new BehaviorSubject<boolean>(false);
   protected failed$ = new BehaviorSubject<boolean>(false);
   protected uploading$ = new BehaviorSubject<boolean>(false);
@@ -33,7 +40,7 @@ export class BdFileUploadComponent implements OnInit {
   protected header$ = new BehaviorSubject<string>(this.getHeader());
 
   ngOnInit(): void {
-    this.status = this.uploads.uploadFile(this.url, this.file, this.parameters, this.formDataParam);
+    this.status = this.uploads.uploadFile<T>(this.url, this.file, this.parameters, this.formDataParam);
 
     this.status.stateObservable.subscribe((state) => {
       this.setProcessDetails();
@@ -56,7 +63,9 @@ export class BdFileUploadComponent implements OnInit {
     this.header$.next(this.getHeader());
   }
 
-  private defaultResultDetailsEvaluation(status: UploadStatus) {
+  private defaultResultDetailsEvaluation<T>(uploadStatus: UploadStatus<T>) {
+    // XXX: assume that who is using default, is typed with ManifestKey[]
+    const status = uploadStatus as UploadStatus<ManifestKey[]>;
     if (status.detail.length === 0) {
       return 'Software version already exists. Nothing to do.';
     }

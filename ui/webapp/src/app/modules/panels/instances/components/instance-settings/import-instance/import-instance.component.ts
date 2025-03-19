@@ -24,7 +24,7 @@ export class ImportInstanceComponent {
 
   protected files: ImportFile[] = [];
 
-  protected resultEval = (s: UploadStatus) => {
+  protected resultEval = (s: UploadStatus<ManifestKey[]>) => {
     if (s.detail.length === 0) {
       return 'Nothing to do.';
     }

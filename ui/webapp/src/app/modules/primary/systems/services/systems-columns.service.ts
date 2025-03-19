@@ -13,7 +13,7 @@ export class SystemsColumnsService {
   private readonly cfg = inject(ConfigService);
   private readonly serversSvc = inject(ServersService);
 
-  public readonly systemIdColumn: BdDataColumn<SystemConfigurationDto> = {
+  public readonly systemIdColumn: BdDataColumn<SystemConfigurationDto, string> = {
     id: 'system',
     name: 'ID',
     data: (r) => r.config.id,
@@ -24,21 +24,21 @@ export class SystemsColumnsService {
     component: BdIdentifierCellComponent,
   };
 
-  public readonly systemNameColumn: BdDataColumn<SystemConfigurationDto> = {
+  public readonly systemNameColumn: BdDataColumn<SystemConfigurationDto, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.config.name,
     hint: BdDataColumnTypeHint.TITLE,
   };
 
-  public readonly systemDescriptionColumn: BdDataColumn<SystemConfigurationDto> = {
+  public readonly systemDescriptionColumn: BdDataColumn<SystemConfigurationDto, string> = {
     id: 'description',
     name: 'Description',
     data: (r) => r.config.description,
     hint: BdDataColumnTypeHint.DESCRIPTION,
   };
 
-  public readonly systemMinionColumn: BdDataColumn<SystemConfigurationDto> = {
+  public readonly systemMinionColumn: BdDataColumn<SystemConfigurationDto, string> = {
     id: 'minion',
     name: 'Server',
     data: (r) => r.minion,
@@ -47,7 +47,7 @@ export class SystemsColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
   };
 
-  public readonly systemSyncColumn: BdDataColumn<SystemConfigurationDto> = {
+  public readonly systemSyncColumn: BdDataColumn<SystemConfigurationDto, ManagedMasterDto> = {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
@@ -56,7 +56,7 @@ export class SystemsColumnsService {
     width: '50px',
   };
 
-  public readonly systemVarsColumn: BdDataColumn<SystemConfigurationDto> = {
+  public readonly systemVarsColumn: BdDataColumn<SystemConfigurationDto, number> = {
     id: 'vars',
     name: '# Variables',
     data: (r) => Object.keys(r.config.systemVariables).length,

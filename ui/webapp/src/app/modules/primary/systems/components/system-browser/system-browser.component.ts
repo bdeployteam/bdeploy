@@ -14,6 +14,7 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
 import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
 import { AsyncPipe } from '@angular/common';
+import { BdDataColumn } from '../../../../../models/data';
 
 @Component({
     selector: 'app-system-browser',
@@ -27,7 +28,7 @@ export class SystemBrowserComponent implements OnInit {
   protected readonly groups = inject(GroupsService);
   protected readonly authService = inject(AuthenticationService);
 
-  protected sysCols = [
+  protected sysCols: BdDataColumn<SystemConfigurationDto, unknown>[] = [
     this.columns.systemNameColumn,
     this.columns.systemDescriptionColumn,
     this.columns.systemVarsColumn,

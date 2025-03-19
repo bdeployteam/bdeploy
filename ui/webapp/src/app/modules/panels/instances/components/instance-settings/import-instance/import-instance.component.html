@@ -14,7 +14,7 @@
           [parameters]="file.parameters"
           [url]="instances.importURL$ | async"
           (dismiss)="onDismiss(i)"
-          [resultEvaluator]="resultEval"
+          [resultEvaluator]="$any(resultEval)"
         ></app-bd-file-upload>
       }
     </div>

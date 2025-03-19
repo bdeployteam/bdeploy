@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { InstanceDto } from 'src/app/models/gen.dtos';
+import { InstanceDto, InstancePurpose } from 'src/app/models/gen.dtos';
 import { NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import {
-  TableCellDisplay
-} from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataColumn } from '../../../../../../models/data';
+import { CellComponent } from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-instance-purpose-short',
@@ -14,9 +12,9 @@ import { BdDataColumn } from '../../../../../../models/data';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass, MatTooltip]
 })
-export class InstancePurposeShortComponent implements TableCellDisplay<InstanceDto> {
+export class InstancePurposeShortComponent implements CellComponent<InstanceDto, InstancePurpose> {
   @Input() record: InstanceDto;
-  @Input() column: BdDataColumn<InstanceDto>;
+  @Input() column: BdDataColumn<InstanceDto, InstancePurpose>;
   
   protected getPurposeAbbrev() {
     return this.record.instanceConfiguration.purpose.charAt(0);

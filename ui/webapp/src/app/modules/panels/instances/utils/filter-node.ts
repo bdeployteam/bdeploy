@@ -7,13 +7,15 @@ import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
     pure: false
 })
 export class NodeFilterPipe implements PipeTransform {
-  transform(appConfigs: ApplicationConfiguration[], args: string): any {
+  transform(appConfigs: ApplicationConfiguration[], args: string): ApplicationConfiguration[] {
     if (appConfigs) {
       if (args.length === 0) {
         return appConfigs;
       } else {
         return appConfigs.filter((appConfig) => searchThroughObject(appConfig, args));
       }
+    } else {
+      return [];
     }
   }
 }
@@ -23,12 +25,12 @@ export class NodeFilterPipe implements PipeTransform {
     pure: false
 })
 export class CustomNodeFilterPipe implements PipeTransform {
-  transform(item: unknown, args: any): boolean {
+  transform(item: object, args: string): boolean {
     if (item) {
       if (args.length === 0) {
         return true;
       } else {
-        return searchThroughObject(item as object, args);
+        return searchThroughObject(item, args);
       }
     }
     return null;
@@ -36,7 +38,7 @@ export class CustomNodeFilterPipe implements PipeTransform {
 }
 
 export function searchThroughObject(obj: object, args: string): boolean {
-  return Object.values(obj).some((val: any) => {
+  return Object.values(obj).some((val: unknown) => {
     if (isObject(val)) {
       return searchThroughObject(val, args);
     }
@@ -48,5 +50,7 @@ export function searchThroughObject(obj: object, args: string): boolean {
     if (val !== null) {
       return val.toString().toLowerCase().includes(args.toLowerCase());
     }
+
+    return false;
   });
 }

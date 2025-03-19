@@ -1,19 +1,29 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AfterViewInit, Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { editor } from 'monaco-editor';
+import IEditor = editor.IEditor;
+import IEditorOptions = editor.IEditorOptions;
 
 let loadedMonaco = false;
 let loadPromise: Promise<void>;
 
 @Component({
-  template: ''
+  template: '',
 })
-export abstract class BdMonacoBaseEditorComponent implements AfterViewInit, OnDestroy {
+
+/**
+ * Defines logic for initialising the monaco editor code.
+ *
+ * @param <T> Type of editor
+ * @param <X> Type of options that should be used with that editor
+ */
+export abstract class BdMonacoBaseEditorComponent<T extends IEditor, X extends IEditorOptions> implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer', { static: true }) _editorContainer: ElementRef;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
-  @Output() onInit = new EventEmitter<any>();
-  protected _editor: any;
-  protected _options: any;
+  @Output() init = new EventEmitter<T>();
+  protected _editor: T;
+  protected _options: X;
   protected _windowResizeSubscription: Subscription;
 
   ngAfterViewInit(): void {
@@ -24,15 +34,15 @@ export abstract class BdMonacoBaseEditorComponent implements AfterViewInit, OnDe
       });
     } else {
       loadedMonaco = true;
-      loadPromise = new Promise<void>((resolve: any) => {
+      loadPromise = new Promise<void>((resolve: () => void) => {
         const baseUrl = './assets/monaco-editor/min/vs';
-        if (typeof ((<any>window).monaco) === 'object') {
+        if (typeof (<any>window).monaco === 'object') {
           resolve();
           return;
         }
-        const onGotAmdLoader: any = () => {
+        const onGotAmdLoader = () => {
           // Load monaco
-          (<any>window).require.config({ paths: { 'vs': `${baseUrl}` } });
+          (<any>window).require.config({ paths: { vs: `${baseUrl}` } });
           (<any>window).require([`vs/editor/editor.main`], () => {
             this.initMonaco(this._options);
             resolve();
@@ -53,7 +63,7 @@ export abstract class BdMonacoBaseEditorComponent implements AfterViewInit, OnDe
     }
   }
 
-  protected abstract initMonaco(options: any): void;
+  protected abstract initMonaco(options: X): void;
 
   ngOnDestroy() {
     if (this._windowResizeSubscription) {

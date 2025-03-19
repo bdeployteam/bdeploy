@@ -27,7 +27,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
   public readonly edit = inject(InstanceEditService);
   public readonly areas = inject(NavAreasService);
 
-  private readonly productVersionColumn: BdDataColumn<ProductDto> = {
+  private readonly productVersionColumn: BdDataColumn<ProductDto, string> = {
     id: 'version',
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -37,7 +37,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
     component: ProductVersionDetailsCellComponent,
   };
 
-  private readonly productUpdateAction: BdDataColumn<ProductDto> = {
+  private readonly productUpdateAction: BdDataColumn<ProductDto, string> = {
     id: 'update',
     name: 'Upd.',
     data: (r) => r.key.tag,
@@ -46,7 +46,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
   };
 
   protected records$ = new BehaviorSubject<ProductDto[]>(null);
-  protected readonly columns: BdDataColumn<ProductDto>[] = [this.productVersionColumn, this.productUpdateAction];
+  protected readonly columns: BdDataColumn<ProductDto, unknown>[] = [this.productVersionColumn, this.productUpdateAction];
 
   private subscription: Subscription;
 

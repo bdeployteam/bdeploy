@@ -26,7 +26,7 @@ export class UserGroupPermissionsComponent {
   protected readonly repos = inject(RepositoriesService);
   protected readonly users = inject(RepositoryUsersService);
 
-  private readonly colGlobalPerm: BdDataColumn<UserGroupInfo> = {
+  private readonly colGlobalPerm: BdDataColumn<UserGroupInfo, Permission> = {
     id: 'global',
     name: 'Global Perm.',
     data: (r) => this.getGlobalPermissionLevel(r),
@@ -34,7 +34,7 @@ export class UserGroupPermissionsComponent {
     component: BdDataPermissionLevelCellComponent,
   };
 
-  private readonly colLocalPerm: BdDataColumn<UserGroupInfo> = {
+  private readonly colLocalPerm: BdDataColumn<UserGroupInfo, Permission> = {
     id: 'local',
     name: 'Local Perm.',
     data: (r) => this.getLocalPermissionLevel(r),
@@ -42,7 +42,7 @@ export class UserGroupPermissionsComponent {
     component: BdDataPermissionLevelCellComponent,
   };
 
-  private readonly colModPerm: BdDataColumn<UserGroupInfo> = {
+  private readonly colModPerm: BdDataColumn<UserGroupInfo, string> = {
     id: 'modify',
     name: 'Modify',
     data: (r) => `Modify permissions for ${r.name}`,
@@ -61,7 +61,7 @@ export class UserGroupPermissionsComponent {
 
   private readonly groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
 
-  protected readonly columns: BdDataColumn<UserGroupInfo>[] = [
+  protected readonly columns: BdDataColumn<UserGroupInfo, unknown>[] = [
     ...this.groupCols.defaultColumns,
     this.colGlobalPerm,
     this.colLocalPerm,

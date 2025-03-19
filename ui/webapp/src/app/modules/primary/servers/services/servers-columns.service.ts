@@ -8,7 +8,7 @@ import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-c
   providedIn: 'root',
 })
 export class ServersColumnsService {
-  private readonly serverNameColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverNameColumn: BdDataColumn<ManagedMasterDto, string> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.hostName,
@@ -16,14 +16,14 @@ export class ServersColumnsService {
     hint: BdDataColumnTypeHint.TITLE,
   };
 
-  private readonly serverDescColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverDescColumn: BdDataColumn<ManagedMasterDto, string> = {
     id: 'description',
     name: 'Description',
     data: (r) => r.description,
     hint: BdDataColumnTypeHint.DESCRIPTION,
   };
 
-  private readonly serverNodesColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverNodesColumn: BdDataColumn<ManagedMasterDto, number> = {
     id: 'nodeCount',
     name: 'Nodes',
     data: (r) => Object.keys(r.minions.minions).length,
@@ -31,7 +31,7 @@ export class ServersColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
   };
 
-  private readonly serverSyncTimeColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverSyncTimeColumn: BdDataColumn<ManagedMasterDto, number> = {
     id: 'syncTime',
     name: 'Last Sync.',
     data: (r) => r.lastSync,
@@ -41,7 +41,7 @@ export class ServersColumnsService {
     component: BdDataDateCellComponent,
   };
 
-  private readonly serverSyncColumn: BdDataColumn<ManagedMasterDto> = {
+  private readonly serverSyncColumn: BdDataColumn<ManagedMasterDto, ManagedMasterDto> = {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
@@ -50,7 +50,7 @@ export class ServersColumnsService {
     width: '50px',
   };
 
-  public readonly defaultServerColumns: BdDataColumn<ManagedMasterDto>[] = [
+  public readonly defaultServerColumns: BdDataColumn<ManagedMasterDto, unknown>[] = [
     this.serverNameColumn,
     this.serverDescColumn,
     this.serverNodesColumn,
@@ -58,7 +58,7 @@ export class ServersColumnsService {
     this.serverSyncColumn,
   ];
 
-  public readonly defaultReducedServerColumns: BdDataColumn<ManagedMasterDto>[] = [
+  public readonly defaultReducedServerColumns: BdDataColumn<ManagedMasterDto, unknown>[] = [
     this.serverNameColumn,
     this.serverDescColumn,
   ];

@@ -67,11 +67,11 @@ export class BdFormToggleComponent implements ControlValueAccessor {
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (_: unknown) => void): void {
     this.onChangedCb = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouchedCb = fn;
   }
 

@@ -8,9 +8,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { BdDataColumn } from '../../../../../../models/data';
-import {
-  TableCellDisplay
-} from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { CellComponent } from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-pinned-parameter-value',
@@ -18,11 +16,11 @@ import {
     styleUrls: ['./pinned-parameter-value.component.css'],
     imports: [MatCheckbox, MatTooltip, MatIcon, AsyncPipe]
 })
-export class PinnedParameterValueComponent implements OnInit, OnChanges, TableCellDisplay<PinnedParameter> {
+export class PinnedParameterValueComponent implements OnInit, OnChanges, CellComponent<PinnedParameter, string> {
   private readonly ports = inject(PortsService);
 
   @Input() record: PinnedParameter;
-  @Input() column: BdDataColumn<PinnedParameter>;
+  @Input() column: BdDataColumn<PinnedParameter, string>;
 
   protected portState$ = new BehaviorSubject<NodeApplicationPort>(null);
   protected booleanValue: boolean;

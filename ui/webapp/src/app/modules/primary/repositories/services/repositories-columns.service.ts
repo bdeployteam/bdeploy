@@ -6,7 +6,7 @@ import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
   providedIn: 'root',
 })
 export class RepositoriesColumnsService {
-  private readonly repositoryTypeColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryTypeColumn: BdDataColumn<SoftwareRepositoryConfiguration, string> = {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -14,7 +14,7 @@ export class RepositoriesColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  private readonly repositoryNameColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryNameColumn: BdDataColumn<SoftwareRepositoryConfiguration, string> = {
     id: 'name',
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -23,7 +23,7 @@ export class RepositoriesColumnsService {
     width: '200px',
   };
 
-  private readonly repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration, string> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -32,7 +32,7 @@ export class RepositoriesColumnsService {
     showWhen: '(min-width: 1000px)',
   };
 
-  private readonly repositoryLogoCardColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private readonly repositoryLogoCardColumn: BdDataColumn<SoftwareRepositoryConfiguration, string> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -40,7 +40,7 @@ export class RepositoriesColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  public readonly defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [
+  public readonly defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration, unknown>[] = [
     this.repositoryTypeColumn,
     this.repositoryNameColumn,
     this.repositoryDescriptionColumn,

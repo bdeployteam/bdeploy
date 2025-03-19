@@ -6,7 +6,7 @@ import { BdButtonComponent } from '../../../../../../core/components/bd-button/b
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdDataColumn } from '../../../../../../../models/data';
 import {
-  TableCellDisplay
+  CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
@@ -14,12 +14,12 @@ import {
     templateUrl: './plugin-delete-action.component.html',
     imports: [BdButtonComponent, MatTooltip]
 })
-export class PluginDeleteActionComponent implements TableCellDisplay<PluginInfoDto> {
+export class PluginDeleteActionComponent implements CellComponent<PluginInfoDto, PluginInfoDto> {
   private readonly parent = inject(forwardRef(() => SettingsGeneralComponent));
   private readonly plugins = inject(PluginAdminService);
 
   @Input() record: PluginInfoDto;
-  @Input() column: BdDataColumn<PluginInfoDto>;
+  @Input() column: BdDataColumn<PluginInfoDto, PluginInfoDto>;
 
   protected doDelete() {
     this.parent.dialog

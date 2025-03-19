@@ -105,7 +105,7 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   protected searchInstanceGroupData(
     search: string,
     data: InstanceGroupConfigurationDto[],
-    columns: BdDataColumn<InstanceGroupConfigurationDto>[],
+    columns: BdDataColumn<InstanceGroupConfigurationDto, unknown>[],
   ) {
     return bdDataDefaultSearch(search, data, [
       ...columns,

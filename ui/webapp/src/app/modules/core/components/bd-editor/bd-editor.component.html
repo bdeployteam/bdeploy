@@ -5,6 +5,6 @@
     [(ngModel)]="editorContent"
     (ngModelChange)="onModelChange($event)"
     [options]="editorOptions"
-    (onInit)="onMonacoInit($event)"
+    (init)="onMonacoInit($event)"
   ></app-bd-monaco-editor>
 </div>

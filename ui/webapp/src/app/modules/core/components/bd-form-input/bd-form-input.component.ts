@@ -42,8 +42,8 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
 
   @Input() label: string;
   @Input() name: string;
-  @Input() required: any;
-  @Input() disabled: any;
+  @Input() required: boolean | string;
+  @Input() disabled: boolean | string;
   @Input() type: string;
   @Input() placeholder: string;
   @Input() suggested: string[];
@@ -119,11 +119,11 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (_: unknown) => void): void {
     this.onChangedCb = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouchedCb = fn;
   }
 

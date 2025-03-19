@@ -30,7 +30,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthenticationService);
   private readonly permissionColumnsService = inject(PermissionColumnsService);
 
-  private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
+  private readonly colDeletePerm: BdDataColumn<ScopedPermission, string> = {
     id: 'delete',
     name: 'Delete',
     data: () => `Delete Permission`,
@@ -41,7 +41,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected user$ = new BehaviorSubject<UserInfo>(null);
-  protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly permColumns: BdDataColumn<ScopedPermission, unknown>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];

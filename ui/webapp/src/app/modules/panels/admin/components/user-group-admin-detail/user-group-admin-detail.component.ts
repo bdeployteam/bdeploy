@@ -32,7 +32,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   private readonly usersColumnsService = inject(UsersColumnsService);
   private readonly permissionColumnsService = inject(PermissionColumnsService);
 
-  private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
+  private readonly colDeletePerm: BdDataColumn<ScopedPermission, string> = {
     id: 'deletePermission',
     name: 'Delete',
     data: () => `Delete Permission`,
@@ -41,7 +41,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
     width: '40px',
   };
 
-  private readonly colDeleteUser: BdDataColumn<UserInfo> = {
+  private readonly colDeleteUser: BdDataColumn<UserInfo, string> = {
     id: 'removeUser',
     name: 'Remove',
     data: () => `Remove User`,
@@ -52,11 +52,11 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
 
   protected loading$ = new BehaviorSubject<boolean>(false);
   protected group$ = new BehaviorSubject<UserGroupInfo>(null);
-  protected readonly permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected readonly permColumns: BdDataColumn<ScopedPermission, unknown>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];
-  protected readonly userColumns: BdDataColumn<UserInfo>[] = [
+  protected readonly userColumns: BdDataColumn<UserInfo, unknown>[] = [
     ...this.usersColumnsService.userGroupAdminDetailsColumns,
     this.colDeleteUser,
   ];

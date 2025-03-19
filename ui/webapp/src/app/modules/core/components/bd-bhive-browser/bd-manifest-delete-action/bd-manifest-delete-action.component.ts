@@ -7,20 +7,20 @@ import { BdButtonComponent } from '../../bd-button/bd-button.component';
 import { ClickStopPropagationDirective } from '../../../directives/click-stop-propagation.directive';
 import { AsyncPipe } from '@angular/common';
 import { BdDataColumn } from '../../../../../models/data';
-import { TableCellDisplay } from '../../bd-data-component-cell/bd-data-component-cell.component';
+import { CellComponent } from '../../bd-data-component-cell/bd-data-component-cell.component';
 
 @Component({
     selector: 'app-bd-manifest-delete-action',
     templateUrl: './bd-manifest-delete-action.component.html',
     imports: [BdButtonComponent, ClickStopPropagationDirective, AsyncPipe]
 })
-export class BdManifestDeleteActionComponent implements TableCellDisplay<HiveEntryDto> {
+export class BdManifestDeleteActionComponent implements CellComponent<HiveEntryDto, string> {
   private readonly hives = inject(HiveService);
   private readonly parent: BdBHiveBrowserComponent = inject(forwardRef(() => BdBHiveBrowserComponent));
   protected readonly auth = inject(AuthenticationService);
 
   @Input() record: HiveEntryDto;
-  @Input() column: BdDataColumn<HiveEntryDto>;
+  @Input() column: BdDataColumn<HiveEntryDto, string>;
 
   protected onDelete(): void {
     this.parent.dialog

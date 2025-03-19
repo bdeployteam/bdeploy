@@ -149,8 +149,8 @@ export class GroupsService {
     return `${this.apiPath}/${group}/image?logo=${id.id}`;
   }
 
-  public create(group: Partial<InstanceGroupConfiguration>): Observable<any> {
-    return this.http.put(this.apiPath, group);
+  public create(group: Partial<InstanceGroupConfiguration>): Observable<InstanceGroupConfiguration> {
+    return this.http.put<InstanceGroupConfiguration>(this.apiPath, group);
   }
 
   public newId(): Observable<string> {

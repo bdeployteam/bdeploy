@@ -18,14 +18,14 @@ interface InstanceEditRow {
   isCurrent: boolean;
 }
 
-const descColumn: BdDataColumn<InstanceEditRow> = {
+const descColumn: BdDataColumn<InstanceEditRow, string> = {
   id: 'desc',
   name: 'Modification',
   data: (r) => r.edit.description,
   classes: (r) => (r.isUndo ? [] : ['bd-secondary-text']),
 };
 
-const currentColumn: BdDataColumn<InstanceEditRow> = {
+const currentColumn: BdDataColumn<InstanceEditRow, string> = {
   id: 'current',
   name: 'Cur.',
   data: (r) => (r.isCurrent ? 'arrow_back' : null),
@@ -33,7 +33,7 @@ const currentColumn: BdDataColumn<InstanceEditRow> = {
   width: '24px',
 };
 
-const redoColumn: BdDataColumn<InstanceEditRow> = {
+const redoColumn: BdDataColumn<InstanceEditRow, string> = {
   id: 'redo',
   name: 'Redo',
   data: (r) => (r.isUndo ? null : 'redo'),
@@ -51,7 +51,7 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
   protected readonly edit = inject(InstanceEditService);
 
   protected records: InstanceEditRow[] = [];
-  protected readonly columns: BdDataColumn<InstanceEditRow>[] = [descColumn, currentColumn, redoColumn];
+  protected readonly columns: BdDataColumn<InstanceEditRow, unknown>[] = [descColumn, currentColumn, redoColumn];
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
 

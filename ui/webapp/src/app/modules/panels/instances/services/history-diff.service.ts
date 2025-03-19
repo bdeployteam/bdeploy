@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import {
   ApplicationConfiguration,
-  ApplicationDescriptor,
+  ApplicationDescriptor, ApplicationStartType,
   ApplicationType,
   CommandConfiguration,
   EndpointsConfiguration,
@@ -15,7 +15,7 @@ import {
   ParameterConfigurationTarget,
   ParameterDescriptor,
   ProcessControlConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
 import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
@@ -67,14 +67,14 @@ function getPreRenderableOrNull(lv: LinkedValueConfiguration): string {
 }
 
 /** Maintains information about the difference in an object. The given value is the base value is set, otherwise the compare value. */
-export class Difference {
+export class Difference<T> {
   /** The value to display to the user */
-  public value: any;
+  public value: T;
 
   /** The type of difference to render */
   public type: DiffType;
 
-  constructor(base: string | number | boolean, compare: string | number | boolean, valueOverride?: unknown) {
+  constructor(base: T, compare: T, valueOverride?: T) {
     this.value = valueOverride || (base ?? compare);
     this.type = getChangeType(base, compare);
   }
@@ -84,11 +84,11 @@ export class Difference {
 export class ProcessControlDiff {
   public type: DiffType;
 
-  public startType: Difference;
-  public keepAlive: Difference;
-  public noOfRetries: Difference;
-  public gracePeriod: Difference;
-  public attachStdin: Difference;
+  public startType: Difference<ApplicationStartType>;
+  public keepAlive: Difference<boolean>;
+  public noOfRetries: Difference<number>;
+  public gracePeriod: Difference<number>;
+  public attachStdin: Difference<boolean>;
 
   constructor(base: ProcessControlConfiguration, compare: ProcessControlConfiguration) {
     this.startType = new Difference(base?.startType, compare?.startType);
@@ -112,7 +112,7 @@ export class ProcessControlDiff {
 /** Differences in one of the CommandConfigurations in an ApplicationConfiguration */
 export class CommandDiff {
   public type: DiffType;
-  public executable: Difference;
+  public executable: Difference<string>;
   public parameters: ParameterDiff[] = [];
   public environment: ParameterDiff[] = [];
 
@@ -155,7 +155,7 @@ export class CommandDiff {
 /** Differences in a single parameter of a CommandConfiguration. Creates diffs for every pre-rendered part of the parameter if possible */
 export class ParameterDiff {
   public type: DiffType;
-  public values: Difference[] = [];
+  public values: Difference<string>[] = [];
 
   constructor(
     base: ParameterConfiguration,
@@ -238,15 +238,15 @@ export class EndpointsDiff {
 export class HttpEndpointDiff {
   public type: DiffType;
 
-  public path: Difference;
-  public port: Difference;
-  public secure: Difference;
-  public trustAll: Difference;
-  public trustStore: Difference;
-  public trustStorePass: Difference;
-  public authType: Difference;
-  public authUser: Difference;
-  public authPass: Difference;
+  public path: Difference<string>;
+  public port: Difference<string>;
+  public secure: Difference<string>;
+  public trustAll: Difference<boolean>;
+  public trustStore: Difference<string>;
+  public trustStorePass: Difference<string>;
+  public authType: Difference<string>;
+  public authUser: Difference<string>;
+  public authPass: Difference<string>;
 
   constructor(base: HttpEndpoint, compare: HttpEndpoint) {
     this.path = new Difference(base?.path, compare?.path);
@@ -285,8 +285,8 @@ export class HttpEndpointDiff {
 export class ApplicationConfigurationDiff {
   public type: DiffType;
 
-  public id: Difference;
-  public name: Difference;
+  public id: Difference<string>;
+  public name: Difference<string>;
   public processControl: ProcessControlDiff;
   public start: CommandDiff;
   public endpoints: EndpointsDiff;
@@ -324,15 +324,15 @@ export class ApplicationConfigurationDiff {
 export class InstanceConfigurationDiff {
   public type: DiffType;
 
-  public name: Difference;
-  public description: Difference;
-  public autoStart: Difference;
-  public purpose: Difference;
-  public productTag: Difference;
-  public configTree: Difference;
-  public autoUninstall: Difference;
-  public system: Difference;
-  public systemTag: Difference;
+  public name: Difference<string>;
+  public description: Difference<string>;
+  public autoStart: Difference<boolean>;
+  public purpose: Difference<string>;
+  public productTag: Difference<string>;
+  public configTree: Difference<string>;
+  public autoUninstall: Difference<boolean>;
+  public system: Difference<string>;
+  public systemTag: Difference<string>;
 
   constructor(base: InstanceConfiguration, compare: InstanceConfiguration) {
     this.name = new Difference(base?.name, compare?.name);
@@ -364,10 +364,10 @@ export class InstanceConfigurationDiff {
 export class VariableValueDiff {
   public diffType: DiffType;
 
-  public value: Difference;
-  public description: Difference;
-  public type: Difference;
-  public customEditor: Difference;
+  public value: Difference<string>;
+  public description: Difference<string>;
+  public type: Difference<string>;
+  public customEditor: Difference<string>;
 
   constructor(
     public key: string,

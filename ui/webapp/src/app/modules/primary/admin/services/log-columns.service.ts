@@ -5,7 +5,7 @@ import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 
-const colAvatar: BdDataColumn<RemoteDirectoryEntry> = {
+const colAvatar: BdDataColumn<RemoteDirectoryEntry, string> = {
   id: 'avatar',
   name: '',
   data: () => 'subject',
@@ -13,14 +13,14 @@ const colAvatar: BdDataColumn<RemoteDirectoryEntry> = {
   component: BdDataIconCellComponent,
 };
 
-const colPath: BdDataColumn<RemoteDirectoryEntry> = {
+const colPath: BdDataColumn<RemoteDirectoryEntry, string> = {
   id: 'path',
   name: 'Path',
   data: (r) => r.path,
   isId: true,
 };
 
-const colSize: BdDataColumn<RemoteDirectoryEntry> = {
+const colSize: BdDataColumn<RemoteDirectoryEntry, number> = {
   id: 'size',
   name: 'Size',
   data: (r) => r.size,
@@ -28,7 +28,7 @@ const colSize: BdDataColumn<RemoteDirectoryEntry> = {
   component: BdDataSizeCellComponent,
 };
 
-const colMod: BdDataColumn<RemoteDirectoryEntry> = {
+const colMod: BdDataColumn<RemoteDirectoryEntry, number> = {
   id: 'modified',
   name: 'Last Modified',
   data: (r) => r.lastModified,
@@ -40,5 +40,5 @@ const colMod: BdDataColumn<RemoteDirectoryEntry> = {
   providedIn: 'root',
 })
 export class LogColumnsService {
-  public readonly defaultColumns: BdDataColumn<RemoteDirectoryEntry>[] = [colAvatar, colPath, colSize, colMod];
+  public readonly defaultColumns: BdDataColumn<RemoteDirectoryEntry, unknown>[] = [colAvatar, colPath, colSize, colMod];
 }

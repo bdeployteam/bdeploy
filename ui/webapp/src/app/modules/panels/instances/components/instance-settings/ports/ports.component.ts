@@ -21,7 +21,7 @@ import { BdDialogContentComponent } from '../../../../../core/components/bd-dial
 import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
 import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
 
-const colName: BdDataColumn<PortParam> = {
+const colName: BdDataColumn<PortParam, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
@@ -29,7 +29,7 @@ const colName: BdDataColumn<PortParam> = {
   tooltipDelay: 50,
 };
 
-const colType: BdDataColumn<PortParam> = {
+const colType: BdDataColumn<PortParam, string> = {
   id: 'type',
   name: 'Type',
   data: (r) => r.type,
@@ -37,7 +37,7 @@ const colType: BdDataColumn<PortParam> = {
   width: '24px',
 };
 
-const colPort: BdDataColumn<PortParam> = {
+const colPort: BdDataColumn<PortParam, string | number> = {
   id: 'port',
   name: 'Port',
   data: (r) => (isNaN(Number(r.port)) ? r.port : Number(r.port)),
@@ -64,7 +64,7 @@ export class PortsComponent implements OnInit {
   protected readonly edit = inject(InstanceEditService);
   protected readonly portEdit = inject(PortsEditService);
 
-  protected readonly columns: BdDataColumn<PortParam>[] = [colName, colType, colPort];
+  protected readonly columns: BdDataColumn<PortParam, unknown>[] = [colName, colType, colPort];
   protected checked: PortParam[];
   protected ports: PortParam[] = [];
   protected amount: number;

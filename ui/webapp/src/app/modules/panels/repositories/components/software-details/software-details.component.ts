@@ -9,7 +9,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { InstTemplateData, ProductActionsColumnsService } from 'src/app/modules/core/services/product-actions-columns';
 import {
   SwPkgType,
-  RepositoryService
+  RepositoryService, SwRepositoryEntry
 } from 'src/app/modules/primary/repositories/services/repository.service';
 import { SoftwareDetailsService } from '../../services/software-details.service';
 
@@ -77,7 +77,7 @@ export class SoftwareDetailsComponent implements OnInit {
     this.softwareDetailsPlugins$ = this.detailsService.getPlugins();
   }
 
-  protected doDelete(software: any) {
+  protected doDelete(software: SwRepositoryEntry) {
     this.dialog
       .confirm(`Delete ${software.key.tag}`, `Are you sure you want to delete version ${software.key.tag}?`, 'delete')
       .subscribe((r) => {

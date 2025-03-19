@@ -24,7 +24,7 @@ interface NodeRow {
   config: InstanceNodeConfigurationDto;
 }
 
-const colNodeName: BdDataColumn<NodeRow> = {
+const colNodeName: BdDataColumn<NodeRow, string> = {
   id: 'name',
   name: 'Node',
   data: (r) => r.name,
@@ -42,7 +42,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   protected readonly servers = inject(ServersService);
 
   protected records: NodeRow[] = [];
-  protected readonly columns: BdDataColumn<NodeRow>[] = [colNodeName];
+  protected readonly columns: BdDataColumn<NodeRow, unknown>[] = [colNodeName];
   protected checked: NodeRow[] = [];
   protected hasPendingChanges: boolean;
 
