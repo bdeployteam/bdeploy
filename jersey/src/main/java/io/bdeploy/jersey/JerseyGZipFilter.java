@@ -49,8 +49,8 @@ public final class JerseyGZipFilter implements ClientRequestFilter {
             // don't add Content-Encoding header for requests with no entity and for requests which use multipart
             if (request.hasEntity() && !request.getHeaderString(HttpHeaders.CONTENT_TYPE).contains("multipart")) {
                 if (request.getHeaders().getFirst(HttpHeaders.CONTENT_ENCODING) == null) {
-                    // FIXME: this does not work for older BDeploy server versions :| need to be switchable in the future.
-                    //                    request.getHeaders().putSingle(HttpHeaders.CONTENT_ENCODING, GZIP_ENCODING);
+                    // TODO: This does not work for older BDeploy server versions :| need to be switchable in the future.
+                    // request.getHeaders().putSingle(HttpHeaders.CONTENT_ENCODING, GZIP_ENCODING);
                 }
             }
         }
