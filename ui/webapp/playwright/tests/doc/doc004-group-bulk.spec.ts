@@ -42,5 +42,5 @@ test('Bulk Instance Manipulation', async ({ standalone }) => {
   const dlg = await bulk.getLocalMessageDialog('Result');
   await expect(dlg.getByText('Created instance version 2')).toHaveCount(2);
 
-  await instances.screenshot('Doc_InstancesBulkResult');
+  await instances.screenshot('Doc_InstancesBulkResult', false, false);
 });
