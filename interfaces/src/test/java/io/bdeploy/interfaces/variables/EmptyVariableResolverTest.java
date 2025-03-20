@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 class EmptyVariableResolverTest {
 
     @Test
-    void testEmptyVariableResolverTest() {
+    void testEmptyVariableResolver() {
         var resolver = new EmptyVariableResolver();
         ResolverTestHelper.TEST_STRINGS.forEach(s -> assertNotNull(resolver.apply(s)));
     }
