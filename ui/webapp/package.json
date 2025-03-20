@@ -14,16 +14,16 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^19.2.1",
-    "@angular/cdk": "^19.2.2",
-    "@angular/common": "^19.2.1",
-    "@angular/compiler": "^19.2.1",
-    "@angular/core": "^19.2.1",
-    "@angular/forms": "^19.2.1",
-    "@angular/material": "^19.2.2",
-    "@angular/platform-browser": "^19.2.1",
-    "@angular/platform-browser-dynamic": "^19.2.1",
-    "@angular/router": "^19.2.1",
+    "@angular/animations": "^19.2.3",
+    "@angular/cdk": "^19.2.4",
+    "@angular/common": "^19.2.3",
+    "@angular/compiler": "^19.2.3",
+    "@angular/core": "^19.2.3",
+    "@angular/forms": "^19.2.3",
+    "@angular/material": "^19.2.4",
+    "@angular/platform-browser": "^19.2.3",
+    "@angular/platform-browser-dynamic": "^19.2.3",
+    "@angular/router": "^19.2.3",
     "@auth0/auth0-angular": "^2.2.3",
     "@ngx-loading-bar/core": "^7.0.0",
     "@ngx-loading-bar/http-client": "^7.0.0",
@@ -55,9 +55,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.1",
-    "@angular/cli": "^19.2.1",
-    "@angular/compiler-cli": "^19.2.1",
+    "@angular-devkit/build-angular": "^19.2.4",
+    "@angular/cli": "^19.2.4",
+    "@angular/compiler-cli": "^19.2.3",
     "@cyclonedx/cyclonedx-npm": "^2.0.0",
     "@playwright/test": "^1.49.1",
     "@tailwindcss/postcss": "^4.0.0",
@@ -72,7 +72,7 @@
     "monocart-reporter": "^2.9.13",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.0.0",
-    "typescript": "~5.7.3",
+    "typescript": "~5.8.2",
     "typescript-eslint": "^8.22.0"
   }
 }

@@ -5,7 +5,7 @@ plugins {
     id 'base'
     id "com.github.psxpaul.execfork" version "0.2.2"
     id "jacoco"
-    id "com.github.breadmoirai.github-release" version "2.4.1"
+    id "com.github.breadmoirai.github-release" version "2.5.2"
 }
 
 ext {
@@ -230,13 +230,13 @@ task release(dependsOn: [releaseTest, verifyBinaries]) {
 evaluationDependsOn(':api')
 githubRelease {
     if(project.hasProperty('githubToken')) {
-        token project.getProperty('githubToken')
+        token = project.getProperty('githubToken')
     }
-    owner 'bdeployteam'
-    repo 'bdeploy'
-    tagName "v${version}"
-    releaseName "Release ${version}"
-    targetCommitish "master"
+    owner = "bdeployteam"
+    repo = "bdeploy"
+    tagName = "v${version}"
+    releaseName = "Release ${version}"
+    targetCommitish = "master"
 
     releaseAssets.from(project(":minion").linux64DistZip)
     releaseAssets.from(project(":minion").win64DistZip)

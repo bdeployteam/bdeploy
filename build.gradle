@@ -129,10 +129,10 @@ configure(actualSubprojects) {
     }
 
     dependencies {
-        commonTestDeps 'org.junit.jupiter:junit-jupiter-api:5.11.4',
-                       'org.junit.jupiter:junit-jupiter-params:5.11.4',
-                       'org.hamcrest:hamcrest-core:3.0'
-        testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.11.4'
+        commonTestDeps platform('org.junit:junit-bom:5.12.1')
+        commonTestDeps 'org.junit.jupiter:junit-jupiter'
+        commonTestDeps 'org.hamcrest:hamcrest-core:3.0'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 
     eclipseJdt.doLast {
