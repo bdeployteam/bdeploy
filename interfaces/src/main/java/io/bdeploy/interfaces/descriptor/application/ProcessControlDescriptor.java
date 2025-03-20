@@ -34,11 +34,10 @@ public class ProcessControlDescriptor {
 
     /** How to deal with working directories for applications when launching. */
     public enum ApplicationDirectoryMode {
-        /** Determine automatically whether to set the working directory based on whether a startScriptName is set */
-        @JsonEnumDefaultValue AUTOMATIC,
-        /** Never set the working directory */
+        /** Never set the working directory -> leave it as-is */
         DONT_SET,
-        /** Always set the working directory */
+        /** Always set the working directory -> it will be set to an application specific directory */
+        @JsonEnumDefaultValue
         SET
     }
 
@@ -76,7 +75,7 @@ public class ProcessControlDescriptor {
     public String startScriptName;
 
     @JsonPropertyDescription("Whether the working directory should be set to an application specific directory.")
-    public ApplicationDirectoryMode workingDirectory = ApplicationDirectoryMode.AUTOMATIC;
+    public ApplicationDirectoryMode workingDirectory = ApplicationDirectoryMode.SET;
 
     @JsonPropertyDescription("The file extension that the file association will be bound to.")
     public String fileAssocExtension;

@@ -79,6 +79,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationBrandingDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationExitCodeDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationDirectoryMode;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -954,24 +955,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
                     .redirectOutput(Redirect.INHERIT);
-
-            switch (clientCfg.appDesc.processControl.workingDirectory) {
-                case AUTOMATIC:
-                    if (clientCfg.appDesc.processControl.startScriptName == null) {
-                        b.directory(appDir.toFile());
-                    }
-                    break;
-                case SET:
-                    b.directory(appDir.toFile());
-                    break;
-                case DONT_SET:
-                    break; // don't do anything
+            if (clientCfg.appDesc.processControl.workingDirectory == ApplicationDirectoryMode.SET) {
+                b.directory(appDir.toFile());
             }
-
             if (pc.startEnv != null) {
                 b.environment().putAll(pc.startEnv);
             }
-
             return b.start();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start " + appCfg.id, e);
