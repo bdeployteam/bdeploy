@@ -952,8 +952,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
-            // We intentionally don't set the current directory here, otherwise command line arguments referencing files
-            // would not work properly in conjunction with start scripts and file associations
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
                     .redirectOutput(Redirect.INHERIT);
 
