@@ -22,7 +22,7 @@ import io.bdeploy.ui.cli.RemoteSystemTool;
 import jakarta.ws.rs.ClientErrorException;
 
 @ExtendWith(TestMinion.class)
-public class ResolvingTemplateVariablesCliTest extends BaseMinionCliTest {
+class ResolvingTemplateVariablesCliTest extends BaseMinionCliTest {
 
     @Test
     void testDefaultInstanceIsOkViaSystemTemplate(RemoteService remote, @TempDir Path tmp) throws IOException {
