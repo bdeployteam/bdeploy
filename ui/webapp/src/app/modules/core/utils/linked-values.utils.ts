@@ -422,6 +422,13 @@ export function gatherSpecialExpansions(
     group: null
   });
   result.push({
+    name: 'I:UUID',
+    description: `The instance ID`,
+    preview: getInstanceIdOrMock(instance),
+    link: '{{I:UUID}}',
+    group: null
+  });
+  result.push({
     name: 'I:TAG',
     description: 'The instance version',
     preview: 'X',
@@ -459,11 +466,18 @@ export function gatherSpecialExpansions(
     group: null,
   });
   result.push({
+    name: 'A:ID',
+    description: `The application ID`,
+    preview: process ? process.id : '<application-id>',
+    link: '{{A:ID}}',
+    group: null,
+  });
+  result.push({
     name: 'A:UUID',
     description: `The application ID`,
     preview: process ? process.id : '<application-id>',
     link: '{{A:UUID}}',
-    group: null,
+    group: null
   });
 
   // Minion
