@@ -43,7 +43,7 @@ public class FetchTool extends RemoteServiceTool<FetchConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String source();
 
-        @Help("Manifest(s) to push. May appear multiple times. Format is 'name:tag'")
+        @Help("Manifest(s) to fetch. May appear multiple times. Format is 'name:tag'")
         String[] manifest() default {};
     }
 
