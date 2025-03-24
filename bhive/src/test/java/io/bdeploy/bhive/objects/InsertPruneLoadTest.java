@@ -62,6 +62,8 @@ class InsertPruneLoadTest {
             hive = tstHive;
         }
 
+        Random r = new Random(0);
+
         LongAdder productions = new LongAdder();
         LongAdder prunes = new LongAdder();
         LongAdder errors = new LongAdder();
@@ -86,7 +88,7 @@ class InsertPruneLoadTest {
             threads.add(new Thread(() -> {
                 while (!stop.get()) {
                     try {
-                        prune(hive);
+                        prune(hive, r);
                         prunes.increment();
                     } catch (Exception e) {
                         errors.increment();
@@ -138,10 +140,10 @@ class InsertPruneLoadTest {
         assertEquals(0, errors.sum());
     }
 
-    void prune(BHive hive) {
+    void prune(BHive hive, Random r) {
         hive.execute(new PruneOperation());
         try {
-            TimeUnit.MILLISECONDS.sleep(new Random().nextInt(10));
+            TimeUnit.MILLISECONDS.sleep(r.nextInt(10));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
