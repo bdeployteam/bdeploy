@@ -135,7 +135,8 @@ public class Configuration {
      */
     public <T extends Annotation> T get(Class<? extends Annotation> target) {
         @SuppressWarnings("unchecked")
-        T proxy = (T) Proxy.newProxyInstance(target.getClassLoader(), new Class<?>[] { target }, this::doMap);
+        T proxy = (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[] { target },
+                this::doMap);
 
         // access each method once to initialize cache, run conversions and especially validations.
         List<Exception> validationProblems = new ArrayList<>();

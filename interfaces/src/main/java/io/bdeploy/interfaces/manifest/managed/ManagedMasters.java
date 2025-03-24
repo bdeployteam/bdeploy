@@ -20,8 +20,13 @@ public class ManagedMasters {
      */
     public ManagedMasters(BHive hive) {
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+        Manifest.Key key = igm.getKey();
 
-        this.meta = new MetaManifest<>(igm.getKey(), false, ManagedMastersConfiguration.class);
+        if (key == null) {
+            throw new IllegalStateException("Cannot create ManagedMasters without an Instance Group Manifest");
+        }
+
+        this.meta = new MetaManifest<>(key, false, ManagedMastersConfiguration.class);
         this.hive = hive;
     }
 

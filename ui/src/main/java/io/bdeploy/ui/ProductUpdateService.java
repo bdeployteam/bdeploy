@@ -162,10 +162,14 @@ public class ProductUpdateService {
             ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
             List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues,
             VariableResolver resolver) {
-        var current = currentApplications == null ? null
-                : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
-        if (current != null && current.isEmpty()) {
-            throw new IllegalStateException("Cannot find current application: " + app.application);
+
+        Optional<ApplicationManifest> current = Optional.empty();
+        if (currentApplications != null) {
+            current = currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
+
+            if (current.isEmpty()) {
+                throw new IllegalStateException("Cannot find current application: " + app.application);
+            }
         }
 
         var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName())).findFirst();
@@ -193,7 +197,7 @@ public class ProductUpdateService {
         if (targetDesc.startCommand.parameters != null && !targetDesc.startCommand.parameters.isEmpty()) {
             app.start.executable = targetDesc.startCommand.launcherPath;
 
-            if (current != null) {
+            if (current.isPresent()) {
                 // update parameters, add missing, add validation notice for removed parameters
                 app.start.parameters = updateParameters(app, targetDesc, app.start.parameters, targetDesc.startCommand.parameters,
                         current.get().getDescriptor().startCommand.parameters, allApps, validationIssues, resolver);

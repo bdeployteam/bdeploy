@@ -259,7 +259,8 @@ public class PluginManagerImpl implements PluginManager {
         PluginInternalHandle handle = new PluginInternalHandle();
         try {
             handle.header = hdr;
-            handle.pluginLoader = new URLClassLoader(new URL[] { plugin.toUri().toURL() }, Plugin.class.getClassLoader());
+            handle.pluginLoader = new URLClassLoader(new URL[] { plugin.toUri().toURL() },
+                    Thread.currentThread().getContextClassLoader());
             handle.plugin = Plugin.class.cast(handle.pluginLoader.loadClass(hdr.mainClass).getConstructor().newInstance());
             return handle;
         } catch (Exception e) {
