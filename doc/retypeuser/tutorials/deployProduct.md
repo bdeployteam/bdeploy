@@ -43,9 +43,6 @@ It is done in the **Products** page of the **Instance Group**
    ![Choose Product Version](/images/Doc_ImportProduct_SelectVersion.png){width=480}
    :::
 7. Click the import button.
-   :::{align=center}
-   ![Press Import button](/images/Doc_ImportProduct_PanelFilled.png){width=480}
-   :::
 8. The product will appear in the list of available products once successfully imported.
    :::{align=center}
    ![Product Version imported](/images/Doc_ImportProduct_Success.png){width=480}
