@@ -322,10 +322,8 @@ namespace Bdeploy.Installer {
                     string startMenuPath = Path.Combine(productVendor, instanceGroup, instance);
                     data.StartMenuShortcut = shortcut.CreateStartMenuLink(linkName, startMenuPath, forAllUsers);
 
-                    // Only create desktop shortcut if we just have written the descriptor
-                    if (!File.Exists(appDescriptor)) {
-                        data.DesktopShortcut = shortcut.CreateDesktopLink(linkName, forAllUsers);
-                    }
+                    // Ensure that desktop shortcut is always up-2-date
+                    data.DesktopShortcut = shortcut.CreateDesktopLink(linkName, forAllUsers);
                 }
 
                 // A hint for the uninstaller which registry key should be deleted
