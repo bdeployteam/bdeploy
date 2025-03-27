@@ -7,8 +7,8 @@ import java.nio.file.Path;
 import javax.accessibility.AccessibleAction;
 import javax.accessibility.AccessibleContext;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -38,7 +38,7 @@ public class BrowserDialogAutostartCellRenderer extends JCheckBox implements Tab
         this.bhiveDir = bhiveDir.toUri();
         this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
         this.sortModel = sortModel;
-        setHorizontalAlignment(JLabel.CENTER);
+        setHorizontalAlignment(SwingConstants.CENTER);
         setBorderPainted(true);
     }
 
