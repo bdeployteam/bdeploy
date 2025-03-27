@@ -547,8 +547,8 @@ public class ProcessController {
 
         // Stop command failed or nothing defined.
         // Go on with destroying the process via the handle
-        long stopCommandDuration = Duration.between(Instant.now(), stopRequested).toMillis();
-        long gracePeriod = processConfig.processControl.gracePeriod - stopCommandDuration;
+        long stopCommandDuration = Duration.between(stopRequested, Instant.now()).toMillis();
+        long gracePeriod = processConfig.processControl.gracePeriod + stopCommandDuration;
         if (!doDestroyProcess(gracePeriod)) {
             processState = ProcessState.RUNNING;
             logger.log(l -> l.error("Giving up to terminate application. Process does not respond to kill requests."));
@@ -873,7 +873,7 @@ public class ProcessController {
         // Someone requested termination
         if (stopRequested != null || processState == ProcessState.RUNNING_STOP_PLANNED) {
             if (stopRequested != null) {
-                Duration stopDuration = Duration.between(Instant.now(), stopRequested);
+                Duration stopDuration = Duration.between(stopRequested, Instant.now());
                 logger.log(l -> l.info("Stopping took {}", ProcessControllerHelper.formatDuration(stopDuration)));
             }
             logger.log(l -> l.info("Application remains stopped as stop was requested."));
