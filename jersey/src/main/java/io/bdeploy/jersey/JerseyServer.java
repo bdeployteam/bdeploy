@@ -147,7 +147,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private Predicate<String> userValidator;
-    private GrizzlyHttpContainer container;
 
     /**
      * @param port the port to listen on
@@ -302,7 +301,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             // this redirects from /api to / - not in the default resources as we *do not* want this for plugins.
             rc.register(RedirectOnApiRootAccessImpl.class);
 
-            container = ContainerFactory.createContainer(GrizzlyHttpContainer.class, rc);
+            GrizzlyHttpContainer container = ContainerFactory.createContainer(GrizzlyHttpContainer.class, rc);
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, container, true, sslEngine, false);
             for (Map.Entry<HttpHandlerRegistration, HttpHandler> regs : preRegistrations.entrySet()) {
                 server.getServerConfiguration().addHttpHandler(regs.getValue(), regs.getKey());
