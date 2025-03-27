@@ -20,7 +20,6 @@ import io.bdeploy.interfaces.descriptor.template.SystemTemplateDescriptor;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
-import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
 import io.bdeploy.ui.cli.RemoteSystemTool;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -29,123 +28,137 @@ import jakarta.ws.rs.NotFoundException;
 @ExtendWith(TestMinion.class)
 class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
 
+    // System template tests
+
     @Test
-    void testSystemTemplateProductVersionRegexIsSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)
+    void testSystemTemplateProductVersionRegexIsSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithSystemTemplate(remote, tmp, null, "1\\..*", "1\\..*");
+    }
+
+    @Test
+    void testSystemTemplateInitialProductVersionRegexIsNotSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithSystemTemplate(remote, tmp, "1\\..*", null, ".*");
+    }
+
+    @Test
+    void testSystempTemplateSpecifiesBothProductVersionRegexes(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithSystemTemplate(remote, tmp, "^1\\.0\\.\\d+$", "THISISNOTGONNABREAK", "THISISNOTGONNABREAK");
+    }
+
+    @Test
+    void testSytemTemplateRegexesAreNotSet(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithSystemTemplate(remote, tmp, null, null, ".*");
+    }
+
+    @Test
+    void testSystemTemplateHasNoMatchingProductForInitialProductVersionRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestExceptionWithSystemTemplate(remote, tmp, "IDONOTEXIST", null);
+    }
+
+    @Test
+    void testSystemTemplateHasNoMatchingProductForProductVersionRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestExceptionWithSystemTemplate(remote, tmp, null, "IDONOTEXIST");
+    }
+
+    private void doTestHappyFlowWithSystemTemplate(RemoteService remote, Path tmp, String r1, String r2, String regex)//
             throws IOException {
         createInstanceGroup(remote);
         createAndUploadProduct(remote, tmp);
-        applySystemTemplate(remote, tmp, null, "1\\..*");
-        validateProductFilterRegex(remote, "1\\..*");
+        applySystemTemplate(remote, tmp, r1, r2);
+        validateProductFilterRegex(remote, regex);
     }
 
-    @Test
-    void testSystemTemplateInitialProductVersionRegexIsNotSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)
+    private void doTestExceptionWithSystemTemplate(RemoteService remote, Path tmp, String r1, String r2)//
             throws IOException {
         createInstanceGroup(remote);
         createAndUploadProduct(remote, tmp);
-        applySystemTemplate(remote, tmp, "1\\..*", null);
-        validateProductFilterRegex(remote, ".*");
+        assertThrows(NotFoundException.class, () -> applySystemTemplate(remote, tmp, r1, r2));
+    }
+
+    private void applySystemTemplate(RemoteService remote, Path tmp, String r1, String r2) throws IOException {
+        // Create the system template
+        Path systemTemplatePath = tmp.resolve("system-template.yaml");
+        SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
+        systemTemplate.instances.get(0).productVersionRegex = r2;
+        systemTemplate.instances.get(0).initialProductVersionRegex = r1;
+        TestProductFactory.writeToFile(systemTemplatePath, systemTemplate);
+
+        // Import the system template
+        remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=SYSTEM_NAME", "--purpose=TEST",
+                "--createFrom=" + systemTemplatePath);
+
+        // Check if the system was set up correctly
+        StructuredOutput output = remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--list");
+        assertEquals(1, output.size());
+        assertEquals("SYSTEM_NAME", output.get(0).get("Name"));
+        assertEquals("SYSTEM_DESCRIPTION", output.get(0).get("Description"));
+    }
+
+    // Instance template tests
+
+    @Test
+    void testInstanceTemplateProductVersionRegexIsSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithInstanceTemplate(remote, tmp, null, "1\\..*", "1\\..*");
     }
 
     @Test
-    void testSystempTemplateSpecifiesBothProductVersionRegexes(RemoteService remote, @TempDir Path tmp) throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        applySystemTemplate(remote, tmp, "^1\\.0\\.\\d+$", "THISISNOTGONNABREAK");
-        validateProductFilterRegex(remote, "THISISNOTGONNABREAK");
+    void testInstanceTemplateInitialProductVersionRegexIsNotSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithInstanceTemplate(remote, tmp, "1\\..*", null, ".*");
     }
 
     @Test
-    void testSytemTemplateRegexesAreNotSet(RemoteService remote, @TempDir Path tmp) throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        applySystemTemplate(remote, tmp, null, null);
-        validateProductFilterRegex(remote, ".*");
+    void testInstanceTemplateSpecifiesBothProductVersionRegexes(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithInstanceTemplate(remote, tmp, "^1\\.0\\.\\d+$", "THISISNOTGONNABREAK", "THISISNOTGONNABREAK");
     }
 
     @Test
-    void testSystemTemplateHasNoMatchingProductForInitialProductVersionRegex(RemoteService remote, @TempDir Path tmp)
+    void testInstanceTemplateRegexesAreNotSet(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestHappyFlowWithInstanceTemplate(remote, tmp, null, null, ".*");
+    }
+
+    @Test
+    void testInstanceTemplateHasNoMatchingProductForInitialProductVersionRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestExceptionWithInstanceTemplate(remote, tmp, "IDONOTEXIST", null);
+    }
+
+    @Test
+    void testInstanceTemplateHasNoMatchingProductForProductVersionRegex(RemoteService remote, @TempDir Path tmp)//
+            throws IOException {
+        doTestExceptionWithInstanceTemplate(remote, tmp, null, "IDONOTEXIST");
+    }
+
+    private void doTestHappyFlowWithInstanceTemplate(RemoteService remote, Path tmp, String r1, String r2, String regex)//
             throws IOException {
         createInstanceGroup(remote);
         createAndUploadProduct(remote, tmp);
-        assertThrows(NotFoundException.class, () -> applySystemTemplate(remote, tmp, "IDONOTEXIST", null));
+        applyInstanceTemplate(remote, tmp, r1, r2);
+        validateProductFilterRegex(remote, regex);
     }
 
-    @Test
-    void testSystemTemplateHasNoMatchingProductForProductVersionRegex(RemoteService remote, @TempDir Path tmp)
+    private void doTestExceptionWithInstanceTemplate(RemoteService remote, Path tmp, String r1, String r2)//
             throws IOException {
         createInstanceGroup(remote);
         createAndUploadProduct(remote, tmp);
-        assertThrows(NotFoundException.class, () -> applySystemTemplate(remote, tmp, null, "IDONOTEXIST"));
+        assertThrows(NotFoundException.class, () -> applyInstanceTemplate(remote, tmp, r1, r2));
     }
 
-    @Test
-    void testInstanceTemplateProductVersionRegexIsSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)
-            throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        applyInstanceTemplate(remote, tmp, null, "1\\..*");
-        validateProductFilterRegex(remote, "1\\..*");
-    }
-
-    @Test
-    void testInstanceTemplateInitialProductVersionRegexIsNotSavedAsProductFilterRegex(RemoteService remote, @TempDir Path tmp)
-            throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        applyInstanceTemplate(remote, tmp, "1\\..*", null);
-        validateProductFilterRegex(remote, ".*");
-    }
-
-    @Test
-    void testInstanceTemplateSpecifiesBothProductVersionRegexes(RemoteService remote, @TempDir Path tmp) throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        applyInstanceTemplate(remote, tmp, "^1\\.0\\.\\d+$", "THISISNOTGONNABREAK");
-        validateProductFilterRegex(remote, "THISISNOTGONNABREAK");
-    }
-
-    @Test
-    void testInstanceTemplateRegexesAreNotSet(RemoteService remote, @TempDir Path tmp) throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        applyInstanceTemplate(remote, tmp, null, null);
-        validateProductFilterRegex(remote, ".*");
-    }
-
-    @Test
-    void testInstanceTemplateHasNoMatchingProductForInitialProductVersionRegex(RemoteService remote, @TempDir Path tmp)
-            throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        assertThrows(NotFoundException.class, () -> applyInstanceTemplate(remote, tmp, "IDONOTEXIST", null));
-    }
-
-    @Test
-    void testInstanceTemplateHasNoMatchingProductForProductVersionRegex(RemoteService remote, @TempDir Path tmp)
-            throws IOException {
-        createInstanceGroup(remote);
-        createAndUploadProduct(remote, tmp);
-        assertThrows(NotFoundException.class, () -> applyInstanceTemplate(remote, tmp, null, "IDONOTEXIST"));
-    }
-
-    private void validateProductFilterRegex(RemoteService remote, String regex) {
-        // Check if the instance was set up correctly
-        InstanceResource ir = ResourceProvider.getResource(remote, InstanceGroupResource.class, null)
-                .getInstanceResource("GROUP_NAME");
-        List<InstanceDto> instances = ir.list();
-        assertEquals(1, instances.size());
-        assertEquals(new Manifest.Key("io.bdeploy/test/product", "1.0.0"), instances.get(0).instanceConfiguration.product);
-        assertEquals(regex, instances.get(0).instanceConfiguration.productFilterRegex);
-    }
-
-    private void applyInstanceTemplate(RemoteService remote, Path tmp, String initialProductVersionRegex,
-            String productVersionRegex) throws IOException {
+    private void applyInstanceTemplate(RemoteService remote, Path tmp, String r1, String r2) throws IOException {
         // Create the instance template
         Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
         InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();
-        instanceTemplate.initialProductVersionRegex = initialProductVersionRegex;
-        instanceTemplate.productVersionRegex = productVersionRegex;
+        instanceTemplate.initialProductVersionRegex = r1;
+        instanceTemplate.productVersionRegex = r2;
         TestProductFactory.writeToFile(instanceTemplatePath, instanceTemplate);
 
         // Import the instance template
@@ -164,30 +177,20 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
         assertEquals("None", output.get(0).get("System"));
     }
 
-    private void applySystemTemplate(RemoteService remote, Path tmp, String initialProductVersionRegex,
-            String productVersionRegex) throws IOException {
-        // Create the system template
-        Path systemTemplatePath = tmp.resolve("system-template.yaml");
-        SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
-        systemTemplate.instances.get(0).productVersionRegex = productVersionRegex;
-        systemTemplate.instances.get(0).initialProductVersionRegex = initialProductVersionRegex;
-        TestProductFactory.writeToFile(systemTemplatePath, systemTemplate);
-
-        // Import the system template
-        remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=SYSTEM_NAME", "--purpose=TEST",
-                "--createFrom=" + systemTemplatePath);
-
-        // Check if the system was set up correctly
-        StructuredOutput output = remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--list");
-        assertEquals(1, output.size());
-        assertEquals("SYSTEM_NAME", output.get(0).get("Name"));
-        assertEquals("SYSTEM_DESCRIPTION", output.get(0).get("Description"));
-    }
+    // Utility methods
 
     private void createAndUploadProduct(RemoteService remote, Path tmp) throws IOException {
         Path productPath = Files.createDirectory(tmp.resolve("product"));
         Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
         TestProductFactory.writeProductToFile(productPath, TestProductFactory.generateProduct());
         uploadProduct(remote, bhivePath, productPath);
+    }
+
+    private static void validateProductFilterRegex(RemoteService remote, String regex) {
+        List<InstanceDto> instances = ResourceProvider.getResource(remote, InstanceGroupResource.class, null)
+                .getInstanceResource("GROUP_NAME").list();
+        assertEquals(1, instances.size());
+        assertEquals(new Manifest.Key("io.bdeploy/test/product", "1.0.0"), instances.get(0).instanceConfiguration.product);
+        assertEquals(regex, instances.get(0).instanceConfiguration.productFilterRegex);
     }
 }
