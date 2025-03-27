@@ -159,7 +159,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         var nodeStates = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
 
         // Apply existing nodes
-        String instanceTag = instanceDto.instance.getTag();
         Map<String, InstanceNodeConfigurationDto> nodes = new TreeMap<>();
         for (Entry<String, Key> entry : InstanceManifest.load(hive, uuid, null).getInstanceNodeManifests().entrySet()) {
             InstanceNodeConfigurationDto instanceNodeConfigurationDto = new InstanceNodeConfigurationDto(entry.getKey(),
@@ -206,7 +205,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         }
 
         try {
-            ir.update(cfg.id, updateDto, null, instanceTag);
+            ir.update(cfg.id, updateDto, null, instanceDto.instance.getTag());
         } catch (RuntimeException e) {
             log.warn("Failed to update instance {}", cfg.id, e);
             return new InstanceTemplateReferenceResultDto(cfg.name, InstanceTemplateReferenceStatus.ERROR,
