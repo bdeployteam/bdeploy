@@ -124,8 +124,8 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         SortedSet<Key> scan = ProductManifest.scan(hive);
-        List<ProductDto> result = scan.stream().map(k -> getProductManifest(k)).filter(pm -> pm != null).filter(filter)
-                .map(ProductDto::create).collect(Collectors.toList());
+        List<ProductDto> result = scan.stream().map(k -> getProductManifest(k)).filter(manifest -> manifest != null)
+                .filter(filter).map(ProductDto::create).collect(Collectors.toList());
         if (!result.isEmpty()) {
             Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
             result.sort((a, b) -> {
@@ -472,7 +472,7 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         Stream<TemplateVariable> tempVarStream = Stream.concat(selectedInstanceTemplate.directlyUsedTemplateVars.stream(),
-                selectedInstanceTemplate.groups.stream().flatMap(group -> group.groupVariables.stream()));
+                selectedInstanceTemplate.groups.stream().flatMap(g -> g.groupVariables.stream()));
         Set<TemplateVariableFixedValueOverride> tempVars;
         if (includeDefaults != null && includeDefaults) {
             tempVars = tempVarStream//
