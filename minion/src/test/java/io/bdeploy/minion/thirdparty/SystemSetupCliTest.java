@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
@@ -65,9 +64,8 @@ class SystemSetupCliTest extends BaseMinionCliTest {
 
     @SlowTest
     @Test
-    void testSystemSetupWalkthroughWithSystemTemplate(@TempDir Path tmp, ActivityReporter reporter)
-            throws IOException, URISyntaxException {
-        setupNodeManagedCentral(tmp, reporter);
+    void testSystemSetupWalkthroughWithSystemTemplate(@TempDir Path tmp) throws IOException, URISyntaxException {
+        setupNodeManagedCentral(tmp);
 
         // Create the system template
         Path systemTemplatePath = tmp.resolve("system-template.yaml");
@@ -96,9 +94,8 @@ class SystemSetupCliTest extends BaseMinionCliTest {
 
     @SlowTest
     @Test
-    void testSystemSetupWalkthroughWithInstanceTemplate(@TempDir Path tmp, ActivityReporter reporter)
-            throws IOException, URISyntaxException {
-        setupNodeManagedCentral(tmp, reporter);
+    void testSystemSetupWalkthroughWithInstanceTemplate(@TempDir Path tmp) throws IOException, URISyntaxException {
+        setupNodeManagedCentral(tmp);
 
         // Create a system
         String managedServerName = remote(central, RemoteCentralTool.class, "--instanceGroup=GROUP_NAME", "--list").get(0)
@@ -118,7 +115,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
         doCheck();
     }
 
-    private void setupNodeManagedCentral(Path tmp, ActivityReporter reporter) throws IOException, URISyntaxException {
+    private void setupNodeManagedCentral(Path tmp) throws IOException, URISyntaxException {
         StructuredOutput output;
 
         // Create a software repository on central
