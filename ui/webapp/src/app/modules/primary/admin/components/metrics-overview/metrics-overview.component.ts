@@ -78,8 +78,11 @@ export class MetricsOverviewComponent implements OnInit {
     this.metrics
       .getAllMetrics()
       .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((record: Map<MetricGroup, MetricBundle>) => {
-        this.allMetrics = record;
+      .subscribe((record: Record<MetricGroup, MetricBundle>) => {
+        this.allMetrics = new Map<MetricGroup, MetricBundle>();
+        for (const metricEntry of Object.entries(record)) {
+          this.allMetrics.set(metricEntry[0] as MetricGroup, metricEntry[1]);
+        }
         this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
         const tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
         this.doSelect(isNaN(tabIndex) ? 0 : tabIndex);
