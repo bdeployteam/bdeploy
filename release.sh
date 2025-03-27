@@ -111,8 +111,8 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
 fi
 
 ./gradlew setVersion -PtargetVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
-[[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x releaseTest -x runUitests "${GRADLE_ARG_ARR[@]}"
-[[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x releaseTest "${GRADLE_ARG_ARR[@]}"
+[[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x runUitests "${GRADLE_ARG_ARR[@]}"
+[[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots "${GRADLE_ARG_ARR[@]}"
 
 [[ -z "${NO_MAVEN}" ]] && ./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
 
