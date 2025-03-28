@@ -73,8 +73,7 @@ public class ProductUpdateService {
     private static final Logger log = LoggerFactory.getLogger(ProductUpdateService.class);
 
     public InstanceUpdateDto update(InstanceUpdateDto instance, ProductManifest targetProduct, ProductManifest currentProduct,
-            List<ApplicationManifest> targetApplications, List<ApplicationManifest> currentApplications,
-            SystemConfiguration system) {
+            List<ApplicationManifest> targetApplications, List<ApplicationManifest> currentApplications) {
         List<ApplicationValidationDto> validationIssues = new ArrayList<>();
         instance.validation = validationIssues;
 

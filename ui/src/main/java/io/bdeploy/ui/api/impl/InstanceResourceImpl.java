@@ -726,9 +726,7 @@ public class InstanceResourceImpl implements InstanceResource {
             List<ApplicationManifest> targetApps = target.getApplications().stream()
                     .map(k -> ApplicationManifest.of(hive, k, target)).toList();
 
-            Manifest.Key sysKey = state.config.config.system;
-            SystemConfiguration systemConfig = sysKey == null ? null : SystemManifest.of(hive, sysKey).getConfiguration();
-            return pus.update(state, target, current, targetApps, currentApps, systemConfig);
+            return pus.update(state, target, current, targetApps, currentApps);
         }
     }
 
