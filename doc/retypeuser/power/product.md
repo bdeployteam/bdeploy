@@ -573,7 +573,12 @@ startParameters: <7>
 7. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
 
 !!!info Note
-An **Application Template** can also _extend_ another previously defined template. This works the same as the `template` specifier in [`instance-template.yaml`](#instance-templateyaml) and also allows for `fixedVariables`.
+An **Application Template** can also _extend_ another previously defined template. This works the same as the `template`
+specifier in [`instance-template.yaml`](#instance-templateyaml) and also allows for `fixedVariables`. In this case
+specify `template` (passing the id of another application template) instead of `application`. The last template in the
+inheritance chain must specify an `application`.
+Inheritance will apply all the properties of the "parent" application template to the current one, allowing to override
+or extend individual properties.
 !!!
 
 ```yaml application-template.yaml
