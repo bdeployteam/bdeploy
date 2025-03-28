@@ -76,16 +76,16 @@ public class TestMinion extends TestServer {
         // handle mode switching on a SINGLE minion, which allows us to re-use a single
         // minion per class and switching modes in between tests, instead of registering
         // (and starting) multiple minions if that is not needed.
-        MinionMode mode = this.mode;
+        MinionMode newMode = this.mode;
         for (String tag : context.getTags()) {
             if (MinionMode.CENTRAL.name().equals(tag)) {
-                mode = MinionMode.CENTRAL;
+                newMode = MinionMode.CENTRAL;
             } else if (MinionMode.MANAGED.name().equals(tag)) {
-                mode = MinionMode.MANAGED;
+                newMode = MinionMode.MANAGED;
             }
         }
 
-        MinionMode finalMode = mode;
+        MinionMode finalMode = newMode;
         log.info("TestMinion mode = {}", finalMode);
 
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
