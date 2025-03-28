@@ -722,15 +722,13 @@ public class ProcessController {
         // We are attaching an async-listener so that the hook is not directly called
         // in case the process already terminated when #monitorProcess is called
         CompletableFuture<ProcessHandle> oldHandle = processExit;
-        oldHandle.thenRunAsync(() -> {
-            executeLocked("ExitHook", DEFAULT_USER, () -> {
-                if (oldHandle != processExit) {
-                    logger.log(l -> l.debug("Process handle changed. Skipping exit hook."));
-                    return;
-                }
-                onTerminated();
-            });
-        });
+        oldHandle.thenRunAsync(() -> executeLocked("ExitHook", DEFAULT_USER, () -> {
+            if (oldHandle != processExit) {
+                logger.log(l -> l.debug("Process handle changed. Skipping exit hook."));
+                return;
+            }
+            onTerminated();
+        }));
 
         // Set to running if launched from stopped or crashed
         if (processState.isStopped()) {
