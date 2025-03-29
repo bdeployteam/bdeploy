@@ -1,17 +1,17 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { AsyncPipe } from '@angular/common';
 import { editor } from 'monaco-editor';
 import IStandaloneDiffEditor = editor.IStandaloneDiffEditor;
 import ITextModel = editor.ITextModel;
 import { GlobalMonacoModule, WindowWithMonacoLoaded } from '../../services/monaco-completions.service';
+import { BdMonacoDiffEditorComponent } from '../bd-monaco-editor/bd-monaco-diff-editor.component';
 
 @Component({
     selector: 'app-bd-editor-diff',
     templateUrl: './bd-editor-diff.component.html',
-    imports: [MonacoEditorModule, AsyncPipe]
+    imports: [AsyncPipe, BdMonacoDiffEditorComponent]
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
@@ -45,7 +45,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     this.initMonaco();
   }
 
-  onMonacoInit(monaco: IStandaloneDiffEditor ) {
+  onMonacoInit(monaco: IStandaloneDiffEditor) {
     this.monaco = monaco;
     this.globalMonaco = (window as unknown as WindowWithMonacoLoaded).monaco;
 

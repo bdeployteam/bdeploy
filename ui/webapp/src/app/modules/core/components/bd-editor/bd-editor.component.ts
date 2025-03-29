@@ -18,7 +18,6 @@ import {
 } from '../../services/monaco-completions.service';
 import { ThemeService } from '../../services/theme.service';
 import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { editor, languages, Position} from 'monaco-editor';
@@ -28,6 +27,7 @@ import IEditor = editor.IEditor;
 import CompletionItemProvider = languages.CompletionItemProvider;
 import ProviderResult = languages.ProviderResult;
 import CompletionList = languages.CompletionList;
+import { BdMonacoEditorComponent } from '../bd-monaco-editor/bd-monaco-editor.component';
 
 
 interface EditorOptions {
@@ -42,7 +42,7 @@ interface EditorOptions {
 @Component({
     selector: 'app-bd-editor',
     templateUrl: './bd-editor.component.html',
-    imports: [MonacoEditorModule, FormsModule, AsyncPipe]
+    imports: [FormsModule, AsyncPipe, BdMonacoEditorComponent]
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private readonly themeService = inject(ThemeService);

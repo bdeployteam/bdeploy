@@ -47,7 +47,6 @@
     "ng-terminal": "^6.1.1",
     "ngx-device-detector": "^9.0.0",
     "ngx-gravatar": "^13.0.0",
-    "ngx-monaco-editor": "^12.0.0",
     "pako": "^2.1.0",
     "reconnecting-websocket": "^4.4.0",
     "rxjs": "~7.8.0",

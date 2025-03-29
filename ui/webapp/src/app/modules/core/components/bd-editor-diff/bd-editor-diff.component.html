@@ -3,12 +3,10 @@
     <div>Original</div>
     <div class="mr-11">Modified</div>
   </div>
-  <ngx-monaco-diff-editor
+  <app-bd-monaco-diff-editor
     name="content"
     class="h-full!"
-    [originalModel]="{ code: undefined, language: undefined }"
-    [modifiedModel]="{ code: undefined, language: undefined }"
     [options]="editorOptions"
     (onInit)="onMonacoInit($event)"
-  ></ngx-monaco-diff-editor>
+  ></app-bd-monaco-diff-editor>
 </div>

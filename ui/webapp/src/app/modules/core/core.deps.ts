@@ -44,7 +44,6 @@ import { RouterModule } from '@angular/router';
 import { AuthModule } from '@auth0/auth0-angular';
 import { NgTerminalModule } from 'ng-terminal';
 import { GravatarModule } from 'ngx-gravatar';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { httpInterceptorProviders } from './interceptors';
 import { ConfigService } from './services/config.service';
@@ -105,8 +104,7 @@ export function provideCoreDependencies(): (EnvironmentProviders | Provider)[] {
             LayoutModule,
             // additional libraries used to provide cool UI :)
             GravatarModule,
-            NgTerminalModule,
-            MonacoEditorModule.forRoot()
+            NgTerminalModule
         ])
     ];
 }
