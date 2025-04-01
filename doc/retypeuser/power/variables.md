@@ -147,7 +147,7 @@ Variables are replaced with their actual values when the process is installed on
 
 ## X: Instance and System Variables
 
-Used to expand to instance and system variables. The same prefix is used for both. Instance Variables take precedence over System Variables in expansions, if both have a variable with the same ID.
+Used to expand to instance and system variables. The same prefix is used for both. System Variables take precedence over Instance Variables in expansions, if both have a variable with the same ID.
 
 ```
 {{X:<VAR>}}
