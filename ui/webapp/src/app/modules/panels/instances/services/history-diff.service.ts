@@ -249,7 +249,7 @@ export class HttpEndpointDiff {
   public authPass: Difference<string>;
 
   constructor(base: HttpEndpoint, compare: HttpEndpoint) {
-    this.path = new Difference(base?.path, compare?.path);
+    this.path = new Difference(getPreRenderableOrNull(base?.path), getPreRenderableOrNull(compare?.path));
     this.port = new Difference(getPreRenderableOrNull(base?.port), getPreRenderableOrNull(compare?.port));
     this.secure = new Difference(getPreRenderableOrNull(base?.secure), getPreRenderableOrNull(compare?.secure));
     this.trustAll = new Difference(base?.trustAll, compare?.trustAll);

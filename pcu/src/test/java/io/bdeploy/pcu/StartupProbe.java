@@ -38,7 +38,7 @@ public class StartupProbe {
         HttpEndpoint probe = new HttpEndpoint();
         probe.id = "startup";
         probe.type = HttpEndpointType.PROBE_STARTUP;
-        probe.path = "/api/startup";
+        probe.path = new LinkedValueConfiguration("/api/startup");
         probe.port = new LinkedValueConfiguration(Integer.toString(server.getPort()));
         probe.secure = new LinkedValueConfiguration("true");
         probe.trustAll = true;

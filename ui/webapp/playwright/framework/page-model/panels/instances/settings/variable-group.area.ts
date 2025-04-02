@@ -2,6 +2,7 @@ import { BaseArea } from '@bdeploy-pom/base/base-area';
 import { Locator, Page } from '@playwright/test';
 import { expect } from '@bdeploy-setup';
 import { CustomVariablePopup } from '@bdeploy-pom/panels/instances/settings/custom-variable.popup';
+import { ValueEditorElement } from '@bdeploy-elements/value-editor.element';
 
 export class VariableGroupArea extends BaseArea {
   private readonly _group: Locator;
@@ -18,6 +19,10 @@ export class VariableGroupArea extends BaseArea {
 
   async toggle() {
     await this._group.locator('mat-expansion-panel-header').click();
+  }
+
+  getField(label: string) {
+    return new ValueEditorElement(this.getArea(), label);
   }
 
   async addCustomVariable() {

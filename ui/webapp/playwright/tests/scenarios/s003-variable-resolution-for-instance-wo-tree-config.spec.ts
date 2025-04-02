@@ -1,11 +1,9 @@
 import { expect, test } from '@bdeploy-setup';
-import { LoginPage } from '@bdeploy-pom/primary/login.page';
-import { createInstance, createInstanceGroup, uploadProduct } from '@bdeploy-pom/common/common-tasks';
+import { createInstance, uploadProduct } from '@bdeploy-pom/common/common-tasks';
 import { InstancePurpose } from '@bdeploy/models/gen.dtos';
 import { InstanceDashboardPage } from '@bdeploy-pom/primary/instances/instance-dashboard.page';
 import { InstanceConfigurationPage } from '@bdeploy-pom/primary/instances/instance-configuration.page';
 import { SystemBrowserPage } from '@bdeploy-pom/primary/systems/system-browser.page';
-import { randomUUID } from 'crypto';
 import { BackendApi } from '@bdeploy-backend';
 import { TestInfo } from '@playwright/test';
 
@@ -15,7 +13,7 @@ function groupId(testInfo: TestInfo) {
 
 test.beforeEach(async ({ standalone }, testInfo) => {
   const api = new BackendApi(standalone);
-  await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for S002`);
+  await api.createGroup(groupId(testInfo), `Group (${testInfo.workerIndex}) for S003`);
 });
 
 test.afterEach(async ({ standalone }, testInfo) => {
@@ -23,14 +21,13 @@ test.afterEach(async ({ standalone }, testInfo) => {
   await api.deleteGroup(groupId(testInfo));
 });
 
-test('S003 Variable resolution for instance without tree config (CT_BDEPLOY-515)', async ({ standalone }, testInfo) => {
+test('S003 Variable resolution for instance without tree config', async ({ standalone }, testInfo) => {
   const page = standalone;
   const group = groupId(testInfo);
 
-  /*--- Step 1 -  Upload product ---*/
   await uploadProduct(page, group, 'chat-product-1-direct');
 
-  /*--- Step 2.1 -  Create System ---*/
+  /*--- Create System ---*/
   const systemName = 'system';
   const systems = new SystemBrowserPage(page, group);
   await systems.goto();
@@ -39,7 +36,7 @@ test('S003 Variable resolution for instance without tree config (CT_BDEPLOY-515)
   await addSystemPanel.save();
   await expect(systems.getTableRowContaining(systemName)).toBeAttached();
 
-  /*--- Step 2.2 - Add system variable ---*/
+  /*--- Add system variable ---*/
   // create system.var system variable with value "systemVariableValue"
   const systemDetails = await systems.getSystemDetailsPanel(systemName);
   const systemVarPanel = await systemDetails.getSystemVariablePanel();
@@ -48,7 +45,7 @@ test('S003 Variable resolution for instance without tree config (CT_BDEPLOY-515)
   await systemCustomVarGroup.createCustomVariable('system.var', 'systemVariableValue');
   await systemVarPanel.save(false);
 
-  /*--- Step 3.1 - Create Instance for chat product, using created system ---*/
+  /*--- Create Instance for chat product, using created system ---*/
   const instanceName = 'TestInstance';
   await createInstance(page, group, instanceName, 'Test Instance', InstancePurpose.TEST, 'Demo Chat App', '1.0.0', null, null, null, null, systemName);
   const instance = new InstanceDashboardPage(page, group, instanceName);
@@ -56,7 +53,7 @@ test('S003 Variable resolution for instance without tree config (CT_BDEPLOY-515)
   const config = new InstanceConfigurationPage(page, group, instanceName);
   await config.goto();
 
-  /*--- Step 3.2 - Add instance variable ---*/
+  /*--- Add instance variable ---*/
   const settings = await config.getSettingsPanel();
   const varPanel = await settings.getInstanceVariablePanel();
   const customVarGroup = await varPanel.getVariableGroup('Custom Variables');
@@ -65,7 +62,7 @@ test('S003 Variable resolution for instance without tree config (CT_BDEPLOY-515)
   await customVarGroup.createCustomVariable('instance.var', 'instanceVariableValue');
   await varPanel.apply();
 
-  /*--- Step 4.1 - Add process and configure parameters with link expression ---*/
+  /*--- Add process and configure parameters with link expression ---*/
   let process = await config.getAddProcessPanel('master');
   const processName = 'Chat Application';
   await process.addProcess(processName);
@@ -74,7 +71,7 @@ test('S003 Variable resolution for instance without tree config (CT_BDEPLOY-515)
   const processCustomParameters = await paramPanel.getParameterGroup('Custom Parameters');
   await processCustomParameters.toggle();
 
-  /*--- Step 4.2 - Configure parameters that link to system and instance variables ---*/
+  /*--- Configure parameters that link to system and instance variables ---*/
   const popupForInstanceVariable = await processCustomParameters.addCustomParameter();
   await popupForInstanceVariable.fill('custom.instance', '{{X:instance.var}}');
   await popupForInstanceVariable.ok();

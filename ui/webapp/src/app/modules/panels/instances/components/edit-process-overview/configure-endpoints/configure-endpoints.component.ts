@@ -162,6 +162,18 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
     return strVal === 'true';
   }
 
+  protected getRenderPreview(valueConfiguration: LinkedValueConfiguration) {
+    return getRenderPreview(valueConfiguration, this.process, this.instance, this.system);
+  }
+
+  protected getRawValue(valueConfiguration: LinkedValueConfiguration) {
+    return valueConfiguration.value ?? valueConfiguration.linkExpression;
+  }
+
+  protected combineForDisplay(path: string, contextPath: string) {
+    return contextPath ? (path + ' (' + contextPath + ')') : path;
+  }
+
   protected onChangeAuthType(type: LinkedValueConfiguration, index: number) {
     const exp = getRenderPreview(type, this.process, this.instance, this.system);
     for (const x of Object.values(HttpAuthenticationType)) {

@@ -125,7 +125,7 @@ public class TestAppFactory {
         if (!client && port != 0) {
             HttpEndpoint fakeEndpoint = new HttpEndpoint();
             fakeEndpoint.id = "test";
-            fakeEndpoint.path = "/api/test/with/path"; // must match HelloEndpoint
+            fakeEndpoint.path = new LinkedValueConfiguration("/api/test/with/path"); // must match HelloEndpoint
             fakeEndpoint.port = new LinkedValueConfiguration(String.valueOf(port));
             fakeEndpoint.secure = new LinkedValueConfiguration("true");
             fakeEndpoint.trustAll = true;

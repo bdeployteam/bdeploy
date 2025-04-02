@@ -74,7 +74,7 @@ public class PublicInstanceResourceImpl implements PublicInstanceResource {
                     HttpEndpointApi hea = new HttpEndpointApi();
 
                     hea.id = he.id;
-                    hea.path = he.path;
+                    hea.path = he.path.getPreRenderable();
 
                     eca.http.add(hea);
                 }
