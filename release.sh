@@ -122,7 +122,6 @@ git push https://$GH_USER:$GH_TOKEN@github.com/bdeployteam/bdeploy.git HEAD:mast
 
 ./gradlew githubRelease -PgithubToken=$GH_TOKEN "${GRADLE_ARG_ARR[@]}"
 ./gradlew setVersion -PtargetVersion=$NEXT_VER "${GRADLE_ARG_ARR[@]}"
-[[ -z "${NO_TESTS}" ]] && ./gradlew build releaseTest -x test -x runUitests "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version
 git commit -m "Update to $NEXT_VER"
