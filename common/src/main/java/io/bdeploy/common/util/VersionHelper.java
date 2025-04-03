@@ -52,7 +52,6 @@ public class VersionHelper {
         try (InputStream is = VersionHelper.class.getResourceAsStream("/version.properties")) {
             Properties p = new Properties();
             p.load(is);
-
             return p;
         } catch (IOException | RuntimeException e) {
             if (log.isTraceEnabled()) {
@@ -63,33 +62,32 @@ public class VersionHelper {
     }
 
     /**
-     * Parses and compares the two version object. An exception is thrown if one of the strings does not represent a valid
-     * version.
+     * Parses and compares the two version {@link String Strings}. An exception is thrown if one of the strings does not represent
+     * a valid version.
      *
-     * @param a
-     *            first version to compare
-     * @param b
-     *            second version to compare
-     * @return a negative integer, zero, or a positive integer as this version is less than, equal to, or greater than the
-     *         specified version.
+     * @param a A {@link String} containing the first version to compare
+     * @param b A {@link String} containing the second version to compare
+     * @return A negative integer, zero, or a positive integer as the first version is older than, equal to, or newer than the
+     *         second version
+     * @see #parse(String)
+     * @see #compare(Version, Version)
      */
     public static int compare(String a, String b) {
         return compare(VersionHelper.parse(a), VersionHelper.parse(b));
     }
 
     /**
-     * Compares the two versions taking {@code null} into account. If both versions are {@code null} then they are assumed
-     * to be equal. Otherwise {@code null} is treated as lower than any other version.
+     * Compares two {@link Version Versions}. If both versions are {@code null} then they are assumed to be equal. Otherwise
+     * {@code null} is treated as older than any other version.
      *
-     * @param a
-     *            first version to compare
-     * @param b
-     *            second version to compare
-     * @return a negative integer, zero, or a positive integer as this version is less than, equal to, or greater than the
-     *         specified version.
+     * @param a The first {@link Version} to compare
+     * @param b The second {@link Version} to compare
+     * @return A negative integer, zero, or a positive integer as the first {@link Version} is older than, equal to, or newer than
+     *         the second {@link Version}
+     * @see #compare(String, String)
      */
     public static int compare(Version a, Version b) {
-        if (a == null && b == null) {
+        if (a == b) {
             return 0;
         }
         if (a == null) {
@@ -109,10 +107,11 @@ public class VersionHelper {
     }
 
     /**
-     * Parses the given string into a version. Throws an exception if parsing fails.
+     * Parses the given {@link String} into a {@link Version}.
      *
-     * @param v the string to parse
-     * @return the version object. Never {@code null}
+     * @param v The {@link String} to parse
+     * @return The {@link Version} object, never {@code null}
+     * @throws IllegalArgumentException If the given {@link String} cannot be parsed to a {@link Version}
      */
     public static Version parse(String v) {
         Version version = tryParse(v);
@@ -123,10 +122,10 @@ public class VersionHelper {
     }
 
     /**
-     * Tries to parse the given string into a version object.
+     * Tries to parse the given {@link String} into a {@link Version} object.
      *
-     * @param v the string to parse
-     * @return the version object or {@code null} in case that the string is not a version
+     * @param v The {@link String} to parse
+     * @return The {@link Version} object or {@code null} if the parsing failed
      */
     public static Version tryParse(String v) {
         Matcher matcher = V_PATTERN.matcher(v);
@@ -155,5 +154,4 @@ public class VersionHelper {
     public static boolean isUndefined(Version version) {
         return equals(version, UNDEFINED);
     }
-
 }
