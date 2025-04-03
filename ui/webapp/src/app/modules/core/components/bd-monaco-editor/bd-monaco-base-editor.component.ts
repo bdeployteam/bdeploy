@@ -71,7 +71,7 @@ export abstract class BdMonacoBaseEditorComponent<T extends IEditor, X extends I
     }
     if (this._editor) {
       this._editor.dispose();
-      this._editor = undefined;
+      this._editor = null;
     }
   }
 }

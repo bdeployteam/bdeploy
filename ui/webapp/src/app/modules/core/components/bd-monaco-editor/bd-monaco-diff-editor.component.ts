@@ -17,7 +17,7 @@ export class BdMonacoDiffEditorComponent extends BdMonacoBaseEditorComponent<ISt
 
   @Input()
   set options(options: IStandaloneDiffEditorConstructionOptions) {
-    this._options = Object.assign({}, options);
+    this._options = { ...options };
     if (this._editor) {
       this._editor.dispose();
       this.initMonaco(options);

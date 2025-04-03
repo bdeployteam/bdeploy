@@ -21,7 +21,7 @@ declare let monaco: GlobalMonacoModule;
   ]
 })
 export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent<IStandaloneCodeEditor, IStandaloneEditorConstructionOptions> implements ControlValueAccessor {
-  private zone = inject(NgZone);
+  private readonly zone = inject(NgZone);
 
   private _value = '';
 
@@ -34,7 +34,7 @@ export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent<IStanda
 
   @Input()
   set options(options: IStandaloneEditorConstructionOptions) {
-    this._options = Object.assign({}, options);
+    this._options = { ...options };
     if (this._editor) {
       this._editor.dispose();
       this.initMonaco(options);
@@ -68,7 +68,7 @@ export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent<IStanda
 
     this._editor.setValue(this._value);
 
-    this._editor.onDidChangeModelContent((e: unknown) => {
+    this._editor.onDidChangeModelContent(() => {
       const value = this._editor.getValue();
 
       // value is not propagated to parent when executing outside zone
