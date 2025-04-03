@@ -79,7 +79,7 @@ public class CommonEndpointHelper {
     public static String initUri(HttpEndpoint endpoint, String hostname, String subPath) {
         return ((Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE) ? "https://" : "http://") + hostname
                 + (endpoint.port != null ? (":" + endpoint.port.getPreRenderable()) : "")
-                + concatWithSlashes(endpoint.path, subPath);
+                + concatWithSlashes(endpoint.path != null ? endpoint.path.getPreRenderable() : null, subPath);
     }
 
     private static String concatWithSlashes(String p1, String p2) {
@@ -255,8 +255,8 @@ public class CommonEndpointHelper {
 
         HttpEndpoint processed = new HttpEndpoint();
         processed.id = rawEndpoint.id;
-        processed.path = rawEndpoint.path;
-        processed.contextPath = rawEndpoint.contextPath;
+        processed.path = process(rawEndpoint.path, p);
+        processed.contextPath = process(rawEndpoint.contextPath, p);
         processed.port = process(rawEndpoint.port, p);
         processed.secure = process(rawEndpoint.secure, p);
         processed.trustAll = rawEndpoint.trustAll;

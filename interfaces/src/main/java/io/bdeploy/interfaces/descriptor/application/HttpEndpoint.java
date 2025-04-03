@@ -30,9 +30,10 @@ public class HttpEndpoint {
     @JsonProperty(required = true)
     public String id;
 
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonPropertyDescription("The root path of the endpoint on the server.")
     @JsonProperty(required = true)
-    public String path;
+    public LinkedValueConfiguration path = new LinkedValueConfiguration(null);
 
     /**
      * Additional path segment which should be appended to the endpoint path given.

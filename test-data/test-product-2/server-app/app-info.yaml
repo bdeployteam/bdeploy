@@ -281,4 +281,17 @@ endpoints:
       path: "public/ui"
       port: 4444
       enabled: false
+    - id: "test-api"
+      path: "test-api/v{{X:test.api.version}}"
+      contextPath: "{{X:test.api.context}}"
+      port: "{{X:test.api.port}}"
       type: UI
+      enabled: "{{X:test.api.enabled}}"
+      secure: "{{X:test.api.secure}}"
+      trustAll: "false"
+      trustStore: "{{X:test.api.trustStore}}"
+      trustStorePass: "{{X:test.api.trustStorePass}}"
+      authType: "{{X:test.api.authType}}"
+      tokenUrl: "{{X:test.api.tokenUrl}}"
+      clientId: "{{X:test.api.clientId}}"
+      clientSecret: "{{X:test.api.clientSecret}}"

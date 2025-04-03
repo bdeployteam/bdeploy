@@ -44,3 +44,55 @@ definitions:
     longDescription: "Date when product was updated"
     type: "STRING"
     defaultValue: "27.7.2024"
+  - id: test.api.version
+    name: "API Version"
+    type: "NUMERIC"
+    defaultValue: 12
+  - id: test.api.context
+    name: "Context path"
+    type: "STRING"
+    defaultValue: "instance-context"
+  - id: test.api.enabled
+    name: "API enabled"
+    type: "BOOLEAN"
+    defaultValue: true
+  - id: test.api.port
+    name: "Server port"
+    type: "NUMERIC"
+    defaultValue: 1234
+  - id: test.api.secure
+    name: "Use HTTPS"
+    type: "BOOLEAN"
+    defaultValue: true
+  - id: test.api.trustStore
+    name: "Trust store path"
+    type: "STRING"
+    defaultValue: "instance-trust-store"
+  - id: test.api.trustStorePass
+    name: "Trust store password"
+    type: "STRING"
+    defaultValue: "instance-trust-store-password"
+  - id: test.api.authType
+    name: "Authentication type"
+    type: "STRING"
+    defaultValue: "OIDC"
+  - id: test.api.user
+    name: "User"
+    type: "STRING"
+    defaultValue: "instance-user"
+  - id: test.api.password
+    name: "Password"
+    type: "STRING"
+    defaultValue: "instance-password"
+  - id: test.api.tokenUrl
+    name: "Token URL"
+    type: "STRING"
+    defaultValue: "instance-token-url"
+  - id: test.api.clientId
+    name: "Client ID"
+    type: "STRING"
+    defaultValue: "instance-client-id"
+  - id: test.api.clientSecret
+    name: "Client secret"
+    type: "STRING"
+    defaultValue: "instance-client-secret"
