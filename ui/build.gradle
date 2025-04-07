@@ -174,21 +174,22 @@ task doneWithUitest(dependsOn: [':test-data:triggerStopBDeploy', triggerStopStan
     dependsOn runUitests
 }
 
-task updateDocuScreenshots(type: Copy, dependsOn: doneWithUitest) {
-    from file("${webappDir}/playwright/results/screenshots/")
-    into new File(project(":doc").projectDir, "retypeuser/images")
-
-    include "**/*.png"
-
-    // flatten by using filename as relative path
-    eachFile {
-        path = name
-    }
-
-    includeEmptyDirs = false
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
+task updateDocuScreenshots(dependsOn: doneWithUitest) {
     doLast {
+    	copy {
+	    from file("${webappDir}/playwright/results/screenshots/")
+	    into new File(project(":doc").projectDir, "retypeuser/images")
+
+	    include "**/*.png"
+
+	    // flatten by using filename as relative path
+	    eachFile {
+		path = name
+	    }
+
+	    includeEmptyDirs = false
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
         println('Updating screenshots of user documentation done.')
     }
 }
