@@ -687,7 +687,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         List<VariableConfiguration> result = new ArrayList<>();
 
         for (var v : tpl.instanceVariables) {
-            v.value = new LinkedValueConfiguration(
+            v.value = new LinkedValueConfiguration(v.value == null ? "" :
                     TemplateHelper.process(v.value.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
             result.add(v);
         }
