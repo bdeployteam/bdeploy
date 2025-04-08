@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.poi.util.StringUtil;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
@@ -62,6 +64,7 @@ import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -193,32 +196,52 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void install(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
-        try (var handle = af.run(Actions.INSTALL, name, imf.getConfiguration().id, key.getTag())) {
+        InstanceConfiguration instanceConfig = imf.getConfiguration();
+        String instanceId = instanceConfig.id;
+        Key productKey = instanceConfig.product;
+
+        try (var handle = af.run(Actions.INSTALL, name, instanceId, key.getTag())) {
             SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
             fragmentReferences.remove(InstanceManifest.CLIENT_NODE_NAME);
 
-            // assure that the product has been pushed to the master (e.g. by central).
-            Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(imf.getConfiguration().product));
+            // Assure that the product has been pushed to the master (e.g. by central).
+            Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(productKey));
             if (!Boolean.TRUE.equals(productExists)) {
-                throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product,
-                        Status.NOT_FOUND);
+                throw new WebApplicationException("Cannot find required product " + productKey, Status.NOT_FOUND);
             }
 
-            List<Runnable> runnables = new ArrayList<>();
+            // Assure that the minion has the minimum required BDeploy version
+            String minMinionVersionString = ProductManifest.of(hive, productKey).getProductDescriptor().minMinionVersion;
+            if (StringUtil.isNotBlank(minMinionVersionString)) {
+                Version minMinionVersion;
+                try {
+                    minMinionVersion = VersionHelper.parse(minMinionVersionString);
+                } catch (RuntimeException e) {
+                    throw new WebApplicationException(
+                            "Failed to parse minimum BDeploy version '" + minMinionVersionString + "' of product " + productKey,
+                            e);
+                }
+                if (root.getNodeManager().getSelf().version.compareTo(minMinionVersion) < 0) {
+                    throw new WebApplicationException(
+                            "Installation aborted because minion does not meet the minimum BDeploy version of "
+                                    + minMinionVersionString);
+                }
+            }
 
+            // Create the runnables
+            List<Runnable> runnables = new ArrayList<>();
             for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
                 String nodeName = entry.getKey();
                 Manifest.Key toDeploy = entry.getValue();
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
-
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
 
+                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
                 if (node == null) {
                     log.info("Node {} is offline. Skipping install", nodeName);
                     continue;
                 }
 
-                Runnable r = () -> {
+                runnables.add(() -> {
                     // grab all required manifests from the applications
                     InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
                     LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
@@ -244,9 +267,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             NodeDeploymentResource.class, context);
                     hive.execute(pushOp);
                     deployment.install(toDeploy);
-                };
-
-                runnables.add(r);
+                });
             }
 
             // Execute all tasks
@@ -255,8 +276,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             getState(imf, hive).install(key.getTag());
             imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
 
-            // inform about changes
-            changes.change(ObjectChangeType.INSTANCE, imf.getKey(), new ObjectScope(this.name, imf.getConfiguration().id),
+            // Inform about changes
+            changes.change(ObjectChangeType.INSTANCE, imf.getKey(), new ObjectScope(this.name, instanceId),
                     Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
         }
     }
@@ -561,9 +582,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 }
                 inc.mergeVariables(config, system, v -> processConfigFilesInMemory(configTrees, v));
             } else {
-                Consumer<VariableResolver> cfgResolver =  null != config.configTree ?
-                            v -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v)
-                            : null;
+                Consumer<VariableResolver> cfgResolver = null != config.configTree
+                        ? v -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v)
+                        : null;
                 inc.mergeVariables(config, system, cfgResolver);
             }
 

@@ -1,9 +1,9 @@
 <div class="flex justify-start items-center">
-  <app-bd-button
-    [text]="isUpgrade ? 'Upgrade to this product version' : 'Downgrade to this product version'"
-    [icon]="isUpgrade ? 'file_upload' : 'file_download'"
-    (click)="doUpdate()"
-    [disabled]="isCurrent"
-    tooltip="below"
-  ></app-bd-button>
+  <div matTooltip="{{installButtonTooltip}}" [matTooltipDisabled]="isCurrent">
+    <app-bd-button
+      [icon]="isUpgrade ? 'file_upload' : 'file_download'"
+      (click)="doUpdate()"
+      [disabled]="isCurrent || !hasMinMinionVersion"
+    ></app-bd-button>
+  </div>
 </div>

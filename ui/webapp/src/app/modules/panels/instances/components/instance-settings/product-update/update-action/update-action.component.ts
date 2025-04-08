@@ -7,13 +7,17 @@ import { BdDataColumn } from '../../../../../../../models/data';
 import {
   CellComponent
 } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { compareVersions, convert2String } from 'src/app/modules/core/utils/version.utils';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-update-action',
     templateUrl: './update-action.component.html',
-    imports: [BdButtonComponent]
+    imports: [BdButtonComponent, MatTooltip],
 })
 export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, string> {
+  private readonly cfg = inject(ConfigService);
   private readonly products = inject(ProductsService);
   private readonly edit = inject(InstanceEditService);
 
@@ -24,6 +28,8 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
   private curIndex: number;
   protected isUpgrade: boolean;
   protected isCurrent: boolean;
+  protected hasMinMinionVersion: boolean;
+  protected installButtonTooltip: string;
 
   ngOnInit(): void {
     const products = this.products.products$.value || [];
@@ -35,6 +41,33 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
     );
     this.isUpgrade = this.index < this.curIndex;
     this.isCurrent = this.index === this.curIndex;
+
+    this.installButtonTooltip = this.isUpgrade
+      ? 'Upgrade to this product version'
+      : 'Downgrade to this product version';
+
+    const minimumVersion = this.record.minMinionVersion;
+    if (minimumVersion) {
+      const currentVersion = this.cfg?.config?.version;
+      if (currentVersion) {
+        this.hasMinMinionVersion = compareVersions(minimumVersion, currentVersion) < 0;
+        if (!this.hasMinMinionVersion) {
+          this.installButtonTooltip =
+            'This product version cannot be installed because it requires a BDeploy version of ' +
+            convert2String(minimumVersion) +
+            ' or above, but the current minion only has version ' +
+            convert2String(currentVersion);
+        }
+      } else {
+        this.hasMinMinionVersion = false;
+        this.installButtonTooltip =
+          'This product version cannot be installed because it requires a BDeploy version of ' +
+          convert2String(minimumVersion) +
+          ' or above, but the version of the current minion could not be determined';
+      }
+    } else {
+      this.hasMinMinionVersion = true;
+    }
   }
 
   protected doUpdate() {

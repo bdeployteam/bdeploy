@@ -128,6 +128,9 @@ public class VersionHelper {
      * @return The {@link Version} object or {@code null} if the parsing failed
      */
     public static Version tryParse(String v) {
+        if (v == null) {
+            return null;
+        }
         Matcher matcher = V_PATTERN.matcher(v);
         if (!matcher.matches()) {
             return null;

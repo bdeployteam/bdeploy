@@ -3,10 +3,13 @@
 name: "Demo Product"
 product: "io.bdeploy/demo"
 vendor: BDeploy Team
+minMinionVersion: 7.0.0
+configTemplates: config
+versionFile: "product-version.yaml"
+
 applications:
   - "server-app"
   - "client-app"
-configTemplates: config
 
 instanceTemplates:
   - "instance-template-default.yaml"
@@ -24,5 +27,3 @@ parameterTemplates:
 
 instanceVariableTemplates:
   - "instance-variable-template.yaml"
-
-versionFile: "product-version.yaml"

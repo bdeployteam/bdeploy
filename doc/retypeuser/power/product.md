@@ -470,41 +470,43 @@ The `product-info.yaml` file describes which **Applications** are part of the fi
 name: My Product <1>
 product: com.example/product <2>
 vendor: My Company <3>
+minMinionVersion: 1.2.3 <4>
 
-applications:
-  - my-app1 <4>
+applications: <5>
+  - my-app1
   - my-app2
 
-configTemplates: my-config <5>
-pluginFolder: my-plugins <6>
+configTemplates: my-config <6>
+pluginFolder: my-plugins <7>
 
 applicationTemplates:
-  - "my-templates/app-template.yaml" <7>
+  - "my-templates/app-template.yaml" <8>
 instanceTemplates:
-  - "my-templates/template.yaml" <8>
+  - "my-templates/template.yaml" <9>
 
 parameterTemplates:
-  - "my-templates/param-template.yaml" <9>
+  - "my-templates/param-template.yaml" <10>
 instanceVariableTemplates:
-  - "my-templates/variable-template.yaml" <10>
+  - "my-templates/variable-template.yaml" <11>
 instanceVariableDefinitions:
-  - "my-definitions/instance-variable-definitions.yaml" <11>
+  - "my-definitions/instance-variable-definitions.yaml" <12>
 
-versionFile: my-versions.yaml <12>
+versionFile: my-versions.yaml <13>
 ```
 
 1. A human readable name of the **Product** for display purposes in the Web UI.
 2. A unique ID of the **Product** which is used to base **Instances** of. This should not change, as changing the **Product** ID of an existing **Instance** is not supported.
 3. The vendor of the product. Displayed in the Web UI and used when installing client applications.
-4. The list of **Applications** which are part of the **Product**. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
-5. Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an **Instance** from the resulting **Product**.
-6. Optional: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
-7. A reference to an application template YAML file which defines an [`application-template.yaml`](#application-templateyaml).
-8. A reference to an instance template YAML file which defines an [`instance-template.yaml`](#instance-templateyaml).
-9. A reference to a parameter template YAML file which defines a [`parameter-template.yaml`](#parameter-templateyaml).
-10. A reference to an instance variable template YAML file which defines an [`instance-variable-template.yaml`](#instance-variable-templateyaml).
-11. A reference to an instance variable definitions YAML file which defines an [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml)
-12. The `product-version.yaml` which associates the **Application** IDs (used above) with actual paths to **Applications** on the file system.
+4. The minimum BDeploy version that a minion must have in order to allow installation of this product.
+5. The list of **Applications** which are part of the **Product**. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
+6. Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an **Instance** from the resulting **Product**.
+7. Optional: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
+8. A reference to an application template YAML file which defines an [`application-template.yaml`](#application-templateyaml).
+9. A reference to an instance template YAML file which defines an [`instance-template.yaml`](#instance-templateyaml).
+10. A reference to a parameter template YAML file which defines a [`parameter-template.yaml`](#parameter-templateyaml).
+11. A reference to an instance variable template YAML file which defines an [`instance-variable-template.yaml`](#instance-variable-templateyaml).
+12. A reference to an instance variable definitions YAML file which defines an [`instance-variable-definitions.yaml`](#instance-variable-definitionsyaml)
+13. The `product-version.yaml` which associates the **Application** IDs (used above) with actual paths to **Applications** on the file system.
 
 ## product-version.yaml
 

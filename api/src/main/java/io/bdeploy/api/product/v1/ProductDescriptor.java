@@ -59,4 +59,6 @@ public class ProductDescriptor {
     @JsonPropertyDescription("A relative path to the mandatory 'product-version.yaml' file which defines versions and available applications.")
     public String versionFile;
 
+    @JsonPropertyDescription("The minimum version of the BDeploy minion where an instance with this product may be created.")
+    public String minMinionVersion;
 }

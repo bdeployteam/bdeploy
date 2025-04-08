@@ -1,8 +1,8 @@
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceConfiguration, InstancePurpose, ManagedMasterDto, ManifestKey } from 'src/app/models/gen.dtos';
+import { InstanceConfiguration, InstancePurpose, ManagedMasterDto, ManifestKey, Version } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -22,11 +22,12 @@ import { SystemOnServerValidatorDirective } from '../../validators/system-on-ser
 import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { compareVersions, convert2String } from 'src/app/modules/core/utils/version.utils';
 
 interface ProductRow {
   id: string;
   name: string;
-  versions: string[];
+  versions: { tag: string; minMinionVersion: Version }[];
 }
 
 @Component({
@@ -71,6 +72,9 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
+  protected hasMinMinionVersion = signal(true);
+  protected addInstanceButtonDisabledMessage = signal<string>(null);
+
   ngOnInit(): void {
     this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
@@ -83,21 +87,17 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         this.config.id = r;
         this.subscription.add(
           this.products.products$.subscribe((products) => {
-            const idsAndNamesAndVersions = new Map<string, [string, string[]]>();
+            const idsAndRows = new Map<string, ProductRow>();
             products?.forEach((dto) => {
               const id = dto.key.name;
-              if (!idsAndNamesAndVersions.has(id)) {
-                idsAndNamesAndVersions.set(id, [dto.name, []]);
+              if (!idsAndRows.has(id)) {
+                idsAndRows.set(id, { id, name: dto.name, versions: [] });
               }
-              idsAndNamesAndVersions.get(id)[1].push(dto.key.tag);
+              idsAndRows.get(id).versions.push({ tag: dto.key.tag, minMinionVersion: dto.minMinionVersion });
             });
-
-            this.prodList = Array.from(
-              idsAndNamesAndVersions,
-              ([key, value]) => ({ id: key, name: value[0], versions: value[1] } as ProductRow),
-            );
+            this.prodList = Array.from(idsAndRows.values());
             this.productNames = this.prodList.map((p) => p.name);
-          }),
+          })
         );
 
         const snap = this.areas.panelRoute$.value;
@@ -105,7 +105,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         const prodTag = snap.queryParamMap.get('productTag');
         if (!!prodKey && !!prodTag) {
           const prod = this.prodList.find((p) => p.id === prodKey);
-          if (prod?.versions.find((v) => v === prodTag)) {
+          if (prod?.versions.find((v) => v.tag === prodTag)) {
             this.selectedProduct = prod;
             this.config.product.name = prodKey;
             this.config.product.tag = prodTag;
@@ -148,7 +148,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   }
 
   public canSave(): boolean {
-    return this.form.valid;
+    return this.form.valid && this.hasMinMinionVersion();
   }
 
   protected onSave(): void {
@@ -170,6 +170,42 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   protected updateProduct() {
     this.config.product.name = this.selectedProduct.id;
     this.config.product.tag = null;
+  }
+
+  protected getVersions(){
+    return this.selectedProduct?.versions.map(v => v.tag);
+  }
+
+  protected updateProductVersion() {
+    const minimumVersion = this.selectedProduct?.versions?.filter((v) => v.tag === this.config.product.tag)[0]
+      .minMinionVersion;
+    if (minimumVersion) {
+      const currentVersion = this.cfg?.config?.version;
+      if (currentVersion) {
+        if (compareVersions(minimumVersion, currentVersion) < 0) {
+          this.hasMinMinionVersion.set(true);
+          this.addInstanceButtonDisabledMessage.set(null);
+        } else {
+          this.hasMinMinionVersion.set(false);
+          this.addInstanceButtonDisabledMessage.set(
+            'Creation of the instance is not possible because the selected product version requires a BDeploy version of ' +
+              convert2String(minimumVersion) +
+              ' or above, but the current minion only has version ' +
+              convert2String(currentVersion)
+          );
+        }
+      } else {
+        this.hasMinMinionVersion.set(false);
+        this.addInstanceButtonDisabledMessage.set(
+          'Creation of the instance is not possible because the selected product version requires a BDeploy version of ' +
+            convert2String(minimumVersion) +
+            ' or above, but the version of the current minion could not be determined'
+        );
+      }
+    } else {
+      this.hasMinMinionVersion.set(true);
+      this.addInstanceButtonDisabledMessage.set(null);
+    }
   }
 
   protected onSystemChange(value: ManifestKey) {

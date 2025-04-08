@@ -45,6 +45,7 @@ import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-
 import { ServerNodeComponent } from './server-node/server-node.component';
 import { ClientNodeComponent } from './client-node/client-node.component';
 import { AsyncPipe } from '@angular/common';
+import { compareVersions, convert2String } from 'src/app/modules/core/utils/version.utils';
 
 @Component({
     selector: 'app-dashboard',
@@ -109,6 +110,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   protected isInstalled = signal(false);
   protected hasProduct = signal(false);
+  protected hasMinMinionVersion = signal(false);
+  protected installButtonDisabledMessage = signal<string>(null);
 
   protected isCentral = false;
 
@@ -164,8 +167,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
     this.subscription.add(
       combineLatest([this.instances.current$, this.products.products$]).subscribe(([currentInstance, products]) => {
-        const product = currentInstance?.instanceConfiguration?.product;
-        this.hasProduct.set(!!products?.find((p) => p.key.name === product?.name && p.key.tag === product?.tag));
+        const productKey = currentInstance?.instanceConfiguration?.product;
+        const productDto = products?.find((p) => p.key.name === productKey?.name && p.key.tag === productKey?.tag);
+        this.hasProduct.set(!!productDto);
+
+        const minimumVersion = productDto?.minMinionVersion;
+        if (minimumVersion) {
+          const currentVersion = this.cfg?.config?.version;
+          if (currentVersion) {
+            if (compareVersions(minimumVersion, currentVersion) < 0) {
+              this.hasMinMinionVersion.set(true);
+              this.installButtonDisabledMessage.set(null);
+            } else {
+              this.hasMinMinionVersion.set(false);
+              this.installButtonDisabledMessage.set(
+                'Installation is not possible because this product version requires a minimum BDeploy version of ' +
+                  convert2String(minimumVersion) +
+                  ' or above, but the current minion only has version ' +
+                  convert2String(currentVersion)
+              );
+            }
+          } else {
+            this.hasMinMinionVersion.set(false);
+            this.installButtonDisabledMessage.set(
+              'Installation is not possible because this product version requires a minimum BDeploy version of ' +
+                convert2String(minimumVersion) +
+                ' or above, but the version of the current minion could not be determined'
+            );
+          }
+        } else {
+          this.hasMinMinionVersion.set(true);
+          this.installButtonDisabledMessage.set(null);
+        }
       }),
     );
 

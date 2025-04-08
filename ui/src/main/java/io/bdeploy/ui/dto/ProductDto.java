@@ -6,8 +6,11 @@ import java.util.SortedSet;
 
 import javax.annotation.Generated;
 
+import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.common.Version;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
@@ -17,6 +20,7 @@ public class ProductDto implements Comparable<ProductDto> {
 
     public String name;
     public String vendor;
+    public Version minMinionVersion;
     public String product;
     public Manifest.Key key;
     public Map<String, String> labels;
@@ -27,16 +31,18 @@ public class ProductDto implements Comparable<ProductDto> {
     public List<VariableDescriptor> instanceVariables;
 
     public static ProductDto create(ProductManifest manifest) {
+        ProductDescriptor productDescriptor = manifest.getProductDescriptor();
+
         ProductDto dto = new ProductDto();
-        dto.name = manifest.getProductDescriptor().name;
+        dto.name = productDescriptor.name;
+        dto.vendor = productDescriptor.vendor;
+        dto.minMinionVersion = VersionHelper.tryParse(productDescriptor.minMinionVersion);
         dto.product = manifest.getProduct();
-        dto.vendor = manifest.getProductDescriptor().vendor;
         dto.key = manifest.getKey();
         dto.labels = manifest.getLabels();
         dto.configTree = manifest.getConfigTemplateTreeId();
         dto.instanceTemplates = manifest.getInstanceTemplates();
-        dto.applicationTemplates = manifest.getApplicationTemplates();
-        // no parameter templates intentionally - they are expanded in ApplicationManifest
+        dto.applicationTemplates = manifest.getApplicationTemplates(); // no parameter templates intentionally - they are expanded in ApplicationManifest
         dto.references = manifest.getReferences();
         dto.instanceVariables = manifest.getInstanceVariables();
         return dto;
@@ -78,5 +84,4 @@ public class ProductDto implements Comparable<ProductDto> {
         }
         return true;
     }
-
 }
