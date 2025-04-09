@@ -235,7 +235,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
                 .findFirst().orElse(null);
 
         checkCanRemove(desc);
-        doRemoveParamterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
+        doRemoveParameterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
         checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
 
         return doUpdateInstance(ir, instance, nodecfg);
@@ -294,7 +294,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private static void doRemoveParamterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
+    private static void doRemoveParameterInternal(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
             InstanceNodeConfigurationDto node, ParameterConfiguration toRemove) {
         cfg.start.parameters.remove(toRemove);
         ParameterDescriptor desc = appDesc.startCommand.parameters.stream().filter(p -> p.id.equals(toRemove.id)).findAny()
@@ -306,7 +306,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             for (var p : cfg.start.parameters) {
                 if (!ProductUpdateService.meetsCondition(appDesc, desc, resolver)) {
                     // the parameter is no longer supported, need to remove it.
-                    doRemoveParamterInternal(cfg, appDesc, node, p);
+                    doRemoveParameterInternal(cfg, appDesc, node, p);
                 }
             }
         }
