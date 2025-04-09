@@ -623,7 +623,8 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
 
-        // 1. push product to remote in case it is not yet there, and we have it.
+        // If we have the product -> push it to the remote master to ensure that it's there
+        // If we don't have the product, we assume that the remote master already has it -> else the install below will just fail
         if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
             try (ActionHandle handle = af.run(Actions.PUSH_PRODUCT, group, instanceId,
                     instance.getConfiguration().product.toString())) {
@@ -639,7 +640,7 @@ public class InstanceResourceImpl implements InstanceResource {
             }
         }
 
-        // 2: tell master to deploy
+        // Tell master to deploy
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         master.getNamedMaster(group).install(instance.getKey());
 
