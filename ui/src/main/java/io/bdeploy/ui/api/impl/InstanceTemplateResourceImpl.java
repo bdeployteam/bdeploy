@@ -413,7 +413,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                 for (var a : g.applications) {
                     var atvr = new TemplateVariableResolver(a.templateVariables, Collections.emptyList(), tvr);
                     for (var p : a.startParameters) {
-                        if (p.id.equals(id)) {
+                        if (p.id.equals(id) && p.value != null && !p.value.isBlank()) {
                             String value = TemplateHelper.process(p.value, atvr, Variables.TEMPLATE.shouldResolve());
                             lv = new LinkedValueConfiguration(value);
                         }
