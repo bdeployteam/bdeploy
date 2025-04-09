@@ -42,6 +42,10 @@ public class Version implements Comparable<Version> {
         return qualifier;
     }
 
+    /**
+     * @return A negative integer, zero, or a positive integer as the this {@link Version} is older than, equal to, or newer than
+     *         the specified {@link Version}
+     */
     @Override
     public int compareTo(Version o) {
         // nulls last: this means that a release version is newer than a snapshot.
