@@ -14,6 +14,7 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.common.TestActivityReporter;
+import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -147,20 +148,90 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(0, result.size());
 
-        /* let's create instance with name unitTestInstance */
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--create", "--name=unitTestInstance",
+        /* let's create 2 instances */
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--create", "--name=unitTestInstance1",
                 "--purpose=DEVELOPMENT", "--product=customer/product", "--productVersion=1.0.0.1234");
-        String createdInstanceId = result.get(0).get("InstanceId");
+        String firstInstanceId = result.get(0).get("InstanceId");
+
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--create", "--name=unitTestInstance2",
+                "--purpose=PRODUCTIVE", "--product=customer/product", "--productVersion=1.0.0.1234");
+        String secondInstanceId = result.get(0).get("InstanceId");
+        String bothInstances = firstInstanceId + "," + secondInstanceId;
 
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
-        assertEquals(1, result.size());
-        assertEquals(createdInstanceId, result.get(0).get("Id"));
-        assertEquals("unitTestInstance", result.get(0).get("Name"));
-        assertEquals("1", result.get(0).get("Version"));
-        assertEquals("DEVELOPMENT", result.get(0).get("Purpose"));
+        TestCliTool.StructuredOutputRow actualFirstInstanceRow = firstInstanceId.equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
+        assertEquals("unitTestInstance1", actualFirstInstanceRow.get("Name"));
+        assertEquals("1", actualFirstInstanceRow.get("Version"));
+        assertEquals("DEVELOPMENT", actualFirstInstanceRow.get("Purpose"));
 
-        /* let's delete instance */
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + createdInstanceId, "--delete",
+        TestCliTool.StructuredOutputRow actualSecondInstanceRow = secondInstanceId.equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
+        assertEquals("unitTestInstance2", actualSecondInstanceRow.get("Name"));
+        assertEquals("1", actualSecondInstanceRow.get("Version"));
+        assertEquals("PRODUCTIVE", actualSecondInstanceRow.get("Purpose"));
+
+        /* let's add 1 instance variables for both and 1 variable for just one */
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances,
+                "--setVariable=commonVar", "--value=23", "--type=NUMERIC", "--customEditor=io.something.editor",
+                "--description=my awesome common variable");
+        assertEquals(2, result.size());
+        assertEquals("Updated successfully", result.get(0).get("Message"));
+        assertEquals("Updated successfully", result.get(1).get("Message"));
+
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId,
+                "--setVariable=customVar", "--value=345");
+        assertEquals(1, result.size());
+        assertEquals("Updated successfully", result.get(0).get("Message"));
+
+        /* let's try listing variables for both and seeing it's not allowed */
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances,
+                "--showVariables");
+        assertEquals("Exactly 1 uuid must be provided for listing variables", result.get(0).get("message"));
+
+        /* try listing variables for one */
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId,
+                "--showVariables");
+        assertEquals(2, result.size());
+        TestCliTool.StructuredOutputRow commonVariableRow = "commonVar".equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
+        assertEquals("my awesome common variable", commonVariableRow.get("Description"));
+        assertEquals("NUMERIC", commonVariableRow.get("Type"));
+        assertEquals("io.something.editor", commonVariableRow.get("CustomEditor"));
+        assertEquals("23", commonVariableRow.get("Value"));
+
+        TestCliTool.StructuredOutputRow customVariableRow =  "customVar".equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
+        assertEquals("", customVariableRow.get("Description"));
+        assertEquals("STRING", customVariableRow.get("Type"));
+        assertEquals("", customVariableRow.get("CustomEditor"));
+        assertEquals("345", customVariableRow.get("Value"));
+
+        /* let's remove the custom variable and list variables again for each */
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances,
+                "--removeVariable=customVar");
+        actualFirstInstanceRow = firstInstanceId.equals(result.get(0).get("Instance")) ? result.get(0) : result.get(1);
+        assertEquals("Updated successfully", actualFirstInstanceRow.get("Message"));
+
+        actualSecondInstanceRow = secondInstanceId.equals(result.get(0).get("Instance")) ? result.get(0) : result.get(1);
+        assertEquals("Nothing to modify", actualSecondInstanceRow.get("Message")); //because it never had the custom variable
+
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId,
+                "--showVariables");
+        assertEquals(1, result.size());
+        assertEquals("commonVar", result.get(0).get("Id"));
+        assertEquals("my awesome common variable", result.get(0).get("Description"));
+        assertEquals("NUMERIC", result.get(0).get("Type"));
+        assertEquals("io.something.editor", result.get(0).get("CustomEditor"));
+        assertEquals("23", result.get(0).get("Value"));
+
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + secondInstanceId,
+                "--showVariables");
+        assertEquals(1, result.size());
+        assertEquals("commonVar", result.get(0).get("Id"));
+        assertEquals("my awesome common variable", result.get(0).get("Description"));
+        assertEquals("NUMERIC", result.get(0).get("Type"));
+        assertEquals("io.something.editor", result.get(0).get("CustomEditor"));
+        assertEquals("23", result.get(0).get("Value"));
+
+        /* let's delete both instances */
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--delete",
                 "--yes");
 
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");

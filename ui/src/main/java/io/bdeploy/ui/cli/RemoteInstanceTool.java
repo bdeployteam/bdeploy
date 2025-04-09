@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -37,12 +38,15 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.configuration.VariableConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -84,7 +88,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Validator(NonExistingOrEmptyDirPathValidator.class)
         String exportTo();
 
-        @Help(value = "IDs of the instances to manipulate.")
+        @Help(value = "IDs of the instances to manipulate")
         String[] uuid();
 
         @Help(value = "Version of the existing instance. When exporting must exist.")
@@ -122,7 +126,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("The name to set for the created/updated instance")
         String name();
 
-        @Help("The description to set for the created/updated instance")
+        @Help("The description to set for the created/updated instance if using --update or variable if using --setVariable")
         String description();
 
         @Help("The purpose to set for the created/updated instance")
@@ -165,6 +169,24 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help(value = "Use this flag to open the dashboard of the instance group in the web UI. If an instance uuid is given, it instead opens the dashboard of the specified instance.",
               arg = false)
         boolean open() default false;
+
+        @Help(value = "Show variables for the specified instance", arg = false)
+        boolean showVariables() default false;
+
+        @Help("Set the given variable. If there is no variable descriptor with the given ID, a custom variable will be added.")
+        String setVariable();
+
+        @Help("The value to set the variable to")
+        String value();
+
+        @Help("The type of the variable you are setting. Will default to STRING if not provided.")
+        VariableDescriptor.VariableType type() default VariableDescriptor.VariableType.STRING;
+
+        @Help("A potential custom editor ID which must be provided by a plugin to edit a variable with")
+        String customEditor();
+
+        @Help("Remove the specified variable")
+        String removeVariable();
     }
 
     public RemoteInstanceTool() {
@@ -209,6 +231,13 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             return doUpdateProduct(remote, ir, config);
         } else if (config.delete()) {
             return doDelete(config, ir);
+        } else if (config.showVariables()) {
+            return doShowVariables(ir, config);
+        } else if (config.setVariable() != null) {
+            helpAndFailIfMissing(config.value(), "--value is missing");
+            return doSetVariable(remote, ir, config);
+        } else if (config.removeVariable() != null) {
+            return doRemoveVariable(remote, ir, config);
         } else {
             return createNoOp();
         }
@@ -284,11 +313,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         boolean notCentral = bir.getVersion().mode != MinionMode.CENTRAL;
 
         for (String uuid : new HashSet<>(Arrays.asList(config.uuid()))) {
-            List<InstanceVersionDto> versions = ir.listVersions(uuid);
-            Integer max = versions.stream().map(versionDto -> Integer.valueOf(versionDto.key.getTag()))
-                    .sorted(Collections.reverseOrder()).findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + uuid));
-            String currentTag = max.toString();
+            String currentTag = identifyCurrentVersion(ir, uuid);
 
             InstanceConfiguration cfg = ir.readVersion(uuid, currentTag);
             if (setName) {
@@ -327,7 +352,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     private DataResult doUpdateWithTemplate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
         String[] uuid = config.uuid();
         if (uuid.length != 1) {
-            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command");
         }
 
         BackendInfoResource bir = ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, getLocalContext());
@@ -434,7 +459,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     private DataResult doImport(InstanceResource ir, InstanceConfig config) {
         String[] uuid = config.uuid();
         if (uuid.length != 1) {
-            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command");
         }
 
         Path input = Paths.get(config.importFrom());
@@ -461,7 +486,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         String[] uuid = config.uuid();
         if (uuid.length != 1) {
-            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command.");
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for this command");
         }
         Response resp = ir.exportInstance(uuid[0], config.version());
 
@@ -481,58 +506,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private RenderableResult doUpdateProduct(RemoteService remote, InstanceResource ir, InstanceConfig config) {
-        DataTable result = createDataTable();
-        result.column(new DataTableColumn.Builder("Instance").setMinWidth(10).build());
-        result.column(new DataTableColumn.Builder("Process").setMinWidth(10).build());
-        result.column(new DataTableColumn.Builder("Type").setMinWidth(10).build());
-        result.column(new DataTableColumn.Builder("Message").setMinWidth(5).build());
-
-        BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
-        boolean notCentral = bir.getVersion().mode != MinionMode.CENTRAL;
-
-        for (String instance : new HashSet<>(Arrays.asList(config.uuid()))) {
-            String target = config.updateTo();
-
-            List<InstanceVersionDto> v = ir.listVersions(instance);
-            Integer max = v.stream().map(d -> Integer.valueOf(d.key.getTag())).sorted(Collections.reverseOrder()).findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + instance));
-            String currentTag = max.toString();
-
-            ManagedMasterDto server = notCentral ? null
-                    : ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext())
-                            .getServerForInstance(config.instanceGroup(), instance, currentTag);
-
-            InstanceConfiguration cfg = ir.readVersion(instance, currentTag);
-            InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
-                    ir.getNodeConfigurations(instance, currentTag).nodeConfigDtos);
-            InstanceUpdateDto update = new InstanceUpdateDto(dto, null);
-
-            // perform actual product update
-            update = ir.updateProductVersion(instance, target, update);
-
-            // perform validation of update
-            List<ApplicationValidationDto> issues = ir.validate(instance, update);
-
-            if (issues.isEmpty()) {
-                ir.update(instance, update, server != null ? server.hostName : null, currentTag);
-
-                if (update.validation != null && !update.validation.isEmpty()) {
-                    update.validation.forEach(val -> {
-                        String pid = val.paramId == null ? "" : (" - " + val.paramId);
-                        result.row().cell(instance).cell(val.appId == null ? "" : (val.appId + pid)).cell("WARN")
-                                .cell(val.message).build();
+            return updateMultipleInstancesWithValidation(remote, ir, config,
+                    (uuid, instanceUpdateDto) -> {
+                        String target = config.updateTo();
+                        // perform actual product update
+                        return Optional.of(ir.updateProductVersion(uuid, target, instanceUpdateDto));
                     });
-                }
-            } else {
-                issues.forEach(val -> {
-                    String pid = val.paramId == null ? "" : (" - " + val.paramId);
-                    result.row().cell(instance).cell(val.appId == null ? "" : (val.appId + pid)).cell("ERROR").cell(val.message)
-                            .build();
-                });
-            }
-        }
-
-        return result;
     }
 
     private DataTable doList(RemoteService remote, InstanceConfig config) {
@@ -726,5 +705,160 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         String confirmation = System.console().readLine("Delete instance %1$s (%2$s)? This CANNOT be undone. (Y/N)? ", uuid,
                 instanceName);
         return "Y".equalsIgnoreCase(confirmation);
+    }
+
+    private RenderableResult doShowVariables(InstanceResource ir, InstanceConfig config) {
+        String[] uuids = config.uuid();
+        if (uuids.length != 1) {
+            return createResultWithErrorMessage("Exactly 1 uuid must be provided for listing variables");
+        }
+
+        String uuid = uuids[0];
+        String currentTag = identifyCurrentVersion(ir, uuid);
+        InstanceConfiguration cfg = ir.readVersion(uuid, currentTag);
+
+        DataTable table = createDataTable();
+        table.setCaption("Variables for " + cfg.name + " (" + uuid + ")");
+        table.column(new DataTableColumn.Builder("Id").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Description").setMinWidth(20).build());
+        table.column(new DataTableColumn.Builder("Type").setMinWidth(11).build());
+        table.column(new DataTableColumn.Builder("Custom Editor").setMinWidth(10).build());
+        table.column(new DataTableColumn.Builder("Value").setMinWidth(15).build());
+
+        cfg.instanceVariables.stream()
+                .forEach(variableConfiguration ->
+                        table.row()
+                                .cell(variableConfiguration.id)
+                                .cell(variableConfiguration.description)
+                                .cell(variableConfiguration.type)
+                                .cell(variableConfiguration.customEditor)
+                                .cell(variableConfiguration.value != null ? variableConfiguration.value.getPreRenderable() : null)
+                                .build()
+                );
+
+        return table;
+    }
+
+    private RenderableResult doSetVariable(RemoteService remote, InstanceResource ir, InstanceConfig cmdParams) {
+        String variableId = cmdParams.setVariable();
+
+        return updateMultipleInstancesWithValidation(remote, ir, cmdParams, (uuid, instanceUpdateDto) -> {
+            InstanceConfiguration instanceConfiguration = instanceUpdateDto.config.config;
+                VariableConfiguration variableToSet = instanceConfiguration.instanceVariables.stream()
+                    .filter(variableConfiguration -> variableConfiguration.id.equals(variableId))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        VariableConfiguration variableConfiguration = new VariableConfiguration(variableId, null);
+                        instanceConfiguration.instanceVariables.add(variableConfiguration);
+                        return variableConfiguration;
+                    });
+
+            variableToSet.value = new LinkedValueConfiguration(cmdParams.value());
+            variableToSet.description = cmdParams.description();
+            variableToSet.type = cmdParams.type();
+            variableToSet.customEditor = cmdParams.customEditor();
+            return Optional.of(instanceUpdateDto);
+        });
+    }
+
+    private RenderableResult doRemoveVariable(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        return updateMultipleInstancesWithValidation(remote, ir, config,
+                (uuid, instanceUpdateDto) -> {
+                    var instanceVariables = instanceUpdateDto.config.config.instanceVariables;
+                    Optional<VariableConfiguration> existingVariableConfiguration = instanceVariables.stream().
+                            filter(variableConfiguration -> variableConfiguration.id.equals(config.removeVariable()))
+                            .findFirst();
+                    if(existingVariableConfiguration.isPresent()) {
+                        instanceVariables.remove(existingVariableConfiguration.get());
+                        return Optional.of(instanceUpdateDto);
+                    }
+
+                    return Optional.empty();
+                });
+    }
+
+    private static String identifyCurrentVersion(InstanceResource ir, String uuid) {
+        return Integer.toString(ir.listVersions(uuid).stream()
+                .mapToInt(dto -> Integer.parseInt(dto.key.getTag()))
+                .max()
+                .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + uuid))
+        );
+    }
+
+    /**
+     * Will run the modification function for each instance specified in the uuid list from the cli parameters
+     * and log validations or update errors, for each instance in particular.
+     *
+     * The @param modificationFunction contains the code that modifies an instance by editing the {@link InstanceUpdateDto} that it
+     * receives. It should return an {@link Optional} containing the {@link InstanceUpdateDto} that will be sent when executing the
+     * update. Or return an empty {@link Optional} if no update needs to be executed.
+     *
+     * @param remote {@link RemoteService}
+     * @param ir the {@link InstanceResource} object with which to execute rest calls
+     * @param cmdParams the {@link InstanceConfig} object that encapsulates the parameters received from the user
+     * @param modificationFunction the function that modifies a specific {@link InstanceUpdateDto} to then be sent to the server for
+     *  validation and update
+     * @return the {@link RenderableResult} that should be displayed to the user
+     */
+    private RenderableResult updateMultipleInstancesWithValidation(RemoteService remote,
+            InstanceResource ir,
+            InstanceConfig cmdParams,
+            BiFunction<String, InstanceUpdateDto, Optional<InstanceUpdateDto>> modificationFunction) {
+        DataTable result = createDataTable();
+        result.column(new DataTableColumn.Builder("Instance").setMinWidth(10).build());
+        result.column(new DataTableColumn.Builder("Process").setMinWidth(10).build());
+        result.column(new DataTableColumn.Builder("Type").setMinWidth(5).build());
+        result.column(new DataTableColumn.Builder("Message").setMinWidth(5).build());
+
+        BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
+        boolean notCentral = bir.getVersion().mode != MinionMode.CENTRAL;
+
+        for (String uuid : new HashSet<>(Arrays.asList(cmdParams.uuid()))) {
+            String currentTag = identifyCurrentVersion(ir, uuid);
+
+            ManagedMasterDto server = notCentral ? null
+                    : ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext())
+                            .getServerForInstance(cmdParams.instanceGroup(), uuid, currentTag);
+
+            InstanceConfiguration cfg = ir.readVersion(uuid, currentTag);
+            InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
+                    ir.getNodeConfigurations(uuid, currentTag).nodeConfigDtos);
+
+            // here is where we do custom modifications
+            Optional<InstanceUpdateDto> modifiedUpdateDto = modificationFunction.apply(uuid, new InstanceUpdateDto(dto, null));
+            if(modifiedUpdateDto.isEmpty()) {
+                result.row().cell(uuid).cell("").cell("").cell("Nothing to modify").build();
+                continue;
+            }
+
+            // perform validation of updateDto
+            InstanceUpdateDto updateDto = modifiedUpdateDto.get();
+            List<ApplicationValidationDto> issues = ir.validate(uuid, updateDto);
+
+            if (issues.isEmpty()) {
+                ir.update(uuid, updateDto, server != null ? server.hostName : null, currentTag);
+                if (updateDto.validation != null && !updateDto.validation.isEmpty()) {
+                    result.row().cell(uuid).cell("").cell("").cell("Updated with warnings").build();
+                    addErrorsToResult(result, updateDto.validation, uuid, "WARN");
+                } else {
+                    result.row().cell(uuid).cell("").cell("").cell("Updated successfully").build();
+                }
+            } else {
+                result.row().cell(uuid).cell("").cell("").cell("Not modified").build();
+                addErrorsToResult(result, issues, uuid, "ERROR");
+            }
+
+        }
+
+        return result;
+    }
+
+    private static void addErrorsToResult(DataTable result, List<ApplicationValidationDto> validationErrors,
+            String uuid, String level) {
+        validationErrors.forEach(val -> {
+            String pid = val.paramId == null ? "" : (" - " + val.paramId);
+            result.row().cell(uuid).cell(val.appId == null ? "" : (val.appId + pid)).cell(level)
+                    .cell(val.message).build();
+        });
     }
 }
