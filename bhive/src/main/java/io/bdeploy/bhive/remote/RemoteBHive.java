@@ -20,9 +20,9 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.ZipHelper;
 
 /**
- * Represents a possibly remote (might also be "remote" in the sense of another
- * directory on disc) BHive. This interface is *not* ment to be used for direct remote interface implementation, but rather is a
- * logical representation of a {@link BHive} which is not the currently operated-on {@link BHive}.
+ * Represents a possibly remote (might also be "remote" in the sense of another directory on disc) BHive. This interface is *not*
+ * meant to be used for direct remote interface implementation, but rather is a logical representation of a {@link BHive} which is
+ * not the currently operated-on {@link BHive}.
  *
  * @see LocalBHiveAdapter
  * @see JerseyRemoteBHive
