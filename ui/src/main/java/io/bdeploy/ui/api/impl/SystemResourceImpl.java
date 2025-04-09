@@ -276,7 +276,8 @@ public class SystemResourceImpl implements SystemResource {
             for (var v : request.template.systemVariables) {
                 // expand template variables inline for each system variable.
                 v.defaultValue = new LinkedValueConfiguration(
-                        TemplateHelper.process(v.defaultValue.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
+                        TemplateHelper.process(v.defaultValue == null ? "" : v.defaultValue.getPreRenderable(), tvr,
+                                Variables.TEMPLATE.shouldResolve()));
                 scd.config.systemVariableDefinitions.add(v);
                 scd.config.systemVariables.add(new VariableConfiguration(v));
             }
