@@ -65,7 +65,7 @@ class ResolvingTemplateVariablesCliTest extends BaseMinionCliTest {
     }
 
     @Test
-    void testTemplVarWithoutDefaultValueFailsViaInstanceTemplate(RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testTemplVarWithoutDefaultValueFailsViaInstanceTemplate(RemoteService remote, @TempDir Path tmp) {
         var product = TestProductFactory.generateProduct();
         var appTpl = product.applicationTemplates.get("app-template.yaml");
         var tplVar = appTpl.templateVariables.stream().filter(tv -> "app-tpl-sleep".equals(tv.id)).findFirst().orElseThrow();
@@ -121,7 +121,7 @@ class ResolvingTemplateVariablesCliTest extends BaseMinionCliTest {
         assertEquals(0, output.size());
     }
 
-    private void applySystemTemplate(RemoteService remote, Path tmp) throws IOException {
+    private void applySystemTemplate(RemoteService remote, Path tmp) {
         // Create the system template
         Path systemTemplatePath = tmp.resolve("system-template.yaml");
         SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
@@ -150,7 +150,7 @@ class ResolvingTemplateVariablesCliTest extends BaseMinionCliTest {
         assertTrue(output.get(0).get("System").contains(systemId));
     }
 
-    private void applyInstanceTemplate(RemoteService remote, Path tmp) throws IOException {
+    private void applyInstanceTemplate(RemoteService remote, Path tmp) {
         // Create the instance template
         Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
         InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();

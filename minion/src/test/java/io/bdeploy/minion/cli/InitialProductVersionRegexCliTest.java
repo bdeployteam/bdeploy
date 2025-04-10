@@ -81,7 +81,7 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
         assertThrows(NotFoundException.class, () -> applySystemTemplate(remote, tmp, r1, r2));
     }
 
-    private void applySystemTemplate(RemoteService remote, Path tmp, String r1, String r2) throws IOException {
+    private void applySystemTemplate(RemoteService remote, Path tmp, String r1, String r2) {
         // Create the system template
         Path systemTemplatePath = tmp.resolve("system-template.yaml");
         SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
@@ -153,7 +153,7 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
         assertThrows(NotFoundException.class, () -> applyInstanceTemplate(remote, tmp, r1, r2));
     }
 
-    private void applyInstanceTemplate(RemoteService remote, Path tmp, String r1, String r2) throws IOException {
+    private void applyInstanceTemplate(RemoteService remote, Path tmp, String r1, String r2) {
         // Create the instance template
         Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
         InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();

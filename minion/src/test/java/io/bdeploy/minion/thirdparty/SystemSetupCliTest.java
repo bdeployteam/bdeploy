@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -64,7 +63,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
 
     @SlowTest
     @Test
-    void testSystemSetupWalkthroughWithSystemTemplate(@TempDir Path tmp) throws IOException, URISyntaxException {
+    void testSystemSetupWalkthroughWithSystemTemplate(@TempDir Path tmp) throws IOException {
         setupNodeManagedCentral(tmp);
 
         // Create the system template
@@ -94,7 +93,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
 
     @SlowTest
     @Test
-    void testSystemSetupWalkthroughWithInstanceTemplate(@TempDir Path tmp) throws IOException, URISyntaxException {
+    void testSystemSetupWalkthroughWithInstanceTemplate(@TempDir Path tmp) throws IOException {
         setupNodeManagedCentral(tmp);
 
         // Create a system
@@ -115,7 +114,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
         doCheck();
     }
 
-    private void setupNodeManagedCentral(Path tmp) throws IOException, URISyntaxException {
+    private void setupNodeManagedCentral(Path tmp) throws IOException {
         StructuredOutput output;
 
         // Create a software repository on central
@@ -270,7 +269,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
         ProductManifest.invalidateAllScanCaches();
     }
 
-    private void doCheck() throws IOException {
+    private void doCheck() {
         StructuredOutput output;
 
         // Check if the system was set up correctly

@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -224,7 +223,7 @@ public class TestProductFactory {
         }
     }
 
-    private static void writeFiles(Path productPath, Map<String, ?> map) throws JsonProcessingException, IOException {
+    private static void writeFiles(Path productPath, Map<String, ?> map) throws IOException {
         for (Map.Entry<String, ?> e : map.entrySet()) {
             System.out.println(e.getKey());
             System.out.println(YAML_MAPPER.writeValueAsString(e.getValue()));
