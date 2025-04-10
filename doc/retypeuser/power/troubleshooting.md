@@ -129,4 +129,24 @@ certificates issued by a private CA will cause issues and more work to get them 
 ## Connection closed/refused
 
 Typically `Connection refused`, `Connection closed`, `Connection reset` and other connection related issues are *not*
-related to BDeploy. Please troubleshoot the network connection(s) between the involved parties. 
+related to BDeploy. Please troubleshoot the network connection(s) between the involved parties.
+
+## Hostname changes, renaming a server
+
+When running `bdeploy init` to initialize a root directory, you will have to pass a hostname which BDeploy internally
+uses to connect to itself. If not passed explicitly, this information is taken from the operating system environment.
+However, this sometimes changes after BDeploy has been set up. This will make BDeploy fail to start as it cannot connect
+to itself anymore. In this case you need to update the internal configuration.
+
+This can be done using this command:
+
+```
+bdeploy config --root=<path-to-root> --hostname=<new-hostname>
+```
+
+This will update internal information, and after a restart, BDeploy will be good to go again.
+
+!!!warning Warning
+Make sure to run commands which modify files in the root directory (like the above one) as the *same user* as is used by
+the BDeploy service to run the server. Otherwise, permission issues may arise when you try to start the server.
+!!!
