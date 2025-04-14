@@ -41,63 +41,64 @@
         @if (hasGroupSearchMatch(group)) {
           <mat-expansion-panel #panel>
             <mat-expansion-panel-header>
-              <mat-panel-title> {{ group.name }} </mat-panel-title>
-              @if (!(narrow$ | async)) {
-                <mat-panel-description>
+              <mat-panel-title [ngClass]="isInvalid(groupForm, group) ? 'bd-warning-text' : ''">
+                  {{ group.name }}
+              </mat-panel-title>
+              <!-- if the panel is expanded and the screen is narrow, the buttons are aligned to the end and texts are hidden -->
+              <mat-panel-description [ngClass]="panel.expanded ? 'flex-row-reverse sm:flex-row': ''">
+                <span [ngClass]="panel.expanded ? 'hidden sm:block': ''">
                   @if (!search) {
                     <span>{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
                   }
                   @if (!!search) {
                     <span>Configured or optional parameters match search.</span>
                   }
-                  @if ((groupForm.invalid || hasMissingRequired(group) || hasExistingForbidden(group)) && !panel.expanded) {
-                    <span
-                      class="bd-warning-text text-xs"
-                      >Validation Failed</span
-                      >
+                  @if (!panel.expanded && isInvalid(groupForm, group)) {
+                    <span class="bd-warning-text hidden sm:block text-xs">Validation Failed</span>
+                  }
+                </span>
+
+                @if (panel.expanded) {
+                  <div class="flex gap-1">
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        text="Copy Selected"
+                        icon="content_copy"
+                        (click)="doCopy()"
+                        [disabled]="!checked?.length || !group.isSelectMode"
+                        appClickStopPropagation
+                      ></app-bd-button>
                     }
-                    @if (panel.expanded) {
-                      <div class="flex gap-1">
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            text="Copy Selected"
-                            icon="content_copy"
-                            (click)="doCopy()"
-                            [disabled]="!checked?.length || !group.isSelectMode"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            text="Paste"
-                            icon="content_paste_go"
-                            [disabled]="!clipboardParams?.length"
-                            (click)="doPaste()"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            text="Add Custom Parameter"
-                            icon="add"
-                            (click)="onAddCustomParameter(addCustom)"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                        <app-bd-button
-                          [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
-                          [icon]="group.isSelectMode ? 'check' : 'tune'"
-                          tooltip="below"
-                          [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !hasExistingForbidden(group) && !group.isSelectMode"
-                          [isToggle]="true"
-                          [(toggle)]="group.isSelectMode"
-                          appClickStopPropagation
-                        ></app-bd-button>
-                      </div>
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        text="Paste"
+                        icon="content_paste_go"
+                        [disabled]="!clipboardParams?.length"
+                        (click)="doPaste()"
+                        appClickStopPropagation
+                      ></app-bd-button>
                     }
-                  </mat-panel-description>
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        text="Add Custom Parameter"
+                        icon="add"
+                        (click)="onAddCustomParameter(addCustom)"
+                        appClickStopPropagation
+                      ></app-bd-button>
+                    }
+                    <app-bd-button
+                      [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
+                      [icon]="group.isSelectMode ? 'check' : 'tune'"
+                      tooltip="below"
+                      [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !hasExistingForbidden(group) && !group.isSelectMode"
+                      [isToggle]="true"
+                      [(toggle)]="group.isSelectMode"
+                      appClickStopPropagation
+                    ></app-bd-button>
+                  </div>
                 }
-              </mat-expansion-panel-header>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
               <form #groupForm="ngForm" class="flex flex-col">
                 @if (group.isSelectMode) {
                   <div class="flex justify-start items-center pt-5 self-center bd-hint-text">

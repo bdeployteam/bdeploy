@@ -136,7 +136,6 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   protected readonly groups = inject(GroupsService);
 
   protected groups$ = new BehaviorSubject<ParameterGroup[]>(null);
-  protected narrow$ = new BehaviorSubject<boolean>(false);
   protected search: string;
   protected process: ApplicationConfiguration;
   protected app: ApplicationDto;
@@ -283,12 +282,6 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
           debounceTime(100)
         )
         .subscribe(() => this.preview.update())
-    );
-
-    this.subscription.add(
-      this.bop.observe('(max-width: 800px)').subscribe((bs) => {
-        this.narrow$.next(bs.matches);
-      })
     );
 
     this.subscription.add(
@@ -687,6 +680,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         .map((p) => p.descriptor.mandatory)
         .filter((m) => !m).length > 0
     );
+  }
+
+  protected isInvalid(groupForm: NgForm, g: ParameterGroup): boolean {
+    return groupForm.invalid || this.hasMissingRequired(g) || this.hasExistingForbidden(g);
   }
 
   protected hasMissingRequired(g: ParameterGroup): boolean {
