@@ -137,7 +137,7 @@ bdeploy remote-system --create --name=<SYSTEM_NAME> --createFrom=<PATH_TO_SYSTEM
 
 See [instance-template.yaml](../power/product#instance-templateyaml) for an example instance template.
 
-In order to use an instance template via the CLI you must have a so-called "response file" which contains all values required to apply the instance template without the need to query things from the user, as the CLI cannot do that. The response file has the exact same syntax as the [`instances` section of a system template](/power/product/#supported-instance-attributes).
+In order to use an instance template via the CLI you must have a so-called "response file" which contains all values required to apply the instance template without the need to query things from the user, as the CLI cannot do that. The response file has the exact same syntax as the [`instances` section of a system template](../power/product#supported-instance-attributes).
 
 This is an example of such a response file:
 
