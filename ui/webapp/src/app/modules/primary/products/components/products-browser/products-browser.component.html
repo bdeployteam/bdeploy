@@ -29,7 +29,7 @@
       text="Bulk Manipulation"
       [route]="['panels', 'products', 'bulk-manip']"
       tooltip="below"
-      [disabled]="(auth.isCurrentScopeWrite$ | async) === false || isCardView"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     @if (cfg.isCentral$ | async) {
