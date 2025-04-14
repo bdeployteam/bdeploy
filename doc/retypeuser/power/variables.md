@@ -143,7 +143,7 @@ Enables access to environmental variables defined in the operating system. The n
 | ------------------- | --------------------------------------------------------------------------------------------------------------- |
 | {{ENV:MY_VARIABLE}} | Expands to the value of the environmental variable when the application is **installed** on the node or client. |
 
-Variables are replaced with their actual values when the process is installed on the target minion node. This might not always be desired. Especially for client applications it can be useful to do the actual replacing when the process is launched. This is can be achieved by prefixing the actual variable with the [DELAYED](#DELAYED:-Delaying-Evaluation) prefix. This enables that different users of the client application are getting different parameter values depending on the value of the environmental variable.
+Variables are replaced with their actual values when the process is installed on the target minion node. This might not always be desired. Especially for client applications it can be useful to do the actual replacing when the process is launched. This is can be achieved by prefixing the actual variable with the [DELAYED](#delayed-delaying-evaluation) prefix. This enables that different users of the client application are getting different parameter values depending on the value of the environmental variable.
 
 ## X: Instance and System Variables
 
