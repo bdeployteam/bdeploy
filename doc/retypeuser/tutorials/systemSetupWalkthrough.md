@@ -139,28 +139,7 @@ See [instance-template.yaml](../power/product#instance-templateyaml) for an exam
 
 In order to use an instance template via the CLI you must have a so-called "response file" which contains all values required to apply the instance template without the need to query things from the user, as the CLI cannot do that. The response file has the exact same syntax as the [`instances` section of a system template](../power/product#supported-instance-attributes).
 
-This is an example of such a response file:
-
-```yaml response-file.yaml
-name: "Demo Instance"
-description: "The Test System's Demo Instance"
-productId: "io.bdeploy/demo"
-productVersionRegex: "3\\..*"
-initialProductVersionRegex: "2\\..*"
-templateName: "Default Configuration"
-fixedVariables:
-  - id: "text-param"
-    value: "XX"
-  - id: "sleep-timeout"
-    value: 10
-defaultMappings:
-  - group: "Server Apps"
-    node: "master"
-  - group: "Client Apps"
-    node: "Client Applications"
-```
-
-Note: The node of all client applications must be _exactly_ "Client Applications".
+See [response-file.yaml](../power/product#response-file-yaml) for an example of such a response file.
 
 A response file may also be created via the CLI by using
 
