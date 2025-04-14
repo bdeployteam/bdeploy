@@ -94,58 +94,61 @@
         @if (hasGroupSearchMatch(group)) {
           <mat-expansion-panel #panel>
             <mat-expansion-panel-header>
-              <mat-panel-title> {{ group.name }} </mat-panel-title>
-              @if (!(narrow$ | async)) {
-                <mat-panel-description>
+              <mat-panel-title [ngClass]="groupForm.invalid ? 'bd-warning-text' : ''">
+                {{ group.name }}
+              </mat-panel-title>
+
+              <!-- if the panel is expanded and the screen is narrow, the buttons are aligned to the end and texts are hidden -->
+              <mat-panel-description [ngClass]="panel.expanded ? 'flex-row-reverse sm:flex-row': ''">
+                <span [ngClass]="panel.expanded ? 'hidden sm:block': ''">
                   <span>{{ getValueCount(group) }}/{{ group.pairs.length }} variables shown.</span>
                   @if (groupForm.invalid && !panel.expanded) {
-                    <span class="bd-warning-text text-xs"
-                      >Validation Failed</span
-                      >
+                    <span class="bd-warning-text hidden sm:block text-xs">Validation Failed</span>
+                  }
+                </span>
+                @if (panel.expanded) {
+                  <div class="flex gap-1">
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        text="Copy Selected"
+                        icon="content_copy"
+                        (click)="doCopy()"
+                        [disabled]="!checked?.length || !isCustomGroupSelected"
+                        appClickStopPropagation
+                      ></app-bd-button>
                     }
-                    @if (panel.expanded) {
-                      <div class="flex gap-1">
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            text="Copy Selected"
-                            icon="content_copy"
-                            (click)="doCopy()"
-                            [disabled]="!checked?.length || !isCustomGroupSelected"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            text="Paste"
-                            icon="content_paste_go"
-                            [disabled]="!(clipboardVars$ | async).length"
-                            (click)="doPaste()"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            text="Add Custom Variable"
-                            icon="add"
-                            (click)="onAddCustomVariable(addTemplate)"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                        @if (group.isCustom) {
-                          <app-bd-button
-                            [text]="isCustomGroupSelected ? 'Confirm Selection' : 'Select Variables'"
-                            [icon]="isCustomGroupSelected ? 'check' : 'tune'"
-                            tooltip="below"
-                            [disabled]="!group.pairs.length && !isCustomGroupSelected"
-                            [isToggle]="true"
-                            [(toggle)]="isCustomGroupSelected"
-                            appClickStopPropagation
-                          ></app-bd-button>
-                        }
-                      </div>
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        text="Paste"
+                        icon="content_paste_go"
+                        [disabled]="!(clipboardVars$ | async).length"
+                        (click)="doPaste()"
+                        appClickStopPropagation
+                      ></app-bd-button>
                     }
-                  </mat-panel-description>
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        text="Add Custom Variable"
+                        icon="add"
+                        (click)="onAddCustomVariable(addTemplate)"
+                        appClickStopPropagation
+                      ></app-bd-button>
+                    }
+                    @if (group.isCustom) {
+                      <app-bd-button
+                        [text]="isCustomGroupSelected ? 'Confirm Selection' : 'Select Variables'"
+                        [icon]="isCustomGroupSelected ? 'check' : 'tune'"
+                        tooltip="below"
+                        [disabled]="!group.pairs.length && !isCustomGroupSelected"
+                        [isToggle]="true"
+                        [(toggle)]="isCustomGroupSelected"
+                        appClickStopPropagation
+                      ></app-bd-button>
+                    }
+                  </div>
                 }
+              </mat-panel-description>
+
               </mat-expansion-panel-header>
               <form #groupForm="ngForm" class="flex flex-col">
                 @if (group.isCustom && isCustomGroupSelected) {

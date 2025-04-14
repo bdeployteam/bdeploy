@@ -97,8 +97,6 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   protected newValue: VariableConfiguration;
   protected newUsedIds: string[] = [];
 
-  protected narrow$ = new BehaviorSubject<boolean>(false);
-
   private subscription: Subscription;
 
   @ViewChild('addForm', { static: false }) addForm: NgForm;
@@ -106,12 +104,6 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
 
   ngOnInit() {
     this.subscription = this.searchService.register(this);
-
-    this.subscription.add(
-      this.bop.observe('(max-width: 800px)').subscribe((bs) => {
-        this.narrow$.next(bs.matches);
-      }),
-    );
 
     this.subscription.add(this.clipboardService.clipboard$.subscribe((cb) => this.readFromClipboard(cb.data)));
   }
