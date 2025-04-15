@@ -3,7 +3,6 @@
 name: "Demo Product"
 product: "io.bdeploy/demo"
 vendor: BDeploy Team
-minMinionVersion: 7.0.0
 configTemplates: config
 versionFile: "product-version.yaml"
 
