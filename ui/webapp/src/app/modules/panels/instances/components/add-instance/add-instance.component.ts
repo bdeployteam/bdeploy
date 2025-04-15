@@ -109,6 +109,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
             this.selectedProduct = prod;
             this.config.product.name = prodKey;
             this.config.product.tag = prodTag;
+            this.updateProductVersion();
           }
         }
 
