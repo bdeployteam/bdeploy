@@ -199,6 +199,18 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         if (config.list()) {
             return doList(remote, config);
         }
+        if (config.open()) {
+            String uuid = parseUuid(config.uuid());
+            if (uuid == null) {
+                return BrowserHelper.openUrl(remote, "/#/instances/browser/" + config.instanceGroup())//
+                        ? createResultWithSuccessMessage("Successfully opened the instance group dashboard")//
+                        : createResultWithErrorMessage("Failed to open the instance group dashboard");
+            } else {
+                return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + uuid)//
+                        ? createResultWithSuccessMessage("Successfully opened the instance dashboard")//
+                        : createResultWithErrorMessage("Failed to open the instance dashboard");
+            }
+        }
 
         InstanceResource ir = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(config.instanceGroup());
@@ -211,18 +223,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         if (config.update()) {
             return config.template() != null ? doUpdateWithTemplate(remote, ir, config) : doUpdate(remote, ir, config);
-        } else if (config.open()) {
-            String uuid = parseUuid(config.uuid());
-            if (uuid == null) {
-                return BrowserHelper.openUrl(remote, "/#/instances/browser/" + config.instanceGroup())//
-                        ? createResultWithSuccessMessage("Successfully opened the instance group dashboard")//
-                        : createResultWithErrorMessage("Failed to open the instance group dashboard");
-            } else {
-                return BrowserHelper.openUrl(remote, "/#/instances/dashboard/" + config.instanceGroup() + '/' + uuid)//
-                        ? createResultWithSuccessMessage("Successfully opened the instance dashboard")//
-                        : createResultWithErrorMessage("Failed to open the instance dashboard");
-            }
-         } else if (config.exportTo() != null) {
+        } else if (config.exportTo() != null) {
             return doExport(ir, config);
         } else if (config.importFrom() != null) {
             return doImport(ir, config);
