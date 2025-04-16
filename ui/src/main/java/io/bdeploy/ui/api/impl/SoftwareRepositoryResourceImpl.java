@@ -220,9 +220,8 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         List<ProductKeyWithSourceDto> versions = new ArrayList<>();
 
         for (String repo : repos) {
-            ProductResource resource = getProductResource(repo);
             // ProductResource.list(key) already returns sorted list (latest version first), so we only need to filter and grab first
-            ProductDto repoLatestProduct = resource.list(req.key).stream()
+            ProductDto repoLatestProduct = getProductResource(repo).list(req.key).stream()
                     .filter(dto -> req.productId == null || req.productId.isBlank() || req.productId.equals(dto.product))
                     .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex))
                     .filter(dto -> req.instanceTemplate == null
@@ -237,16 +236,22 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
             if (comparator == null) {
                 comparator = repoComparator;
             } else if (!comparator.getClass().equals(repoComparator.getClass())) {
-                throw new WebApplicationException("Cannot choose latest. Found different comparators: "
+                throw new WebApplicationException("Cannot determine latest product version. Found different comparators: "
                         + comparator.getClass().getName() + " and " + repoComparator.getClass().getName(), Status.BAD_REQUEST);
             }
             versions.add(new ProductKeyWithSourceDto(repo, repoLatestProduct.key));
         }
 
-        if (comparator == null || versions.isEmpty()) {
+        if (versions.isEmpty()) {
             throw new WebApplicationException("No product versions found for --key=" + req.key + " --productId=" + req.productId
                     + " --version=" + req.version + " --repo=" + req.groupOrRepo + " --regex=" + req.regex
                     + " --instanceTemplate=" + req.instanceTemplate, Status.NOT_FOUND);
+        }
+
+        if (comparator == null) {
+            throw new WebApplicationException("Cannot determine latest product version. Found no comparator for --key= " + req.key
+                    + " --productId=" + req.productId + " --version=" + req.version + " --repo=" + req.groupOrRepo + " --regex="
+                    + req.regex + " --instanceTemplate=" + req.instanceTemplate, Status.NOT_FOUND);
         }
 
         // cannot use comparator in lambda (not effectively final)
