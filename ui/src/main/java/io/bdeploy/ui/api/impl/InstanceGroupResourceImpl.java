@@ -546,11 +546,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         ProductResource resource = getProductResource(req.groupOrRepo);
         // ProductResource.list(key) already returns sorted list (latest version first), so we only need to filter and grab first
         ProductDto latestProduct = resource.list(req.key).stream()
-                .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex)).findFirst().orElse(null);
-        if (latestProduct == null) {
-            throw new WebApplicationException("No product versions found for --key=" + req.key + " --version=" + req.version
-                    + " --group=" + req.groupOrRepo + " --regex=" + req.regex, Status.NOT_FOUND);
-        }
+                .filter(dto -> ProductVersionMatchHelper.matchesVersion(dto, req.version, req.regex)).findFirst()
+                .orElseThrow(() -> new WebApplicationException("No product versions found for --key=" + req.key + " --version="
+                        + req.version + " --group=" + req.groupOrRepo + " --regex=" + req.regex, Status.NOT_FOUND));
         return new ProductKeyWithSourceDto(req.groupOrRepo, latestProduct.key);
     }
 }
