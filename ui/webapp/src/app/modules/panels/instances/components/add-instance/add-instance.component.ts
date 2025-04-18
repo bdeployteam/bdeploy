@@ -72,7 +72,6 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  protected hasMinMinionVersion = signal(true);
   protected addInstanceButtonDisabledMessage = signal<string>(null);
 
   ngOnInit(): void {
@@ -109,7 +108,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
             this.selectedProduct = prod;
             this.config.product.name = prodKey;
             this.config.product.tag = prodTag;
-            this.updateProductVersion();
+            this.calculateAddInstanceButtonDisabledMessage();
           }
         }
 
@@ -149,7 +148,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   }
 
   public canSave(): boolean {
-    return this.form.valid && this.hasMinMinionVersion();
+    return this.form.valid && !this.addInstanceButtonDisabledMessage();
   }
 
   protected onSave(): void {
@@ -177,17 +176,15 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     return this.selectedProduct?.versions.map(v => v.tag);
   }
 
-  protected updateProductVersion() {
+  protected calculateAddInstanceButtonDisabledMessage() {
     const minimumVersion = this.selectedProduct?.versions?.filter((v) => v.tag === this.config.product.tag)[0]
       .minMinionVersion;
     if (minimumVersion) {
       const currentVersion = this.cfg?.config?.version;
       if (currentVersion) {
         if (compareVersions(minimumVersion, currentVersion) < 0) {
-          this.hasMinMinionVersion.set(true);
           this.addInstanceButtonDisabledMessage.set(null);
         } else {
-          this.hasMinMinionVersion.set(false);
           this.addInstanceButtonDisabledMessage.set(
             'Creation of the instance is not possible because the selected product version requires a BDeploy version of ' +
               convert2String(minimumVersion) +
@@ -196,7 +193,6 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
           );
         }
       } else {
-        this.hasMinMinionVersion.set(false);
         this.addInstanceButtonDisabledMessage.set(
           'Creation of the instance is not possible because the selected product version requires a BDeploy version of ' +
             convert2String(minimumVersion) +
@@ -204,7 +200,6 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         );
       }
     } else {
-      this.hasMinMinionVersion.set(true);
       this.addInstanceButtonDisabledMessage.set(null);
     }
   }

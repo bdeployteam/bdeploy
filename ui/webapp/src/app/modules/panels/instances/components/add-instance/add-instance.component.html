@@ -61,7 +61,7 @@
         label="Product Version"
         name="version"
         [(ngModel)]="config.product.tag"
-        (ngModelChange)="updateProductVersion()"
+        (ngModelChange)="calculateAddInstanceButtonDisabledMessage()"
         [disabled]="!selectedProduct"
         [values]="getVersions()"
         required
@@ -85,8 +85,8 @@
         ></app-bd-form-select>
       }
       <div
-        matTooltip="{{ hasMinMinionVersion() ? 'Either a mandatory field is missing or a given value is invalid' : addInstanceButtonDisabledMessage() }}"
-        [matTooltipDisabled]="form.valid && hasMinMinionVersion()"
+        matTooltip="{{ addInstanceButtonDisabledMessage() || 'Either a mandatory field is missing or a given value is invalid' }}"
+        [matTooltipDisabled]="form.valid && !addInstanceButtonDisabledMessage()"
         >
         <app-bd-button
           type="submit"
@@ -94,7 +94,7 @@
           [collapsed]="false"
           icon="save"
           color="primary"
-          [disabled]="form.invalid || !hasMinMinionVersion()"
+          [disabled]="form.invalid || !!addInstanceButtonDisabledMessage()"
         ></app-bd-button>
       </div>
     </form>
