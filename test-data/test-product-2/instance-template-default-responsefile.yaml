@@ -3,6 +3,8 @@ description: "The Test System's Demo Instance"
 productId: "io.bdeploy/demo"
 productVersionRegex: "2\\..*"
 templateName: "Default Configuration"
+autoStart: true
+autoUninstall: false
 defaultMappings:
   - group: "Server Apps"
     node: "master"

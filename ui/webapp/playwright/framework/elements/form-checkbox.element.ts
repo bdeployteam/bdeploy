@@ -1,5 +1,6 @@
 import { BaseArea } from '@bdeploy-pom/base/base-area';
 import { Locator } from '@playwright/test';
+import { expect } from '@bdeploy-setup';
 
 export class FormCheckboxElement extends BaseArea {
   private readonly _checkbox: Locator;
@@ -29,6 +30,14 @@ export class FormCheckboxElement extends BaseArea {
     } else {
       await this.uncheck();
     }
+  }
+
+  async shouldBeChecked() {
+    await expect(this._checkbox).toBeChecked();
+  }
+
+  async shouldNotBeChecked() {
+    await expect(this._checkbox).not.toBeChecked();
   }
 
 }

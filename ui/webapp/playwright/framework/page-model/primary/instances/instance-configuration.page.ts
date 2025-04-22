@@ -48,7 +48,7 @@ export class InstanceConfigurationPage extends BaseDialog {
   async getSettingsPanel() {
     const panel = new InstanceSettingsPanel(this.page);
     // check for the toolbar - the dialog is always "invisible", as it has a zero size
-    if(await panel.getToolbar().isVisible()) {
+    if (await panel.getToolbar().isVisible()) {
       return Promise.resolve(panel);
     }
 
@@ -82,6 +82,32 @@ export class InstanceConfigurationPage extends BaseDialog {
 
   getBanner() {
     return this.getDialog().locator('app-bd-banner');
+  }
+
+  async goToBaseConfiguration() {
+    const settings = await this.getSettingsPanel();
+    return await settings.getBaseConfigurationPanel();
+  }
+
+  async shouldHaveNodeCount(expectedNrOfNodes: number) {
+    await expect(this.getDialog().locator('app-config-node')).toHaveCount(expectedNrOfNodes);
+  }
+
+  async shouldHaveControlGroupCountForNode(nodeTestId: string, expectedNrOfControlGroups: number) {
+    await expect(this.getConfigNode(nodeTestId).locator('app-control-group')).toHaveCount(expectedNrOfControlGroups);
+  }
+
+  async shouldHaveProcessCountForNode(nodeTestId: string, expectedNrOfProcesses: number) {
+    if (expectedNrOfProcesses == 0) {
+      await expect(this.getConfigNode(nodeTestId).locator('tr', { hasText: 'No data to show' })).toBeVisible();
+    } else {
+      await expect(this.getConfigNode(nodeTestId).locator('tbody tr', { hasNotText: 'No data to show' }))
+        .toHaveCount(expectedNrOfProcesses);
+    }
+  }
+
+  getProcessRow(nodeTestId: string, name: string) {
+    return this.getConfigNode(nodeTestId).locator('tr', { hasText: name });
   }
 
 }

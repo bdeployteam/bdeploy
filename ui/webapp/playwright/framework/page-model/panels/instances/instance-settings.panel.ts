@@ -7,10 +7,15 @@ import { InstanceVariablePanel } from '@bdeploy-pom/panels/instances/settings/in
 import { ConfigFilesPanel } from '@bdeploy-pom/panels/instances/settings/config-files.panel';
 import { ProductVersionPanel } from '@bdeploy-pom/panels/instances/settings/product-version.panel';
 import { BannerPanel } from '@bdeploy-pom/panels/instances/settings/banner.panel';
+import { BaseConfigurationPanel } from '@bdeploy-pom/panels/instances/settings/base-configuration.panel';
 
 export class InstanceSettingsPanel extends BasePanel {
   constructor(page: Page) {
     super(page, 'app-instance-settings');
+  }
+
+  async getBaseConfigurationPanel() {
+    return createPanel(this.getDialog(), 'Base Configuration', p => new BaseConfigurationPanel(p));
   }
 
   async getInstanceTemplatesPanel() {

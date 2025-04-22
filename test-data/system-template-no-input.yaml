@@ -45,7 +45,7 @@ instances:
       - id: "text-param"
         value: "XX"
       - id: "sleep-timeout"
-        value: 10
+        value: 30
       - id: "licensed-param"
         value: true
     defaultMappings:
@@ -57,6 +57,8 @@ instances:
     description: "The Test System's third (master) Chat Instance"
     productId: "io.bdeploy/chat-app"
     templateName: "Default Configuration"
+    autoStart: true
+    autoUninstall: false
     defaultMappings:
       - group: "Chat App"
         node: "master"

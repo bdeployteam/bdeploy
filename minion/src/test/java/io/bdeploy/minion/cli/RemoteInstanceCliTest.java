@@ -3,7 +3,10 @@ package io.bdeploy.minion.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,8 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
+import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.TestFactory;
@@ -48,14 +53,14 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
 
         /* update purpose to DEVELOPMENT to create a second instance version */
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--update", "--uuid=" + id,
-                "--purpose=DEVELOPMENT");
+                "--purpose=DEVELOPMENT", "--enableAutoStart", "--disableAutoUninstall");
 
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("DEVELOPMENT", result.get(0).get("NewPurpose"));
 
         /* update purpose to PRODUCTIVE to create a third instance version */
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--update", "--uuid=" + id,
-                "--purpose=PRODUCTIVE");
+                "--purpose=PRODUCTIVE", "--productVersionRegex=1.*");
 
         assertEquals("Success", result.get(0).get("message"));
         assertEquals("PRODUCTIVE", result.get(0).get("NewPurpose"));
@@ -73,13 +78,20 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         /* since there are no active or installed versions, list by default will return latest version (3) */
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list");
 
+        // here we check all fields that are listed
         assertEquals(1, result.size());
         assertEquals("aaa-bbb-ccc", result.get(0).get("Id"));
         assertEquals("DemoInstance", result.get(0).get("Name"));
         assertEquals("3", result.get(0).get("Version"));
         assertEquals("", result.get(0).get("Installed")); // not installed
         assertEquals("", result.get(0).get("Active")); // not active
+        assertEquals("*", result.get(0).get("AutoStart"));
+        assertEquals("", result.get(0).get("AutoUninstall"));
         assertEquals("PRODUCTIVE", result.get(0).get("Purpose"));
+        assertEquals("customer/product", result.get(0).get("Product"));
+        assertEquals("1.0.0.1234", result.get(0).get("ProductVersion"));
+        assertEquals("1.*", result.get(0).get("ProductVerRegex"));
+        assertEquals("None", result.get(0).get("System"));
 
         /* let's install first (1) and second (2) versions */
         remote(remote, RemoteDeploymentTool.class, "--instanceGroup=demo", "--uuid=" + id, "--version=1", "--install");
@@ -112,6 +124,10 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("*", result.get(0).get("Installed")); // installed
         assertEquals("*", result.get(0).get("Active")); // active
         assertEquals("TEST", result.get(0).get("Purpose"));
+        // checking to see default values that were not supplied when creating the instance
+        assertEquals("", result.get(0).get("AutoStart"));
+        assertEquals("*", result.get(0).get("AutoUninstall"));
+        assertEquals("", result.get(0).get("ProductVerRegex"));
 
         /* even though we have 3 versions to display, limit = 2 should return only 2 entries */
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all", "--limit=2");
@@ -158,16 +174,18 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         String secondInstanceId = result.get(0).get("InstanceId");
         String bothInstances = firstInstanceId + "," + secondInstanceId;
 
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
-        TestCliTool.StructuredOutputRow actualFirstInstanceRow = firstInstanceId.equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
-        assertEquals("unitTestInstance1", actualFirstInstanceRow.get("Name"));
-        assertEquals("1", actualFirstInstanceRow.get("Version"));
-        assertEquals("DEVELOPMENT", actualFirstInstanceRow.get("Purpose"));
 
-        TestCliTool.StructuredOutputRow actualSecondInstanceRow = secondInstanceId.equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
-        assertEquals("unitTestInstance2", actualSecondInstanceRow.get("Name"));
-        assertEquals("1", actualSecondInstanceRow.get("Version"));
-        assertEquals("PRODUCTIVE", actualSecondInstanceRow.get("Purpose"));
+        Map<String, TestCliTool.StructuredOutputRow> indexedInstances = doRemoteAndIndexOutputOn("Id",
+                remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        TestCliTool.StructuredOutputRow firstInstanceRow = indexedInstances.get(firstInstanceId);
+        assertEquals("unitTestInstance1", firstInstanceRow.get("Name"));
+        assertEquals("1", firstInstanceRow.get("Version"));
+        assertEquals("DEVELOPMENT", firstInstanceRow.get("Purpose"));
+
+        TestCliTool.StructuredOutputRow secondInstanceRow = indexedInstances.get(secondInstanceId);
+        assertEquals("unitTestInstance2", secondInstanceRow.get("Name"));
+        assertEquals("1", secondInstanceRow.get("Version"));
+        assertEquals("PRODUCTIVE", secondInstanceRow.get("Purpose"));
 
         /* let's add 1 instance variables for both and 1 variable for just one */
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances,
@@ -183,37 +201,33 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("Updated successfully", result.get(0).get("Message"));
 
         /* let's try listing variables for both and seeing it's not allowed */
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances,
-                "--showVariables");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--showVariables");
         assertEquals("Exactly 1 uuid must be provided for listing variables", result.get(0).get("message"));
 
         /* try listing variables for one */
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId,
-                "--showVariables");
-        assertEquals(2, result.size());
-        TestCliTool.StructuredOutputRow commonVariableRow = "commonVar".equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
+        Map<String, TestCliTool.StructuredOutputRow> firstInstanceVariables = doRemoteAndIndexOutputOn("Id",
+                remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId, "--showVariables");
+        assertEquals(2, firstInstanceVariables.size());
+        TestCliTool.StructuredOutputRow commonVariableRow = firstInstanceVariables.get("commonVar");
         assertEquals("my awesome common variable", commonVariableRow.get("Description"));
         assertEquals("NUMERIC", commonVariableRow.get("Type"));
         assertEquals("io.something.editor", commonVariableRow.get("CustomEditor"));
         assertEquals("23", commonVariableRow.get("Value"));
 
-        TestCliTool.StructuredOutputRow customVariableRow =  "customVar".equals(result.get(0).get("Id")) ? result.get(0) : result.get(1);
+        TestCliTool.StructuredOutputRow customVariableRow = firstInstanceVariables.get("customVar");
         assertEquals("", customVariableRow.get("Description"));
         assertEquals("STRING", customVariableRow.get("Type"));
         assertEquals("", customVariableRow.get("CustomEditor"));
         assertEquals("345", customVariableRow.get("Value"));
 
         /* let's remove the custom variable and list variables again for each */
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances,
-                "--removeVariable=customVar");
-        actualFirstInstanceRow = firstInstanceId.equals(result.get(0).get("Instance")) ? result.get(0) : result.get(1);
-        assertEquals("Updated successfully", actualFirstInstanceRow.get("Message"));
+        Map<String, TestCliTool.StructuredOutputRow> instanceResult = doRemoteAndIndexOutputOn("Instance",
+                remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--removeVariable=customVar");
+        assertEquals("Updated successfully", instanceResult.get(firstInstanceId).get("Message"));
+        //because it never had the custom variable
+        assertEquals("Nothing to modify", instanceResult.get(secondInstanceId).get("Message"));
 
-        actualSecondInstanceRow = secondInstanceId.equals(result.get(0).get("Instance")) ? result.get(0) : result.get(1);
-        assertEquals("Nothing to modify", actualSecondInstanceRow.get("Message")); //because it never had the custom variable
-
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId,
-                "--showVariables");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId, "--showVariables");
         assertEquals(1, result.size());
         assertEquals("commonVar", result.get(0).get("Id"));
         assertEquals("my awesome common variable", result.get(0).get("Description"));
@@ -231,10 +245,73 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("23", result.get(0).get("Value"));
 
         /* let's delete both instances */
-        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--delete",
-                "--yes");
+        result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--delete", "--yes");
 
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(0, result.size());
     }
+
+    @Test
+    void testCreateInstanceAndUpdateWithTemplate(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
+            throws IOException {
+        var product = TestProductFactory.generateProduct();
+        createInstanceGroup(remote);
+        Path productPath = Files.createDirectory(tmp.resolve("product"));
+        TestProductFactory.writeProductToFile(productPath, product);
+        uploadProduct(remote, Path.of(local.getUri()), productPath);
+
+        // Create the instance template and create instance with it
+        Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
+        InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();
+        TestProductFactory.writeToFile(instanceTemplatePath, instanceTemplate);
+
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_NAME",
+                "--purpose=TEST", "--template=" + instanceTemplatePath);
+
+        // Check if the instance was set up correctly
+        TestCliTool.StructuredOutput output = remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list");
+        assertEquals(1, output.size());
+        assertEquals("INSTANCE_NAME", output.get(0).get("Name"));
+        assertEquals("Instance From TestProductFactory", output.get(0).get("Description"));
+        assertEquals("1", output.get(0).get("Version"));
+        assertEquals("", output.get(0).get("Installed"));
+        assertEquals("", output.get(0).get("Active"));
+        assertEquals("", output.get(0).get("AutoStart"));
+        assertEquals("*", output.get(0).get("AutoUninstall"));
+        assertEquals("TEST", output.get(0).get("Purpose"));
+        assertEquals("io.bdeploy/test/product", output.get(0).get("Product"));
+        assertEquals("1.0.0", output.get(0).get("ProductVersion"));
+        assertEquals(".*", output.get(0).get("ProductVerRegex"));
+        assertEquals("None", output.get(0).get("System"));
+
+        // create an update template and apply it
+        var uuid = output.get(0).get("Id");
+        Path instanceUpdateTemplatePath = tmp.resolve("instance-update-response.yaml");
+        InstanceTemplateReferenceDescriptor instanceUpdateTemplate = TestProductFactory.generateInstanceTemplateReference();
+        // replace this so that it doesn't generate an error on update
+        SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
+        mapping.group = "Another Group";
+        mapping.node = "master";
+        instanceUpdateTemplate.defaultMappings = List.of(mapping);
+        TestProductFactory.writeToFile(instanceUpdateTemplatePath, instanceUpdateTemplate);
+
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--version=1", "--install");
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--version=1", "--activate");
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--update",
+                "--uuid=" + uuid, "--name=UPDATED", "--purpose=PRODUCTIVE", "--template=" + instanceUpdateTemplatePath);
+
+        // Check if the instance was updated correctly
+        Map<String, TestCliTool.StructuredOutputRow> updatedInstances = doRemoteAndIndexOutputOn("Version",
+                remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
+        assertEquals(2, updatedInstances.size());
+        TestCliTool.StructuredOutputRow latestVersionRow = updatedInstances.get("2");
+        assertEquals("", latestVersionRow.get("Installed"));
+        assertEquals("", latestVersionRow.get("Active"));
+        assertEquals("", latestVersionRow.get("AutoStart"));
+        assertEquals("*", latestVersionRow.get("AutoUninstall"));
+        // edge case: name and purpose gets ignored on the update with template in the cli
+        assertEquals("INSTANCE_NAME", latestVersionRow.get("Name"));
+        assertEquals("TEST", latestVersionRow.get("Purpose"));
+    }
+
 }

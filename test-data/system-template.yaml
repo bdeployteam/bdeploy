@@ -47,6 +47,11 @@ instances:
     productId: "io.bdeploy/demo"
     productVersionRegex: "2\\..*"
     templateName: "Default Configuration"
+    autoStart: true
+    autoUninstall: false
+    fixedVariables:
+      - id: "sleep-timeout"
+        value: 30
   - name: "Chat Node {{T:node-id:+1}}"
     description: "The Test System's first Chat Instance"
     productId: "io.bdeploy/chat-app"
@@ -71,6 +76,8 @@ instances:
     description: "The Test System's third (master) Chat Instance"
     productId: "io.bdeploy/chat-app"
     templateName: "Default Configuration"
+    autoStart: true
+    autoUninstall: false
     defaultMappings:
       - group: "Chat App"
         node: "master"

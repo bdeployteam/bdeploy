@@ -45,4 +45,8 @@ export class InstancesBrowserPage extends BaseDialog {
 
     await expect(syncButton.locator('mat-spinner')).not.toBeVisible();
   }
+
+  shouldHaveTableRows(nrOfExpectedRows: number) {
+    return expect(this.getArea().locator('tbody').getByRole('row')).toHaveCount(nrOfExpectedRows);
+  }
 }
