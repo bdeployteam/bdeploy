@@ -17,6 +17,12 @@ public class InstanceTemplateReferenceDescriptor {
     @JsonProperty(required = true)
     public String description;
 
+    @JsonPropertyDescription("Whether the instance should be started automatically when starting the minion(s). This will override the corresponding flag in the referenced template.")
+    public Boolean autoStart;
+
+    @JsonPropertyDescription("Schedule background uninstallation of old instance versions. This will override the corresponding flag in the referenced template.")
+    public Boolean autoUninstall;
+
     @JsonPropertyDescription("The ID of the product to use. This is the 'product' attribute specified in the product-info.yaml file of the product.")
     @JsonProperty(required = true)
     public String productId;

@@ -79,8 +79,10 @@ test('S006 Creation of a system using a template', async ({ standalone }, testIn
   await chatMasterConfig.shouldHaveControlGroupCountForNode('master', 1);
   await chatMasterConfig.shouldHaveProcessCountForNode('master', 1);
   const chatMasterBaseConfig = await chatMasterConfig.goToBaseConfiguration();
-  await chatMasterBaseConfig.getAutomaticStartup().shouldNotBeChecked();
-  await chatMasterBaseConfig.getAutomaticUninstall().shouldBeChecked();
+  // instance template = unset, system template = true => true
+  await chatMasterBaseConfig.getAutomaticStartup().shouldBeChecked();
+  // instance template = unset, system template = false => false
+  await chatMasterBaseConfig.getAutomaticUninstall().shouldNotBeChecked();
 
   const chatNode3Dashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Chat Node 3');
   await chatNode3Dashboard.goto();
@@ -92,7 +94,10 @@ test('S006 Creation of a system using a template', async ({ standalone }, testIn
   // check that the Node Base Name is being used
   await expect(chatNode3Config.getProcessRow('master', 'The Chat App Minion3')).toBeVisible();
   const chatNode3BaseConfig = await chatNode3Config.goToBaseConfiguration();
+  // this checks defaults
+  // instance template = unset, system template = unset => false
   await chatNode3BaseConfig.getAutomaticStartup().shouldNotBeChecked();
+  // instance template = unset, system template = unset => true
   await chatNode3BaseConfig.getAutomaticUninstall().shouldBeChecked();
 
   // skip the other chat node, for now it does not contain anything interesting
@@ -115,7 +120,10 @@ test('S006 Creation of a system using a template', async ({ standalone }, testIn
   await serverWithSleepParameters.getBackToOverviewButton().click();
 
   const demoInstanceBaseConfig = await demoInstanceConfig.goToBaseConfiguration();
+  // this checks system template has precedence
+  // instance template = true, system template = false => false
   await demoInstanceBaseConfig.getAutomaticStartup().shouldNotBeChecked();
+  // instance template = false, system template = true => true
   await demoInstanceBaseConfig.getAutomaticUninstall().shouldBeChecked();
 });
 

@@ -52,16 +52,22 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         // instance template with unset properties - unset in system template - check defaults
         InstanceTemplateReferenceDescriptor referenceWoOverrides = TestProductFactory.generateInstanceTemplateReference(
                 "no overrides instance", smallInstanceTemplate.name);
+        referenceWoOverrides.autoStart = null;
+        referenceWoOverrides.autoUninstall = null;
         systemTemplate.instances.add(referenceWoOverrides);
 
         // instance template with unset in instance template, but set in system
         InstanceTemplateReferenceDescriptor referenceWithSystemValues = TestProductFactory.generateInstanceTemplateReference(
                 "instance with system values", smallInstanceTemplate.name);
+        referenceWithSystemValues.autoStart = true;
+        referenceWithSystemValues.autoUninstall = false;
         systemTemplate.instances.add(referenceWithSystemValues);
 
         // this attempts to have all properties set and check which ones are used: instance or system
         InstanceTemplateReferenceDescriptor referenceWithOverrides = TestProductFactory.generateInstanceTemplateReference(
                 "instance with overrides", instanceTemplate.name);
+        referenceWithOverrides.autoStart = false;
+        referenceWithOverrides.autoUninstall = true;
         systemTemplate.instances.add(referenceWithOverrides);
         TestProductFactory.writeToFile(systemTemplatePath, systemTemplate);
 
@@ -107,8 +113,8 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         assertEquals("io.bdeploy/test/product", instance.get("Product"));
         assertEquals("1.0.0", instance.get("ProductVersion"));
         assertTrue(instance.get("System").contains(systemId));
-        assertEquals("", instance.get("AutoStart"));
-        assertEquals("*", instance.get("AutoUninstall"));
+        assertEquals("*", instance.get("AutoStart"));
+        assertEquals("", instance.get("AutoUninstall"));
     }
 
     private static void doFullInstanceChecks(TestCliTool.StructuredOutputRow instance, String systemId) {

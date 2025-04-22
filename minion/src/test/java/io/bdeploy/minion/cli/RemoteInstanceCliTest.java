@@ -260,9 +260,12 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         TestProductFactory.writeProductToFile(productPath, product);
         uploadProduct(remote, Path.of(local.getUri()), productPath);
 
-        // Create the instance template and create instance with it
+        // Create the instance template
         Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
         InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();
+        // set to null to check defaults; scenario with values is tested from the system template test
+        instanceTemplate.autoStart = null;
+        instanceTemplate.autoUninstall = null;
         TestProductFactory.writeToFile(instanceTemplatePath, instanceTemplate);
 
         remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_NAME",
@@ -288,6 +291,9 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         var uuid = output.get(0).get("Id");
         Path instanceUpdateTemplatePath = tmp.resolve("instance-update-response.yaml");
         InstanceTemplateReferenceDescriptor instanceUpdateTemplate = TestProductFactory.generateInstanceTemplateReference();
+        // these values are ignored and the original ones are kept
+        instanceUpdateTemplate.autoStart = false;
+        instanceUpdateTemplate.autoUninstall = true;
         // replace this so that it doesn't generate an error on update
         SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
         mapping.group = "Another Group";

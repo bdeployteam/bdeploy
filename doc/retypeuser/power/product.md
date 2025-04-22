@@ -706,6 +706,8 @@ groups: <8>
 - name: "Client Apps"
   type: CLIENT <15>
   description: "All client applications"
+  autoStart: false <16>
+  autoUninstall: true <17>
 
   applications:
   - application: client-app
@@ -727,6 +729,8 @@ groups: <8>
 13. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
 14. Using `applyTo`, an application can be restricted to be applied only to certain nodes, running a specified operating system. A list of supported operating systems can be specified. If this is not specified, the application is assumed to be capable of being applied to nodes running any of all supported operating systems.
 15. A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
+16. Whether the instance should be started automatically when starting the minion(s). This parameter is optional and will be `false` if not specified.
+17. Whether to schedule background uninstallation of old instance versions. This parameter is optional and will be `true` if not specified.
 
 An instance template will be presented to the user when visiting an [Empty Instance](/user/instance/#instance-templates).
 
@@ -888,6 +892,8 @@ productId: "io.bdeploy/demo"
 productVersionRegex: "3\\..*"
 initialProductVersionRegex: "2\\..*"
 templateName: "Default Configuration"
+autoStart: false
+autoUninstall: true
 defaultMappings:
   - group: "Server Apps"
     node: "master"
@@ -929,6 +935,8 @@ instances:
     productVersionRegex: "3\\..*"
     initialProductVersionRegex: "2\\.."
     templateName: "Default Configuration"
+    autoStart: false
+    autoUninstall: true
   - name: "Chat Instance"
     description: "The Test System's first Chat Instance"
     productId: "io.bdeploy/chat-app"
@@ -980,11 +988,13 @@ Defined `templateVariables` can be used in each `instances` `name`, `description
 Each element provides a description of an instance to be created from a specific product and a specific instance template.
 
 | Attribute                    | Description                                                                                                                                                                                                                                                   |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `name`                       | The name of the instance to create. May use **Template Variables** from the **System Template**.                                                                                                                                                              |
 | `description`                | Describes the purpose or meaning of the to-be-created instance.                                                                                                                                                                                               |
 | `productId`                  | The **ID** of the product to be used. Note that this is not the **Name**. It corresponds to the `product` field in [`product-info.yaml`](#product-infoyaml).                                                                                                  |
 | `productVersionRegex`        | An optional regular expression which is used to is used to filter newer product versions for product update suggestions. Serves as initialProductVersionRegex, if initialProductVersionRegex is not provided.                                                 |
+| `autoStart`                  | Whether the instance should be started automatically when starting the minion(s). If present, will override the value from the instance template. This parameter is optional, and if not specified in either template, will have the value `false`.           |
+| `autoUninstall`              | Whether to schedule background uninstallation of old instance versions. This parameter is optional, and if not specified in either template, will have the value `true`.                                                                                      |
 | `initialProductVersionRegex` | An optional regular expression which narrows down allowable versions of the specified product. Useful in case multiple major versions of a product exist on a server, and only a certain one is supported. Otherwise, the newest product version is selected. |
 | `templateName`               | The name of the **Instance Template** to apply to create this instance. This template must exist in the selected product version.                                                                                                                             |
 | `defaultMappings`            | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset by UI and an exception is thrown by CLI.       |

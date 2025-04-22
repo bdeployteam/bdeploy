@@ -74,6 +74,8 @@ public class TestProductFactory {
         inst.description = "Instance From TestProductFactory";
         inst.productId = "io.bdeploy/test";
         inst.templateName = templateName;
+        inst.autoStart = true;
+        inst.autoUninstall = false;
 
         SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
         mapping.group = "Only Group";
@@ -136,6 +138,8 @@ public class TestProductFactory {
         InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
         tpl.name = "Default Test Configuration";
         tpl.description = "Creates an instance with the default configuration";
+        tpl.autoStart = true;
+        tpl.autoUninstall = false;
 
         InstanceTemplateControlGroup pcg1 = new InstanceTemplateControlGroup();
         pcg1.name = "First Group";

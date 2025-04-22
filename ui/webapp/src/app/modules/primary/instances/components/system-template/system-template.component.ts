@@ -368,6 +368,15 @@ export class SystemTemplateComponent implements OnInit {
         }
       }
 
+      // We use the value from the instance-template if the system template didn't override it.
+      if(i.autoStart == null) {
+        i.autoStart = tpl.autoStart;
+      }
+
+      if(i.autoUninstall == null) {
+        i.autoUninstall = tpl.autoUninstall;
+      }
+
       if (expStatus.length > 0) {
         console.log(`There have been ${expStatus.length} issues when expanding template variables for ${i.name}`);
         expStatus.forEach((s) => console.log(` -> ${s.message}`));

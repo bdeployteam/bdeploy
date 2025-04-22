@@ -47,8 +47,8 @@ instances:
     productId: "io.bdeploy/demo"
     productVersionRegex: "2\\..*"
     templateName: "Default Configuration"
-    autoStart: true
-    autoUninstall: false
+    autoStart: false
+    autoUninstall: true
     fixedVariables:
       - id: "sleep-timeout"
         value: 30

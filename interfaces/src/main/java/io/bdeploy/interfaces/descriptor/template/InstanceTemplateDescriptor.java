@@ -22,6 +22,12 @@ public class InstanceTemplateDescriptor {
     @JsonPropertyDescription("Description of what this template will accomplish to set up.")
     public String description;
 
+    @JsonPropertyDescription("Whether the instance should be started automatically when starting the minion(s). Will default to false if not specified.")
+    public Boolean autoStart;
+
+    @JsonPropertyDescription("Schedule background uninstallation of old instance versions. Will default to true if not specified.")
+    public Boolean autoUninstall;
+
     @JsonAlias("variables")
     @JsonPropertyDescription("A list of user-provided variables which can be used in the template. All variables of all application templates used are queried along with these variables when applying the template.")
     public List<TemplateVariable> templateVariables = new ArrayList<>();

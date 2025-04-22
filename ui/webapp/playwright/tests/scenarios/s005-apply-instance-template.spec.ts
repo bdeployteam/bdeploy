@@ -50,7 +50,7 @@ test('S005 Apply instance template', async ({ standalone }, testInfo) => {
 
   // check base configuration is correct
   const chatInstanceBaseConfig = await chatInstanceSettings.getBaseConfigurationPanel();
-  // the default instance settings should not be overridden by the template
+  // this is not specified in the template, but checking it anyway
   await chatInstanceBaseConfig.getAutomaticStartup().shouldNotBeChecked();
   await chatInstanceBaseConfig.getAutomaticUninstall().shouldBeChecked();
   await chatInstanceConfig.save();
@@ -84,7 +84,7 @@ test('S005 Apply instance template', async ({ standalone }, testInfo) => {
 
   // check base configuration is correct
   const secondInstanceBaseConfig = await secondInstanceSettings.getBaseConfigurationPanel();
-  // the default instance settings should not be overridden by the template
+  // autoStart = true and autoInstall = false in template IS IGNORED
   await secondInstanceBaseConfig.getAutomaticStartup().shouldNotBeChecked();
   await secondInstanceBaseConfig.getAutomaticUninstall().shouldBeChecked();
 });

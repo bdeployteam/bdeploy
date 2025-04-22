@@ -32,6 +32,8 @@ public class FlattenedInstanceTemplateConfiguration {
 
     public String name;
     public String description;
+    public Boolean autoStart;
+    public Boolean autoUninstall;
     public List<VariableConfiguration> instanceVariables;
     public List<InstanceVariableConfiguration> instanceVariableValues;
     public List<InstanceTemplateControlGroup> processControlGroups;
@@ -48,6 +50,8 @@ public class FlattenedInstanceTemplateConfiguration {
             List<VariableDescriptor> instanceVariableDescriptors) {
         this.name = original.name;
         this.description = original.description;
+        this.autoStart = original.autoStart != null ? original.autoStart : false;
+        this.autoUninstall = original.autoUninstall != null ? original.autoUninstall : true;
         this.processControlGroups = original.processControlGroups;
         this.groups = original.groups.stream()
                 .map(g -> new FlattenedInstanceTemplateGroupConfiguration(g, appTpl, original.templateVariables)).filter(g -> {

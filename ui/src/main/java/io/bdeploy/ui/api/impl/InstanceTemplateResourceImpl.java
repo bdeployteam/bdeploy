@@ -291,6 +291,12 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.description = TemplateHelper.process(inst.description, tvr, Variables.TEMPLATE.shouldResolve());
         cfg.product = productKey;
         cfg.productFilterRegex = inst.productVersionRegex;
+        if(null != inst.autoStart) {
+            cfg.autoStart = inst.autoStart;
+        }
+        if(null != inst.autoUninstall) {
+            cfg.autoUninstall = inst.autoUninstall;
+        }
         cfg.system = systemKey;
         // cfg.configTree = pmf.getConfigTemplateTreeId(); // not allowed.
         cfg.purpose = purpose;
