@@ -13,6 +13,8 @@ import {
 import { escapeSpecialCharacters, SpecialCharacterType } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
 
+const ARITH_EXPR = `(\\+|-|)?[0-9]+`;
+
 export function createLinkedValue(val: string): LinkedValueConfiguration {
   return !!val && val.indexOf('{{') !== -1
     ? { linkExpression: val, value: null }
@@ -244,7 +246,7 @@ function doMatchVariable(s: string, config: VariableConfiguration): boolean {
     config &&
     (s === `{{X:${config.id}}}` ||
       ([VariableType.NUMERIC, VariableType.CLIENT_PORT, VariableType.SERVER_PORT].includes(config.type) &&
-        /{{X:${config.id}:${ARITH_EXPR}}}/.exec(s) != null))
+        s.match(`{{X:${config.id}:${ARITH_EXPR}}}`) != null))
   );
 }
 
@@ -253,9 +255,9 @@ function doMatchProcessParameter(s: string, paramId: string, appName: string, th
     return false;
   }
   if (thisApp) {
-    return s === `{{V:${paramId}}}` || /{{V:${paramId}:${ARITH_EXPR}}}/.exec(s) != null;
+    return s === `{{V:${paramId}}}` || s.match(`{{V:${paramId}:${ARITH_EXPR}}}`) != null;
   }
-  return s === `{{V:${appName}:${paramId}}}` || /{{V:${appName}:${paramId}:${ARITH_EXPR}}}/.exec(s) != null;
+  return s === `{{V:${appName}:${paramId}}}` || s.match(`{{V:${appName}:${paramId}:${ARITH_EXPR}}}`) != null;
 }
 
 function doExpand(wholeExpression: string, config: LinkedValueConfiguration, paramType?: VariableType): string {
