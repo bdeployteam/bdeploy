@@ -127,7 +127,7 @@ export class ServerDetailsComponent implements OnInit {
           } else if (err instanceof HttpErrorResponse) {
             msg = err.statusText;
           }
-          this.dialog.info('Eror Updating', `There was an error applying the update to the server: ${msg}`).subscribe();
+          this.dialog.info('Error Updating', `There was an error applying the update to the server: ${msg}`).subscribe();
         },
       });
   }
