@@ -48,3 +48,6 @@ The BDeploy project is sponsored by, developed by and copyright by:
 
 ![SSI Schaefer Software Development GmbH](https://bdeploy.io/user/images/ssi-logo.png)
 
+> **Note**
+> Be aware of the clarification of license interpretation in the [LICENSE](LICENSE) file.
+
