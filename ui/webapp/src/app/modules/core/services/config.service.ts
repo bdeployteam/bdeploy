@@ -127,7 +127,11 @@ export class ConfigService {
 
           const fullHref = window.location.href;
           const urlParams = new URLSearchParams(fullHref.substring(fullHref.indexOf('?') + 1));
-          return combineLatest([of(c), loadAuthSettings, this.loadSession(urlParams.get('otp'))]);
+          const otp = urlParams.get('otp');
+          if (otp) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+          return combineLatest([of(c), loadAuthSettings, this.loadSession(otp)]);
         }),
         map(([config, authSettings, session]) => {
           this.webAuthCfg = authSettings;
