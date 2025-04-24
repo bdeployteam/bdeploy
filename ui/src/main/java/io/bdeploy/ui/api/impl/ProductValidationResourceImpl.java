@@ -40,6 +40,7 @@ import io.bdeploy.interfaces.descriptor.application.EndpointsDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
@@ -128,20 +129,42 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private static List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
-        return desc.applicationTemplates.stream().map(a -> {
+        List<ProductValidationIssueApi> issues = desc.applicationTemplates.stream().map(a -> {
             try {
-                var issues = validateFlatApplicationTemplate(
+                var subIssues = validateFlatApplicationTemplate(
                         new FlattenedApplicationTemplateConfiguration(a, desc.applicationTemplates, null), desc);
 
                 // need to validate variables directly on the original, as flattening moves/merges variables.
-                issues.addAll(validateTemplateVariablesOnApplication(a));
+                subIssues.addAll(validateTemplateVariablesOnApplication(a));
 
-                return issues;
+                return subIssues;
             } catch (Exception e) {
                 return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         "Cannot resolve application template " + a.name + ": " + e.toString()));
             }
-        }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
+        }).flatMap(l -> l.stream()).filter(Objects::nonNull).collect(Collectors.toList());
+
+        // check process control
+        Map<String, ProcessControlDescriptor> appsToProcessControl = desc.applications.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().processControl));
+        for (var appTemplate : desc.applicationTemplates) {
+            var processControlDescriptor = appsToProcessControl.get(appTemplate.application);
+            if (!processControlDescriptor.supportsKeepAlive) {
+                String variableName = "keepAlive";
+                if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
+                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, appTemplate.id + " has '"
+                            + variableName + "' enabled, but the descriptor of the application forbids it"));
+                }
+            }
+            if (!processControlDescriptor.supportsAutostart) {
+                String variableName = "autostart";
+                if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
+                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, appTemplate.id + " has '"
+                            + variableName + "' enabled, but the descriptor of the application forbids it"));
+                }
+            }
+        }
+        return issues;
     }
 
     private static Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnInstance(

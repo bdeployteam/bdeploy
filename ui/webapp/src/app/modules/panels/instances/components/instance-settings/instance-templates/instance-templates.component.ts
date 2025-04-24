@@ -1,5 +1,5 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material/stepper';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -16,15 +16,13 @@ import {
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateVariable,
-  TemplateVariableType
+  TemplateVariableType,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_OK
+  ACTION_OK,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
@@ -36,15 +34,12 @@ import { ProcessEditService } from '../../../services/process-edit.service';
 import { TemplateMessageDetailsComponent } from './template-message-details/template-message-details.component';
 import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
 
-
 import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { BdFormSelectComponent } from '../../../../../core/components/bd-form-select/bd-form-select.component';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
-import {
-  BdFormTemplateVariableComponent
-} from '../../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { BdFormTemplateVariableComponent } from '../../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
 import { BdNoDataComponent } from '../../../../../core/components/bd-no-data/bd-no-data.component';
 import { AsyncPipe } from '@angular/common';
 
@@ -71,10 +66,24 @@ const tplColDetails: BdDataColumn<TemplateMessage, string> = {
 };
 
 @Component({
-    selector: 'app-instance-templates',
-    templateUrl: './instance-templates.component.html',
-    styleUrls: ['./instance-templates.component.css'],
-  imports: [BdDataTableComponent, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatStepper, MatStep, BdFormSelectComponent, FormsModule, MatTooltip, BdButtonComponent, BdFormTemplateVariableComponent, BdNoDataComponent, AsyncPipe]
+  selector: 'app-instance-templates',
+  templateUrl: './instance-templates.component.html',
+  styleUrls: ['./instance-templates.component.css'],
+  imports: [
+    BdDataTableComponent,
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    MatStepper,
+    MatStep,
+    BdFormSelectComponent,
+    FormsModule,
+    MatTooltip,
+    BdButtonComponent,
+    BdFormTemplateVariableComponent,
+    BdNoDataComponent,
+    AsyncPipe,
+  ],
 })
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private readonly products = inject(ProductsService);
@@ -92,7 +101,8 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   protected groups: Record<string, string>; // key is group name, value is target node name.
   protected messages: TemplateMessage[];
   protected readonly msgColumns: BdDataColumn<TemplateMessage, unknown>[] = [tplColName, tplColDetails];
-  protected isAnyGroupSelected = false;
+  protected areSelectedGroupsValid = false;
+  protected groupSelectionNextButtonDisabledReason = signal<string>(null);
   protected hasAllVariables = false;
   protected firstStepCompleted = false;
   protected secondStepCompleted = false;
@@ -113,7 +123,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.subscription = combineLatest([this.instanceEdit.state$, this.products.products$]).subscribe(
       ([state, prods]) => {
         const prod = prods?.find(
-          (p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag,
+          (p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag
         );
 
         if (!prod) {
@@ -124,7 +134,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         this.product = prod;
         this.records = prod.instanceTemplates ? prod.instanceTemplates : [];
         this.recordsLabel = this.records.map((record) => record.name);
-      },
+      }
     );
   }
 
@@ -157,15 +167,61 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected validateAnyGroupSelected() {
+  protected validateSelectedGroups() {
+    let anyGroupSelected = false;
+    const invalidGroups: string[] = [];
     for (const k of Object.keys(this.groups)) {
       const v = this.groups[k];
       if (v !== null && v !== undefined) {
-        this.isAnyGroupSelected = true;
-        return;
+        anyGroupSelected = true;
+
+        // check if group contains only valid applications
+        appLoop: for (const app of this.template.groups.find((group) => group.name === k).applications) {
+          const processControlConfig = app.processControl;
+          if (!processControlConfig) {
+            continue;
+          }
+
+          // need to find all apps in the product which match the key name...
+          const searchKey = this.product.product + '/' + app.application;
+          for (const app of this.instanceEdit.stateApplications$.value) {
+            const appKey = getAppKeyName(app.key);
+            if (searchKey === appKey) {
+              const processControlDescriptor = app?.descriptor?.processControl;
+              if (!processControlDescriptor) {
+                continue;
+              }
+              if (
+                (processControlConfig['autostart'] && !processControlDescriptor.supportsAutostart) ||
+                (processControlConfig['keepAlive'] && !processControlDescriptor.supportsKeepAlive)
+              ) {
+                invalidGroups.push(k);
+                break appLoop;
+              }
+            }
+          }
+        }
       }
     }
-    this.isAnyGroupSelected = false;
+
+    if (!anyGroupSelected) {
+      this.areSelectedGroupsValid = false;
+      this.groupSelectionNextButtonDisabledReason.set('At least 1 group must be selected');
+    } else if (invalidGroups.length !== 0) {
+      this.areSelectedGroupsValid = false;
+      this.groupSelectionNextButtonDisabledReason.set(
+        invalidGroups.length === 1
+          ? "The group '" +
+              invalidGroups[0] +
+              "' contains invalid application templates and therefore cannot be selected"
+          : "The groups '" +
+              invalidGroups.join("', '") +
+              "' contain invalid application templates and therefore cannot be selected"
+      );
+    } else {
+      this.areSelectedGroupsValid = true;
+      this.groupSelectionNextButtonDisabledReason.set(null);
+    }
   }
 
   protected validateHasAllVariables() {
@@ -192,7 +248,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     });
     this.groups = {};
 
-    this.validateAnyGroupSelected();
+    this.validateSelectedGroups();
     this.firstStepCompleted = true;
     this.goNext();
   }
@@ -214,7 +270,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
     // prepare available process control groups
     const pcgs = this.template.processControlGroups.map(
-      (p) => Object.assign({}, p) as ProcessControlGroupConfiguration,
+      (p) => Object.assign({}, p) as ProcessControlGroupConfiguration
     );
     pcgs.forEach((p) => (p.processOrder = []));
 
@@ -230,7 +286,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         const existingVariable = instance.instanceVariables.find((iv) => iv.id === v.id);
         if (existingVariable) {
           existingVariable.value = createLinkedValue(
-            performTemplateVariableSubst(getPreRenderable(v.value), this.variables, status),
+            performTemplateVariableSubst(getPreRenderable(v.value), this.variables, status)
           );
           status.forEach((e) =>
             this.messages.push({
@@ -239,7 +295,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
               appname: null,
               template: null,
               message: e,
-            }),
+            })
           );
         } else {
           this.messages.push({
@@ -262,7 +318,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         const processed = cloneDeep(v);
         const status: StatusMessage[] = [];
         processed.value = createLinkedValue(
-          performTemplateVariableSubst(getPreRenderable(processed.value), this.variables, status),
+          performTemplateVariableSubst(getPreRenderable(processed.value), this.variables, status)
         );
         status.forEach((e) =>
           this.messages.push({
@@ -271,7 +327,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             appname: null,
             template: null,
             message: e,
-          }),
+          })
         );
 
         const index = instance.instanceVariables.findIndex((x) => x.id === v.id);
@@ -354,7 +410,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     observables: Observable<string>[],
     node: InstanceNodeConfigurationDto,
     groupName: string,
-    nodeName: string,
+    nodeName: string
   ) {
     for (const template of group.applications) {
       // need to find all apps in the product which match the key name...
@@ -373,10 +429,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
                     appname: template?.name ? template.name : app.name,
                     template: template,
                     message: e,
-                  }),
+                  })
                 );
-              }),
-            ),
+              })
+            )
           );
         }
       }
@@ -389,7 +445,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     pcgs: ProcessControlGroupConfiguration[],
     groupName: string,
     nodeName: string,
-    observables: Observable<string>[],
+    observables: Observable<string>[]
   ) {
     for (const app of group.applications) {
       // need to prepare process control groups synchronously before adding applications.
@@ -406,7 +462,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             return {
               node: n[nodeName],
               appDto: this.instanceEdit.stateApplications$.value?.find(
-                (a) => a.key.name === getTemplateAppKey(this.product, app, n[nodeName]),
+                (a) => a.key.name === getTemplateAppKey(this.product, app, n[nodeName])
               ),
             };
           }),
@@ -440,15 +496,15 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
                       appname: app?.name ? app.name : appDto.name,
                       template: app,
                       message: e,
-                    }),
+                    })
                   );
-                }),
+                })
               );
             }
           }),
           // since adding returns an observable we concat them, so a subscription to the observable will yield the addProcess response.
-          concatAll(),
-        ),
+          concatAll()
+        )
       );
     }
   }
@@ -461,7 +517,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     node: InstanceNodeConfigurationDto,
     pcgs: ProcessControlGroupConfiguration[],
     groupName: string,
-    nodeName: string,
+    nodeName: string
   ) {
     const cg = app.preferredProcessControlGroup;
     if (cg) {
