@@ -288,7 +288,7 @@ endpoints:
       type: UI
       enabled: "{{X:test.api.enabled}}"
       secure: "{{X:test.api.secure}}"
-      trustAll: "false"
+      trustAll: false
       trustStore: "{{X:test.api.trustStore}}"
       trustStorePass: "{{X:test.api.trustStorePass}}"
       authType: "{{X:test.api.authType}}"
