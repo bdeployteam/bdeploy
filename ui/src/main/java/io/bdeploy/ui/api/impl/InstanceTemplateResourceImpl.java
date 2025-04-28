@@ -14,6 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -30,6 +32,7 @@ import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
@@ -71,6 +74,7 @@ import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.FixedParameterListValueResolver;
 import io.bdeploy.interfaces.variables.Variables;
 import io.bdeploy.ui.ProductUpdateService;
+import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.InstanceTemplateResource;
@@ -270,6 +274,24 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             InstanceTemplateReferenceDescriptor inst, Manifest.Key productKey, Map<String, String> groupToNode,
             TemplateVariableResolver parentTvr, List<TemplateVariableFixedValueOverride> overrides, InstancePurpose purpose) {
         ProductManifest pmf = ProductManifest.of(hive, productKey);
+
+        // check minimum minion Version
+        String minMinionVersionString = pmf.getProductDescriptor().minMinionVersion;
+        if (StringUtil.isNotBlank(minMinionVersionString)) {
+            Version minMinionVersion;
+            try {
+                minMinionVersion = VersionHelper.parse(minMinionVersionString);
+            } catch (RuntimeException e) {
+                return new InstanceTemplateReferenceResultDto(inst.name, InstanceTemplateReferenceStatus.ERROR,
+                        "Failed to parse minimum BDeploy version '" + minMinionVersionString + "' of product " + productKey);
+            }
+            if (ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, context).getVersion().version
+                    .compareTo(minMinionVersion) < 0) {
+                return new InstanceTemplateReferenceResultDto(inst.name, InstanceTemplateReferenceStatus.ERROR,
+                        "Installation aborted because minion does not meet the minimum BDeploy version of "
+                                + minMinionVersionString);
+            }
+        }
 
         Optional<FlattenedInstanceTemplateConfiguration> instTemplate = pmf.getInstanceTemplates().stream()
                 .filter(t -> t.name.equals(inst.templateName)).findAny();
@@ -693,8 +715,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         List<VariableConfiguration> result = new ArrayList<>();
 
         for (var v : tpl.instanceVariables) {
-            v.value = new LinkedValueConfiguration(v.value == null ? "" :
-                    TemplateHelper.process(v.value.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
+            v.value = new LinkedValueConfiguration(v.value == null ? ""
+                    : TemplateHelper.process(v.value.getPreRenderable(), tvr, Variables.TEMPLATE.shouldResolve()));
             result.add(v);
         }
 

@@ -1,6 +1,8 @@
 package io.bdeploy.minion.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,11 +25,14 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.minion.cli.TestProductFactory.TestProductDescriptor;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
+import jakarta.ws.rs.InternalServerErrorException;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
@@ -174,9 +179,8 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         String secondInstanceId = result.get(0).get("InstanceId");
         String bothInstances = firstInstanceId + "," + secondInstanceId;
 
-
-        Map<String, TestCliTool.StructuredOutputRow> indexedInstances = doRemoteAndIndexOutputOn("Id",
-                remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
+        Map<String, TestCliTool.StructuredOutputRow> indexedInstances = doRemoteAndIndexOutputOn("Id", remote,
+                RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         TestCliTool.StructuredOutputRow firstInstanceRow = indexedInstances.get(firstInstanceId);
         assertEquals("unitTestInstance1", firstInstanceRow.get("Name"));
         assertEquals("1", firstInstanceRow.get("Version"));
@@ -205,8 +209,8 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("Exactly 1 uuid must be provided for listing variables", result.get(0).get("message"));
 
         /* try listing variables for one */
-        Map<String, TestCliTool.StructuredOutputRow> firstInstanceVariables = doRemoteAndIndexOutputOn("Id",
-                remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId, "--showVariables");
+        Map<String, TestCliTool.StructuredOutputRow> firstInstanceVariables = doRemoteAndIndexOutputOn("Id", remote,
+                RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + firstInstanceId, "--showVariables");
         assertEquals(2, firstInstanceVariables.size());
         TestCliTool.StructuredOutputRow commonVariableRow = firstInstanceVariables.get("commonVar");
         assertEquals("my awesome common variable", commonVariableRow.get("Description"));
@@ -221,8 +225,8 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("345", customVariableRow.get("Value"));
 
         /* let's remove the custom variable and list variables again for each */
-        Map<String, TestCliTool.StructuredOutputRow> instanceResult = doRemoteAndIndexOutputOn("Instance",
-                remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--removeVariable=customVar");
+        Map<String, TestCliTool.StructuredOutputRow> instanceResult = doRemoteAndIndexOutputOn("Instance", remote,
+                RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--removeVariable=customVar");
         assertEquals("Updated successfully", instanceResult.get(firstInstanceId).get("Message"));
         //because it never had the custom variable
         assertEquals("Nothing to modify", instanceResult.get(secondInstanceId).get("Message"));
@@ -303,12 +307,12 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
 
         remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--version=1", "--install");
         remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--version=1", "--activate");
-        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--update",
-                "--uuid=" + uuid, "--name=UPDATED", "--purpose=PRODUCTIVE", "--template=" + instanceUpdateTemplatePath);
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--update", "--uuid=" + uuid, "--name=UPDATED",
+                "--purpose=PRODUCTIVE", "--template=" + instanceUpdateTemplatePath);
 
         // Check if the instance was updated correctly
-        Map<String, TestCliTool.StructuredOutputRow> updatedInstances = doRemoteAndIndexOutputOn("Version",
-                remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
+        Map<String, TestCliTool.StructuredOutputRow> updatedInstances = doRemoteAndIndexOutputOn("Version", remote,
+                RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
         assertEquals(2, updatedInstances.size());
         TestCliTool.StructuredOutputRow latestVersionRow = updatedInstances.get("2");
         assertEquals("", latestVersionRow.get("Installed"));
@@ -320,4 +324,96 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         assertEquals("TEST", latestVersionRow.get("Purpose"));
     }
 
+    @Test
+    void testMinMinionVersionWithoutTemplate(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
+            throws IOException {
+        // Create instance group
+        createInstanceGroup(remote);
+
+        // Create product
+        TestProductDescriptor productDescriptor = TestProductFactory.generateProduct();
+        productDescriptor.descriptor.minMinionVersion = "999.0.0";
+        Path productPath = Files.createDirectory(tmp.resolve("product"));
+        TestProductFactory.writeProductToFile(productPath, productDescriptor);
+        uploadProduct(remote, Path.of(local.getUri()), productPath);
+
+        // Run Test
+        assertThrows(InternalServerErrorException.class,
+                () -> remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_NAME",
+                        "--purpose=TEST", "--product=io.bdeploy/test/product", "--productVersion=1.0.0"));
+    }
+
+    @Test
+    void testMinMinionVersionWithTemplate(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
+            throws IOException {
+        // Create instance group
+        createInstanceGroup(remote);
+
+        // Create product
+        TestProductDescriptor productDescriptor = TestProductFactory.generateProduct();
+        productDescriptor.descriptor.minMinionVersion = "999.0.0";
+        Path productPath = Files.createDirectory(tmp.resolve("product"));
+        TestProductFactory.writeProductToFile(productPath, productDescriptor);
+        uploadProduct(remote, Path.of(local.getUri()), productPath);
+
+        // Create instance template
+        Path responseFilePath = tmp.resolve("ResponseFile.yaml");
+        TestProductFactory.writeToFile(responseFilePath, TestProductFactory.generateInstanceTemplateReference());
+
+        // Run Test
+        StructuredOutput output = remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create",
+                "--name=INSTANCE_NAME", "--purpose=TEST", "--template=" + responseFilePath);
+        assertEquals(1, output.size());
+        assertTrue(output.get(0).get("message").startsWith("ERROR: "), "Installation must fail due to minMinionVersion");
+    }
+
+    @Test
+    void testMinMinionVersionInstanceUpdate(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
+            throws IOException {
+        // Create instance group
+        createInstanceGroup(remote);
+
+        // Create product version 1
+        TestProductDescriptor productDescriptor1 = TestProductFactory.generateProduct();
+        productDescriptor1.descriptor.minMinionVersion = "0.0.0";
+
+        // Create product version 2
+        TestProductDescriptor productDescriptor2 = TestProductFactory.generateProduct();
+        productDescriptor2.descriptor.minMinionVersion = "999.0.0";
+        productDescriptor2.version = TestProductFactory.generateProductVersion("2.0.0");
+
+        // Upload product versions
+        Path bhivePath = Path.of(local.getUri());
+        Path productPath1 = Files.createDirectory(tmp.resolve("product1"));
+        Path productPath2 = Files.createDirectory(tmp.resolve("product2"));
+        TestProductFactory.writeProductToFile(productPath1, productDescriptor1);
+        TestProductFactory.writeProductToFile(productPath2, productDescriptor2);
+        remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath, "--import=" + productPath1,
+                "--push");
+        remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath, "--import=" + productPath2,
+                "--push");
+        ProductManifest.invalidateAllScanCaches();
+
+        // Create instance
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_NAME",
+                "--purpose=TEST", "--product=io.bdeploy/test/product", "--productVersion=1.0.0");
+        TestCliTool.StructuredOutput output = remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list");
+        assertEquals(1, output.size());
+        assertEquals("INSTANCE_NAME", output.get(0).get("Name"));
+        assertEquals("", output.get(0).get("Description"));
+        assertEquals("1", output.get(0).get("Version"));
+        assertEquals("", output.get(0).get("Installed"));
+        assertEquals("", output.get(0).get("Active"));
+        assertEquals("", output.get(0).get("AutoStart"));
+        assertEquals("*", output.get(0).get("AutoUninstall"));
+        assertEquals("TEST", output.get(0).get("Purpose"));
+        assertEquals("io.bdeploy/test/product", output.get(0).get("Product"));
+        assertEquals("1.0.0", output.get(0).get("ProductVersion"));
+        assertEquals("", output.get(0).get("ProductVerRegex"));
+        assertEquals("None", output.get(0).get("System"));
+
+        // Run Test
+        assertThrows(InternalServerErrorException.class, () -> remote(remote, RemoteInstanceTool.class,
+                "--instanceGroup=GROUP_NAME", "--uuid=" + output.get(0).get("Id"), "--updateTo=2.0.0"));
+    }
 }

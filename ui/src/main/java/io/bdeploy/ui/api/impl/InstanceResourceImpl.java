@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.poi.util.StringUtil;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
@@ -55,6 +57,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -119,6 +122,7 @@ import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceBulkResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -340,17 +344,34 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
+        RemoteService remote = mp.getNamedMasterOrSelf(hive, managedServer);
+
+        String minMinionVersionString = product.getProductDescriptor().minMinionVersion;
+        if (StringUtil.isNotBlank(minMinionVersionString)) {
+            Version minMinionVersion;
+            try {
+                minMinionVersion = VersionHelper.parse(minMinionVersionString);
+            } catch (RuntimeException e) {
+                throw new WebApplicationException(
+                        "Failed to parse minimum BDeploy version '" + minMinionVersionString + "' of product " + product.getKey(),
+                        e);
+            }
+            if (ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, context).getVersion().version
+                    .compareTo(minMinionVersion) < 0) {
+                throw new WebApplicationException(
+                        "Installation aborted because minion does not meet the minimum BDeploy version of "
+                                + minMinionVersionString);
+            }
+        }
+
         applyProductInstanceVariables(instanceConfig, product);
 
-        MasterRootResource root = getManagingRootResource(managedServer);
-
-        root.getNamedMaster(group)
+        ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree(hive, "", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 
-        // immediately fetch back so we have it to create the association. don't use
-        // #syncInstance here,
-        // it requires the association to already exist.
+        // immediately fetch back so we have it to create the association.
+        // don't use #syncInstance here; it requires the association to already exist
         rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
     }
 
@@ -360,11 +381,6 @@ public class InstanceResourceImpl implements InstanceResource {
                 config.instanceVariables.add(new VariableConfiguration(instVar));
             }
         }
-    }
-
-    private MasterRootResource getManagingRootResource(String managedServer) {
-        RemoteService remote = mp.getNamedMasterOrSelf(hive, managedServer);
-        return ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context);
     }
 
     private static void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
@@ -500,8 +516,8 @@ public class InstanceResourceImpl implements InstanceResource {
                     + oldConfig.getKey().getTag(), Status.BAD_REQUEST);
         }
 
-        MasterRootResource root = getManagingRootResource(managedServer);
-        root.getNamedMaster(group).update(config, expectedTag);
+        ResourceProvider.getVersionedResource(mp.getNamedMasterOrSelf(hive, managedServer), MasterRootResource.class, context)
+                .getNamedMaster(group).update(config, expectedTag);
 
         // immediately fetch back so we have it to create the association
         syncInstance(minion, rc, group, instanceId);
@@ -724,6 +740,24 @@ public class InstanceResourceImpl implements InstanceResource {
 
             ProductManifest target = ProductManifest.of(hive,
                     new Manifest.Key(state.config.config.product.getName(), productTag));
+
+            String minMinionVersionString = target.getProductDescriptor().minMinionVersion;
+            if (StringUtil.isNotBlank(minMinionVersionString)) {
+                Version minMinionVersion;
+                try {
+                    minMinionVersion = VersionHelper.parse(minMinionVersionString);
+                } catch (RuntimeException e) {
+                    throw new WebApplicationException("Failed to parse minimum BDeploy version '" + minMinionVersionString
+                            + "' of product " + target.getKey(), e);
+                }
+
+                if (minion.getSelfConfig().version.compareTo(minMinionVersion) < 0) {
+                    throw new WebApplicationException(
+                            "Installation aborted because target minion does not meet the minimum BDeploy version of "
+                                    + minMinionVersionString);
+                }
+            }
+
             List<ApplicationManifest> targetApps = target.getApplications().stream()
                     .map(k -> ApplicationManifest.of(hive, k, target)).toList();
 

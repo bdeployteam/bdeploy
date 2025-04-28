@@ -68,7 +68,8 @@ public class TestProductFactory {
         return generateInstanceTemplateReference("Test Instance", "Default Test Configuration");
     }
 
-    public static InstanceTemplateReferenceDescriptor generateInstanceTemplateReference(String instanceName, String templateName) {
+    public static InstanceTemplateReferenceDescriptor generateInstanceTemplateReference(String instanceName,
+            String templateName) {
         InstanceTemplateReferenceDescriptor inst = new InstanceTemplateReferenceDescriptor();
         inst.name = instanceName;
         inst.description = "Instance From TestProductFactory";
@@ -89,7 +90,7 @@ public class TestProductFactory {
     public static TestProductDescriptor generateProduct() {
         TestProductDescriptor product = new TestProductDescriptor();
         product.descriptor = generateProductInfo();
-        product.version = generateProductVersion();
+        product.version = generateProductVersion("1.0.0");
         product.applications = Map.of("app-info.yaml", generateApplication());
         product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplate());
         product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplate());
@@ -110,9 +111,9 @@ public class TestProductFactory {
         return productDescriptor;
     }
 
-    private static ProductVersionDescriptor generateProductVersion() {
+    public static ProductVersionDescriptor generateProductVersion(String version) {
         ProductVersionDescriptor productVersion = new ProductVersionDescriptor();
-        productVersion.version = "1.0.0";
+        productVersion.version = version;
         productVersion.appInfo = Map.of("server-app", Map.of(WINDOWS, "app-info.yaml", LINUX, "app-info.yaml"));
         return productVersion;
     }
