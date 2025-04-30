@@ -94,7 +94,7 @@ test('S004 Application Http Endpoints Configuration', async ({ standalone }, tes
   processSettings = await config.getProcessSettingsPanel('master', 'Server With Sleep');
   eps = await processSettings.getConfigureEndpointsPanel();
   testEndpoint = await eps.getEndpointArea('test-api');
-  testEndpoint.scrollIntoView();
+  await testEndpoint.scrollIntoView();
   await expect(testEndpoint.getDisabledReason()).toContainText('This endpoint is disabled due to a missing prerequisite ({{X:test.api.enabled}}).');
   await testEndpoint.getField('Port').shouldBeDisabled();
 

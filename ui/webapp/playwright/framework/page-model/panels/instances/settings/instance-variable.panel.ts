@@ -13,6 +13,6 @@ export class InstanceVariablePanel extends BasePanel {
 
   async apply() {
     await this.getToolbar().getByRole('button', { name: 'Apply' }).click();
-    expect(this.getDialog()).not.toBeAttached();
+    await expect(this.getDialog()).not.toBeAttached();
   }
 }

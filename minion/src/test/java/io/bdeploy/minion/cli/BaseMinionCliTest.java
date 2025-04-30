@@ -3,10 +3,14 @@ package io.bdeploy.minion.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -35,6 +39,13 @@ public abstract class BaseMinionCliTest {
         }
     }
 
+    protected Map<String, TestCliTool.StructuredOutputRow> doRemoteAndIndexOutputOn(String indexColumn, RemoteService remote,
+            Class<? extends CliTool> tool, String... args) {
+        StructuredOutput output = remote(remote, tool, args);
+        return IntStream.range(0, output.size()).boxed()
+                .collect(Collectors.toMap(i -> output.get(i).get(indexColumn), output::get));
+    }
+
     protected void createInstanceGroup(RemoteService remote) {
         StructuredOutput output = remote(remote, RemoteInstanceGroupTool.class, "--list");
         assertEquals(0, output.size());
@@ -59,4 +70,23 @@ public abstract class BaseMinionCliTest {
         assertEquals("Test Product", output.get(0).get("Name"));
         assertEquals("1", output.get(0).get("NoOfInstanceTemplates"));
     }
+
+    protected void uploadProduct(RemoteService remote, Path tmp, Path bhivePath, TestProductFactory.TestProductDescriptor product)
+            throws IOException {
+        Path productPath = Files.createDirectory(tmp.resolve("product"));
+        TestProductFactory.writeProductToFile(productPath, product);
+
+        // Push the product
+        remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath, "--import=" + productPath,
+                "--push");
+
+        ProductManifest.invalidateAllScanCaches();
+
+        StructuredOutput output = remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath,
+                "--list");
+        assertEquals(1, output.size());
+        assertEquals("Test Product", output.get(0).get("Name"));
+        assertEquals(String.valueOf(product.instanceTemplates.size()), output.get(0).get("NoOfInstanceTemplates"));
+    }
+
 }

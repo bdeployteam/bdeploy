@@ -9,6 +9,7 @@ import static io.bdeploy.interfaces.descriptor.application.ProcessControlDescrip
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,11 +65,15 @@ public class TestProductFactory {
     }
 
     public static InstanceTemplateReferenceDescriptor generateInstanceTemplateReference() {
+        return generateInstanceTemplateReference("Test Instance", "Default Test Configuration");
+    }
+
+    public static InstanceTemplateReferenceDescriptor generateInstanceTemplateReference(String instanceName, String templateName) {
         InstanceTemplateReferenceDescriptor inst = new InstanceTemplateReferenceDescriptor();
-        inst.name = "Test Instance";
+        inst.name = instanceName;
         inst.description = "Instance From TestProductFactory";
         inst.productId = "io.bdeploy/test";
-        inst.templateName = "Default Test Configuration";
+        inst.templateName = templateName;
 
         SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
         mapping.group = "Only Group";
@@ -110,7 +115,24 @@ public class TestProductFactory {
         return productVersion;
     }
 
-    private static InstanceTemplateDescriptor generateInstanceTemplate() {
+    public static InstanceTemplateDescriptor generateMinimalInstanceTemplate(String templateName) {
+        InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
+        tpl.name = templateName;
+
+        InstanceTemplateGroup group = new InstanceTemplateGroup();
+        group.name = "Min Group";
+        TemplateApplication app1 = new TemplateApplication();
+        app1.application = "server-app";
+        app1.name = "Min Application";
+        app1.processControl = Map.of("startType", "MANUAL_CONFIRM");
+        group.applications = List.of(app1);
+        tpl.groups = new ArrayList<>();
+        tpl.groups.add(group);
+
+        return tpl;
+    }
+
+    public static InstanceTemplateDescriptor generateInstanceTemplate() {
         InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
         tpl.name = "Default Test Configuration";
         tpl.description = "Creates an instance with the default configuration";

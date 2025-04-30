@@ -43,13 +43,13 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
     }
 
     @Test
-    void testSystempTemplateSpecifiesBothProductVersionRegexes(RemoteService remote, @TempDir Path tmp)//
+    void testSystemTemplateSpecifiesBothProductVersionRegexes(RemoteService remote, @TempDir Path tmp)//
             throws IOException {
         doTestHappyFlowWithSystemTemplate(remote, tmp, "^1\\.0\\.\\d+$", "THISISNOTGONNABREAK", "THISISNOTGONNABREAK");
     }
 
     @Test
-    void testSytemTemplateRegexesAreNotSet(RemoteService remote, @TempDir Path tmp)//
+    void testSystemTemplateRegexesAreNotSet(RemoteService remote, @TempDir Path tmp)//
             throws IOException {
         doTestHappyFlowWithSystemTemplate(remote, tmp, null, null, ".*");
     }

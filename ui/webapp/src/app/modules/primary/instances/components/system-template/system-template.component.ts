@@ -397,7 +397,7 @@ export class SystemTemplateComponent implements OnInit {
     this.validateAllTemplateGroupsSelected();
   }
 
-  private updateInstanteTemplateVariables(tpl: TemplateSelection) {
+  private updateInstanceTemplateVariables(tpl: TemplateSelection) {
     tpl.requiredVariables = [];
     if (tpl.tpl.directlyUsedTemplateVars?.length) {
       tpl.requiredVariables.push(...tpl.tpl.directlyUsedTemplateVars);
@@ -505,7 +505,7 @@ export class SystemTemplateComponent implements OnInit {
 
   protected validateAnyGroupSelected(tpl: TemplateSelection) {
     // we may need more or less variables :) do this early for the early return below.
-    this.updateInstanteTemplateVariables(tpl);
+    this.updateInstanceTemplateVariables(tpl);
 
     for (const grp of tpl.tpl.groups) {
       const v = tpl.groups[grp.name];

@@ -68,7 +68,7 @@ public class InstanceConfiguration {
     /**
      * Schedule background uninstallation of old instance versions
      */
-    public boolean autoUninstall;
+    public boolean autoUninstall = true;
 
     /**
      * Regular expression to filter products before calculating newest available version

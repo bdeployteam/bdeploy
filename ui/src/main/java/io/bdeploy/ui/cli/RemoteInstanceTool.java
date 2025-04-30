@@ -546,9 +546,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         table.column(new DataTableColumn.Builder("Ver.").setName("Version").setMinWidth(4).build());
         table.column(new DataTableColumn.Builder("Installed").build());
         table.column(new DataTableColumn.Builder("Active").build());
+        table.column(new DataTableColumn.Builder("Auto Start").build());
+        table.column(new DataTableColumn.Builder("Auto Uninstall").build());
         table.column(new DataTableColumn.Builder("Purpose").build());
         table.column(new DataTableColumn.Builder("Product").setMinWidth(25).build());
         table.column(new DataTableColumn.Builder("Product Version").setMinWidth(14).build());
+        table.column(new DataTableColumn.Builder("Product Ver. Regex").setMinWidth(14).build());
         table.column(new DataTableColumn.Builder("System").build());
         table.column(new DataTableColumn.Builder("Description").setMinWidth(0).build());
 
@@ -580,9 +583,17 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
                 DataTableRowBuilder row = table.row();
 
-                row.cell(instance.instanceConfiguration.id).cell(vCfg.name).cell(version.key.getTag())
-                        .cell(isInstalled ? "*" : "").cell(isActive ? "*" : "").cell(vCfg.purpose.name())
-                        .cell(version.product.getName()).cell(version.product.getTag())
+                row.cell(instance.instanceConfiguration.id)
+                        .cell(vCfg.name)
+                        .cell(version.key.getTag())
+                        .cell(isInstalled ? "*" : "")
+                        .cell(isActive ? "*" : "")
+                        .cell(vCfg.autoStart ? "*" : "")
+                        .cell(vCfg.autoUninstall ? "*" : "")
+                        .cell(vCfg.purpose.name())
+                        .cell(version.product.getName())
+                        .cell(version.product.getTag())
+                        .cell(vCfg.productFilterRegex)
                         .cell(instance.instanceConfiguration.system != null ? instance.instanceConfiguration.system : "None")
                         .cell(vCfg.description);
 

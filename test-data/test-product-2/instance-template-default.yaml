@@ -2,7 +2,8 @@
 
 name: Default Configuration
 description: "Creates an instance with the default server and client configuration"
-
+autoStart: true
+autoUninstall: false
 templateVariables:
   - uid: text-param
     name: "Text Value"
