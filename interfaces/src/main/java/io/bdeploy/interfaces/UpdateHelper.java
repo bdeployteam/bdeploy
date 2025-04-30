@@ -227,7 +227,7 @@ public class UpdateHelper {
         }
 
         if (version == null) {
-            throw new IllegalStateException("Cannot determin version for update package");
+            throw new IllegalStateException("Cannot determine version for update package");
         }
 
         if (Boolean.parseBoolean(props.getProperty("snapshot"))) {

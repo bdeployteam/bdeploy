@@ -10,6 +10,6 @@ rem Download Windows 10 SDK:  https://developer.microsoft.com/en-US/windows/down
 rem Download SafeNet Drivers: https://support.globalsign.com/ssl/ssl-certificates-installation/safenet-drivers#Windows
 rem Add the following directory to the local path C:\Program Files (x86)\Windows Kits\10\bin\<version>\x64
 
-signtool sign /n "IT Solutions GmbH" /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\win64\dist\BDeploy.exe
-signtool sign /n "IT Solutions GmbH" /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\win64\dist\FileAssoc.exe
-signtool sign /n "IT Solutions GmbH" /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\win64\dist\bin\Installer.bin
+signtool sign /n "IT Solutions GmbH" /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\winX64\dist\BDeploy.exe
+signtool sign /n "IT Solutions GmbH" /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\winX64\dist\FileAssoc.exe
+signtool sign /n "IT Solutions GmbH" /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\winX64\dist\bin\Installer.bin

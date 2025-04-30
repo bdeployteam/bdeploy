@@ -253,7 +253,7 @@ test('Instance Configuration', async ({ standalone }, testInfo) => {
   await addClientProcess.addProcess('Client Application');
   await config.waitForValidation();
 
-  await expect(config.getConfigNode('__ClientApplications').getByRole('row', { name: 'Client Application' })).toHaveCount(2);
+  await expect(config.getConfigNode('__ClientApplications').getByRole('row', { name: 'Client Application' })).toHaveCount(3);
   const clientSettings = await config.getProcessSettingsPanel('__ClientApplications', 'Client Application');
   const clientParams = await clientSettings.getConfigureParametersPanel();
 

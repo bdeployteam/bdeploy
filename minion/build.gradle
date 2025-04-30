@@ -43,29 +43,29 @@ startScripts {
 
 evaluationDependsOn(':launcher')
 void addLauncherDist(Distribution dist) {
-    if(!project(':launcher').linux64DistZip.enabled) {
-        println("WARNING: Linux launcher dist not enabled, not included in BDeploy release ZIPs");
+    if(!project(':launcher').linuxX64DistZip.enabled) {
+        println("WARNING: Linux x64 launcher dist not enabled, not included in BDeploy release ZIPs");
     } else {
         dist.contents {
-            from(project(':launcher').linux64DistZip) {
+            from(project(':launcher').linuxX64DistZip) {
                 into 'launcher'
             }
         }
     }
-    if(!project(':launcher').win64DistZip.enabled) {
-        println("WARNING: Windows launcher dist not enabled, not included in BDeploy release ZIPs");
+    if(!project(':launcher').linuxAarch64DistZip.enabled) {
+        println("WARNING: Linux aarch64 launcher dist not enabled, not included in BDeploy release ZIPs");
     } else {
         dist.contents {
-            from(project(':launcher').win64DistZip) {
+            from(project(':launcher').linuxAarch64DistZip) {
                 into 'launcher'
             }
         }
     }
-    if(!project(':launcher').mac64DistZip.enabled) {
-        println("WARNING: MacOS launcher dist not enabled, not included in BDeploy release ZIPs");
+    if(!project(':launcher').winX64DistZip.enabled) {
+        println("WARNING: Windows x64 launcher dist not enabled, not included in BDeploy release ZIPs");
     } else {
         dist.contents {
-            from(project(':launcher').mac64DistZip) {
+            from(project(':launcher').winX64DistZip) {
                 into 'launcher'
             }
         }
@@ -73,24 +73,28 @@ void addLauncherDist(Distribution dist) {
 }
 
 distributions {
-    win64 {
-        distributionBaseName = 'bdeploy-win64'
+    winX64 {
+        distributionBaseName = 'bdeploy-win-x64'
         addLauncherDist(it)
         contents {
             exclude '_bdeploy'
         }
     }
-    linux64 {
-        distributionBaseName = 'bdeploy-linux64'
+    linuxX64 {
+        distributionBaseName = 'bdeploy-linux-x64'
         addLauncherDist(it)
         contents {
             exclude '_bdeploy.bat'
             rename('_bdeploy', 'bdeploy')
         }
     }
-    mac64 {
-        distributionBaseName = 'bdeploy-mac64'
+    linuxAarch64 {
+        distributionBaseName = 'bdeploy-linux-aarch64'
         addLauncherDist(it)
+        contents {
+            exclude '_bdeploy.bat'
+            rename('_bdeploy', 'bdeploy')
+        }
     }
 }
 

@@ -123,7 +123,7 @@ Beware that due to the nature of variable expansion (the point in time this happ
 
 Enables conditional output of text based on the current operating system. The name of the variable refers to the name of the operating system. Using
 this variable allows the usage of different arguments for different operating systems while still using a single YAML file.  
-Accepted values are: WINDOWS, LINUX, AIX, MACOS
+Accepted values are: WINDOWS, LINUX, LINUX_AARCH64
 
 ```
 {{OSNAME:<conditional output>}}

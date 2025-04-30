@@ -91,9 +91,9 @@ This makes it necessary to open a second tab in the browser and navigate to [htt
 You can build distribution packages for other platforms by installing their respective JDKs. You need to specify those JDKs as properties during the build. To simplify the process, you can create these entries in `~/.gradle/gradle.properties`:
 
 ```properties ~/.gradle/gradle.properties
-systemProp.win64jdk=/path/to/jdks/windows/jdk-21
-systemProp.linux64jdk=/path/to/jdks/linux/jdk-21
-#systemProp.mac64jdk=/path/to/jdks/mac/jdk-21/Contents/Home
+systemProp.win-x64jdk=/path/to/jdks/windows/jdk-21
+systemProp.linux-x64jdk=/path/to/jdks/linux/jdk-21
+systemProp.linux-aarch64jdk=/path/to/jdks/linux-aarch64/jdk-21
 ```
 
 !!!info Tip

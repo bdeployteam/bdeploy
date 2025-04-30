@@ -220,6 +220,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
                           test-app:
                             WINDOWS: "app-info.yaml"
                             LINUX: "app-info.yaml"
+                            LINUX_AARCH64: "app-info.yaml"
                             """);
         Files.writeString(productPath.resolve("app-info.yaml"),//
                 """
@@ -227,6 +228,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
                         supportedOperatingSystems:
                           - WINDOWS
                           - LINUX
+                          - LINUX_AARCH64
                         processControl:
                           gracePeriod: 3000
                           supportedStartTypes:
@@ -236,7 +238,7 @@ class SystemSetupCliTest extends BaseMinionCliTest {
                           supportsKeepAlive: true
                           noOfRetries: 2
                         startCommand:
-                          launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
+                          launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}{{LINUX_AARCH64:launch.sh}}"
                           """);
         Files.writeString(productPath.resolve("instance-template.yaml"),//
                 """

@@ -2,8 +2,8 @@ name: "Chat Application"
 
 supportedOperatingSystems:
   - LINUX
+  - LINUX_AARCH64
   - WINDOWS
-  #- MACOS
 
 processControl:
   gracePeriod: 3000
@@ -15,4 +15,4 @@ processControl:
   attachStdin: true
 
 startCommand:
-  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
+  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}{{LINUX_AARCH64:launch.sh}}"

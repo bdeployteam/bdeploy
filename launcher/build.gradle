@@ -33,9 +33,14 @@ applicationDefaultJvmArgs = [ "-Xmx256m" ]
 rootProject.addMultiPlatformDistBuild(project)
 
 distributions {
-    mac64 {
-        contents {
-            from fileTree("${projectDir}/src/linux64/dist")
-        }
+    winX64 {
+        distributionBaseName = 'launcher-win-x64'
+    }
+    linuxX64 {
+        distributionBaseName = 'launcher-linux-x64'
+    }
+    linuxAarch64 {
+        distributionBaseName = 'launcher-linux-aarch64'
     }
 }
+

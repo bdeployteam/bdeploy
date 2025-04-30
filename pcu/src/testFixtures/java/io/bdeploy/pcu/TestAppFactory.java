@@ -31,7 +31,7 @@ public class TestAppFactory {
 
     static {
         scriptEnding.put(OperatingSystem.LINUX, ".sh");
-        scriptEnding.put(OperatingSystem.MACOS, ".sh");
+        scriptEnding.put(OperatingSystem.LINUX_AARCH64, ".sh");
         scriptEnding.put(OperatingSystem.WINDOWS, ".cmd");
 
         sleepScriptContent.put(OperatingSystem.WINDOWS, //
@@ -46,7 +46,7 @@ public class TestAppFactory {
                         "sleep $1\n" //
         );
 
-        sleepScriptContent.put(OperatingSystem.MACOS, //
+        sleepScriptContent.put(OperatingSystem.LINUX_AARCH64, //
                 "#!/usr/bin/env bash\n" + //
                         "echo 'Hello script'\n" + //
                         "sleep $1\n" //

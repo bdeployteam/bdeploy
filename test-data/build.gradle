@@ -65,7 +65,7 @@ void setupBDeployJavaExec(JavaExec je, String root, int port) {
 }
 
 void setupProfilerAgent(com.github.psxpaul.task.JavaExecFork je, String name) {
-    if(project.hasProperty("yourkitPath")) {
+    if(project.hasProperty("yourkitPath") && !rootProject.isAarch64()) {
         def path = new File(project.getProperty("yourkitPath"));
         def profPath = null;
 
@@ -73,8 +73,6 @@ void setupProfilerAgent(com.github.psxpaul.task.JavaExecFork je, String name) {
             profPath = new File(path, "bin/windows-x86-64/yjpagent.dll");
         } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
             profPath = new File(path, "bin/linux-x86-64/libyjpagent.so");
-        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-            profPath = new File(path, "bin/mac/libyjpagent.dylib");
         }
 
         je.jvmArgs += [ "-agentpath:" + profPath + "=tracing,sessionname=" + name ];
@@ -93,11 +91,13 @@ void createServerTasks(String name, String root, int port) {
 
         def taskName = "";
         if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            taskName = "win64DistZip"
+            taskName = "winX64DistZip"
         } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-            taskName = "linux64DistZip"
-        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-            taskName = "mac64DistZip"
+            if(rootProject.isAarch64()) {
+                taskName = "linuxAarch64DistZip"
+            } else {
+                taskName = "linuxX64DistZip"
+            }
         }
         dependsOn ':minion:'+taskName
 
@@ -161,7 +161,6 @@ task initExtSoftwareHive(type: JavaExec, dependsOn: cleanExternalSoftwareHive) {
 // now define the dynamic tasks for each operating system
 createExternalSoftwareTasks("windows")
 createExternalSoftwareTasks("linux")
-// createExternalSoftwareTasks("mac")
 
 void createExternalSoftwareTasks(String os) {
     def osUpper = os.substring(0,1).toUpperCase() + os.substring(1);
@@ -193,17 +192,17 @@ createProductTasks("externalSoftware2Zip","external-software-2-raw")
 
 task verifyBDeployExe(type: JavaExec) {
     setupBDeployJavaExec(it, null, 0);
-    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/win64/dist/BDeploy.exe" ]
+    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/BDeploy.exe" ]
 }
 
 task verifyFileAssocExe(type: JavaExec) {
     setupBDeployJavaExec(it, null, 0);
-    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/win64/dist/FileAssoc.exe" ]
+    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/FileAssoc.exe" ]
 }
 
 task verifyInstallerBin(type: JavaExec) {
     setupBDeployJavaExec(it, null, 0);
-    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/win64/dist/bin/Installer.bin" ]
+    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/bin/Installer.bin" ]
 }
 
 task verifyBinaries() {
@@ -229,8 +228,9 @@ githubRelease {
     releaseName = "Release ${version}"
     targetCommitish = "master"
 
-    releaseAssets.from(project(":minion").linux64DistZip)
-    releaseAssets.from(project(":minion").win64DistZip)
+    releaseAssets.from(project(":minion").linuxX64DistZip)
+    releaseAssets.from(project(":minion").linuxAarch64DistZip)
+    releaseAssets.from(project(":minion").winX64DistZip)
     releaseAssets.from(project(":api").shadowJar)
     releaseAssets.from(fileTree(project(":api").resolve.outputDir))
     releaseAssets.from(project(":test-data").product1Zip)
