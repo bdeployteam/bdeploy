@@ -129,7 +129,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         @Help("The key of a configuration variable to remove using --update")
         String removeVariable();
 
-        @Help("Path to a system template specification. Note that not variable input is supported, the template must apply without user input.")
+        @Help("Path to a system template specification. Note that no variable input is supported, so the template must apply without user input.")
         @Validator(ExistingPathValidator.class)
         String createFrom();
 
