@@ -4,17 +4,15 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
 import { BdDataColumn } from '../../../../../../../models/data';
-import {
-  CellComponent
-} from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { CellComponent } from '../../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
 import { compareVersions, convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
-    selector: 'app-update-action',
-    templateUrl: './update-action.component.html',
-    imports: [BdButtonComponent, MatTooltip],
+  selector: 'app-update-action',
+  templateUrl: './update-action.component.html',
+  imports: [BdButtonComponent, MatTooltip],
 })
 export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, string> {
   private readonly cfg = inject(ConfigService);
@@ -37,7 +35,7 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
     this.curIndex = products.findIndex(
       (r) =>
         this.edit.state$.value?.config.config.product.name === r.key.name &&
-        this.edit.state$.value?.config.config.product.tag === r.key.tag,
+        this.edit.state$.value?.config.config.product.tag === r.key.tag
     );
     this.isUpgrade = this.index < this.curIndex;
     this.isCurrent = this.index === this.curIndex;
@@ -53,7 +51,7 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
         this.hasMinMinionVersion = compareVersions(minimumVersion, currentVersion) < 0;
         if (!this.hasMinMinionVersion) {
           this.installButtonTooltip =
-            'This product version cannot be installed because it requires a BDeploy version of ' +
+            'This product version cannot be applied because it requires a BDeploy version of ' +
             convert2String(minimumVersion) +
             ' or above, but the current minion only has version ' +
             convert2String(currentVersion);
@@ -61,7 +59,7 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
       } else {
         this.hasMinMinionVersion = false;
         this.installButtonTooltip =
-          'This product version cannot be installed because it requires a BDeploy version of ' +
+          'This product version cannot be applied because it requires a BDeploy version of ' +
           convert2String(minimumVersion) +
           ' or above, but the version of the current minion could not be determined';
       }

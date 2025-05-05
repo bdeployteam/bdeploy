@@ -288,7 +288,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
             if (ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, context).getVersion().version
                     .compareTo(minMinionVersion) < 0) {
                 return new InstanceTemplateReferenceResultDto(inst.name, InstanceTemplateReferenceStatus.ERROR,
-                        "Installation aborted because minion does not meet the minimum BDeploy version of "
+                        "Creation of instance aborted because minion does not meet the minimum BDeploy version of "
                                 + minMinionVersionString);
             }
         }

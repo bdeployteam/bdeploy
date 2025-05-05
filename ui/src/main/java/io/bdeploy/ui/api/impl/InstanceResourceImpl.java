@@ -359,7 +359,7 @@ public class InstanceResourceImpl implements InstanceResource {
             if (ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, context).getVersion().version
                     .compareTo(minMinionVersion) < 0) {
                 throw new WebApplicationException(
-                        "Installation aborted because minion does not meet the minimum BDeploy version of "
+                        "Creation of instance aborted because minion does not meet the minimum BDeploy version of "
                                 + minMinionVersionString);
             }
         }
@@ -753,7 +753,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
                 if (minion.getSelfConfig().version.compareTo(minMinionVersion) < 0) {
                     throw new WebApplicationException(
-                            "Installation aborted because target minion does not meet the minimum BDeploy version of "
+                            "Update of instance aborted because target minion does not meet the minimum BDeploy version of "
                                     + minMinionVersionString);
                 }
             }
