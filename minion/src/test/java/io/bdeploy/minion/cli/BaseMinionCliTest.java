@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,11 +40,17 @@ public abstract class BaseMinionCliTest {
         }
     }
 
-    protected Map<String, TestCliTool.StructuredOutputRow> doRemoteAndIndexOutputOn(String indexColumn, RemoteService remote,
+    protected Map<String, TestCliTool.StructuredOutputRow> doRemoteAndIndexOutputOn(
+            Function<TestCliTool.StructuredOutputRow, String> indexFunction, RemoteService remote,
             Class<? extends CliTool> tool, String... args) {
         StructuredOutput output = remote(remote, tool, args);
         return IntStream.range(0, output.size()).boxed()
-                .collect(Collectors.toMap(i -> output.get(i).get(indexColumn), output::get));
+                .collect(Collectors.toMap(i -> indexFunction.apply(output.get(i)), output::get));
+    }
+
+    protected Map<String, TestCliTool.StructuredOutputRow> doRemoteAndIndexOutputOn(String indexColumn, RemoteService remote,
+            Class<? extends CliTool> tool, String... args) {
+        return doRemoteAndIndexOutputOn(s -> s.get(indexColumn), remote, tool, args);
     }
 
     protected void createInstanceGroup(RemoteService remote) {

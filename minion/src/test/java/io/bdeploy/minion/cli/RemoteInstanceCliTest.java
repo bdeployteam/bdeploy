@@ -22,6 +22,7 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -259,45 +260,71 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
     void testCreateInstanceAndUpdateWithTemplate(BHive local, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
             throws IOException {
         var product = TestProductFactory.generateProduct();
+        // create one template with default values, and one without
+        InstanceTemplateDescriptor smallInstanceTemplate = TestProductFactory.generateMinimalInstanceTemplate("Small instance");
+        product.instanceTemplates = Map.of("min-instance-template.yaml", smallInstanceTemplate,
+                "instance-template.yaml", TestProductFactory.generateInstanceTemplate());
+        product.descriptor.instanceTemplates = List.of("min-instance-template.yaml", "instance-template.yaml");
+
         createInstanceGroup(remote);
-        Path productPath = Files.createDirectory(tmp.resolve("product"));
-        TestProductFactory.writeProductToFile(productPath, product);
-        uploadProduct(remote, Path.of(local.getUri()), productPath);
+        uploadProduct(remote, tmp, Path.of(local.getUri()), product);
 
-        // Create the instance template
-        Path instanceTemplatePath = tmp.resolve("instance-response.yaml");
-        InstanceTemplateReferenceDescriptor instanceTemplate = TestProductFactory.generateInstanceTemplateReference();
-        // set to null to check defaults; scenario with values is tested from the system template test
-        instanceTemplate.autoStart = null;
-        instanceTemplate.autoUninstall = null;
-        TestProductFactory.writeToFile(instanceTemplatePath, instanceTemplate);
+        // Create instance template without any values set
+        Path templateWithDefaultsPath = tmp.resolve("min-instance-response.yaml");
+        InstanceTemplateReferenceDescriptor templateWithDefaults = TestProductFactory.generateInstanceTemplateReference(
+                "no overrides instance", smallInstanceTemplate.name);
+        templateWithDefaults.autoStart = null;
+        templateWithDefaults.autoUninstall = null;
+        TestProductFactory.writeToFile(templateWithDefaultsPath, templateWithDefaults);
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_1",
+                "--purpose=TEST", "--template=" + templateWithDefaultsPath);
 
-        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_NAME",
-                "--purpose=TEST", "--template=" + instanceTemplatePath);
+        // Create the instance with overrides
+        Path templateWithOverridePath= tmp.resolve("min-instance-response.yaml");
+        InstanceTemplateReferenceDescriptor templateWithOverrides = TestProductFactory.generateInstanceTemplateReference();
+        templateWithOverrides.autoStart = !product.instanceTemplates.get("instance-template.yaml").autoStart;
+        templateWithOverrides.autoUninstall = !product.instanceTemplates.get("instance-template.yaml").autoUninstall;
+        TestProductFactory.writeToFile(templateWithOverridePath, templateWithOverrides);
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_2",
+                "--purpose=PRODUCTIVE", "--template=" + templateWithOverridePath);
 
-        // Check if the instance was set up correctly
-        TestCliTool.StructuredOutput output = remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list");
-        assertEquals(1, output.size());
-        assertEquals("INSTANCE_NAME", output.get(0).get("Name"));
-        assertEquals("Instance From TestProductFactory", output.get(0).get("Description"));
-        assertEquals("1", output.get(0).get("Version"));
-        assertEquals("", output.get(0).get("Installed"));
-        assertEquals("", output.get(0).get("Active"));
-        assertEquals("", output.get(0).get("AutoStart"));
-        assertEquals("*", output.get(0).get("AutoUninstall"));
-        assertEquals("TEST", output.get(0).get("Purpose"));
-        assertEquals("io.bdeploy/test/product", output.get(0).get("Product"));
-        assertEquals("1.0.0", output.get(0).get("ProductVersion"));
-        assertEquals(".*", output.get(0).get("ProductVerRegex"));
-        assertEquals("None", output.get(0).get("System"));
+        // Check if the instances was set up correctly
+        Map<String, TestCliTool.StructuredOutputRow> output = doRemoteAndIndexOutputOn("Name",
+                remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list");
+        assertEquals(2, output.size());
+        TestCliTool.StructuredOutputRow instanceWithDefaults = output.get("INSTANCE_1");
+        assertEquals("Instance From TestProductFactory", instanceWithDefaults.get("Description"));
+        assertEquals("1", instanceWithDefaults.get("Version"));
+        assertEquals("", instanceWithDefaults.get("Installed"));
+        assertEquals("", instanceWithDefaults.get("Active"));
+        assertEquals("", instanceWithDefaults.get("AutoStart"));
+        assertEquals("*", instanceWithDefaults.get("AutoUninstall"));
+        assertEquals("TEST", instanceWithDefaults.get("Purpose"));
+        assertEquals("io.bdeploy/test/product", instanceWithDefaults.get("Product"));
+        assertEquals("1.0.0", instanceWithDefaults.get("ProductVersion"));
+        assertEquals(".*", instanceWithDefaults.get("ProductVerRegex"));
+        assertEquals("None", instanceWithDefaults.get("System"));
+
+        TestCliTool.StructuredOutputRow instanceWithOverrides = output.get("INSTANCE_2");
+        assertEquals("Instance From TestProductFactory", instanceWithOverrides.get("Description"));
+        assertEquals("1", instanceWithOverrides.get("Version"));
+        assertEquals("", instanceWithOverrides.get("Installed"));
+        assertEquals("", instanceWithOverrides.get("Active"));
+        assertEquals("", instanceWithOverrides.get("AutoStart"));
+        assertEquals("*", instanceWithOverrides.get("AutoUninstall"));
+        assertEquals("PRODUCTIVE", instanceWithOverrides.get("Purpose"));
+        assertEquals("io.bdeploy/test/product", instanceWithOverrides.get("Product"));
+        assertEquals("1.0.0", instanceWithOverrides.get("ProductVersion"));
+        assertEquals(".*", instanceWithOverrides.get("ProductVerRegex"));
+        assertEquals("None", instanceWithOverrides.get("System"));
 
         // create an update template and apply it
-        var uuid = output.get(0).get("Id");
+        var uuid = instanceWithDefaults.get("Id");
         Path instanceUpdateTemplatePath = tmp.resolve("instance-update-response.yaml");
         InstanceTemplateReferenceDescriptor instanceUpdateTemplate = TestProductFactory.generateInstanceTemplateReference();
         // these values are ignored and the original ones are kept
-        instanceUpdateTemplate.autoStart = false;
-        instanceUpdateTemplate.autoUninstall = true;
+        instanceUpdateTemplate.autoStart = true;
+        instanceUpdateTemplate.autoUninstall = false;
         // replace this so that it doesn't generate an error on update
         SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
         mapping.group = "Another Group";
@@ -311,16 +338,15 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
                 "--purpose=PRODUCTIVE", "--template=" + instanceUpdateTemplatePath);
 
         // Check if the instance was updated correctly
-        Map<String, TestCliTool.StructuredOutputRow> updatedInstances = doRemoteAndIndexOutputOn("Version", remote,
-                RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
-        assertEquals(2, updatedInstances.size());
-        TestCliTool.StructuredOutputRow latestVersionRow = updatedInstances.get("2");
+        Map<String, TestCliTool.StructuredOutputRow> updatedInstances = doRemoteAndIndexOutputOn(
+                row -> row.get("Name") + "-" + row.get("Version"),
+                remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
+        assertEquals(3, updatedInstances.size());
+        TestCliTool.StructuredOutputRow latestVersionRow = updatedInstances.get("INSTANCE_1-2");
         assertEquals("", latestVersionRow.get("Installed"));
         assertEquals("", latestVersionRow.get("Active"));
         assertEquals("", latestVersionRow.get("AutoStart"));
         assertEquals("*", latestVersionRow.get("AutoUninstall"));
-        // edge case: name and purpose gets ignored on the update with template in the cli
-        assertEquals("INSTANCE_NAME", latestVersionRow.get("Name"));
         assertEquals("TEST", latestVersionRow.get("Purpose"));
     }
 

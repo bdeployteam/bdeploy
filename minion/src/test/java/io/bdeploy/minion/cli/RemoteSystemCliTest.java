@@ -56,7 +56,14 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         referenceWoOverrides.autoUninstall = null;
         systemTemplate.instances.add(referenceWoOverrides);
 
-        // instance template with unset in instance template, but set in system
+        // instance template with set values, but no overrides in the system template
+        InstanceTemplateReferenceDescriptor referenceWithInstanceValues = TestProductFactory.generateInstanceTemplateReference(
+                "instance with instance values", instanceTemplate.name);
+        referenceWithInstanceValues.autoStart = null;
+        referenceWithInstanceValues.autoUninstall = null;
+        systemTemplate.instances.add(referenceWithInstanceValues);
+
+        // instance template with unset values, but set in system
         InstanceTemplateReferenceDescriptor referenceWithSystemValues = TestProductFactory.generateInstanceTemplateReference(
                 "instance with system values", smallInstanceTemplate.name);
         referenceWithSystemValues.autoStart = true;
@@ -69,6 +76,7 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         referenceWithOverrides.autoStart = false;
         referenceWithOverrides.autoUninstall = true;
         systemTemplate.instances.add(referenceWithOverrides);
+
         TestProductFactory.writeToFile(systemTemplatePath, systemTemplate);
 
         // Import the system template
@@ -88,9 +96,10 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         // Check if the instance was set up correctly
         Map<String, TestCliTool.StructuredOutputRow> mappedInstancesRows = doRemoteAndIndexOutputOn("Name", remote,
                 RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
-        assertEquals(3, mappedInstancesRows.size());
+        assertEquals(4, mappedInstancesRows.size());
 
         doInstanceWithNoOverridesChecks(mappedInstancesRows.get("no overrides instance"), systemId);
+        doInstanceWithInstanceValuesCheck(mappedInstancesRows.get("instance with instance values"), systemId);
         doInstanceWithSystemValuesCheck(mappedInstancesRows.get("instance with system values"), systemId);
         doFullInstanceChecks(mappedInstancesRows.get("instance with overrides"), systemId);
     }
@@ -104,6 +113,17 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         assertTrue(instance.get("System").contains(systemId));
         assertEquals("", instance.get("AutoStart"));
         assertEquals("*", instance.get("AutoUninstall"));
+    }
+
+    private static void doInstanceWithInstanceValuesCheck(TestCliTool.StructuredOutputRow instance, String systemId) {
+        assertEquals("Instance From TestProductFactory", instance.get("Description"));
+        assertEquals("1", instance.get("Version"));
+        assertEquals("TEST", instance.get("Purpose"));
+        assertEquals("io.bdeploy/test/product", instance.get("Product"));
+        assertEquals("1.0.0", instance.get("ProductVersion"));
+        assertTrue(instance.get("System").contains(systemId));
+        assertEquals("*", instance.get("AutoStart"));
+        assertEquals("", instance.get("AutoUninstall"));
     }
 
     private static void doInstanceWithSystemValuesCheck(TestCliTool.StructuredOutputRow instance, String systemId) {
