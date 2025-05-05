@@ -32,6 +32,7 @@ export class BdButtonComponent implements AfterViewInit {
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
+  @Input() tooltip: string;
   @Input() tooltipPosition: TooltipPosition;
   @Input() badge: string | number;
   @Input() badgeColor: ThemePalette = 'accent';

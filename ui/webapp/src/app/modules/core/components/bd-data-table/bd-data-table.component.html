@@ -235,7 +235,8 @@
                     @if (row.node.item) {
                       <app-bd-button
                         [text]="getDataAsStringFor(col, row.node.item)"
-                        tooltipPosition="left"
+                        [tooltip]="getTooltipTextFor(col, row.node.item)"
+                        [tooltipPosition]="col.tooltipPosition || 'left'"
                         [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
                         (click)="col.action(row.node.item)"
                         [disabled]="!col.actionDisabled ? false : col.actionDisabled(row.node.item)"

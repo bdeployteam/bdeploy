@@ -33,6 +33,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() collapsed = true;
   @Input() color: BdButtonColorMode;
   @Input() disabled = false;
+  @Input() tooltip: string;
   @Input() tooltipPosition: TooltipPosition;
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
 

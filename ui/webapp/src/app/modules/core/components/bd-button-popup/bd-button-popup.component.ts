@@ -15,6 +15,7 @@ export class BdButtonPopupComponent {
   @Input() icon: string;
   @Input() badge: number;
   @Input() collapsed = true;
+  @Input() tooltip: string;
   @Input() tooltipPosition: TooltipPosition;
   @Input() disabled = false;
 

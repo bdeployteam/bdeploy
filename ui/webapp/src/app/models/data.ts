@@ -1,6 +1,7 @@
 import { Type } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { CellComponent } from '../modules/core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { TooltipPosition } from '@angular/material/tooltip';
 
 /**
  * A type hint for the colum which may (mostly in card mode) have influence on where and how information is rendered.
@@ -50,6 +51,9 @@ export interface BdDataColumn<T, R> {
 
   /** Additional tooltip callback which will be queried if given instead of displaying the data as tooltip */
   tooltip?: (record: T) => string;
+
+  /** The position of the tooltip; defaults to 'left' */
+  tooltipPosition?: TooltipPosition
 
   /** Provides a alternative rendering component for the cell, which has a reference to the Record and the Column. */
   component?: Type<CellComponent<T, R>>;
