@@ -1,7 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -20,7 +19,6 @@ import {
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection, MatSortHeader } from '@angular/material/sort';
-import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject, debounceTime, Observable, of, Subject, Subscription } from 'rxjs';
 import {
@@ -43,8 +41,9 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { BdDataComponentCellComponent } from '../bd-data-component-cell/bd-data-component-cell.component';
 import { BdButtonComponent } from '../bd-button/bd-button.component';
+import { FlatTreeControl, FlatDataSource, TreeFlattener } from '../../utils/tree.utils';
 
-/** Represents the hirarchical presentation of the records after grouping/sorting/searching is applied. */
+/** Represents the hierarchical presentation of the records after grouping/sorting/searching is applied. */
 interface Node<T> {
   nodeId: unknown;
   item: T;
@@ -223,7 +222,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   @ViewChild(MatSort)
   private readonly sortHeader: MatSort;
 
-  /** The current sort dicdated by the sortHeader */
+  /** The current sort dictated by the sortHeader */
   @Input() sort: Sort;
 
   /** Hide the headers, shows only the contents area */
@@ -246,7 +245,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
   /** The transformer bound to 'this', so we can use this in the transformer function */
   private readonly boundTransformer: (node: Node<T>, level: number) => FlatNode<T> = this.transformer.bind(this);
-  private readonly treeFlattener = new MatTreeFlattener(
+  private readonly treeFlattener = new TreeFlattener(
     this.boundTransformer,
     (n) => n.level,
     (n) => n.expandable,
@@ -255,7 +254,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   private subscription: Subscription;
   private mediaSubscription: Subscription;
 
-  /** endless pseudo-id counter for created nodes to be used with trackBy in case no ID solumn is set. */
+  /** endless pseudo-id counter for created nodes to be used with trackBy in case no ID column is set. */
   private nodeCnt = 0;
 
   protected hasMoreData = false;
@@ -268,8 +267,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   protected headerCheckForbidden = false;
 
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
-  /* tempalte */
-  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+  /* template */
+  dataSource = new FlatDataSource(this.treeControl, this.treeFlattener);
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -437,7 +436,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
         }
       }
 
-      // sort groups - sorting is dicdated by the BdDataGrouping, or (if grouping does not specify) is natural.
+      // sort groups - sorting is dictated by the BdDataGrouping, or (if grouping does not specify) is natural.
       const byGroupSorted = new Map(
         [...byGroup.entries()].sort((a, b) => {
           if (grouping[0].definition.sort) {
