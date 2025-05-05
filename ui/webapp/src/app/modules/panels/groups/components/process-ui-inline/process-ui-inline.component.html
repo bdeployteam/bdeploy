@@ -4,14 +4,14 @@
     <app-bd-button
       text="Reload"
       icon="refresh"
-      tooltip="left"
+      tooltipPosition="left"
       (click)="reloadIFrame()"
       [disabled]="!app?.endpoint?.endpoint?.proxying"
     ></app-bd-button>
     <app-bd-button
       text="Fullscreen"
       icon="fullscreen"
-      tooltip="left"
+      tooltipPosition="left"
       (click)="setIFrameFullscreen()"
       [disabled]="!app?.endpoint?.endpoint?.proxying"
     ></app-bd-button>
@@ -19,14 +19,14 @@
     <app-bd-button
       text="Open in new Tab"
       icon="open_in_new"
-      tooltip="left"
+      tooltipPosition="left"
       (click)="openUiEndpoint()"
       [disabled]="!app?.endpoint?.endpoint?.proxying"
     ></app-bd-button>
     <app-bd-button
       text="Open directly on host in new Tab"
       icon="open_in_browser"
-      tooltip="left"
+      tooltipPosition="left"
       [disabled]="!directUri"
       [matTooltip]="directUri ? null : 'Direct URI to application not available.'"
       matTooltipPosition="left"

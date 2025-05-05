@@ -23,7 +23,7 @@
         icon="grid_view"
         text="Toggle Card Mode"
         [(toggle)]="isCardView"
-        tooltip="below"
+        tooltipPosition="below"
         [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
       ></app-bd-button>
       <app-bd-panel-button
@@ -31,13 +31,13 @@
         icon="library_add_check"
         text="Bulk Manipulation"
         [route]="['panels', 'instances', 'bulk-manip']"
-        tooltip="below"
+        tooltipPosition="below"
         [disabled]="!(authService.isCurrentScopeWrite$ | async)"
       ></app-bd-panel-button>
       <app-bd-button
         icon="cloud_sync"
         text="Fetch instance states"
-        tooltip="below"
+        tooltipPosition="below"
         (click)="doSyncAll()"
         [loadingWhen$]="instances.overallStatesLoading$"
         [disabled]="instances.overallStatesLoading$| async"
@@ -47,14 +47,14 @@
         icon="settings"
         text="Group Settings"
         [route]="['panels', 'groups', 'settings']"
-        tooltip="below"
+        tooltipPosition="below"
         [disabled]="!!(authService.isCurrentScopedExclusiveReadClient$ | async)"
       ></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
       <app-bd-button
         text="Apply System Template..."
         icon="auto_awesome"
-        tooltip="below"
+        tooltipPosition="below"
         [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
         [disabled]="!(authService.isCurrentScopeWrite$ | async)"
       ></app-bd-button>
@@ -63,7 +63,7 @@
           icon="add"
           text="Add Instance..."
           [route]="['panels', 'instances', 'add']"
-          tooltip="below"
+          tooltipPosition="below"
           [disabled]="!(allowInstanceCreation$ | async)"
         ></app-bd-panel-button>
       </div>

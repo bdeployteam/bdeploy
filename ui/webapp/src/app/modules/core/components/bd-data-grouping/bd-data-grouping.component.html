@@ -17,14 +17,14 @@
         </mat-select>
       </mat-form-field>
       <app-bd-button
-        tooltip="above"
+      tooltipPosition="above"
         text="Save preset"
         icon="save"
         (click)="savePreset()"
         [disabled]="disabled"
       ></app-bd-button>
       <app-bd-button
-        tooltip="above"
+      tooltipPosition="above"
         text="Reset preset"
         icon="settings_backup_restore"
         (click)="deletePreset()"
@@ -64,7 +64,7 @@
             <app-bd-button
               text="Add"
               icon="add"
-              tooltip="above"
+              tooltipPosition="above"
               (click)="addGrouping()"
               [disabled]="groupings.length >= 5"
             ></app-bd-button>

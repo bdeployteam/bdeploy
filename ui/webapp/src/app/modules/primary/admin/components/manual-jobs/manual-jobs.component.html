@@ -1,7 +1,7 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Jobs Administration">
     <div class="flex-auto"></div>
-    <app-bd-button icon="refresh" text="Reload" color="primary" (click)="load()" tooltip="below"></app-bd-button>
+    <app-bd-button icon="refresh" text="Reload" color="primary" (click)="load()" tooltipPosition="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-data-table [records]="records$ | async" [columns]="columns"></app-bd-data-table>

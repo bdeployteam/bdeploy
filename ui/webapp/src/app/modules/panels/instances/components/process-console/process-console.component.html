@@ -26,7 +26,7 @@
       text="Download Full Content"
       (click)="doDownload()"
       [disabled]="!(available$ | async)"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>

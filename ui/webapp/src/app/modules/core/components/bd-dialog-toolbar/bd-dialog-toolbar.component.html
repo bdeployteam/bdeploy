@@ -15,7 +15,7 @@
         <app-bd-button
           text="Close"
           icon="close"
-          tooltip="left"
+          tooltipPosition="left"
           [collapsed]="narrow$ | async"
           (click)="closePanel()"
         ></app-bd-button>
@@ -29,7 +29,7 @@
           [relative]="relative"
           [route]="route"
           [collapsed]="narrow$ | async"
-          tooltip="left"
+          tooltipPosition="left"
         ></app-bd-panel-button>
       }
     </mat-toolbar-row>

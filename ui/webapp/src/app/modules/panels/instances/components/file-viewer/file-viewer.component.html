@@ -5,7 +5,7 @@
       <app-bd-panel-button
         icon="edit"
         text="Edit File"
-        tooltip="below"
+        tooltipPosition="below"
         [disabled]="oversized || !canEdit"
         [route]="['..', 'edit']"
         [relative]="true"
@@ -15,13 +15,13 @@
     }
     <app-bd-button
       text="Download File"
-      tooltip="left"
+      tooltipPosition="left"
       icon="cloud_download"
       (click)="instances.download(directory$.value, file$.value)"
     ></app-bd-button>
     <app-bd-button
       text="Follow Changes"
-      tooltip="left"
+      tooltipPosition="left"
       icon="play_arrow"
       [isToggle]="true"
       [toggle]="follow$ | async"

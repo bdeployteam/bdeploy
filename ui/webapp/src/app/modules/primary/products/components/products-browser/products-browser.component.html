@@ -20,7 +20,7 @@
       icon="grid_view"
       text="Toggle Card Mode"
       [(toggle)]="isCardView"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
     ></app-bd-button>
     <app-bd-panel-button
@@ -28,7 +28,7 @@
       icon="library_add_check"
       text="Bulk Manipulation"
       [route]="['panels', 'products', 'bulk-manip']"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
@@ -38,7 +38,7 @@
         text="Synchronize Product Versions"
         [route]="['panels', 'products', 'sync']"
         [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
-        tooltip="below"
+        tooltipPosition="below"
       ></app-bd-panel-button>
     }
     <app-bd-panel-button
@@ -46,14 +46,14 @@
       text="Import Product..."
       [route]="['panels', 'products', 'transfer']"
       [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-panel-button>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Product..."
       [route]="['panels', 'products', 'upload']"
       [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 

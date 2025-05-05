@@ -18,7 +18,7 @@
       (toggleChange)="showCreate$.next($event)"
       icon="add_circle_outline"
       text="Show Creation Events"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <app-bd-button
       [isToggle]="true"
@@ -26,7 +26,7 @@
       (toggleChange)="showDeploy$.next($event)"
       icon="downloading"
       text="Show Deployment Events"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <app-bd-button
       [isToggle]="true"
@@ -34,7 +34,7 @@
       (toggleChange)="showRuntime$.next($event)"
       icon="run_circle"
       [text]="isCentral ? 'Show Runtime Events - requires connection to managed server' : 'Show Runtime Events'"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="runtimeLocked$ | async"
     ></app-bd-button>
   </app-bd-dialog-toolbar>

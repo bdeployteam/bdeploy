@@ -6,14 +6,14 @@
       icon="grid_view"
       text="Toggle Card Mode"
       [(toggle)]="dataTable.grid"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       text="Add System"
       icon="add"
       [route]="['panels', 'systems', 'add']"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="!(authService.isCurrentScopeWrite$ | async)"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>

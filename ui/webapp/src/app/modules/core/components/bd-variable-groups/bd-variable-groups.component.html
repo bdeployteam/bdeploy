@@ -138,7 +138,7 @@
                       <app-bd-button
                         [text]="isCustomGroupSelected ? 'Confirm Selection' : 'Select Variables'"
                         [icon]="isCustomGroupSelected ? 'check' : 'tune'"
-                        tooltip="below"
+                        tooltipPosition="below"
                         [disabled]="!group.pairs.length && !isCustomGroupSelected"
                         [isToggle]="true"
                         [(toggle)]="isCustomGroupSelected"

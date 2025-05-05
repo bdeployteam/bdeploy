@@ -37,7 +37,7 @@
             text="Update from product template"
             icon="file_upload"
             (click)="doRestoreFromTemplate()"
-            tooltip="below"
+            tooltipPosition="below"
           ></app-bd-button>
         }
         @if (isText) {
@@ -46,7 +46,7 @@
             icon="compare"
             [route]="['compare', path]"
             [relative]="true"
-            tooltip="below"
+            tooltipPosition="below"
           ></app-bd-panel-button>
         }
       }
@@ -55,7 +55,7 @@
           text="Create from product template"
           icon="add"
           (click)="doAddFromTemplate()"
-          tooltip="below"
+          tooltipPosition="below"
         ></app-bd-button>
       }
     }
@@ -63,7 +63,7 @@
     <app-bd-button
       text="Delete"
       icon="delete"
-      tooltip="below"
+      tooltipPosition="below"
       (click)="onDelete()"
       [disabled]="!!record.persistent && !record.persistent.instanceId && !record.modification?.file"
     ></app-bd-button>
@@ -71,14 +71,14 @@
     <app-bd-button
       text="Replace"
       icon="upload_file"
-      tooltip="below"
+      tooltipPosition="below"
       (click)="doReplaceFile(replaceDialog)"
     ></app-bd-button>
 
     <app-bd-button
       text="Rename"
       icon="drive_file_rename_outline"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="!renameAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
       (click)="onRename(renameDialog)"
     ></app-bd-button>
@@ -86,7 +86,7 @@
     <app-bd-panel-button
       icon="edit"
       text="Edit"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="!isEditAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
       [route]="[path]"
       [relative]="true"

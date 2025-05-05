@@ -65,7 +65,7 @@
       icon="settings"
       [route]="['panels', 'instances', 'settings']"
       [disabled]="!(servers.isCurrentInstanceSynchronized$ | async)"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-panel-button>
   }
   <mat-divider [vertical]="true"></mat-divider>
@@ -180,7 +180,7 @@
                   color="primary"
                   icon="auto_fix_high"
                   text="Apply Instance Template"
-                  tooltip="below"
+                  tooltipPosition="below"
                   [route]="['panels', 'instances', 'settings', 'templates']"
                 ></app-bd-panel-button>
               </div>

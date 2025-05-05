@@ -6,23 +6,23 @@
       icon="library_add_check"
       text="Bulk Manipulation"
       [route]="['panels', 'admin', 'software', 'bulk-manipulation']"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-panel-button>
-    <app-bd-button text="Restart Server" icon="restart_alt" (click)="restartServer()" tooltip="below"></app-bd-button>
+    <app-bd-button text="Restart Server" icon="restart_alt" (click)="restartServer()" tooltipPosition="below"></app-bd-button>
     <app-bd-button
       text="Create Server Stack Dump"
       icon="monitoring"
       (click)="createStackDump()"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Software"
       color="primary"
       [route]="['panels', 'admin', 'software', 'upload']"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-panel-button>
-    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()" tooltip="below"></app-bd-button>
+    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()" tooltipPosition="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-data-table

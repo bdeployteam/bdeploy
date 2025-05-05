@@ -19,7 +19,7 @@
       icon="grid_view"
       text="Toggle Card Mode"
       [(toggle)]="isCardView"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     @if (!isManaged) {
@@ -28,7 +28,7 @@
         text="Add Instance Group..."
         [route]="['panels', 'groups', 'add']"
         [disabled]="!isAddAllowed"
-        tooltip="below"
+        tooltipPosition="below"
       ></app-bd-panel-button>
     } @else {
       <app-bd-panel-button
@@ -36,7 +36,7 @@
         text="Link Instance Group..."
         [route]="['panels', 'servers', 'link', 'central']"
         [disabled]="!isAttachAllowed"
-        tooltip="below"
+        tooltipPosition="below"
       ></app-bd-panel-button>
     }
   </app-bd-dialog-toolbar>

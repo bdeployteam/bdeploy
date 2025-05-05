@@ -32,14 +32,14 @@
         text="Delete Selected Files"
         icon="delete"
         (click)="bulkDelete()"
-        tooltip="below"
+        tooltipPosition="below"
       ></app-bd-button>
     }
     <app-bd-button
       icon="library_add_check"
       text="Bulk Manipulation"
       (click)="bulkMode = !bulkMode"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <app-bd-button text="Add File" icon="add" (click)="doAddFile(addDialog)"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>

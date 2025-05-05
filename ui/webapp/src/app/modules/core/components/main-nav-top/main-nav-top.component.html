@@ -13,14 +13,14 @@
         icon="palette"
         text="Select Theme"
         color="toolbar"
-        tooltip="below"
+        tooltipPosition="below"
         [route]="['panels', 'user', 'themes']"
       ></app-bd-panel-button>
       <app-bd-panel-button
         class="local-info-button"
         text="User Settings"
         color="toolbar"
-        tooltip="below"
+        tooltipPosition="below"
         [route]="['panels', 'user', 'settings']"
       >
         <app-user-avatar [mail]="user?.email" [hostSize]="36"></app-user-avatar>

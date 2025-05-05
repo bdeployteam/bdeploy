@@ -53,7 +53,7 @@
       text="Toggle Card Mode"
       [toggle]="gridMode$ | async"
       (toggleChange)="gridMode$.next($event)"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="collapsed$ | async"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
@@ -63,14 +63,14 @@
       text="Collapsed Mode"
       [toggle]="collapsed$ | async"
       (toggleChange)="collapsed$.next($event)"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <app-bd-panel-button
       #bulkBtn
       text="Bulk Control"
       icon="library_add_check"
       [route]="['panels', 'instances', 'bulk-control']"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="!(auth.isCurrentScopeWrite$ | async)"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
@@ -113,7 +113,7 @@
                     [collapsed]="isInstalled()"
                     [disabled]="!(states$ | async) || (mappedInstall$ | async) || isInstalled() || !(auth.isCurrentScopeWrite$ | async) || !hasProduct() || !hasMinMinionVersion()"
                     [loadingWhen$]="mappedInstall$"
-                    tooltip="below"
+                    tooltipPosition="below"
                   ></app-bd-button>
                 </div>
                   <app-bd-button
@@ -124,7 +124,7 @@
                     [collapsed]="!isInstalled()"
                     [disabled]="!(states$ | async) || (mappedActivate$ | async) || !isInstalled() || !(auth.isCurrentScopeWrite$ | async)"
                     [loadingWhen$]="mappedActivate$"
-                    tooltip="below"
+                    tooltipPosition="below"
                   ></app-bd-button>
               </div>
             </div>

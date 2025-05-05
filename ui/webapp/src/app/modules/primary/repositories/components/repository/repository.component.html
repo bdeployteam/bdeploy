@@ -14,14 +14,14 @@
       icon="grid_view"
       text="Toggle Card Mode"
       [(toggle)]="isCardView"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-button>
     <app-bd-panel-button
       #bulkMode
       icon="library_add_check"
       text="Bulk Manipulation"
       [route]="['panels', 'repositories', 'bulk-manip']"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
     ></app-bd-panel-button>
 
@@ -30,7 +30,7 @@
       icon="settings"
       text="Repository Settings"
       [route]="['panels', 'repositories', 'settings']"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
     ></app-bd-panel-button>
 
@@ -40,7 +40,7 @@
       text="Upload Software"
       [route]="['panels', 'repositories', 'upload']"
       [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
-      tooltip="below"
+      tooltipPosition="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 

@@ -1,4 +1,4 @@
-<app-bd-button-popup #popup [text]="sortBy" tooltip="below" [collapsed]="false" [hidden]="disabled">
+<app-bd-button-popup #popup [text]="sortBy" tooltipPosition="below" [collapsed]="false" [hidden]="disabled">
   <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5">
     <mat-radio-group class="flex flex-col" [ngModel]="selectedColumn" (ngModelChange)="updateSortColumn($event)">
       @for (column of _columns; track column) {

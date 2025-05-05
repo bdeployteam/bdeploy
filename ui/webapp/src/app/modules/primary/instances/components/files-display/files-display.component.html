@@ -20,13 +20,13 @@
       icon="library_add_check"
       text="Bulk Manipulation"
       [route]="['panels', 'instances', 'files', 'bulk-manip']"
-      tooltip="below"
+      tooltipPosition="below"
       [disabled]="(loading$ | async) || (noactive$ | async)"
     ></app-bd-panel-button>
     <app-bd-button
       text="Refresh"
       icon="refresh"
-      tooltip="below"
+      tooltipPosition="below"
       (click)="load(instance)"
       [loadingWhen$]="loading$"
       [disabled]="(loading$ | async) || (noactive$ | async)"

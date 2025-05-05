@@ -89,7 +89,7 @@
                     <app-bd-button
                       [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
                       [icon]="group.isSelectMode ? 'check' : 'tune'"
-                      tooltip="below"
+                      tooltipPosition="below"
                       [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !hasExistingForbidden(group) && !group.isSelectMode"
                       [isToggle]="true"
                       [(toggle)]="group.isSelectMode"

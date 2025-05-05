@@ -112,7 +112,7 @@
                     [ngClass]="action.classes ? action.classes(record) : []"
                     [icon]="action.icon(record)"
                     [text]="getDataAsStringFor(action)"
-                    tooltip="below"
+                    tooltipPosition="below"
                     (click)="action.action(record)"
                     [disabled]="!action.actionDisabled ? false : action.actionDisabled(record)"
                     color="inherit"
