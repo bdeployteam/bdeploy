@@ -128,7 +128,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
         InstanceResource ir = igr.getInstanceResource(group);
         InstanceDto instanceDto = ir.read(uuid);
-        ProductDto productDto = igr.getProductResource(group).list(instanceDto.activeProduct.getName()).getFirst();
+        ProductDto productDto = findOrImportProduct(group, responseFile,
+                Optional.ofNullable(instanceDto.activeProduct).map(Key::getName).orElse(null));
 
         // find and verify all group mappings and whether all variables are set for each required group
         FlattenedInstanceTemplateConfiguration tpl = getInstanceTemplateConfig(productDto.instanceTemplates,
@@ -140,7 +141,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         // update the instance
         InstanceTemplateReferenceResultDto result = updateInstanceWithTemplateRequest(mp.getNamedMasterOrSelf(hive, server),
-                responseFile, ir, instanceDto, tpl, groupToNode, uuid);
+                responseFile, ir, instanceDto, tpl, groupToNode, uuid, ProductManifest.of(hive, productDto.key));
 
         // sync in case of success
         if (result.status != InstanceTemplateReferenceStatus.ERROR) {
@@ -152,9 +153,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
     private InstanceTemplateReferenceResultDto updateInstanceWithTemplateRequest(RemoteService remote,
             InstanceTemplateReferenceDescriptor responseFile, InstanceResource ir, InstanceDto instanceDto,
-            FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, String uuid) {
-        ProductManifest pmf = ProductManifest.of(hive, instanceDto.activeProduct);
-
+            FlattenedInstanceTemplateConfiguration tpl, Map<String, String> groupToNode, String uuid, ProductManifest pmf) {
         InstanceConfiguration cfg = instanceDto.instanceConfiguration;
         TemplateVariableResolver tvr = new TemplateVariableResolver(tpl.directlyUsedTemplateVars, responseFile.fixedVariables,
                 null);
@@ -227,18 +226,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         sanitizeInstanceTemplateReferenceDescriptor(responseFile);
 
         // find, import and verify product
-        ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
-        ProductDto productDto = InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(null)).orElseGet(() -> {
-            LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
-            req.productId = responseFile.productId;
-            req.version = InstanceTemplateHelper.getInitialProductVersionRegex(responseFile);
-            req.regex = true;
-            req.instanceTemplate = responseFile.templateName;
-            SoftwareRepositoryResourceImpl srr = rc.initResource(new SoftwareRepositoryResourceImpl());
-            ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
-            pr.copyProduct(toImport.groupOrRepo, toImport.key.getName(), List.of(toImport.key.getTag()));
-            return InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(null)).get();
-        });
+        ProductDto productDto = findOrImportProduct(group, responseFile, null);
 
         // find and verify all group mappings and whether all variables are set for each required group
         FlattenedInstanceTemplateConfiguration tpl = getInstanceTemplateConfig(productDto.instanceTemplates,
@@ -743,5 +731,33 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         }
 
         return defaultValue;
+    }
+
+    /**
+     * find, import and verify product
+     *
+     * @param group the identifier of the instance group
+     * @param responseFile the descriptor based on which we are looking up the product
+     * @param productName optional filter, if not <code>null</code>  will look up products with that name
+     * @return a productDto matching the responseFile
+     */
+    private ProductDto findOrImportProduct(String group, InstanceTemplateReferenceDescriptor responseFile,
+            String productName) {
+        ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
+        // searching in the existing product list (pr.list)
+        return InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(productName)).orElseGet(() -> {
+            // create a product request
+            LatestProductVersionRequestDto req = new LatestProductVersionRequestDto();
+            req.productId = responseFile.productId;
+            req.version = InstanceTemplateHelper.getInitialProductVersionRegex(responseFile);
+            req.regex = true;
+            req.instanceTemplate = responseFile.templateName;
+            SoftwareRepositoryResourceImpl srr = rc.initResource(new SoftwareRepositoryResourceImpl());
+            ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
+            // import it
+            pr.copyProduct(toImport.groupOrRepo, toImport.key.getName(), List.of(toImport.key.getTag()));
+            // look it up again
+            return InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(productName)).get();
+        });
     }
 }

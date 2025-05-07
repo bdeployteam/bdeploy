@@ -332,8 +332,6 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         instanceUpdateTemplate.defaultMappings = List.of(mapping);
         TestProductFactory.writeToFile(instanceUpdateTemplatePath, instanceUpdateTemplate);
 
-        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--version=1", "--install");
-        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--version=1", "--activate");
         remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--update", "--uuid=" + uuid, "--name=UPDATED",
                 "--purpose=PRODUCTIVE", "--template=" + instanceUpdateTemplatePath);
 
