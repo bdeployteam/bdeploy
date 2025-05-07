@@ -101,6 +101,9 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     @Override
     public void activate(Key key) {
         BHive hive = root.getHive();
+        if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+            throw new WebApplicationException("Activation failed because key " + key + " is not installed.");
+        }
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm,
