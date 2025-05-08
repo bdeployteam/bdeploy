@@ -122,7 +122,7 @@ export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewI
     }
     this.plugins.load(this.plugin, this.findEditor().modulePath).then((m) => {
       this.currentValue = getPreRenderable(this.value);
-      this.editor = new m.default(this.plugins.getApi(this.plugin)) as EditorPlugin;
+      this.editor = new m.default(this.plugins.getApi(this.plugin));
 
       this.cd.markForCheck();
     });

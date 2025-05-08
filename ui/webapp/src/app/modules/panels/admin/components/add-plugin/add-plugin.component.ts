@@ -24,7 +24,7 @@ export class AddPluginComponent {
       return null;
     }
 
-    const details = result.detail as PluginInfoDto;
+    const details = result.detail;
     return 'Added ' + details.name + ' ' + details.version;
   }
 

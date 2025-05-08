@@ -70,15 +70,13 @@ export class HistoryDiffFieldComponent implements OnInit, OnChanges {
 
   private determineMaskLength(value: unknown): number {
     if(typeof value === 'string') {
-      return (value as string).length;
+      return value.length;
     } else if(typeof value === 'object') {
         const length = (value as Record<string, unknown>)['length'];
         if(typeof length === 'number') {
-          return length as number;
+          return length;
         }
     }
-
     return 1;
   }
-
 }

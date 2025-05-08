@@ -22,7 +22,7 @@ export class OverallStatusColumnComponent implements CellComponent<InstanceDto, 
   @Input() column: BdDataColumn<InstanceDto, InstanceOverallStatusDto>;
 
   protected getStatus() {
-    const s = this.column.data(this.record) as InstanceOverallStatusDto;
+    const s = this.column.data(this.record);
     if (s?.timestamp) {
       if (this.cfg.getCorrectedNow() - s.timestamp > STATUS_TIMEOUT) {
         return null;
