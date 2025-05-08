@@ -60,7 +60,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDest
   protected suggestedIds: string[];
 
   private subscription: Subscription;
-  private instancesUsing$ = new BehaviorSubject<InstanceDto[]>([]);
+  private readonly instancesUsing$ = new BehaviorSubject<InstanceDto[]>([]);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) tb: BdDialogToolbarComponent;
