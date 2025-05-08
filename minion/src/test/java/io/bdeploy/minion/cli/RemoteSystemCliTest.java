@@ -24,7 +24,7 @@ import io.bdeploy.ui.cli.RemoteInstanceTool;
 import io.bdeploy.ui.cli.RemoteSystemTool;
 
 @ExtendWith(TestMinion.class)
-public class RemoteSystemCliTest extends BaseMinionCliTest {
+class RemoteSystemCliTest extends BaseMinionCliTest {
 
     @Test
     void testSystemCreatedWithTemplate(RemoteService remote, @TempDir Path tmp) throws IOException {
@@ -50,29 +50,29 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
         systemTemplate.instances = new ArrayList<>();
         // instance template with unset properties - unset in system template - check defaults
-        InstanceTemplateReferenceDescriptor referenceWoOverrides = TestProductFactory.generateInstanceTemplateReference(
-                "no overrides instance", smallInstanceTemplate.name);
+        InstanceTemplateReferenceDescriptor referenceWoOverrides = TestProductFactory
+                .generateInstanceTemplateReference("no overrides instance", smallInstanceTemplate.name);
         referenceWoOverrides.autoStart = null;
         referenceWoOverrides.autoUninstall = null;
         systemTemplate.instances.add(referenceWoOverrides);
 
         // instance template with set values, but no overrides in the system template
-        InstanceTemplateReferenceDescriptor referenceWithInstanceValues = TestProductFactory.generateInstanceTemplateReference(
-                "instance with instance values", instanceTemplate.name);
+        InstanceTemplateReferenceDescriptor referenceWithInstanceValues = TestProductFactory
+                .generateInstanceTemplateReference("instance with instance values", instanceTemplate.name);
         referenceWithInstanceValues.autoStart = null;
         referenceWithInstanceValues.autoUninstall = null;
         systemTemplate.instances.add(referenceWithInstanceValues);
 
         // instance template with unset values, but set in system
-        InstanceTemplateReferenceDescriptor referenceWithSystemValues = TestProductFactory.generateInstanceTemplateReference(
-                "instance with system values", smallInstanceTemplate.name);
+        InstanceTemplateReferenceDescriptor referenceWithSystemValues = TestProductFactory
+                .generateInstanceTemplateReference("instance with system values", smallInstanceTemplate.name);
         referenceWithSystemValues.autoStart = true;
         referenceWithSystemValues.autoUninstall = false;
         systemTemplate.instances.add(referenceWithSystemValues);
 
         // this attempts to have all properties set and check which ones are used: instance or system
-        InstanceTemplateReferenceDescriptor referenceWithOverrides = TestProductFactory.generateInstanceTemplateReference(
-                "instance with overrides", instanceTemplate.name);
+        InstanceTemplateReferenceDescriptor referenceWithOverrides = TestProductFactory
+                .generateInstanceTemplateReference("instance with overrides", instanceTemplate.name);
         referenceWithOverrides.autoStart = false;
         referenceWithOverrides.autoUninstall = true;
         systemTemplate.instances.add(referenceWithOverrides);
@@ -148,5 +148,4 @@ public class RemoteSystemCliTest extends BaseMinionCliTest {
         assertEquals("", instance.get("AutoStart"));
         assertEquals("*", instance.get("AutoUninstall"));
     }
-
 }
