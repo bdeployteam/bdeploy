@@ -11,7 +11,7 @@ class DelayedVariableResolverTest {
     @Test
     void testDelayedVariableResolver() {
         VariableResolver parent1 = s -> s;
-        VariableResolver parent2 = s -> s.toUpperCase();
+        VariableResolver parent2 = String::toUpperCase;
         VariableResolver parent3 = s -> "###" + s + "###";
 
         var resolver1 = new DelayedVariableResolver(parent1);
