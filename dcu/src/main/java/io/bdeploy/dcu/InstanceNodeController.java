@@ -366,14 +366,13 @@ public class InstanceNodeController {
         SortedMap<String, TreeSet<String>> requiredInstanceKeys = new TreeMap<>();
         for (InstanceNodeController inc : toKeep) {
             // add all applications and all of their dependencies as resolved locally.
-            inc.getManifest().getConfiguration().applications.stream().peek(a -> {
+            inc.getManifest().getConfiguration().applications.stream().forEach(a -> {
                 SortedSet<String> deps = ApplicationManifest.of(source, a.application, null).getDescriptor().runtimeDependencies;
-                if (deps == null) {
-                    return;
+                if (deps != null) {
+                    deps.stream().map(d -> LocalDependencyFetcher.resolveSingleLocal(source, d, runningOs))
+                            .map(Manifest.Key::directoryFriendlyName).forEach(requiredKeys::add);
                 }
-                deps.stream().map(d -> LocalDependencyFetcher.resolveSingleLocal(source, d, runningOs))
-                        .map(Manifest.Key::directoryFriendlyName).forEach(requiredKeys::add);
-            }).forEach(a -> {
+
                 if (a.pooling == ApplicationPoolType.GLOBAL || a.pooling == null) {
                     requiredKeys.add(a.application.directoryFriendlyName());
                 } else if (a.pooling == ApplicationPoolType.LOCAL) {
