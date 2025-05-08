@@ -39,13 +39,13 @@ class InstanceAndSystemVariableResolverTest {
 
         node.mergeVariables(instance, system, null);
 
-        assertEquals(node.variables.get("instance.var"), "instanceVariableValue1");
-        assertEquals(node.variables.get("system.var"), "systemVariableValue1");
-        assertEquals(node.variables.get("common.var"), "systemVariableValue2");
+        assertEquals("instanceVariableValue1", node.variables.get("instance.var"));
+        assertEquals("systemVariableValue1", node.variables.get("system.var"));
+        assertEquals("systemVariableValue2", node.variables.get("common.var"));
 
         InstanceAndSystemVariableResolver resolver = new InstanceAndSystemVariableResolver(node);
-        assertEquals(TemplateHelper.process("{{X:instance.var}}", resolver), "instanceVariableValue1");
-        assertEquals(TemplateHelper.process("{{X:system.var}}", resolver), "systemVariableValue1");
-        assertEquals(TemplateHelper.process("{{X:common.var}}", resolver), "systemVariableValue2");
+        assertEquals("instanceVariableValue1", TemplateHelper.process("{{X:instance.var}}", resolver));
+        assertEquals("systemVariableValue1", TemplateHelper.process("{{X:system.var}}", resolver));
+        assertEquals("systemVariableValue2", TemplateHelper.process("{{X:common.var}}", resolver));
     }
 }
