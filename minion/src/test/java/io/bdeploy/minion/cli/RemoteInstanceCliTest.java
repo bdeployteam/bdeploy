@@ -251,6 +251,9 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
 
         /* let's delete both instances */
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--uuid=" + bothInstances, "--delete", "--yes");
+        assertEquals(2, result.size());
+        assertEquals("Deleted", result.get(0).get("Result"));
+        assertEquals("Deleted", result.get(1).get("Result"));
 
         result = remote(remote, RemoteInstanceTool.class, "--instanceGroup=demo", "--list", "--all");
         assertEquals(0, result.size());
@@ -262,8 +265,8 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
         var product = TestProductFactory.generateProduct();
         // create one template with default values, and one without
         InstanceTemplateDescriptor smallInstanceTemplate = TestProductFactory.generateMinimalInstanceTemplate("Small instance");
-        product.instanceTemplates = Map.of("min-instance-template.yaml", smallInstanceTemplate,
-                "instance-template.yaml", TestProductFactory.generateInstanceTemplate());
+        product.instanceTemplates = Map.of("min-instance-template.yaml", smallInstanceTemplate, "instance-template.yaml",
+                TestProductFactory.generateInstanceTemplate());
         product.descriptor.instanceTemplates = List.of("min-instance-template.yaml", "instance-template.yaml");
 
         createInstanceGroup(remote);
@@ -271,16 +274,16 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
 
         // Create instance template without any values set
         Path templateWithDefaultsPath = tmp.resolve("min-instance-response.yaml");
-        InstanceTemplateReferenceDescriptor templateWithDefaults = TestProductFactory.generateInstanceTemplateReference(
-                "no overrides instance", smallInstanceTemplate.name);
+        InstanceTemplateReferenceDescriptor templateWithDefaults = TestProductFactory
+                .generateInstanceTemplateReference("no overrides instance", smallInstanceTemplate.name);
         templateWithDefaults.autoStart = null;
         templateWithDefaults.autoUninstall = null;
         TestProductFactory.writeToFile(templateWithDefaultsPath, templateWithDefaults);
-        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_1",
-                "--purpose=TEST", "--template=" + templateWithDefaultsPath);
+        remote(remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--create", "--name=INSTANCE_1", "--purpose=TEST",
+                "--template=" + templateWithDefaultsPath);
 
         // Create the instance with overrides
-        Path templateWithOverridePath= tmp.resolve("min-instance-response.yaml");
+        Path templateWithOverridePath = tmp.resolve("min-instance-response.yaml");
         InstanceTemplateReferenceDescriptor templateWithOverrides = TestProductFactory.generateInstanceTemplateReference();
         templateWithOverrides.autoStart = !product.instanceTemplates.get("instance-template.yaml").autoStart;
         templateWithOverrides.autoUninstall = !product.instanceTemplates.get("instance-template.yaml").autoUninstall;
@@ -289,8 +292,8 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
                 "--purpose=PRODUCTIVE", "--template=" + templateWithOverridePath);
 
         // Check if the instances was set up correctly
-        Map<String, TestCliTool.StructuredOutputRow> output = doRemoteAndIndexOutputOn("Name",
-                remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list");
+        Map<String, TestCliTool.StructuredOutputRow> output = doRemoteAndIndexOutputOn("Name", remote, RemoteInstanceTool.class,
+                "--instanceGroup=GROUP_NAME", "--list");
         assertEquals(2, output.size());
         TestCliTool.StructuredOutputRow instanceWithDefaults = output.get("INSTANCE_1");
         assertEquals("Instance From TestProductFactory", instanceWithDefaults.get("Description"));
@@ -337,8 +340,8 @@ class RemoteInstanceCliTest extends BaseMinionCliTest {
 
         // Check if the instance was updated correctly
         Map<String, TestCliTool.StructuredOutputRow> updatedInstances = doRemoteAndIndexOutputOn(
-                row -> row.get("Name") + "-" + row.get("Version"),
-                remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME", "--list", "--all");
+                row -> row.get("Name") + "-" + row.get("Version"), remote, RemoteInstanceTool.class, "--instanceGroup=GROUP_NAME",
+                "--list", "--all");
         assertEquals(3, updatedInstances.size());
         TestCliTool.StructuredOutputRow latestVersionRow = updatedInstances.get("INSTANCE_1-2");
         assertEquals("", latestVersionRow.get("Installed"));
