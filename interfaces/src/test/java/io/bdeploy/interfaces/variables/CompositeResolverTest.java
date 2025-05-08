@@ -138,7 +138,7 @@ class CompositeResolverTest {
         String envVar = Variables.ENVIRONMENT_VARIABLE.getPrefix() + "unknown.param";
         Arrays.stream(resolvers).forEach(resolver -> assertEquals("", resolver.apply(envVar)));
         Arrays.stream(Variables.values())//
-                .filter(var -> var != Variables.ENVIRONMENT_VARIABLE)//
+                .filter(variable -> variable != Variables.ENVIRONMENT_VARIABLE)//
                 .map(Variables::getPrefix)//
                 .map(prefix -> prefix + "unknown.param")//
                 .forEach(param -> Arrays.stream(resolvers).forEach(resolver -> assertNull(resolver.apply(param))));

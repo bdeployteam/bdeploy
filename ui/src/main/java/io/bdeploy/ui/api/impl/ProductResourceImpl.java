@@ -485,13 +485,13 @@ public class ProductResourceImpl implements ProductResource {
                         }
                         return aHasDefault ? 1 : -1;
                     })//
-                    .map(var -> new TemplateVariableFixedValueOverride(var.id,
-                            var.defaultValue != null ? var.defaultValue : "<" + var.type + " VALUE>"))
+                    .map(tVar -> new TemplateVariableFixedValueOverride(tVar.id,
+                            tVar.defaultValue != null ? tVar.defaultValue : "<" + tVar.type + " VALUE>"))
                     .collect(Collectors.toUnmodifiableSet());
         } else {
             tempVars = tempVarStream//
-                    .filter(var -> var.defaultValue == null)
-                    .map(var -> new TemplateVariableFixedValueOverride(var.id, "<" + var.type + " VALUE>"))//
+                    .filter(tVar -> tVar.defaultValue == null)
+                    .map(tVar -> new TemplateVariableFixedValueOverride(tVar.id, "<" + tVar.type + " VALUE>"))//
                     .collect(Collectors.toUnmodifiableSet());
         }
 
