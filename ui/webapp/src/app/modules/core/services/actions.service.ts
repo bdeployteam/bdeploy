@@ -18,6 +18,8 @@ import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
 import { EMPTY_SCOPE, ObjectChangesService } from './object-changes.service';
 
+type ActionAttribute = null | string | string[];
+
 @Injectable({
   providedIn: 'root',
 })
@@ -184,9 +186,9 @@ export class ActionsService {
 
   private actionMatches(
     action: ActionBroadcastDto,
-    groups: string | string[] | null,
-    instances: string | string[] | null,
-    items: string | string[] | null,
+    groups: ActionAttribute,
+    instances: ActionAttribute,
+    items: ActionAttribute,
   ): boolean {
     return (
       this.actionAttributeMatch(action.action.bhive, groups) &&
@@ -195,7 +197,7 @@ export class ActionsService {
     );
   }
 
-  private actionAttributeMatch(actionAttribute: string, allowedAttributes: string | string[] | null): boolean {
+  private actionAttributeMatch(actionAttribute: string, allowedAttributes: ActionAttribute): boolean {
     if (!allowedAttributes) {
       return true; // ignore check if allowed = null;
     }
