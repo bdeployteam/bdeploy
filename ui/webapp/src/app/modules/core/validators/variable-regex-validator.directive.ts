@@ -20,7 +20,7 @@ export class VariableRegexValidator implements Validator {
   @Input('appVariableRegexValidator') context: VariableRegexValidationContext;
 
   public validate(control: AbstractControl): ValidationErrors | null {
-    if (!this.context || !this.context.regex) {
+    if (!this.context?.regex) {
       return null;
     }
     const preview = getRenderPreview(

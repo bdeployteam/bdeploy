@@ -144,7 +144,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   }
 
   public hasErrorMessage(): boolean {
-    return !!this.errorFallback || (this.ngControl && this.ngControl.invalid);
+    return !!this.errorFallback || this.ngControl?.invalid;
   }
 
   public getErrorMessage() {
