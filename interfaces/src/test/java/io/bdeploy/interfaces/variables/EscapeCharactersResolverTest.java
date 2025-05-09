@@ -9,7 +9,7 @@ import io.bdeploy.common.util.VariableResolver;
 class EscapeCharactersResolverTest {
 
     private static final VariableResolver PARENT1 = s -> s;
-    private static final VariableResolver PARENT2 = s -> s.toUpperCase();
+    private static final VariableResolver PARENT2 = String::toUpperCase;
     private static final VariableResolver PARENT3 = s -> "###" + s + "###";
 
     @Test

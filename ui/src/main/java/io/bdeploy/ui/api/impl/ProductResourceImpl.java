@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -124,8 +125,8 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         SortedSet<Key> scan = ProductManifest.scan(hive);
-        List<ProductDto> result = scan.stream().map(k -> getProductManifest(k)).filter(manifest -> manifest != null)
-                .filter(filter).map(ProductDto::create).collect(Collectors.toList());
+        List<ProductDto> result = scan.stream().map(this::getProductManifest).filter(Objects::nonNull).filter(filter)
+                .map(ProductDto::create).collect(Collectors.toList());
         if (!result.isEmpty()) {
             Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
             result.sort((a, b) -> {
