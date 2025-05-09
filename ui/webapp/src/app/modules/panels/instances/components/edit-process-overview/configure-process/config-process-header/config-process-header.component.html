@@ -2,34 +2,36 @@
   <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[300px]">
     <div class="flex flex-col gap-2.5">
       <span>Select the allowed configuration directories to be mirrored to the client installation.</span>
-      <mat-tree [dataSource]="dirDataSource" [treeControl]="dirTreeControl" class="overflow-auto max-h-[400px]">
+      <mat-tree [dataSource]="dirDataSource" #tree [childrenAccessor]="childrenAccessor" class="overflow-auto max-h-[400px]">
+        <!-- this is a leaf node -->
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
           <button mat-icon-button disabled> </button>
-          <mat-checkbox [checked]="dirSelection.isSelected(node)" (change)="dirSelection.toggle(node);"
-            >{{node.name}}</mat-checkbox
-            >
-          </mat-tree-node>
+          <mat-checkbox [checked]="dirSelection.isSelected(node)" (change)="dirSelection.toggle(node);">
+            {{node.name}}
+          </mat-checkbox>
+        </mat-tree-node>
 
-          <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
-            <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'toggle ' + node.filename">
-              <mat-icon> {{dirTreeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}} </mat-icon>
-            </button>
-            <mat-checkbox
-              [checked]="descendantsAllSelected(node)"
-              [indeterminate]="descendantsPartiallySelected(node)"
-              (change)="dirItemSelectionToggle(node)"
-              >{{node.name}}</mat-checkbox
-              >
-            </mat-tree-node>
-          </mat-tree>
-          <div class="flex flex-row-reverse">
-            <app-bd-button text="Apply" [collapsed]="false" color="primary" (click)="doApplyDirectories()"></app-bd-button>
-          </div>
-        </div>
-      </mat-card>
-    </ng-template>
+        <!-- this is a node with children -->
+        <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+          <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'toggle ' + node.filename">
+            <mat-icon> {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}} </mat-icon>
+          </button>
+          <mat-checkbox
+            [checked]="descendantsAllSelected(node)"
+            [indeterminate]="descendantsPartiallySelected(node)"
+            (change)="dirItemSelectionToggle(node)">
+            {{node.name}}
+          </mat-checkbox>
+        </mat-tree-node>
+      </mat-tree>
+      <div class="flex flex-row-reverse">
+        <app-bd-button text="Apply" [collapsed]="false" color="primary" (click)="doApplyDirectories()"></app-bd-button>
+      </div>
+    </div>
+  </mat-card>
+</ng-template>
 
-    <ng-template #directoryHelp>
+<ng-template #directoryHelp>
       <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[1024px]">
         <div class="flex flex-col gap-2.5">
           <p>
@@ -45,7 +47,6 @@
         </div>
       </mat-card>
     </ng-template>
-
     <form #form="ngForm">
       <div class="local-header">
         @if (app && edit.process$ | async; as process) {
@@ -127,13 +128,12 @@
                 name="configDirs"
                 [(ngModel)]="process.processControl.configDirs"
                 errorDisplay="immediate"
-          matTooltip="A comma separated list of allowed directories for this
-          client application within the instance's configuration
-          directory."
+                matTooltip="A comma separated list of allowed directories for this
+                client application within the instance's configuration
+                directory."
                 matTooltipShowDelay="1000"
                 appEditItemInListValidator
-                [allowedValues]="dirFlatAllowedValues"
-                >
+                [allowedValues]="dirFlatAllowedValues">
                 <div class="flex gap-2.5">
                   <mat-icon
                     matTooltip="Additional Information"

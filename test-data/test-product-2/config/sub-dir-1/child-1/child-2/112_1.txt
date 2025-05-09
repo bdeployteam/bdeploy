@@ -1,0 +1,2 @@
+This is a configuration file, for exemplifying directories.
+The name of the file tracks the number and level of the directory it is in.
