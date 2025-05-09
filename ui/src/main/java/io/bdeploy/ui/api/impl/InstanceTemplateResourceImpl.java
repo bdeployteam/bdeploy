@@ -723,13 +723,12 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         return result;
     }
 
-    private boolean getFirstNonNull(boolean defaultValue, Boolean... valueInOrderOfPriority) {
+    private static boolean getFirstNonNull(boolean defaultValue, Boolean... valueInOrderOfPriority) {
         for (Boolean value : valueInOrderOfPriority) {
             if (null != value) {
                 return value;
             }
         }
-
         return defaultValue;
     }
 
@@ -738,11 +737,10 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
      *
      * @param group the identifier of the instance group
      * @param responseFile the descriptor based on which we are looking up the product
-     * @param productName optional filter, if not <code>null</code>  will look up products with that name
+     * @param productName optional filter, if not <code>null</code> will look up products with that name
      * @return a productDto matching the responseFile
      */
-    private ProductDto findOrImportProduct(String group, InstanceTemplateReferenceDescriptor responseFile,
-            String productName) {
+    private ProductDto findOrImportProduct(String group, InstanceTemplateReferenceDescriptor responseFile, String productName) {
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
         // searching in the existing product list (pr.list)
         return InstanceTemplateHelper.findMatchingProduct(responseFile, pr.list(productName)).orElseGet(() -> {
