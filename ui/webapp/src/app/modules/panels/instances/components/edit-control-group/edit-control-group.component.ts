@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { combineLatest, debounceTime, Observable, of, Subscription, tap } from 'rxjs';
+import { combineLatest, Observable, of, Subscription, tap } from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
@@ -38,7 +38,7 @@ import { AsyncPipe } from '@angular/common';
     templateUrl: './edit-control-group.component.html',
   imports: [MatCard, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdNotificationCardComponent, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, BdPopupDirective, BdButtonComponent, MatDivider, AsyncPipe]
 })
-export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit {
+export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDestroy {
   private readonly areas = inject(NavAreasService);
   protected readonly cfg = inject(ConfigService);
   protected readonly edit = inject(InstanceEditService);
@@ -48,7 +48,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
-  private subscription: Subscription;
+  private subscription?: Subscription;
 
   protected handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
   protected waitTypeValues = [
@@ -83,17 +83,6 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     );
   }
 
-  ngAfterViewInit(): void {
-    if (!this.form) {
-      return;
-    }
-    this.subscription.add(
-      this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
-        this.hasPendingChanges = this.isDirty();
-      })
-    );
-  }
-
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
   }
@@ -107,7 +96,10 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
   }
 
   protected onSave() {
-    this.doSave().subscribe(() => this.tb.closePanel());
+    this.doSave().subscribe(() => {
+      this.tb.closePanel();
+      this.subscription?.unsubscribe();
+    });
   }
 
   public doSave(): Observable<unknown> {
@@ -125,7 +117,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     this.removeGroup();
     // if this was the last group, we trigger creation of the default group.
     this.edit.getLastControlGroup(this.node);
-    this.edit.conceal('Remove Control Group ' + this.group.name);
+    this.edit.conceal('Remove Control Group ' + this.origGroup.name);
     this.tb.closePanel();
   }
 
@@ -140,7 +132,7 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDes
     }
 
     this.node.controlGroups.splice(
-      this.node.controlGroups.findIndex((cg) => cg.name === this.group.name),
+      this.node.controlGroups.findIndex((cg) => cg.name === this.origGroup.name),
       1
     );
   }

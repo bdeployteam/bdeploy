@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { combineLatest, debounceTime, Observable, of, Subscription, tap } from 'rxjs';
+import { combineLatest, Observable, of, Subscription, tap } from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
@@ -45,7 +45,7 @@ const GROUP_TEMPLATE: ProcessControlGroupConfiguration = {
     templateUrl: './add-control-group.component.html',
   imports: [MatCard, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdNotificationCardComponent, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, BdPopupDirective, BdButtonComponent, AsyncPipe]
 })
-export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
+export class AddControlGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
   protected readonly cfg = inject(ConfigService);
   protected readonly edit = inject(InstanceEditService);
@@ -55,7 +55,7 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
-  private subscription: Subscription;
+  private subscription?: Subscription;
 
   protected handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
   protected waitTypeValues = [
@@ -67,7 +67,6 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
   protected newGroup: ProcessControlGroupConfiguration = cloneDeep(GROUP_TEMPLATE);
   protected node: InstanceNodeConfiguration;
   protected nodeName: string;
-  protected hasPendingChanges: boolean;
 
   ngOnInit(): void {
     this.subscription = this.areas.registerDirtyable(this, 'panel');
@@ -83,15 +82,6 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
     );
   }
 
-  ngAfterViewInit(): void {
-    if (!this.form) {
-      return;
-    }
-    this.subscription = this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
-      this.hasPendingChanges = this.isDirty();
-    });
-  }
-
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
   }
@@ -105,7 +95,10 @@ export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   protected onSave() {
-    this.doSave().subscribe(() => this.tb.closePanel());
+    this.doSave().subscribe(() => {
+      this.tb.closePanel();
+      this.subscription?.unsubscribe();
+    });
   }
 
   public doSave(): Observable<unknown> {

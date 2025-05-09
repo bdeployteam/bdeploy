@@ -97,7 +97,7 @@
               icon="done"
               [collapsed]="false"
               color="primary"
-              [disabled]="!hasPendingChanges || form.invalid || !(servers.isCurrentInstanceSynchronized$ | async)"
+              [disabled]="!isDirty() || form.invalid || !(servers.isCurrentInstanceSynchronized$ | async)"
             ></app-bd-button>
           </div>
         }
