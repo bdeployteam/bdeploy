@@ -1,6 +1,6 @@
 <div
 class="w-full"
-[matTooltip]="tooltip ?? tooltipPosition ? text : null"
+[matTooltip]="tooltip ?? (tooltipPosition ? text : null)"
 [matTooltipPosition]="tooltipPosition ?? 'below'"
 >
 <button
