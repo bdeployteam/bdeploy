@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class URLishTest {
 
@@ -81,5 +83,17 @@ class URLishTest {
         assertEquals("/some?query=value", u.pathAndQuery);
 
         assertEquals("scheme://bdeploy:1/some?query=value", u.toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "0", "1", "65535" })
+    void testValidPortValues(String port) {
+        String urlString = "scheme://host:" + port + "/path";
+        URLish u = new URLish(urlString);
+        assertEquals("scheme://", u.scheme);
+        assertEquals("host", u.hostname);
+        assertEquals(port, u.port);
+        assertEquals("/path", u.pathAndQuery);
+        assertEquals(urlString, u.toString());
     }
 }
