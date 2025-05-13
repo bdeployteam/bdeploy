@@ -596,6 +596,9 @@ public class ProductUpdateService {
 
         // check allowed values per type.
         switch (paramDesc.type) {
+            case STRING, PASSWORD, ENVIRONMENT:
+                // No validation for these types
+                break;
             case BOOLEAN:
                 if (!"true".equals(stringVal) && !"false".equals(stringVal)) {
                     result.add(new ApplicationValidationDto(process.id, paramDesc.id,
@@ -619,8 +622,6 @@ public class ProductUpdateService {
                 } catch (IllegalArgumentException e) {
                     result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Value must be URL-like."));
                 }
-                break;
-            default:
                 break;
         }
     }
