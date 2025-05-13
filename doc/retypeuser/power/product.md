@@ -354,9 +354,9 @@ _Default:_ `STRING`
 
 _Mandatory:_ no
 
-_Description:_ Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. Since _5.6.0_, `ENVIRONMENT` is available as an additional type.
+_Description:_ The Type of the parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`, `URL` and `ENVIRONMENT`.
 
-The `CLIENT_PORT` and `SERVER_PORT` types are treated like `NUMERIC` parameters throughout the whole application, with the exception of the dialogs that deal with ports specifically.
+`CLIENT_PORT`, `SERVER_PORT` and `URL` are special because they can be modified via some port-specific dialogs, e.g. the port-shift functionality on the instance configuration page.
 
 The `ENVIRONMENT` type will cause a parameter to be put in the process' environment instead of its command line. The name of the environment variable is specified using the `parameter` field. The fields `hasValue`, `valueAsSeparateArg` and `valueSeparator` must not be set on `ENVIRONMENT` parameters, and are ignored. Instead the Operating System specific Environment Variable handling is applied.
 
