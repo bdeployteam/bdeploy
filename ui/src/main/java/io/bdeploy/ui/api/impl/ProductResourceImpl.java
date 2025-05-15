@@ -60,6 +60,7 @@ import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescri
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateGroupMapping;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
+import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
@@ -399,7 +400,7 @@ public class ProductResourceImpl implements ProductResource {
                 igc.productToRepo = new HashMap<>();
             }
             igc.productToRepo.put(productName, softwareRepository);
-            igr.update(this.group, igc);
+            new InstanceGroupManifest(hive).update(igc);
 
             ProductManifest.invalidateScanCache(hive);
         }
