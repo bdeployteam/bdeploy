@@ -11,7 +11,8 @@ import {
   InstanceNodeConfigurationDto,
   MinionDto,
   OperatingSystem,
-  TemplateVariableType
+  ProcessControlConfiguration,
+  TemplateVariableType,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ClipboardData, ClipboardService } from 'src/app/modules/core/services/clipboard.service';
@@ -20,17 +21,13 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../services/process-edit.service';
 import { AppTemplateNameComponent } from './app-template-name/app-template-name.component';
-import {
-  BdFormTemplateVariableComponent
-} from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { BdFormTemplateVariableComponent } from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
 import { FormsModule } from '@angular/forms';
 
 import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
-import {
-  BdNotificationCardComponent
-} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 
@@ -57,11 +54,21 @@ const colAppName: BdDataColumn<AppRow, string> = {
 };
 
 @Component({
-    selector: 'app-add-process',
-    templateUrl: './add-process.component.html',
-    styleUrls: ['./add-process.component.css'],
-    encapsulation: ViewEncapsulation.None,
-  imports: [BdFormTemplateVariableComponent, FormsModule, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdButtonComponent, BdNotificationCardComponent, BdDataTableComponent, AsyncPipe]
+  selector: 'app-add-process',
+  templateUrl: './add-process.component.html',
+  styleUrls: ['./add-process.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    BdFormTemplateVariableComponent,
+    FormsModule,
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdButtonComponent,
+    BdNotificationCardComponent,
+    BdDataTableComponent,
+    AsyncPipe,
+  ],
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
   private readonly edit = inject(ProcessEditService);
@@ -75,6 +82,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     data: (r) => `Add ${r.template ? 'template ' + r.template.name : r.app.appDisplayName} to selected node.`,
     icon: (r) => (r.template ? 'auto_fix_normal' : 'add'),
     action: (r) => this.addProcess(r),
+    actionDisabled: (r) => !this.validateTemplate(r),
+    tooltip: (r) => this.calculateTooltip(r),
+    tooltipPosition: 'left',
     width: '42px',
   };
 
@@ -169,7 +179,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         this.edit.node$.pipe(distinctUntilChanged()),
         this.instanceEdit.nodes$,
         this.clipboardService.clipboard$,
-      ]).subscribe(([node, nodeConfigs, cb]) => this.readFromClipboard(node, nodeConfigs[node.nodeName], cb)),
+      ]).subscribe(([node, nodeConfigs, cb]) => this.readFromClipboard(node, nodeConfigs[node.nodeName], cb))
     );
   }
 
@@ -179,6 +189,44 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   protected doPaste(cfg: ApplicationConfiguration) {
     this.edit.addProcessPaste(cfg);
+  }
+
+  private validateTemplate(row: AppRow): boolean {
+    if (!row.template) {
+      return true;
+    }
+    const processControlConfig = row.template.processControl as ProcessControlConfiguration;
+    if (processControlConfig) {
+      for (const app of row.app.applications) {
+        const processControlDescriptor = app.descriptor.processControl;
+        if (processControlConfig.autostart && !processControlDescriptor.supportsAutostart) {
+          return false;
+        }
+        if (processControlConfig.keepAlive && !processControlDescriptor.supportsKeepAlive) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private calculateTooltip(row: AppRow): string {
+    if (!row.template) {
+      return `Add '${row.app.appDisplayName}' to selected node`;
+    }
+    const processControlConfig = row.template.processControl as ProcessControlConfiguration;
+    if (processControlConfig) {
+      for (const app of row.app.applications) {
+        const processControlDescriptor = app.descriptor.processControl;
+        if (processControlConfig.autostart && !processControlDescriptor.supportsAutostart) {
+          return `Template '${row.template.name}' cannot be used because it attempts to set 'autostart' to true, which is forbidden by the descriptor of the application`;
+        }
+        if (processControlConfig.keepAlive && !processControlDescriptor.supportsKeepAlive) {
+          return `Template '${row.template.name}' cannot be used because it attempts to set 'keepAlive' to true, which is forbidden by the descriptor of the application`;
+        }
+      }
+    }
+    return `Add template '${row.template.name}' to selected node`;
   }
 
   private readFromClipboard(node: InstanceNodeConfigurationDto, minion: MinionDto, cb: ClipboardData) {
@@ -271,7 +319,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   private validateHasAllVariables(
     template: FlattenedApplicationTemplateConfiguration,
-    variables: Record<string, string>,
+    variables: Record<string, string>
   ) {
     for (const v of template.templateVariables) {
       if (!variables[v.id]) {

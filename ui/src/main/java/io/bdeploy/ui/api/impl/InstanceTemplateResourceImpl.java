@@ -601,6 +601,18 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         // now apply from template in case things are set.
         applyFromPCTplMap(cfg.processControl, reqApp.processControl);
+
+        // verify process control validity
+        var processControlDescriptor = appDesc.processControl;
+        var processControlConfiguration = cfg.processControl;
+        if (!processControlDescriptor.supportsKeepAlive && processControlConfiguration.keepAlive) {
+            throw new WebApplicationException("Invalid application template '" + reqApp.name
+                    + "'. Template has 'keepAlive' enabled, but its descriptor forbids it.", Status.EXPECTATION_FAILED);
+        }
+        if (!processControlDescriptor.supportsAutostart && processControlConfiguration.autostart) {
+            throw new WebApplicationException("Invalid application template '" + reqApp.name
+                    + "'. Template has 'autostart' enabled, but its descriptor forbids it.", Status.EXPECTATION_FAILED);
+        }
     }
 
     private static void applyFromPCTplMap(ProcessControlConfiguration target, Map<String, Object> tpl) {
