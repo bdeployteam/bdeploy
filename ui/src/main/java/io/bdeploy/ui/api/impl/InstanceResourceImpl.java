@@ -734,10 +734,6 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
             }
 
-            ProductManifest pm = current;
-            List<ApplicationManifest> currentApps = current == null ? null
-                    : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
-
             ProductManifest target = ProductManifest.of(hive,
                     new Manifest.Key(state.config.config.product.getName(), productTag));
 
@@ -760,6 +756,10 @@ public class InstanceResourceImpl implements InstanceResource {
 
             List<ApplicationManifest> targetApps = target.getApplications().stream()
                     .map(k -> ApplicationManifest.of(hive, k, target)).toList();
+
+            ProductManifest pm = current;
+            List<ApplicationManifest> currentApps = current == null ? null
+                    : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
 
             return pus.update(state, target, current, targetApps, currentApps);
         }
