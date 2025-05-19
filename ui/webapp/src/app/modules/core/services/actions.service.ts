@@ -133,7 +133,7 @@ export class ActionsService {
 
   public action(
     /**
-     * Which action should be listened for.
+     * Which actions should be listened for.
      */
     types: Actions[],
 
