@@ -175,9 +175,10 @@ export class ActionsService {
       instObs,
       itemObs,
     ]).pipe(
-      skipWhile(([actions]) => !actions?.length),
-      map(([actions, grps, instances, items]) => actions.filter((a) => this.actionMatches(a, grps, instances, items))),
-      map((a) => !!a?.length),
+      map(
+        ([actions, grps, instances, items]) =>
+          !!actions?.filter((a) => this.actionMatches(a, grps, instances, items)).length
+      )
     );
 
     // now provide a combined observable for local and server state
