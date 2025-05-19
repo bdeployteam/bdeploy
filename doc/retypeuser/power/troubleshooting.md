@@ -131,6 +131,14 @@ certificates issued by a private CA will cause issues and more work to get them 
 Typically `Connection refused`, `Connection closed`, `Connection reset` and other connection related issues are *not*
 related to BDeploy. Please troubleshoot the network connection(s) between the involved parties.
 
+The first steps of network troubleshooting are:
+1. Ensure that the managed server is actually running
+1. Attempt to ping the managed server from the central server
+   ```
+   ping <IP-ADDRESS_WITHOUT_PORT> -c 3
+   ```
+1. Check if a firewall is blocking the port that the managed server is running on
+
 ## Hostname changes, renaming a server
 
 When running `bdeploy init` to initialize a root directory, you will have to pass a hostname which BDeploy internally
