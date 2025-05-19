@@ -7,7 +7,6 @@ import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggl
 import { FormsModule, NgForm } from '@angular/forms';
 import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
 import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
-import { ServerConnectionUrlSyntaxValidator } from '../../../../core/validators/server-connection-url-syntax-validator.directive';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { AsyncPipe } from '@angular/common';
 import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
@@ -16,11 +15,12 @@ import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-
 import { NavAreasService } from '../../../../core/services/nav-areas.service';
 import { MailSenderSettingsDto } from '../../../../../models/gen.dtos';
 import { DirtyableDialog } from '../../../../core/guards/dirty-dialog.guard';
+import { PatternValidator } from '../../../../core/validators/pattern-validator.directive';
 
 @Component({
     selector: 'app-mail-sending',
     templateUrl: './mail-sending.component.html',
-  imports: [BdFormToggleComponent, FormsModule, BdFormInputComponent, TrimmedValidator, ServerConnectionUrlSyntaxValidator, BdButtonComponent, AsyncPipe, BdDialogComponent, BdDialogContentComponent, BdDialogToolbarComponent]
+  imports: [BdFormToggleComponent, FormsModule, BdFormInputComponent, TrimmedValidator, PatternValidator, BdButtonComponent, AsyncPipe, BdDialogComponent, BdDialogContentComponent, BdDialogToolbarComponent]
 })
 export class MailSendingComponent implements OnInit, DirtyableDialog, OnDestroy {
   private readonly settings = inject(SettingsService);

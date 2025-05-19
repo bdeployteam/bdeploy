@@ -16,12 +16,13 @@ import { TrimmedValidator } from '../../../../core/validators/trimmed.directive'
 import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { AsyncPipe } from '@angular/common';
+import { PatternValidator } from '../../../../core/validators/pattern-validator.directive';
 
 @Component({
     selector: 'app-edit-ldap-server',
     templateUrl: './edit-ldap-server.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormToggleComponent, BdButtonComponent, AsyncPipe]
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormToggleComponent, BdButtonComponent, AsyncPipe, PatternValidator]
 })
 export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly settings = inject(SettingsService);
