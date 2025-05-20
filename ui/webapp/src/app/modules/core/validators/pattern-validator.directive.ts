@@ -23,15 +23,15 @@ interface KnownPatternConfig {
 
 const KNOWN_PATTERNS: Record<Pattern, KnownPatternConfig> = {
   ['IMAP']: {
-    regex: new RegExp('^[i|I][m|M][a|A][p|P][s|S]?:\\/\\/[a-zA-Z0-9\\w\\-\\.~]+:\\d{1,5}(|(\\/[a-zA-Z0-9\\w\\-\\.~]+)+)$'),
+    regex: new RegExp('^[i|I][m|M][a|A][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}(|(\\/[\\w\\-\\.~]+)+)$'),
     errorMessage: 'Doesn\'t match IMAP URL scheme'
   },
   ['SMTP']: {
-    regex: new RegExp('^[s|S][m|M][t|T][p|P][s|S]?:\\/\\/[a-zA-Z0-9\\w\\-\\.~]+:\\d{1,5}$'),
+    regex: new RegExp('^[s|S][m|M][t|T][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}$'),
     errorMessage: 'Doesn\'t match SMTP URL scheme'
   },
   ['LDAP']: {
-    regex: new RegExp('^[l|L][d|D][a|A][p|P][s|S]?:\\/\\/[a-zA-Z0-9\\w\\-\\.~]+:\\d{1,5}$'),
+    regex: new RegExp('^[l|L][d|D][a|A][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}$'),
     errorMessage: 'Doesn\'t match LDAP URL scheme'
   }
 };
