@@ -14,12 +14,13 @@ import { BdFormInputComponent } from '../../../../core/components/bd-form-input/
 import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
 import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
+import { PatternValidator } from '../../../../core/validators/pattern-validator.directive';
 
 @Component({
     selector: 'app-add-ldap-server',
     templateUrl: './add-ldap-server.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormToggleComponent, BdButtonComponent]
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormToggleComponent, BdButtonComponent, PatternValidator]
 })
 export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly settings = inject(SettingsService);
