@@ -27,12 +27,12 @@ processControl:
 
 supportedOperatingSystems:
   - LINUX
+  - LINUX_AARCH64
   - WINDOWS
-  #- MACOS
 
 type: "CLIENT"
 startCommand:
-  launcherPath: "{{WINDOWS:client.bat}}{{LINUX:client.sh}}{{MACOS:client.sh}}"
+  launcherPath: "{{WINDOWS:client.bat}}{{LINUX:client.sh}}{{LINUX_AARCH64:client.sh}}"
   parameters:
     - uid: "param.file"
       name: "File to open"

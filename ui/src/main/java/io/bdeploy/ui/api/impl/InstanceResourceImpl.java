@@ -886,7 +886,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     createWindowsInstaller(im,//
                             appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
                     break;
-                case LINUX, MACOS:
+                case LINUX, LINUX_AARCH64:
                     fileName += ".run";
                     createLinuxInstaller(im,//
                             appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation);

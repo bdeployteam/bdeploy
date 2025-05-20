@@ -1,6 +1,7 @@
 package io.bdeploy.minion.cli;
 
 import static io.bdeploy.common.util.OsHelper.OperatingSystem.LINUX;
+import static io.bdeploy.common.util.OsHelper.OperatingSystem.LINUX_AARCH64;
 import static io.bdeploy.common.util.OsHelper.OperatingSystem.WINDOWS;
 import static io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType.INSTANCE;
 import static io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType.MANUAL;
@@ -114,7 +115,7 @@ public class TestProductFactory {
     public static ProductVersionDescriptor generateProductVersion(String version) {
         ProductVersionDescriptor productVersion = new ProductVersionDescriptor();
         productVersion.version = version;
-        productVersion.appInfo = Map.of("server-app", Map.of(WINDOWS, "app-info.yaml", LINUX, "app-info.yaml"));
+        productVersion.appInfo = Map.of("server-app", Map.of(WINDOWS, "app-info.yaml", LINUX, "app-info.yaml", LINUX_AARCH64, "app-info.yaml"));
         return productVersion;
     }
 
@@ -198,7 +199,7 @@ public class TestProductFactory {
     private static ApplicationDescriptor generateApplication() {
         ApplicationDescriptor app = new ApplicationDescriptor();
         app.name = "Server Application";
-        app.supportedOperatingSystems = List.of(WINDOWS, LINUX);
+        app.supportedOperatingSystems = List.of(WINDOWS, LINUX, LINUX_AARCH64);
 
         ProcessControlDescriptor processControl = new ProcessControlDescriptor();
         processControl.gracePeriod = 3000;
@@ -208,7 +209,7 @@ public class TestProductFactory {
         app.processControl = processControl;
 
         ExecutableDescriptor startCommand = new ExecutableDescriptor();
-        startCommand.launcherPath = "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}";
+        startCommand.launcherPath = "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}{{LINUX_AARCH64:launch.sh}}";
         ParameterDescriptor param = new ParameterDescriptor();
         param.id = "param.sleep";
         param.name = "Sleep Timeout";

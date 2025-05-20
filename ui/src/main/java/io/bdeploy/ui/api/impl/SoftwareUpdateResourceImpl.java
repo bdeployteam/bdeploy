@@ -259,7 +259,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                     fileName = "BDeploy Click & Start - Installer.exe";
                     createWindowsInstaller(installerPath, launcherKey, launcherLocation);
                     break;
-                case LINUX, MACOS:
+                case LINUX, LINUX_AARCH64:
                     fileName = "BDeploy-Click-and-Start-Installer.run";
                     createLinuxInstaller(installerPath, launcherKey, launcherLocation);
                     break;

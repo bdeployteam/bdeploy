@@ -207,7 +207,7 @@
     <PostBuildEvent>if "$(ConfigurationName)" == "Release" (
    signtool sign /n "IT Solutions GmbH" /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256  "$(TargetPath)"
 )
-copy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist\bin\$(ProjectName).bin" /Y</PostBuildEvent>
+copy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\winX64\dist\bin\$(ProjectName).bin" /Y</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

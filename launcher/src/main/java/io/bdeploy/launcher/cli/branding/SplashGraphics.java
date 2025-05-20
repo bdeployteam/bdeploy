@@ -110,7 +110,7 @@ final class SplashGraphics extends JPanel implements LauncherSplashDisplay {
     public void paint(Graphics g) {
         // Using hints on Windows leads to bold text which is hard to read
         Graphics2D g2d = (Graphics2D) g;
-        if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
+        if (OsHelper.getRunningOs() == OperatingSystem.LINUX || OsHelper.getRunningOs() == OperatingSystem.LINUX_AARCH64) {
             g2d.addRenderingHints(hintsMap);
         }
 

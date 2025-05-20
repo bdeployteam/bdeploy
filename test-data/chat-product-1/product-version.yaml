@@ -3,4 +3,4 @@ appInfo:
   chat-app:
     WINDOWS: "chat-app/app-info.yaml"
     LINUX: "chat-app/app-info.yaml"
-    #MACOS: "chat-app/app-info.yaml"
+    LINUX_AARCH64: "chat-app/app-info.yaml"

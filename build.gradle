@@ -46,12 +46,15 @@ ext {
     // Defines the minimum BDeploy version when upgrading to "this" version. This is checked on servers which support this property prior to performing the update.
     minSourceServerVersion = "4.2.0"
 
+    // CPU architecture of the running OS
+    currentArch = System.getProperty("os.arch")
+
     // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
-    win64jdk = readJdk("win64jdk")
+    winX64jdk = readJdk("win-x64jdk")
     // Defines the path to a LINUX JDK, to be able to build linux dist packages on windows
-    linux64jdk = readJdk("linux64jdk")
-    // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
-    mac64jdk = readJdk("mac64jdk")
+    linuxX64jdk = readJdk("linux-x64jdk")
+    // Defines the path to a LINUX AARCH64 JSK, to be able to build arm packages
+    linuxAarch64jdk = readJdk("linux-aarch64jdk")
 
     // build SNAPSHOT replacement where needed.
     buildDate = new Date().format('yyyyMMddHHmm')
@@ -245,13 +248,13 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
-    task genLinux64VersionProperties() {
+    task genLinuxX64VersionProperties() {
         dependsOn genVersionProperties
         outputs.upToDateWhen { false }
-        outputs.file "$buildDir/resources/linux64/version.properties"
+        outputs.file "$buildDir/resources/linuxX64/version.properties"
         doLast {
-            file("$buildDir/resources/linux64").mkdirs()
-            file("$buildDir/resources/linux64/version.properties").withWriter { w ->
+            file("$buildDir/resources/linuxX64").mkdirs()
+            file("$buildDir/resources/linuxX64/version.properties").withWriter { w ->
                 def p = new Properties()
                 file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
                 p['os'] = 'LINUX' // literal of OperatingSystem
@@ -260,13 +263,28 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
-    task genWin64VersionProperties() {
+    task genLinuxAarch64VersionProperties() {
         dependsOn genVersionProperties
         outputs.upToDateWhen { false }
-        outputs.file "$buildDir/resources/win64/version.properties"
+        outputs.file "$buildDir/resources/linuxAarch64/version.properties"
         doLast {
-            file("$buildDir/resources/win64").mkdirs()
-            file("$buildDir/resources/win64/version.properties").withWriter { w ->
+            file("$buildDir/resources/linuxAarch64").mkdirs()
+            file("$buildDir/resources/linuxAarch64/version.properties").withWriter { w ->
+                def p = new Properties()
+                file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
+                p['os'] = 'LINUX_AARCH64' // literal of OperatingSystem
+                p.store w, null
+            }
+        }
+    }
+
+    task genWinX64VersionProperties() {
+        dependsOn genVersionProperties
+        outputs.upToDateWhen { false }
+        outputs.file "$buildDir/resources/winX64/version.properties"
+        doLast {
+            file("$buildDir/resources/winX64").mkdirs()
+            file("$buildDir/resources/winX64/version.properties").withWriter { w ->
                 def p = new Properties()
                 file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
                 p['os'] = 'WINDOWS' // literal of OperatingSystem
@@ -275,25 +293,9 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
-    task genMac64VersionProperties() {
-        dependsOn genVersionProperties
-        outputs.upToDateWhen { false }
-        outputs.file "$buildDir/resources/mac64/version.properties"
-        doLast {
-            file("$buildDir/resources/mac64").mkdirs()
-            file("$buildDir/resources/mac64/version.properties").withWriter { w ->
-                def p = new Properties()
-                file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
-                p['os'] = 'MACOS' // literal of OperatingSystem
-                p.store w, null
-            }
-        }
-    }
-
-
-    processResources.dependsOn genLinux64VersionProperties
-    processResources.dependsOn genWin64VersionProperties
-    processResources.dependsOn genMac64VersionProperties
+    processResources.dependsOn genLinuxX64VersionProperties
+    processResources.dependsOn genLinuxAarch64VersionProperties
+    processResources.dependsOn genWinX64VersionProperties
 }
 
 def void addMultiPlatformDistBuild(Project prj) {
@@ -310,27 +312,27 @@ def void addMultiPlatformDistBuild(Project prj) {
     }
 
     prj.distributions {
-        linux64 {
+        linuxX64 {
             contents {
                 with prj.distributions.main.getContents()
-                from rootProject.jlinkLinux64.outputs
-                from prj.genLinux64VersionProperties.outputs
+                from rootProject.jlinkLinuxX64.outputs
+                from prj.genLinuxX64VersionProperties.outputs
             }
         }
 
-        win64 {
+        linuxAarch64 {
             contents {
                 with prj.distributions.main.getContents()
-                from rootProject.jlinkWin64.outputs
-                from prj.genWin64VersionProperties.outputs
+                from rootProject.jlinkLinuxAarch64.outputs
+                from prj.genLinuxAarch64VersionProperties.outputs
             }
         }
 
-        mac64 {
+        winX64 {
             contents {
                 with prj.distributions.main.getContents()
-                from rootProject.jlinkMac64.outputs
-                from prj.genMac64VersionProperties.outputs
+                from rootProject.jlinkWinX64.outputs
+                from prj.genWinX64VersionProperties.outputs
             }
         }
     }
@@ -340,49 +342,48 @@ def void addMultiPlatformDistBuild(Project prj) {
 
     // no tar files at all, please
     prj.distTar.enabled = false
-    prj.linux64DistTar.enabled = false
-    prj.win64DistTar.enabled = false
-    prj.mac64DistTar.enabled = false
+    prj.linuxX64DistTar.enabled = false
+    prj.linuxAarch64DistTar.enabled = false
+    prj.winX64DistTar.enabled = false
 
     if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        // need special JDK for win64 as module input dir
-        prj.build.dependsOn prj.linux64DistZip
-        prj.installDist.dependsOn prj.installLinux64Dist
-        if(!hasWinJdk()) {
-            prj.win64DistZip.enabled = false
-        }
-        if(!hasMacJdk()) {
-            prj.mac64DistZip.enabled = false
+        if(isAarch64()) {
+            prj.build.dependsOn prj.linuxAarch64DistZip
+            prj.installDist.dependsOn prj.installLinuxAarch64Dist
+            if(!hasWinX64Jdk()) {
+                prj.winX64DistZip.enabled = false
+            }
+            if(!hasLinuxX64Jdk()) {
+                prj.linuxX64DistZip.enabled = false
+            }
+        } else {
+            prj.build.dependsOn prj.linuxX64DistZip
+            prj.installDist.dependsOn prj.installLinuxX64Dist
+            if(!hasWinX64Jdk()) {
+                prj.winX64DistZip.enabled = false
+            }
+            if(!hasLinuxAarch64Jdk()) {
+                prj.linuxAarch64DistZip.enabled = false
+            }
         }
     } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        // need special JDK for linux64 as module input dir
-        prj.build.dependsOn prj.win64DistZip
-        prj.installDist.dependsOn prj.installWin64Dist
-        if(!hasLinuxJdk()) {
-            prj.linux64DistZip.enabled = false
+        prj.build.dependsOn prj.winX64DistZip
+        prj.installDist.dependsOn prj.installWinX64Dist
+        if(!hasLinuxX64Jdk()) {
+            prj.linuxX64DistZip.enabled = false
         }
-        if(!hasMacJdk()) {
-            prj.mac64DistZip.enabled = false
-        }
-    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-        // need special JDK for linux64 as module input dir
-        prj.build.dependsOn prj.mac64DistZip
-        prj.installDist.dependsOn prj.installMac64Dist
-        if(!hasLinuxJdk()) {
-            prj.linux64DistZip.enabled = false
-        }
-        if(!hasWinJdk()) {
-            prj.win64DistZip.enabled = false
+        if(!hasLinuxAarch64Jdk()) {
+            prj.linuxAarch64DistZip.enabled = false
         }
     }
 
-    prj.installLinux64Dist.doFirst {
+    prj.installLinuxX64Dist.doFirst {
         delete "$destinationDir"
     }
-    prj.installWin64Dist.doFirst {
+    prj.installLinuxAarch64Dist.doFirst {
         delete "$destinationDir"
     }
-    prj.installMac64Dist.doFirst {
+    prj.installWinX64Dist.doFirst {
         delete "$destinationDir"
     }
 
@@ -429,16 +430,16 @@ dependencyUpdates {
     }
 }
 
-private boolean hasWinJdk() {
-    return file("$win64jdk/bin/java.exe").exists();
+private boolean hasWinX64Jdk() {
+    return file("$winX64jdk/bin/java.exe").exists();
 }
 
-private boolean hasLinuxJdk() {
-    return file("$linux64jdk/lib/libjava.so").exists();
+private boolean hasLinuxX64Jdk() {
+    return file("$linuxX64jdk/lib/libjava.so").exists();
 }
 
-private boolean hasMacJdk() {
-    return file("$mac64jdk/lib/libjava.dylib").exists();
+public boolean hasLinuxAarch64Jdk() {
+    return file("$linuxAarch64jdk/lib/libjava.so").exists();
 }
 
 private String readJdk(String which) {
@@ -447,16 +448,36 @@ private String readJdk(String which) {
         println("Using " + which + " from " + v);
         return v;
     }
+
+    // only return running jdk on the correct platform.
+    if(which.equals("win-x64jdk") && org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        return null;
+    }
+    if(which.equals("linux-x64jdk") && (!org.gradle.internal.os.OperatingSystem.current().isLinux() || isAarch64())) {
+        return null;
+    }
+    if(which.equals("linux-aarch64jdk") && (!org.gradle.internal.os.OperatingSystem.current().isLinux() || !isAarch64())) {
+        return null;
+    }
+
+    // we're native here, so return the running java
     return System.getProperty("java.home")
+}
+
+
+private boolean isAarch64() {
+    return currentArch.equalsIgnoreCase("aarch64");
 }
 
 private void updateJavaPath(ProcessForkOptions options) {
     if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        options.executable = "${rootProject.buildDir}/jlink/linux64/jre/bin/java"
+        if(isAarch64()) {
+            options.executable = "${rootProject.buildDir}/jlink/linuxAarch64/jre/bin/java"
+        } else {
+            options.executable = "${rootProject.buildDir}/jlink/linuxX64/jre/bin/java"
+        }
     } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        options.executable = "${rootProject.buildDir}/jlink/win64/jre/bin/java.exe"
-    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-        options.executable = "${rootProject.buildDir}/jlink/mac64/jre/bin/java"
+        options.executable = "${rootProject.buildDir}/jlink/winX64/jre/bin/java.exe"
     }
 }
 
@@ -466,11 +487,13 @@ ext.configureJlink = { task, String modHome, String outDir ->
 
         def linkExec
         if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-            linkExec = [ "$linux64jdk/bin/jlink", "--module-path", "$modHome/jmods:mlib" ]
-        } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-            linkExec = [ "$mac64jdk/bin/jlink", "--module-path", "$modHome/jmods:mlib" ]
+            if(isAarch64()) {
+                linkExec = [ "$linuxAarch64jdk/bin/jlink", "--module-path", "$modHome/jmods:mlib" ]
+            } else {
+                linkExec = [ "$linuxX64jdk/bin/jlink", "--module-path", "$modHome/jmods:mlib" ]
+            }
         } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            linkExec = [ "$win64jdk\\bin\\jlink.exe", "--module-path", "$modHome\\jmods;mlib" ]
+            linkExec = [ "$winX64jdk\\bin\\jlink.exe", "--module-path", "$modHome\\jmods;mlib" ]
         }
 
         // find required modules with this command:
@@ -488,31 +511,40 @@ ext.configureJlink = { task, String modHome, String outDir ->
     }
 }
 
-task jlinkLinux64(type:Exec) { t ->
-    configureJlink(t, "$linux64jdk", "$buildDir/jlink/linux64")
+task jlinkLinuxX64(type:Exec) { t ->
+    configureJlink(t, "$linuxX64jdk", "$buildDir/jlink/linuxX64")
     doFirst {
-        if (!hasLinuxJdk()) {
-            throw new InvalidUserDataException("$linux64jdk does not seem to be a linux JDK, please set -Plinux64jdk=c:/path/to/jdk")
+        if (!hasLinuxX64Jdk()) {
+            throw new InvalidUserDataException("$linuxX64jdk does not seem to be a linux x64 JDK, please set -Plinux-x64jdk=c:/path/to/jdk")
         }
     }
 }
 
-task jlinkWin64(type:Exec) { t ->
-    configureJlink(t, "$win64jdk", "$buildDir/jlink/win64")
+task jlinkLinuxAarch64(type:Exec) { t ->
+    configureJlink(t, "$linuxAarch64jdk", "$buildDir/jlink/linuxAarch64")
     doFirst {
-        if (!hasWinJdk()) {
-            throw new InvalidUserDataException("$win64jdk does not seem to be a windows JDK, please set -Pwin64jdk=/path/to/jdk")
+        if (!hasLinuxAarch64Jdk()) {
+            throw new InvalidUserDataException("$linuxAarch64jdk does not seem to be a linux aarch64 JDK, please set -Plinux-aarch64jdk=c:/path/to/jdk")
+        }
+    }
+}
+
+task jlinkWinX64(type:Exec) { t ->
+    configureJlink(t, "$winX64jdk", "$buildDir/jlink/winX64")
+    doFirst {
+        if (!hasWinX64Jdk()) {
+            throw new InvalidUserDataException("$winX64jdk does not seem to be a windows JDK, please set -Pwin-x64jdk=/path/to/jdk")
         }
     }
 
     doLast {
-        String base = new File("$buildDir/jlink/win64/jre").getPath();
-        fileTree("$buildDir/jlink/win64/jre").matching {
+        String base = new File("$buildDir/jlink/winX64/jre").getPath();
+        fileTree("$buildDir/jlink/winX64/jre").matching {
             include "**/*.exe"
             include "**/*.dll"
         }.each {
             String rel = it.getPath().substring(base.length() + 1);
-            File src = new File("$win64jdk", rel);
+            File src = new File("$winX64jdk", rel);
             
             if(src.exists()) {
                 java.nio.file.Files.copy(src.toPath(), it.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
@@ -521,22 +553,15 @@ task jlinkWin64(type:Exec) { t ->
     }
 }
 
-task jlinkMac64(type:Exec) { t ->
-    configureJlink(t, "$mac64jdk", "$buildDir/jlink/mac64")
-    doFirst {
-        if (!hasMacJdk()) {
-            throw new InvalidUserDataException("$mac64jdk does not seem to be a windows JDK, please set -Pmac64jdk=/path/to/jdk")
-        }
-    }
-}
-
 task jlinkAny() {
     if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        dependsOn jlinkLinux64
+        if(isAarch64()) {
+            dependsOn jlinkLinuxAarch64
+        } else {
+            dependsOn jlinkLinuxX64
+        }
     } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        dependsOn jlinkWin64
-    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-        dependsOn jlinkMac64
+        dependsOn jlinkWinX64
     }
 }
 
@@ -550,11 +575,14 @@ task release() {
             throw new RuntimeException("Cannot release a SNAPSHOT: " + version);
         }
 
-        if(!hasWinJdk()) {
-            throw new RuntimeException("Cannot release without a WINDOWS JDK");
+        if(!hasWinX64Jdk()) {
+            throw new RuntimeException("Cannot release without a WINDOWS x64 JDK");
         }
-        if(!hasLinuxJdk()) {
-            throw new RuntimeException("Cannot release without a LINUX JDK");
+        if(!hasLinuxX64Jdk()) {
+            throw new RuntimeException("Cannot release without a LINUX x64 JDK");
+        }
+        if(!hasLinuxAarch64Jdk()) {
+            throw new RuntimeException("Cannot release without a LINUX aarch64 JDK");
         }
     }
 }
@@ -615,34 +643,31 @@ project.tasks["sonarqube"].dependsOn jacocoFullReport
 build.dependsOn test
 
 if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-    // need special JDK for win64 as module input dir
-    if(!hasWinJdk()) {
-        logger.warn("No windows JDK available, skipping windows distribution")
-        jlinkWin64.enabled = false
+    if(isAarch64()) {
+        if(!hasLinuxX64Jdk()) {
+            logger.warn("No linux x64 JDK available, skipping linux x64 distribution")
+            jlinkLinuxX64.enabled = false
+        }
+    } else {
+        if(!hasLinuxAarch64Jdk()) {
+            logger.warn("No linux aarch64 JDK available, skipping linux aarch64 distribution")
+            jlinkLinuxAarch64.enabled = false
+        }
     }
-    if(!hasMacJdk()) {
-        logger.warn("No MacOS JDK available, skipping MacOs distribution")
-        jlinkMac64.enabled = false
+    // need special JDK for win64 as module input dir
+    if(!hasWinX64Jdk()) {
+        logger.warn("No windows x64 JDK available, skipping windows x64 distribution")
+        jlinkWinX64.enabled = false
     }
 } else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
     // need special JDK for linux64 as module input dir
-    if(!hasLinuxJdk()) {
-        logger.warn("No linux JDK available, skipping linux distribution")
-        jlinkLinux64.enabled = false
+    if(!hasLinuxX64Jdk()) {
+        logger.warn("No linux x64 JDK available, skipping linux x64 distribution")
+        jlinkLinuxX64.enabled = false
     }
-    if(!hasMacJdk()) {
-        logger.warn("No MacOS JDK available, skipping MacOs distribution")
-        jlinkMac64.enabled = false
-    }
-} else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-    // need special JDK for linux64 as module input dir
-    if(!hasLinuxJdk()) {
-        logger.warn("No linux JDK available, skipping linux distribution")
-        jlinkLinux64.enabled = false
-    }
-    if(!hasWinJdk()) {
-        logger.warn("No windows JDK available, skipping windows distribution")
-        jlinkWin64.enabled = false
+    if(!hasLinuxAarch64Jdk()) {
+        logger.warn("No linux aarch64 JDK available, skipping linux aarch64 distribution")
+        jlinkLinuxAarch64.enabled = false
     }
 }
 

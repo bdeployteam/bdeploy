@@ -127,13 +127,12 @@ export class ClientApplicationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentOs = (() => {
+      // TODO: aarch64 support
       switch (this.dd.os) {
         case 'Windows':
           return OperatingSystem.WINDOWS;
         case 'Linux':
           return OperatingSystem.LINUX;
-        case 'Mac':
-          return OperatingSystem.MACOS;
       }
       return null;
     })();

@@ -1,0 +1,25 @@
+# Template for a BDeploy minion service unit. Usage:
+#  1) sudo copy the .service file to /etc/systemd/system/ and chmod 644 it.
+#  2) set a proper unit description (either master or node).
+#  3) fix all paths to be valid.
+#  4) set the correct application user which will be running the application.
+#  5) Change/remove the KillMode if child processes should be killed when stopping BDeploy. Default is to let them live on.
+#  6) start and/or enable service using systemctl
+
+[Unit]
+Description=BDeploy [Master|Node]
+After=network-online.target
+
+[Service]
+User=APPLICATION_USER
+Type=simple
+Restart=always
+RestartSec=10
+ExecStart=/opt/bdeploy/master/bin/bdeploy start --root=/opt/bdeploy/data
+LimitNOFILE=65535
+LimitNPROC=65535
+KillMode=process
+Environment="JAVA_OPTS=-Xmx1G"
+
+[Install]
+WantedBy=multi-user.target

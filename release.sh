@@ -79,6 +79,10 @@ echo "Releasing $REL_VER from current $CURRENT_VER, updating to $NEXT_VER. OK?"
 read ok
 
 set -e
+# this suffix is required by github actions, and we won't be able to download with this suffix attached, so we need to remove it.
+LTS_SUFFIX=".0.LTS"
+JAVA_FILE="$(cat .java-version)"
+JAVA_REL=${JAVA_FILE%%${LTS_SUFFIX}}
 
 if [[ -n "${JDK_DL_ROOT}" ]]; then
     r="${JDK_DL_ROOT}/jdks"
@@ -87,27 +91,38 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
         rm -rf "${r}"
     fi
 
-    if [[ ! -d "${r}/linux64" ]]; then
-        mkdir -p "${r}/linux64"
-        curl -L "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/adoptium?project=jdk" --output "${r}/jdk-linux64.tar.gz"
+    if [[ ! -d "${r}/linux-x64" ]]; then
+        mkdir -p "${r}/linux-x64"
+        curl -L "https://api.adoptium.net/v3/binary/version/jdk-${JAVA_REL}/linux/x64/jdk/hotspot/normal/eclipse?project=jdk" --output "${r}/jdk-linux-x64.tar.gz"
         (
-            cd "${r}/linux64"
-            tar xfz "${r}/jdk-linux64.tar.gz" > /dev/null
+            cd "${r}/linux-x64"
+            tar xfz "${r}/jdk-linux-x64.tar.gz" > /dev/null
         )
     fi
-    v=$(find "${r}/linux64/" -maxdepth 1 -type d -not -name 'linux64' -name '[^.]?*' -printf %f -quit)
-    GRADLE_ARG_ARR+=( "-Dlinux64jdk=${r}/linux64/${v}" )
+    v=$(find "${r}/linux-x64/" -maxdepth 1 -type d -not -name 'linux-x64' -name '[^.]?*' -printf %f -quit)
+    GRADLE_ARG_ARR+=( "-Dlinux-x64jdk=${r}/linux-x64/${v}" )
 
-    if [[ ! -d "${r}/win64" ]]; then
-        mkdir -p "${r}/win64"
-        curl -L "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jdk/hotspot/normal/adoptium?project=jdk" --output "${r}/jdk-win64.zip"
+    if [[ ! -d "${r}/win-x64" ]]; then
+        mkdir -p "${r}/win-x64"
+        curl -L "https://api.adoptium.net/v3/binary/version/jdk-${JAVA_REL}/windows/x64/jdk/hotspot/normal/eclipse?project=jdk" --output "${r}/jdk-win-x64.zip"
         (
-            cd "${r}/win64"
-            unzip "${r}/jdk-win64.zip" > /dev/null
+            cd "${r}/win-x64"
+            unzip "${r}/jdk-win-x64.zip" > /dev/null
         )
     fi
-    v=$(find "${r}/win64/" -maxdepth 1 -type d -not -name 'win64' -name '[^.]?*' -printf %f -quit)
-    GRADLE_ARG_ARR+=( "-Dwin64jdk=${r}/win64/${v}" )
+    v=$(find "${r}/win-x64/" -maxdepth 1 -type d -not -name 'win-x64' -name '[^.]?*' -printf %f -quit)
+    GRADLE_ARG_ARR+=( "-Dwin-x64jdk=${r}/win-x64/${v}" )
+
+    if [[ ! -d "${r}/linux-aarch64" ]]; then
+        mkdir -p "${r}/linux-aarch64"
+        curl -L "https://api.adoptium.net/v3/binary/version/jdk-${JAVA_REL}/linux/aarch64/jdk/hotspot/normal/eclipse?project=jdk" --output "${r}/jdk-linux-aarch64.tar.gz"
+        (
+            cd "${r}/linux-aarch64"
+            tar xfz "${r}/jdk-linux-aarch64.tar.gz" > /dev/null
+        )
+    fi
+    v=$(find "${r}/linux-aarch64/" -maxdepth 1 -type d -not -name 'linux-aarch64' -name '[^.]?*' -printf %f -quit)
+    GRADLE_ARG_ARR+=( "-Dlinux-aarch64jdk=${r}/linux-aarch64/${v}" )
 fi
 
 ./gradlew setVersion -PtargetVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"

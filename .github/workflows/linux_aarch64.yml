@@ -1,13 +1,10 @@
-name: BDeploy CI - Windows
-on: 
-  push:
-    branches-ignore:
-      - 'aarch64'
+name: BDeploy CI - Linux (Aarch64)
+on: [push]
 
 jobs:
   build:
-    name: Build and test on Windows
-    runs-on: windows-latest
+    name: Build and test on Linux Aarch64
+    runs-on: ubuntu-24.04-arm
 
     steps:
     - name: Checkout from GIT
@@ -29,7 +26,13 @@ jobs:
 
     - name: Build and Test
       id: build
-      run: ./gradlew --stacktrace --scan clean build
+      run: ./gradlew --stacktrace --scan clean build -x retypeUserDoc
+
+    - name: Upload dist zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: snapshot-dist-zip
+        path: minion/build/distributions
 
     - name: Upload playwright results
       uses: actions/upload-artifact@v4
