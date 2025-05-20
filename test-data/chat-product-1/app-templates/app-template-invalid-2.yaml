@@ -1,0 +1,6 @@
+id: invalid-chat-app-2
+application: chat-app
+name: Chat App 2
+description: Invalid because the chat-app does not support autostart
+processControl:
+  autostart: true

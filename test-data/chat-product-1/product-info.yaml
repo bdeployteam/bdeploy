@@ -4,7 +4,14 @@ vendor: BDeploy Team
 applications:
   - "chat-app"
 
+applicationTemplates:
+  - "app-templates/app-template-invalid-1.yaml"
+  - "app-templates/app-template-invalid-2.yaml"
+  - "app-templates/app-template-invalid-3.yaml"
+
 instanceTemplates:
   - "instance-template-default.yaml"
+  - "instance-template-invalid.yaml"
+  - "instance-template-overrides.yaml"
 
 versionFile: "product-version.yaml"

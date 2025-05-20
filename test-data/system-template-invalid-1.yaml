@@ -1,0 +1,36 @@
+# yaml-language-server: $schema= https://localhost:7701/api/public/v1/schema/systemTemplateYaml
+
+name: Test System
+description: "A test for process control configuration for chat app"
+
+instances:
+  - name: "Chat Node Default"
+    description: "Default Configuration"
+    productId: "io.bdeploy/chat-app"
+    templateName: "Default Configuration"
+    defaultMappings:
+      - group: "Chat App"
+        node: "master"
+  - name: "Chat Node Invalid"
+    description: "Invalid Configuration"
+    productId: "io.bdeploy/chat-app"
+    templateName: "Invalid Configuration"
+    defaultMappings:
+      - group: "Invalid template 1"
+        node: "master"
+      - group: "Invalid template 2"
+        node: "master"
+      - group: "Invalid app 1"
+        node: "master"
+      - group: "Invalid app 2"
+        node: "master"
+  - name: "Chat Node With Overrides"
+    description: "Instance With Overrides"
+    productId: "io.bdeploy/chat-app"
+    templateName: "Instance With Overrides"
+    defaultMappings:
+      - group: "Invalid app 1"
+        node: "master"
+      - group: "Invalid app 2"
+        node: "master"
+

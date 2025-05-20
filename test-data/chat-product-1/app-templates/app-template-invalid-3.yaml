@@ -1,0 +1,7 @@
+id: invalid-chat-app-3
+application: chat-app
+name: Chat App 3
+description: Invalid because the chat-app does not support autostart or keepAlive
+processControl:
+  autostart: true
+  keepAlive: true

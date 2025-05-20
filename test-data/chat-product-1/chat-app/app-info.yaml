@@ -11,6 +11,7 @@ processControl:
     - MANUAL
     - MANUAL_CONFIRM
   supportsKeepAlive: false
+  supportsAutostart: false
   noOfRetries: 0
   attachStdin: true
 

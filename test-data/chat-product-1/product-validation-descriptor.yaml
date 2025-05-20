@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/productValidationYaml
+
+product: "product-info.yaml"
+
+applications:
+  chat-app: "chat-app/app-info.yaml"
