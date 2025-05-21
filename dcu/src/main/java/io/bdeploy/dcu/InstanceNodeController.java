@@ -134,6 +134,10 @@ public class InstanceNodeController {
      * @return the ID of the just installed instance.
      */
     public String install() {
+        // make sure that the data and log directories always exist
+        paths.getAndCreate(SpecialDirectory.DATA);
+        paths.getAndCreate(SpecialDirectory.LOG_DATA);
+
         if (isInstalled()) {
             return manifest.getId();
         }
@@ -259,10 +263,6 @@ public class InstanceNodeController {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot write PCU information", e);
         }
-
-        // make sure that the data and log directories always exists
-        paths.getAndCreate(SpecialDirectory.DATA);
-        paths.getAndCreate(SpecialDirectory.LOG_DATA);
     }
 
     private SortedMap<Key, Path> installPooledApplicationsFor(InstanceNodeConfiguration dc) {
