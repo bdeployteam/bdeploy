@@ -46,6 +46,7 @@ import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
 import io.bdeploy.schema.PublicSchemaValidator;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.Minion;
@@ -113,19 +114,47 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private static List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
         var instanceVariableDescriptors = desc.instanceVariableDefinitions.stream().flatMap(ds -> ds.definitions.stream())
                 .toList();
-        return desc.instanceTemplates.stream().map(t -> {
+        var issues = desc.instanceTemplates.stream().map(t -> {
             try {
-                var issues = validateFlatInstanceTemplate(new FlattenedInstanceTemplateConfiguration(t,
+                var subIssues = validateFlatInstanceTemplate(new FlattenedInstanceTemplateConfiguration(t,
                         desc.instanceVariableTemplates, desc.applicationTemplates, instanceVariableDescriptors), desc);
 
-                issues.addAll(validateTemplateVariablesOnInstance(t, desc));
+                subIssues.addAll(validateTemplateVariablesOnInstance(t, desc));
 
-                return issues;
+                return subIssues;
             } catch (Exception e) {
                 return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         "Cannot resolve instance template " + t.name + ": " + e.toString()));
             }
-        }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
+        }).flatMap(l -> l.stream()).filter(Objects::nonNull).collect(Collectors.toList());
+
+        // check process control
+        Map<String, String> appTemplateToAppId = desc.applicationTemplates.stream()
+                .collect(Collectors.toMap(x -> x.id, x -> x.application));
+        Map<String, ProcessControlDescriptor> appsToProcessControl = desc.applications.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().processControl));
+        for (var instanceTemplate : desc.instanceTemplates) {
+            for (var group : instanceTemplate.groups) {
+                for (var templateApp : group.applications) {
+                    String appName = templateApp.application;
+                    boolean usesTemplate = false;
+                    if (appName == null) {
+                        appName = appTemplateToAppId.get(templateApp.template);
+                        usesTemplate = true;
+                    }
+                    var processControlDescriptor = appsToProcessControl.get(appName);
+                    if (!processControlDescriptor.supportsKeepAlive) {
+                        addInstanceTemplateProcessControlIssue(issues, templateApp, "keepAlive", instanceTemplate.name,
+                                group.name, usesTemplate);
+                    }
+                    if (!processControlDescriptor.supportsAutostart) {
+                        addInstanceTemplateProcessControlIssue(issues, templateApp, "autostart", instanceTemplate.name,
+                                group.name, usesTemplate);
+                    }
+                }
+            }
+        }
+        return issues;
     }
 
     private static List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
@@ -157,6 +186,17 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             }
         }
         return issues;
+    }
+
+    private static void addInstanceTemplateProcessControlIssue(List<ProductValidationIssueApi> issues,
+            TemplateApplication templateApp, String variableName, String templateName, String groupName, boolean usesTemplate) {
+        if (Boolean.TRUE.equals(templateApp.processControl.get(variableName))) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                    "Instance template '" + templateName + "' has group '" + groupName + "' which uses "
+                            + (usesTemplate ? "template" : "application") + " '"
+                            + (usesTemplate ? templateApp.template : templateApp.application) + "' and sets its parameter '"
+                            + variableName + "' to enabled, but the descriptor of the application forbids it"));
+        }
     }
 
     private static void addAppTemplateProcessControlIssue(List<ProductValidationIssueApi> issues,
