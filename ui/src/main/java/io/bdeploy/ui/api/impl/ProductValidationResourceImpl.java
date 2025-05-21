@@ -150,21 +150,21 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         for (var appTemplate : desc.applicationTemplates) {
             var processControlDescriptor = appsToProcessControl.get(appTemplate.application);
             if (!processControlDescriptor.supportsKeepAlive) {
-                String variableName = "keepAlive";
-                if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
-                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, appTemplate.id + " has '"
-                            + variableName + "' enabled, but the descriptor of the application forbids it"));
-                }
+                addAppTemplateProcessControlIssue(issues, appTemplate, "keepAlive");
             }
             if (!processControlDescriptor.supportsAutostart) {
-                String variableName = "autostart";
-                if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
-                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, appTemplate.id + " has '"
-                            + variableName + "' enabled, but the descriptor of the application forbids it"));
-                }
+                addAppTemplateProcessControlIssue(issues, appTemplate, "autostart");
             }
         }
         return issues;
+    }
+
+    private static void addAppTemplateProcessControlIssue(List<ProductValidationIssueApi> issues,
+            ApplicationTemplateDescriptor appTemplate, String variableName) {
+        if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application template '" + appTemplate.id
+                    + "' has '" + variableName + "' enabled, but the descriptor of the application forbids it"));
+        }
     }
 
     private static Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnInstance(
