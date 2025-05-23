@@ -71,11 +71,8 @@ export class PatternValidator implements StrictValidator {
   private getErrorMessageIfConfigured() {
     if (typeof this.appPattern === "string") {
       return KNOWN_PATTERNS[this.appPattern].errorMessage;
-    } else {
-      return (this.appPattern as PatternValidatorConfiguration).errorMessage
     }
-
-    return null;
+    return (this.appPattern as PatternValidatorConfiguration).errorMessage
   }
 
   private determineRegex() {
