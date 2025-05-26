@@ -2,6 +2,7 @@
   <img src="https://bdeploy.io/user/images/logo.svg" width="150" />
 </p>
 <p align="center">
+  <!-- CI Builds -->
   <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeploy+CI+-+Linux%22+branch%3Amaster" title="GitHub CI - Linux">
    <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Linux/badge.svg?branch=master" />
   </a>
@@ -10,21 +11,30 @@
    <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Windows/badge.svg?branch=master" />
   </a>
   -->
-  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Quality Gate">
+  <!-- Sonarcloud -->
+  <br>
+  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Sonarcloud - Quality Gate">
    <img src="https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=bdeployteam_bdeploy" />
   </a>
-  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Test Coverage">
+  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Sonarcloud - Test Coverage">
    <img src="https://sonarcloud.io/api/project_badges/measure?metric=coverage&project=bdeployteam_bdeploy" />
   </a>
-  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Maintainability Rating">
+  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Sonarcloud - Maintainability Rating">
    <img src="https://sonarcloud.io/api/project_badges/measure?metric=sqale_rating&project=bdeployteam_bdeploy" />
   </a>
-  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Reliability Rating">
+  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Sonarcloud - Reliability Rating">
    <img src="https://sonarcloud.io/api/project_badges/measure?metric=reliability_rating&project=bdeployteam_bdeploy" />
   </a>
-  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Security Rating">
+  <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Sonarcloud - Security Rating">
    <img src="https://sonarcloud.io/api/project_badges/measure?metric=security_rating&project=bdeployteam_bdeploy" />
   </a>
+  <!-- CodeScene -->
+  <br>
+  <a href="https://codescene.io/projects/4743" title="CodeScene - Dashboard">
+   <img src="https://codescene.io/images/analyzed-by-codescene-badge.svg" />
+  </a>
+  <!-- YouTube -->
+  <br>
   <a href="https://www.youtube.com/channel/UCIsYjcRg7GSFb7pM60MBmtw/featured" title="YouTube Channel">
    <img src="https://img.shields.io/static/v1?label=&message=BDeploy%20on%20YouTube&color=red&logo=youtube" />
   </a>
