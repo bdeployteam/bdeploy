@@ -85,7 +85,7 @@ public class ProductUpdateService {
 
         if (currentApplications == null) {
             validationIssues.add(new ApplicationValidationDto(null, null,
-                    "Source product not available, command line cannot be migrated. Please check parameters manually."));
+                    "Source product not available, command line cannot be migrated -> please check parameters manually"));
         }
 
         Map<ApplicationConfiguration, InstanceNodeConfigurationDto> allApps = new HashMap<>();
@@ -291,7 +291,7 @@ public class ProductUpdateService {
                 toReset.put(val, desc.get());
                 validation.add(new ApplicationValidationDto(app.id, val.id,
                         "Previously custom parameter's id collides with newly added parameter: " + val.id
-                                + ". Resetting to default value for '" + desc.get().name + "'."));
+                                + " -> resetting to default value for '" + desc.get().name + '\''));
             } else if (oldDesc.isPresent() && desc.isEmpty()) {
                 // previously defined parameter is now undefined, we want to
                 toReset.put(val, null);
@@ -544,7 +544,7 @@ public class ProductUpdateService {
 
         if (command.executable == null || !command.executable.equals(desc.launcherPath)) {
             result.add(new ApplicationValidationDto(process.id, null,
-                    "Assigned Exectuable does not match the required launcher path."));
+                    "Assigned Exectuable does not match the required launcher path"));
         }
 
         for (var paramDesc : desc.parameters) {
@@ -569,7 +569,7 @@ public class ProductUpdateService {
 
         // check mandatory.
         if (paramDesc.mandatory && (paramValue == null || paramValue.value == null)) {
-            result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Mandatory parameter has no value."));
+            result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Mandatory parameter has no value"));
         }
 
         if (paramValue == null || paramValue.value == null) {
