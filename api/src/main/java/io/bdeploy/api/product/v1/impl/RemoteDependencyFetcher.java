@@ -89,7 +89,11 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
             if (!dep.contains(":")) {
                 throw new IllegalStateException("Dependency must have a tag ('name:tag'): " + dep);
             }
-            if (!findOnRemote(os, group, toFetch, dep)) {
+            try {
+                if (!findOnRemote(os, group, toFetch, dep)) {
+                    unresolved.add(dep);
+                }
+            } catch (RuntimeException e) {
                 unresolved.add(dep);
             }
         }
