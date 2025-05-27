@@ -3,14 +3,15 @@
 </p>
 <p align="center">
   <!-- CI Builds -->
-  <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeploy+CI+-+Linux%22+branch%3Amaster" title="GitHub CI - Linux">
-   <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Linux/badge.svg?branch=master" />
+  <a href="https://github.com/bdeployteam/bdeploy/actions/workflows/linux.yml" title="GitHub CI - Linux">
+   <img src="https://github.com/bdeployteam/bdeploy/actions/workflows/linux.yml/badge.svg" />
   </a>
-  <!-- Uncomment once Windows is back on track.
-  <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeploy+CI+-+Windows%22+branch%3Amaster" title="GitHub CI - Windows">
-   <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Windows/badge.svg?branch=master" />
+  <a href="https://github.com/bdeployteam/bdeploy/actions/workflows/linux_aarch64.yml" title="GitHub CI - Linux (aarch64)">
+   <img src="https://github.com/bdeployteam/bdeploy/actions/workflows/linux_aarch64.yml/badge.svg" />
   </a>
-  -->
+  <a href="https://github.com/bdeployteam/bdeploy/actions/workflows/windows.yml" title="GitHub CI - Windows">
+   <img src="https://github.com/bdeployteam/bdeploy/actions/workflows/windows.yml/badge.svg" />
+  </a>
   <!-- Sonarcloud -->
   <br>
   <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Sonarcloud - Quality Gate">
