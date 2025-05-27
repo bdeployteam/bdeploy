@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateG
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
 import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableType;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 
@@ -53,6 +55,7 @@ public class TestProductFactory {
         inst.description = "The Test Instance of the Test System";
         inst.productId = "io.bdeploy/test";
         inst.templateName = "Default Test Configuration";
+        inst.fixedVariables = new ArrayList<>();
 
         SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
         mapping.group = "Only Group";
@@ -60,7 +63,7 @@ public class TestProductFactory {
 
         inst.defaultMappings = List.of(mapping);
 
-        system.instances = List.of(inst);
+        system.instances.add(inst);
 
         return system;
     }
@@ -78,6 +81,7 @@ public class TestProductFactory {
         inst.templateName = templateName;
         inst.autoStart = true;
         inst.autoUninstall = false;
+        inst.fixedVariables = new ArrayList<>();
 
         SystemTemplateInstanceTemplateGroupMapping mapping = new SystemTemplateInstanceTemplateGroupMapping();
         mapping.group = "Only Group";
@@ -90,24 +94,27 @@ public class TestProductFactory {
 
     public static TestProductDescriptor generateProduct() {
         TestProductDescriptor product = new TestProductDescriptor();
-        product.descriptor = generateProductInfo();
         product.version = generateProductVersion("1.0.0");
         product.applications = Map.of("app-info.yaml", generateApplication());
-        product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplate());
-        product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplate());
+        product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplate(), "app-template-2.yaml",
+                generateApplicationTemplateWithFixedVariable(), "app-template-3.yaml",
+                generateApplicationTemplateWithOtherVariable());
+        product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplate(), "min-instance-template.yaml",
+                TestProductFactory.generateMinimalInstanceTemplate("Small instance"));
         product.launchBat = "echo \"Successfully launched on WINDOWS\"";
         product.launchSh = "echo \"Successfully launched on LINUX\"";
+        product.descriptor = generateProductInfo(product);
         return product;
     }
 
-    private static ProductDescriptor generateProductInfo() {
+    private static ProductDescriptor generateProductInfo(TestProductDescriptor testDescriptor) {
         ProductDescriptor productDescriptor = new ProductDescriptor();
         productDescriptor.name = "Test Product";
         productDescriptor.product = "io.bdeploy/test";
         productDescriptor.vendor = "BDeploy Team";
-        productDescriptor.applications = List.of("server-app");
-        productDescriptor.applicationTemplates = List.of("app-template.yaml");
-        productDescriptor.instanceTemplates = List.of("instance-template.yaml");
+        productDescriptor.applications = testDescriptor.version.appInfo.keySet().stream().toList();
+        productDescriptor.applicationTemplates = testDescriptor.applicationTemplates.keySet().stream().toList();
+        productDescriptor.instanceTemplates = testDescriptor.instanceTemplates.keySet().stream().toList();
         productDescriptor.versionFile = "product-version.yaml";
         return productDescriptor;
     }
@@ -115,7 +122,8 @@ public class TestProductFactory {
     public static ProductVersionDescriptor generateProductVersion(String version) {
         ProductVersionDescriptor productVersion = new ProductVersionDescriptor();
         productVersion.version = version;
-        productVersion.appInfo = Map.of("server-app", Map.of(WINDOWS, "app-info.yaml", LINUX, "app-info.yaml", LINUX_AARCH64, "app-info.yaml"));
+        productVersion.appInfo = Map.of("server-app",
+                Map.of(WINDOWS, "app-info.yaml", LINUX, "app-info.yaml", LINUX_AARCH64, "app-info.yaml"));
         return productVersion;
     }
 
@@ -124,16 +132,32 @@ public class TestProductFactory {
         tpl.name = templateName;
 
         InstanceTemplateGroup group = new InstanceTemplateGroup();
-        group.name = "Min Group";
-        TemplateApplication app1 = new TemplateApplication();
-        app1.application = "server-app";
-        app1.name = "Min Application";
-        app1.processControl = Map.of("startType", "MANUAL_CONFIRM");
-        group.applications = List.of(app1);
-        tpl.groups = new ArrayList<>();
+        group.name = "Only Group";
+
+        group.applications = generateApplicationsForInstanceTemplate();
         tpl.groups.add(group);
 
         return tpl;
+    }
+
+    public static List<TemplateApplication> generateApplicationsForInstanceTemplate() {
+        TemplateApplication appWithoutTemplate = generateTemplateApplication("Application 1");
+        TemplateApplication appWithTemplateVariableWithDefault = generateTemplateApplication("Application 2");
+        appWithTemplateVariableWithDefault.template = "server-with-sleep";
+        TemplateApplication appWithTemplateVariableAndFixedValue = generateTemplateApplication("Application 3");
+        appWithTemplateVariableAndFixedValue.template = "server-with-fixed-variable";
+        TemplateApplication appWithAnotherTemplateVariableAndFixedValue = generateTemplateApplication("Application 4");
+        appWithAnotherTemplateVariableAndFixedValue.template = "server-with-other-variable";
+        return Arrays.asList(appWithoutTemplate, appWithTemplateVariableWithDefault, appWithTemplateVariableAndFixedValue,
+                appWithAnotherTemplateVariableAndFixedValue);
+    }
+
+    public static TemplateApplication generateTemplateApplication(String appName) {
+        TemplateApplication app1 = new TemplateApplication();
+        app1.application = "server-app";
+        app1.name = appName;
+        app1.processControl = Map.of("startType", "MANUAL_CONFIRM");
+        return app1;
     }
 
     public static InstanceTemplateDescriptor generateInstanceTemplate() {
@@ -153,7 +177,7 @@ public class TestProductFactory {
         pcg2.startType = null;
         pcg2.startWait = null;
         pcg2.stopType = ProcessControlGroupHandlingType.PARALLEL;
-        tpl.processControlGroups = List.of(pcg1, pcg2);
+        tpl.processControlGroups = Arrays.asList(pcg1, pcg2);
 
         InstanceTemplateGroup group = new InstanceTemplateGroup();
         group.name = "Only Group";
@@ -165,8 +189,8 @@ public class TestProductFactory {
         app1.processControl = Map.of("startType", "MANUAL_CONFIRM");
         TemplateApplication app2 = new TemplateApplication();
         app2.template = "server-with-sleep";
-        group.applications = List.of(app1, app2);
-        tpl.groups = List.of(group);
+        group.applications = Arrays.asList(app1, app2);
+        tpl.groups.add(group);
         return tpl;
     }
 
@@ -176,7 +200,6 @@ public class TestProductFactory {
         tpl.application = "server-app";
         tpl.name = "Server With Sleep";
         tpl.description = "A Server Application with the sleep parameter set to a given value.";
-        tpl.fixedVariables = null;
         tpl.processControl = null;
         tpl.applyOn = null;
 
@@ -186,12 +209,42 @@ public class TestProductFactory {
         tplVar.description = "The amount of time the server application should sleep";
         tplVar.type = TemplateVariableType.NUMERIC;
         tplVar.defaultValue = "750";
-        tpl.templateVariables = List.of(tplVar);
+        tpl.fixedVariables = new ArrayList<>();
+        tpl.templateVariables.add(tplVar);
 
-        TemplateParameter param = new TemplateParameter();
-        param.id = "param.sleep";
-        param.value = "{{T:app-tpl-sleep}}";
-        tpl.startParameters = List.of(param);
+        tpl.startParameters.add(aTemplateParameter("param.sleep", "{{T:app-tpl-sleep}}"));
+
+        return tpl;
+    }
+
+    private static ApplicationTemplateDescriptor generateApplicationTemplateWithFixedVariable() {
+        ApplicationTemplateDescriptor tpl = generateApplicationTemplate();
+        tpl.id = "server-with-fixed-variable";
+        tpl.name = "Server With Fixed Variable";
+        tpl.description = "This Server Application defines a value for the template variable";
+        tpl.fixedVariables.add(new TemplateVariableFixedValueOverride("app-tpl-sleep", "720"));
+        return tpl;
+    }
+
+    private static ApplicationTemplateDescriptor generateApplicationTemplateWithOtherVariable() {
+        ApplicationTemplateDescriptor tpl = new ApplicationTemplateDescriptor();
+        tpl.id = "server-with-other-variable";
+        tpl.application = "server-app";
+        tpl.name = "Server With Other Variable";
+        tpl.description = "This Server Application uses a different template variable.";
+        tpl.fixedVariables.add(new TemplateVariableFixedValueOverride("app-tpl-sleep-2", "700"));
+        tpl.processControl = null;
+        tpl.applyOn = null;
+
+        TemplateVariable tplVar = new TemplateVariable();
+        tplVar.id = "app-tpl-sleep-2";
+        tplVar.name = "Sleep Timeout";
+        tplVar.description = "The amount of time the server application should sleep";
+        tplVar.type = TemplateVariableType.NUMERIC;
+        tplVar.defaultValue = "760";
+        tpl.templateVariables.add(tplVar);
+
+        tpl.startParameters.add(aTemplateParameter("param.sleep", "{{T:app-tpl-sleep-2}}"));
 
         return tpl;
     }
@@ -260,6 +313,23 @@ public class TestProductFactory {
         }
     }
 
+    public static TemplateParameter aTemplateParameter(String id, String value) {
+        TemplateParameter param = new TemplateParameter();
+        param.id = id;
+        param.value = value;
+        return param;
+    }
+
+    public static TemplateVariable aTemplateVariable(String id, String defaultValue) {
+        TemplateVariable templateVariable = new TemplateVariable();
+        templateVariable.id = id;
+        templateVariable.name = id;
+        templateVariable.description = "Something that is related to " + id;
+        templateVariable.defaultValue = defaultValue;
+        templateVariable.type = TemplateVariableType.NUMERIC;
+        return templateVariable;
+    }
+
     public static class TestProductDescriptor {
 
         public ProductDescriptor descriptor;
@@ -271,4 +341,5 @@ public class TestProductFactory {
         public String launchSh;
 
     }
+
 }
