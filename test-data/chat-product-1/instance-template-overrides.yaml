@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
+
+name: Instance With Overrides
+description: "Valid Instance configuration with multiple overrides"
+
+autoStart: true
+groups:
+  - name: "Override invalid template 1"
+    applications:
+      - template: "invalid-chat-app-1"
+        processControl:
+          keepAlive: false
+  - name: "Override invalid template 2"
+    applications:
+      - template: "invalid-chat-app-2"
+        processControl:
+          autostart: false

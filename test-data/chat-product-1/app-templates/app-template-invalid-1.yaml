@@ -1,0 +1,6 @@
+id: invalid-chat-app-1
+application: chat-app
+name: Chat App 1
+description: Invalid because the chat-app does not support keepAlive
+processControl:
+  keepAlive: true

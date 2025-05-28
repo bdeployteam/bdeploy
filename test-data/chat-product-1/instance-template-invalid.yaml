@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
+
+name: Invalid Configuration
+description: "Instance with examples of invalid configuration"
+
+groups:
+  - name: "Chat App"
+    description: "Valid app configuration"
+    applications:
+      - application: chat-app
+        name: "The Valid Chat App"
+        description: "This group is valid so that we can install an instance with this template"
+  - name: "Invalid template 1"
+    applications:
+      - template: "invalid-chat-app-1"
+  - name: "Invalid template 2"
+    applications:
+      - template: "invalid-chat-app-2"
+  - name: "Invalid app 1"
+    applications:
+      - application: chat-app
+        name: "Invalid 1"
+        description: "Invalid because keepAlive is not supported"
+        processControl:
+          keepAlive: true
+  - name: "Invalid app 2"
+    applications:
+      - application: chat-app
+        name: "Invalid 2"
+        description: "Invalid because autoStart is not supported"
+        processControl:
+          autostart: true
+  - name: "Invalid app 3"
+    applications:
+      - application: chat-app
+        name: "Invalid 3"
+        description: "Invalid because keepAlive and autoStart are not supported"
+        processControl:
+          keepAlive: true
+          autostart: true
