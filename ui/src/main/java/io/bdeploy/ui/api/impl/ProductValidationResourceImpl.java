@@ -77,10 +77,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             var app = appEntry.getKey();
             var applicationDescriptor = appEntry.getValue();
             if (applicationDescriptor.startCommand != null) {
-                validateCommand(issues, app, applicationDescriptor.startCommand, config.parameterTemplates);
+                validateCommand(issues, app, applicationDescriptor.startCommand, config.parameterTemplates, false);
             }
             if (applicationDescriptor.stopCommand != null) {
-                validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates);
+                validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates, true);
             }
             if (applicationDescriptor.type == ApplicationType.CLIENT) {
                 EndpointsDescriptor endpointsDescr = applicationDescriptor.endpoints;
@@ -366,7 +366,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private static void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,
-            List<ParameterTemplateDescriptor> parameterTemplates) {
+            List<ParameterTemplateDescriptor> parameterTemplates, boolean requireValue) {
 
         // expand and verify parameter templates
         var expanded = new ArrayList<ParameterDescriptor>();
@@ -389,9 +389,14 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         for (var param : expanded) {
             if (startIds.contains(param.id)) {
                 issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                        app + " has parameters with duplicate id " + param.id));
+                        "Application '" + app + "' has parameters with duplicate id '" + param.id + '\''));
             }
             startIds.add(param.id);
+
+            if (requireValue && (param.defaultValue == null || param.defaultValue.getPreRenderable() == null)) {
+                issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Parameter '" + param.id + "' of application '" + app + "' must have a default value"));
+            }
         }
     }
 
