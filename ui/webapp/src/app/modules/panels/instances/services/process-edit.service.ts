@@ -177,7 +177,7 @@ export class ProcessEditService {
       }
 
       // always fully re-calculate stop command.
-      appConfig.stop = this.calculateInitialCommand(app.descriptor.stopCommand, [], {}, []);
+      appConfig.stop = this.calculateInitialCommand(appConfig, app.descriptor.stopCommand, [], {}, []);
 
       this.node$.value.nodeConfiguration.applications.push(appConfig);
       this.edit.getLastControlGroup(this.node$.value.nodeConfiguration).processOrder.push(appConfig.id);
@@ -192,14 +192,6 @@ export class ProcessEditService {
     variableValues: Record<string, string>,
     status: StatusMessage[]
   ): Observable<string> {
-    const start: CommandConfiguration = this.calculateInitialCommand(
-      application.descriptor.startCommand,
-      template ? template.startParameters : [],
-      variableValues,
-      status
-    );
-    const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {}, status);
-
     const templateProcessName = template?.processName ? template.processName : template?.name;
 
     const process: ApplicationConfiguration = {
@@ -220,11 +212,20 @@ export class ProcessEditService {
         lifenessProbe: null,
         livenessProbe: application.descriptor.processControl.livenessProbe,
         configDirs: application.descriptor.processControl.configDirs,
-        autostart: application.descriptor.processControl.supportsAutostart
+        autostart: application.descriptor.processControl.supportsAutostart,
       },
-      start: start,
-      stop: stop
+      start: null, // calculated later
+      stop: null, // calculated later
     };
+
+    process.start = this.calculateInitialCommand(
+      process,
+      application.descriptor.startCommand,
+      template ? template.startParameters : [],
+      variableValues,
+      status
+    );
+    process.stop = this.calculateInitialCommand(process, application.descriptor.stopCommand, [], {}, status);
 
     if (template?.processControl) {
       // partially deserialized - only apply specified attributes.
@@ -349,7 +350,18 @@ export class ProcessEditService {
     return null;
   }
 
+  public recalculateStopCommand() {
+    this.process$.value.stop = this.calculateInitialCommand(
+      this.process$.value,
+      this.application$.value.descriptor.stopCommand,
+      [],
+      {},
+      []
+    );
+  }
+
   private calculateInitialCommand(
+    appConfig: ApplicationConfiguration,
     descriptor: ExecutableDescriptor,
     templates: TemplateParameter[],
     values: Record<string, string>,
@@ -396,14 +408,7 @@ export class ProcessEditService {
         this.meetsConditionOnGiven(
           descriptor.parameters.find((x) => x.id === p.id),
           descriptor,
-          {
-            // dummy just so we can resolve from our own parameters during adding.
-            // this may be problematic in case of "condition chains".
-            start: {
-              executable: descriptor.launcherPath,
-              parameters: mandatoryParams
-            }
-          } as ApplicationConfiguration
+          appConfig
         )
       )
     };
