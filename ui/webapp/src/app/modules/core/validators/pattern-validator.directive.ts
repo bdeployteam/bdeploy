@@ -23,7 +23,7 @@ interface KnownPatternConfig {
 
 const KNOWN_PATTERNS: Record<Pattern, KnownPatternConfig> = {
   ['IMAP']: {
-    regex: new RegExp('^[i|I][m|M][a|A][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}(|(\\/[\\w\\-\\.~]+)+)$'),
+    regex: new RegExp('^[i|I][m|M][a|A][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}($|(\\/[\\w\\-\\.~]+)+$)'),
     errorMessage: 'Doesn\'t match IMAP URL scheme'
   },
   ['SMTP']: {
