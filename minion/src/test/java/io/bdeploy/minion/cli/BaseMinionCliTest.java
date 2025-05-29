@@ -41,8 +41,8 @@ public abstract class BaseMinionCliTest {
     }
 
     protected Map<String, TestCliTool.StructuredOutputRow> doRemoteAndIndexOutputOn(
-            Function<TestCliTool.StructuredOutputRow, String> indexFunction, RemoteService remote,
-            Class<? extends CliTool> tool, String... args) {
+            Function<TestCliTool.StructuredOutputRow, String> indexFunction, RemoteService remote, Class<? extends CliTool> tool,
+            String... args) {
         StructuredOutput output = remote(remote, tool, args);
         return IntStream.range(0, output.size()).boxed()
                 .collect(Collectors.toMap(i -> indexFunction.apply(output.get(i)), output::get));
@@ -75,7 +75,7 @@ public abstract class BaseMinionCliTest {
                 "--list");
         assertEquals(1, output.size());
         assertEquals("Test Product", output.get(0).get("Name"));
-        assertEquals("1", output.get(0).get("NoOfInstanceTemplates"));
+        assertEquals("2", output.get(0).get("NoOfInstanceTemplates"));
     }
 
     protected void uploadProduct(RemoteService remote, Path tmp, Path bhivePath, TestProductFactory.TestProductDescriptor product)
