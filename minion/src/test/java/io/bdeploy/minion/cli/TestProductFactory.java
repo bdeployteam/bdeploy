@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
+import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupHandlingType;
@@ -251,7 +252,7 @@ public class TestProductFactory {
 
     private static ApplicationDescriptor generateApplication() {
         ApplicationDescriptor app = new ApplicationDescriptor();
-        app.name = "Server Application";
+        app.name = "server-app";
         app.supportedOperatingSystems = List.of(WINDOWS, LINUX, LINUX_AARCH64);
 
         ProcessControlDescriptor processControl = new ProcessControlDescriptor();
@@ -275,7 +276,38 @@ public class TestProductFactory {
         startCommand.parameters = List.of(param);
         app.startCommand = startCommand;
 
+        ExecutableDescriptor stopCommand = new ExecutableDescriptor();
+        stopCommand.launcherPath = "{{WINDOWS:stop.bat}}{{LINUX:stop.sh}}{{LINUX_AARCH64:stop.sh}}";
+        ParameterDescriptor stopParam = new ParameterDescriptor();
+        stopParam.id = "wait.time";
+        stopParam.name = "Wait Time";
+        stopParam.longDescription = "A numeric parameter that controls how long to wait";
+        stopParam.groupName = "Timeouts";
+        stopParam.parameter = "--wait";
+        stopParam.defaultValue = new LinkedValueConfiguration("25");
+        stopParam.type = VariableType.NUMERIC;
+        stopParam.mandatory = true;
+        stopCommand.parameters = List.of(param);
+        app.stopCommand = stopCommand;
+
         return app;
+    }
+
+    public static Path generateAndWriteValidationDescriptor(Path productPath, TestProductDescriptor product) {
+        ProductValidationDescriptorApi validationDescriptor = new ProductValidationDescriptorApi();
+        validationDescriptor.product = "product-info.yaml";
+        product.applications.keySet().forEach(appInfoPath -> {
+            validationDescriptor.applications.put(product.applications.get(appInfoPath).name, appInfoPath);
+        });
+
+        try {
+            Path validationDescriptorPath = productPath.resolve("validation-descriptor.yaml");
+            Files.writeString(validationDescriptorPath, YAML_MAPPER.writeValueAsString(validationDescriptor));
+            return validationDescriptorPath;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to write validation descriptor to file", e);
+        }
     }
 
     public static void writeToFile(Path path, Object obj) {

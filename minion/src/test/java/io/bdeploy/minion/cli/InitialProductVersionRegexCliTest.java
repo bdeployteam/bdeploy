@@ -178,14 +178,6 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
     }
 
     // Utility methods
-
-    private void createAndUploadProduct(RemoteService remote, Path tmp) throws IOException {
-        Path productPath = Files.createDirectory(tmp.resolve("product"));
-        Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
-        TestProductFactory.writeProductToFile(productPath, TestProductFactory.generateProduct());
-        uploadProduct(remote, bhivePath, productPath);
-    }
-
     private static void validateProductFilterRegex(RemoteService remote, String regex) {
         List<InstanceDto> instances = ResourceProvider.getResource(remote, InstanceGroupResource.class, null)
                 .getInstanceResource("GROUP_NAME").list();

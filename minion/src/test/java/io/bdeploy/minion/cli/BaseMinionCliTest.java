@@ -96,4 +96,16 @@ public abstract class BaseMinionCliTest {
         assertEquals(String.valueOf(product.instanceTemplates.size()), output.get(0).get("NoOfInstanceTemplates"));
     }
 
+    protected Path createAndUploadProduct(RemoteService remote, Path tmp) throws IOException {
+        return createAndUploadProduct(remote, tmp, TestProductFactory.generateProduct());
+    }
+
+    protected Path createAndUploadProduct(RemoteService remote, Path tmp, TestProductFactory.TestProductDescriptor productDescriptor) throws IOException {
+        Path productPath = Files.createDirectory(tmp.resolve("product"));
+        Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
+        TestProductFactory.writeProductToFile(productPath, productDescriptor);
+        uploadProduct(remote, bhivePath, productPath);
+        return productPath;
+    }
+
 }

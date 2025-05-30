@@ -142,7 +142,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                         appName = appTemplateToAppId.get(templateApp.template);
                         usesTemplate = true;
                     }
-                    var processControlDescriptor = appsToProcessControl.get(appName);
+                    var processControlDescriptor = Optional.ofNullable(appsToProcessControl.get(appName))
+                            .orElse(new ProcessControlDescriptor());
                     if (!processControlDescriptor.supportsKeepAlive) {
                         addInstanceTemplateProcessControlIssue(issues, templateApp, "keepAlive", instanceTemplate.name,
                                 group.name, usesTemplate);
@@ -177,7 +178,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         Map<String, ProcessControlDescriptor> appsToProcessControl = desc.applications.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().processControl));
         for (var appTemplate : desc.applicationTemplates) {
-            var processControlDescriptor = appsToProcessControl.get(appTemplate.application);
+            var processControlDescriptor = Optional.ofNullable(appsToProcessControl.get(appTemplate.application))
+                    .orElse(new ProcessControlDescriptor());
             if (!processControlDescriptor.supportsKeepAlive) {
                 addAppTemplateProcessControlIssue(issues, appTemplate, "keepAlive");
             }
