@@ -8,6 +8,7 @@ applicationTemplates:
   - "app-templates/app-template-invalid-1.yaml"
   - "app-templates/app-template-invalid-2.yaml"
   - "app-templates/app-template-invalid-3.yaml"
+  - "app-templates/app-template-https.yaml"
 
 instanceTemplates:
   - "instance-template-default.yaml"

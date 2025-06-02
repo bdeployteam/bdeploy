@@ -169,6 +169,7 @@
                                 [matTooltip]="!canToggle ? 'Parameter cannot be added or removed, see description.' : 'Click to add or remove this optional parameter'"
                                 [matTooltipShowDelay]="500"
                                 matRipple
+                                data-testid="toggle-param"
                                 class="local-add-remove cursor-pointer"
                                 [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value && edit.meetsConditionOnGiven(p.descriptor, app.descriptor.startCommand, process)"
                                 >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add' }}</mat-icon
