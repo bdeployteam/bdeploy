@@ -17,3 +17,21 @@ processControl:
 
 startCommand:
   launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}{{LINUX_AARCH64:launch.sh}}"
+  parameters:
+    - uid: "https-keystore-path"
+      name: "Keystore"
+      parameter: "-keystore.path"
+      groupName: "Test Parameters"
+      longDescription: "Keystore for setting up HTTPS."
+stopCommand:
+  launcherPath: "{{WINDOWS:stop.bat}}{{LINUX:stop.sh}}{{LINUX_AARCH64:stop.sh}}"
+  parameters:
+    - uid: "stop-https-keystore-path"
+      name: "Keystore"
+      parameter: "-keystore.path"
+      groupName: "Test Parameters"
+      value: "{{V:https-keystore-path}}"
+      mandatory: true
+      condition:
+        parameter: "https-keystore-path"
+        must: BE_NON_EMPTY

@@ -39,4 +39,21 @@ export class ParameterGroupArea extends BaseArea {
     await this._group.locator('mat-expansion-panel-header').getByRole('button', { name: 'Add Custom Parameter' }).click();
     return Promise.resolve(new CustomParameterPopup(this._group));
   }
+
+  async parameterHasValue(id: string, expectedValue: string) {
+    await expect(this.getParameter(id).locator("input").nth(0)).toHaveValue(expectedValue);
+  }
+
+  async shouldBeSelected(id: string) {
+    await expect(this.getParameter(id).getByTestId('toggle-param')).toContainText('delete');
+  }
+
+  async shouldNotBeSelected(id: string) {
+    await expect(this.getParameter(id).getByTestId('toggle-param')).toContainText('add');
+  }
+
+  async toggleParameter(id: string) {
+    await this.getParameter(id).getByTestId('toggle-param').click();
+  }
+
 }

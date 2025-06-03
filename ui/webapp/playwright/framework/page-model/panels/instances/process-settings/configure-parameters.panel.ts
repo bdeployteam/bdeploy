@@ -20,6 +20,10 @@ export class ConfigureParametersPanel extends BasePanel {
     await this.page.mouse.wheel(0, 10);
   }
 
+  getStartCommandPreview() {
+    return this.getDialog().locator("app-history-process-config");
+  }
+
   async apply() {
     await this.getToolbar().getByRole('button', { name: 'Apply' }).click();
   }

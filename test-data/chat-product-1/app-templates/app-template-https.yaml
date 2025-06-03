@@ -1,0 +1,8 @@
+id: app-with-https
+application: chat-app
+name: App with Https
+description: This app has a stop command parameter, and is valid
+
+startParameters:
+  - uid: "https-keystore-path"
+    value: "../some/path/keystore"
