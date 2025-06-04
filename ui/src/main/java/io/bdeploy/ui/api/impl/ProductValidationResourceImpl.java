@@ -71,19 +71,20 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return validate(parsed);
     }
 
-    private static ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
+    private static ProductValidationResponseApi validate(ProductValidationConfigDescriptor desc) {
         List<ProductValidationIssueApi> issues = new ArrayList<>();
-        issues.addAll(validateProductDescriptor(config));
+        issues.addAll(validateProductDescriptor(desc));
+        issues.addAll(validateApplicationTemplates(desc));
 
         // validate all application commands, parameters, etc.
-        for (Map.Entry<String, ApplicationDescriptor> appEntry : config.applications.entrySet()) {
+        for (Map.Entry<String, ApplicationDescriptor> appEntry : desc.applications.entrySet()) {
             var app = appEntry.getKey();
             var applicationDescriptor = appEntry.getValue();
             if (applicationDescriptor.startCommand != null) {
-                validateCommand(issues, app, applicationDescriptor.startCommand, config.parameterTemplates, false);
+                validateCommand(issues, app, applicationDescriptor.startCommand, desc.parameterTemplates, false);
             }
             if (applicationDescriptor.stopCommand != null) {
-                validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates, true);
+                validateCommand(issues, app, applicationDescriptor.stopCommand, desc.parameterTemplates, true);
             }
             if (applicationDescriptor.type == ApplicationType.CLIENT) {
                 EndpointsDescriptor endpointsDescr = applicationDescriptor.endpoints;
@@ -98,9 +99,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
 
         // validate all the templates.
-        issues.addAll(validateInstanceVariableDefinitions(config));
-        issues.addAll(validateInstanceTemplates(config));
-        issues.addAll(validateApplicationTemplates(config));
+        issues.addAll(validateInstanceVariableDefinitions(desc));
+        issues.addAll(validateInstanceTemplates(desc));
 
         return new ProductValidationResponseApi(issues);
     }
@@ -113,6 +113,34 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         if (minMinionVersion != null && VersionHelper.tryParse(minMinionVersion) == null) {
             issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                     "Minimum BDeploy version '" + minMinionVersion + "' cannot be parsed"));
+        }
+
+        return issues;
+    }
+
+    private static List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
+
+        Map<String, ProcessControlDescriptor> appsToProcessControl = desc.applications.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().processControl));
+        for (ApplicationTemplateDescriptor appTemplate : desc.applicationTemplates) {
+            try {
+                issues.addAll(validateTemplateVariablesOnApplication(appTemplate));
+                issues.addAll(validateFlatApplicationTemplate(
+                        new FlattenedApplicationTemplateConfiguration(appTemplate, desc.applicationTemplates, null), desc));
+
+                var processControlDescriptor = Optional.ofNullable(appsToProcessControl.get(appTemplate.application))
+                        .orElse(new ProcessControlDescriptor());
+                if (!processControlDescriptor.supportsKeepAlive) {
+                    addAppTemplateProcessControlIssue(issues, appTemplate, "keepAlive");
+                }
+                if (!processControlDescriptor.supportsAutostart) {
+                    addAppTemplateProcessControlIssue(issues, appTemplate, "autostart");
+                }
+            } catch (RuntimeException e) {
+                issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Cannot resolve application template '" + appTemplate.name + "': " + e.toString()));
+            }
         }
 
         return issues;
@@ -174,36 +202,71 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return issues;
     }
 
-    private static List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
-        List<ProductValidationIssueApi> issues = desc.applicationTemplates.stream().map(a -> {
-            try {
-                var subIssues = validateFlatApplicationTemplate(
-                        new FlattenedApplicationTemplateConfiguration(a, desc.applicationTemplates, null), desc);
+    private static List<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
+            ApplicationTemplateDescriptor appTplDescr) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
 
-                // need to validate variables directly on the original, as flattening moves/merges variables.
-                subIssues.addAll(validateTemplateVariablesOnApplication(a));
+        String tplNiceName = appTplDescr.name == null ? createNiceAnonymousName(appTplDescr.application) : appTplDescr.name;
 
-                return subIssues;
-            } catch (Exception e) {
-                return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                        "Cannot resolve application template " + a.name + ": " + e.toString()));
-            }
-        }).flatMap(l -> l.stream()).filter(Objects::nonNull).collect(Collectors.toList());
+        // check for duplicates
+        Set<String> ids = new HashSet<>();
+        Set<String> duplicateIds = appTplDescr.templateVariables.stream().map(descriptor -> descriptor.id)
+                .filter(id -> !ids.add(id)).collect(Collectors.toSet());
+        if (!duplicateIds.isEmpty()) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application template '" + tplNiceName
+                    + "' contains duplicate template variables: " + String.join(", ", duplicateIds)));
+        }
 
-        // check process control
-        Map<String, ProcessControlDescriptor> appsToProcessControl = desc.applications.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().processControl));
-        for (var appTemplate : desc.applicationTemplates) {
-            var processControlDescriptor = Optional.ofNullable(appsToProcessControl.get(appTemplate.application))
-                    .orElse(new ProcessControlDescriptor());
-            if (!processControlDescriptor.supportsKeepAlive) {
-                addAppTemplateProcessControlIssue(issues, appTemplate, "keepAlive");
-            }
-            if (!processControlDescriptor.supportsAutostart) {
-                addAppTemplateProcessControlIssue(issues, appTemplate, "autostart");
+        // figure out which variables are requested in the template
+        TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
+        TemplateHelper.process(appTplDescr.name, res, res::canResolve);
+        for (var p : appTplDescr.startParameters) {
+            TemplateHelper.process(p.value, res, res::canResolve);
+        }
+
+        // now compare to the list of *defined* variables to find missing and/or too many definitions
+        Set<String> requested = res.getRequestedVariables();
+        for (var r : requested) {
+            var tv = appTplDescr.templateVariables.stream().filter(v -> v.id.equals(r)).findAny();
+            if (tv.isEmpty()) {
+                issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Missing definition for used template variable '" + r + "' in application template '" + tplNiceName
+                                + '\''));
             }
         }
+        for (var d : appTplDescr.templateVariables) {
+            if (!requested.contains(d.id)) {
+                issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING, "Template variable '" + d.id
+                        + "' is defined but never used in application template '" + tplNiceName + '\''));
+            }
+        }
+
         return issues;
+    }
+
+    private static List<ProductValidationIssueApi> validateFlatApplicationTemplate(FlattenedApplicationTemplateConfiguration tpl,
+            ProductValidationConfigDescriptor descriptor) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
+
+        if (!descriptor.applications.containsKey(tpl.application)) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                    "Application template '" + (tpl.name == null ? createNiceAnonymousName(tpl.application) : tpl.name)
+                            + "' references application '" + tpl.application + "' which does not exist"));
+        }
+
+        return issues;
+    }
+
+    private static void addAppTemplateProcessControlIssue(List<ProductValidationIssueApi> issues,
+            ApplicationTemplateDescriptor appTemplate, String variableName) {
+        if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application template '" + appTemplate.id
+                    + "' has '" + variableName + "' enabled, but the descriptor of the application forbids it"));
+        }
+    }
+
+    private static String createNiceAnonymousName(String s) {
+        return "<anonymous> (" + s + ")";
     }
 
     private static void addInstanceTemplateProcessControlIssue(List<ProductValidationIssueApi> issues,
@@ -214,14 +277,6 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                             + (usesTemplate ? "template" : "application") + " '"
                             + (usesTemplate ? templateApp.template : templateApp.application) + "' and sets its parameter '"
                             + variableName + "' to enabled, but the descriptor of the application forbids it"));
-        }
-    }
-
-    private static void addAppTemplateProcessControlIssue(List<ProductValidationIssueApi> issues,
-            ApplicationTemplateDescriptor appTemplate, String variableName) {
-        if (Boolean.TRUE.equals(appTemplate.processControl.get(variableName))) {
-            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application template '" + appTemplate.id
-                    + "' has '" + variableName + "' enabled, but the descriptor of the application forbids it"));
         }
     }
 
@@ -309,39 +364,6 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return result;
     }
 
-    private static Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
-            ApplicationTemplateDescriptor a) {
-        List<ProductValidationIssueApi> result = new ArrayList<>();
-
-        String tplNiceName = a.name == null ? createNiceAnonymousName(a.application) : a.name;
-
-        // figure out which variables are requested in the template.
-        TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
-        TemplateHelper.process(a.name, res, res::canResolve);
-        for (var p : a.startParameters) {
-            TemplateHelper.process(p.value, res, res::canResolve);
-        }
-
-        // now compare to the list of *defined* variables to find missing and/or too many definitions.
-        Set<String> requested = res.getRequestedVariables();
-        for (var r : requested) {
-            var tv = a.templateVariables.stream().filter(v -> v.id.equals(r)).findAny();
-            if (tv.isEmpty()) {
-                result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                        "Missing definition for used template variable " + r + " in " + tplNiceName));
-            }
-        }
-
-        for (var d : a.templateVariables) {
-            if (!requested.contains(d.id)) {
-                result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
-                        "Template variable " + d.id + " defined but never used in " + tplNiceName));
-            }
-        }
-
-        return result;
-    }
-
     private static List<ProductValidationIssueApi> validateFlatInstanceTemplate(FlattenedInstanceTemplateConfiguration tpl,
             ProductValidationConfigDescriptor descriptor) {
         List<String> controlGroupsInTemplate = tpl.processControlGroups.stream().map(c -> c.name).toList();
@@ -363,24 +385,6 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
 
         return result;
-    }
-
-    private static List<ProductValidationIssueApi> validateFlatApplicationTemplate(FlattenedApplicationTemplateConfiguration tpl,
-            ProductValidationConfigDescriptor descriptor) {
-        List<ProductValidationIssueApi> result = new ArrayList<>();
-
-        String tplNiceName = tpl.name == null ? createNiceAnonymousName(tpl.application) : tpl.name;
-
-        if (!descriptor.applications.containsKey(tpl.application)) {
-            result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                    "Application " + tpl.application + " not found for application template " + tplNiceName));
-        }
-
-        return result;
-    }
-
-    private static String createNiceAnonymousName(String s) {
-        return "<anonymous> (" + s + ")";
     }
 
     private static void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,

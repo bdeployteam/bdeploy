@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,8 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariableType;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.cli.TestProductFactory.TestProductDescriptor;
@@ -56,6 +59,138 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         Set<String> errors = extractBySeverity("ERROR", output);
 
         assertTrue(errors.contains("Minimum BDeploy version '" + minMinionVersion + "' cannot be parsed"));
+    }
+
+    @Test
+    void testApplicationTemplatesValidation(RemoteService remote, @TempDir Path tmp) throws IOException {
+        createInstanceGroup(remote);
+
+        TemplateVariable duplicateTemplateVariable1 = new TemplateVariable();
+        TemplateVariable duplicateTemplateVariable2 = new TemplateVariable();
+        TemplateVariable duplicateTemplateVariable3 = new TemplateVariable();
+        duplicateTemplateVariable1.id = "duplicate-template-var-singular";
+        duplicateTemplateVariable2.id = "duplicate-template-var-dual";
+        duplicateTemplateVariable3.id = "duplicate-template-var-dual";
+        duplicateTemplateVariable1.name = "Duplicate template variable singular";
+        duplicateTemplateVariable2.name = "Duplicate template variable dual 1";
+        duplicateTemplateVariable3.name = "Duplicate template variable dual 2";
+        duplicateTemplateVariable1.description = "A duplicate template variable that got added twice";
+        duplicateTemplateVariable2.description = "A duplicate template variable that shares its ID with another template variable";
+        duplicateTemplateVariable3.description = "A duplicate template variable that shares its ID with another template variable";
+        duplicateTemplateVariable1.type = TemplateVariableType.STRING;
+        duplicateTemplateVariable2.type = TemplateVariableType.NUMERIC;
+        duplicateTemplateVariable3.type = TemplateVariableType.BOOLEAN;
+
+        TemplateVariable unusedTemplateVariable1 = new TemplateVariable();
+        TemplateVariable unusedTemplateVariable2 = new TemplateVariable();
+        TemplateVariable unusedTemplateVariable3 = new TemplateVariable();
+        TemplateVariable unusedTemplateVariable4 = new TemplateVariable();
+        unusedTemplateVariable1.id = "unused-tpl-var-string";
+        unusedTemplateVariable2.id = "unused-tpl-var-numeric";
+        unusedTemplateVariable3.id = "unused-tpl-var-boolean";
+        unusedTemplateVariable4.id = "unused-tpl-var-password";
+        unusedTemplateVariable1.name = "Unused STRING template variable";
+        unusedTemplateVariable2.name = "Unused NUMERIC template variable";
+        unusedTemplateVariable3.name = "Unused BOOLEAN template variable";
+        unusedTemplateVariable4.name = "Unused PASSWORD template variable";
+        unusedTemplateVariable1.description = "A template variable of type STRING and without a default value that is declared but never used";
+        unusedTemplateVariable2.description = "A template variable of type NUMERIC and without a default value that is declared but never used";
+        unusedTemplateVariable3.description = "A template variable of type BOOLEAN and without a default value that is declared but never used";
+        unusedTemplateVariable4.description = "A template variable of type PASSWORD and without a default value that is declared but never used";
+        unusedTemplateVariable1.type = TemplateVariableType.STRING;
+        unusedTemplateVariable2.type = TemplateVariableType.NUMERIC;
+        unusedTemplateVariable3.type = TemplateVariableType.BOOLEAN;
+        unusedTemplateVariable4.type = TemplateVariableType.PASSWORD;
+
+        ApplicationTemplateDescriptor appTplWithInvalidParameters = new ApplicationTemplateDescriptor();
+        appTplWithInvalidParameters.id = "app-tpl-with-invalid-params";
+        appTplWithInvalidParameters.application = "server-app";
+        appTplWithInvalidParameters.name = "Invalid template with invalid process parameters";
+        appTplWithInvalidParameters.description = "A named invalid application template that references parameters that do not exist and declares parameters that are not used, as well as duplicates";
+        appTplWithInvalidParameters.templateVariables.add(duplicateTemplateVariable1); // add singular duplicate variable
+        appTplWithInvalidParameters.templateVariables.add(duplicateTemplateVariable1); // add singular duplicate variable again
+        appTplWithInvalidParameters.templateVariables.add(duplicateTemplateVariable2); // add dual duplicate variable 1
+        appTplWithInvalidParameters.templateVariables.add(duplicateTemplateVariable3); // add dual duplicate variable 2
+        appTplWithInvalidParameters.templateVariables.add(unusedTemplateVariable1); // add STRING parameter that is never used
+        appTplWithInvalidParameters.templateVariables.add(unusedTemplateVariable2); // add NUMERIC parameter that is never used
+        appTplWithInvalidParameters.templateVariables.add(unusedTemplateVariable3); // add BOOLEAN parameter that is never used
+        appTplWithInvalidParameters.templateVariables.add(unusedTemplateVariable4); // add PASSWORD parameter that is never used
+        appTplWithInvalidParameters.startParameters.add(TestProductFactory// add a valid fixed value parameter
+                .aTemplateParameter("fixedValueParam", "fixed-value"));
+        appTplWithInvalidParameters.startParameters.add(TestProductFactory// try to reference the singular duplicate template variable
+                .aTemplateParameter("duplicateParam", "{{T:duplicate-template-var-singular}}"));
+        appTplWithInvalidParameters.startParameters.add(TestProductFactory// add an invalid parameter reference
+                .aTemplateParameter("invalidParam", "{{T:non-existant-param}}"));
+
+        ApplicationTemplateDescriptor appTplWithInvalidProcessControl = new ApplicationTemplateDescriptor();
+        appTplWithInvalidProcessControl.id = "server-with-sleep";
+        appTplWithInvalidProcessControl.application = "server-app";
+        appTplWithInvalidProcessControl.name = "Invalid template with invalid process control";
+        appTplWithInvalidProcessControl.description = "A named invalid application template that has an invalid process control";
+        appTplWithInvalidProcessControl.processControl = new HashMap<>();
+        appTplWithInvalidProcessControl.processControl.put("keepAlive", true); // generate invalid keepAlive
+        appTplWithInvalidProcessControl.processControl.put("autostart", true); // generate invalid autostart
+
+        ApplicationTemplateDescriptor appTplForMissingApp1 = new ApplicationTemplateDescriptor();
+        appTplForMissingApp1.id = "app-tpl-for-missing-app1";
+        appTplForMissingApp1.application = "app-that-does-not-exist"; // reference non-existing application
+        appTplForMissingApp1.name = "Invalid template for missing application";
+        appTplForMissingApp1.description = "A named invalid application template for an application that does not exist";
+
+        ApplicationTemplateDescriptor appTplForMissingApp2 = new ApplicationTemplateDescriptor();
+        appTplForMissingApp2.id = "app-tpl-for-missing-app2";
+        appTplForMissingApp2.application = "app-that-does-not-exist"; // reference non-existing application
+        appTplForMissingApp2.name = null;
+        appTplForMissingApp2.description = "An anonymous invalid application template for an application that does not exist";
+
+        TestProductDescriptor product = TestProductFactory.generateProduct();
+        product.applicationTemplates = new HashMap<>();
+        product.applicationTemplates.put("app-template-with-invalid-parameters.yaml", appTplWithInvalidParameters);
+        product.applicationTemplates.put("app-template-with-invalid-process-control.yaml", appTplWithInvalidProcessControl);
+        product.applicationTemplates.put("app-template-for-missing-app1.yaml", appTplForMissingApp1);
+        product.applicationTemplates.put("app-template-for-missing-app2.yaml", appTplForMissingApp2);
+        product.instanceTemplates = new HashMap<>();
+        product.descriptor.applicationTemplates = product.applicationTemplates.keySet().stream().toList();
+        product.descriptor.instanceTemplates = new ArrayList<>();
+
+        ApplicationDescriptor applicationDescriptor = product.applications.get("app-info.yaml");
+        applicationDescriptor.processControl.supportsKeepAlive = false; // disallow keepAlive
+        applicationDescriptor.processControl.supportsAutostart = false; // disallow autostart
+
+        StructuredOutput output = getResult(remote, tmp, product);
+        assertEquals(12, output.size());
+
+        Set<String> warnings = extractBySeverity("WARNING", output);
+        assertEquals(5, warnings.size());
+        Set<String> errors = extractBySeverity("ERROR", output);
+        assertEquals(6, errors.size());
+
+        assertTrue(warnings.contains("Template variable 'unused-tpl-var-string'"
+                + " is defined but never used in application template 'Invalid template with invalid process parameters'"));
+        assertTrue(warnings.contains("Template variable 'unused-tpl-var-numeric'"
+                + " is defined but never used in application template 'Invalid template with invalid process parameters'"));
+        assertTrue(warnings.contains("Template variable 'unused-tpl-var-boolean'"
+                + " is defined but never used in application template 'Invalid template with invalid process parameters'"));
+        assertTrue(warnings.contains("Template variable 'unused-tpl-var-password'"
+                + " is defined but never used in application template 'Invalid template with invalid process parameters'"));
+        assertTrue(warnings.contains("Template variable 'duplicate-template-var-dual'" // The output contains this warning twice
+                + " is defined but never used in application template 'Invalid template with invalid process parameters'"));
+
+        assertTrue(errors.contains("Application template 'Invalid template with invalid process parameters'"
+                + " contains duplicate template variables: duplicate-template-var-singular, duplicate-template-var-dual"));
+
+        assertTrue(errors.contains("Missing definition for used template variable 'non-existant-param' in application template"
+                + " 'Invalid template with invalid process parameters'"));
+
+        assertTrue(errors.contains("Application template 'Invalid template for missing application'"
+                + " references application 'app-that-does-not-exist' which does not exist"));
+        assertTrue(errors.contains("Application template '<anonymous> (app-that-does-not-exist)'"
+                + " references application 'app-that-does-not-exist' which does not exist"));
+
+        assertTrue(errors.contains("Application template 'server-with-sleep' has 'keepAlive'"
+                + " enabled, but the descriptor of the application forbids it"));
+        assertTrue(errors.contains("Application template 'server-with-sleep' has 'autostart'"
+                + " enabled, but the descriptor of the application forbids it"));
     }
 
     @Test

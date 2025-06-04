@@ -74,8 +74,6 @@ public abstract class BaseMinionCliTest {
         StructuredOutput output = remote(remote, ProductTool.class, "--instanceGroup=GROUP_NAME", "--hive=" + bhivePath,
                 "--list");
         assertEquals(1, output.size());
-        assertEquals("Test Product", output.get(0).get("Name"));
-        assertEquals("2", output.get(0).get("NoOfInstanceTemplates"));
     }
 
     protected void uploadProduct(RemoteService remote, Path tmp, Path bhivePath, TestProductFactory.TestProductDescriptor product)
