@@ -16,6 +16,8 @@ public class OsHelper {
         WINDOWS, // this is X64
         LINUX, // this is X64
         LINUX_AARCH64,
+        @Deprecated(forRemoval = true, since = "7.7.0")
+        AIX,
         @JsonEnumDefaultValue
         UNKNOWN
     }
