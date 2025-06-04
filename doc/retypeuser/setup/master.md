@@ -83,7 +83,7 @@ Be aware that the user running the **start** command later on **must** be the ow
 After the initialization - which needs to be done only once - the **master** can be started with the following command:
 
 ```
-bdeploy master --root=</path/to/root>
+bdeploy start --root=</path/to/root>
 ```
 
 This will start the **master** server which also hosts the Web UI: [https://localhost:7701](https://localhost:7701)
