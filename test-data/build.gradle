@@ -1,4 +1,7 @@
+import com.github.psxpaul.task.JavaExecFork
 import okhttp3.OkHttpClient
+import org.gradle.api.internal.tasks.userinput.UserInputHandler
+
 import java.util.concurrent.TimeUnit
 
 plugins {
@@ -9,29 +12,29 @@ plugins {
 }
 
 ext {
-    testServerRoot = "${buildDir}/test-root"
+    testServerRoot = layout.buildDirectory.dir("test-root").get().asFile
     testServerHost = "localhost"
     testServerPort = 7711
 
-    testServerRootCentral = "${buildDir}/test-root-central"
-    testServerRootManaged = "${buildDir}/test-root-managed"
+    testServerRootCentral = layout.buildDirectory.dir("test-root-central").get().asFile
+    testServerRootManaged = layout.buildDirectory.dir("test-root-managed").get().asFile
     testServerPortCentral = 7715
     testServerPortManaged = 7716
 }
 
 evaluationDependsOn(':minion')
 
-int randomServerPort() {
+static int randomServerPort() {
     new ServerSocket(0).withCloseable {
         return it.getLocalPort();
     }
 }
 
 void createProductTasks(String taskName, String prod) {
-    task "${taskName}" (type: Zip) {
+    tasks.register("${taskName}", Zip) {
         from fileTree(dir: "${projectDir}/${prod}")
         archiveFileName = "${prod}-direct.zip"
-        destinationDirectory = file("${buildDir}/distribution/")
+        destinationDirectory = layout.buildDirectory.dir("distribution")
         inputs.dir file("${projectDir}/${prod}")
     }
 
@@ -57,14 +60,14 @@ void setupBDeployRemoteEnv(ProcessForkOptions options, String root, int port) {
 }
 
 void setupBDeployJavaExec(JavaExec je, String root, int port) {
-    je.main = project(":minion").mainClassName
+    je.mainClass = project(":minion").application.getMainClass().get()
     je.classpath = project(":minion").sourceSets.main.runtimeClasspath
     if(root != null) {
         setupBDeployRemoteEnv(je, root, port)
     }
 }
 
-void setupProfilerAgent(com.github.psxpaul.task.JavaExecFork je, String name) {
+void setupProfilerAgent(JavaExecFork je, String name) {
     if(project.hasProperty("yourkitPath") && !rootProject.isAarch64()) {
         def path = new File(project.getProperty("yourkitPath"));
         def profPath = null;
@@ -79,37 +82,42 @@ void setupProfilerAgent(com.github.psxpaul.task.JavaExecFork je, String name) {
     }
 }
 
-task triggerStopBDeploy() {
+tasks.register('triggerStopBDeploy') {
     doLast {
+        tasks.named('startTestBDeploy').get().stop();
+        tasks.named('startTestBDeployManaged').get().stop();
+        tasks.named('startTestBDeployCentral').get().stop();
+
         println("Stopped BDeploy Server")
     }
 }
 
 void createServerTasks(String name, String root, int port) {
-    task "initTestBDeploy${name}"(type: JavaExec ) {
+    tasks.register("initTestBDeploy${name}", JavaExec) {
         setupBDeployJavaExec(it, root, port);
 
         def taskName = "";
         if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
             taskName = "winX64DistZip"
         } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-            if(rootProject.isAarch64()) {
+            if (rootProject.isAarch64()) {
                 taskName = "linuxAarch64DistZip"
             } else {
                 taskName = "linuxX64DistZip"
             }
         }
-        dependsOn ':minion:'+taskName
+        dependsOn ':minion:' + taskName
 
         doFirst() {
             delete "${root}"
         }
 
-        if(name.equals("Central") || name.equals("Managed")) {
+        if (name.equals("Central") || name.equals("Managed")) {
             // save some time on startup...
-            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name, "--initUser=admin", "--initPassword=adminadminadmin" ]
+            args = ["init", "--port=${port}", "--dist=ignore", "--mode=" + name, "--initUser=admin", "--initPassword=adminadminadmin"]
         } else {
-            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin", "--pooling", "--pool=${buildDir}/test-pool" ]
+            def poolDir = layout.buildDirectory.dir('test-pool').get().asFile
+            args = ["init", "--port=${port}", "--dist=" + project(':minion').tasks.named(taskName).get().outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin", "--pooling", "--pool=${poolDir}"]
         }
 
         mustRunAfter("externalSoftwareZip")
@@ -119,43 +127,46 @@ void createServerTasks(String name, String root, int port) {
         mustRunAfter("product3Zip")
     }
 
-    task "startTestBDeploy${name}"(type: com.github.psxpaul.task.JavaExecFork, dependsOn: "initTestBDeploy${name}") {
+    tasks.register("startTestBDeploy${name}", JavaExecFork) {
+        dependsOn "initTestBDeploy${name}"
+
         doNotTrackState("No State")
         setupBDeployEnv(it, root)
         setupProfilerAgent(it, "Test" + name)
-        main = project(":minion").mainClassName
+        main = project(":minion").application.getMainClass().get()
         classpath = project(":minion").sourceSets.main.runtimeClasspath
         args = [ "start", "--allowCors", "--consoleLog" ]
         jvmArgs += [ '-Xmx128M' ] // all tests must fit :)
         waitForPort = port
-        stopAfter = triggerStopBDeploy
 
         mustRunAfter("initTestBDeploy${name}")
     }
 }
 
-createServerTasks("", testServerRoot, testServerPort);
-task checkTestBDeploy(type: JavaExec, dependsOn: startTestBDeploy) {
-    setupBDeployJavaExec(it, testServerRoot, testServerPort);
-    args = [ "remote-master", "--minions" ]
+createServerTasks("", testServerRoot.toString(), testServerPort);
+tasks.register('checkTestBDeploy', JavaExec) {
+    dependsOn startTestBDeploy
+    setupBDeployJavaExec(it, testServerRoot.toString(), testServerPort);
+    args = ["remote-master", "--minions"]
 
     mustRunAfter(startTestBDeploy)
 }
 
-createServerTasks("Central", testServerRootCentral, testServerPortCentral);
-createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
+createServerTasks("Central", testServerRootCentral.toString(), testServerPortCentral);
+createServerTasks("Managed", testServerRootManaged.toString(), testServerPortManaged);
 
 startTestBDeployManaged.mustRunAfter(checkTestBDeploy)
 startTestBDeployCentral.mustRunAfter(startTestBDeployManaged)
 
 
-task cleanExternalSoftwareHive(type: Delete) {
-    delete "${buildDir}/external-software-hive"
+tasks.register('cleanExternalSoftwareHive', Delete) {
+    delete layout.buildDirectory.dir("external-software-hive")
 }
 
-task initExtSoftwareHive(type: JavaExec, dependsOn: cleanExternalSoftwareHive) {
-    setupBDeployJavaExec(it, testServerRoot, testServerPort);
-    args = [ "bhive", "init", "--hive=${buildDir}/external-software-hive" ]
+tasks.register('initExtSoftwareHive', JavaExec) {
+    dependsOn cleanExternalSoftwareHive
+    setupBDeployJavaExec(it, testServerRoot.toString(), testServerPort);
+    args = ["bhive", "init", "--hive=${layout.buildDirectory.dir('external-software-hive').get().asFile}"]
 }
 
 // now define the dynamic tasks for each operating system
@@ -164,12 +175,13 @@ createExternalSoftwareTasks("linux")
 
 void createExternalSoftwareTasks(String os) {
     def osUpper = os.substring(0,1).toUpperCase() + os.substring(1);
-    def hive = "${buildDir}/external-software-hive";
+    def hive = layout.buildDirectory.dir("external-software-hive").get().asFile;
     def source = "${projectDir}/external-software/${os}"
 
-    task "externalSoftware${osUpper}" (type: JavaExec, dependsOn: "initExtSoftwareHive") {
-        setupBDeployJavaExec(it, testServerRoot, testServerPort);
-        args = [ "bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0" ]
+    tasks.register("externalSoftware${osUpper}", JavaExec) {
+        dependsOn "initExtSoftwareHive"
+        setupBDeployJavaExec(it, testServerRoot.toString(), testServerPort);
+        args = ["bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0"]
     }
 
     build {
@@ -177,11 +189,13 @@ void createExternalSoftwareTasks(String os) {
     }
 }
 
-task externalSoftwareZip(type: Zip, dependsOn: [externalSoftwareWindows, externalSoftwareLinux]) {
+tasks.register('externalSoftwareZip', Zip) {
+    dependsOn externalSoftwareWindows
+    dependsOn externalSoftwareLinux
     archiveFileName = "external-software-hive.zip"
-    destinationDirectory = file("${buildDir}/distribution/")
-    
-    from "${buildDir}/external-software-hive"
+    destinationDirectory = layout.buildDirectory.dir("distribution")
+
+    from layout.buildDirectory.dir("external-software-hive")
 }
 
 // now define the dynamic tasks for each product
@@ -190,28 +204,29 @@ createProductTasks("product2Zip", "test-product-2")
 createProductTasks("product3Zip", "chat-product-1")
 createProductTasks("externalSoftware2Zip","external-software-2-raw")
 
-task verifyBDeployExe(type: JavaExec) {
+tasks.register('verifyBDeployExe', JavaExec) {
     setupBDeployJavaExec(it, null, 0);
-    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/BDeploy.exe" ]
+    args = ["verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/BDeploy.exe"]
 }
 
-task verifyFileAssocExe(type: JavaExec) {
+tasks.register('verifyFileAssocExe', JavaExec) {
     setupBDeployJavaExec(it, null, 0);
-    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/FileAssoc.exe" ]
+    args = ["verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/FileAssoc.exe"]
 }
 
-task verifyInstallerBin(type: JavaExec) {
+tasks.register('verifyInstallerBin', JavaExec) {
     setupBDeployJavaExec(it, null, 0);
-    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/bin/Installer.bin" ]
+    args = ["verify-signature", "--executable=" + project(":launcher").projectDir + "/src/winX64/dist/bin/Installer.bin"]
 }
 
-task verifyBinaries() {
+tasks.register('verifyBinaries') {
     dependsOn verifyBDeployExe
     dependsOn verifyFileAssocExe
     dependsOn verifyInstallerBin
 }
 
-task release(dependsOn: [verifyBinaries]) {
+tasks.register('release') {
+    dependsOn verifyBinaries
     doLast {
         println "Release seems to do be ok..."
     }
@@ -253,7 +268,7 @@ jacoco {
 }
 
 // now all tasks that depend on any of the generated tasks
-task setupDemoServer() {
+tasks.register('setupDemoServer') {
     dependsOn checkTestBDeploy
     dependsOn startTestBDeployCentral
     dependsOn startTestBDeployManaged
@@ -262,10 +277,8 @@ task setupDemoServer() {
         println("----------------------------------------------------------------------------------------")
         println("Successfully started demo server. Point your browser to:")
         println("  https://localhost:${testServerPort} - STANDALONE Demo Server")
-        if(!project.hasProperty('cypressNoCentral')) {
-            println("  https://localhost:${testServerPortCentral} - CENTRAL Demo Server")
-            println("  https://localhost:${testServerPortManaged} - MANAGED Demo Server")
-        }
+        println("  https://localhost:${testServerPortCentral} - CENTRAL Demo Server")
+        println("  https://localhost:${testServerPortManaged} - MANAGED Demo Server")
         println("User and password for the demo server(s) are 'admin' and 'admin'.")
         println("NOTE: that cookies are hostname based, so logging in to one will log out on any other");
         println("      server running on the same hostname.");
@@ -273,10 +286,11 @@ task setupDemoServer() {
     }
 }
 
-task runDemoServer(dependsOn: setupDemoServer) {
+tasks.register('runDemoServer') {
+    dependsOn setupDemoServer
     doLast() {
         // no println will work in doLast, it will appear only AFTER the question is answered.
-        def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
+        def userInput = services.get(UserInputHandler)
         def answer = userInput.askUser(i -> i.askQuestion("Enter any value (or press enter) to stop the server", "Stop")).getOrNull();
     }
 }

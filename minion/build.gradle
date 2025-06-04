@@ -6,7 +6,9 @@ ext {
     scriptDefVmArgs = [ '-Xms64m', '-Xmx1g', '-XX:-OmitStackTraceInFastThrow' ]
 }
 
-mainClassName = 'io.bdeploy.minion.cli.MinionServerCli'
+application {
+    mainClass = 'io.bdeploy.minion.cli.MinionServerCli'
+}
 
 dependencies {
     implementation(

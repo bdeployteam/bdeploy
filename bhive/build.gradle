@@ -2,7 +2,9 @@ plugins {
     id 'application'
 }
 
-mainClassName = 'io.bdeploy.bhive.cli.BHiveCli'
+application {
+    mainClass = 'io.bdeploy.bhive.cli.BHiveCli'
+}
 
 dependencies {
     implementation project(":common")
@@ -13,15 +15,12 @@ dependencies {
     commonTestDeps(project(":logging"))
 }
 
-if(project.hasProperty("test.hive.override")) {
-    ext.xTime = System.currentTimeMillis();
-    testResultsDirName = "${buildDir}/test-results/${ext.xTime}"
-}
-
 distTar.enabled = false
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 startScripts {
     defaultJvmOpts = [ '-Xmx512m' ]

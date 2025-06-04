@@ -5,13 +5,13 @@
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds/
  */
 
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 buildscript {
     repositories {
         maven {
-            url 'https://repository.mulesoft.org/nexus/content/repositories/public/'
+            url = 'https://repository.mulesoft.org/nexus/content/repositories/public/'
         }
         mavenCentral()
         gradlePluginPortal()
@@ -72,15 +72,15 @@ allprojects {
     }
 }
 
-task printVersion {
+tasks.register('printVersion') {
     doLast {
         println version
     }
 }
 
-task setVersion {
+tasks.register('setVersion') {
     doFirst {
-        if(!project.hasProperty('targetVersion')) {
+        if (!project.hasProperty('targetVersion')) {
             throw new RuntimeException("Need to set property targetVersion");
         }
     }
@@ -118,8 +118,10 @@ configure(actualSubprojects) {
         buildCommand 'org.eclipse.xtext.ui.shared.xtextBuilder'
     }
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
 
     configurations {
         commonTestDeps
@@ -154,25 +156,25 @@ configure(actualSubprojects) {
 
     jacocoTestReport {
         mustRunAfter "test"
-        executionData fileTree(dir: "$buildDir/jacoco").matching { include '*.exec' }
+        executionData fileTree(dir: layout.buildDirectory.dir("jacoco").get().asFile).matching { include '*.exec' }
     }
 
     testlogger {
-        showStandardStreams true
-        showFailedStandardStreams true
+        showStandardStreams = true
+        showFailedStandardStreams = true
 
         if(project.hasProperty('verboseTest')) {
-            showPassedStandardStreams true
-            showSkippedStandardStreams true
-            theme 'standard'
+            showPassedStandardStreams = true
+            showSkippedStandardStreams = true
+            theme = 'standard'
         } else {
-            showPassedStandardStreams false
-            showSkippedStandardStreams false
-            theme 'mocha-parallel'
+            showPassedStandardStreams = false
+            showSkippedStandardStreams = false
+            theme = 'mocha-parallel'
         }
 
-        slowThreshold 6000
-        showFullStackTraces true
+        slowThreshold = 6000
+        showFullStackTraces = true
     }
 
     test {
@@ -195,12 +197,12 @@ configure(actualSubprojects) {
         rootProject.updateJavaPath(test)
     }
 
-	task sourcesJar(type: Jar) {
+    tasks.register('sourcesJar', Jar) {
         archiveClassifier = 'sources'
         from sourceSets.main.allJava
     }
 
-    task javadocJar(type: Jar) {
+    tasks.register('javadocJar', Jar) {
         archiveClassifier = 'javadoc'
         from javadoc.destinationDir
 
@@ -224,7 +226,7 @@ configure(actualSubprojects) {
         }
     }
 
-    task cleanCustomEclipseJdt(type: Delete) {
+    tasks.register('cleanCustomEclipseJdt', Delete) {
         delete ".settings/org.eclipse.jdt.ui.prefs"
     }
 
@@ -232,14 +234,16 @@ configure(actualSubprojects) {
 }
 
 configure([project(':minion'), project(':launcher')]) {
-    task genVersionProperties() {
+    tasks.register('genVersionProperties') {
+        def prjName = project.name
+        def buildDir = layout.buildDirectory.asFile.get()
         outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/main/version.properties"
         doLast {
             file("$buildDir/resources/main").mkdirs()
             file("$buildDir/resources/main/version.properties").withWriter { w ->
                 def p = new Properties()
-                p['project'] = project.name
+                p['project'] = prjName
                 p['snapshot'] = version.contains('SNAPSHOT') ? 'true' : 'false'
                 p['version'] = version.replaceAll('SNAPSHOT', rootProject.ext.buildDate)
                 p['minSourceVersion'] = minSourceServerVersion
@@ -248,8 +252,9 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
-    task genLinuxX64VersionProperties() {
+    tasks.register('genLinuxX64VersionProperties') {
         dependsOn genVersionProperties
+        def buildDir = layout.buildDirectory.asFile.get()
         outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/linuxX64/version.properties"
         doLast {
@@ -263,8 +268,9 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
-    task genLinuxAarch64VersionProperties() {
+    tasks.register('genLinuxAarch64VersionProperties') {
         dependsOn genVersionProperties
+        def buildDir = layout.buildDirectory.asFile.get()
         outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/linuxAarch64/version.properties"
         doLast {
@@ -278,8 +284,9 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
-    task genWinX64VersionProperties() {
+    tasks.register('genWinX64VersionProperties') {
         dependsOn genVersionProperties
+        def buildDir = layout.buildDirectory.asFile.get()
         outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/winX64/version.properties"
         doLast {
@@ -389,13 +396,13 @@ def void addMultiPlatformDistBuild(Project prj) {
 
 }
 
-task testReport(type: TestReport) {
-    destinationDir = file("$buildDir/reports/tests")
+tasks.register('testReport', TestReport) {
+    destinationDirectory = layout.buildDirectory.dir("reports/tests")
     // Include the results from the `test` task in all subprojects
-    reportOn actualSubprojects*.test
+    testResults.from(actualSubprojects*.test*.binaryResultsDirectory)
 }
 
-task genJavaDoc(type: Javadoc) {
+tasks.register('genJavaDoc', Javadoc) {
     source = actualSubprojects*.sourceSets.main.allJava
     destinationDir = reporting.file("javadoc")
     classpath = files(actualSubprojects*.sourceSets.main.compileClasspath)
@@ -405,17 +412,6 @@ task genJavaDoc(type: Javadoc) {
 }
 
 build.finalizedBy genJavaDoc
-
-/*gradle.taskGraph.whenReady {taskGraph ->
-    println "Found task graph: " + taskGraph
-    println "Found " + taskGraph.allTasks.size() + " tasks."
-    taskGraph.allTasks.forEach { task ->
-        println task
-        task.dependsOn.forEach { dep ->
-            println "  - " + dep
-        }
-    }
-}*/
 
 def isNonStable = { String version ->
   // -jre for guava
@@ -465,25 +461,26 @@ private String readJdk(String which) {
 }
 
 
-private boolean isAarch64() {
+public boolean isAarch64() {
     return currentArch.equalsIgnoreCase("aarch64");
 }
 
 private void updateJavaPath(ProcessForkOptions options) {
+    def rootBuild = rootProject.layout.buildDirectory
     if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         if(isAarch64()) {
-            options.executable = "${rootProject.buildDir}/jlink/linuxAarch64/jre/bin/java"
+            options.executable = rootBuild.file("jlink/linuxAarch64/jre/bin/java").get().asFile.path
         } else {
-            options.executable = "${rootProject.buildDir}/jlink/linuxX64/jre/bin/java"
+            options.executable = rootBuild.file("jlink/linuxX64/jre/bin/java").get().asFile.path
         }
     } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        options.executable = "${rootProject.buildDir}/jlink/winX64/jre/bin/java.exe"
+        options.executable = rootBuild.file("jlink/winX64/jre/bin/java.exe").get().asFile.path
     }
 }
 
-ext.configureJlink = { task, String modHome, String outDir ->
+ext.configureJlink = { task, String modHome, Provider<Directory> outDir ->
     configure(task) {
-        outputs.dir "$outDir"
+        outputs.dir outDir
 
         def linkExec
         if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
@@ -499,20 +496,20 @@ ext.configureJlink = { task, String modHome, String outDir ->
         // find required modules with this command:
         // $JAVA_HOME/bin/jdeps -summary *.jar | awk '{ print $3 }' | sort -u
         commandLine ( linkExec + [
-            "--output", "$outDir/jre",
+                "--output", "${outDir.get().asFile}/jre",
             "--compress=zip-9", "--no-header-files", "--no-man-pages",
             "--add-modules",
             "java.base,java.compiler,java.datatransfer,java.desktop,java.instrument,java.logging,java.management,java.naming,java.sql,java.xml,java.rmi,jdk.crypto.ec,jdk.jdwp.agent,jdk.jdi,jdk.zipfs,jdk.jcmd,jdk.management"
         ])
 
         doFirst {
-            delete "$outDir"
+            delete outDir
         }
     }
 }
 
-task jlinkLinuxX64(type:Exec) { t ->
-    configureJlink(t, "$linuxX64jdk", "$buildDir/jlink/linuxX64")
+tasks.register('jlinkLinuxX64', Exec) { t ->
+    configureJlink(t, "$linuxX64jdk", layout.buildDirectory.dir("jlink/linuxX64"))
     doFirst {
         if (!hasLinuxX64Jdk()) {
             throw new InvalidUserDataException("$linuxX64jdk does not seem to be a linux x64 JDK, please set -Plinux-x64jdk=c:/path/to/jdk")
@@ -520,8 +517,8 @@ task jlinkLinuxX64(type:Exec) { t ->
     }
 }
 
-task jlinkLinuxAarch64(type:Exec) { t ->
-    configureJlink(t, "$linuxAarch64jdk", "$buildDir/jlink/linuxAarch64")
+tasks.register('jlinkLinuxAarch64', Exec) { t ->
+    configureJlink(t, "$linuxAarch64jdk", layout.buildDirectory.dir("jlink/linuxAarch64"))
     doFirst {
         if (!hasLinuxAarch64Jdk()) {
             throw new InvalidUserDataException("$linuxAarch64jdk does not seem to be a linux aarch64 JDK, please set -Plinux-aarch64jdk=c:/path/to/jdk")
@@ -529,8 +526,8 @@ task jlinkLinuxAarch64(type:Exec) { t ->
     }
 }
 
-task jlinkWinX64(type:Exec) { t ->
-    configureJlink(t, "$winX64jdk", "$buildDir/jlink/winX64")
+tasks.register('jlinkWinX64', Exec) { t ->
+    configureJlink(t, "$winX64jdk", layout.buildDirectory.dir("jlink/winX64"))
     doFirst {
         if (!hasWinX64Jdk()) {
             throw new InvalidUserDataException("$winX64jdk does not seem to be a windows JDK, please set -Pwin-x64jdk=/path/to/jdk")
@@ -538,29 +535,29 @@ task jlinkWinX64(type:Exec) { t ->
     }
 
     doLast {
-        String base = new File("$buildDir/jlink/winX64/jre").getPath();
-        fileTree("$buildDir/jlink/winX64/jre").matching {
+        String base = layout.buildDirectory.dir("jlink/winX64/jre").get().asFile.getPath();
+        layout.buildDirectory.dir("jlink/winX64/jre").get().asFileTree.matching {
             include "**/*.exe"
             include "**/*.dll"
         }.each {
             String rel = it.getPath().substring(base.length() + 1);
             File src = new File("$winX64jdk", rel);
-            
-            if(src.exists()) {
-                java.nio.file.Files.copy(src.toPath(), it.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            if (src.exists()) {
+                Files.copy(src.toPath(), it.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
         }
     }
 }
 
-task jlinkAny() {
-    if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        if(isAarch64()) {
+tasks.register('jlinkAny') {
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        if (isAarch64()) {
             dependsOn jlinkLinuxAarch64
         } else {
             dependsOn jlinkLinuxX64
         }
-    } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+    } else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         dependsOn jlinkWinX64
     }
 }
@@ -569,26 +566,26 @@ actualSubprojects*.test {
     dependsOn rootProject.tasks["jlinkAny"]
 }
 
-task release() {
+tasks.register('release') {
     doFirst {
-        if(version.contains('SNAPSHOT')) {
+        if (version.contains('SNAPSHOT')) {
             throw new RuntimeException("Cannot release a SNAPSHOT: " + version);
         }
 
-        if(!hasWinX64Jdk()) {
+        if (!hasWinX64Jdk()) {
             throw new RuntimeException("Cannot release without a WINDOWS x64 JDK");
         }
-        if(!hasLinuxX64Jdk()) {
+        if (!hasLinuxX64Jdk()) {
             throw new RuntimeException("Cannot release without a LINUX x64 JDK");
         }
-        if(!hasLinuxAarch64Jdk()) {
+        if (!hasLinuxAarch64Jdk()) {
             throw new RuntimeException("Cannot release without a LINUX aarch64 JDK");
         }
     }
 }
 
 evaluationDependsOnChildren()
-task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+tasks.register('jacocoFullReport', JacocoReport) {
     dependsOn actualSubprojects*.test
 
     getAdditionalSourceDirs().from(files(actualSubprojects.sourceSets.main.allSource.srcDirs))
@@ -596,16 +593,16 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     getClassDirectories().from(files(actualSubprojects.sourceSets.main.output))
 
     rootProject.getAllTasks(true).each { p, tasks ->
-        if(p.name == 'interfaces' || p.name == 'launcher' || p.name == 'ui' || p.name == 'api' || p.name == 'logging') {
+        if (p.name == 'interfaces' || p.name == 'launcher' || p.name == 'ui' || p.name == 'api' || p.name == 'logging') {
             return; // no tests run in there right now.
         }
 
         tasks.each {
-            if(!it.enabled) {
+            if (!it.enabled) {
                 return;
             }
-            def x = it.getExtensions().findByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension);
-            if(x != null) {
+            def x = it.getExtensions().findByType(JacocoTaskExtension);
+            if (x != null) {
                 getExecutionData().from(x.destinationFile);
             }
         }
@@ -613,7 +610,7 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
 
     reports {
         xml.required = true
-        xml.destination file("$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/jacocoFullReport/jacocoFullReport.xml")
     }
 
     onlyIf = {
@@ -621,7 +618,7 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     }
 }
 
-task test {
+tasks.register('test') {
     dependsOn actualSubprojects*.test
     finalizedBy testReport
     finalizedBy jacocoFullReport
@@ -630,7 +627,7 @@ task test {
 sonarqube {
     properties {
         property "sonar.projectKey", "bdeployteam_bdeploy"
-        property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+        property "sonar.coverage.jacoco.xmlReportPaths", layout.buildDirectory.file("reports/jacoco/jacocoFullReport/jacocoFullReport.xml").get().asFile.path
         property "sonar.verbose", "true"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.organization", "bdeployteam"

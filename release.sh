@@ -48,18 +48,17 @@ if [[ -z "${SONATYPE_TOKEN}" ]]; then
     die "SONATYPE_TOKEN variable must contain the Nexus token which is allowed to create a release"
 fi
 
-if [[ -z "${GPG_ID}" ]]; then
-    die "GPG_ID variable must contain the GPG Key which is used to signe artifacts"
+if [[ -z "${GPG_SECRET_KEY}" ]]; then
+    die "GPG_SECRET_KEY variable must contain the GPG secret key (base64) which is used to sign artifacts"
+fi
+
+if [[ -z "${GPG_PUBLIC_KEY}" ]]; then
+    die "GPG_PUBLIC_KEY variable must contain the GPG public key (base64)"
 fi
 
 if [[ -z "${GPG_PASS}" ]]; then
     die "GPG_PASS variable must contain the passphrase for the GPG Key"
 fi
-
-if [[ -z "${GPG_FILE}" ]]; then
-    die "GPG_FILE variable must contain the path to the GPG Keyring file"
-fi
-
 
 CURRENT_VER="$(cat "$ROOT/bdeploy.version")"
 
@@ -129,7 +128,14 @@ fi
 [[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x runUitests "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots "${GRADLE_ARG_ARR[@]}"
 
-[[ -z "${NO_MAVEN}" ]] && ./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
+export JRELEASER_GPG_PASSPHRASE=$GPG_PASS
+export JRELEASER_GPG_PUBLIC_KEY=$GPG_PUBLIC_KEY
+export JRELEASER_GPG_SECRET_KEY=$GPG_SECRET_KEY
+
+export JRELEASER_MAVENCENTRAL_USERNAME=$SONATYPE_USER
+export JRELEASER_MAVENCENTRAL_PASSWORD=$SONATYPE_TOKEN
+
+[[ -z "${NO_MAVEN}" ]] && ./gradlew publish jreleaserDeploy "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version doc
 git commit -m "Release $REL_VER"

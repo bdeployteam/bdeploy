@@ -6,7 +6,10 @@ ext {
     scriptDefVmArgs = [ '-Xms64m', '-Xmx128m' ]
 }
 
-mainClassName = 'io.bdeploy.launcher.cli.LauncherCli'
+application {
+    mainClass = 'io.bdeploy.launcher.cli.LauncherCli'
+    applicationDefaultJvmArgs = [ "-Xmx256m" ]
+}
 
 dependencies {
     implementation(
@@ -29,7 +32,6 @@ dependencies {
     commonTestDeps(testFixtures(project(":bhive")))
 }
 
-applicationDefaultJvmArgs = [ "-Xmx256m" ]
 rootProject.addMultiPlatformDistBuild(project)
 
 distributions {

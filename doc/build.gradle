@@ -1,13 +1,13 @@
 ext.resolveVersion = { task ->
     configure(task) {
-        doFirst {
-            def retypeFile = new File("${workingDir}/retype.yml")
-            def clonedFile = new File("${workingDir}/retype.yml.clone")
-            clonedFile.text = retypeFile.text
+        def retypeFile = new File("${workingDir}/retype.yml")
+        def clonedFile = new File("${workingDir}/retype.yml.clone")
+        def releaseTagPattern = ~/^\d+\.\d+\.\d+$/
+        def releaseVersion = project.version.toString()
+        def releaseLink = (releaseVersion ==~ releaseTagPattern) ? "https://github.com/bdeployteam/bdeploy/releases/tag/v${releaseVersion}" : "https://github.com/bdeployteam/bdeploy/releases"
 
-            def releaseTagPattern = ~/^\d+\.\d+\.\d+$/
-            def releaseVersion = project.version.toString()
-            def releaseLink = (releaseVersion ==~ releaseTagPattern) ? "https://github.com/bdeployteam/bdeploy/releases/tag/v${releaseVersion}" : "https://github.com/bdeployteam/bdeploy/releases"
+        doFirst {
+            clonedFile.text = retypeFile.text
             retypeFile.text = retypeFile.text.replace("{{ releaseVersion }}", releaseVersion).replace("{{ releaseLink }}", releaseLink)
         }
     }
@@ -15,9 +15,10 @@ ext.resolveVersion = { task ->
 
 ext.revertVersion = { task ->
     configure(task) {
+        def retypeFile = new File("${workingDir}/retype.yml")
+        def clonedFile = new File("${workingDir}/retype.yml.clone")
+
         doLast {
-            def retypeFile = new File("${workingDir}/retype.yml")
-            def clonedFile = new File("${workingDir}/retype.yml.clone")
             retypeFile.text = clonedFile.text
             delete(clonedFile)
         }
@@ -26,6 +27,7 @@ ext.revertVersion = { task ->
 
 ext.buildRetype = { task ->
     configure(task) {
+        enabled !rootProject.isAarch64()
         resolveVersion(task)
         group = BasePlugin.BUILD_GROUP
 	    if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
@@ -37,27 +39,25 @@ ext.buildRetype = { task ->
     }
 }
 
-task retypeDevDoc(type: Exec) { t ->
+tasks.register('retypeDevDoc', Exec) { t ->
     workingDir './retypedev'
     inputs.dir './retypedev'
-    outputs.dir "${buildDir}/docs/dev"
+    outputs.dir layout.buildDirectory.dir("docs/dev")
     buildRetype(t)
 }
 
-task retypeUserDoc(type: Exec) { t ->
+tasks.register('retypeUserDoc', Exec) { t ->
     workingDir './retypeuser'
     inputs.dir './retypeuser'
-    outputs.dir "${buildDir}/docs/user"
+    outputs.dir layout.buildDirectory.dir("docs/user")
     buildRetype(t)
 }
 
-task doc {
-   // dummy
+tasks.register('doc') {
+    dependsOn retypeDevDoc
+    dependsOn retypeUserDoc
 }
 
-task clean {
-    delete project.buildDir
+tasks.register('clean') {
+    delete layout.buildDirectory
 }
-
-doc.dependsOn retypeDevDoc
-doc.dependsOn retypeUserDoc

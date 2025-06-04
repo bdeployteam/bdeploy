@@ -1,3 +1,9 @@
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.github.psxpaul.task.ExecFork
+import cz.habarta.typescript.generator.Jackson2Configuration
+import cz.habarta.typescript.generator.gradle.GenerateTask
+import org.gradle.api.internal.tasks.userinput.UserInputHandler
+
 plugins {
     id "com.github.psxpaul.execfork" version "0.2.2"
     id "cz.habarta.typescript-generator" version "3.2.1263"
@@ -56,7 +62,7 @@ ext.sharedUitestServeLogic = { task, List<String> target ->
 
 evaluationDependsOn(':test-data')
 
-task updateFixtureProducts(type: Copy) {
+tasks.register('updateFixtureProducts', Copy) {
     def prj = project(':test-data')
     from prj.product1Zip.outputs
     from prj.product2Zip.outputs
@@ -73,52 +79,52 @@ task updateFixtureProducts(type: Copy) {
     }
 }
 
-task triggerStopStandalone {
+tasks.register('triggerStopStandalone') {
     doLast {
+        tasks.getByName('runServerStandalone').stop()
         println "Stop Standalone UI"
     }
 }
 
-task runServerStandalone(type: com.github.psxpaul.task.ExecFork) {
+tasks.register('runServerStandalone', ExecFork) {
     sharedUitestServeLogic(it, ["-c", "uitest-standalone"])
     waitForOutput = "Application bundle generation complete"
     timeout = 240
-    stopAfter = triggerStopStandalone
     dependsOn 'buildAngular'
     mustRunAfter(updateFixtureProducts)
 }
 
-task triggerStopCentral {
+tasks.register('triggerStopCentral') {
     doLast {
+        tasks.getByName('runServerCentral').stop()
         println "Stop Central UI"
     }
 }
 
-task runServerCentral(type: com.github.psxpaul.task.ExecFork) {
+tasks.register('runServerCentral', ExecFork) {
     sharedUitestServeLogic(it, ["-c", "uitest-central"])
     waitForOutput = "Application bundle generation complete"
     timeout = 240
-    stopAfter = triggerStopCentral
     dependsOn 'buildAngular'
     mustRunAfter(updateFixtureProducts)
 }
 
-task triggerStopManaged {
+tasks.register('triggerStopManaged') {
     doLast {
+        tasks.getByName('runServerManaged').stop()
         println "Stop Managed UI"
     }
 }
 
-task runServerManaged(type: com.github.psxpaul.task.ExecFork) {
+tasks.register('runServerManaged', ExecFork) {
     sharedUitestServeLogic(it, ["-c", "uitest-managed"])
     waitForOutput = "Application bundle generation complete"
     timeout = 240
-    stopAfter = triggerStopManaged
     dependsOn 'buildAngular'
     mustRunAfter(updateFixtureProducts)
 }
 
-task updateFixtures() {
+tasks.register('updateFixtures') {
     dependsOn ':test-data:setupDemoServer'
     dependsOn 'updateFixtureProducts'
     dependsOn runServerStandalone
@@ -126,47 +132,59 @@ task updateFixtures() {
     dependsOn runServerManaged
 }
 
-task installBrowsers(type: Exec) { t ->
+tasks.register('installAngular', Exec) { t ->
+    inputs.file "$webappDir/package.json"
+    outputs.dir "$webappDir/node_modules"
+    sharedNpmLogic(t, ["ci", "--legacy-peer-deps"])
+}
+
+tasks.register('installBrowsers', Exec) { t ->
+    dependsOn installAngular
+
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP;
 
     sharedNpmLogic(t, ["run", "--", "playwright", "install"])
 }
 
-task runUitests(type: Exec, dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) { t ->
+tasks.register('runUitests', Exec) {t ->
+    dependsOn installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged
     doFirst() {
-	delete "$webappDir/playwright/results/screenshots"
+        delete "$webappDir/playwright/results/screenshots"
     }
 
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP;
 
     def opts = [];
-    if(project.hasProperty("ui")) {
+    if (project.hasProperty("ui")) {
         opts.add("--ui");
     }
-    if(project.hasProperty("debug")) {
+    if (project.hasProperty("debug")) {
         opts.add("--debug");
     }
 
     def target = "test";
-    if(project.hasProperty("codegen")) {
+    if (project.hasProperty("codegen")) {
         target = "codegen";
     }
 
     sharedNpmLogic(t, ["run", "--", "playwright", target] + opts)
 }
 
-task runUitestsInfra(dependsOn: [installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged]) {
+tasks.register('runUitestsInfra') {
+    dependsOn installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged
     doLast() {
         // no println will work in doLast, it will appear only AFTER the question is answered.
-        def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
+        def userInput = services.get(UserInputHandler)
         def answer = userInput.askUser(i -> i.askQuestion("Enter any value (or press enter) to stop the server", "Stop")).getOrNull();
     }
 }
 
 // this one is required to stop the server and accumulate coverage data
-task doneWithUitest(dependsOn: [':test-data:triggerStopBDeploy', triggerStopStandalone, triggerStopCentral, triggerStopManaged]) {
+tasks.register('doneWithUitest') {
+    dependsOn ':test-data:triggerStopBDeploy', triggerStopStandalone, triggerStopCentral, triggerStopManaged
+
     doLast {
         println('UI Testing done...')
     }
@@ -174,57 +192,52 @@ task doneWithUitest(dependsOn: [':test-data:triggerStopBDeploy', triggerStopStan
     dependsOn runUitests
 }
 
-task updateDocuScreenshots(dependsOn: doneWithUitest) {
+tasks.register('updateDocuScreenshots') {
+    dependsOn doneWithUitest
     doLast {
-    	copy {
-	    from file("${webappDir}/playwright/results/screenshots/")
-	    into new File(project(":doc").projectDir, "retypeuser/images")
+        copy {
+            from file("${webappDir}/playwright/results/screenshots/")
+            into new File(project(":doc").projectDir, "retypeuser/images")
 
-	    include "**/*.png"
+            include "**/*.png"
 
-	    // flatten by using filename as relative path
-	    eachFile {
-		path = name
-	    }
+            // flatten by using filename as relative path
+            eachFile {
+                path = name
+            }
 
-	    includeEmptyDirs = false
-	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	}
+            includeEmptyDirs = false
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
         println('Updating screenshots of user documentation done.')
     }
 }
 
-project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runUitests
+project(':test-data').tasks.named('triggerStopBDeploy').configure({mustRunAfter runUitests})
 triggerStopStandalone.mustRunAfter runUitests
 triggerStopCentral.mustRunAfter runUitests
 triggerStopManaged.mustRunAfter runUitests
 test.dependsOn doneWithUitest
 
-task cleanAngular(type:Delete) {
+tasks.register('cleanAngular', Delete) {
     delete "$webappDir/dist"
 }
 
-task buildAngularInternal(type:Exec) { t ->
+tasks.register('buildAngularInternal', Exec) { t ->
     inputs.dir "$webappDir/src"
     outputs.dir "$webappDir/dist/webapp"
     sharedNpmLogic(t, ["run", "--", "ng", "build", "-c", "production"])
-	dependsOn 'installAngular'
+    dependsOn 'installAngular'
     dependsOn 'genDtos'
 }
 
-task buildAngular() {
+tasks.register('buildAngular') {
     dependsOn 'buildAngularInternal'
     dependsOn 'checkLintAfterBuild'
     dependsOn 'copyUserDoc'
 }
 
-task installAngular(type:Exec) { t ->
-    inputs.file "$webappDir/package.json"
-    outputs.dir "$webappDir/node_modules"
-    sharedNpmLogic(t, ["ci", "--legacy-peer-deps"])
-}
-
-task checkLintAfterBuild(type:Exec) { t ->
+tasks.register('checkLintAfterBuild', Exec) { t ->
     inputs.dir "$webappDir/src"
     outputs.dir "$webappDir/dist/webapp"
     sharedNpmLogic(t, ["run", "--", "ng", "lint"])
@@ -232,117 +245,119 @@ task checkLintAfterBuild(type:Exec) { t ->
 }
 
 evaluationDependsOn(':doc')
-task copyUserDoc(type:Copy, dependsOn:':doc:retypeUserDoc') {
+tasks.register('copyUserDoc', Copy) {
+    dependsOn ':doc:retypeUserDoc'
     from tasks.getByPath(':doc:retypeUserDoc').outputs
     into "$webappDir/dist/webapp/browser/assets/doc"
 
     mustRunAfter 'buildAngularInternal'
 }
 
-task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsOn: compileJava) {
+tasks.register('genDtos', GenerateTask) {
+    dependsOn compileJava
     jsonLibrary = 'jackson2'
     classes = [
-        // Descriptors
-        'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
-        'io.bdeploy.interfaces.descriptor.application.HttpEndpoint$HttpAuthenticationType',
-        // Configurations and their DTOs
-        'io.bdeploy.interfaces.configuration.SettingsConfiguration',
-        'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
-        'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
-        'io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto',
-        'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
-        'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto',
-        'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
-        'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',
-        'io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto',
-        'io.bdeploy.interfaces.configuration.instance.FileStatusDto',
-        'io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto',
-        'io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration',
-        // UI only DTOs
-        'io.bdeploy.ui.dto.ApplicationDto',
-        'io.bdeploy.ui.dto.ClientApplicationDto',
-        'io.bdeploy.ui.dto.InstanceDto',
-        'io.bdeploy.ui.dto.InstanceAllClientsDto',
-        'io.bdeploy.ui.dto.InstanceOverallStatusDto',
-        'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',
-        'io.bdeploy.ui.dto.ProductDto',
-        'io.bdeploy.ui.dto.HiveInfoDto',
-        'io.bdeploy.ui.dto.HiveEntryDto',
-        'io.bdeploy.ui.dto.InstanceVersionDto',
-        'io.bdeploy.ui.dto.JobDto',
-        'io.bdeploy.ui.dto.StringEntryChunkDto',
-        'io.bdeploy.ui.dto.ConfigFileDto',
-        'io.bdeploy.ui.dto.BackendInfoDto',
-        'io.bdeploy.ui.dto.ProductTransferDto',
-        'io.bdeploy.ui.dto.InstanceUsageDto',
-        'io.bdeploy.ui.dto.HistoryResultDto',
-        'io.bdeploy.ui.dto.HistoryEntryDto',
-        'io.bdeploy.ui.dto.HistoryFilterDto',
-        'io.bdeploy.ui.dto.UploadInfoDto',
-        'io.bdeploy.ui.dto.ObjectChangeType',
-        'io.bdeploy.ui.dto.ObjectChangeHint',
-        'io.bdeploy.ui.dto.ObjectChangeDetails',
-        'io.bdeploy.ui.dto.NodeAttachDto',
-        'io.bdeploy.ui.dto.MinionSyncResultDto',
-        'io.bdeploy.ui.dto.SystemConfigurationDto',
-        'io.bdeploy.ui.dto.SystemTemplateDto',
-        'io.bdeploy.ui.dto.SystemTemplateRequestDto',
-        'io.bdeploy.ui.dto.SystemTemplateResultDto',
-        'io.bdeploy.ui.dto.InstanceProcessStatusDto',
-        'io.bdeploy.ui.dto.BulkOperationResultDto',
-        'io.bdeploy.ui.dto.UserBulkAssignPermissionDto',
-        'io.bdeploy.ui.dto.UserBulkRemovePermissionDto',
-        'io.bdeploy.ui.dto.UserGroupBulkAssignPermissionDto',
-        'io.bdeploy.ui.dto.UserGroupBulkRemovePermissionDto',
-        'io.bdeploy.ui.dto.ProductUpdateDto',
-        'io.bdeploy.ui.dto.ReportParameterOptionDto',
-        // Other, generic
-        'io.bdeploy.common.Version',
-        'io.bdeploy.common.security.ApiAccessToken',
-        'io.bdeploy.interfaces.cleanup.CleanupGroup',
-        'io.bdeploy.interfaces.directory.RemoteDirectory',
-        'io.bdeploy.interfaces.minion.MinionStatusDto',
-        'io.bdeploy.interfaces.minion.NodeSynchronizationStatus',
-        'io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord',
-        'io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord',
-        'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
-        'io.bdeploy.interfaces.manifest.statistics.ClientUsageData',
-        'io.bdeploy.interfaces.RepairAndPruneResultDto',
-        'io.bdeploy.interfaces.UserGroupInfo',
-        'io.bdeploy.interfaces.UserInfo',
-        'io.bdeploy.interfaces.UserProfileInfo',
-        'io.bdeploy.interfaces.UserPermissionUpdateDto',
-        'io.bdeploy.interfaces.UserGroupPermissionUpdateDto',
-        'io.bdeploy.interfaces.UserChangePasswordDto',
-        'io.bdeploy.interfaces.VerifyOperationResultDto',
-        'io.bdeploy.interfaces.plugin.PluginInfoDto',
-        'io.bdeploy.interfaces.settings.WebAuthSettingsDto',
-        'io.bdeploy.interfaces.settings.SpecialAuthenticators',
-        'io.bdeploy.interfaces.report.ReportDescriptor',
-        'io.bdeploy.interfaces.report.ReportRequestDto',
-        'io.bdeploy.interfaces.report.ReportResponseDto',
-        'io.bdeploy.api.remote.v1.dto.CredentialsApi',
-        'io.bdeploy.jersey.ws.change.msg.ObjectChangeDto',
-        'io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto',
-        'io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto',
-        'io.bdeploy.jersey.actions.ActionBroadcastDto',
-        // Metrics
-        'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
-        'io.bdeploy.common.metrics.Metrics$MetricGroup',
-        'io.bdeploy.jersey.monitoring.JerseyServerMonitoringDto',
+            // Descriptors
+            'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
+            'io.bdeploy.interfaces.descriptor.application.HttpEndpoint$HttpAuthenticationType',
+            // Configurations and their DTOs
+            'io.bdeploy.interfaces.configuration.SettingsConfiguration',
+            'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
+            'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
+            'io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto',
+            'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto',
+            'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto',
+            'io.bdeploy.interfaces.configuration.instance.FileStatusDto',
+            'io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto',
+            'io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration',
+            // UI only DTOs
+            'io.bdeploy.ui.dto.ApplicationDto',
+            'io.bdeploy.ui.dto.ClientApplicationDto',
+            'io.bdeploy.ui.dto.InstanceDto',
+            'io.bdeploy.ui.dto.InstanceAllClientsDto',
+            'io.bdeploy.ui.dto.InstanceOverallStatusDto',
+            'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',
+            'io.bdeploy.ui.dto.ProductDto',
+            'io.bdeploy.ui.dto.HiveInfoDto',
+            'io.bdeploy.ui.dto.HiveEntryDto',
+            'io.bdeploy.ui.dto.InstanceVersionDto',
+            'io.bdeploy.ui.dto.JobDto',
+            'io.bdeploy.ui.dto.StringEntryChunkDto',
+            'io.bdeploy.ui.dto.ConfigFileDto',
+            'io.bdeploy.ui.dto.BackendInfoDto',
+            'io.bdeploy.ui.dto.ProductTransferDto',
+            'io.bdeploy.ui.dto.InstanceUsageDto',
+            'io.bdeploy.ui.dto.HistoryResultDto',
+            'io.bdeploy.ui.dto.HistoryEntryDto',
+            'io.bdeploy.ui.dto.HistoryFilterDto',
+            'io.bdeploy.ui.dto.UploadInfoDto',
+            'io.bdeploy.ui.dto.ObjectChangeType',
+            'io.bdeploy.ui.dto.ObjectChangeHint',
+            'io.bdeploy.ui.dto.ObjectChangeDetails',
+            'io.bdeploy.ui.dto.NodeAttachDto',
+            'io.bdeploy.ui.dto.MinionSyncResultDto',
+            'io.bdeploy.ui.dto.SystemConfigurationDto',
+            'io.bdeploy.ui.dto.SystemTemplateDto',
+            'io.bdeploy.ui.dto.SystemTemplateRequestDto',
+            'io.bdeploy.ui.dto.SystemTemplateResultDto',
+            'io.bdeploy.ui.dto.InstanceProcessStatusDto',
+            'io.bdeploy.ui.dto.BulkOperationResultDto',
+            'io.bdeploy.ui.dto.UserBulkAssignPermissionDto',
+            'io.bdeploy.ui.dto.UserBulkRemovePermissionDto',
+            'io.bdeploy.ui.dto.UserGroupBulkAssignPermissionDto',
+            'io.bdeploy.ui.dto.UserGroupBulkRemovePermissionDto',
+            'io.bdeploy.ui.dto.ProductUpdateDto',
+            'io.bdeploy.ui.dto.ReportParameterOptionDto',
+            // Other, generic
+            'io.bdeploy.common.Version',
+            'io.bdeploy.common.security.ApiAccessToken',
+            'io.bdeploy.interfaces.cleanup.CleanupGroup',
+            'io.bdeploy.interfaces.directory.RemoteDirectory',
+            'io.bdeploy.interfaces.minion.MinionStatusDto',
+            'io.bdeploy.interfaces.minion.NodeSynchronizationStatus',
+            'io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord',
+            'io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord',
+            'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
+            'io.bdeploy.interfaces.manifest.statistics.ClientUsageData',
+            'io.bdeploy.interfaces.RepairAndPruneResultDto',
+            'io.bdeploy.interfaces.UserGroupInfo',
+            'io.bdeploy.interfaces.UserInfo',
+            'io.bdeploy.interfaces.UserProfileInfo',
+            'io.bdeploy.interfaces.UserPermissionUpdateDto',
+            'io.bdeploy.interfaces.UserGroupPermissionUpdateDto',
+            'io.bdeploy.interfaces.UserChangePasswordDto',
+            'io.bdeploy.interfaces.VerifyOperationResultDto',
+            'io.bdeploy.interfaces.plugin.PluginInfoDto',
+            'io.bdeploy.interfaces.settings.WebAuthSettingsDto',
+            'io.bdeploy.interfaces.settings.SpecialAuthenticators',
+            'io.bdeploy.interfaces.report.ReportDescriptor',
+            'io.bdeploy.interfaces.report.ReportRequestDto',
+            'io.bdeploy.interfaces.report.ReportResponseDto',
+            'io.bdeploy.api.remote.v1.dto.CredentialsApi',
+            'io.bdeploy.jersey.ws.change.msg.ObjectChangeDto',
+            'io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto',
+            'io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto',
+            'io.bdeploy.jersey.actions.ActionBroadcastDto',
+            // Metrics
+            'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
+            'io.bdeploy.common.metrics.Metrics$MetricGroup',
+            'io.bdeploy.jersey.monitoring.JerseyServerMonitoringDto',
     ]
     customTypeMappings = [
-        'java.net.URI:string',
-        'java.time.Instant:number'
+            'java.net.URI:string',
+            'java.time.Instant:number'
     ]
     customTypeNaming = [
-        'io.bdeploy.bhive.model.Manifest$Key:ManifestKey',
-        'io.bdeploy.bhive.model.Tree$EntryType:TreeEntryType'
+            'io.bdeploy.bhive.model.Manifest$Key:ManifestKey',
+            'io.bdeploy.bhive.model.Tree$EntryType:TreeEntryType'
     ]
     excludeClasses = [
-        'java.lang.Comparable',
-        'java.util.Comparator',
-        'java.io.Serializable',
+            'java.lang.Comparable',
+            'java.util.Comparator',
+            'java.io.Serializable',
     ]
     outputFileType = 'implementationFile'
     outputKind = 'module'
@@ -354,23 +369,23 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
     noEslintDisable = true
     noTslintDisable = true
 
-    def cfg = new cz.habarta.typescript.generator.Jackson2Configuration();
-    cfg.fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-    cfg.getterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-    cfg.isGetterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-    cfg.setterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+    def cfg = new Jackson2Configuration();
+    cfg.fieldVisibility = JsonAutoDetect.Visibility.ANY;
+    cfg.getterVisibility = JsonAutoDetect.Visibility.NONE;
+    cfg.isGetterVisibility = JsonAutoDetect.Visibility.NONE;
+    cfg.setterVisibility = JsonAutoDetect.Visibility.NONE;
 
     jackson2Configuration = cfg
 
-    outputFile = "${buildDir}/gen.dtos.tmp.ts"
+    def tmpOutFile = layout.buildDirectory.file("gen.dtos.tmp.ts").get().asFile
+    def outFile = file("${webappDir}/src/app/models/gen.dtos.ts")
+
+    outputFile = tmpOutFile
 
     doLast {
-        def outputFile = "${webappDir}/src/app/models/gen.dtos.ts"
-        def tmpOutputFile = "${buildDir}/gen.dtos.tmp.ts"
-
-        if(!file(outputFile).exists() || !file(outputFile).text.equals(file(tmpOutputFile).text)) {
-            delete file(outputFile)
-            file(tmpOutputFile).renameTo(file(outputFile))
+        if (!outFile.exists() || !outFile.text.equals(tmpOutFile.text)) {
+            delete outFile
+            tmpOutFile.renameTo(outFile)
         } else {
             println("No changes in generated DTO, skipping update")
         }

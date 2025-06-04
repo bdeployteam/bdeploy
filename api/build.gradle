@@ -1,3 +1,5 @@
+import enforcer.rules.EnforceBytecodeVersion
+
 plugins {
   id 'eclipse'
   id 'java-library'
@@ -5,6 +7,7 @@ plugins {
   id 'signing'
   id 'com.gradleup.shadow' version '8.3.6'
   id "io.swagger.core.v3.swagger-gradle-plugin" version "2.2.26"
+  id 'org.jreleaser' version '1.18.0'
 }
 
 dependencies {
@@ -22,8 +25,10 @@ dependencies {
     )
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 build.dependsOn shadowJar
 build.dependsOn resolve
@@ -52,7 +57,7 @@ resolve {
     outputFileName = 'BDeployAPI'
     outputFormat = 'YAML'
     classpath = sourceSets.main.runtimeClasspath
-    outputDir = file("${buildDir}/openapi")
+    outputDir = layout.buildDirectory.dir("openapi").get().asFile
     readAllResources = false
     resourceClasses = [
         'io.bdeploy.api.remote.v1.PublicRootResource',
@@ -62,10 +67,10 @@ resolve {
 }
 
 enforce {
-    rule(enforcer.rules.EnforceBytecodeVersion) { r ->
+    rule(EnforceBytecodeVersion) { r ->
         r.enabled = true
         r.configurations = [ 'runtime' ]
-        r.maxJdkVersion = project.targetCompatibility.getMajorVersion()
+        r.maxJdkVersion = java.targetCompatibility.getMajorVersion()
     }
 }
 
@@ -73,23 +78,25 @@ evaluationDependsOn(':bhive')
 evaluationDependsOn(':common')
 evaluationDependsOn(':jersey')
 
-task allSourcesJar(type: Jar, dependsOn: classes) {
-	group = 'build'
-	archiveClassifier = 'sources'
-	from files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.allSource })
+tasks.register('allSourcesJar', Jar) {
+    dependsOn classes
+    group = 'build'
+    archiveClassifier = 'sources'
+    from files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.allSource })
 }
 
-task allJavadoc(type: Javadoc) {
+tasks.register('allJavadoc', Javadoc) {
     source files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.allJava })
     classpath = files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.compileClasspath })
-    destinationDir = file("${buildDir}/docs/javadoc")
+    destinationDir = layout.buildDirectory.dir("docs/javadoc").get().asFile;
 
     options.encoding = 'UTF-8'
     options.addBooleanOption('html5', true)
     options.addStringOption('Xdoclint:-missing', '-quiet')
 }
 
-task allJavadocJar(type: Jar, dependsOn: allJavadoc) {
+tasks.register('allJavadocJar', Jar) {
+    dependsOn allJavadoc
     archiveClassifier = 'javadoc'
     from allJavadoc.destinationDir
 }
@@ -142,23 +149,35 @@ publishing {
 	repositories {
 		mavenLocal()
         maven {
-            credentials {
-                username project.findProperty('sonatypeUser') ?: 'anonymous'
-                password project.findProperty('sonatypeToken') ?: ''
-            }
-
-            if(project.version.endsWith('-SNAPSHOT')) {
-                url 'https://oss.sonatype.org/content/repositories/snapshots'
-            } else {
-                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-            }
+            url = layout.buildDirectory.dir("staging-deploy").get().asFile
         }
 	}
 }
 
-if(!project.version.endsWith('-SNAPSHOT')) {
+jreleaserDeploy.dependsOn publish
+
+// see release.sh for which environment variables are to be set before running this task!
+jreleaser {
+    gitRootSearch = true
+
     signing {
-        sign publishing.publications.shadow
+        active = 'ALWAYS'
+        armored = true
+        mode = 'FILE'
+    }
+
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository(layout.buildDirectory.dir("staging-deploy").get().asFile.path)
+
+                    applyMavenCentralRules = true
+                }
+            }
+        }
     }
 }
 
