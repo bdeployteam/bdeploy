@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -61,12 +60,14 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     @Override
     public ProductValidationResponseApi validate(FormDataMultiPart fdmp) {
+        ProductValidationConfigDescriptor parsed;
         try {
-            return validate(parse(FormDataHelper.getStreamFromMultiPart(fdmp)));
+            parsed = parse(FormDataHelper.getStreamFromMultiPart(fdmp));
         } catch (SchemaValidationException ex) {
             return new ProductValidationResponseApi(ex.errors.stream()
                     .map(e -> new ProductValidationIssueApi(ProductValidationSeverity.ERROR, ex.path + ": " + e)).toList());
         }
+        return validate(parsed);
     }
 
     private static ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
@@ -437,10 +438,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             Path unzipped = tmpDir.resolve("unzipped_product");
             Files.copy(inputStream, zip);
             ZipHelper.unzip(zip, unzipped);
-
-            PublicSchemaValidator validator = new PublicSchemaValidator();
-
-            return parse(unzipped, validator);
+            return parse(unzipped);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot import from uploaded ZIP", e);
         } finally {
@@ -448,55 +446,47 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
     }
 
-    private static ProductValidationConfigDescriptor parse(Path dir, PublicSchemaValidator validator) {
+    private static ProductValidationConfigDescriptor parse(Path dir) {
+        PublicSchemaValidator val = new PublicSchemaValidator();
+
+        ProductValidationDescriptorApi productValidationDescriptorApi = parse(val, dir, ProductValidationDescriptorApi.class,
+                Schema.productValidationYaml, ProductValidationDescriptorApi.FILE_NAME);
+
         ProductValidationConfigDescriptor config = new ProductValidationConfigDescriptor();
-
-        config.productValidation = parse(dir, dir.resolve(ProductValidationDescriptorApi.FILE_NAME),
-                ProductValidationDescriptorApi.class, validator, Schema.productValidationYaml);
-        config.product = parse(dir, dir.resolve(config.productValidation.product), ProductDescriptor.class, validator,
-                Schema.productInfoYaml);
-        config.applicationTemplates = parse(dir, dir, config.product.applicationTemplates, ApplicationTemplateDescriptor.class,
-                validator, Schema.applicationTemplateYaml);
-        config.instanceTemplates = parse(dir, dir, config.product.instanceTemplates, InstanceTemplateDescriptor.class, validator,
-                Schema.instanceTemplateYaml);
-        config.instanceVariableTemplates = parse(dir, dir, config.product.instanceVariableTemplates,
-                InstanceVariableTemplateDescriptor.class, validator, Schema.instanceVariableTemplateYaml);
-        config.parameterTemplates = parse(dir, dir, config.product.parameterTemplates, ParameterTemplateDescriptor.class,
-                validator, Schema.parameterTemplateYaml);
-        config.instanceVariableDefinitions = parse(dir, dir, config.product.instanceVariableDefinitions,
-                InstanceVariableDefinitionDescriptor.class, validator, Schema.instanceVariableDefinitionYaml);
-
-        config.applications = new HashMap<>();
-        var apps = Optional.ofNullable(config.productValidation.applications).orElseGet(Collections::emptyMap);
-        for (Map.Entry<String, String> entry : apps.entrySet()) {
-            String app = entry.getKey();
-            String relApp = entry.getValue();
-            Path appPath = dir.resolve(relApp);
-            var appDescriptor = parse(dir, appPath, ApplicationDescriptor.class, validator, Schema.appInfoYaml);
-            config.applications.put(app, appDescriptor);
-        }
-
+        config.product = parse(val, dir, ProductDescriptor.class, Schema.productInfoYaml, productValidationDescriptorApi.product);
+        config.applicationTemplates = parse(val, dir, ApplicationTemplateDescriptor.class, Schema.applicationTemplateYaml,
+                config.product.applicationTemplates);
+        config.instanceTemplates = parse(val, dir, InstanceTemplateDescriptor.class, Schema.instanceTemplateYaml,
+                config.product.instanceTemplates);
+        config.instanceVariableTemplates = parse(val, dir, InstanceVariableTemplateDescriptor.class,
+                Schema.instanceVariableTemplateYaml, config.product.instanceVariableTemplates);
+        config.instanceVariableDefinitions = parse(val, dir, InstanceVariableDefinitionDescriptor.class,
+                Schema.instanceVariableDefinitionYaml, config.product.instanceVariableDefinitions);
+        config.parameterTemplates = parse(val, dir, ParameterTemplateDescriptor.class, Schema.parameterTemplateYaml,
+                config.product.parameterTemplates);
+        config.applications = productValidationDescriptorApi.applications.entrySet().stream()
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
+                        entry -> parse(val, dir, ApplicationDescriptor.class, Schema.appInfoYaml, entry.getValue())));
         return config;
     }
 
-    private static <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass, PublicSchemaValidator validator,
-            Schema schema) {
-        return filenames == null ? Collections.emptyList()
-                : filenames.stream().map(dir::resolve).map(path -> parse(root, path, klass, validator, schema)).toList();
+    private static <T> List<T> parse(PublicSchemaValidator val, Path root, Class<T> klass, Schema schema, List<String> files) {
+        return files == null ? Collections.emptyList()
+                : files.stream().map(file -> parse(val, root, klass, schema, file)).toList();
     }
 
-    private static <T> T parse(Path root, Path path, Class<T> klass, PublicSchemaValidator validator, Schema schema) {
+    private static <T> T parse(PublicSchemaValidator val, Path root, Class<T> klass, Schema schema, String file) {
+        Path filePath = root.resolve(file);
         if (schema != null) {
-            List<String> result = validator.validate(schema, path);
+            List<String> result = val.validate(schema, filePath);
             if (!result.isEmpty()) {
-                throw new SchemaValidationException(root.relativize(path), result);
+                throw new SchemaValidationException(root.relativize(filePath), result);
             }
         }
-
-        try (InputStream is = Files.newInputStream(path)) {
+        try (InputStream is = Files.newInputStream(filePath)) {
             return StorageHelper.fromYamlStream(is, klass);
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot parse " + root.relativize(path), e);
+            throw new IllegalStateException("Cannot parse " + root.relativize(filePath), e);
         }
     }
 
@@ -506,7 +496,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         private final transient List<String> errors;
         private final transient Path path;
 
-        public SchemaValidationException(Path path, List<String> errors) {
+        private SchemaValidationException(Path path, List<String> errors) {
             this.path = path;
             this.errors = errors;
         }
