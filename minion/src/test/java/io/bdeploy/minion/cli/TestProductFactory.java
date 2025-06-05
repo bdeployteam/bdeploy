@@ -204,6 +204,7 @@ public class TestProductFactory {
         tpl.description = "A Server Application with the sleep parameter set to a given value.";
         tpl.processControl = null;
         tpl.applyOn = null;
+        tpl.preferredProcessControlGroup = "First Group";
 
         TemplateVariable tplVar = new TemplateVariable();
         tplVar.id = "app-tpl-sleep";
