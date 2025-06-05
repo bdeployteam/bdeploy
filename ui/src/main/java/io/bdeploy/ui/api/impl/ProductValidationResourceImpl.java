@@ -318,11 +318,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         List<ProductValidationIssueApi> issues = new ArrayList<>();
 
         List<String> controlGroupsInTemplate = tpl.processControlGroups.stream().map(c -> c.name).toList();
-        boolean notEmpty = !controlGroupsInTemplate.isEmpty();//TODO also check if empty?
         for (var grp : tpl.groups) {
             for (var app : grp.applications) {
                 issues.addAll(validateFlatApplicationTemplate(app, descriptor));
-                if (notEmpty && app.preferredProcessControlGroup != null
+                if (app.preferredProcessControlGroup != null
                         && !controlGroupsInTemplate.contains(app.preferredProcessControlGroup)) {
                     issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
                             "Preferred process control group '" + app.preferredProcessControlGroup + "' for application '"

@@ -138,15 +138,17 @@ public class TestProductFactory {
     }
 
     public static InstanceTemplateDescriptor generateMinimalInstanceTemplate(String templateName) {
-        InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
-        tpl.name = templateName;
-
         InstanceTemplateGroup group = new InstanceTemplateGroup();
         group.name = "Only Group";
-
         group.applications = generateApplicationsForInstanceTemplate();
-        tpl.groups.add(group);
 
+        InstanceTemplateControlGroup controlGroup = new InstanceTemplateControlGroup();
+        controlGroup.name = "First Group";
+
+        InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
+        tpl.name = templateName;
+        tpl.groups.add(group);
+        tpl.processControlGroups.add(controlGroup);
         return tpl;
     }
 
