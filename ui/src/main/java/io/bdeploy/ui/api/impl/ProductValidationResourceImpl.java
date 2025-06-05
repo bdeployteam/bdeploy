@@ -26,6 +26,7 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
@@ -72,6 +73,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     private static ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
         List<ProductValidationIssueApi> issues = new ArrayList<>();
+        issues.addAll(validateProductDescriptor(config));
 
         // validate all application commands, parameters, etc.
         for (Map.Entry<String, ApplicationDescriptor> appEntry : config.applications.entrySet()) {
@@ -101,6 +103,19 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         issues.addAll(validateApplicationTemplates(config));
 
         return new ProductValidationResponseApi(issues);
+    }
+
+    private static List<ProductValidationIssueApi> validateProductDescriptor(ProductValidationConfigDescriptor desc) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
+
+        // Validate minimum BDeploy version
+        String minMinionVersion = desc.product.minMinionVersion;
+        if (minMinionVersion != null && VersionHelper.tryParse(minMinionVersion) == null) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                    "Minimum BDeploy version '" + minMinionVersion + "' cannot be parsed"));
+        }
+
+        return issues;
     }
 
     private static List<ProductValidationIssueApi> validateInstanceVariableDefinitions(ProductValidationConfigDescriptor desc) {

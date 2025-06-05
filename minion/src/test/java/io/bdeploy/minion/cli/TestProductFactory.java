@@ -117,6 +117,7 @@ public class TestProductFactory {
         productDescriptor.applicationTemplates = testDescriptor.applicationTemplates.keySet().stream().toList();
         productDescriptor.instanceTemplates = testDescriptor.instanceTemplates.keySet().stream().toList();
         productDescriptor.versionFile = "product-version.yaml";
+        productDescriptor.minMinionVersion = "1.2.3";
         return productDescriptor;
     }
 

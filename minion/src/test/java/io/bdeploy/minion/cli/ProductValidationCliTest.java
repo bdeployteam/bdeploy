@@ -14,6 +14,8 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
@@ -23,6 +25,7 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.minion.cli.TestProductFactory.TestProductDescriptor;
 import io.bdeploy.ui.cli.RemoteProductValidationTool;
 
 @ExtendWith(TestMinion.class)
@@ -31,19 +34,34 @@ class ProductValidationCliTest extends BaseMinionCliTest {
     @Test
     void testValidProduct(RemoteService remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
-        var product = TestProductFactory.generateProduct();
-        Path productPath = createAndUploadProduct(remote, tmp);
-        Path validationDescriptorPath = TestProductFactory.generateAndWriteValidationDescriptor(productPath, product);
 
-        StructuredOutput output = remote(remote, RemoteProductValidationTool.class, "--descriptor=" + validationDescriptorPath);
+        TestProductDescriptor product = TestProductFactory.generateProduct();
 
+        StructuredOutput output = getResult(remote, tmp, product);
+        assertEquals(1, output.size());
         assertEquals("Success", output.get(0).get("message"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "a.b.c", "1-2-3", "1.x2x.3" })
+    void testProductDescriptorValidation(String minMinionVersion, RemoteService remote, @TempDir Path tmp) throws IOException {
+        createInstanceGroup(remote);
+
+        TestProductDescriptor product = TestProductFactory.generateProduct();
+        product.descriptor.minMinionVersion = minMinionVersion;
+
+        StructuredOutput output = getResult(remote, tmp, product);
+        assertEquals(1, output.size());
+
+        Set<String> errors = extractBySeverity("ERROR", output);
+
+        assertTrue(errors.contains("Minimum BDeploy version '" + minMinionVersion + "' cannot be parsed"));
     }
 
     @Test
     void testProductWithValidationIssues(RemoteService remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
-        var product = TestProductFactory.generateProduct();
+        TestProductDescriptor product = TestProductFactory.generateProduct();
         ApplicationDescriptor applicationDescriptor = product.applications.get("app-info.yaml");
         ApplicationTemplateDescriptor appTemplate = product.applicationTemplates.get("app-template.yaml");
         appTemplate.processControl = new HashMap<>();
@@ -59,9 +77,7 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         applicationDescriptor.processControl.supportsAutostart = false;
         appTemplate.processControl.put("autostart", true);
 
-        Path productPath = createAndUploadProduct(remote, tmp, product);
-        Path validationDescriptorPath = TestProductFactory.generateAndWriteValidationDescriptor(productPath, product);
-        StructuredOutput output = remote(remote, RemoteProductValidationTool.class, "--descriptor=" + validationDescriptorPath);
+        StructuredOutput output = getResult(remote, tmp, product);
 
         Set<String> warnings = extractBySeverity("WARNING", output);
         assertEquals(0, warnings.size());
@@ -79,6 +95,12 @@ class ProductValidationCliTest extends BaseMinionCliTest {
                 + " 'autostart' enabled, but the descriptor of the application forbids it"));
         assertTrue(errors.contains("Parameter 'wait.time' of application 'server-app' must have a default value"));
         assertEquals(7, errors.size());
+    }
+
+    private StructuredOutput getResult(RemoteService remote, Path tmp, TestProductDescriptor product) throws IOException {
+        Path productPath = createAndUploadProduct(remote, tmp, product);
+        Path validationDescriptorPath = TestProductFactory.generateAndWriteValidationDescriptor(productPath, product);
+        return remote(remote, RemoteProductValidationTool.class, "--descriptor=" + validationDescriptorPath);
     }
 
     private static ExecutableDescriptor generateInvalidStopCommand() {
@@ -100,5 +122,4 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         return IntStream.range(0, validationOutput.size()).filter(i -> severity.equals(validationOutput.get(i).get("Severity")))
                 .mapToObj(i -> validationOutput.get(i).get("Message")).collect(Collectors.toSet());
     }
-
 }
