@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
@@ -26,9 +27,9 @@ public class ParameterCondition {
     public String expression;
 
     @JsonPropertyDescription("The condition type, which specifies the relation between the parameter/expression and the passed value.")
+    @JsonProperty(required = true)
     public ParameterConditionType must;
 
     @JsonPropertyDescription("The value matched against the parameter/expression in the way specified by the condition type ('must')")
     public String value;
-
 }
