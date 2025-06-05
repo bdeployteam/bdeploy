@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
@@ -150,14 +149,11 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         appTplForMissingApp2.description = "An anonymous invalid application template for an application that does not exist";
 
         TestProductDescriptor product = TestProductFactory.generateProduct();
-        product.applicationTemplates = new HashMap<>();
         product.applicationTemplates.put("app-template-with-invalid-parameters.yaml", appTplWithInvalidParameters);
         product.applicationTemplates.put("app-template-with-invalid-process-control.yaml", appTplWithInvalidProcessControl);
         product.applicationTemplates.put("app-template-for-missing-app1.yaml", appTplForMissingApp1);
         product.applicationTemplates.put("app-template-for-missing-app2.yaml", appTplForMissingApp2);
-        product.instanceTemplates = new HashMap<>();
         product.descriptor.applicationTemplates = product.applicationTemplates.keySet().stream().toList();
-        product.descriptor.instanceTemplates = new ArrayList<>();
 
         ApplicationDescriptor applicationDescriptor = product.applications.get("app-info.yaml");
         applicationDescriptor.processControl.supportsKeepAlive = false; // disallow keepAlive
@@ -330,9 +326,7 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         instanceTplWithInvalidProcessControl.groups.add(groupOfAppsWithInvalidProcessControl);
 
         TestProductDescriptor product = TestProductFactory.generateProduct();
-        product.applicationTemplates = new HashMap<>(product.applicationTemplates);
         product.applicationTemplates.put("app-template-with-invalid-process-control.yaml", appTplWithInvalidProcessControl);
-        product.instanceTemplates = new HashMap<>();
         product.instanceTemplates.put("instance-tpl-with-invalid-groups", instanceTplWithMissingControlGroup);
         product.instanceTemplates.put("instance-tpl-with-invalid-variables", instanceTplWithInvalidVariables);
         product.instanceTemplates.put("instance-tpl-with-invalid-process-control", instanceTplWithInvalidProcessControl);
@@ -420,7 +414,6 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         descr.definitions.add(duplicateVarDual2); // add dual duplicate variable 2
 
         TestProductDescriptor product = TestProductFactory.generateProduct();
-        product.instanceVariableDefinitions = new HashMap<>(product.instanceVariableDefinitions);
         product.instanceVariableDefinitions.put("invalid-instance-variable-definitions.yaml", descr);
         product.descriptor.instanceVariableDefinitions = product.instanceVariableDefinitions.keySet().stream().toList();
 
@@ -467,12 +460,10 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         TestProductDescriptor product = TestProductFactory.generateProduct();
         ApplicationDescriptor applicationDescriptor = product.applications.get("app-info.yaml");
         applicationDescriptor.type = ApplicationType.CLIENT; // Set to CLIENT to trigger the endpoint error
-        applicationDescriptor.startCommand.parameters = new ArrayList<>(applicationDescriptor.startCommand.parameters);
         applicationDescriptor.startCommand.parameters.add(duplicateParamSolo); // add duplicate parameter
         applicationDescriptor.startCommand.parameters.add(duplicateParamSolo); // add duplicate parameter again
         applicationDescriptor.startCommand.parameters.add(duplicateParamDual1); // add dual duplicate parameter 1
         applicationDescriptor.startCommand.parameters.add(duplicateParamDual2); // add dual duplicate parameter 2
-        applicationDescriptor.stopCommand.parameters = new ArrayList<>(applicationDescriptor.stopCommand.parameters);
         applicationDescriptor.stopCommand.parameters.add(parmWithDefault); // add a valid parameter
         applicationDescriptor.stopCommand.parameters.add(parmWithoutDefault); // add a parameter without a default value
 
