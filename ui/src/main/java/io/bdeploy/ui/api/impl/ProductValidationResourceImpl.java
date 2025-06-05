@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -75,6 +77,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         issues.addAll(validateProductDescriptor(desc));
         issues.addAll(validateApplicationTemplates(desc));
         issues.addAll(validateInstanceTemplates(desc));
+        issues.addAll(validateInstanceVariableDefinitions(desc));
 
         // validate all application commands, parameters, etc.
         for (Map.Entry<String, ApplicationDescriptor> appEntry : desc.applications.entrySet()) {
@@ -97,9 +100,6 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 }
             }
         }
-
-        // validate all the templates.
-        issues.addAll(validateInstanceVariableDefinitions(desc));
 
         return new ProductValidationResponseApi(issues);
     }
@@ -185,12 +185,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private static List<ProductValidationIssueApi> validateInstanceVariableDefinitions(ProductValidationConfigDescriptor desc) {
-        Set<String> ids = new HashSet<>();
-        Set<String> duplicateIds = desc.instanceVariableDefinitions.stream().flatMap(ivd -> ivd.definitions.stream())
-                .map(descriptor -> descriptor.id).filter(id -> !ids.add(id)).collect(Collectors.toSet());
-        return duplicateIds.isEmpty() ? Collections.emptyList()
-                : Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                        "Duplicate instance variable definition IDs: " + String.join(", ", duplicateIds)));
+        return checkForDuplicates(desc.instanceVariableDefinitions.stream().flatMap(ivd -> ivd.definitions.stream())
+                .map(descriptor -> descriptor.id), "Instance variable definitions");
     }
 
     private static List<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
@@ -200,13 +196,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         String tplNiceName = appTplDescr.name == null ? createNiceAnonymousName(appTplDescr.application) : appTplDescr.name;
 
         // check for duplicates
-        Set<String> ids = new HashSet<>();
-        Set<String> duplicateIds = appTplDescr.templateVariables.stream().map(descriptor -> descriptor.id)
-                .filter(id -> !ids.add(id)).collect(Collectors.toSet());
-        if (!duplicateIds.isEmpty()) {
-            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application template '" + tplNiceName
-                    + "' contains duplicate template variables: " + String.join(", ", duplicateIds)));
-        }
+        issues.addAll(checkForDuplicates(appTplDescr.templateVariables, "Application", tplNiceName));
 
         // figure out which variables are requested in the template
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
@@ -239,13 +229,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         List<ProductValidationIssueApi> issues = new ArrayList<>();
 
         // check for duplicates
-        Set<String> ids = new HashSet<>();
-        Set<String> duplicateIds = t.templateVariables.stream().map(descriptor -> descriptor.id).filter(id -> !ids.add(id))
-                .collect(Collectors.toSet());
-        if (!duplicateIds.isEmpty()) {
-            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Instance template '" + t.name
-                    + "' contains duplicate template variables: " + String.join(", ", duplicateIds)));
-        }
+        issues.addAll(checkForDuplicates(t.templateVariables, "Instance", t.name));
 
         // validate on instanceVariable values, application names and application startParameters
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
@@ -319,6 +303,24 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                                     + "' is not available in the instance template '" + tpl.name + '\''));
                 }
             }
+        }
+
+        return issues;
+    }
+
+    private static List<ProductValidationIssueApi> checkForDuplicates(Collection<TemplateVariable> variables, String type,
+            String name) {
+        return checkForDuplicates(variables.stream().map(var -> var.id), type + " template '" + name + '\'');
+    }
+
+    private static List<ProductValidationIssueApi> checkForDuplicates(Stream<String> idStream, String identifier) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
+
+        Set<String> ids = new HashSet<>();
+        Set<String> duplicateIds = idStream.filter(id -> !ids.add(id)).collect(Collectors.toSet());
+        if (!duplicateIds.isEmpty()) {
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                    identifier + " contain(s) duplicate template variables: " + String.join(", ", duplicateIds)));
         }
 
         return issues;

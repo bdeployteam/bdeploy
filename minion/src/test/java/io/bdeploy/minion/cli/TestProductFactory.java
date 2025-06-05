@@ -28,6 +28,7 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
+import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateControlGroup;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
@@ -40,6 +41,7 @@ import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableType;
+import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 
 public class TestProductFactory {
@@ -100,6 +102,7 @@ public class TestProductFactory {
         product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplate(), "app-template-2.yaml",
                 generateApplicationTemplateWithFixedVariable(), "app-template-3.yaml",
                 generateApplicationTemplateWithOtherVariable());
+        product.instanceVariableDefinitions = Map.of("instance-variable-definitions.yaml", generateInstanceVariableDefinitions());
         product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplate(), "min-instance-template.yaml",
                 TestProductFactory.generateMinimalInstanceTemplate("Small instance"));
         product.launchBat = "echo \"Successfully launched on WINDOWS\"";
@@ -115,6 +118,7 @@ public class TestProductFactory {
         productDescriptor.vendor = "BDeploy Team";
         productDescriptor.applications = testDescriptor.version.appInfo.keySet().stream().toList();
         productDescriptor.applicationTemplates = testDescriptor.applicationTemplates.keySet().stream().toList();
+        productDescriptor.instanceVariableDefinitions = testDescriptor.instanceVariableDefinitions.keySet().stream().toList();
         productDescriptor.instanceTemplates = testDescriptor.instanceTemplates.keySet().stream().toList();
         productDescriptor.versionFile = "product-version.yaml";
         productDescriptor.minMinionVersion = "1.2.3";
@@ -194,6 +198,29 @@ public class TestProductFactory {
         group.applications = Arrays.asList(app1, app2);
         tpl.groups.add(group);
         return tpl;
+    }
+
+    public static InstanceVariableDefinitionDescriptor generateInstanceVariableDefinitions() {
+        VariableDescriptor var1 = new VariableDescriptor();
+        var1.id = "variable-definition-1";
+        var1.name = "Instance variable definition 1";
+        var1.longDescription = "An instance variable that was defined in an instance-variable-definiton.yaml (1)";
+
+        VariableDescriptor var2 = new VariableDescriptor();
+        var2.id = "variable-definition-2";
+        var2.name = "Instance variable definition 2";
+        var2.longDescription = "An instance variable that was defined in an instance-variable-definiton.yaml (2)";
+
+        VariableDescriptor var3 = new VariableDescriptor();
+        var3.id = "variable-definition-3";
+        var3.name = "Instance variable definition 3";
+        var3.longDescription = "An instance variable that was defined in an instance-variable-definiton.yaml (3)";
+
+        InstanceVariableDefinitionDescriptor descr = new InstanceVariableDefinitionDescriptor();
+        descr.definitions.add(var1);
+        descr.definitions.add(var2);
+        descr.definitions.add(var3);
+        return descr;
     }
 
     private static ApplicationTemplateDescriptor generateApplicationTemplate() {
@@ -328,6 +355,7 @@ public class TestProductFactory {
             Files.writeString(productPath.resolve("product-version.yaml"), YAML_MAPPER.writeValueAsString(product.version));
             writeFiles(productPath, product.applications);
             writeFiles(productPath, product.applicationTemplates);
+            writeFiles(productPath, product.instanceVariableDefinitions);
             writeFiles(productPath, product.instanceTemplates);
             Files.writeString(productPath.resolve("launch.bat"), product.launchBat);
             Files.writeString(productPath.resolve("launch.sh"), product.launchSh);
@@ -370,6 +398,7 @@ public class TestProductFactory {
         public ProductVersionDescriptor version;
         public Map<String, ApplicationDescriptor> applications;
         public Map<String, ApplicationTemplateDescriptor> applicationTemplates;
+        public Map<String, InstanceVariableDefinitionDescriptor> instanceVariableDefinitions;
         public Map<String, InstanceTemplateDescriptor> instanceTemplates;
         public String launchBat;
         public String launchSh;
