@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,17 +102,28 @@ public class TestProductFactory {
 
     public static TestProductDescriptor generateProduct() {
         TestProductDescriptor product = new TestProductDescriptor();
-        product.version = generateProductVersion("1.0.0");
-        product.applications = Map.of("app-info.yaml", generateApplication());
-        product.applicationTemplates = Map.of("app-template.yaml", generateApplicationTemplate(), "app-template-2.yaml",
-                generateApplicationTemplateWithFixedVariable(), "app-template-3.yaml",
-                generateApplicationTemplateWithOtherVariable());
-        product.instanceVariableDefinitions = Map.of("instance-variable-definitions.yaml", generateInstanceVariableDefinitions());
-        product.instanceTemplates = Map.of("instance-template.yaml", generateInstanceTemplate(), "min-instance-template.yaml",
+
+        product.applications = new HashMap<>();
+        product.applications.put("app-info.yaml", generateApplication());
+
+        product.applicationTemplates = new HashMap<>();
+        product.applicationTemplates.put("app-template.yaml", generateApplicationTemplate());
+        product.applicationTemplates.put("app-template-2.yaml", generateApplicationTemplateWithFixedVariable());
+        product.applicationTemplates.put("app-template-3.yaml", generateApplicationTemplateWithOtherVariable());
+
+        product.instanceVariableDefinitions = new HashMap<>();
+        product.instanceVariableDefinitions.put("instance-variable-definitions.yaml", generateInstanceVariableDefinitions());
+
+        product.instanceTemplates = new HashMap<>();
+        product.instanceTemplates.put("instance-template.yaml", generateInstanceTemplate());
+        product.instanceTemplates.put("min-instance-template.yaml",
                 TestProductFactory.generateMinimalInstanceTemplate("Small instance"));
+
+        product.version = generateProductVersion("1.0.0");
         product.launchBat = "echo \"Successfully launched on WINDOWS\"";
         product.launchSh = "echo \"Successfully launched on LINUX\"";
         product.descriptor = generateProductInfo(product);
+
         return product;
     }
 
@@ -138,15 +150,17 @@ public class TestProductFactory {
     }
 
     public static InstanceTemplateDescriptor generateMinimalInstanceTemplate(String templateName) {
-        InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
-        tpl.name = templateName;
-
         InstanceTemplateGroup group = new InstanceTemplateGroup();
         group.name = "Only Group";
-
         group.applications = generateApplicationsForInstanceTemplate();
-        tpl.groups.add(group);
 
+        InstanceTemplateControlGroup controlGroup = new InstanceTemplateControlGroup();
+        controlGroup.name = "First Group";
+
+        InstanceTemplateDescriptor tpl = new InstanceTemplateDescriptor();
+        tpl.name = templateName;
+        tpl.groups.add(group);
+        tpl.processControlGroups.add(controlGroup);
         return tpl;
     }
 
@@ -326,7 +340,7 @@ public class TestProductFactory {
         param.defaultValue = new LinkedValueConfiguration("10");
         param.type = VariableType.NUMERIC;
         param.mandatory = true;
-        startCommand.parameters = List.of(param);
+        startCommand.parameters = new ArrayList<>(List.of(param));
         app.startCommand = startCommand;
 
         ExecutableDescriptor stopCommand = new ExecutableDescriptor();
@@ -340,7 +354,7 @@ public class TestProductFactory {
         stopParam.defaultValue = new LinkedValueConfiguration("25");
         stopParam.type = VariableType.NUMERIC;
         stopParam.mandatory = true;
-        stopCommand.parameters = List.of(param);
+        stopCommand.parameters = new ArrayList<>(List.of(param));
         app.stopCommand = stopCommand;
 
         return app;

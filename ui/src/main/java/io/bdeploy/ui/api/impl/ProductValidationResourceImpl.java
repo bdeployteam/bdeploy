@@ -24,6 +24,7 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi;
 import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidationSeverity;
 import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VersionHelper;
@@ -115,6 +116,12 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 if (!processControlDescriptor.supportsAutostart) {
                     addAppTemplateProcessControlIssue(issues, appTemplate, "autostart");
                 }
+                //TODO remove this check once the schema validation shows WARNINGs for deprecated fields
+                if (appTemplate.applyOn.contains(OsHelper.OperatingSystem.AIX)) {
+                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
+                            "Application template '" + appTemplate.id + "' lists '" + OsHelper.OperatingSystem.AIX
+                                    + "' in its 'applyOn', which is deprecated since version 7.7.0 and marked for removal"));
+                }
             } catch (RuntimeException e) {
                 issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         "Cannot resolve application template '" + appTemplate.name + "': " + e.toString()));
@@ -151,6 +158,14 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                         if (!processControlDescriptor.supportsAutostart) {
                             addInstanceTemplateProcessControlIssue(issues, templateApp, "autostart", instanceTemplate.name,
                                     group.name, usesTemplate);
+                        }
+                        //TODO remove this check once the schema validation shows WARNINGs for deprecated fields
+                        if (templateApp.applyOn.contains(OsHelper.OperatingSystem.AIX)) {
+                            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
+                                    (usesTemplate ? "Template" : "Application") + " '" + (usesTemplate
+                                            ? templateApp.template
+                                            : templateApp.application) + "' lists '" + OsHelper.OperatingSystem.AIX
+                                            + "' in its 'applyOn', which is deprecated since version 7.7.0 and marked for removal"));
                         }
                     }
                 }
@@ -189,6 +204,12 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                                 '\'' + app + "' is a client application but has endpoints configured"));
                     }
                 }
+            }
+            //TODO remove this check once the schema validation shows WARNINGs for deprecated fields
+            if (applicationDescriptor.supportedOperatingSystems.contains(OsHelper.OperatingSystem.AIX)) {
+                issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING, '\'' + app + "' lists '"
+                        + OsHelper.OperatingSystem.AIX
+                        + "' as a supported operating system, which is deprecated since version 7.7.0 and marked for removal"));
             }
         }
 
@@ -297,11 +318,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         List<ProductValidationIssueApi> issues = new ArrayList<>();
 
         List<String> controlGroupsInTemplate = tpl.processControlGroups.stream().map(c -> c.name).toList();
-        boolean notEmpty = !controlGroupsInTemplate.isEmpty();//TODO also check if empty?
         for (var grp : tpl.groups) {
             for (var app : grp.applications) {
                 issues.addAll(validateFlatApplicationTemplate(app, descriptor));
-                if (notEmpty && app.preferredProcessControlGroup != null
+                if (app.preferredProcessControlGroup != null
                         && !controlGroupsInTemplate.contains(app.preferredProcessControlGroup)) {
                     issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
                             "Preferred process control group '" + app.preferredProcessControlGroup + "' for application '"
