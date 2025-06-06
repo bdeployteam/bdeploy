@@ -24,6 +24,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateControlGroup;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
@@ -182,7 +183,7 @@ class ProductValidationCliTest extends BaseMinionCliTest {
                 + " is defined but never used in application template 'Invalid template with invalid process parameters'"));
 
         assertTrue(errors.contains("Application template 'Invalid template with invalid process parameters'"
-                + " contains duplicate template variables: duplicate-template-var-singular, duplicate-template-var-dual"));
+                + " contain(s) duplicate template variables: duplicate-template-var-singular, duplicate-template-var-dual"));
 
         assertTrue(errors.contains("Missing definition for used template variable 'non-existant-param' in application template"
                 + " 'Invalid template with invalid process parameters'"));
@@ -367,7 +368,7 @@ class ProductValidationCliTest extends BaseMinionCliTest {
                 + " is defined but never used in instance template 'Instance template with invalid variables'"));
 
         assertTrue(errors.contains("Instance template 'Instance template with invalid variables'"
-                + " contains duplicate template variables: duplicate-template-var-singular, duplicate-template-var-dual"));
+                + " contain(s) duplicate template variables: duplicate-template-var-singular, duplicate-template-var-dual"));
 
         assertTrue(errors.contains("Missing definition for used template variable 'non-existant-param' in instance template"
                 + " 'Instance template with invalid variables'"));
@@ -385,6 +386,52 @@ class ProductValidationCliTest extends BaseMinionCliTest {
         assertTrue(errors.contains("Instance template 'Instance template with invalid process control' has group"
                 + " 'Only Group - Process Control' which uses template 'tpl-of-app-with-process-control' and sets its"
                 + " parameter 'keepAlive' to enabled, but the descriptor of the application forbids it"));
+    }
+
+    @Test
+    void testInstanceVariableDefinitionValidation(RemoteService remote, @TempDir Path tmp) throws IOException {
+        createInstanceGroup(remote);
+
+        VariableDescriptor validVar = new VariableDescriptor();
+        validVar.id = "variable-definition-valid";
+        validVar.name = "Valid instance variable definition";
+        validVar.longDescription = "A valid variable";
+
+        VariableDescriptor duplicateVarSolo = new VariableDescriptor();
+        duplicateVarSolo.id = "variable-definition-duplicate-solo";
+        duplicateVarSolo.name = "Invalid instance variable definition - duplicate solo";
+        duplicateVarSolo.longDescription = "A variable that gets added twice";
+
+        VariableDescriptor duplicateVarDual1 = new VariableDescriptor();
+        duplicateVarDual1.id = "variable-definition-duplicate-dual";
+        duplicateVarDual1.name = "Invalid instance variable definition - duplicate dual 1";
+        duplicateVarDual1.longDescription = "A variable that has the same id as another variable 1";
+
+        VariableDescriptor duplicateVarDual2 = new VariableDescriptor();
+        duplicateVarDual2.id = "variable-definition-duplicate-dual";
+        duplicateVarDual2.name = "Invalid instance variable definition - duplicate dual 2";
+        duplicateVarDual2.longDescription = "A variable that has the same id as another variable 2";
+
+        InstanceVariableDefinitionDescriptor descr = new InstanceVariableDefinitionDescriptor();
+        descr.definitions.add(validVar);
+        descr.definitions.add(duplicateVarSolo); // add singular duplicate variable
+        descr.definitions.add(duplicateVarSolo); // add singular duplicate variable
+        descr.definitions.add(duplicateVarDual1); // add dual duplicate variable 1
+        descr.definitions.add(duplicateVarDual2); // add dual duplicate variable 2
+
+        TestProductDescriptor product = TestProductFactory.generateProduct();
+        product.instanceVariableDefinitions = new HashMap<>(product.instanceVariableDefinitions);
+        product.instanceVariableDefinitions.put("invalid-instance-variable-definitions.yaml", descr);
+        product.descriptor.instanceVariableDefinitions = product.instanceVariableDefinitions.keySet().stream().toList();
+
+        StructuredOutput output = getResult(remote, tmp, product);
+        assertEquals(1, output.size());
+
+        Set<String> errors = extractBySeverity("ERROR", output);
+        assertEquals(1, errors.size());
+
+        assertTrue(errors.contains("Instance variable definitions contain(s) duplicate template"
+                + " variables: variable-definition-duplicate-solo, variable-definition-duplicate-dual"));
     }
 
     @Test
