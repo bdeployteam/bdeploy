@@ -66,8 +66,9 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         try {
             parsed = parse(FormDataHelper.getStreamFromMultiPart(fdmp));
         } catch (SchemaValidationException ex) {
-            return new ProductValidationResponseApi(ex.errors.stream()
-                    .map(e -> new ProductValidationIssueApi(ProductValidationSeverity.ERROR, ex.path + ": " + e)).toList());
+            return new ProductValidationResponseApi(
+                    ex.errors.stream().map(e -> new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                            "Parsing error in '" + ex.path + "': " + e)).toList());
         }
         return validate(parsed);
     }
@@ -78,29 +79,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         issues.addAll(validateApplicationTemplates(desc));
         issues.addAll(validateInstanceTemplates(desc));
         issues.addAll(validateInstanceVariableDefinitions(desc));
-
-        // validate all application commands, parameters, etc.
-        for (Map.Entry<String, ApplicationDescriptor> appEntry : desc.applications.entrySet()) {
-            var app = appEntry.getKey();
-            var applicationDescriptor = appEntry.getValue();
-            if (applicationDescriptor.startCommand != null) {
-                validateCommand(issues, app, applicationDescriptor.startCommand, desc.parameterTemplates, false);
-            }
-            if (applicationDescriptor.stopCommand != null) {
-                validateCommand(issues, app, applicationDescriptor.stopCommand, desc.parameterTemplates, true);
-            }
-            if (applicationDescriptor.type == ApplicationType.CLIENT) {
-                EndpointsDescriptor endpointsDescr = applicationDescriptor.endpoints;
-                if (endpointsDescr != null) {
-                    List<HttpEndpoint> httpEndpoints = endpointsDescr.http;
-                    if (httpEndpoints != null && !httpEndpoints.isEmpty()) {
-                        issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                                app + " is a client application but has endpoints configured"));
-                    }
-                }
-            }
-        }
-
+        issues.addAll(validateApplications(desc));
         return new ProductValidationResponseApi(issues);
     }
 
@@ -187,6 +166,33 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private static List<ProductValidationIssueApi> validateInstanceVariableDefinitions(ProductValidationConfigDescriptor desc) {
         return checkForDuplicates(desc.instanceVariableDefinitions.stream().flatMap(ivd -> ivd.definitions.stream())
                 .map(descriptor -> descriptor.id), "Instance variable definitions");
+    }
+
+    private static List<ProductValidationIssueApi> validateApplications(ProductValidationConfigDescriptor desc) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
+
+        for (Map.Entry<String, ApplicationDescriptor> appEntry : desc.applications.entrySet()) {
+            var app = appEntry.getKey();
+            var applicationDescriptor = appEntry.getValue();
+            if (applicationDescriptor.startCommand != null) {
+                validateCommand(issues, app, applicationDescriptor.startCommand, desc.parameterTemplates, false);
+            }
+            if (applicationDescriptor.stopCommand != null) {
+                validateCommand(issues, app, applicationDescriptor.stopCommand, desc.parameterTemplates, true);
+            }
+            if (applicationDescriptor.type == ApplicationType.CLIENT) {
+                EndpointsDescriptor endpointsDescr = applicationDescriptor.endpoints;
+                if (endpointsDescr != null) {
+                    List<HttpEndpoint> httpEndpoints = endpointsDescr.http;
+                    if (httpEndpoints != null && !httpEndpoints.isEmpty()) {
+                        issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                                '\'' + app + "' is a client application but has endpoints configured"));
+                    }
+                }
+            }
+        }
+
+        return issues;
     }
 
     private static List<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
@@ -384,32 +390,29 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     private static void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,
             List<ParameterTemplateDescriptor> parameterTemplates, boolean requireValue) {
-
         // expand and verify parameter templates
         var expanded = new ArrayList<ParameterDescriptor>();
         for (var param : command.parameters) {
             if (param.id == null) {
                 if (param.template == null) {
                     issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
-                            app + " has parameter without id or template"));
+                            '\'' + app + "' has parameter without id or template"));
                     continue;
                 }
-
                 expanded.addAll(expandTemplateRecursive(app, param, parameterTemplates, issues));
             } else {
                 expanded.add(param);
             }
         }
 
-        // now check all parameters.
+        // now check all parameters
         var startIds = new HashSet<String>();
         for (var param : expanded) {
             if (startIds.contains(param.id)) {
                 issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                        "Application '" + app + "' has parameters with duplicate id '" + param.id + '\''));
+                        "Application '" + app + "' has parameter with duplicate id '" + param.id + '\''));
             }
             startIds.add(param.id);
-
             if (requireValue && (param.defaultValue == null || param.defaultValue.getPreRenderable() == null)) {
                 issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         "Parameter '" + param.id + "' of application '" + app + "' must have a default value"));

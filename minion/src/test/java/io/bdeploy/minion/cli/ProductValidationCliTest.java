@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -21,8 +20,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import io.bdeploy.common.TestCliTool.StructuredOutput;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
@@ -435,63 +435,65 @@ class ProductValidationCliTest extends BaseMinionCliTest {
     }
 
     @Test
-    void testProductWithValidationIssues(RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testAppliationValidation(RemoteService remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
+
+        ParameterDescriptor duplicateParamSolo = new ParameterDescriptor();
+        duplicateParamSolo.id = "duplicate-param-solo";
+        duplicateParamSolo.name = "Duplicate parameter solo";
+        duplicateParamSolo.longDescription = "A parameter that gets added twice";
+
+        ParameterDescriptor duplicateParamDual1 = new ParameterDescriptor();
+        duplicateParamDual1.id = "duplicate-param-dual";
+        duplicateParamDual1.name = "Duplicate parameter dual 1";
+        duplicateParamDual1.longDescription = "A parameter that has the same id as another parameter";
+
+        ParameterDescriptor duplicateParamDual2 = new ParameterDescriptor();
+        duplicateParamDual2.id = "duplicate-param-dual";
+        duplicateParamDual2.name = "Duplicate parameter dual 1";
+        duplicateParamDual2.longDescription = "A parameter that has the same id as another parameter";
+
+        ParameterDescriptor parmWithDefault = new ParameterDescriptor();
+        parmWithDefault.id = "param-with-default";
+        parmWithDefault.name = "Parameter with default value";
+        parmWithDefault.longDescription = "A normal and valid parameter with a default value";
+        parmWithDefault.defaultValue = new LinkedValueConfiguration("dummy");
+
+        ParameterDescriptor parmWithoutDefault = new ParameterDescriptor();
+        parmWithoutDefault.id = "param-without-default";
+        parmWithoutDefault.name = "Parameter without default value";
+        parmWithoutDefault.longDescription = "A normal and valid parameter without a default value";
+
         TestProductDescriptor product = TestProductFactory.generateProduct();
         ApplicationDescriptor applicationDescriptor = product.applications.get("app-info.yaml");
-        ApplicationTemplateDescriptor appTemplate = product.applicationTemplates.get("app-template.yaml");
-        appTemplate.processControl = new HashMap<>();
-
-        // missing stop command parameter
-        applicationDescriptor.stopCommand = generateInvalidStopCommand();
-
-        // generate invalid keepAlive
-        applicationDescriptor.processControl.supportsKeepAlive = false;
-        appTemplate.processControl.put("keepAlive", true);
-
-        // generate invalid autoStart
-        applicationDescriptor.processControl.supportsAutostart = false;
-        appTemplate.processControl.put("autostart", true);
+        applicationDescriptor.type = ApplicationType.CLIENT; // Set to CLIENT to trigger the endpoint error
+        applicationDescriptor.startCommand.parameters = new ArrayList<>(applicationDescriptor.startCommand.parameters);
+        applicationDescriptor.startCommand.parameters.add(duplicateParamSolo); // add duplicate parameter
+        applicationDescriptor.startCommand.parameters.add(duplicateParamSolo); // add duplicate parameter again
+        applicationDescriptor.startCommand.parameters.add(duplicateParamDual1); // add dual duplicate parameter 1
+        applicationDescriptor.startCommand.parameters.add(duplicateParamDual2); // add dual duplicate parameter 2
+        applicationDescriptor.stopCommand.parameters = new ArrayList<>(applicationDescriptor.stopCommand.parameters);
+        applicationDescriptor.stopCommand.parameters.add(parmWithDefault); // add a valid parameter
+        applicationDescriptor.stopCommand.parameters.add(parmWithoutDefault); // add a parameter without a default value
 
         StructuredOutput output = getResult(remote, tmp, product);
-
-        Set<String> warnings = extractBySeverity("WARNING", output);
-        assertEquals(0, warnings.size());
+        assertEquals(4, output.size());
 
         Set<String> errors = extractBySeverity("ERROR", output);
-        assertTrue(errors.contains("Instance template 'Default Test Configuration'"
-                + " has group 'Only Group' which uses template 'server-with-sleep' and sets its parameter 'keepAlive' to"
-                + " enabled, but the descriptor of the application forbids it"));
-        assertTrue(errors.contains("Instance template 'Default Test Configuration'"
-                + " has group 'Only Group' which uses template 'server-with-sleep' and sets its parameter 'autostart' to"
-                + " enabled, but the descriptor of the application forbids it"));
-        assertTrue(errors.contains("Application template 'server-with-sleep' has"
-                + " 'keepAlive' enabled, but the descriptor of the application forbids it"));
-        assertTrue(errors.contains("Application template 'server-with-sleep' has"
-                + " 'autostart' enabled, but the descriptor of the application forbids it"));
-        assertTrue(errors.contains("Parameter 'wait.time' of application 'server-app' must have a default value"));
-        assertEquals(7, errors.size());
+        assertEquals(4, errors.size());
+
+        assertTrue(errors.contains("'server-app' is a client application but has endpoints configured"));
+
+        assertTrue(errors.contains("Application 'server-app' has parameter with duplicate id 'duplicate-param-solo'"));
+        assertTrue(errors.contains("Application 'server-app' has parameter with duplicate id 'duplicate-param-dual'"));
+
+        assertTrue(errors.contains("Parameter 'param-without-default' of application 'server-app' must have a default value"));
     }
 
     private StructuredOutput getResult(RemoteService remote, Path tmp, TestProductDescriptor product) throws IOException {
         Path productPath = createAndUploadProduct(remote, tmp, product);
         Path validationDescriptorPath = TestProductFactory.generateAndWriteValidationDescriptor(productPath, product);
         return remote(remote, RemoteProductValidationTool.class, "--descriptor=" + validationDescriptorPath);
-    }
-
-    private static ExecutableDescriptor generateInvalidStopCommand() {
-        ExecutableDescriptor stopCommand = new ExecutableDescriptor();
-        stopCommand.launcherPath = "{{WINDOWS:stop.bat}}{{LINUX:stop.sh}}{{LINUX_AARCH64:stop.sh}}";
-        ParameterDescriptor stopParam = new ParameterDescriptor();
-        stopParam.id = "wait.time";
-        stopParam.name = "Wait Time";
-        stopParam.longDescription = "A numeric parameter that controls how long to wait";
-        stopParam.groupName = "Timeouts";
-        stopParam.parameter = "--wait";
-        stopParam.type = VariableDescriptor.VariableType.NUMERIC;
-        stopParam.mandatory = true;
-        stopCommand.parameters = List.of(stopParam);
-        return stopCommand;
     }
 
     private static Set<String> extractBySeverity(String severity, StructuredOutput validationOutput) {

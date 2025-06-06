@@ -25,7 +25,11 @@ import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupHandlingType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupWaitType;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
+import io.bdeploy.interfaces.descriptor.application.EndpointsDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.instance.InstanceVariableDefinitionDescriptor;
@@ -280,9 +284,29 @@ public class TestProductFactory {
     }
 
     private static ApplicationDescriptor generateApplication() {
+        HttpEndpoint endpoint1 = new HttpEndpoint();
+        HttpEndpoint endpoint2 = new HttpEndpoint();
+        HttpEndpoint endpoint3 = new HttpEndpoint();
+        endpoint1.id = "endpoint-1";
+        endpoint2.id = "endpoint-2";
+        endpoint3.id = "endpoint-3";
+        endpoint1.path = new LinkedValueConfiguration("dummyPath1");
+        endpoint2.path = new LinkedValueConfiguration("dummyPath2");
+        endpoint3.path = new LinkedValueConfiguration("dummyPath3");
+        endpoint1.type = HttpEndpointType.DEFAULT;
+        endpoint2.type = HttpEndpointType.PROBE_STARTUP;
+        endpoint3.type = HttpEndpointType.PROBE_ALIVE;
+
+        EndpointsDescriptor endpoints = new EndpointsDescriptor();
+        endpoints.http.add(endpoint1);
+        endpoints.http.add(endpoint2);
+        endpoints.http.add(endpoint3);
+
         ApplicationDescriptor app = new ApplicationDescriptor();
         app.name = "server-app";
+        app.type = ApplicationType.SERVER;
         app.supportedOperatingSystems = List.of(WINDOWS, LINUX, LINUX_AARCH64);
+        app.endpoints = endpoints;
 
         ProcessControlDescriptor processControl = new ProcessControlDescriptor();
         processControl.gracePeriod = 3000;
