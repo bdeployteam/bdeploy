@@ -27,8 +27,8 @@ plugins {
     id 'base'
     id 'jacoco'
     id 'com.github.ben-manes.versions' version '0.52.0'
-    id "org.sonarqube" version "6.0.1.5171"
-    id 'org.cyclonedx.bom' version '2.2.0'
+    id "org.sonarqube" version "6.2.0.5505"
+    id 'org.cyclonedx.bom' version '2.3.1'
 }
 
 cyclonedxBom {
@@ -50,11 +50,11 @@ ext {
     currentArch = System.getProperty("os.arch")
 
     // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
-    winX64jdk = readJdk("win-x64jdk")
+    winX64jdk = readJdk("win_x64jdk")
     // Defines the path to a LINUX JDK, to be able to build linux dist packages on windows
-    linuxX64jdk = readJdk("linux-x64jdk")
+    linuxX64jdk = readJdk("linux_x64jdk")
     // Defines the path to a LINUX AARCH64 JSK, to be able to build arm packages
-    linuxAarch64jdk = readJdk("linux-aarch64jdk")
+    linuxAarch64jdk = readJdk("linux_aarch64jdk")
 
     // build SNAPSHOT replacement where needed.
     buildDate = new Date().format('yyyyMMddHHmm')
@@ -134,7 +134,7 @@ configure(actualSubprojects) {
     }
 
     dependencies {
-        commonTestDeps platform('org.junit:junit-bom:5.12.1')
+        commonTestDeps platform('org.junit:junit-bom:5.13.1')
         commonTestDeps 'org.junit.jupiter:junit-jupiter'
         commonTestDeps 'org.hamcrest:hamcrest-core:3.0'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
