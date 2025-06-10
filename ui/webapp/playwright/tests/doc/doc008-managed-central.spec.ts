@@ -33,6 +33,10 @@ test.afterEach(async ({ central, managed }, testInfo) => {
 });
 
 test('Managed Central Link', async ({managed, central}, testInfo) => {
+  // must filter list of groups so other tests don't interfere with the linking panel.
+  const managedApi = new BackendApi(managed);
+  await managedApi.mockFilterGroups(groupId(testInfo));
+
   const groups = new InstanceGroupsBrowserPage(managed);
   await groups.goto();
 
