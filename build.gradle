@@ -50,11 +50,11 @@ ext {
     currentArch = System.getProperty("os.arch")
 
     // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
-    winX64jdk = readJdk("win_x64jdk")
+    winX64jdk = readJdk("winX64jdk")
     // Defines the path to a LINUX JDK, to be able to build linux dist packages on windows
-    linuxX64jdk = readJdk("linux_x64jdk")
+    linuxX64jdk = readJdk("linuxX64jdk")
     // Defines the path to a LINUX AARCH64 JSK, to be able to build arm packages
-    linuxAarch64jdk = readJdk("linux_aarch64jdk")
+    linuxAarch64jdk = readJdk("linuxAarch64jdk")
 
     // build SNAPSHOT replacement where needed.
     buildDate = new Date().format('yyyyMMddHHmm')
