@@ -3,13 +3,16 @@ import com.github.psxpaul.task.ExecFork
 import cz.habarta.typescript.generator.Jackson2Configuration
 import cz.habarta.typescript.generator.gradle.GenerateTask
 import org.gradle.api.internal.tasks.userinput.UserInputHandler
+import com.github.gradle.node.variant.VariantComputer
+import com.github.gradle.node.variant.VariantComputerKt
 
 plugins {
     id "com.github.psxpaul.execfork" version "0.2.2"
     id "cz.habarta.typescript-generator" version "3.2.1263"
+    id "com.github.node-gradle.node" version "7.1.0"
 }
 
-def webappDir = "$projectDir/webapp"
+def webappDir = layout.projectDirectory.dir("webapp")
 
 dependencies {
     implementation(
@@ -29,32 +32,29 @@ dependencies {
 sourceSets {
     main {
         resources {
-            srcDirs = ["$webappDir/dist/webapp"]
+            srcDirs = [ webappDir.dir("dist/webapp") ]
         }
     }
 }
 
-ext.sharedNpmLogic = { task, List<String> target -> 
-    configure(task) {
-        workingDir "$webappDir"
-        group = BasePlugin.BUILD_GROUP
-        if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            commandLine (["npm"] + target)
-        } else {
-            commandLine (["npm.cmd"] + target)
-        }
-    }
+node {
+    download = true
+    version = "22.16.0"
+    nodeProjectDir = webappDir
+    workDir = layout.buildDirectory.dir('nodejs')
+    npmInstallCommand = System.getenv('CI') ? 'ci' : 'install'
 }
 
 ext.sharedUitestServeLogic = { task, List<String> target ->
     configure(task) {
-        workingDir "$webappDir"
+        workingDir = webappDir
         group = BasePlugin.BUILD_GROUP
-        if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            executable "npm"
-        } else {
-            executable "npm.cmd"
-        }
+        def nodeBinDirProvider = new VariantComputer().computeNpmBinDir(node.resolvedNodeDir, node.resolvedPlatform)
+        def nodeBinary = nodeBinDirProvider.get().file(org.gradle.internal.os.OperatingSystem.current().isWindows() ? 'npm.cmd' : 'npm')
+        def pathSep = org.gradle.internal.os.OperatingSystem.current().isWindows() ? ';' : ':'
+
+        executable = nodeBinary.asFile
+        environment = [ 'PATH': nodeBinDirProvider.get().asFile.toString() + pathSep + System.getenv('PATH')]
 
         args = ["run", "--", "ng", "serve", "--no-hmr"] + target
     }
@@ -72,10 +72,10 @@ tasks.register('updateFixtureProducts', Copy) {
 
     from new File(prj.projectDir, "/system-template.yaml")
 
-    into "${webappDir}/playwright/fixtures"
+    into webappDir.dir("playwright/fixtures")
 
     doFirst {
-        delete fileTree("${webappDir}/playwright/fixtures").matching { include "*.zip" }
+        delete webappDir.dir("playwright/fixtures").asFileTree.matching { include "*.zip" }
     }
 }
 
@@ -132,29 +132,19 @@ tasks.register('updateFixtures') {
     dependsOn runServerManaged
 }
 
-tasks.register('installAngular', Exec) { t ->
-    inputs.file "$webappDir/package.json"
-    outputs.dir "$webappDir/node_modules"
-    sharedNpmLogic(t, ["ci", "--legacy-peer-deps"])
+tasks.register('installBrowsers', NpxTask) {
+    dependsOn npmInstall
+    command = 'playwright'
+    args = [ 'install' ]
 }
 
-tasks.register('installBrowsers', Exec) { t ->
-    dependsOn installAngular
-
-    workingDir "$webappDir"
-    group = BasePlugin.BUILD_GROUP;
-
-    sharedNpmLogic(t, ["run", "--", "playwright", "install"])
-}
-
-tasks.register('runUitests', Exec) {t ->
+tasks.register('runUitests', NpxTask) {t ->
     dependsOn installBrowsers, updateFixtures, runServerStandalone, runServerCentral, runServerManaged
     doFirst() {
-        delete "$webappDir/playwright/results/screenshots"
+        delete webappDir.dir("playwright/results/screenshots")
     }
 
-    workingDir "$webappDir"
-    group = BasePlugin.BUILD_GROUP;
+    workingDir = webappDir
 
     def opts = [];
     if (project.hasProperty("ui")) {
@@ -169,7 +159,8 @@ tasks.register('runUitests', Exec) {t ->
         target = "codegen";
     }
 
-    sharedNpmLogic(t, ["run", "--", "playwright", target] + opts)
+    command = 'playwright'
+    args = [ target ] + opts
 }
 
 tasks.register('runUitestsInfra') {
@@ -196,8 +187,8 @@ tasks.register('updateDocuScreenshots') {
     dependsOn doneWithUitest
     doLast {
         copy {
-            from file("${webappDir}/playwright/results/screenshots/")
-            into new File(project(":doc").projectDir, "retypeuser/images")
+            from webappDir.dir("playwright/results/screenshots")
+            into project(":doc").layout.projectDirectory.dir("retypeuser/images")
 
             include "**/*.png"
 
@@ -220,15 +211,17 @@ triggerStopManaged.mustRunAfter runUitests
 test.dependsOn doneWithUitest
 
 tasks.register('cleanAngular', Delete) {
-    delete "$webappDir/dist"
+    delete webappDir.dir("dist")
 }
 
-tasks.register('buildAngularInternal', Exec) { t ->
-    inputs.dir "$webappDir/src"
-    outputs.dir "$webappDir/dist/webapp"
-    sharedNpmLogic(t, ["run", "--", "ng", "build", "-c", "production"])
-    dependsOn 'installAngular'
+tasks.register('buildAngularInternal', NpxTask) { t ->
+    inputs.dir webappDir.dir("src")
+    outputs.dir webappDir.dir("dist/webapp")
+    dependsOn 'npmInstall'
     dependsOn 'genDtos'
+
+    command = 'ng'
+    args = ["build", "-c", "production"]
 }
 
 tasks.register('buildAngular') {
@@ -237,18 +230,18 @@ tasks.register('buildAngular') {
     dependsOn 'copyUserDoc'
 }
 
-tasks.register('checkLintAfterBuild', Exec) { t ->
-    inputs.dir "$webappDir/src"
-    outputs.dir "$webappDir/dist/webapp"
-    sharedNpmLogic(t, ["run", "--", "ng", "lint"])
+tasks.register('checkLintAfterBuild', NpxTask) { t ->
+    inputs.dir webappDir.dir("src")
     mustRunAfter 'buildAngularInternal'
+    command = 'ng'
+    args = ['lint']
 }
 
 evaluationDependsOn(':doc')
 tasks.register('copyUserDoc', Copy) {
     dependsOn ':doc:retypeUserDoc'
     from tasks.getByPath(':doc:retypeUserDoc').outputs
-    into "$webappDir/dist/webapp/browser/assets/doc"
+    into webappDir.dir("dist/webapp/browser/assets/doc")
 
     mustRunAfter 'buildAngularInternal'
 }
@@ -378,7 +371,7 @@ tasks.register('genDtos', GenerateTask) {
     jackson2Configuration = cfg
 
     def tmpOutFile = layout.buildDirectory.file("gen.dtos.tmp.ts").get().asFile
-    def outFile = file("${webappDir}/src/app/models/gen.dtos.ts")
+    def outFile = webappDir.file("src/app/models/gen.dtos.ts").asFile
 
     outputFile = tmpOutFile
 
@@ -394,8 +387,8 @@ tasks.register('genDtos', GenerateTask) {
 
 sonarqube {
     properties {
-        properties["sonar.sources"] += "${webappDir}/src"
-        property "sonar.javascript.lcov.reportPaths", "${webappDir}/playwright/results/reports/monocart/lcov/coverage.lcov.info"
+        properties["sonar.sources"] += webappDir.dir("src").asFile.toString()
+        property "sonar.javascript.lcov.reportPaths", webappDir.file("playwright/results/reports/monocart/lcov/coverage.lcov.info").asFile.toString()
     }
 }
 
