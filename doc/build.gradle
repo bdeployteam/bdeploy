@@ -1,56 +1,56 @@
-ext.resolveVersion = { task ->
+import com.github.gradle.node.npm.task.NpxTask
+
+plugins {
+    id "com.github.node-gradle.node" version "7.1.0"
+}
+
+node {
+    download = true
+    version = "22.16.0"
+    workDir = layout.buildDirectory.dir('nodejs')
+    npmInstallCommand = 'ci'
+}
+
+private resolveVersion(NpxTask task, Directory dir) {
     configure(task) {
-        def retypeFile = new File("${workingDir}/retype.yml")
-        def clonedFile = new File("${workingDir}/retype.yml.clone")
+        def retypeFile = dir.file("retype.yml").asFile
+        def inFile = dir.file("retype.yml.in").asFile
         def releaseTagPattern = ~/^\d+\.\d+\.\d+$/
         def releaseVersion = project.version.toString()
         def releaseLink = (releaseVersion ==~ releaseTagPattern) ? "https://github.com/bdeployteam/bdeploy/releases/tag/v${releaseVersion}" : "https://github.com/bdeployteam/bdeploy/releases"
 
         doFirst {
-            clonedFile.text = retypeFile.text
-            retypeFile.text = retypeFile.text.replace("{{ releaseVersion }}", releaseVersion).replace("{{ releaseLink }}", releaseLink)
+            retypeFile.text = inFile.text.replace("{{ releaseVersion }}", releaseVersion).replace("{{ releaseLink }}", releaseLink)
         }
     }
 }
 
-ext.revertVersion = { task ->
-    configure(task) {
-        def retypeFile = new File("${workingDir}/retype.yml")
-        def clonedFile = new File("${workingDir}/retype.yml.clone")
-
-        doLast {
-            retypeFile.text = clonedFile.text
-            delete(clonedFile)
-        }
-    }
-}
-
-ext.buildRetype = { task ->
+private buildRetype(NpxTask task, Directory dir) {
     configure(task) {
         enabled !rootProject.isAarch64()
-        resolveVersion(task)
+        dependsOn npmInstall
+        resolveVersion(task, dir)
         group = BasePlugin.BUILD_GROUP
-	    if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-	        commandLine (["npx", "retypeapp", "build"])
-	    } else {
-	        commandLine (["npx.cmd", "retypeapp", "build"])
-	    }
-        revertVersion(task)
+
+        command = 'retypeapp'
+        args = ['build']
     }
 }
 
-tasks.register('retypeDevDoc', Exec) { t ->
-    workingDir './retypedev'
-    inputs.dir './retypedev'
-    outputs.dir layout.buildDirectory.dir("docs/dev")
-    buildRetype(t)
+tasks.register('retypeDevDoc', NpxTask) { t ->
+    def dir = layout.projectDirectory.dir('retypedev')
+    workingDir = dir
+    inputs.dir(dir)
+    outputs.dir(layout.buildDirectory.dir("docs/dev"))
+    buildRetype(t, dir)
 }
 
-tasks.register('retypeUserDoc', Exec) { t ->
-    workingDir './retypeuser'
-    inputs.dir './retypeuser'
-    outputs.dir layout.buildDirectory.dir("docs/user")
-    buildRetype(t)
+tasks.register('retypeUserDoc', NpxTask) { t ->
+    def dir = layout.projectDirectory.dir('retypeuser')
+    workingDir = dir
+    inputs.dir(dir)
+    outputs.dir(layout.buildDirectory.dir("docs/dev"))
+    buildRetype(t, dir)
 }
 
 tasks.register('doc') {
