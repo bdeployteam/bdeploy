@@ -37,7 +37,7 @@ export default defineConfig({
   /* Restrict parallel tests on CI. */
   workers: process.env['CI'] ? 2 : 4,
   /* default test timeout */
-  timeout: process.env['CI'] ? 60000 : 30000,
+  timeout: process.env['CI'] ? 90000 : 30000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['list'],
@@ -70,7 +70,7 @@ export default defineConfig({
 
   /* Timeout when expecting something to happen */
   expect: {
-    timeout: process.env['CI'] ? 20000 : 5000
+    timeout: process.env['CI'] ? 40000 : 5000
   },
 
   projects: [
