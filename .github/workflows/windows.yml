@@ -1,8 +1,5 @@
-name: BDeploy CI - Windows
-on: 
-  push:
-    branches-ignore:
-      - 'aarch64'
+name: Windows (x64)
+on: [push]
 
 jobs:
   build:
@@ -24,7 +21,7 @@ jobs:
 
     - name: Build and Test
       id: build
-      run: ./gradlew --stacktrace --scan clean build
+      run: ./gradlew --stacktrace --scan clean build -Pworkers=1
 
     - name: Upload playwright results
       uses: actions/upload-artifact@v4

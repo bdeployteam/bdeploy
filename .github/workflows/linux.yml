@@ -1,4 +1,4 @@
-name: BDeploy CI - Linux
+name: Linux (x64)
 on: [push]
 
 jobs:
