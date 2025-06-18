@@ -66,7 +66,9 @@ test('Software Repositories', async ({ standalone }, testInfo) => {
 });
 
 test('Runtime Dependencies', async ({ standalone }, testInfo) => {
-  await new BackendApi(standalone).createRepo(repoId(testInfo), 'Test Repository');
+  const api = new BackendApi(standalone);
+  await api.createRepo(repoId(testInfo), 'Test Repository');
+  await api.mockFilterGroups();
 
   const sw = new ReposSoftwarePage(standalone, repoId(testInfo));
   await sw.goto();

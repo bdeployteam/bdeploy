@@ -153,6 +153,10 @@ tasks.register('runUitests', NpxTask) {t ->
     if (project.hasProperty("debug")) {
         opts.add("--debug");
     }
+    if (project.hasProperty("trace")) {
+        opts.add("--trace");
+        opts.add("on");
+    }
     if (project.hasProperty("workers")) {
 	opts.add("--workers")
 	opts.add(project.getProperty("workers"))

@@ -80,6 +80,10 @@ export class BackendApi {
         const json = await real.json() as InstanceGroupConfigurationDto[] || [];
         const filtered = json.filter(g => groups.includes(g.instanceGroupConfiguration.name));
 
+        const origGroups = json.map(g => g.instanceGroupConfiguration.name);
+        const filteredGroups = filtered.map(g => g.instanceGroupConfiguration.name);
+        console.log(`Reduced groups from ${JSON.stringify(origGroups)} to ${JSON.stringify(filteredGroups)}`);
+
         await route.fulfill({
           response: real,
           json: filtered
@@ -92,11 +96,16 @@ export class BackendApi {
       server.onMessage(m => {
         const dto = JSON.parse(m.toString()) as ObjectChangeDto;
         if (dto.scope.scope.length < 1) {
+          console.log(`Sending WS message without scope: ${dto}`)
           ws.send(m);
+          return;
         }
         if (groups.includes(dto.scope.scope[0])) {
           ws.send(m);
+          return;
         }
+
+        console.log(`Suppressed WS message for ${JSON.stringify(dto.scope.scope)} - only ${JSON.stringify(groups)} is allowed`);
         // otherwise swallow the message - it is meant for filtered instance groups.
       });
     });
