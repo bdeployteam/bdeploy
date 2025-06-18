@@ -81,7 +81,8 @@ public class CentralUpdateResourceImpl implements CommonUpdateResource {
     private static OperatingSystem getTargetOsFromUpdate(Key version) {
         ScopedManifestKey scoped = ScopedManifestKey.parse(version);
         if (scoped == null) {
-            throw new IllegalStateException("Cannot determine OS from key " + version);
+            log.warn("Cannot determine OS from key {}", version);
+            return OperatingSystem.UNKNOWN;
         }
 
         return scoped.getOperatingSystem();

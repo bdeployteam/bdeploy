@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -28,6 +29,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.ZipHelper;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import jakarta.ws.rs.core.SecurityContext;
@@ -38,6 +40,9 @@ import jakarta.ws.rs.core.SecurityContext;
 public class UpdateHelper {
 
     public static final Version UPDATE_API_V1 = new Version(1, 0, 0, null);
+
+    public static final Version SERVER_OLD_VERSION = new Version(1, 0, 0, null);
+    public static final Version SERVER_LIMIT_VERSION = new Version(7, 7, 0, null);
 
     /**
      * Prefix for all update package {@link Key}s.
@@ -249,33 +254,43 @@ public class UpdateHelper {
      * @param context the security context identifying the initiating user.
      */
     public static void update(RemoteService svc, Collection<Key> keys, boolean cleanup, SecurityContext context) {
-        CommonUpdateResource root = ResourceProvider.getResource(svc, CommonUpdateResource.class, context);
+        CommonRootResource rootRsrc = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+        CommonUpdateResource updRsrc = ResourceProvider.getResource(svc, CommonUpdateResource.class, context);
 
         Version apiVersion;
+        Version serverVersion;
         try {
-            apiVersion = root.getUpdateApiVersion();
+            apiVersion = updRsrc.getUpdateApiVersion();
+            serverVersion = rootRsrc.getVersion();
         } catch (Exception e) {
-            // API version not (yet) supported, must be old BDeploy.
+            // API version (or server version) not (yet) supported, must be old BDeploy.
             if (log.isTraceEnabled()) {
-                log.trace("API version not (yet) supported", e);
+                log.trace("API or server version not (yet) supported", e);
             }
             apiVersion = UPDATE_API_V1;
+            serverVersion = SERVER_OLD_VERSION; // just use *any* older version, really. Not newer than 7.6.x
         }
 
         switch (apiVersion.getMajor()) {
             case 1:
                 // We need to sort the updates so that the running OS is the last one
-                keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
-                    // put own OS last.
-                    if (a.getOperatingSystem() != b.getOperatingSystem()) {
-                        return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
-                    }
-                    return a.getKey().toString().compareTo(b.getKey().toString());
-                }).forEach(k -> root.updateV1(k.getKey(), cleanup));
+                streamFilteredKeys(keys, serverVersion).forEach(k -> updRsrc.updateV1(k.getKey(), cleanup));
                 break;
             default:
                 throw new UnsupportedOperationException("Update API version not supported: " + apiVersion);
         }
+    }
+
+    static Stream<ScopedManifestKey> streamFilteredKeys(Collection<Manifest.Key> keys, Version serverVersion) {
+        return keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
+            // put own OS last.
+            if (a.getOperatingSystem() != b.getOperatingSystem()) {
+                return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
+            }
+            return a.getKey().toString().compareTo(b.getKey().toString());
+        }).filter(k -> {
+            return k.getOperatingSystem() != OperatingSystem.LINUX_AARCH64 || serverVersion.compareTo(SERVER_LIMIT_VERSION) >= 0;
+        });
     }
 
     public static Version currentApiVersion() {
