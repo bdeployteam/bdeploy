@@ -18,7 +18,9 @@
           @if (server.update?.updateAvailable) {
             <strong>Update available:</strong>
             <div class="flex justify-start items-center">
-              {{ version }}
+              <div class="flex-auto">
+                {{ origVersion }} ⭢ {{ version }}
+              </div>
               <mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
             </div>
           }

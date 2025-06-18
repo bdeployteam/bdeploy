@@ -63,6 +63,7 @@ export class ServerDetailsComponent implements OnInit {
   );
 
   protected version: string;
+  protected origVersion: string;
   protected server: ManagedMasterDto;
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
@@ -74,6 +75,7 @@ export class ServerDetailsComponent implements OnInit {
       }
       this.server = server;
       this.version = convert2String(server.update?.updateVersion);
+      this.origVersion = convert2String(server.update?.runningVersion);
     });
   }
 
