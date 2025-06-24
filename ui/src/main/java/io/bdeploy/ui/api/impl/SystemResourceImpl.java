@@ -175,9 +175,17 @@ public class SystemResourceImpl implements SystemResource {
                 req.version = InstanceTemplateHelper.getInitialProductVersionRegex(instance);
                 req.regex = true;
                 req.instanceTemplate = instance.templateName;
-                ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
-                if (result.productsToImport.stream().noneMatch(p -> p.key.equals(toImport.key))) {
-                    result.productsToImport.add(toImport);
+                try {
+                    ProductKeyWithSourceDto toImport = srr.getLatestProductVersion(req);
+                    if (result.productsToImport.stream().noneMatch(p -> p.key.equals(toImport.key))) {
+                        result.productsToImport.add(toImport);
+                    }
+                } catch (Exception e) {
+                    throw new WebApplicationException(
+                            "Cannot find any product with ID '" + instance.productId + "', version '" + req.version
+                                    + "' containing an instance template '" + instance.templateName
+                                    + "' in the current instance group and any available software repository",
+                            Status.EXPECTATION_FAILED);
                 }
             }
         }

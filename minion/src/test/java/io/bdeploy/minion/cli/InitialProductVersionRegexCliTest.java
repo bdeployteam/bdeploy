@@ -22,7 +22,7 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
 import io.bdeploy.ui.cli.RemoteSystemTool;
 import io.bdeploy.ui.dto.InstanceDto;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ClientErrorException;
 
 @ExtendWith(TestMinion.class)
 class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
@@ -77,7 +77,7 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
             throws IOException {
         createInstanceGroup(remote);
         createAndUploadProduct(remote, tmp);
-        assertThrows(NotFoundException.class, () -> applySystemTemplate(remote, tmp, r1, r2));
+        assertThrows(ClientErrorException.class, () -> applySystemTemplate(remote, tmp, r1, r2));
     }
 
     private void applySystemTemplate(RemoteService remote, Path tmp, String r1, String r2) {
@@ -149,7 +149,7 @@ class InitialProductVersionRegexCliTest extends BaseMinionCliTest {
             throws IOException {
         createInstanceGroup(remote);
         createAndUploadProduct(remote, tmp);
-        assertThrows(NotFoundException.class, () -> applyInstanceTemplate(remote, tmp, r1, r2));
+        assertThrows(ClientErrorException.class, () -> applyInstanceTemplate(remote, tmp, r1, r2));
     }
 
     private void applyInstanceTemplate(RemoteService remote, Path tmp, String r1, String r2) {
