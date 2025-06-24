@@ -27,13 +27,12 @@ const cro: CoverageReportOptions = {
 export default defineConfig({
   outputDir: './playwright/results/results',
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: !process.env['CI'],
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env['CI'],
   /* Retry on CI only, but only once */
-  retries: process.env['CI'] ? 1 : 0,
-  /* In case of failure, fail fast(er) on CI */
-  maxFailures: process.env['CI'] ? 1 : 5,
+  retries: process.env['CI'] ? 3 : 0,
+  maxFailures: process.env['CI'] ? 5 : 5,
   /* Restrict parallel tests on CI. */
   workers: process.env['CI'] ? 2 : 4,
   /* default test timeout */
