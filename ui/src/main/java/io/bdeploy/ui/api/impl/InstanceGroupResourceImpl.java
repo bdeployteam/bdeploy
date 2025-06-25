@@ -28,6 +28,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportObjectOperation;
+import io.bdeploy.bhive.op.InvalidateCachesOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.security.ScopedPermission;
@@ -550,5 +551,16 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 .orElseThrow(() -> new WebApplicationException("No product versions found for --key=" + req.key + " --version="
                         + req.version + " --group=" + req.groupOrRepo + " --regex=" + req.regex, Status.NOT_FOUND));
         return new ProductKeyWithSourceDto(req.groupOrRepo, latestProduct.key);
+    }
+
+    @Override
+    public void invalidateCaches(String group) {
+        BHive hive = registry.get(group);
+        if(hive == null) {
+            throw new WebApplicationException("Cannot find " + group, Status.EXPECTATION_FAILED);
+        }
+
+        hive.execute(new InvalidateCachesOperation());
+        ProductManifest.invalidateScanCache(hive);
     }
 }

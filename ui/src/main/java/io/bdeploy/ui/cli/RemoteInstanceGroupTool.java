@@ -54,6 +54,9 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
 
         @Help(value = "Automatically cleanup old/unused product versions")
         boolean autoCleanup() default true;
+
+        @Help("Invalidate any cached information related to storage in the given instance group")
+        String invalidateCachesOn();
     }
 
     public RemoteInstanceGroupTool() {
@@ -109,11 +112,14 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
                 table.row().cell(cfg.name).cell(cfg.title).cell(ics.size()).cell(cfg.description).build();
             }
             return table;
+        } else if(config.invalidateCachesOn() != null) {
+            client.invalidateCaches(config.invalidateCachesOn());
+            return createSuccess();
         } else if (config.delete() != null) {
             // don't use out() here, really make sure the warning appears on screen.
-            String confirmation = System.console().readLine(
-                    "Delete %1$s? This CANNOT be undone. Type the name of the Instance Group to delete to confirm: ",
-                    config.delete());
+            String confirmation = System.console()
+                    .readLine("Delete %1$s? This CANNOT be undone. Type the name of the Instance Group to delete to confirm: ",
+                            config.delete());
 
             if (confirmation != null && confirmation.equals(config.delete())) {
                 client.delete(config.delete());
@@ -124,7 +130,6 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         } else {
             return createNoOp();
         }
-
     }
 
 }

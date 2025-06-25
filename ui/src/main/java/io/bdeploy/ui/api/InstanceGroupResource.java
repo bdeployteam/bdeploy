@@ -146,4 +146,8 @@ public interface InstanceGroupResource {
     @POST
     @Path("/product-version/latest")
     public ProductKeyWithSourceDto getLatestProductVersion(LatestProductVersionRequestDto req);
+
+    @POST
+    @Path("/{group}/invalidate-caches")
+    public void invalidateCaches(@PathParam("group") String group);
 }
