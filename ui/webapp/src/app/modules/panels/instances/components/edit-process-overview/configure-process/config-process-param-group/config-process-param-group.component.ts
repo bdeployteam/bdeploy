@@ -41,7 +41,7 @@ import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-po
 import { ClipboardService } from 'src/app/modules/core/services/clipboard.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
-import { createLinkedValue, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
+import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -727,7 +727,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
     // search name, description, parameter, value.
     return (
-      [p.descriptor?.name, p.descriptor?.longDescription, p.descriptor?.parameter, p.value?.value]
+      [p.descriptor?.name, p.descriptor?.longDescription, p.descriptor?.parameter, p.value?.id, getPreRenderable(p.value?.value, p.descriptor?.type)]
         .join(' ')
         .toLowerCase()
         .indexOf(this.search.toLowerCase()) !== -1
