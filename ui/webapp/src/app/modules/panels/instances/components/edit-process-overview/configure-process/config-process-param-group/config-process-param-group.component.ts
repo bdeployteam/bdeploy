@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import {
   Component,
   EventEmitter,
@@ -125,7 +124,6 @@ interface ParameterGroup {
     ],
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
-  private readonly bop = inject(BreakpointObserver);
   private readonly systems = inject(SystemsService);
   private readonly searchService = inject(SearchService);
   private readonly snackbar = inject(MatSnackBar);
@@ -612,6 +610,11 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         this.edit.process$.value.start.parameters.splice(predecessorIndex + 1, 0, param.value);
       }
     }
+
+    this.updatePreview$.next(true);
+
+    // rebuild completions if parameters changed.
+    this.completions = this.buildCompletions();
   }
 
   protected doChangeParam(p: ParameterPair, val: LinkedValueConfiguration) {
@@ -627,7 +630,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   private doUpdateConditionals(p: ParameterPair) {
-    const id = p.descriptor ? p.descriptor.id : p.value.id;
+    const id = p.descriptor ? p.descriptor.id : p.value?.id;
+    if(!id) {
+      return;
+    }
     for (const grp of this.groups$.value) {
       for (const pair of grp.pairs) {
         // in case the value of a parameter is *referencing* this parameter, we need to update conditionals for the other parameter as well.

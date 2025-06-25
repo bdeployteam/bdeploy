@@ -221,6 +221,15 @@ function processParameter(
         break;
       }
     }
+
+    // if we failed to find a descriptor for the parameter (i.e. name is still not set), this is a custom parameter
+    // and we need to populate the fields with what we have.
+    if(!name) {
+      name = param.id;
+      description = `Custom parameter ${name}`;
+      preview = getPreRenderable(param.value);
+      expandMapper = (s: string) => doExpand(s, param.value, VariableType.STRING); // custom is always string.
+    }
   } else {
     // just for display - this is OK as value and expression, no need to expand.
     name = param.id;
