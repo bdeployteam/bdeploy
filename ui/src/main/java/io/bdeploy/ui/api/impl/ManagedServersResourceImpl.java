@@ -644,8 +644,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 continue; // OK. other server.
             }
 
-            // Not OK: instance no longer on server
-            centralHive.execute(new ManifestDeleteOperation().setToDelete(instanceKey));
+            // Not OK: instance no longer on server. We need to make sure to also delete the node manifests of that instance version!
+            InstanceManifest.delete(centralHive, instanceKey);
             removedInstances.add(instanceKey);
         }
 
