@@ -57,8 +57,8 @@ export class SoftwareDetailsComponent implements OnInit, OnDestroy {
       const sw = s.find((x) => x.version === version);
       this.software$.next(sw);
 
-      this.systemOs$.next(sw.system.map((x) => getAppOs(x)));
-      this.launcherOs$.next(sw.launcher.map((x) => getAppOs(x)));
+      this.systemOs$.next(sw.system.map((x) => getAppOs(x)).filter(o => !!o));
+      this.launcherOs$.next(sw.launcher.map((x) => getAppOs(x)).filter(o => !!o));
     });
   }
 
