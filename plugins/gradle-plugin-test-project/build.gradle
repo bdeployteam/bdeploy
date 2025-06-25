@@ -47,7 +47,7 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:33.4.8-jre'
 
-    testImplementation platform('org.junit:junit-bom:5.13.1')
+    testImplementation platform('org.junit:junit-bom:5.13.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

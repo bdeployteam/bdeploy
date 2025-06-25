@@ -5,11 +5,11 @@ plugins {
 dependencies {
     implementation(
         project(":common"),
-        'org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3',
+        'org.apache.logging.log4j:log4j-slf4j2-impl:2.25.0',
     )
 
     api(
-        'org.apache.logging.log4j:log4j-core:2.24.3',
+        'org.apache.logging.log4j:log4j-core:2.25.0',
     )
 }
 
