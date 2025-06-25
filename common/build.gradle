@@ -19,8 +19,8 @@ dependencies {
         'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.0',
         'com.fasterxml.jackson.module:jackson-module-blackbird:2.19.0',
         'org.apache.commons:commons-compress:1.27.1',
-        'org.jline:jline-terminal:3.30.4',
-        'org.jline:jline-terminal-jni:3.30.4',
+        'org.jline:jline-terminal:3.30.2',
+        'org.jline:jline-terminal-jni:3.30.2',
         
     )
 

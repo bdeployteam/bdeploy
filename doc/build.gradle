@@ -29,6 +29,7 @@ private buildRetype(NpxTask task, Directory dir) {
     configure(task) {
         enabled !rootProject.isAarch64()
         dependsOn npmInstall
+        dependsOn nodeSetup
         resolveVersion(task, dir)
         group = BasePlugin.BUILD_GROUP
 
