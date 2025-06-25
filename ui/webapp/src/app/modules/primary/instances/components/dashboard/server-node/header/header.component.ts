@@ -66,6 +66,9 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
       const state = states[this.node.nodeName];
 
       if (!state.monitoring) {
+        this.curve = [];
+        this.maxValue = 0;
+        this.hasVisiblePoint = false;
         return;
       }
 
