@@ -5,6 +5,7 @@
     #itemContainer
     [style.width.px]="attachTo.offsetWidth"
     class="overflow-y-auto flex flex-col p-1"
+    data-testid="content-assist-menu"
     >
     @for (match of matches; track match; let i = $index) {
       <div
