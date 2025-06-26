@@ -28,7 +28,7 @@ import io.bdeploy.common.util.ZipHelper;
 public class RollingFileAuditor implements Auditor {
 
     private static final Logger log = LoggerFactory.getLogger(RollingFileAuditor.class);
-    public static final String LOG_PATTERN = "%d{dd-HH:mm:ss.SSS} | %-5level | AUD/%-20X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
+    public static final String LOG_PATTERN = "%d{yyyy-MM-dd-HH:mm:ss.SSS} | %-5level | AUD/%-20X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
     public static final int LOG_MAX_INDEX = 3;
 
     public static final String LOG_TXT_FILENAME = "audit.log";
