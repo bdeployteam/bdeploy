@@ -10,6 +10,10 @@ export class AddInstancePanel extends BasePanel {
     super(page, 'app-add-instance');
   }
 
+  async getInstanceId() {
+    return this.getDialog().locator(':text(\'Creating instance\') strong').textContent();
+  }
+
   async fill(name: string, description: string, purpose: InstancePurpose,
              productName: string, productVersion: string, managedServer: string = null, versionRegex: string = null, autoStart = false,
              autoUninstall = true, system: string = null) {

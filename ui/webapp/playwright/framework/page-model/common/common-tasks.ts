@@ -51,8 +51,11 @@ export async function createInstance(page: Page, groupId: string, name: string, 
   await instances.goto();
 
   const panel = await instances.addInstance();
+  const id = await panel.getInstanceId();
   await panel.fill(name, description, purpose, productName, productVersion, managedServer, versionRegex, autoStart, autoUninstall, system);
 
   await panel.save();
   await expect(panel.getDialog()).not.toBeAttached();
+
+  return id;
 }
