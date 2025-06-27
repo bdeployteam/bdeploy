@@ -127,6 +127,8 @@ fi
 echo "Sonatype User: " "$(echo ${SONATYPE_USER} | sed 's/.\{1\}/& /g')"
 echo "GitHub User: " "$(echo ${GH_USER} | sed 's/.\{1\}/& /g')"
 
+GRADLE_ARG_ARR+=( "--stacktrace" )
+
 [[ -f "${GPG_PUBLIC_KEY}" ]] || die "Public key not found at ${GPG_PUBLIC_KEY}"
 [[ -f "${GPG_SECRET_KEY}" ]] || die "Public key not found at ${GPG_SECRET_KEY}"
 
