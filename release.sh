@@ -124,10 +124,6 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
     GRADLE_ARG_ARR+=( "-DlinuxAarch64jdk=${r}/linux-aarch64/${v}" )
 fi
 
-echo "Sonatype User: " "$(echo ${SONATYPE_USER} | sed 's/.\{1\}/& /g')"
-echo "GitHub User: " "$(echo ${GH_USER} | sed 's/.\{1\}/& /g')"
-echo "GPG Test:" "$(echo ${GPG_PASS} | sed 's/.\{1\}/& /g')"
-
 GRADLE_ARG_ARR+=( "--stacktrace" )
 
 [[ -f "${GPG_PUBLIC_KEY}" ]] || die "Public key not found at ${GPG_PUBLIC_KEY}"
