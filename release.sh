@@ -126,6 +126,7 @@ fi
 
 echo "Sonatype User: " "$(echo ${SONATYPE_USER} | sed 's/.\{1\}/& /g')"
 echo "GitHub User: " "$(echo ${GH_USER} | sed 's/.\{1\}/& /g')"
+echo "GPG Test:" "$(echo ${GPG_PASS} | sed 's/.\{1\}/& /g')"
 
 GRADLE_ARG_ARR+=( "--stacktrace" )
 
@@ -136,12 +137,12 @@ GRADLE_ARG_ARR+=( "--stacktrace" )
 [[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x runUitests "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots "${GRADLE_ARG_ARR[@]}"
 
-export JRELEASER_GPG_PASSPHRASE=$GPG_PASS
-export JRELEASER_GPG_PUBLIC_KEY=$GPG_PUBLIC_KEY
-export JRELEASER_GPG_SECRET_KEY=$GPG_SECRET_KEY
+export JRELEASER_GPG_PASSPHRASE="$GPG_PASS"
+export JRELEASER_GPG_PUBLIC_KEY="$GPG_PUBLIC_KEY"
+export JRELEASER_GPG_SECRET_KEY="$GPG_SECRET_KEY"
 
-export JRELEASER_MAVENCENTRAL_USERNAME=$SONATYPE_USER
-export JRELEASER_MAVENCENTRAL_PASSWORD=$SONATYPE_TOKEN
+export JRELEASER_MAVENCENTRAL_USERNAME="$SONATYPE_USER"
+export JRELEASER_MAVENCENTRAL_PASSWORD="$SONATYPE_TOKEN"
 
 [[ -z "${NO_MAVEN}" ]] && ./gradlew publish jreleaserDeploy "${GRADLE_ARG_ARR[@]}"
 
