@@ -126,6 +126,8 @@ fi
 
 GRADLE_ARG_ARR+=( "--stacktrace" )
 
+export NO_MAVEN=yes
+
 [[ -f "${GPG_PUBLIC_KEY}" ]] || die "Public key not found at ${GPG_PUBLIC_KEY}"
 [[ -f "${GPG_SECRET_KEY}" ]] || die "Public key not found at ${GPG_SECRET_KEY}"
 
