@@ -99,7 +99,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
         )
     fi
     v=$(find "${r}/linux-x64/" -maxdepth 1 -type d -not -name 'linux-x64' -name '[^.]?*' -printf %f -quit)
-    GRADLE_ARG_ARR+=( "-Dlinux_x64jdk=${r}/linux-x64/${v}" )
+    GRADLE_ARG_ARR+=( "-DlinuxX64jdk=${r}/linux-x64/${v}" )
 
     if [[ ! -d "${r}/win-x64" ]]; then
         mkdir -p "${r}/win-x64"
@@ -110,7 +110,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
         )
     fi
     v=$(find "${r}/win-x64/" -maxdepth 1 -type d -not -name 'win-x64' -name '[^.]?*' -printf %f -quit)
-    GRADLE_ARG_ARR+=( "-Dwin_x64jdk=${r}/win-x64/${v}" )
+    GRADLE_ARG_ARR+=( "-DwinX64jdk=${r}/win-x64/${v}" )
 
     if [[ ! -d "${r}/linux-aarch64" ]]; then
         mkdir -p "${r}/linux-aarch64"
@@ -121,7 +121,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
         )
     fi
     v=$(find "${r}/linux-aarch64/" -maxdepth 1 -type d -not -name 'linux-aarch64' -name '[^.]?*' -printf %f -quit)
-    GRADLE_ARG_ARR+=( "-Dlinux_aarch64jdk=${r}/linux-aarch64/${v}" )
+    GRADLE_ARG_ARR+=( "-DlinuxAarch64jdk=${r}/linux-aarch64/${v}" )
 fi
 
 ./gradlew setVersion -PtargetVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
