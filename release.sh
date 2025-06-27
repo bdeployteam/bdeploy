@@ -124,6 +124,9 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
     GRADLE_ARG_ARR+=( "-DlinuxAarch64jdk=${r}/linux-aarch64/${v}" )
 fi
 
+[[ -f "${GPG_PUBLIC_KEY}" ]] || die "Public key not found at ${GPG_PUBLIC_KEY}"
+[[ -f "${GPG_SECRET_KEY}" ]] || die "Public key not found at ${GPG_SECRET_KEY}"
+
 ./gradlew setVersion -PtargetVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
 [[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x runUitests "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots "${GRADLE_ARG_ARR[@]}"
