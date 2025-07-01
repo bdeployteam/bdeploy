@@ -140,7 +140,7 @@ export JRELEASER_GPG_SECRET_KEY="$GPG_SECRET_KEY"
 export JRELEASER_MAVENCENTRAL_USERNAME="$SONATYPE_USER"
 export JRELEASER_MAVENCENTRAL_PASSWORD="$SONATYPE_TOKEN"
 
-[[ -z "${NO_MAVEN}" ]] && ./gradlew publish jreleaserDeploy "${GRADLE_ARG_ARR[@]}"
+[[ -z "${NO_MAVEN}" ]] && ./gradlew publish jreleaserUpload "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version doc
 git commit -m "Release $REL_VER"
