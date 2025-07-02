@@ -546,7 +546,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             SortedMap<Key, ObjectId> launchers = rbh.getManifestInventory(launcherKey);
             for (Key launcher : launchers.keySet()) {
                 ScopedManifestKey smk = ScopedManifestKey.parse(launcher);
-                if (smk.getOperatingSystem() != runningOs) {
+                if (smk == null || smk.getOperatingSystem() != runningOs) {
                     continue;
                 }
 
