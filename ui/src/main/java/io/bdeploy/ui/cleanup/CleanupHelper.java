@@ -27,7 +27,6 @@ import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -90,11 +89,15 @@ public class CleanupHelper {
         // master cleanup (clean instance groups, skip otherwise (software repositories))
         for (String group : registry.getAll().keySet()) {
             log.info("Checking group {}...", group);
-            CleanupInstanceGroupContext context = new CleanupInstanceGroupContext(group, registry.get(group), vss);
-            if (context.getInstanceGroupConfiguration() != null) {
-                CleanupGroup cleanupGroup = calculateInstanceGroup(context);
-                groups.add(cleanupGroup);
-                instanceNodeManifestsToKeep.addAll(context.getAllInstanceNodeManifestsToKeep());
+            try {
+                CleanupInstanceGroupContext context = new CleanupInstanceGroupContext(group, registry.get(group), vss);
+                if (context.getInstanceGroupConfiguration() != null) {
+                    CleanupGroup cleanupGroup = calculateInstanceGroup(context);
+                    groups.add(cleanupGroup);
+                    instanceNodeManifestsToKeep.addAll(context.getAllInstanceNodeManifestsToKeep());
+                }
+            } catch (Exception e) {
+                log.warn("Unexpected Exception while calculating cleanup for {}", group, e);
             }
         }
 
@@ -326,9 +329,8 @@ public class CleanupHelper {
                     // delete applications in product: this assumes that no single application version is used in multiple products.
                     for (Key appKey : pm.getApplications()) {
                         context.addManifest4deletion(appKey);
-                        ApplicationManifest am = ApplicationManifest.of(context.getHive(), appKey, pm);
                         actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(), "Delete Application \""
-                                + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
+                                + appKey.getName() + "\", version \"" + appKey.getTag() + "\""));
                     }
                 }
             }
