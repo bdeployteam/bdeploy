@@ -252,6 +252,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                         // applications /must/ follow the ScopedManifestKey rules.
                         ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+                        if (smk == null) {
+                            log.error("Manifest for application '" + app.application
+                                    + "' could not be found - it will not be installed");
+                            continue;
+                        }
 
                         // the dependency must be here. it has been pushed here with the product,
                         // since the product /must/ reference all direct dependencies.
@@ -358,6 +363,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             // applications /must/ follow the ScopedManifestKey rules.
             ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+            if (smk == null) {
+                log.error("Manifest for application '" + app.application + "' could not be found - it will not be installed");
+                continue;
+            }
 
             // the dependency must be here. it has been pushed here with the product,
             // since the product /must/ reference all direct dependencies.
@@ -1069,6 +1078,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // application key MUST be a ScopedManifestKey. dependencies /must/ be present
         ScopedManifestKey smk = ScopedManifestKey.parse(cfg.appConfig.application);
+        if (smk == null) {
+            throw new WebApplicationException("Cannot identify target application: " + cfg.appConfig.application,
+                    Status.EXPECTATION_FAILED);
+        }
         cfg.resolvedRequires.addAll(
                 new LocalDependencyFetcher().fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
 

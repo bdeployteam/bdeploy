@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
@@ -378,8 +379,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
         BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
         ManifestListOperation operation = new ManifestListOperation().setManifestName(manifestName);
         Set<Key> result = defaultHive.execute(operation);
-        return result.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getTag().equals(runningVersion))
-                .collect(Collectors.toSet());
+        return result.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull)
+                .filter(smk -> smk.getTag().equals(runningVersion)).collect(Collectors.toSet());
     }
 
     @Override

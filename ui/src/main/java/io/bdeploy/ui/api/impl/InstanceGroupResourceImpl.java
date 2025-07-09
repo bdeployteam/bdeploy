@@ -404,6 +404,11 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             clientApp.id = appConfig.id;
             clientApp.description = appConfig.name;
             ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
+            if (scopedKey == null) {
+                log.error("Manifest for application '" + appConfig.application
+                        + "' could not be found - it will not be included in the list");
+                continue;
+            }
             clientApp.os = scopedKey.getOperatingSystem();
             if (os != null && clientApp.os != os) {
                 continue;
@@ -556,7 +561,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     @Override
     public void invalidateCaches(String group) {
         BHive hive = registry.get(group);
-        if(hive == null) {
+        if (hive == null) {
             throw new WebApplicationException("Cannot find " + group, Status.EXPECTATION_FAILED);
         }
 

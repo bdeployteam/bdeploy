@@ -289,6 +289,10 @@ public class InstanceNodeController {
 
             // applications /must/ follow the ScopedManifestKey rules.
             ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+            if (smk == null) {
+                log.error("Manifest for application '" + app.application + "' could not be found - it will not be installed");
+                continue;
+            }
 
             // the dependency must be here. it has been pushed here with the configuration.
             // all dependencies go to the global pool

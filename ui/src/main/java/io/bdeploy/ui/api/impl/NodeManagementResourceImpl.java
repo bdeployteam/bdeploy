@@ -3,6 +3,7 @@ package io.bdeploy.ui.api.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -76,7 +77,7 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
         MasterRootResource root = ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context);
 
         // We need to sort the updates so that the running OS is the last one
-        keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
+        keys.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull).sorted((a, b) -> {
             // put own OS last.
             if (a.getOperatingSystem() != b.getOperatingSystem()) {
                 return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;

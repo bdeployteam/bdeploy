@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -282,7 +283,7 @@ public class UpdateHelper {
     }
 
     static Stream<ScopedManifestKey> streamFilteredKeys(Collection<Manifest.Key> keys, Version serverVersion) {
-        return keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
+        return keys.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull).sorted((a, b) -> {
             // put own OS last.
             if (a.getOperatingSystem() != b.getOperatingSystem()) {
                 return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;

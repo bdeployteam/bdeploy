@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
@@ -483,8 +484,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                     instanceKeys.stream().map(InstanceManifest::getIdFromKey).toList(), managedSystems, managedSystemIds);
 
             // 5. Determine which of the instances and systems of the central server no longer exist on the managed server and delete them.
-            syncRemoveInstancesAndSystems(managedServerName, centralHive, instanceKeys, managedSystemIds,
-                    removedInstances, removedSystems);
+            syncRemoveInstancesAndSystems(managedServerName, centralHive, instanceKeys, managedSystemIds, removedInstances,
+                    removedSystems);
 
             // from here on we only want the LATEST key for each instance. The map contains the name of the key for uniqueness along with
             // the key which has the highest numeric tag.
@@ -707,7 +708,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         try (RemoteBHive rbh = RemoteBHive.forService(svc, null, new ActivityReporter.Null())) {
             SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory(SoftwareUpdateResource.BDEPLOY_MF_NAME,
                     SoftwareUpdateResource.LAUNCHER_MF_NAME);
-            inventory.keySet().stream().forEach(key -> remoteVersions.add(ScopedManifestKey.parse(key)));
+            inventory.keySet().stream().map(ScopedManifestKey::parse).filter(Objects::nonNull)
+                    .forEach(scopedKey -> remoteVersions.add(scopedKey));
         }
 
         // Determine what is available in our hive
@@ -796,7 +798,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
         ManifestListOperation operation = new ManifestListOperation().setManifestName(manifestName);
         Set<Key> result = defaultHive.execute(operation);
-        return result.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getTag().equals(runningVersion))
+        return result.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull)
+                .filter(smk -> smk.getTag().equals(runningVersion))
                 .collect(Collectors.toSet());
     }
 

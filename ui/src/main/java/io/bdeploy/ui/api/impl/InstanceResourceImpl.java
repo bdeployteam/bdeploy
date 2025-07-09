@@ -839,6 +839,11 @@ public class InstanceResourceImpl implements InstanceResource {
 
             // Determine the target OS, and build the according installer.
             ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
+            if (applicationKey == null) {
+                throw new WebApplicationException("Cannot identify target application: " + appConfig.application,
+                        Status.EXPECTATION_FAILED);
+            }
+
             OperatingSystem applicationOs = applicationKey.getOperatingSystem();
 
             // Determine latest version of launcher

@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -110,8 +111,8 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         }
 
         // check if we have all required update packages for each OS.
-        Set<OperatingSystem> provided = target.stream().map(x -> ScopedManifestKey.parse(x).getOperatingSystem())
-                .collect(Collectors.toSet());
+        Set<OperatingSystem> provided = target.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull)
+                .map(ScopedManifestKey::getOperatingSystem).collect(Collectors.toSet());
         for (var reqOs : required) {
             if (!provided.contains(reqOs)) {
                 throw new WebApplicationException(
@@ -344,8 +345,9 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
      */
     public ScopedManifestKey getNewestLauncher(OperatingSystem os) {
         List<Key> versions = getLauncherVersions();
-        return versions.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getOperatingSystem() == os)
-                .filter(SoftwareUpdateResourceImpl::matchesRunningVersion).reduce((first, second) -> second).orElse(null);
+        return versions.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull)
+                .filter(smk -> smk.getOperatingSystem() == os).filter(SoftwareUpdateResourceImpl::matchesRunningVersion)
+                .reduce((first, second) -> second).orElse(null);
     }
 
     /** Returns whether or not this version matches the running version */

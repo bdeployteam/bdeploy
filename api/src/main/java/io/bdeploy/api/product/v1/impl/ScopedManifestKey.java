@@ -29,7 +29,7 @@ public class ScopedManifestKey {
 
     /**
      * @param key a {@link Key} in a format understandable as {@link ScopedManifestKey}.
-     * @return a {@link ScopedManifestKey}
+     * @return a {@link ScopedManifestKey}, or <code>null</code> if the key could not be parsed
      */
     public static ScopedManifestKey parse(Manifest.Key key) {
         String name = key.getName();
