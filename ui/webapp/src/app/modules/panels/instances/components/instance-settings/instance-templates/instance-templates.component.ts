@@ -1,4 +1,3 @@
-import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, inject, OnDestroy, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material/stepper';
 import { cloneDeep } from 'lodash-es';
@@ -88,36 +87,38 @@ const tplColDetails: BdDataColumn<TemplateMessage, string> = {
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private readonly products = inject(ProductsService);
   private readonly edit = inject(ProcessEditService);
+  private readonly instanceEdit = inject(InstanceEditService);
   protected readonly servers = inject(ServersService);
-  protected readonly instanceEdit = inject(InstanceEditService);
+
+  protected readonly msgColumns: BdDataColumn<TemplateMessage, unknown>[] = [tplColName, tplColDetails];
 
   protected loading$ = new BehaviorSubject<boolean>(false);
+  protected messages: TemplateMessage[];
 
-  protected records: FlattenedInstanceTemplateConfiguration[];
-  protected recordsLabel: string[];
+  protected instanceTemplates: FlattenedInstanceTemplateConfiguration[];
+  protected instanceTemplateLabels: string[];
 
   protected template: FlattenedInstanceTemplateConfiguration;
-  protected variables: Record<string, string>; // key is var name, value is value.
-  protected groups: Record<string, string>; // key is group name, value is target node name.
-  protected messages: TemplateMessage[];
-  protected readonly msgColumns: BdDataColumn<TemplateMessage, unknown>[] = [tplColName, tplColDetails];
-  protected areSelectedGroupsValid = false;
-  protected groupSelectionNextButtonDisabledReason = signal<string>(null);
-  protected hasAllVariables = false;
-  protected firstStepCompleted = false;
-  protected secondStepCompleted = false;
-  protected requiredVariables: TemplateVariable[] = [];
-
   protected groupNodes: Record<string, string[]>;
   protected groupLabels: Record<string, string[]>;
+
+  protected groups: Record<string, string>; // key is group name, value is target node name
+  protected areAssignedGroupsValid = false;
+  protected groupSelectionNextButtonTooltip = signal<string>(null);
+  protected finalConfirmButtonTooltip = signal<string>(null);
+
+  protected allRequiredVariables: TemplateVariable[] = [];
+  protected variables: Record<string, string>; // key is var name, value is value
+  protected hasAllRequiredVariables = false;
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private readonly tb: BdDialogToolbarComponent;
   @ViewChild('msgTemplate') private readonly tplMessages: TemplateRef<unknown>;
-  @ViewChild('stepper', { static: false }) private readonly myStepper: MatStepper;
+  @ViewChild('stepper', { static: false }) protected readonly stepper: MatStepper;
 
-  private product: ProductDto;
   private subscription: Subscription;
+  private product: ProductDto;
+  private directlyUsedVariables: TemplateVariable[] = [];
 
   ngOnInit() {
     this.subscription = combineLatest([this.instanceEdit.state$, this.products.products$]).subscribe(
@@ -127,13 +128,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         );
 
         if (!prod) {
-          this.records = [];
+          this.instanceTemplates = [];
           return;
         }
 
         this.product = prod;
-        this.records = prod.instanceTemplates ? prod.instanceTemplates : [];
-        this.recordsLabel = this.records.map((record) => record.name);
+        this.instanceTemplates = prod.instanceTemplates ? prod.instanceTemplates : [];
+        this.instanceTemplateLabels = this.instanceTemplates.map((record) => record.name);
       }
     );
   }
@@ -142,38 +143,54 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  private getNodesFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
-    if (group.type === ApplicationType.CLIENT) {
-      return [null, CLIENT_NODE_NAME];
-    } else {
-      return [
-        null,
-        ...this.instanceEdit.state$.value.config.nodeDtos.map((n) => n.nodeName).filter((n) => n !== CLIENT_NODE_NAME),
-      ];
-    }
-  }
-
-  private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
-    const nodeValues = this.getNodesFor(group);
-
-    return nodeValues.map((n) => {
-      if (n === null) {
-        return '(skip)';
-      } else if (n === CLIENT_NODE_NAME) {
-        return 'Apply to Client Applications';
-      } else {
-        return 'Apply to ' + n;
-      }
+  protected selectTemplate() {
+    this.groupNodes = {};
+    this.groupLabels = {};
+    this.template.groups.forEach((group) => {
+      this.groupNodes[group.name] =
+        group.type === ApplicationType.CLIENT
+          ? [null, CLIENT_NODE_NAME]
+          : [
+              null,
+              ...this.instanceEdit.state$.value.config.nodeDtos
+                .map((nodeDto) => nodeDto.nodeName)
+                .filter((nodeName) => nodeName !== CLIENT_NODE_NAME),
+            ];
+      this.groupLabels[group.name] = this.groupNodes[group.name].map((n) => {
+        switch (n) {
+          case null:
+            return '(skip)';
+          case CLIENT_NODE_NAME:
+            return 'Apply to Client Applications';
+          default:
+            return 'Apply to ' + n;
+        }
+      });
     });
+
+    this.groups = {};
+    this.areAssignedGroupsValid = false;
+    this.groupSelectionNextButtonTooltip.set('At least 1 group must be selected');
+
+    this.directlyUsedVariables = [];
+    if (this.template.directlyUsedTemplateVars?.length) {
+      this.directlyUsedVariables.push(...this.template.directlyUsedTemplateVars);
+    }
+    this.allRequiredVariables = [];
+    this.variables = {};
+    this.hasAllRequiredVariables = false;
+
+    this.stepper.selected.completed = !!this.template;
+    this.stepper.next();
   }
 
-  protected validateSelectedGroups() {
-    let anyGroupSelected = false;
+  protected assignGroup() {
+    let anyGroupAssigned = false;
     const invalidGroups: string[] = [];
     for (const k of Object.keys(this.groups)) {
       const v = this.groups[k];
       if (v !== null && v !== undefined) {
-        anyGroupSelected = true;
+        anyGroupAssigned = true;
 
         // check if group contains only valid applications
         appLoop: for (const app of this.template.groups.find((group) => group.name === k).applications) {
@@ -204,12 +221,12 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (!anyGroupSelected) {
-      this.areSelectedGroupsValid = false;
-      this.groupSelectionNextButtonDisabledReason.set('At least 1 group must be selected');
+    if (!anyGroupAssigned) {
+      this.areAssignedGroupsValid = false;
+      this.groupSelectionNextButtonTooltip.set('At least 1 group must be selected');
     } else if (invalidGroups.length !== 0) {
-      this.areSelectedGroupsValid = false;
-      this.groupSelectionNextButtonDisabledReason.set(
+      this.areAssignedGroupsValid = false;
+      this.groupSelectionNextButtonTooltip.set(
         invalidGroups.length === 1
           ? "The group '" +
               invalidGroups[0] +
@@ -219,48 +236,45 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
               "' contain invalid application templates and therefore cannot be selected"
       );
     } else {
-      this.areSelectedGroupsValid = true;
-      this.groupSelectionNextButtonDisabledReason.set(null);
+      this.groupSelectionNextButtonTooltip.set('Proceed to variable configuration');
+      this.areAssignedGroupsValid = true;
     }
+
+    this.allRequiredVariables = [...this.directlyUsedVariables];
+    for (const grp of Object.keys(this.groups)) {
+      const grpDef = this.template.groups.find((g) => g.name === grp);
+      if (!grpDef || !this.groups[grp] || !grpDef.groupVariables?.length) {
+        continue;
+      }
+      for (const v of grpDef.groupVariables) {
+        if (this.allRequiredVariables.findIndex((t) => t.id === v.id) === -1) {
+          this.allRequiredVariables.push(v);
+        }
+      }
+    }
+
+    this.variables = {};
+
+    for (const requiredVariable of this.allRequiredVariables) {
+      this.variables[requiredVariable.id] = requiredVariable.defaultValue;
+      if (requiredVariable.defaultValue === null && requiredVariable.type === TemplateVariableType.BOOLEAN) {
+        this.variables[requiredVariable.id] = 'false';
+      }
+    }
+    this.checkVariables();
   }
 
-  protected validateHasAllVariables() {
-    if (!this.template) {
-      return;
-    }
-    for (const v of this.requiredVariables) {
-      const value = this.variables[v.id];
+  protected checkVariables() {
+    for (const requiredVariable of this.allRequiredVariables) {
+      const value = this.variables[requiredVariable.id];
       if (value === '' || value === null || value === undefined) {
-        this.hasAllVariables = false;
+        this.hasAllRequiredVariables = false;
+        this.finalConfirmButtonTooltip.set(`Required variable '${requiredVariable.name}' is still missing`);
         return;
       }
     }
-    this.hasAllVariables = true;
-  }
-
-  protected selectTemplate() {
-    // setup things required by the templates.
-    this.groupNodes = {};
-    this.groupLabels = {};
-    this.template.groups.forEach((group) => {
-      this.groupNodes[group.name] = this.getNodesFor(group);
-      this.groupLabels[group.name] = this.getLabelsFor(group);
-    });
-    this.groups = {};
-
-    this.validateSelectedGroups();
-    this.firstStepCompleted = true;
-    this.goNext();
-  }
-
-  protected goToAssignVariableStep() {
-    this.secondStepCompleted = true;
-    this.goNext();
-  }
-
-  private goNext() {
-    this.myStepper.selected.completed = true;
-    this.myStepper.next();
+    this.finalConfirmButtonTooltip.set('Apply template with current configuration');
+    this.hasAllRequiredVariables = true;
   }
 
   protected applyStageFinal() {
@@ -382,8 +396,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     combineLatest(observables)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe(() => {
-        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) => this.cleanProcessControlGroup(n));
-
+        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) => {
+          // Removes empty process control groups from the configuration
+          n.nodeConfiguration.controlGroups = n.nodeConfiguration.controlGroups.filter((x) => !!x.processOrder?.length);
+        });
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
         if (this.messages.length) {
@@ -541,67 +557,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           node.nodeConfiguration.controlGroups.push(pcgTempl);
         }
       }
-    }
-  }
-
-  /**
-   * Removes empty process control groups from the configuration.
-   */
-  private cleanProcessControlGroup(node: InstanceNodeConfigurationDto) {
-    node.nodeConfiguration.controlGroups = node.nodeConfiguration.controlGroups.filter((n) => !!n.processOrder?.length);
-  }
-
-  protected onStepSelectionChange(event: StepperSelectionEvent) {
-    switch (event.selectedIndex) {
-      case 0:
-        this.groups = {};
-        this.firstStepCompleted = false;
-        this.secondStepCompleted = false;
-
-        this.template = null;
-        this.groupLabels = null;
-        this.groupNodes = null;
-        break;
-      case 1:
-        this.secondStepCompleted = false;
-        this.requiredVariables = [];
-        this.hasAllVariables = false;
-        break;
-      case 2:
-        this.variables = {};
-        this.requiredVariables = [];
-
-        if (this.template.directlyUsedTemplateVars?.length) {
-          this.requiredVariables.push(...this.template.directlyUsedTemplateVars);
-        }
-
-        for (const grp of Object.keys(this.groups)) {
-          const grpDef = this.template.groups.find((g) => g.name === grp);
-          if (!grpDef || !this.groups[grp] || !grpDef.groupVariables?.length) {
-            continue;
-          }
-
-          for (const v of grpDef.groupVariables) {
-            if (this.requiredVariables.findIndex((t) => t.id === v.id) === -1) {
-              // not yet there, add.
-              this.requiredVariables.push(v);
-            }
-          }
-        }
-
-        if (this.requiredVariables.length) {
-          for (const v of this.requiredVariables) {
-            this.variables[v.id] = v.defaultValue;
-            if (v.defaultValue === null && v.type === TemplateVariableType.BOOLEAN) {
-              this.variables[v.id] = 'false';
-            }
-          }
-          this.validateHasAllVariables();
-        } else {
-          this.hasAllVariables = true;
-        }
-
-        break;
     }
   }
 }
