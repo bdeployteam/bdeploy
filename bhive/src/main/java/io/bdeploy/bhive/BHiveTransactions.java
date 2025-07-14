@@ -185,7 +185,8 @@ public class BHiveTransactions {
                     } else if (Files.isDirectory(p)) {
                         // TX PID does NOT exist, this is either a *very* old or completely outdated transaction, or
                         // there is a race with whoever wants to create the TX PID file.
-                        if (retries++ <= 300) {
+                        if (retries < 300) {
+                            retries++;
                             Threads.sleep(10);
                             continue; // try again.
                         }
