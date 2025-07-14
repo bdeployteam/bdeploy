@@ -30,7 +30,7 @@ test('S005 Apply instance template', async ({ standalone }, testInfo) => {
   const chatInstanceDashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Chat Instance');
   await chatInstanceDashboard.goto();
 
-  let chatInstanceConfig = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Chat Instance');
+  const chatInstanceConfig = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Chat Instance');
   await chatInstanceConfig.goto();
 
   const chatInstanceSettings = await chatInstanceConfig.getSettingsPanel();
@@ -61,7 +61,7 @@ test('S005 Apply instance template', async ({ standalone }, testInfo) => {
   const secondInstanceDashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Product 2 Instance');
   await secondInstanceDashboard.goto();
 
-  let secondInstanceConfig = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Product 2 Instance');
+  const secondInstanceConfig = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Product 2 Instance');
   await secondInstanceConfig.goto();
 
   const secondInstanceSettings = await  secondInstanceConfig.getSettingsPanel();
