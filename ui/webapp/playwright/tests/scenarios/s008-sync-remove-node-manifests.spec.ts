@@ -35,7 +35,7 @@ test('S008 Sync deleted instance version', async ({ central, managed }, testInfo
   const instanceConfig = new InstanceConfigurationPage(central, groupId(testInfo), 'Demo Instance');
   await instanceConfig.goto();
 
-  let addProcessPanel = await instanceConfig.getAddProcessPanel('master');
+  const addProcessPanel = await instanceConfig.getAddProcessPanel('master');
   await addProcessPanel.addProcess('Server Application');
   await instanceConfig.waitForValidation();
   await instanceConfig.save();

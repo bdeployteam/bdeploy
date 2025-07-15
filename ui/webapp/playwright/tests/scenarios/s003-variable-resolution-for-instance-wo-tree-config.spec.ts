@@ -63,7 +63,7 @@ test('S003 Variable resolution for instance without tree config', async ({ stand
   await varPanel.apply();
 
   /*--- Add process and configure parameters with link expression ---*/
-  let process = await config.getAddProcessPanel('master');
+  const process = await config.getAddProcessPanel('master');
   const processName = 'Chat Application';
   await process.addProcess(processName);
   const processSettings = await config.getProcessSettingsPanel('master', processName);

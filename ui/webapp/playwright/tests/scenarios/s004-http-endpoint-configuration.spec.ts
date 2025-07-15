@@ -36,7 +36,7 @@ test('S004 Application Http Endpoints Configuration', async ({ standalone }, tes
 
   /*--- Add process that uses the endpoint and navigate to the endpoint config ---*/
   const processName = 'Server With Sleep';
-  let process = await config.getAddProcessPanel('master');
+  const process = await config.getAddProcessPanel('master');
   await process.addProcessTemplate(processName);
   const varDlg = process.getVariableTemplatePopup();
   await varDlg.confirm();

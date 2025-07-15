@@ -28,10 +28,10 @@ test('S007 Create and edit process', async ({ standalone }, testInfo) => {
   const chatInstanceDashboard = new InstanceDashboardPage(standalone, groupId(testInfo), 'Chat Instance');
   await chatInstanceDashboard.goto();
 
-  let instanceConfig = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Chat Instance');
+  const instanceConfig = new InstanceConfigurationPage(standalone, groupId(testInfo), 'Chat Instance');
   await instanceConfig.goto();
 
-  let addProcessPanel = await instanceConfig.getAddProcessPanel('master');
+  const addProcessPanel = await instanceConfig.getAddProcessPanel('master');
   await addProcessPanel.shouldHaveOptionCount(5); // 1 app and 4 templates
   /*--- Check which template can and cannot be selected ---*/
   await addProcessPanel.checkTemplateCanBeSelected("App with Https");
