@@ -428,6 +428,7 @@ public class ProcessController {
     private void doStart(boolean resetRecoverCount) {
         // Do nothing if already started
         if (processState.isRunning()) {
+            logger.log(l -> l.info("Skipping start of {} because it is already running", processConfig.name));
             return;
         }
         logger.log(l -> l.info("Starting {}", processConfig.name));
