@@ -1,6 +1,9 @@
 package io.bdeploy.launcher.cli;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -84,20 +87,27 @@ public class ClientCleanup {
 
         // Cleanup hive and pool
         log.info("Removing stale pooled applications that are not used any more...");
+        Path graveyardDir = lpp.get(SpecialDirectory.GRAVEYARD);
+        try {
+            Files.createDirectories(graveyardDir);
+        } catch (IOException e) {
+            log.error("Failed to create graveyard directory at {}", graveyardDir, e);
+            return;
+        }
         Path poolDir = lpp.get(SpecialDirectory.MANIFEST_POOL);
         for (Manifest.Key key : availableApps) {
             log.info("Deleting {}", key);
 
-            // File-Locks could prevent that we can delete the folder
-            // thus we first try to rename and then delete
+            // File-Locks could prevent that we can delete the folder, thus we just move it away and delete it later
             Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
             if (PathHelper.exists(pooledPath)) {
-                Path tmpPath = pooledPath.getParent().resolve(pooledPath.getFileName() + "_delete");
+                Path tmpPath = graveyardDir.resolve(pooledPath.getFileName());
                 try {
-                    PathHelper.moveAndDelete(pooledPath, tmpPath);
+                    PathHelper.moveRetry(pooledPath, tmpPath, StandardCopyOption.ATOMIC_MOVE,
+                            StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
-                    log.warn("Unable to delete unused pooled application.", e);
-                    return;
+                    log.warn("Failed to move unused pooled application to graveyard: {}", key, e);
+                    continue;
                 }
             }
 
@@ -151,12 +161,13 @@ public class ClientCleanup {
         }
     }
 
-    /** Cleans the pool, scripts and apps directory */
+    /** Cleans the pool, scripts, apps directory and graveyard */
     private void doCleanup() {
         deleteDirIfEmpty(lpp.get(SpecialDirectory.MANIFEST_POOL));
         deleteDirIfEmpty(lpp.get(SpecialDirectory.START_SCRIPTS));
         deleteDirIfEmpty(lpp.get(SpecialDirectory.FILE_ASSOC_SCRIPTS));
         deleteDirIfEmpty(lpp.get(SpecialDirectory.APPS));
+        PathHelper.deleteRecursiveRetry(lpp.get(SpecialDirectory.GRAVEYARD));
     }
 
     private static boolean deleteDirIfEmpty(Path path) {

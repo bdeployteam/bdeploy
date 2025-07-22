@@ -23,6 +23,8 @@ public class LauncherPathProvider {
         APPS("apps"),
         /** <i>[BDEPLOY_HOME]/bhive</i> */
         BHIVE("bhive"),
+        /** <i>[BDEPLOY_HOME]/graveyard</i> */
+        GRAVEYARD("graveyard"),
         /** <i>[BDEPLOY_HOME]/launcher</i> */
         LAUNCHER("launcher"),
         /** <i>[BDEPLOY_HOME]/logs</i> */
@@ -107,7 +109,7 @@ public class LauncherPathProvider {
     public Path get(SpecialDirectory dir, String applicationId) {
         Path result = switch (dir) {
             case HOME -> homeDir;
-            case APPS, BHIVE, LAUNCHER, LOGS -> get(SpecialDirectory.HOME, applicationId).resolve(dir.getDirName());
+            case APPS, BHIVE, GRAVEYARD, LAUNCHER, LOGS -> get(SpecialDirectory.HOME, applicationId).resolve(dir.getDirName());
             case MANIFEST_POOL, START_SCRIPTS, FILE_ASSOC_SCRIPTS -> get(SpecialDirectory.APPS, applicationId)
                     .resolve(dir.getDirName());
             case APP -> get(SpecialDirectory.APPS, applicationId).resolve(applicationId);
