@@ -853,6 +853,7 @@ public class ProcessController {
             // defined as "OK" by kubernetes as well.
             return status >= 200 && status < 400;
         } catch (Exception e) {
+            logger.log(l -> l.warn("Failed to process HTTP GET request for endpoint {} of type {}", ep.id, type, e));
             lastProbeResults.put(type, new ProcessProbeResultDto(type, 500, e.toString(), System.currentTimeMillis()));
             return false;
         }
