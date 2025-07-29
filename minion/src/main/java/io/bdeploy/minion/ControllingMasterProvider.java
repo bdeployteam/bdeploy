@@ -31,7 +31,7 @@ public class ControllingMasterProvider implements MasterProvider {
                 }
                 ManagedMasterDto controlling = available.getManagedMaster(associated);
                 if (controlling == null) {
-                    throw new WebApplicationException("Recorded master for " + assetKey + " not longer available: " + associated,
+                    throw new WebApplicationException("Recorded master for " + assetKey + " no longer available: " + associated,
                             Status.EXPECTATION_FAILED);
                 }
                 return new RemoteService(UriBuilder.fromUri(controlling.uri).build(), controlling.auth);
