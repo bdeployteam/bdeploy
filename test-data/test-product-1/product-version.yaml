@@ -3,8 +3,6 @@ appInfo:
   server-app:
     WINDOWS: "server-app/app-info.yaml"
     LINUX: "server-app/app-info.yaml"
-    LINUX_AARCH64: "server-app/app-info.yaml"
   client-app:
     WINDOWS: "client-app/app-info.yaml"
     LINUX: "client-app/app-info.yaml"
-    LINUX_AARCH64: "client-app/app-info.yaml"
