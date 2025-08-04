@@ -55,8 +55,6 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy,
       if (this.record) {
         this.id$.next(this.record.id);
         this.update(ps);
-
-        console.log(`Update ${this.record.name}: ${JSON.stringify(ProcessesService.get(ps, this.record.id), null, 2)}`);
       }
     });
   }
