@@ -89,9 +89,14 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         // Notify that there is a new deployment
         MinionProcessController processController = root.getProcessController();
+
+        // it is possible that the controllers already exist in case we are calling install
+        // on an instance version that is already installed.
         InstanceProcessController controller = processController.getOrCreate(inm);
-        controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, inm.getKey().getTag(),
-                inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
+        if (controller.getProcessList(inm.getKey().getTag()) == null) {
+            controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, inm.getKey().getTag(),
+                    inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
+        }
     }
 
     @Override
