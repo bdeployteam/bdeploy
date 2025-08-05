@@ -2,7 +2,6 @@ name: "Server Application"
 
 supportedOperatingSystems:
   - LINUX
-  - LINUX_AARCH64
   - WINDOWS
 
 processControl:
@@ -15,7 +14,7 @@ processControl:
   noOfRetries: 2
 
 startCommand:
-  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}{{LINUX_AARCH64:launch.sh}}"
+  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
   parameters:
     - uid: "param.text"
       name: "Text"
