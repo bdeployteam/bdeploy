@@ -66,7 +66,8 @@
       [style.display]="hasMoreData ? 'table-row' : 'none'"
     ></tr>
 
-    @for (col of _columns; track col; let i = $index) {
+    @for (col of _columns; track col) {
+      @let first = (_visibleColumns.indexOf(col.id) === 0);
       <ng-container [matColumnDef]="col.id">
         <!-- Column headers -->
         <th
@@ -79,15 +80,15 @@
           mat-sort-header
           [disabled]="!sortData"
           >
-          @if (!checkMode || i !== 0) {
+          @if (!checkMode || !first) {
             <div
-              [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null"
+              [style.marginLeft.px]="first && !!grouping?.length ? '40' : null"
               class="truncate"
               >
               {{ col.name }}
             </div>
           }
-          @if (checkMode && i === 0) {
+          @if (checkMode && first) {
             <mat-checkbox
               #cb
               [checked]="isAllChecked()"
@@ -105,7 +106,7 @@
           </td>
           <ng-container *matCellDef="let row">
             <!-- First column, can not be an action. -->
-            @if (i === 0) {
+            @if (first) {
               <td
                 mat-cell
                 [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
@@ -183,7 +184,7 @@
                 </td>
               }
               <!-- Columns after the first one -->
-              @if (i !== 0 && !col.action && !row.expandable) {
+              @if (!first && !col.action && !row.expandable) {
                 <td
                   mat-cell
                   [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
