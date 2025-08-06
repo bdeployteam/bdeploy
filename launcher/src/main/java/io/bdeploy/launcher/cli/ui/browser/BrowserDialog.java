@@ -299,7 +299,7 @@ public class BrowserDialog extends BaseDialog {
 
         TableColumn columnA = columnModel.getColumn(BrowserDialogTableColumn.AUTOSTART.ordinal());
         columnA.setPreferredWidth(10);
-        columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(bhiveDir, auditor, sortModel));
+        columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(sortModel));
 
         TableColumn columnS = columnModel.getColumn(BrowserDialogTableColumn.START_SCRIPT.ordinal());
         columnS.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
