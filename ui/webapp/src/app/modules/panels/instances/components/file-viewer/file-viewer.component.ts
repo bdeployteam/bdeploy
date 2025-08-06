@@ -135,7 +135,11 @@ export class FileViewerComponent implements OnInit, OnDestroy {
         switchMap((chunk) => unwrap(entry, chunk)),
       )
       .subscribe((chunk) => {
-        this.content$.next(chunk.content);
+        if(!chunk.binary) {
+          this.content$.next(chunk.content);
+        } else {
+          this.content$.next('<file content is detected to be binary - please download to view>');
+        }
         this.offset = chunk.endPointer;
       });
   }
