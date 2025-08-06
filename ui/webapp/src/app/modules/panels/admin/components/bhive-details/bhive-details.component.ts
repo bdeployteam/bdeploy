@@ -50,6 +50,11 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // reset unmapped state, relying on the mapped state from now on.
+      this.repairing$.next(false);
+      this.enablingPool$.next(false);
+      this.disablingPool$.next(false);
+
       this.bhive$.next(route.params['bhive']);
 
       this.hives.hives$.subscribe((list) => {
@@ -63,16 +68,17 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
   }
 
   protected doRepairAndPrune(): void {
+    const bh = this.bhive$.value; // might change when changing selected hive
     this.dialog
       .confirm('Repair and Prune', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive')
       .subscribe((confirmed) => {
         if (confirmed) {
           this.repairing$.next(true);
           this.hives
-            .repairAndPrune(this.bhive$.value, true)
+            .repairAndPrune(bh, true)
             .pipe(
               finalize(() => this.repairing$.next(false)),
-              measure('Repairing and Pruning ' + this.bhive$.value),
+              measure('Repairing and Pruning ' + bh),
             )
             .subscribe(({ repaired, pruned }) => {
               console.groupCollapsed('Damaged Objects');
@@ -85,7 +91,7 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
               const repairMessage = keys?.length
                 ? `Repair removed ${keys.length} damaged objects.`
                 : `No damaged objects were found.`;
-              const pruneMessage = `Prune freed <strong>${pruned}</strong> in ${this.bhive$.value}.`;
+              const pruneMessage = `Prune freed <strong>${pruned}</strong> in ${bh}.`;
               this.dialog.info(`Repair and Prune`, `${repairMessage}<br/>${pruneMessage}`, 'build').subscribe();
             });
         }
