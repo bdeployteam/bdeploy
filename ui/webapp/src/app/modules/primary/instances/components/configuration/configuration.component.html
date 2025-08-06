@@ -98,13 +98,7 @@
     icon="save"
     color="primary"
     [loadingWhen$]="edit.validating$"
-      [disabled]="
-        !(servers.isCurrentInstanceSynchronized$ | async) ||
-        !(edit.hasSaveableChanges$ | async) ||
-        (edit.incompatible$ | async) ||
-        (edit.validating$ | async) ||
-        !!(edit.issues$ | async)?.length
-      "
+    [disabled]="!canSave()"
     [matTooltip]="(edit.incompatible$ | async) ? 'Saving is not possible due to a conflict on the server' : 'Save all changes'"
     matTooltipPosition="below"
     (click)="onSave()"

@@ -187,7 +187,11 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   }
 
   public canSave(): boolean {
-    return this.servers.isCurrentInstanceSynchronized$.value;
+    return this.servers.isCurrentInstanceSynchronized$.value &&
+      this.edit.hasSaveableChanges$.value &&
+      !this.edit.incompatible$.value &&
+      !this.edit.validating$.value &&
+      !this.edit.issues$.value?.length;
   }
 
   protected onSave() {
