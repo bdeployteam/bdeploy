@@ -6,7 +6,7 @@ dependencies {
     implementation(
         project(":common"),
 
-        'org.eclipse.angus:jakarta.mail:2.0.3'
+        'org.eclipse.angus:jakarta.mail:2.0.4'
     )
 
     api(

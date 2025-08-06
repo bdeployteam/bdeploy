@@ -5,9 +5,9 @@ plugins {
   id 'java-library'
   id 'maven-publish'
   id 'signing'
-  id 'com.gradleup.shadow' version '8.3.7'
+  id 'com.gradleup.shadow' version '8.3.9'
   id "io.swagger.core.v3.swagger-gradle-plugin" version "2.2.26"
-  id 'org.jreleaser' version '1.18.0'
+  id 'org.jreleaser' version '1.19.0'
 }
 
 dependencies {
@@ -15,11 +15,11 @@ dependencies {
         project(":common"),
         project(":jersey"),
         project(":bhive"),
-        'io.swagger.core.v3:swagger-annotations:2.2.34',
+        'io.swagger.core.v3:swagger-annotations:2.2.35',
     )
     swaggerDeps(
-        'org.apache.commons:commons-lang3:3.17.0',
-        'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.34',
+        'org.apache.commons:commons-lang3:3.18.0',
+        'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.35',
         'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0',
         'jakarta.servlet:jakarta.servlet-api:6.1.0'
     )

@@ -134,7 +134,7 @@ configure(actualSubprojects) {
     }
 
     dependencies {
-        commonTestDeps platform('org.junit:junit-bom:5.13.2')
+        commonTestDeps platform('org.junit:junit-bom:5.13.4')
         commonTestDeps 'org.junit.jupiter:junit-jupiter'
         commonTestDeps 'org.hamcrest:hamcrest-core:3.0'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

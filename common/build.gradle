@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api (
-        'commons-codec:commons-codec:1.18.0',
+        'commons-codec:commons-codec:1.19.0',
         'com.google.guava:guava:33.4.8-jre',
         'io.dropwizard.metrics:metrics-core:4.2.33',
         'org.slf4j:slf4j-api:2.0.17',
@@ -14,11 +14,11 @@ dependencies {
     )
 
     implementation (
-        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.19.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.19.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.1',
-        'com.fasterxml.jackson.module:jackson-module-blackbird:2.19.1',
-        'org.apache.commons:commons-compress:1.27.1',
+        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.19.2',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.19.2',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.2',
+        'com.fasterxml.jackson.module:jackson-module-blackbird:2.19.2',
+        'org.apache.commons:commons-compress:1.28.0',
         'org.jline:jline-terminal:3.30.2',
         'org.jline:jline-terminal-jni:3.30.2',
         
