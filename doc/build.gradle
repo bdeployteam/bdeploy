@@ -50,7 +50,7 @@ tasks.register('retypeUserDoc', NpxTask) { t ->
     def dir = layout.projectDirectory.dir('retypeuser')
     workingDir = dir
     inputs.dir(dir)
-    outputs.dir(layout.buildDirectory.dir("docs/dev"))
+    outputs.dir(layout.buildDirectory.dir("docs/user"))
     buildRetype(t, dir)
 }
 
