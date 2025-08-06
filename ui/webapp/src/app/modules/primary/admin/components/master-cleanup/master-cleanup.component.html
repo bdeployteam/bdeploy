@@ -31,7 +31,7 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">
-      @if (cleanup.cleanup$ | async; as groups) {
+      @if (!(cleanup.loading$ | async) && cleanup.cleanup$ | async; as groups) {
         <mat-tab-group dynamicHeight animationDuration="0ms">
           @for (group of groups; track group) {
             <mat-tab>
