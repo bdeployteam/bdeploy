@@ -175,6 +175,9 @@ jreleaser {
                     stagingRepository(layout.buildDirectory.dir("staging-deploy").get().asFile.path)
 
                     applyMavenCentralRules = true
+
+                    retryDelay = 30
+                    maxRetries = 200
                 }
             }
         }
