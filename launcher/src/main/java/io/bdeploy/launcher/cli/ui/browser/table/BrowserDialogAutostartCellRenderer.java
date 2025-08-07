@@ -43,12 +43,12 @@ public class BrowserDialogAutostartCellRenderer extends JCheckBox implements Tab
 
         setForeground(t.getForeground());
 
-        if (t.getModel() instanceof BrowserDialogTableModel bdTableModel) {
+        if (t.getModel() instanceof BrowserDialogTableModel bdTableModel && v instanceof Boolean currentValue) {
             ClientSoftwareConfiguration config = bdTableModel.get(sortModel.convertRowIndexToModel(r));
             ClientApplicationDto metadata = config.metadata;
             if (metadata == null) {
                 setBackground(BrowserDialogTableCellColorConstants.COULD_NOT_CALCULATE);
-            } else if (metadata.supportsAutostart && v instanceof Boolean currentValue) {
+            } else if (metadata.supportsAutostart) {
                 setBackground(currentValue != null && currentValue != metadata.autostart
                         ? BrowserDialogTableCellColorConstants.PAY_ATTENTION
                         : t.getBackground());
