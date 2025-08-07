@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, mergeMap, skipWhile } from 'rxjs/operators';
 import { FileStatusDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
@@ -59,6 +59,7 @@ export class FilesService {
   }
 
   private loadFiles(api: string, txt: string) {
+    this.directories$.next([]);
     this.instances.current$
       .pipe(
         skipWhile((i) => !i),
