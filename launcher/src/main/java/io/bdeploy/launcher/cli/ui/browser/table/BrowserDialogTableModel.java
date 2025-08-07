@@ -1,7 +1,5 @@
 package io.bdeploy.launcher.cli.ui.browser.table;
 
-import java.net.URI;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,28 +7,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.launcher.LocalClientApplicationSettings;
 import io.bdeploy.launcher.LocalClientApplicationSettingsManifest;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
-import io.bdeploy.logging.audit.RollingFileAuditor;
 
 public class BrowserDialogTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = 1L;
 
     private final List<ClientSoftwareConfiguration> apps = new ArrayList<>();
-    private final URI bhiveDir;
-    private final Auditor auditor;
+    private final BHive bhive;
+    private LocalClientApplicationSettings settings;
 
-    public BrowserDialogTableModel(Path bhiveDir, Auditor auditor) {
-        this.bhiveDir = bhiveDir.toUri();
-        this.auditor = auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir);
+    public BrowserDialogTableModel(BHive hive) {
+        this.bhive = hive;
+        addTableModelListener(new TableModelListener() {
+
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                settings = new LocalClientApplicationSettingsManifest(bhive).read();
+            }
+        });
+    }
+
+    /**
+     * Returns the current snapshot of the {@link LocalClientApplicationSettings}.
+     */
+    public LocalClientApplicationSettings getCurrentSettings() {
+        return settings;
     }
 
     /**
@@ -116,12 +126,9 @@ public class BrowserDialogTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (BrowserDialogTableColumn.fromIndex(columnIndex) == BrowserDialogTableColumn.AUTOSTART) {
-            try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
-                LocalClientApplicationSettingsManifest manifest = new LocalClientApplicationSettingsManifest(hive);
-                LocalClientApplicationSettings settings = manifest.read();
-                settings.putAutostartEnabled(apps.get(rowIndex).clickAndStart, (boolean) aValue);
-                manifest.write(settings);
-            }
+            LocalClientApplicationSettingsManifest manifest = new LocalClientApplicationSettingsManifest(bhive);
+            settings.putAutostartEnabled(apps.get(rowIndex).clickAndStart, (boolean) aValue);
+            manifest.write(settings);
             fireTableCellUpdated(rowIndex, columnIndex);
         }
     }
@@ -146,10 +153,6 @@ public class BrowserDialogTableModel extends AbstractTableModel {
             case SERVER_VERSION:
                 return metadata != null ? metadata.serverVersion : "N/A";
             case AUTOSTART:
-                LocalClientApplicationSettings settings;
-                try (BHive hive = new BHive(bhiveDir, auditor, new ActivityReporter.Null())) {
-                    settings = new LocalClientApplicationSettingsManifest(hive).read();
-                }
                 Boolean autostartEnabled = settings.getAutostartEnabled(apps.get(rowIndex).clickAndStart);
                 if (autostartEnabled != null) {
                     return autostartEnabled;

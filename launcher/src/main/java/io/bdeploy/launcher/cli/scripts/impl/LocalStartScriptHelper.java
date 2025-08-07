@@ -3,7 +3,7 @@ package io.bdeploy.launcher.cli.scripts.impl;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
@@ -20,8 +20,8 @@ import io.bdeploy.launcher.cli.scripts.ScriptUtils;
 
 public class LocalStartScriptHelper extends LocalScriptHelper {
 
-    public LocalStartScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp) {
-        super(os, auditor, lpp, SpecialDirectory.START_SCRIPTS);
+    public LocalStartScriptHelper(OperatingSystem os, BHive bhive, LauncherPathProvider lpp) {
+        super(os, bhive, lpp, SpecialDirectory.START_SCRIPTS);
     }
 
     @Override

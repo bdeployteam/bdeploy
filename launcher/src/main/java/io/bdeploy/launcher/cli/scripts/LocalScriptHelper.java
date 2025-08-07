@@ -9,8 +9,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
@@ -26,13 +24,13 @@ public abstract class LocalScriptHelper {
 
     protected final OperatingSystem os;
     protected final LauncherPathProvider lpp;
-    private final Auditor auditor;
+    private final BHive bhive;
     private final Path scriptDir;
 
-    protected LocalScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
+    protected LocalScriptHelper(OperatingSystem os, BHive bhive, LauncherPathProvider lpp, SpecialDirectory scriptDir) {
         this.os = os;
         this.lpp = lpp;
-        this.auditor = auditor;
+        this.bhive = bhive;
         this.scriptDir = lpp.get(scriptDir);
     }
 
@@ -52,13 +50,10 @@ public abstract class LocalScriptHelper {
         String scriptContent = getScriptContent(clientCfg);
         Path fullScriptPath = scriptDir.resolve(scriptName);
 
-        boolean scriptIsActive;
-        try (BHive hive = new BHive(lpp.get(SpecialDirectory.BHIVE).toUri(), auditor, new ActivityReporter.Null())) {
-            LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(hive);
-            LocalClientApplicationSettings settings = settingsManifest.read();
-            scriptIsActive = updateSettings(settings, scriptName, new ScriptInfo(scriptName, clickAndStart), override);
-            settingsManifest.write(settings);
-        }
+        LocalClientApplicationSettingsManifest settingsManifest = new LocalClientApplicationSettingsManifest(bhive);
+        LocalClientApplicationSettings settings = settingsManifest.read();
+        boolean scriptIsActive = updateSettings(settings, scriptName, new ScriptInfo(scriptName, clickAndStart), override);
+        settingsManifest.write(settings);
 
         Files.createDirectories(scriptDir);
         if (scriptIsActive) {

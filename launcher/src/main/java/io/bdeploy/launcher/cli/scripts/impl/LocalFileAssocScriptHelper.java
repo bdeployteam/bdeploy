@@ -9,7 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
@@ -26,8 +26,8 @@ public class LocalFileAssocScriptHelper extends LocalScriptHelper {
 
     private static final Logger log = LoggerFactory.getLogger(LocalFileAssocScriptHelper.class);
 
-    public LocalFileAssocScriptHelper(OperatingSystem os, Auditor auditor, LauncherPathProvider lpp) {
-        super(os, auditor, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS);
+    public LocalFileAssocScriptHelper(OperatingSystem os, BHive bhive, LauncherPathProvider lpp) {
+        super(os, bhive, lpp, SpecialDirectory.FILE_ASSOC_SCRIPTS);
     }
 
     @Override

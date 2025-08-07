@@ -676,20 +676,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if necessary.
         doExecuteLocked(hive, reporter, () -> {
-            installApplication(hive, splash, reporter, auditor, serverVersion, noSystemChanges);
+            installApplication(hive, splash, reporter, serverVersion, noSystemChanges);
             return null;
         });
     }
 
     /** Installs the application with all requirements if necessary. */
-    private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter, Auditor auditor,
-            Version serverVersion, boolean noSystemChanges) {
+    private void installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter, Version serverVersion,
+            boolean noSystemChanges) {
         // Update scripts
         if (!noSystemChanges) {
             OperatingSystem os = OsHelper.getRunningOs();
-            updateScripts(clientAppCfg, new LocalStartScriptHelper(os, auditor, lpp), "start", startScriptsDir);
-            updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, auditor, lpp), "file association",
-                    fileAssocScriptsDir);
+            updateScripts(clientAppCfg, new LocalStartScriptHelper(os, hive, lpp), "start", startScriptsDir);
+            updateScripts(clientAppCfg, new LocalFileAssocScriptHelper(os, hive, lpp), "file association", fileAssocScriptsDir);
         }
 
         // Check if the application has any missing artifacts

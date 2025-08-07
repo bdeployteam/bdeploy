@@ -104,6 +104,7 @@ public class BrowserDialog extends BaseDialog {
     private final transient Auditor auditor;
 
     private final OperatingSystem os;
+    private final BHive bhive;
     private final BrowserDialogTableModel model;
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel;
     private final JTable table;
@@ -144,7 +145,8 @@ public class BrowserDialog extends BaseDialog {
         this.auditor = userArea != null ? RollingFileAuditor.getFactory().apply(userArea) : null;
 
         this.os = OsHelper.getRunningOs();
-        this.model = new BrowserDialogTableModel(bhiveDir, auditor);
+        this.bhive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null());
+        this.model = new BrowserDialogTableModel(bhive);
         this.sortModel = new TableRowSorter<>(model);
         this.table = new JTable(model);
 
@@ -302,12 +304,12 @@ public class BrowserDialog extends BaseDialog {
         columnA.setCellRenderer(new BrowserDialogAutostartCellRenderer(sortModel));
 
         TableColumn columnS = columnModel.getColumn(BrowserDialogTableColumn.START_SCRIPT.ordinal());
-        columnS.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
-                .getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, metadata.startScriptName))));
+        columnS.setCellRenderer(new BrowserDialogScriptCellRenderer(sortModel,
+                (settings, identifier) -> settings.getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, identifier))));
 
         TableColumn columnF = columnModel.getColumn(BrowserDialogTableColumn.FILE_ASSOC_EXTENSION.ordinal());
-        columnF.setCellRenderer(new BrowserDialogScriptCellRenderer(bhiveDir, auditor, sortModel, (settings, metadata) -> settings
-                .getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, metadata.fileAssocExtension))));
+        columnF.setCellRenderer(new BrowserDialogScriptCellRenderer(sortModel,
+                (settings, identifier) -> settings.getFileAssocScriptInfo(ScriptUtils.getFileAssocIdentifier(os, identifier))));
 
         TableColumn columnO = columnModel.getColumn(BrowserDialogTableColumn.OFFLINE_LAUNCHABLE.ordinal());
         columnO.setPreferredWidth(10);
@@ -534,12 +536,12 @@ public class BrowserDialog extends BaseDialog {
 
     /** Activate the start script of the selected application */
     private void onActivateStartScriptEvent(ActionEvent e) {
-        handleScriptChange(pathProvider -> new LocalStartScriptHelper(os, auditor, pathProvider), "start");
+        handleScriptChange(pathProvider -> new LocalStartScriptHelper(os, bhive, pathProvider), "start");
     }
 
     /** Activate the file association script of the selected application */
     private void onActivateFileAssocScriptEvent(ActionEvent e) {
-        handleScriptChange(pathProvider -> new LocalFileAssocScriptHelper(os, auditor, pathProvider), "file association");
+        handleScriptChange(pathProvider -> new LocalFileAssocScriptHelper(os, bhive, pathProvider), "file association");
     }
 
     private void handleScriptChange(Function<LauncherPathProvider, LocalScriptHelper> scriptHelperCreator, String scriptType) {
@@ -734,9 +736,7 @@ public class BrowserDialog extends BaseDialog {
             if (singleAppMetadata != null) {
                 ClickAndStartDescriptor clickAndStart = singleApp.clickAndStart;
                 LocalClientApplicationSettings settings;
-                try (BHive hive = new BHive(bhiveDir.toUri(), auditor, new ActivityReporter.Null())) {
-                    settings = new LocalClientApplicationSettingsManifest(hive).read();
-                }
+                settings = new LocalClientApplicationSettingsManifest(bhive).read();
                 ScriptInfo startScriptInfo = settings
                         .getStartScriptInfo(ScriptUtils.getStartScriptIdentifier(os, singleAppMetadata.startScriptName));
                 if (startScriptInfo != null && !clickAndStart.equals(startScriptInfo.getDescriptor())) {
@@ -762,6 +762,12 @@ public class BrowserDialog extends BaseDialog {
         updateItem.setEnabled(writeAllowedAndSingleAppSelected);
         uninstallButton.setEnabled(writeAllowedAndSingleAppSelected);
         uninstallItem.setEnabled(writeAllowedAndSingleAppSelected);
+    }
+
+    @Override
+    protected void doClose(int closeReason) {
+        bhive.close();
+        super.doClose(closeReason);
     }
 
     private static void showErrorMessageDialog(Component parent, String text) {
