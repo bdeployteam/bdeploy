@@ -520,7 +520,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         ApplicationType groupType = group.type == null ? ApplicationType.SERVER : group.type;
 
         for (var reqApp : group.applications) {
-            if (!reqApp.applyOn.isEmpty() && !reqApp.applyOn.contains(targetOs)) {
+            List<OperatingSystem> applyOn = reqApp.applyOn;
+            if (applyOn != null && !applyOn.isEmpty() && !applyOn.contains(targetOs)) {
                 log.debug("Skipping application {}, not applicable to {}", reqApp.name, targetOs);
                 continue;
             }
