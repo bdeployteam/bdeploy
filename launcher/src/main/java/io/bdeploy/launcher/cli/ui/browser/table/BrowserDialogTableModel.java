@@ -27,6 +27,7 @@ public class BrowserDialogTableModel extends AbstractTableModel {
 
     public BrowserDialogTableModel(BHive hive) {
         this.bhive = hive;
+        this.settings = new LocalClientApplicationSettingsManifest(bhive).read();
         addTableModelListener(new TableModelListener() {
 
             @Override
