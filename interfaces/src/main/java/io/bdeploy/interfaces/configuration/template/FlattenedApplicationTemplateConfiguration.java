@@ -34,7 +34,7 @@ public class FlattenedApplicationTemplateConfiguration {
 
     public String preferredProcessControlGroup;
 
-    public List<OperatingSystem> applyOn;
+    public List<OperatingSystem> applyOn = new ArrayList<>();
 
     public Map<String, Object> processControl;
 
