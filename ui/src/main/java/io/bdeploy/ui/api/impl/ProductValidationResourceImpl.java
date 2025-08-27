@@ -336,7 +336,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     private static List<ProductValidationIssueApi> checkForDuplicates(Collection<TemplateVariable> variables, String type,
             String name) {
-        return checkForDuplicates(variables.stream().map(var -> var.id), type + " template '" + name + '\'');
+        return checkForDuplicates(variables.stream().map(templateVar -> templateVar.id), type + " template '" + name + '\'');
     }
 
     private static List<ProductValidationIssueApi> checkForDuplicates(Stream<String> idStream, String identifier) {
