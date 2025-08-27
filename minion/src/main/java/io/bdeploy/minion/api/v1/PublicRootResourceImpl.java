@@ -65,21 +65,21 @@ public class PublicRootResourceImpl implements PublicRootResource {
     @Deprecated(since = "2.3.0")
     @Override
     public Response login(String user, String pass, boolean full) {
-        AuthResource auth = rc.getResource(AuthResourceImpl.class);
+        AuthResource authRes = rc.getResource(AuthResourceImpl.class);
         if (full) {
-            return auth.authenticatePacked(new CredentialsApi(user, pass));
+            return authRes.authenticatePacked(new CredentialsApi(user, pass));
         } else {
-            return auth.authenticate(new CredentialsApi(user, pass));
+            return authRes.authenticate(new CredentialsApi(user, pass));
         }
     }
 
     @Override
     public Response login2(CredentialsApi credentials, boolean full) {
-        AuthResource auth = rc.getResource(AuthResourceImpl.class);
+        AuthResource authRes = rc.getResource(AuthResourceImpl.class);
         if (full) {
-            return auth.authenticatePacked(credentials);
+            return authRes.authenticatePacked(credentials);
         } else {
-            return auth.authenticate(credentials);
+            return authRes.authenticate(credentials);
         }
     }
 
