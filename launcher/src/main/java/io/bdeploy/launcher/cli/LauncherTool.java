@@ -423,7 +423,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     }
                 }
 
-                doInstall(hive, reporter, splash, auditor, serverVersion, noSystemChanges);
+                doInstall(hive, reporter, splash, serverVersion, noSystemChanges);
             }
 
             // Launch the application
@@ -658,7 +658,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         doExit(UpdateHelper.CODE_RESTART);
     }
 
-    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, Auditor auditor,
+    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash,
             Version serverVersion, boolean noSystemChanges) {
         // Update splash with the fetched branding information.
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
