@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 import io.bdeploy.bhive.BHive;
@@ -28,13 +26,7 @@ public class BrowserDialogTableModel extends AbstractTableModel {
     public BrowserDialogTableModel(BHive hive) {
         this.bhive = hive;
         this.settings = new LocalClientApplicationSettingsManifest(bhive).read();
-        addTableModelListener(new TableModelListener() {
-
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                settings = new LocalClientApplicationSettingsManifest(bhive).read();
-            }
-        });
+        addTableModelListener(e -> settings = new LocalClientApplicationSettingsManifest(bhive).read());
     }
 
     /**
