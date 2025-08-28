@@ -289,9 +289,8 @@ public class UpdateHelper {
                 return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
             }
             return a.getKey().toString().compareTo(b.getKey().toString());
-        }).filter(k -> {
-            return k.getOperatingSystem() != OperatingSystem.LINUX_AARCH64 || serverVersion.compareTo(SERVER_LIMIT_VERSION) >= 0;
-        });
+        }).filter(k -> k.getOperatingSystem() != OperatingSystem.LINUX_AARCH64
+                || serverVersion.compareTo(SERVER_LIMIT_VERSION) >= 0);
     }
 
     public static Version currentApiVersion() {
