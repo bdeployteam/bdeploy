@@ -50,7 +50,6 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
             ManifestConsistencyCheckOperation checkOp = new ManifestConsistencyCheckOperation();
             try (Activity activity = getActivityReporter().start(baseActivity, totalSize);
                     ReportingInputStream reportingIn = new ReportingInputStream(dataIn, totalSize, activity, baseActivity)) {
-                SortedSet<ObjectId> objects = new TreeSet<>();
                 SortedSet<Manifest> manifests = new TreeSet<>();
 
                 // Read all manifests from the stream
@@ -66,8 +65,7 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                 counter = dataIn.readLong();
                 for (int i = 0; i < counter; i++) {
                     long size = dataIn.readLong();
-                    ObjectId insertedId = getObjectManager().db(db -> db.addObject(new FixedLengthStream(reportingIn, size)));
-                    objects.add(insertedId);
+                    getObjectManager().db(db -> db.addObject(new FixedLengthStream(reportingIn, size)));
                 }
                 result.sumMissingObjects = counter;
 
