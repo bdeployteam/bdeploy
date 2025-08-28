@@ -47,7 +47,7 @@ public interface PublicRootResource {
      * @return Either a full authentication pack or a token only.
      * @deprecated Causes problems with encoding of query parameters with certain strong password values.
      */
-    @Deprecated
+    @Deprecated(since = "2.3.0")
     @Operation(summary = "Login to a BDeploy Server",
                description = "Uses given credentials to create a token for the BDeploy server. This token can be used by tooling to perform communication with the server on behalf of the given user. The 'full' parameter controls the type of token returned. Most tools require a full token.")
     @GET

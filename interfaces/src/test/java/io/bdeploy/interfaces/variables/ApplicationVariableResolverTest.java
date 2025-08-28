@@ -27,7 +27,7 @@ class ApplicationVariableResolverTest {
         assertEquals(APP_NAME, RESOLVER.doResolve("NAME"));
     }
 
-    @Deprecated
+    @Deprecated(since = "7.6.0")
     @Test
     void testApplicationVariableResolverUUID() {
         assertEquals(APP_ID, RESOLVER.doResolve("UUID"));
