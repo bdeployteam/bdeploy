@@ -253,8 +253,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         // applications /must/ follow the ScopedManifestKey rules.
                         ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
                         if (smk == null) {
-                            log.error("Manifest for application '" + app.application
-                                    + "' could not be found - it will not be installed");
+                            log.error("Manifest for application '{}' could not be found - it will not be installed",
+                                    app.application);
                             continue;
                         }
 
@@ -364,7 +364,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             // applications /must/ follow the ScopedManifestKey rules.
             ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
             if (smk == null) {
-                log.error("Manifest for application '" + app.application + "' could not be found - it will not be installed");
+                log.error("Manifest for application '{}' could not be found - it will not be installed", app.application);
                 continue;
             }
 
