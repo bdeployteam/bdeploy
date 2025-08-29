@@ -26,7 +26,8 @@ public class JerseyCspFilter extends BaseFilter {
             "img-src 'self' https://* data:",
             "style-src 'self' 'unsafe-inline'",
             "base-uri 'self'",
-            "form-action 'self'"
+            "form-action 'self'",
+            "worker-src 'self' blob:"
     };
     // @formatter:on
 
