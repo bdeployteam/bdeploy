@@ -15,6 +15,8 @@
             <div>{{ !!state.monitoring?.availableProcessors ? state.monitoring.availableProcessors : 'Unknown' }}</div>
             <div>Master:</div>
             <div>{{ state.config.master ? 'yes' : 'no' }}</div>
+            <div>Node type:</div>
+            <div>{{ state.config.minionNodeType }}</div>
             @if (!state.offline) {
               <div>Up Since:</div>
               <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>

@@ -110,7 +110,7 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
         dto.remote = nodeRemote;
         dto.sourceMode = MinionMode.NODE;
 
-        root.addNode(dto);
+        root.addServerNode(dto);
 
         return createSuccess().addField("Node Name", minionName);
     }

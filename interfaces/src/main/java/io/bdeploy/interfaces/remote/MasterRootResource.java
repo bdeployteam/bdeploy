@@ -40,7 +40,7 @@ public interface MasterRootResource extends CommonUpdateResource {
      */
     @PUT
     @Path("/minions/{name}")
-    public void addNode(@PathParam("name") String name, RemoteService minion);
+    public void addServerNode(@PathParam("name") String name, RemoteService minion);
 
     /**
      * @param name the name of the minion to add.

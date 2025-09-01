@@ -25,9 +25,10 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
- * Management resource which more or less plain-redirects to the local MasterRootResource.
+ * Management resource which more or less plain-redirects to the local {@link MasterRootResource}.
  * <p>
- * In case of CENTRAL does nothing. A dedicated implementation is required for CENTRAL.
+ * Most calls throw if the current {@link Minion} has {@link MinionMode#CENTRAL}. A dedicated implementation is required for
+ * this case.
  */
 public class NodeManagementResourceImpl implements NodeManagementResource {
 
@@ -49,10 +50,11 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
     }
 
     @Override
-    public void addNode(NodeAttachDto data) {
+    public void addServerNode(NodeAttachDto data) {
         throwIfCentral();
         if (data.sourceMode == MinionMode.NODE) {
-            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).addNode(data.name, data.remote);
+            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).addServerNode(data.name,
+                    data.remote);
         } else {
             ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).convertNode(data.name, data.remote);
         }
