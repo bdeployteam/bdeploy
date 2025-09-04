@@ -60,7 +60,7 @@ class MinionConnectionTest {
         dto.sourceMode = MinionMode.NODE;
         dto.remote = nodeSvc;
 
-        nodeMgmt.addNode(dto);
+        nodeMgmt.addServerNode(dto);
         var nodes = nodeMgmt.getNodes();
 
         assertEquals(2, nodes.size()); // includes "master" (self)

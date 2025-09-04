@@ -61,11 +61,11 @@ class InstanceResourceTest {
         dto.sourceMode = MinionMode.NODE;
 
         dto.name = "Node1";
-        nmr.addNode(dto);
+        nmr.addServerNode(dto);
         dto.name = "Node2";
-        nmr.addNode(dto);
+        nmr.addServerNode(dto);
         dto.name = "Node3";
-        nmr.addNode(dto);
+        nmr.addServerNode(dto);
     }
 
     /**

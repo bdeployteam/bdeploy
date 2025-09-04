@@ -43,7 +43,7 @@ public interface NodeManagementResource {
     @PUT
     @Path("/nodes")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void addNode(NodeAttachDto data);
+    public void addServerNode(NodeAttachDto data);
 
     /**
      * @param name the name of the node to edit

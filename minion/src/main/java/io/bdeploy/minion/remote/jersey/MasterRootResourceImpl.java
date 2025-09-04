@@ -44,6 +44,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionDto.MinionNodeType;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -101,9 +102,9 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
-    public void addNode(String name, RemoteService minion) {
+    public void addServerNode(String name, RemoteService minion) {
         try (var handle = af.run(Actions.ADD_NODE, null, null, name)) {
-            nodes.addNode(name, MinionDto.create(false, minion));
+            nodes.addNode(name, MinionDto.create(false, minion, MinionNodeType.SERVER));
         }
     }
 

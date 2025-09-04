@@ -34,6 +34,7 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionDto.MinionNodeType;
 import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -224,7 +225,8 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         }
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
-        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mode != MinionMode.NODE, remote));
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME,
+                MinionDto.create(mode != MinionMode.NODE, remote, MinionNodeType.SERVER));
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);
