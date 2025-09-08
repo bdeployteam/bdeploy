@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Shell" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="io.bdeploy.minion.cli.MinionServerCli" />
+    <module name="io.bdeploy.minion.main" />
+    <option name="PROGRAM_PARAMETERS" value="shell" />
+    <selectedOptions>
+      <option name="environmentVariables" visible="false" />
+    </selectedOptions>
+    <option name="VM_PARAMETERS" value="-XX:+HeapDumpOnOutOfMemoryError -Xmx256m" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/../runtime" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.bdeploy.minion.cli.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
