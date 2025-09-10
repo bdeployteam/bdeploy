@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -388,8 +387,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     private static InstanceClientAppsDto listClientApps(InstanceManifest im, BHive hive, OperatingSystem os) {
-        SortedMap<String, Key> manifests = im.getInstanceNodeManifestKeys();
-        Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
+        Key clientKey = im.getClientNodeInstanceNodeManifestKey();
         if (clientKey == null) {
             return null;
         }

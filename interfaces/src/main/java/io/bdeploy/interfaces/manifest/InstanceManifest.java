@@ -169,7 +169,7 @@ public class InstanceManifest {
         }
 
         // delete nodes
-        for (Manifest.Key node : im.getInstanceNodeManifestKeys().values()) {
+        for (Manifest.Key node : im.nodes.values()) {
             hive.execute(new ManifestDeleteOperation().setToDelete(node));
         }
 
@@ -227,6 +227,33 @@ public class InstanceManifest {
      */
     public Manifest.Key getKey() {
         return key;
+    }
+
+    /**
+     * Returns a {@link SortedMap} of name of the node along with the key of the corresponding
+     * {@linkplain InstanceNodeManifest}.<br>
+     * The client node is explicitly excluded from this list.
+     */
+    public SortedMap<String, Manifest.Key> getNonClientInstanceNodeManifestKeys() {
+        SortedMap<String, Manifest.Key> result = new TreeMap<>();
+        for (var entry : nodes.entrySet()) {
+            String key = entry.getKey();
+            if (!key.equals(CLIENT_NODE_NAME)) {
+                result.put(key, entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the key of the {@link InstanceNodeManifest} of the client node.
+     *
+     * @see Map#get
+     * @return The {@link InstanceNodeManifest} of the client node or <code>null</code> if the instance does not have a client
+     *         node
+     */
+    public Manifest.Key getClientNodeInstanceNodeManifestKey() {
+        return getInstanceNodeManifestKeys().get(CLIENT_NODE_NAME);
     }
 
     /**
@@ -433,5 +460,4 @@ public class InstanceManifest {
     public CustomAttributes getAttributes(BHiveExecution hive) {
         return new CustomAttributes(getKey(), hive);
     }
-
 }

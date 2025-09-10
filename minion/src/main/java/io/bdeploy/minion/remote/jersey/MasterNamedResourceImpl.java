@@ -201,9 +201,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Key productKey = instanceConfig.product;
 
         try (var handle = af.run(Actions.INSTALL, name, instanceId, key.getTag())) {
-            SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifestKeys();
-            fragmentReferences.remove(InstanceManifest.CLIENT_NODE_NAME);
-
             // Assure that the product has been pushed to the master (e.g. by central).
             Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(productKey));
             if (!Boolean.TRUE.equals(productExists)) {
@@ -230,7 +227,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             // Create the runnables
             List<Runnable> runnables = new ArrayList<>();
-            for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
+            for (Map.Entry<String, Manifest.Key> entry : imf.getNonClientInstanceNodeManifestKeys().entrySet()) {
                 String nodeName = entry.getKey();
                 Manifest.Key toDeploy = entry.getValue();
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
@@ -460,13 +457,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
         try (var handle = af.run(Actions.UNINSTALL, name, imf.getConfiguration().id, key.getTag())) {
-
-            SortedMap<String, Key> fragments = imf.getInstanceNodeManifestKeys();
-            fragments.remove(InstanceManifest.CLIENT_NODE_NAME);
-
             List<Runnable> runnables = new ArrayList<>();
-
-            for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
+            for (Map.Entry<String, Manifest.Key> entry : imf.getNonClientInstanceNodeManifestKeys().entrySet()) {
                 String nodeName = entry.getKey();
                 Manifest.Key toRemove = entry.getValue();
 
@@ -1086,7 +1078,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.clientImageIcon = amf.readBrandingIcon(hive);
 
         // set dedicated config tree.
-        Key clientKey = imf.getInstanceNodeManifestKeys().get(InstanceManifest.CLIENT_NODE_NAME);
+        Key clientKey = imf.getClientNodeInstanceNodeManifestKey();
         if (clientKey != null) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, clientKey);
             if (inmf != null && !inmf.getConfigTrees().isEmpty()) {
@@ -1517,8 +1509,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Instance has no active tag: " + instanceId, Status.NOT_FOUND);
         }
 
-        InstanceManifest imf = InstanceManifest.load(hive, instanceId, state.activeTag);
-        Manifest.Key key = imf.getInstanceNodeManifestKeys().get(InstanceManifest.CLIENT_NODE_NAME); // only for clients.
+        Manifest.Key key = InstanceManifest.load(hive, instanceId, state.activeTag).getClientNodeInstanceNodeManifestKey(); // only for clients
 
         if (key == null) {
             throw new WebApplicationException("Instance has no client node: " + instanceId, Status.NOT_FOUND);
