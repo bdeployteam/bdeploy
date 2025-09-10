@@ -56,6 +56,7 @@ import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Invocation;
@@ -282,19 +283,6 @@ public class CommonEndpointHelper {
 
     public static CompositeResolver createEndpoindResolver(InstanceNodeManifest inm, ApplicationConfiguration app,
             DeploymentPathProvider dpp) {
-        CompositeResolver resolver = new CompositeResolver();
-        if (dpp != null) {
-            resolver.add(new DeploymentPathResolver(dpp));
-        }
-        resolver.add(new InstanceAndSystemVariableResolver(inm.getConfiguration()));
-        resolver.add(new ConditionalExpressionResolver(resolver));
-        resolver.add(new ApplicationVariableResolver(app));
-        resolver.add(new ApplicationParameterValueResolver(app.id, inm.getConfiguration()));
-        resolver.add(new ParameterValueResolver(new ApplicationParameterProvider(inm.getConfiguration())));
-        resolver.add(new OsVariableResolver());
-        resolver.add(new EscapeJsonCharactersResolver(resolver));
-        resolver.add(new EscapeXmlCharactersResolver(resolver));
-        resolver.add(new EscapeYamlCharactersResolver(resolver));
-        return resolver;
+        return Resolvers.forApplication(Resolvers.forInstance(inm, dpp), inm.getConfiguration(), app);
     }
 }

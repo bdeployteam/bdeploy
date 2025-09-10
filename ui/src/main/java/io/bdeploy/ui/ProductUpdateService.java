@@ -47,25 +47,7 @@ import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
-import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
-import io.bdeploy.interfaces.variables.CompositeResolver;
-import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
-import io.bdeploy.interfaces.variables.DelayedVariableResolver;
-import io.bdeploy.interfaces.variables.DeploymentPathDummyResolver;
-import io.bdeploy.interfaces.variables.EmptyVariableResolver;
-import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
-import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
-import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
-import io.bdeploy.interfaces.variables.InstanceVariableResolver;
-import io.bdeploy.interfaces.variables.LocalHostnameResolver;
-import io.bdeploy.interfaces.variables.ManifestSelfResolver;
-import io.bdeploy.interfaces.variables.ManifestVariableDummyResolver;
-import io.bdeploy.interfaces.variables.OsVariableResolver;
-import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.*;
 
 @Service
 public class ProductUpdateService {
@@ -510,27 +492,14 @@ public class ProductUpdateService {
     }
 
     public static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
-        CompositeResolver res = new CompositeResolver();
-        res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
-        res.add(new ConditionalExpressionResolver(res));
-        res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
-        if (process != null) {
-            res.add(new ApplicationVariableResolver(process));
-            res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
-            ManifestVariableDummyResolver dummy = new ManifestVariableDummyResolver();
-            res.add(new ManifestSelfResolver(process.application, dummy));
-            res.add(dummy);
-            res.add(new DelayedVariableResolver(res));
-        }
+        CompositeResolver res = Resolvers.forInstance(node.nodeConfiguration, "1", null);
+        res.add(new ManifestVariableDummyResolver());
         res.add(new DeploymentPathDummyResolver());
-        res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
-        res.add(new OsVariableResolver());
-        res.add(new LocalHostnameResolver(false));
         res.add(new EnvironmentVariableDummyResolver());
-        res.add(new EscapeJsonCharactersResolver(res));
-        res.add(new EscapeXmlCharactersResolver(res));
-        res.add(new EscapeYamlCharactersResolver(res));
-
+        res.add(new LocalHostnameResolver(false));
+        if (process != null) {
+            return Resolvers.forApplication(res, node.nodeConfiguration, process);
+        }
         return res;
     }
 

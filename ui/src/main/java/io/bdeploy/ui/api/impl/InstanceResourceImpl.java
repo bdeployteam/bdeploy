@@ -108,12 +108,19 @@ import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
+import io.bdeploy.interfaces.variables.DelayedVariableResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathDummyResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathResolver;
+import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
 import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
 import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
+import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
@@ -1242,6 +1249,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = InstanceManifest.load(hive, instance, state.activeTag);
 
         String nodeName = null;
+        InstanceNodeManifest inm = null;
         InstanceNodeConfiguration ic = null;
         ApplicationConfiguration app = null;
 
@@ -1258,6 +1266,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             if (app != null) {
                 ic = inc;
+                inm = inmf;
                 nodeName = entry.getKey();
                 break;
             }
@@ -1276,19 +1285,13 @@ public class InstanceResourceImpl implements InstanceResource {
                     Status.NOT_FOUND);
         }
 
-        // note that we cannot resolve deployment paths here, but this *should* not matter for calculating a URI.
-        CompositeResolver list = new CompositeResolver();
-        list.add(new InstanceAndSystemVariableResolver(ic));
-        list.add(new ConditionalExpressionResolver(list));
-        list.add(new ApplicationVariableResolver(app));
-        list.add(new ApplicationParameterValueResolver(app.id, ic));
-        list.add(new ParameterValueResolver(new ApplicationParameterProvider(ic)));
-        list.add(new OsVariableResolver());
-        list.add(new EscapeJsonCharactersResolver(list));
-        list.add(new EscapeXmlCharactersResolver(list));
-        list.add(new EscapeYamlCharactersResolver(list));
+        // note that we cannot fully resolve paths as we might be on the wrong node. thus we're using a dummy
+        // resolver as paths do not play any role in calculating the URL.
+        CompositeResolver instanceResolver = Resolvers.forInstancePathIndependent(inm.getConfiguration());
+        instanceResolver.add(new DeploymentPathDummyResolver());
+        CompositeResolver resolver = Resolvers.forApplication(instanceResolver, inm.getConfiguration(), app);
 
-        HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
+        HttpEndpoint processed = CommonEndpointHelper.processEndpoint(resolver, ep.get());
         if (processed == null) {
             throw new WebApplicationException(
                     "Endpoint not enabled: " + endpoint + " for application " + application + " in instance " + instance,

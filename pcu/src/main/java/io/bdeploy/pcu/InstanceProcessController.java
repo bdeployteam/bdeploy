@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.interfaces.variables.Resolvers;
 
 /**
  * Manages all processes of a given instance and knows which processes from which version are running. The controller will
@@ -83,12 +84,7 @@ public class InstanceProcessController {
         for (ProcessConfiguration config : groupConfig.applications) {
             Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.id);
             ProcessController controller = new ProcessController(groupConfig.id, tag, config, processDir);
-            CompositeResolver resolverWithApp = new CompositeResolver();
-            if (inm != null) {
-                resolverWithApp.add(new ApplicationParameterValueResolver(config.id, inm.getConfiguration()));
-            }
-            resolverWithApp.add(resolver);
-            controller.setVariableResolver(resolverWithApp);
+            controller.setVariableResolver(inm == null ? resolver : Resolvers.forProcess(resolver, inm.getConfiguration(), config));
 
             if (runtimeHistory != null) {
                 controller.addStatusListener(event -> {

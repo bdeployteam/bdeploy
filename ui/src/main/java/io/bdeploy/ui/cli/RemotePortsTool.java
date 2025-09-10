@@ -35,6 +35,7 @@ import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -219,17 +220,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
     }
 
     private static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
-        // limited to resolvers which could yield a valid port value, considering potential cross-references.
-        CompositeResolver res = new CompositeResolver();
-        res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
-        res.add(new ConditionalExpressionResolver(res));
-        res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
-        res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
-        res.add(new OsVariableResolver());
-        res.add(new EscapeJsonCharactersResolver(res));
-        res.add(new EscapeXmlCharactersResolver(res));
-        res.add(new EscapeYamlCharactersResolver(res));
-        return res;
+        return Resolvers.forApplication(Resolvers.forInstancePathIndependent(node.nodeConfiguration), node.nodeConfiguration, process);
     }
 
     private static class NodePort {

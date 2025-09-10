@@ -60,6 +60,7 @@ import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 
 /**
  * A {@link InstanceNodeController} is a unit which can be locally deployed.
@@ -80,39 +81,23 @@ public class InstanceNodeController {
     private final BHive hive;
     private final TaskSynchronizer syncOps;
     private final InstanceNodeManifest manifest;
-    private final CompositeResolver resolvers = new CompositeResolver();
-    private final Path deploymentDir;
-    private final Path logDataDir;
+    private final CompositeResolver resolvers;
     private final DeploymentPathProvider paths;
 
     /**
      * @param hive the hive to export artifacts from
-     * @param deploymentDir the root directory used for deployment/runtime
-     * @param logDataDir the external data files directory
+     * @param dpp the deployment paths for the relevant instance
      * @param manifest the instance node manifest
      */
-    public InstanceNodeController(BHive hive, Path deploymentDir, Path logDataDir, InstanceNodeManifest manifest,
+    public InstanceNodeController(BHive hive, DeploymentPathProvider dpp, InstanceNodeManifest manifest,
             TaskSynchronizer syncOps) {
         this.hive = hive;
         this.syncOps = syncOps;
-        this.deploymentDir = deploymentDir;
-        this.logDataDir = logDataDir;
         this.manifest = manifest;
-        this.paths = new DeploymentPathProvider(deploymentDir, logDataDir, manifest);
+        this.paths = dpp;
 
         // Setup default resolvers for this node
-        InstanceNodeConfiguration config = manifest.getConfiguration();
-        this.resolvers.add(new InstanceAndSystemVariableResolver(manifest.getConfiguration()));
-        this.resolvers.add(new ConditionalExpressionResolver(this.resolvers));
-        this.resolvers.add(new InstanceVariableResolver(config, paths.get(SpecialDirectory.ROOT), manifest.getKey().getTag()));
-        this.resolvers.add(new DelayedVariableResolver(resolvers));
-        this.resolvers.add(new OsVariableResolver());
-        this.resolvers.add(new EnvironmentVariableResolver());
-        this.resolvers.add(new DeploymentPathResolver(paths));
-        this.resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(config)));
-        this.resolvers.add(new EscapeJsonCharactersResolver(resolvers));
-        this.resolvers.add(new EscapeXmlCharactersResolver(resolvers));
-        this.resolvers.add(new EscapeYamlCharactersResolver(resolvers));
+        this.resolvers = Resolvers.forInstance(manifest, paths);
     }
 
     public InstanceNodeManifest getManifest() {
@@ -225,9 +210,7 @@ public class InstanceNodeController {
      * only be done if the node is fully deployed.
      */
     public ProcessGroupConfiguration getProcessGroupConfiguration() {
-        DeploymentPathProvider dpp = new DeploymentPathProvider(deploymentDir, logDataDir, manifest);
-
-        Path processConfigFile = dpp.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON);
+        Path processConfigFile = paths.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON);
         if (!Files.exists(processConfigFile)) {
             return null;
         }
@@ -336,7 +319,7 @@ public class InstanceNodeController {
         List<InstanceNodeController> toKeep = new ArrayList<>();
         for (Manifest.Key key : inHive) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
-            InstanceNodeController inc = new InstanceNodeController(source, deploymentDir, logData, inmf, new TaskSynchronizer());
+            InstanceNodeController inc = new InstanceNodeController(source, new DeploymentPathProvider(deploymentDir, logData, inmf), inmf, new TaskSynchronizer());
 
             if (inc.isInstalled()) {
                 if (log.isDebugEnabled()) {

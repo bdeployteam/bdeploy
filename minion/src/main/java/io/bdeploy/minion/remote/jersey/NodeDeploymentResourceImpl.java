@@ -81,7 +81,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         BHive hive = root.getHive();
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentPaths(inm), inm, ts);
         inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
 
         inc.install();
@@ -107,7 +107,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         }
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm,
+        InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentPaths(inm), inm,
                 ts);
         if (!toActivate.isInstalled()) {
             throw new WebApplicationException("Key " + key + " is not deployed", Status.NOT_FOUND);
@@ -186,7 +186,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         getState(inm, hive).uninstall(key.getTag());
 
         // cleanup the deployment directory.
-        new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts).uninstall();
+        new InstanceNodeController(hive, root.getDeploymentPaths(inm), inm, ts).uninstall();
 
         // Remove the InstanceNodeManifest
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
@@ -237,8 +237,9 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         Key activeKey = new Manifest.Key(newest.getKey().getName(), activeTag);
 
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(),
-                InstanceNodeManifest.of(hive, activeKey), ts);
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, activeKey);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentPaths(inm),
+                inm, ts);
 
         Path dataRoot = inc.getDeploymentPathProvider().getAndCreate(dir);
 
@@ -340,7 +341,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     private InstanceNodeController getInstanceNodeController(Manifest.Key nodeKey) {
         BHive hive = root.getHive();
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeKey);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), root.getLogDataDir(), inm, ts);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentPaths(inm), inm, ts);
         if (!inc.isInstalled()) {
             throw new WebApplicationException("Key " + nodeKey + " is not deployed", Status.NOT_FOUND);
         }

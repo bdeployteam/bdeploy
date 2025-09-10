@@ -8,6 +8,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
+import javax.naming.spi.Resolver;
+
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -36,6 +38,7 @@ import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 
 /**
  * A {@link InstanceNodeConfiguration} marries each {@link ApplicationDescriptor}
@@ -104,7 +107,7 @@ public class InstanceNodeConfiguration {
      * @param valueResolver a resolver queried for all variables to expand.
      * @return the rendered {@link ProcessGroupConfiguration}, which is machine specific.
      */
-    public ProcessGroupConfiguration renderDescriptor(VariableResolver valueResolver, InstanceNodeConfiguration dc) {
+    public ProcessGroupConfiguration renderDescriptor(VariableResolver valueResolver, InstanceNodeConfiguration inc) {
         ProcessGroupConfiguration pgc = new ProcessGroupConfiguration();
         pgc.name = name;
         pgc.id = id;
@@ -113,17 +116,7 @@ public class InstanceNodeConfiguration {
         // each downstream application has a scoped provider allowing to directly
         // reference parameter values of parameters in the same scope.
         for (ApplicationConfiguration app : applications) {
-            CompositeResolver list = new CompositeResolver();
-            list.add(new InstanceAndSystemVariableResolver(dc));
-            list.add(new ConditionalExpressionResolver(list));
-            list.add(new ApplicationVariableResolver(app));
-            list.add(new ApplicationParameterValueResolver(app.id, dc));
-            list.add(new ManifestSelfResolver(app.application, valueResolver));
-            list.add(valueResolver);
-            list.add(new EscapeJsonCharactersResolver(list));
-            list.add(new EscapeXmlCharactersResolver(list));
-            list.add(new EscapeYamlCharactersResolver(list));
-            ProcessConfiguration pc = app.renderDescriptor(list);
+            ProcessConfiguration pc = app.renderDescriptor(Resolvers.forApplication(valueResolver, inc, app));
             pgc.applications.add(pc);
         }
 
@@ -177,15 +170,10 @@ public class InstanceNodeConfiguration {
             TrackingInstanceAndSystemVariableResolver tracker = new TrackingInstanceAndSystemVariableResolver(this);
             CompositeResolver resolver = new CompositeResolver();
             resolver.add(tracker);
-            resolver.add(new DelayedVariableResolver(resolver));
-            resolver.add(new OsVariableResolver());
-            resolver.add(new EnvironmentVariableResolver());
-            resolver.add(new ParameterValueResolver(new ApplicationParameterProvider(this)));
+            resolver.add(Resolvers.forInstancePathIndependent(this));
 
             for (ApplicationConfiguration cfg : applications) {
-                CompositeResolver perApp = new CompositeResolver();
-                perApp.add(new ApplicationParameterValueResolver(cfg.id, this));
-                perApp.add(resolver);
+                CompositeResolver perApp = Resolvers.forApplication(resolver, this, cfg);
                 perApp.add(new EmptyVariableResolver()); // last one: ignore all other expansions.
 
                 // this will update the tracking resolver with all required variables.

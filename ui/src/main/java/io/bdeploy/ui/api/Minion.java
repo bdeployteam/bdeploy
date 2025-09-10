@@ -9,8 +9,10 @@ import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.JerseySessionConfiguration;
 import io.bdeploy.ui.dto.JobDto;
 
@@ -166,4 +168,9 @@ public interface Minion {
      * @return the configured default object pool path if any.
      */
     public Path getDefaultPoolPath();
+
+    /**
+     * @return the {@link DeploymentPathProvider} for the given {@link InstanceNodeManifest} utilizing this minions configured directories.
+     */
+    public DeploymentPathProvider getDeploymentPaths(InstanceNodeManifest inm);
 }

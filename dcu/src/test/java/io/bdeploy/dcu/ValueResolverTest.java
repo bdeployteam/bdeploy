@@ -34,6 +34,7 @@ import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.interfaces.variables.Variables;
 
 class ValueResolverTest {
@@ -71,10 +72,8 @@ class ValueResolverTest {
 
         dc.applications.add(a1c);
 
-        CompositeResolver list = new CompositeResolver();
-        list.add(new DeploymentPathResolver(dpp));
+        CompositeResolver list = Resolvers.forInstance(dc, "x", dpp);
         list.add(new ManifestVariableResolver(new ManifestRefPathProvider(mfs)));
-        list.add(new ParameterValueResolver(new ApplicationParameterProvider(dc)));
 
         // tests whether the use cases in the a1c start command work.
         ProcessGroupConfiguration dd = dc.renderDescriptor(list, dc);

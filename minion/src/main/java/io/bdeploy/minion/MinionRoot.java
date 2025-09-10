@@ -79,6 +79,7 @@ import io.bdeploy.interfaces.settings.MailReceiverSettingsDto;
 import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 import io.bdeploy.interfaces.settings.OIDCSettingsDto;
 import io.bdeploy.interfaces.settings.OktaSettingsDto;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.JerseySessionConfiguration;
 import io.bdeploy.jersey.SessionStorage;
@@ -924,7 +925,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private void initProcessControllerForInstance(SortedMap<String, Manifest.Key> activeVersions, Key key) {
         try {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentDir(), getLogDataDir(), inm,
+            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentPaths(inm), inm,
                     new TaskSynchronizer());
             if (!inc.isInstalled()) {
                 return;
@@ -1132,5 +1133,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public Path getDefaultPoolPath() {
         return getState().poolDefaultPath;
+    }
+
+    @Override
+    public DeploymentPathProvider getDeploymentPaths(InstanceNodeManifest inm) {
+        return new DeploymentPathProvider(getDeploymentDir(), getLogDataDir(), inm);
     }
 }

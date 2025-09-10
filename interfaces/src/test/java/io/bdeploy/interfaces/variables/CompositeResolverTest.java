@@ -249,27 +249,11 @@ class CompositeResolverTest {
             pooledSoftware.put(key, MANIFEST_POOL_DIR.resolve(key.directoryFriendlyName()));
         }
 
-        var preResolver = new CompositeResolver();
-        preResolver.add(new InstanceAndSystemVariableResolver(clientCfg.instanceConfig));
-        preResolver.add(new ConditionalExpressionResolver(preResolver));
-        preResolver.add(new ApplicationVariableResolver(clientCfg.appConfig));
-        preResolver.add(new DelayedVariableResolver(preResolver));
-        preResolver.add(new InstanceVariableResolver(clientCfg.instanceConfig, APP_DIR, clientCfg.activeTag));
-        preResolver.add(new OsVariableResolver());
-        preResolver.add(new EnvironmentVariableResolver());
-        preResolver.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
-        preResolver.add(new EscapeJsonCharactersResolver(preResolver));
-        preResolver.add(new EscapeXmlCharactersResolver(preResolver));
-        preResolver.add(new EscapeYamlCharactersResolver(preResolver));
-        preResolver.add(new DeploymentPathResolver(DPP));
+        var preResolver = Resolvers.forInstance(clientCfg.instanceConfig, clientCfg.activeTag, DPP);
         preResolver.add(new ManifestVariableResolver(new ManifestRefPathProvider(pooledSoftware)));
         preResolver.add(new LocalHostnameResolver(true));
 
-        var resolver = new CompositeResolver();
-        resolver.add(new ApplicationParameterValueResolver(clientCfg.appConfig.id, clientCfg.instanceConfig));
-        resolver.add(new ManifestSelfResolver(clientCfg.appConfig.application, preResolver));
-        resolver.add(preResolver);
-        return resolver;
+        return Resolvers.forApplication(preResolver, clientCfg.instanceConfig, clientCfg.appConfig);
     }
 
     private static void testParametersWithoutPrefix(CompositeResolver... resolvers) {

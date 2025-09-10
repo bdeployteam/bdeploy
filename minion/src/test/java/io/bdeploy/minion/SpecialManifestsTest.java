@@ -41,6 +41,7 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
@@ -177,8 +178,8 @@ class SpecialManifestsTest {
 
             Manifest.Key ifmRoot = im.getInstanceNodeManifests().values().iterator().next();
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, ifmRoot);
-            InstanceNodeController inmf = new InstanceNodeController(hive, tmp.resolve(deploymentDir), tmp.resolve("fakeLogData"),
-                    inm, new TaskSynchronizer());
+            InstanceNodeController inmf = new InstanceNodeController(hive, new DeploymentPathProvider(tmp.resolve(deploymentDir), tmp.resolve("fakeLogData"),
+                    inm), inm, new TaskSynchronizer());
             assertEquals("Test", inm.getConfiguration().name);
             assertEquals(1, inm.getConfiguration().applications.size());
             assertEquals("My Dummy", inm.getConfiguration().applications.iterator().next().name);
