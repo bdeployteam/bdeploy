@@ -150,12 +150,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }),
     );
     this.subscription.add(
-      this.states.state$.subscribe((s) => {
-        this.states$.next(s);
-        this.isInstalled.set(!!s?.installedTags?.find((c) => c === this.currentInstance()?.instance.tag));
-      }),
-    );
-    this.subscription.add(
       this.instances.current$.subscribe((currentInstance) => {
         this.currentInstance.set(currentInstance);
       }),
@@ -163,6 +157,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.instances.active$.subscribe((activeInstance) => {
         this.activeInstance.set(activeInstance);
+      }),
+    );
+    this.subscription.add(
+      this.states.state$.subscribe((s) => {
+        this.states$.next(s);
+        this.isInstalled.set(!!s?.installedTags?.find((c) => c === this.currentInstance()?.instance.tag));
       }),
     );
     this.subscription.add(
