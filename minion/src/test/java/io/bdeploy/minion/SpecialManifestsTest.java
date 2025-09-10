@@ -172,11 +172,11 @@ class SpecialManifestsTest {
             InstanceManifest im = InstanceManifest.of(hive, new Manifest.Key(imName,
                     hive.execute(new ManifestMaxIdOperation().setManifestName(imName)).get().toString()));
 
-            assertEquals(1, im.getInstanceNodeManifests().size());
+            assertEquals(1, im.getInstanceNodeManifestKeys().size());
 
             Path deploymentDir = tmp.resolve("fakeDeploy");
 
-            Manifest.Key ifmRoot = im.getInstanceNodeManifests().values().iterator().next();
+            Manifest.Key ifmRoot = im.getInstanceNodeManifestKeys().values().iterator().next();
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, ifmRoot);
             InstanceNodeController inmf = new InstanceNodeController(hive, new DeploymentPathProvider(tmp.resolve(deploymentDir), tmp.resolve("fakeLogData"),
                     inm), inm, new TaskSynchronizer());

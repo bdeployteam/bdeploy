@@ -201,7 +201,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Key productKey = instanceConfig.product;
 
         try (var handle = af.run(Actions.INSTALL, name, instanceId, key.getTag())) {
-            SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
+            SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifestKeys();
             fragmentReferences.remove(InstanceManifest.CLIENT_NODE_NAME);
 
             // Assure that the product has been pushed to the master (e.g. by central).
@@ -340,7 +340,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     // returns null if node is not present in instance version
     private Manifest.Key getNodeKey(String nodeName, String instanceId, String versionTag) {
         InstanceManifest imf = InstanceManifest.load(hive, instanceId, versionTag);
-        SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
+        SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifestKeys();
         return fragmentReferences.get(nodeName);
     }
 
@@ -396,9 +396,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     oldIm.getHistory(hive).recordAction(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
 
                     // make sure all nodes which no longer participate are deactivated.
-                    for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
+                    for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifestKeys().entrySet()) {
                         // deactivation by activation later on.
-                        if (imf.getInstanceNodeManifests().containsKey(oldNode.getKey())) {
+                        if (imf.getInstanceNodeManifestKeys().containsKey(oldNode.getKey())) {
                             continue;
                         }
 
@@ -420,7 +420,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 }
             }
 
-            SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
+            SortedMap<String, Key> fragments = imf.getInstanceNodeManifestKeys();
             for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
                 String nodeName = entry.getKey();
                 if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
@@ -461,7 +461,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         try (var handle = af.run(Actions.UNINSTALL, name, imf.getConfiguration().id, key.getTag())) {
 
-            SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
+            SortedMap<String, Key> fragments = imf.getInstanceNodeManifestKeys();
             fragments.remove(InstanceManifest.CLIENT_NODE_NAME);
 
             List<Runnable> runnables = new ArrayList<>();
@@ -935,7 +935,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig) {
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
-        for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifestKeys().entrySet()) {
             InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
             InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
             InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey(), nodeConfig);
@@ -1090,7 +1090,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.clientImageIcon = amf.readBrandingIcon(hive);
 
         // set dedicated config tree.
-        Key clientKey = imf.getInstanceNodeManifests().get(InstanceManifest.CLIENT_NODE_NAME);
+        Key clientKey = imf.getInstanceNodeManifestKeys().get(InstanceManifest.CLIENT_NODE_NAME);
         if (clientKey != null) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, clientKey);
             if (inmf != null && !inmf.getConfigTrees().isEmpty()) {
@@ -1218,7 +1218,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Manifest.Key instanceKey = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
         InstanceManifest imf = InstanceManifest.of(hive, instanceKey);
 
-        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifestKeys().entrySet()) {
             String nodeName = entry.getKey();
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
 
@@ -1522,7 +1522,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         InstanceManifest imf = InstanceManifest.load(hive, instanceId, state.activeTag);
-        Manifest.Key key = imf.getInstanceNodeManifests().get(InstanceManifest.CLIENT_NODE_NAME); // only for clients.
+        Manifest.Key key = imf.getInstanceNodeManifestKeys().get(InstanceManifest.CLIENT_NODE_NAME); // only for clients.
 
         if (key == null) {
             throw new WebApplicationException("Instance has no client node: " + instanceId, Status.NOT_FOUND);
@@ -1601,7 +1601,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         String activeTag = getInstanceState(instanceId).activeTag;
         InstanceManifest imf = InstanceManifest.load(hive, instanceId, activeTag);
         Map.Entry<String, Manifest.Key> node = null;
-        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifestKeys().entrySet()) {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, entry.getValue());
             boolean found = inm.getConfiguration().applications.stream().anyMatch(a -> a.id.equals(appId));
             if (found) {

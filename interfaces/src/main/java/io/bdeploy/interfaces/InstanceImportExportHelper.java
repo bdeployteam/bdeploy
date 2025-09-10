@@ -67,7 +67,7 @@ public class InstanceImportExportHelper {
         InstanceCompleteConfigDto export = new InstanceCompleteConfigDto();
 
         export.config = imf.getConfiguration();
-        for (Map.Entry<String, Key> node : imf.getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Key> node : imf.getInstanceNodeManifestKeys().entrySet()) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(source, node.getValue());
             export.minions.put(node.getKey(), inmf.getConfiguration());
         }
@@ -150,7 +150,7 @@ public class InstanceImportExportHelper {
             // gather all IDs for every artifact which has an ID except for the instance itself (currently only applications).
             // all IDs which are NOT yet known to the instance MUST be re-assigned to avoid clashes when "copying" an instance.
             // in case there is no existing (latest) version yet, the pool stays empty and all IDs are re-assigned.
-            for (Manifest.Key inmfKey : existing.getInstanceNodeManifests().values()) {
+            for (Manifest.Key inmfKey : existing.getInstanceNodeManifestKeys().values()) {
                 InstanceNodeManifest inmf = InstanceNodeManifest.of(target, inmfKey);
                 for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
                     validateId(app.id);

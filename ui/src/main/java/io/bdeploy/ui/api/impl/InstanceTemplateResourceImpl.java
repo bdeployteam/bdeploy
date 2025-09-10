@@ -163,7 +163,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         // Apply existing nodes
         Map<String, InstanceNodeConfigurationDto> nodes = new TreeMap<>();
-        for (Entry<String, Key> entry : InstanceManifest.load(hive, uuid, null).getInstanceNodeManifests().entrySet()) {
+        for (Entry<String, Key> entry : InstanceManifest.load(hive, uuid, null).getInstanceNodeManifestKeys().entrySet()) {
             InstanceNodeConfigurationDto instanceNodeConfigurationDto = new InstanceNodeConfigurationDto(entry.getKey(),
                     InstanceNodeManifest.of(hive, entry.getValue()).getConfiguration());
             nodes.put(instanceNodeConfigurationDto.nodeName, instanceNodeConfigurationDto);

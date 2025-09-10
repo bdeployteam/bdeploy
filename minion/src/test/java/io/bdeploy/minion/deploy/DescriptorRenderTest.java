@@ -31,7 +31,7 @@ class DescriptorRenderTest {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, null, null, tmp, false);
         InstanceManifest imf = InstanceManifest.of(local, instance);
 
-        InstanceNodeManifest inmf = InstanceNodeManifest.of(local, imf.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest inmf = InstanceNodeManifest.of(local, imf.getInstanceNodeManifestKeys().get(Minion.DEFAULT_NAME));
         ApplicationConfiguration app = inmf.getConfiguration().applications.get(0);
 
         ProcessConfiguration pc = app.renderDescriptor(new VariableResolver() {

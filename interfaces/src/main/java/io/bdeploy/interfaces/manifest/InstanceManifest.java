@@ -169,7 +169,7 @@ public class InstanceManifest {
         }
 
         // delete nodes
-        for (Manifest.Key node : im.getInstanceNodeManifests().values()) {
+        for (Manifest.Key node : im.getInstanceNodeManifestKeys().values()) {
             hive.execute(new ManifestDeleteOperation().setToDelete(node));
         }
 
@@ -178,13 +178,13 @@ public class InstanceManifest {
     }
 
     /**
-     * Find the application with the given ID in this configuration.
+     * Find the {@link ApplicationConfiguration} with the given ID in this configuration.
      *
-     * @param hive the hive where the manifest is stored
-     * @param applicationId unique name of the application
+     * @param hive The {@link BHive} where the manifest is stored
+     * @param applicationId The unique name of the application
      */
     public ApplicationConfiguration getApplicationConfiguration(BHive hive, String applicationId) {
-        for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : nodes.entrySet()) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
             for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
                 if (app.id.equals(applicationId)) {
@@ -196,13 +196,13 @@ public class InstanceManifest {
     }
 
     /**
-     * Find the instance node with the given ID in this configuration.
+     * Find the {@link InstanceNodeConfiguration} with the given ID in this configuration.
      *
-     * @param hive the hive where the manifest is stored
-     * @param applicationId unique name of the application
+     * @param hive The {@link BHive} where the manifest is stored
+     * @param applicationId The unique name of the application
      */
     public InstanceNodeConfiguration getInstanceNodeConfiguration(BHive hive, String applicationId) {
-        for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : nodes.entrySet()) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
             InstanceNodeConfiguration inc = inmf.getConfiguration();
             for (ApplicationConfiguration app : inc.applications) {
@@ -230,28 +230,21 @@ public class InstanceManifest {
     }
 
     /**
-     * Returns the name of the node along with a reference to the actual
-     * {@linkplain InstanceNodeManifest manifest}.
-     *
-     * @return a set containing the name of the node (=key) and its manifest
-     *         reference (=value)
+     * Returns a {@link SortedMap} of name of the node along with the key of the corresponding {@linkplain InstanceNodeManifest}.
      */
-    public SortedMap<String, Manifest.Key> getInstanceNodeManifests() {
+    public SortedMap<String, Manifest.Key> getInstanceNodeManifestKeys() {
         return nodes;
     }
 
     /**
-     * Returns the name of the node along with the actual node configuration.
+     * Returns a {@link SortedMap} of the name of the node along with the corresponding {@link InstanceNodeConfiguration}.
      *
-     * @param hive the hive where the manifest is stored
-     * @return a set containing the name of the node (=key) and its manifest
-     *         reference (=value)
+     * @param hive The {@link BHive} where the manifest is stored
      */
-    public Map<String, InstanceNodeConfiguration> getInstanceNodeConfiguration(BHive hive) {
-        Map<String, InstanceNodeConfiguration> result = new TreeMap<>();
-        for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
-            InstanceNodeManifest imf = InstanceNodeManifest.of(hive, entry.getValue());
-            result.put(entry.getKey(), imf.getConfiguration());
+    public SortedMap<String, InstanceNodeConfiguration> getInstanceNodeConfigurations(BHive hive) {
+        SortedMap<String, InstanceNodeConfiguration> result = new TreeMap<>();
+        for (var entry : nodes.entrySet()) {
+            result.put(entry.getKey(), InstanceNodeManifest.of(hive, entry.getValue()).getConfiguration());
         }
         return result;
     }

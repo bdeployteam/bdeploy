@@ -614,7 +614,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Update the node configuration. Create entries for nodes that are configured
         // but missing
-        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifestKeys().entrySet()) {
             String nodeName = entry.getKey();
             InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, k -> {
                 // Node is not known any more but has configured applications
@@ -1238,7 +1238,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceNodeConfiguration ic = null;
         ApplicationConfiguration app = null;
 
-        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
+        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifestKeys().entrySet()) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
             InstanceNodeConfiguration inc = inmf.getConfiguration();
 

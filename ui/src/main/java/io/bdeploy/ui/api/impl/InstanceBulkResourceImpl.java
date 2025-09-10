@@ -117,7 +117,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         Map<String, Manifest.Key> instanceKeys = new TreeMap<>();
         List<InstanceUpdateDto> updates = instances.stream().map(i -> InstanceManifest.of(hive, i)).map(im -> {
             var icd = new InstanceConfigurationDto(im.getConfiguration(),
-                    im.getInstanceNodeManifests().entrySet().stream().map(e -> new InstanceNodeConfigurationDto(e.getKey(),
+                    im.getInstanceNodeManifestKeys().entrySet().stream().map(e -> new InstanceNodeConfigurationDto(e.getKey(),
                             InstanceNodeManifest.of(hive, e.getValue()).getConfiguration())).toList());
 
             instanceKeys.put(icd.config.id, im.getKey());

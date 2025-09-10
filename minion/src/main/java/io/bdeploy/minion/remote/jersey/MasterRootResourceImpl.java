@@ -200,7 +200,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         InstanceManifest existing = InstanceManifest.of(hive, new Manifest.Key(rootName, String.valueOf(latest.get())));
 
         InstanceManifest.Builder imfb = new InstanceManifest.Builder().setInstanceConfiguration(existing.getConfiguration());
-        for (Map.Entry<String, InstanceNodeConfiguration> node : existing.getInstanceNodeConfiguration(hive).entrySet()) {
+        for (Map.Entry<String, InstanceNodeConfiguration> node : existing.getInstanceNodeConfigurations(hive).entrySet()) {
             InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
             InstanceNodeConfiguration nodeCfg = node.getValue();
 

@@ -256,7 +256,7 @@ public class CleanupHelper {
             SortedSet<Key> inmfs = context.getAllInstanceManifests().stream() //
                     .filter(im -> im.getName().equals(imKey.getName())) //
                     .map(key -> InstanceManifest.of(context.getHive(), key)) //
-                    .flatMap(im -> im.getInstanceNodeManifests().values().stream()) //
+                    .flatMap(im -> im.getInstanceNodeManifestKeys().values().stream()) //
                     .filter(inm -> (state.activeTag != null && intTagComparator.compare(inm.getTag(), state.activeTag) >= 0)
                             || inm.getTag().equals(state.lastActiveTag) //
                             || activeTags.contains(inm.getTag())) //
@@ -276,7 +276,7 @@ public class CleanupHelper {
             SortedSet<Key> inmfs = context.getAllInstanceManifests().stream() //
                     .filter(im -> im.getName().equals(imKey.getName())) //
                     .map(key -> InstanceManifest.of(context.getHive(), key))
-                    .flatMap(im -> im.getInstanceNodeManifests().values().stream())
+                    .flatMap(im -> im.getInstanceNodeManifestKeys().values().stream())
                     .collect(Collectors.toCollection(TreeSet::new));
             context.addInstanceNodeManifestsToKeep(inmfs);
         }

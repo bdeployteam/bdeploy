@@ -133,7 +133,7 @@ class MinionDeployTest {
 
         // instance has a single server application, fetch its id and query output
         InstanceManifest imf = InstanceManifest.of(local, instance);
-        Key nodeKey = imf.getInstanceNodeManifests().get("master");
+        Key nodeKey = imf.getInstanceNodeManifestKeys().get("master");
         InstanceNodeManifest inmf = InstanceNodeManifest.of(local, nodeKey);
         String appId = inmf.getConfiguration().applications.get(0).id;
 
@@ -228,8 +228,8 @@ class MinionDeployTest {
         // check application UIDs
         InstanceManifest im2 = InstanceManifest.of(local, importedInstance);
 
-        InstanceNodeManifest master1 = InstanceNodeManifest.of(local, im1.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
-        InstanceNodeManifest master2 = InstanceNodeManifest.of(local, im2.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest master1 = InstanceNodeManifest.of(local, im1.getInstanceNodeManifestKeys().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest master2 = InstanceNodeManifest.of(local, im2.getInstanceNodeManifestKeys().get(Minion.DEFAULT_NAME));
 
         // IDs may NEVER match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master2.getConfiguration().applications.get(0).name);
@@ -242,7 +242,7 @@ class MinionDeployTest {
         assertEquals(instance.getName(), importedVersion.getName());
 
         InstanceManifest im3 = InstanceManifest.of(local, importedVersion);
-        InstanceNodeManifest master3 = InstanceNodeManifest.of(local, im3.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest master3 = InstanceNodeManifest.of(local, im3.getInstanceNodeManifestKeys().get(Minion.DEFAULT_NAME));
 
         // IDs MUST match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master3.getConfiguration().applications.get(0).name);
