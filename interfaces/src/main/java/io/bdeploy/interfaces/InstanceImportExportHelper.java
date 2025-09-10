@@ -67,10 +67,7 @@ public class InstanceImportExportHelper {
         InstanceCompleteConfigDto export = new InstanceCompleteConfigDto();
 
         export.config = imf.getConfiguration();
-        for (Map.Entry<String, Key> node : imf.getInstanceNodeManifestKeys().entrySet()) {
-            InstanceNodeManifest inmf = InstanceNodeManifest.of(source, node.getValue());
-            export.minions.put(node.getKey(), inmf.getConfiguration());
-        }
+        export.minions.putAll(imf.getInstanceNodeConfigurations(source));
 
         try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
             Path zroot = zfs.getPath("/");
@@ -150,9 +147,8 @@ public class InstanceImportExportHelper {
             // gather all IDs for every artifact which has an ID except for the instance itself (currently only applications).
             // all IDs which are NOT yet known to the instance MUST be re-assigned to avoid clashes when "copying" an instance.
             // in case there is no existing (latest) version yet, the pool stays empty and all IDs are re-assigned.
-            for (Manifest.Key inmfKey : existing.getInstanceNodeManifestKeys().values()) {
-                InstanceNodeManifest inmf = InstanceNodeManifest.of(target, inmfKey);
-                for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
+            for (var cfg : existing.getInstanceNodeConfigurations(target).values()) {
+                for (ApplicationConfiguration app : cfg.applications) {
                     validateId(app.id);
                     idPool.add(app.id);
                 }

@@ -612,9 +612,8 @@ public class InstanceResourceImpl implements InstanceResource {
         Map<String, InstanceNodeConfigurationDto> node2Config = new TreeMap<>();
         result.nodeConfigDtos.forEach(dto -> node2Config.put(dto.nodeName, dto));
 
-        // Update the node configuration. Create entries for nodes that are configured
-        // but missing
-        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifestKeys().entrySet()) {
+        // Update the node configuration. Create entries for nodes that are configured but missing
+        for (var entry : im.getInstanceNodeConfigurations(hive).entrySet()) {
             String nodeName = entry.getKey();
             InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, k -> {
                 // Node is not known any more but has configured applications
@@ -622,7 +621,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 result.nodeConfigDtos.add(inc);
                 return inc;
             });
-            nodeConfig.nodeConfiguration = InstanceNodeManifest.of(hive, entry.getValue()).getConfiguration();
+            nodeConfig.nodeConfiguration = entry.getValue();
         }
     }
 

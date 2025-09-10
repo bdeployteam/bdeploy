@@ -96,9 +96,8 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, activeTag);
 
         SortedMap<String, EndpointsConfiguration> result = new TreeMap<>();
-        for (Manifest.Key imnk : im.getInstanceNodeManifestKeys().values()) {
-            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, imnk);
-            inm.getConfiguration().applications.stream().forEach(a -> result.put(a.id, a.endpoints));
+        for (var inc : im.getInstanceNodeConfigurations(hive).values()) {
+            inc.applications.stream().forEach(a -> result.put(a.id, a.endpoints));
         }
 
         return result;

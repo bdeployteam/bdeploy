@@ -424,15 +424,12 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     private static InstanceUiEndpointsDto listUiEndpoints(InstanceManifest im, BHive hive) {
-        SortedMap<String, Key> manifests = im.getInstanceNodeManifestKeys();
-
         InstanceUiEndpointsDto allInstEps = new InstanceUiEndpointsDto();
         allInstEps.instanceId = im.getConfiguration().id;
         allInstEps.endpoints = new ArrayList<>();
 
-        for (Map.Entry<String, Key> nodeEntry : manifests.entrySet()) {
+        for (var instanceNode : im.getInstanceNodeManifests(hive).values()) {
             // Add all configured client applications
-            InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, nodeEntry.getValue());
             for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
                 CompositeResolver resolver = CommonEndpointHelper.createEndpoindResolver(instanceNode, appConfig, null);
 

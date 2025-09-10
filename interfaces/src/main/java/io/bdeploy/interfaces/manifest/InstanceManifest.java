@@ -237,6 +237,19 @@ public class InstanceManifest {
     }
 
     /**
+     * Returns a {@link SortedMap} of the name of the node along with the corresponding {@link InstanceNodeManifest}.
+     *
+     * @param hive The {@link BHive} where the manifest is stored
+     */
+    public SortedMap<String, InstanceNodeManifest> getInstanceNodeManifests(BHive hive) {
+        SortedMap<String, InstanceNodeManifest> result = new TreeMap<>();
+        for (var entry : nodes.entrySet()) {
+            result.put(entry.getKey(), InstanceNodeManifest.of(hive, entry.getValue()));
+        }
+        return result;
+    }
+
+    /**
      * Returns a {@link SortedMap} of the name of the node along with the corresponding {@link InstanceNodeConfiguration}.
      *
      * @param hive The {@link BHive} where the manifest is stored
