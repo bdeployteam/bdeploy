@@ -72,6 +72,11 @@ public interface Minion {
     public MinionMode getMode();
 
     /**
+     * @return the type used by the node part of this minion.
+     */
+    public MinionDto.MinionNodeType getNodeType();
+
+    /**
      * @return the own {@link RemoteService} for loop-back communication
      */
     public RemoteService getSelf();

@@ -22,6 +22,7 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ApiAccessToken.Builder;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
@@ -200,7 +201,7 @@ public class TestMinion extends TestServer {
             try {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, new ActivityReporter.Null());
-                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode, true);
+                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode, MinionDto.MinionNodeType.SERVER, true);
                 mr.modifyState(s -> s.poolDefaultPath = root.resolve("objpool"));
                 mr.onStartup(true);
             } catch (Exception e) {
