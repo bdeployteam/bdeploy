@@ -137,6 +137,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
                     if (cfg.isPresent()) {
                         nodeName = entry.getKey();
+                        break;
                     }
                 }
 
