@@ -1,0 +1,39 @@
+<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
+  <app-bd-dialog-toolbar header="Add Multi-Node" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <form #form="ngForm">
+      <div class="flex flex-col gap-2.5">
+        <span>Create a configuration for a multi-node. Configure the expected OS on the worker nodes.</span>
+        <span>After creating the multi-node you can download the master file that is used to attach the worker node to this master, which will monitor them.</span>
+        <app-bd-form-input
+          name="name"
+          label="Name"
+          [ngModel]="data.name"
+          (ngModelChange)="updateName($event)"
+          required
+          appIdentifier
+          appEditUniqueValueValidator
+          errorDisplay="immediate"
+          [disallowedValues]="nodeNames$ | async"
+          [appRevalidateOn]="nodeNames$"
+        ></app-bd-form-input>
+        <app-bd-form-select
+          [values]="osOptions"
+          label="Operating System"
+          name="operatingSystem"
+          [(ngModel)]="data.config.operatingSystem"
+          required
+        ></app-bd-form-select>
+        <app-bd-button
+          color="primary"
+          [disabled]="!canSave() || (mappedAdd$ | async)"
+          [loadingWhen$]="mappedAdd$"
+          [collapsed]="false"
+          text="Save"
+          icon="save"
+          (click)="onSave()"
+        ></app-bd-button>
+      </div>
+    </form>
+  </app-bd-dialog-content>
+</app-bd-dialog>

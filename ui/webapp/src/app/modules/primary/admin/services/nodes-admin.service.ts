@@ -2,16 +2,20 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, debounceTime, finalize, Observable } from 'rxjs';
 import {
+  CreateMultiNodeDto,
   ManifestKey,
   MinionStatusDto,
+  MultiNodeDto,
   NodeAttachDto,
   ObjectChangeType,
+  OperatingSystem,
   RemoteService,
-  RepairAndPruneResultDto,
+  RepairAndPruneResultDto
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
+import { DownloadService } from '../../../core/services/download.service';
 
 export interface MinionRecord {
   name: string;
@@ -19,12 +23,13 @@ export interface MinionRecord {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class NodesAdminService {
   private readonly changes = inject(ObjectChangesService);
   private readonly cfg = inject(ConfigService);
   private readonly http = inject(HttpClient);
+  private readonly downloads = inject(DownloadService);
 
   public loading$ = new BehaviorSubject<boolean>(true);
   public nodes$ = new BehaviorSubject<MinionRecord[]>(null);
@@ -40,6 +45,14 @@ export class NodesAdminService {
     this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
   }
 
+  public getOperatingSystemOptions() {
+    return [
+      OperatingSystem.LINUX,
+      OperatingSystem.LINUX_AARCH64,
+      OperatingSystem.WINDOWS
+    ];
+  }
+
   public reload() {
     this.loading$.next(true);
     this.http
@@ -48,7 +61,7 @@ export class NodesAdminService {
       .subscribe((nodes) => {
         const minions = Object.keys(nodes).map((name) => ({
           name,
-          status: nodes[name],
+          status: nodes[name]
         }));
         this.nodes$.next(minions);
       });
@@ -95,4 +108,30 @@ export class NodesAdminService {
       .post<unknown>(`${this.apiPath()}/nodes/${nodeName}/shutdown`, null)
       .pipe(measure(`Shutdown node ${nodeName}`));
   }
+
+  public addMultiNode(dto: CreateMultiNodeDto): Observable<unknown> {
+    return this.http.put(`${this.apiPath()}/multi-nodes`, dto).pipe(measure(`Add multi-node ${dto.name}`));
+  }
+
+  public editMultiNode(nodeName: string, config: MultiNodeDto): Observable<unknown> {
+    return this.http.post(`${this.apiPath()}/multi-nodes/${nodeName}`, config).pipe(measure(`Edit multi-node ${nodeName}`));
+  }
+
+  public downloadMultiNodeMasterFile(nodeName: string): Observable<unknown> {
+    return new Observable((s) => {
+      this.http.get(`${this.apiPath()}/multi-nodes/${nodeName}/masterFile`)
+        .subscribe({
+          next: (data) => {
+            this.downloads.downloadJson(nodeName + '-master-file.json', data);
+            s.next(null);
+            s.complete();
+          },
+          error: (err) => {
+            s.error(err);
+            s.complete();
+          }
+        });
+    });
+  }
+
 }

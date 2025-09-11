@@ -243,7 +243,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
         minionConfiguration.addMinion(Minion.DEFAULT_NAME,
-                MinionDto.create(mode != MinionMode.NODE, remote, MinionNodeType.SERVER));
+                MinionDto.createServerNode(mode != MinionMode.NODE, remote));
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);

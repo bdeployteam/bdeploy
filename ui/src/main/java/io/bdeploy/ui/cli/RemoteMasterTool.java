@@ -153,6 +153,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         DataTable table = createDataTable();
         table.setCaption("Minions on " + svc.getUri());
         table.column(new DataTableColumn.Builder("Name").setMinWidth(13).build());
+        table.column(new DataTableColumn.Builder("Type").setMinWidth(7).build());
         table.column(new DataTableColumn.Builder("Status").setMinWidth(6).build());
         table.column(new DataTableColumn.Builder("Start").setMinWidth(10).build());
         table.column(new DataTableColumn.Builder("OS").setMinWidth(7).build());
@@ -163,7 +164,8 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             String startTime = s.startup != null ? FormatHelper.formatTemporal(s.startup) : "-";
             String status = s.offline ? "OFFLINE" : "ONLINE";
             MinionDto config = s.config;
-            table.row().cell(e.getKey()).cell(status).cell(startTime).cell(config.os).cell(config.version).build();
+            table.row().cell(e.getKey()).cell(e.getValue().config.minionNodeType.name()).cell(status).cell(startTime)
+                    .cell(config.os).cell(config.version).build();
         }
         return table;
     }

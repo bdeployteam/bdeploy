@@ -11,12 +11,15 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
+import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
+import io.bdeploy.ui.dto.CreateMultiNodeDto;
 import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -27,8 +30,8 @@ import jakarta.ws.rs.core.SecurityContext;
 /**
  * Management resource which more or less plain-redirects to the local {@link MasterRootResource}.
  * <p>
- * Most calls throw if the current {@link Minion} has {@link MinionMode#CENTRAL}. A dedicated implementation is required for
- * this case.
+ * Most calls throw if the current {@link Minion} has {@link MinionMode#CENTRAL}. A dedicated implementation is required for this
+ * case.
  */
 public class NodeManagementResourceImpl implements NodeManagementResource {
 
@@ -53,8 +56,8 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
     public void addServerNode(NodeAttachDto data) {
         throwIfCentral();
         if (data.sourceMode == MinionMode.NODE) {
-            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).addServerNode(data.name,
-                    data.remote);
+            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context)
+                    .addServerNode(data.name, data.remote);
         } else {
             ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).convertNode(data.name, data.remote);
         }
@@ -119,5 +122,27 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
         if (minion.getMode() == MinionMode.CENTRAL) {
             throw new WebApplicationException("Operation not available in mode CENTRAL");
         }
+    }
+
+    @Override
+    public void addMultiNode(CreateMultiNodeDto createMultiNodeDto) {
+        throwIfCentral();
+        if (createMultiNodeDto.config.operatingSystem == null || OsHelper.isNotSupported(createMultiNodeDto.config.operatingSystem)) {
+            throw new WebApplicationException("The operating system is required and must be supported, for adding a multi-node.");
+        }
+        ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context)
+                .addMultiNode(createMultiNodeDto.name, createMultiNodeDto.config);
+    }
+
+    @Override
+    public MultiNodeMasterFile getMultiNodeMasterFile(String name) {
+        throwIfCentral();
+
+        MultiNodeMasterFile desc = new MultiNodeMasterFile();
+        desc.name = name;
+        desc.master = new RemoteService(minion.getSelf().getUri(),
+                ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).generateWeakToken(name));
+
+        return desc;
     }
 }

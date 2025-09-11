@@ -8,6 +8,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -124,5 +125,21 @@ public interface MasterRootResource extends CommonUpdateResource {
      */
     @Path("{name}")
     public MasterNamedResource getNamedMaster(@PathParam("name") String name);
+
+    /**
+     * @param name the name of the minion to add
+     * @param config the data required for the multi-node
+     */
+    @PUT
+    @Path("/minions/multi-nodes/{name}")
+    public void addMultiNode(@PathParam("name") String name, MultiNodeDto config);
+
+    /**
+     * @param principal the principal name to issue the token to.
+     * @return a "weak" token is suitable for applications that need to register themselves on master, like multi-nodes
+     */
+    @POST
+    @Path("/weak-token")
+    public String generateWeakToken(String principal);
 
 }

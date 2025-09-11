@@ -25,6 +25,7 @@ import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
@@ -70,7 +71,10 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         this.nodeSynchronizer = new NodeSynchronizer(this.self, this.config.getMinion(this.self));
 
         // initially, all nodes are offline.
-        this.config.entrySet().forEach(e -> this.status.put(e.getKey(), createStarting(e.getValue())));
+        this.config.entrySet().forEach(e -> this.status.put(e.getKey(),
+                e.getValue().minionNodeType == MinionDto.MinionNodeType.MULTI
+                        ? createOfflineMultiNode(e.getValue())
+                        : createStarting(e.getValue())));
 
         if (root.getMode() == MinionMode.CENTRAL) {
             // no need to periodically fetch states here. However we *do* want to verify connectivity
@@ -115,6 +119,10 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
     private static MinionStatusDto createStarting(MinionDto node) {
         return MinionStatusDto.createOffline(node, "Starting...");
+    }
+
+    private static MinionStatusDto createOfflineMultiNode(MinionDto node) {
+        return MinionStatusDto.createOffline(node, "No Nodes Connected...");
     }
 
     private void fetchNodeStates() {
@@ -165,6 +173,11 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
             // in case the configuration was removed while we were scheduled.
             if (mdto != null) {
+                if(mdto.minionNodeType == MinionDto.MinionNodeType.MULTI) {
+                    log.info("Skipping multi-node {} start.", node);
+                    return;
+                }
+
                 MinionStatusResource msr = ResourceProvider.getResource(mdto.remote, MinionStatusResource.class, null);
 
                 long start = System.currentTimeMillis();
@@ -306,7 +319,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         log.info("Adding node {}", name);
 
         config.addMinion(name, minion);
-        status.put(name, createStarting(minion));
+        status.put(name, createOfflineMultiNode(minion));
         contactWarning.put(name, Boolean.FALSE); // was not reachable (new), issue recovery log.
         scheduleSave();
 
@@ -339,6 +352,20 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     @Override
     public void setChangeEventManager(ChangeEventManager changes) {
         this.changes = changes;
+    }
+
+    @Override
+    public void addMultiNode(String name, MultiNodeDto multiNodeDto) {
+        log.info("Adding multi-node {}", name);
+
+        MinionDto minion = MinionDto.createMultiNode(multiNodeDto.operatingSystem);
+        config.addMinion(name, minion);
+        status.put(name, createOfflineMultiNode(minion));
+        contactWarning.put(name, Boolean.FALSE); // was not reachable (new), issue recovery log.
+        scheduleSave();
+
+        log.info("Updating state for added multi-node {}", name);
+        fetchNodeState(name);
     }
 
 }

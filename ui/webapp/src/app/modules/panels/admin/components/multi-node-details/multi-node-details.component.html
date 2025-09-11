@@ -1,0 +1,50 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [panel]="true" header="Multi-Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    @if (nodeState$ | async; as state) {
+      <div class="flex flex-col gap-2.5">
+        <app-bd-notification-card
+          [svgIcon]="state.config.os"
+          [dismissable]="false"
+          header="{{ nodeName$ | async }} - {{ state.config.os }}"
+          >
+          <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
+            <div>Master:</div>
+            <div>{{ state.config.master ? 'yes' : 'no' }}</div>
+            <div>Node type:</div>
+            <div>{{ state.config.minionNodeType }}</div>
+          </div>
+          @if (state.offline) {
+            <strong class="pt-2" [matTooltip]="state.infoText" [matTooltipShowDelay]="500">{{ state.infoText }}</strong>
+          }
+        </app-bd-notification-card>
+        <mat-divider></mat-divider>
+        <app-bd-button
+          text="Download Master File"
+          icon="download"
+          [collapsed]="false"
+          (click)="downloadMasterFile()"
+          [loadingWhen$]="downloadingMasterFile$"
+          [disabled]="downloadingMasterFile$ | async"
+        ></app-bd-button>
+        <app-bd-button
+          text="Remove"
+          icon="delete"
+          [collapsed]="false"
+          (click)="onDelete()"
+          [disabled]="state.config?.master || (mappedDelete$ | async)"
+          [loadingWhen$]="mappedDelete$"
+        ></app-bd-button>
+      </div>
+    } @else {
+      <app-bd-notification-card
+        icon="info"
+        [type]="'warning'"
+        [dismissable]="false"
+        header="Multi-Node Details not available"
+        >
+        <div class="text-justify">Multi-Node details are not available.</div>
+      </app-bd-notification-card>
+    }
+  </app-bd-dialog-content>
+</app-bd-dialog>

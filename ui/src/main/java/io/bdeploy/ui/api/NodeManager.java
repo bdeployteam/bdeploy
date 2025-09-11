@@ -6,6 +6,7 @@ import java.util.Map;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
 import io.bdeploy.ui.api.impl.ChangeEventManager;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.SecurityContext;
@@ -90,5 +91,11 @@ public interface NodeManager {
      * @param changes the {@link ChangeEventManager} to be used by this {@link NodeManager}.
      */
     public void setChangeEventManager(ChangeEventManager changes);
+
+    /**
+     * @param name the name of the multi-node to add
+     * @param config the configuration of the node
+     */
+    public void addMultiNode(String name, MultiNodeDto config);
 
 }

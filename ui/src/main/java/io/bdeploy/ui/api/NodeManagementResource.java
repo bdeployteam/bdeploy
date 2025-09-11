@@ -8,7 +8,10 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
+import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
+import io.bdeploy.ui.dto.CreateMultiNodeDto;
 import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -97,4 +100,19 @@ public interface NodeManagementResource {
     @Path("/nodes/{name}/shutdown")
     @RequiredPermission(permission = Permission.ADMIN)
     public void shutdownNode(@PathParam("name") String name);
+
+    /**
+     * @param createMultiNodeDto the required data for declaring a multi-node
+     */
+    @PUT
+    @Path("/multi-nodes")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void addMultiNode(CreateMultiNodeDto createMultiNodeDto);
+
+    /**
+     * @param name the name of the multi-node for which to generate the file
+     */
+    @GET
+    @Path("/multi-nodes/{name}/masterFile")
+    public MultiNodeMasterFile getMultiNodeMasterFile(@PathParam("name") String name);
 }

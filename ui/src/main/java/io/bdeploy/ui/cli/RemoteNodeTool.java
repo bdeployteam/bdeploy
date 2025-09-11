@@ -1,5 +1,7 @@
 package io.bdeploy.ui.cli;
 
+import static io.bdeploy.common.util.OsHelper.OperatingSystem;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.cfg.Configuration;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
@@ -19,11 +22,13 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.cli.RemoteNodeTool.NodeConfig;
+import io.bdeploy.ui.dto.CreateMultiNodeDto;
 import io.bdeploy.ui.dto.NodeAttachDto;
 
 /**
@@ -125,6 +130,7 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
     private RenderableResult doListMinions(RemoteService r) {
         DataTable table = createDataTable();
         table.column(new DataTableColumn.Builder("Name").setMinWidth(5).build());
+        table.column(new DataTableColumn.Builder("Type").setMinWidth(7).build());
         table.column(new DataTableColumn.Builder("OS").setMinWidth(7).build());
         table.column(new DataTableColumn.Builder("URI").build());
         table.column(new DataTableColumn.Builder("Online").setMinWidth(6).build());
@@ -136,8 +142,9 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
             String name = entry.getKey();
             MinionStatusDto details = entry.getValue();
             MinionDto config = details.config;
-            table.row().cell(name).cell(config.os != null ? config.os.name() : "Unknown").cell(config.remote.getUri())
-                    .cell(details.offline ? "" : "*").cell(details.infoText).build();
+            table.row().cell(name).cell(config.minionNodeType.name()).cell(config.os != null ? config.os.name() : "Unknown")
+                    .cell(config.remote != null ? config.remote.getUri() : "").cell(details.offline ? "" : "*")
+                    .cell(details.infoText).build();
         }
         return table;
     }

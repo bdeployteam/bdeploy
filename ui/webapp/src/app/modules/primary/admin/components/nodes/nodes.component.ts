@@ -11,6 +11,7 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
+import { MinionNodeType } from '../../../../../models/gen.dtos';
 
 const nodeColName: BdDataColumn<MinionRecord, string> = {
   id: 'name',
@@ -58,10 +59,20 @@ export class NodesComponent {
   protected readonly nodesAdmin = inject(NodesAdminService);
 
   protected sort: Sort = { active: 'name', direction: 'asc' };
-  protected getRecordRoute = (row: MinionRecord) => [
-    '',
-    { outlets: { panel: ['panels', 'admin', 'node-detail', row.name] } },
-  ];
+  protected getRecordRoute = (row: MinionRecord) => {
+    if (row?.status?.config?.minionNodeType == MinionNodeType.MULTI) {
+      return [
+        '',
+        { outlets: { panel: ['panels', 'admin', 'multi-node-detail', row.name] } }
+      ];
+    } else {
+      return [
+        '',
+        { outlets: { panel: ['panels', 'admin', 'node-detail', row.name] } }
+      ];
+    }
+  };
+
   protected readonly columns: BdDataColumn<MinionRecord, unknown>[] = [
     nodeColName,
     nodeColStatus,

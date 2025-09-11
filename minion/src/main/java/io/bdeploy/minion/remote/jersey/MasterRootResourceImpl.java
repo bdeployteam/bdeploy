@@ -44,8 +44,8 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.interfaces.minion.MinionDto.MinionNodeType;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.MultiNodeDto;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -104,7 +104,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
     @Override
     public void addServerNode(String name, RemoteService minion) {
         try (var handle = af.run(Actions.ADD_NODE, null, null, name)) {
-            nodes.addNode(name, MinionDto.create(false, minion, MinionNodeType.SERVER));
+            nodes.addNode(name, MinionDto.createServerNode(false, minion));
         }
     }
 
@@ -630,4 +630,17 @@ public class MasterRootResourceImpl implements MasterRootResource {
         public Map<String, Map<String, List<Manifest.Key>>> toFetch = new TreeMap<>();
         public Map<String, List<InstanceDto>> allInstances = new TreeMap<>();
     }
+
+    @Override
+    public void addMultiNode(String name, MultiNodeDto config) {
+        try (var handle = af.run(Actions.ADD_NODE, null, null, name)) {
+            nodes.addMultiNode(name, config);
+        }
+    }
+
+    @Override
+    public String generateWeakToken(String principal) {
+        return root.createWeakToken(principal);
+    }
+
 }

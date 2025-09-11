@@ -1,5 +1,7 @@
 package io.bdeploy.common.util;
 
+import java.util.EnumSet;
+
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 /**
@@ -22,7 +24,18 @@ public class OsHelper {
         UNKNOWN
     }
 
+    private static final EnumSet<OperatingSystem> supportedOperatingSystems = EnumSet.of(OperatingSystem.WINDOWS,
+            OperatingSystem.LINUX, OperatingSystem.LINUX_AARCH64);
+
     private OsHelper() {
+    }
+
+    public static boolean isSupported(OperatingSystem os) {
+        return supportedOperatingSystems.contains(os);
+    }
+
+    public static boolean isNotSupported(OperatingSystem os) {
+        return !isSupported(os);
     }
 
     /**

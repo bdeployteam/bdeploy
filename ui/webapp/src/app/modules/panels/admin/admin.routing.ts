@@ -4,42 +4,6 @@ import { AdminGuard } from '../../core/guards/admin.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const ADMIN_PANEL_ROUTES: Routes = [
   {
     path: 'add-plugin',
@@ -94,6 +58,17 @@ export const ADMIN_PANEL_ROUTES: Routes = [
     path: 'node-detail/:node/conversion',
     loadComponent: () => import('./components/node-details/node-conversion/node-conversion.component').then(m => m.NodeConversionComponent),
     canActivate: [AdminGuard],
+  },
+  {
+    path: 'add-multi-node',
+    loadComponent: () => import('./components/add-multi-node/add-multi-node.component').then(m => m.AddMultiNodeComponent),
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard]
+  },
+  {
+    path: 'multi-node-detail/:node',
+    loadComponent: () => import('./components/multi-node-details/multi-node-details.component').then(m => m.MultiNodeDetailsComponent),
+    canActivate: [AdminGuard]
   },
   {
     path: 'bhive/:bhive',

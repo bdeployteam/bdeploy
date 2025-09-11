@@ -48,15 +48,29 @@ public class MinionDto {
      *
      * @param isMaster whether or not this is a master minion
      * @param remote the remote service
-     * @param minionNodeType the {@link MinionNodeType} of this node
      */
-    public static MinionDto create(boolean isMaster, RemoteService remote, MinionNodeType minionNodeType) {
+    public static MinionDto createServerNode(boolean isMaster, RemoteService remote) {
         MinionDto dto = new MinionDto();
         dto.master = isMaster;
         dto.remote = remote;
         dto.version = VersionHelper.getVersion();
         dto.os = OsHelper.getRunningOs();
-        dto.minionNodeType = minionNodeType;
+        dto.minionNodeType = MinionNodeType.SERVER;
+        return dto;
+    }
+
+    /**
+     * Creates and returns a new minion DTO, that represent the configuration of multi-node. This action can only be done from the
+     * master node.
+     *
+     * @param operatingSystem the expected operating system of the physical nodes
+     */
+    public static MinionDto createMultiNode(OperatingSystem operatingSystem) {
+        MinionDto dto = new MinionDto();
+        dto.master = false;
+        dto.version = VersionHelper.getVersion();
+        dto.os = operatingSystem;
+        dto.minionNodeType = MinionNodeType.MULTI;
         return dto;
     }
 }

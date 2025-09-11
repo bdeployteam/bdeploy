@@ -73,6 +73,8 @@ export class ConfigService {
 
     this.icons.addSvgIcon('LINUX', this.sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
     this.icons.addSvgIcon('LINUX_AARCH64', this.sanitizer.bypassSecurityTrustResourceUrl('assets/linux_aarch64.svg'));
+    this.icons.addSvgIcon('AIX', this.sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
+    this.icons.addSvgIcon('UNKNOWN', this.sanitizer.bypassSecurityTrustResourceUrl('assets/indeterminate_question.svg'));
     this.icons.addSvgIcon('WINDOWS', this.sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
     this.icons.addSvgIcon('WEB', this.sanitizer.bypassSecurityTrustResourceUrl('assets/web.svg'));
     this.icons.addSvgIcon('sort_asc', this.sanitizer.bypassSecurityTrustResourceUrl('assets/sort-asc.svg'));
