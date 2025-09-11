@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -63,7 +62,6 @@ import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -163,9 +161,9 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
         // Apply existing nodes
         Map<String, InstanceNodeConfigurationDto> nodes = new TreeMap<>();
-        for (Entry<String, Key> entry : InstanceManifest.load(hive, uuid, null).getInstanceNodeManifestKeys().entrySet()) {
+        for (var entry : InstanceManifest.load(hive, uuid, null).getInstanceNodeConfigurations(hive).entrySet()) {
             InstanceNodeConfigurationDto instanceNodeConfigurationDto = new InstanceNodeConfigurationDto(entry.getKey(),
-                    InstanceNodeManifest.of(hive, entry.getValue()).getConfiguration());
+                    entry.getValue());
             nodes.put(instanceNodeConfigurationDto.nodeName, instanceNodeConfigurationDto);
         }
 

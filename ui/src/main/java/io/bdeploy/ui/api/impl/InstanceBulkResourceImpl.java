@@ -30,7 +30,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
@@ -116,9 +115,8 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         // 1) Read instances per key. Read all instance manifests, and all associated node manifests. Then mash them into an update DTO which has no config file changes.
         Map<String, Manifest.Key> instanceKeys = new TreeMap<>();
         List<InstanceUpdateDto> updates = instances.stream().map(i -> InstanceManifest.of(hive, i)).map(im -> {
-            var icd = new InstanceConfigurationDto(im.getConfiguration(),
-                    im.getInstanceNodeManifestKeys().entrySet().stream().map(e -> new InstanceNodeConfigurationDto(e.getKey(),
-                            InstanceNodeManifest.of(hive, e.getValue()).getConfiguration())).toList());
+            var icd = new InstanceConfigurationDto(im.getConfiguration(), im.getInstanceNodeConfigurations(hive).entrySet()
+                    .stream().map(e -> new InstanceNodeConfigurationDto(e.getKey(), e.getValue())).toList());
 
             instanceKeys.put(icd.config.id, im.getKey());
             return new InstanceUpdateDto(icd, null);

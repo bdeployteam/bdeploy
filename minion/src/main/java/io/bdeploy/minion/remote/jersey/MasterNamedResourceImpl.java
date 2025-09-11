@@ -935,12 +935,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig) {
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
-        for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifestKeys().entrySet()) {
-            InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
-            InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
-            InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey(), nodeConfig);
-
-            result.add(dto);
+        for (var entry : oldConfig.getInstanceNodeConfigurations(hive).entrySet()) {
+            result.add(new InstanceNodeConfigurationDto(entry.getKey(), entry.getValue()));
         }
         return result;
     }
