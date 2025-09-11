@@ -1,7 +1,5 @@
 package io.bdeploy.interfaces.variables;
 
-import com.google.errorprone.annotations.Var;
-
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
