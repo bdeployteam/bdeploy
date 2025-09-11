@@ -47,7 +47,14 @@ import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.variables.*;
+import io.bdeploy.interfaces.nodes.NodeType;
+import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathDummyResolver;
+import io.bdeploy.interfaces.variables.EmptyVariableResolver;
+import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
+import io.bdeploy.interfaces.variables.LocalHostnameResolver;
+import io.bdeploy.interfaces.variables.ManifestVariableDummyResolver;
+import io.bdeploy.interfaces.variables.Resolvers;
 
 @Service
 public class ProductUpdateService {
@@ -424,7 +431,7 @@ public class ProductUpdateService {
 
                 // check unique process names
                 var conflictUid = processNames.put(process.name, process.id);
-                if (conflictUid != null && !InstanceManifest.CLIENT_NODE_NAME.equals(node.nodeName)) {
+                if (conflictUid != null && node.nodeConfiguration.nodeType != NodeType.CLIENT) {
                     result.add(new ApplicationValidationDto(process.id, null,
                             "The process name " + process.name + " is not unique."));
                     result.add(new ApplicationValidationDto(conflictUid, null,
@@ -459,7 +466,7 @@ public class ProductUpdateService {
         for (var node : nodes) {
             String nodeName = node.nodeName;
             VariableResolver resolver = createResolver(node, null);
-            if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
+            if (node.nodeConfiguration.nodeType == NodeType.CLIENT) {
                 node.nodeConfiguration.applications.stream()//
                         .map(app -> app.processControl.configDirs)//
                         .filter(d -> d != null && !d.isEmpty())//

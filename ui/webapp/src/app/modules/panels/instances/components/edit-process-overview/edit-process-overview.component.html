@@ -17,7 +17,7 @@
           text="Configure Endpoints..."
           icon="settings_ethernet"
           [collapsed]="false"
-          [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeName === clientNodeName"
+          [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeConfiguration.nodeType === clientNodeType"
           [relative]="true"
           [route]="['endpoints']"
         ></app-bd-panel-button>
@@ -25,7 +25,7 @@
           text="Move to Node"
           icon="dns"
           [collapsed]="false"
-          [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeName === clientNodeName"
+          [disabled]="!(edit.process$ | async) || edit.node$.value?.nodeConfiguration.nodeType === clientNodeType"
           [relative]="true"
           [route]="['move']"
         ></app-bd-panel-button>

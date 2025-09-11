@@ -12,7 +12,7 @@
         tooltipPosition="below"
         [disabled]="!(auth.isCurrentScopeWrite$ | async)"
         (click)="
-          areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value], ['panels', 'instances', 'config', 'process', CLIENT_NODE, app$.value.client.id])
+          areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value], ['panels', 'instances', 'config', 'process', nodeName, app$.value.client.id])
         "
       ></app-bd-button>
     }

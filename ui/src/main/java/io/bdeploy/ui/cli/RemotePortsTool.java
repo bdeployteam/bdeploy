@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -198,8 +199,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                         if (param.value.linkExpression != null) {
                             val = TemplateHelper.process(param.value.linkExpression, resolver);
                         }
-                        result.add(new NodePort(node.nodeName, config.name, config.id, paramDesc.type, paramDesc.name,
-                                Integer.parseInt(val)));
+                        result.add(new NodePort(node.nodeName, node.nodeConfiguration.nodeType, config.name, config.id,
+                                paramDesc.type, paramDesc.name, Integer.parseInt(val)));
                     } catch (NumberFormatException e) {
                         out().println("Illegal port value configured for " + param.id + " on application " + config.id);
                     }
@@ -210,12 +211,14 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
     }
 
     private static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
-        return Resolvers.forApplication(Resolvers.forInstancePathIndependent(node.nodeConfiguration), node.nodeConfiguration, process);
+        return Resolvers.forApplication(Resolvers.forInstancePathIndependent(node.nodeConfiguration), node.nodeConfiguration,
+                process);
     }
 
     private static class NodePort {
 
         private final String nodeName;
+        private final NodeType nodeType;
 
         private final String appName;
         private final String appId;
@@ -228,8 +231,10 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         private ProcessState processState;
         private String runningTag;
 
-        public NodePort(String nodeName, String appName, String appId, VariableType type, String description, int port) {
+        public NodePort(String nodeName, NodeType nodeType, String appName, String appId, VariableType type, String description,
+                int port) {
             this.nodeName = nodeName;
+            this.nodeType = nodeType;
             this.appName = appName;
             this.appId = appId;
             this.type = type;
@@ -242,7 +247,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         }
 
         public String getNodeName() {
-            if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
+            if (nodeType == NodeType.CLIENT) {
                 return InstanceManifest.CLIENT_NODE_LABEL;
             }
             return nodeName;
@@ -262,7 +267,5 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         public String toString() {
             return description + " on " + appName + " = " + port;
         }
-
     }
-
 }

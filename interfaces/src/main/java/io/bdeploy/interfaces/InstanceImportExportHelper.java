@@ -36,6 +36,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.nodes.NodeType;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
@@ -166,7 +167,7 @@ public class InstanceImportExportHelper {
             reAssignAppIds(idPool, nodeCfg);
 
             String minionName = node.getKey();
-            if (!InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
+            if (nodeCfg.nodeType != NodeType.CLIENT) {
                 MinionDto minionDto = minions.get(minionName);
                 reAssignApplications(target, nodeCfg, minionName, minionDto);
                 inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, cfgId);
@@ -190,7 +191,7 @@ public class InstanceImportExportHelper {
     }
 
     private static void reAssignApplications(BHive hive, InstanceNodeConfiguration nodeCfg, String minionName, MinionDto minion) {
-        if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
+        if (nodeCfg.nodeType == NodeType.CLIENT) {
             return;
         }
         for (ApplicationConfiguration app : nodeCfg.applications) {

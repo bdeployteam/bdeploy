@@ -21,6 +21,7 @@ import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
+import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
@@ -33,6 +34,9 @@ import io.bdeploy.interfaces.variables.Resolvers;
 public class InstanceNodeConfiguration {
 
     public static final String FILE_NAME = "node.json";
+
+    /** The {@link NodeType} of the node */
+    public NodeType nodeType;
 
     /**
      * The human readable name of the instance.

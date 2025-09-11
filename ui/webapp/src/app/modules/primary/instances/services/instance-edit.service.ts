@@ -4,7 +4,6 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, Subject, Subscription, combineLatest, forkJoin, of } from 'rxjs';
 import { debounceTime, finalize, first, tap } from 'rxjs/operators';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationDescriptor,
   ApplicationDto,
@@ -18,6 +17,7 @@ import {
   InstanceNodeConfigurationDto,
   InstanceUpdateDto,
   MinionDto,
+  NodeType,
   ObjectChangeDetails,
   ObjectChangeType,
   ProcessControlGroupConfiguration,
@@ -349,14 +349,14 @@ export class InstanceEditService {
           if (!base.nodeDtos.length) {
             const masterNode = nodesArray.find((n) => n.value.master);
             if (masterNode) {
-              base.nodeDtos.push(this.createEmptyNode(masterNode.key, base.config));
+              base.nodeDtos.push(this.createEmptyNode(masterNode.key, base.config, NodeType.SERVER));
             }
           }
 
           // make sure we have the client application virtual node if there are client applications.
-          const clientNode = base.nodeDtos.find((n) => n.nodeName === CLIENT_NODE_NAME);
+          const clientNode = base.nodeDtos.find((n) => n.nodeConfiguration.nodeType === NodeType.CLIENT);
           if (!clientNode && !!nodes.applications.find((a) => a.descriptor.type === ApplicationType.CLIENT)) {
-            base.nodeDtos.push(this.createEmptyNode(CLIENT_NODE_NAME, base.config));
+            base.nodeDtos.push(this.createEmptyNode('', base.config, NodeType.CLIENT));
           }
 
           this.base$.next({ config: base, files: [], warnings: [] });
@@ -487,10 +487,11 @@ export class InstanceEditService {
   }
 
   /** Creates an empty node, which can be added to an instance configuration */
-  public createEmptyNode(name: string, instance: InstanceConfiguration): InstanceNodeConfigurationDto {
+  public createEmptyNode(name: string, instance: InstanceConfiguration, nodeType: NodeType): InstanceNodeConfigurationDto {
     return {
       nodeName: name,
       nodeConfiguration: {
+        nodeType: nodeType,
         name: instance.name,
         autoStart: instance.autoStart,
         product: instance.product,

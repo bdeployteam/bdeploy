@@ -1,9 +1,8 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import { InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationDto, NodeType } from 'src/app/models/gen.dtos';
 import {
   BdDialogToolbarComponent
 } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -74,7 +73,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
         // nodes which are not (no longer) present.
         for (const node of state.config.nodeDtos) {
           const hasNode = !!nodes[node.nodeName];
-          if (!hasNode && node.nodeName !== CLIENT_NODE_NAME) {
+          if (!hasNode && node.nodeConfiguration.nodeType !== NodeType.CLIENT) {
             const row = { name: node.nodeName, config: node };
             this.records.push(row);
             this.checked.push(row);
@@ -95,7 +94,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   protected onCheckedChange(rows: NodeRow[]) {
     // need to propagate changes to the state object.
     for (const node of [...this.edit.state$.value.config.nodeDtos]) {
-      if (node.nodeName === CLIENT_NODE_NAME) {
+      if (node.nodeConfiguration.nodeType === NodeType.CLIENT) {
         continue;
       }
 
@@ -109,7 +108,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
     for (const row of rows) {
       if (!this.edit.state$.value?.config.nodeDtos.find((n) => n.nodeName === row.name)) {
         const inst = this.edit.current$.value;
-        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration));
+        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration, NodeType.SERVER));
       }
     }
     this.hasPendingChanges = this.edit.hasPendingChanges();

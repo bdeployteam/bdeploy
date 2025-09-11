@@ -6,6 +6,7 @@ import {
   ApplicationDto,
   InstanceConfiguration,
   InstanceNodeConfigurationDto,
+  NodeType,
 } from 'src/app/models/gen.dtos';
 import { ApplicationConfigurationDiff, DiffType } from '../services/history-diff.service';
 import { InstanceConfigCache } from './instance-utils';
@@ -27,6 +28,7 @@ export class ApplicationPair {
 
 export class NodePair {
   name: string;
+  type: NodeType;
   isOrderChanged: boolean;
   applications: ApplicationPair[] = [];
   hasDifferences: boolean;
@@ -38,6 +40,7 @@ export class NodePair {
     compareApplications: ApplicationDto[],
   ) {
     this.name = base?.nodeName ? base.nodeName : compare?.nodeName;
+    this.type = base?.nodeConfiguration.nodeType ? base.nodeConfiguration.nodeType : compare.nodeConfiguration.nodeType;
 
     const baseApps = base?.nodeConfiguration?.applications ? base.nodeConfiguration.applications : [];
     const compareApps = compare?.nodeConfiguration?.applications ? compare.nodeConfiguration.applications : [];

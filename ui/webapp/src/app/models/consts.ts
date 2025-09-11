@@ -2,9 +2,6 @@
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
 export const NO_UNAUTH_DELAY_HDR = 'X-No-Unauth-Delay';
 
-/** "Special" name of node containing client applications. */
-export const CLIENT_NODE_NAME = '__ClientApplications';
-
 /** Sort callback for node names, putting 'master' in the first place */
 export const sortNodesMasterFirst = (a: string, b: string): number => {
   if (a === 'master') {

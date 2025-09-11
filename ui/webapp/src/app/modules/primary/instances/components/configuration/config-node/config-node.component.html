@@ -3,7 +3,7 @@
     <div class="bd-default-padding flex justify-start items-center">
       <div class="flex flex-col">
         <div class="bd-type-text">{{ nodeType }}</div>
-        <div class="bd-title-text">{{ node }}</div>
+        <div class="bd-title-text">{{ nodeLabel }}</div>
       </div>
       @if (node$ | async; as node) {
         <mat-icon class="self-center ml-5" [svgIcon]="node.os"></mat-icon>
@@ -50,7 +50,7 @@
       }
     } @else {
       <app-bd-data-table
-        [id]="clientTableId"
+        [id]="nodeName + '||' + clientTableName"
         [records]="(config$ | async)?.nodeConfiguration.applications"
         [columns]="cols"
         [sortData]="null"

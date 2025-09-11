@@ -4,7 +4,6 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map, skipWhile, tap } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -13,6 +12,7 @@ import {
   FlattenedApplicationTemplateConfiguration,
   InstanceNodeConfigurationDto,
   LinkedValueConfiguration,
+  NodeType,
   ParameterConditionType,
   ParameterConfiguration,
   ParameterConfigurationTarget,
@@ -61,7 +61,7 @@ export class ProcessEditService {
       const nodeName = route?.params['node'];
       const process = route?.params['process'];
 
-      if (!nodeName || !prods || !state || !apps) {
+      if (nodeName == null || !prods || !state || !apps) {
         this.node$.next(null);
         this.product$.next(null);
         this.applications$.next(null);
@@ -116,7 +116,7 @@ export class ProcessEditService {
     // need to find the proper application (linux vs. windows).
     const state = this.edit.nodes$.value[this.node$.value.nodeName];
     const appOs = getAppOs(appConfig.application);
-    const isServerNode = this.node$.value.nodeName !== CLIENT_NODE_NAME;
+    const isServerNode = this.node$.value.nodeConfiguration.nodeType === NodeType.SERVER;
     if (isServerNode && appOs && state.os !== appOs) {
       // different OS with OS bound application - need to find a more suitable one :)
       const keyName = getAppKeyName(appConfig.application);

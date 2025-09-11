@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { InstanceNodeConfigurationListDto } from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationListDto, NodeType } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -30,7 +29,7 @@ export class HistoryViewComponent implements OnInit, OnDestroy, BdSearchable {
 
   protected base$ = new BehaviorSubject<string>(null);
   protected config$ = new BehaviorSubject<InstanceConfigCache>(null);
-  protected clientNodeName = CLIENT_NODE_NAME;
+  protected clientNodeType = NodeType.CLIENT;
   protected searchTerm = '';
 
   private subscription: Subscription;

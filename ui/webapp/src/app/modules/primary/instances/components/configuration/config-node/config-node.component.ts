@@ -11,12 +11,12 @@ import {
   ViewChildren
 } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
   MinionDto,
+  NodeType,
   ProcessControlGroupConfiguration
 } from 'src/app/models/gen.dtos';
 import {
@@ -49,7 +49,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly edit = inject(InstanceEditService);
   protected readonly columns = inject(ProcessesColumnsService);
 
-  @HostBinding('attr.data-testid') @Input() nodeName: string;
+  @Input() nodeName: string;
+
+  @HostBinding('attr.data-testid')
+  get testId() {
+    return this.nodeLabel;
+  }
 
   private readonly processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration, string> = {
     id: 'name',
@@ -74,10 +79,10 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   protected allowedSources$ = new BehaviorSubject<string[]>(null);
   protected isClientNode: boolean;
   protected nodeType: string;
-  protected node: string;
+  protected nodeLabel: string;
   protected groupExpansion: Record<string, boolean> = {};
   protected lastId: string;
-  protected clientTableId = CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
+  protected clientTableName = DEF_CONTROL_GROUP.name;
 
   protected cols: BdDataColumn<ApplicationConfiguration, unknown>[] = [];
 
@@ -103,15 +108,6 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         this.node$.next(nodes[this.nodeName]);
       }
-      this.isClientNode = this.nodeName === CLIENT_NODE_NAME;
-      this.nodeType = this.isClientNode ? 'Virtual Node' : 'Node';
-      this.node = this.isClientNode ? 'Client Applications' : this.nodeName;
-
-      if (this.isClientNode) {
-        this.cols = [this.processNameAndOsAndEditStatusColumn, ...this.columns.defaultProcessesConfigColumns];
-      } else {
-        this.cols = [this.processNameAndEditStatusColumn, ...this.columns.defaultProcessesConfigColumns];
-      }
     });
 
     this.subscription.add(
@@ -133,6 +129,17 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
             this.allowedSources$.next(null);
             this.groupedProcesses$.next(null);
             return;
+          }
+
+          this.isClientNode = nodeConfig.nodeConfiguration.nodeType === NodeType.CLIENT;
+          if (this.isClientNode) {
+            this.nodeType = 'Virtual Node';
+            this.nodeLabel = 'Client Applications';
+            this.cols = [this.processNameAndOsAndEditStatusColumn, ...this.columns.defaultProcessesConfigColumns];
+          } else {
+            this.nodeType = 'Node';
+            this.nodeLabel = this.nodeName;
+            this.cols = [this.processNameAndEditStatusColumn, ...this.columns.defaultProcessesConfigColumns];
           }
 
           // reset expansion state in case we switch the instance somehow.

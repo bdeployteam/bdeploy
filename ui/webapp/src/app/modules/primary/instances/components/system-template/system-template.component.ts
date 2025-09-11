@@ -3,7 +3,6 @@ import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angula
 import { MatStepper, MatStep } from '@angular/material/stepper';
 import { Observable, map } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -476,24 +475,16 @@ export class SystemTemplateComponent implements OnInit {
 
   private getNodesFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     if (group.type === ApplicationType.CLIENT) {
-      return [null, CLIENT_NODE_NAME];
-    } else {
-      return [null, ...this.nodeNames.filter((n) => n !== CLIENT_NODE_NAME)];
+      return [null, '__ClientApplications'];//TODO refactor to eliminate this magic constant
     }
+    return [null, ...this.nodeNames];
   }
 
   private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
-    const nodeValues = this.getNodesFor(group);
-
-    return nodeValues.map((n) => {
-      if (n === null) {
-        return '(skip)';
-      } else if (n === CLIENT_NODE_NAME) {
-        return 'Apply to Client Applications';
-      } else {
-        return 'Apply to ' + n;
-      }
-    });
+    if (group.type === ApplicationType.CLIENT) {
+      return ['(skip)', 'Apply to Client Applications'];
+    }
+    return ['(skip)', ...this.nodeNames.map((n) => 'Apply to ' + n)];
   }
 
   private validateAllTemplateGroupsSelected() {

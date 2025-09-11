@@ -1,8 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { OperatingSystem } from 'src/app/models/gen.dtos';
+import { NodeType, OperatingSystem } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
@@ -17,6 +16,7 @@ import { BdExpandButtonComponent } from '../../../../core/components/bd-expand-b
 import { ClientUsageGraphComponent } from './usage-graph/usage-graph.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
 @Component({
     selector: 'app-client-detail',
@@ -28,8 +28,9 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   protected readonly areas = inject(NavAreasService);
   protected readonly clients = inject(ClientsService);
   protected readonly auth = inject(AuthenticationService);
+  protected readonly instances = inject(InstancesService);
 
-  protected readonly CLIENT_NODE = CLIENT_NODE_NAME;
+  protected nodeName: string;
 
   protected app$ = new BehaviorSubject<ClientApp>(null);
 
@@ -42,12 +43,18 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.clients.apps$, this.areas.panelRoute$, this.clients.launcher$]).subscribe(
-      ([apps, route, launcher]) => {
+    this.subscription = combineLatest([
+      this.clients.apps$,
+      this.areas.panelRoute$,
+      this.clients.launcher$,
+      this.instances.activeNodeCfgs$
+    ]).subscribe(([apps, route, launcher, nodes]) => {
         if (!route || !apps || !route.paramMap.has('app')) {
           this.app$.next(null);
           return;
         }
+
+        this.nodeName = nodes?.nodeConfigDtos?.find((n) => n.nodeConfiguration.nodeType === NodeType.CLIENT)?.nodeName
 
         const appId = route.paramMap.get('app');
         const app = apps.find((a) => a.client.id === appId);

@@ -4,7 +4,6 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationType,
@@ -12,6 +11,7 @@ import {
   FlattenedInstanceTemplateConfiguration,
   FlattenedInstanceTemplateGroupConfiguration,
   InstanceNodeConfigurationDto,
+  NodeType,
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateVariable,
@@ -149,23 +149,27 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.template.groups.forEach((group) => {
       this.groupNodes[group.name] =
         group.type === ApplicationType.CLIENT
-          ? [null, CLIENT_NODE_NAME]
+          ? [
+              null,
+              ...this.instanceEdit.state$.value.config.nodeDtos
+                .filter((nodeDto) => nodeDto.nodeConfiguration.nodeType === NodeType.CLIENT)
+                .map((nodeDto) => nodeDto.nodeName),
+            ]
           : [
               null,
               ...this.instanceEdit.state$.value.config.nodeDtos
-                .map((nodeDto) => nodeDto.nodeName)
-                .filter((nodeName) => nodeName !== CLIENT_NODE_NAME),
+                .filter((nodeDto) => nodeDto.nodeConfiguration.nodeType !== NodeType.CLIENT)
+                .map((nodeDto) => nodeDto.nodeName),
             ];
-      this.groupLabels[group.name] = this.groupNodes[group.name].map((n) => {
-        switch (n) {
-          case null:
-            return '(skip)';
-          case CLIENT_NODE_NAME:
-            return 'Apply to Client Applications';
-          default:
-            return 'Apply to ' + n;
-        }
-      });
+      this.groupLabels[group.name] =
+        group.type === ApplicationType.CLIENT
+          ? ['(skip)', 'Apply to Client Applications']
+          : [
+              '(skip)',
+              ...this.instanceEdit.state$.value.config.nodeDtos
+                .filter((nodeDto) => nodeDto.nodeConfiguration.nodeType !== NodeType.CLIENT)
+                .map((nodeDto) => 'Apply to ' + nodeDto.nodeName),
+            ];
     });
 
     this.groups = {};
@@ -358,7 +362,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
     for (const groupName of Object.keys(this.groups)) {
       const nodeName = this.groups[groupName];
-      if (!nodeName) {
+      if (nodeName == null) {
         continue; // skipped.
       }
 

@@ -2,13 +2,14 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
-import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
+import { sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationValidationDto,
   FlattenedInstanceTemplateConfiguration,
   InstanceConfiguration,
-  InstanceNodeConfigurationDto
+  InstanceNodeConfigurationDto,
+  NodeType
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -212,7 +213,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   }
 
   private isClientNode(node: InstanceNodeConfigurationDto) {
-    return node.nodeName === CLIENT_NODE_NAME;
+    return node.nodeConfiguration.nodeType === NodeType.CLIENT;
   }
 
   private isEmptyInstance() {

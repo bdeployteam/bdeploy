@@ -108,7 +108,7 @@ test('S006 Creation of a system using a template', async ({ standalone }, testIn
   await demoInstanceConfig.goto();
   await demoInstanceConfig.shouldHaveNodeCount(2);
   // we did not apply client apps
-  await demoInstanceConfig.shouldHaveProcessCountForNode('__ClientApplications', 0);
+  await demoInstanceConfig.shouldHaveProcessCountForNode('Client Applications', 0);
   // check 3 control groups were added each with a process
   await demoInstanceConfig.shouldHaveControlGroupCountForNode('master', 3);
   await demoInstanceConfig.shouldHaveProcessCountForNode('master', 3);

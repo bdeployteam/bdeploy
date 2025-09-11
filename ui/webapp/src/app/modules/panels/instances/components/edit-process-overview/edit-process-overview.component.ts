@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
@@ -12,6 +11,7 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { AsyncPipe } from '@angular/common';
+import { NodeType } from 'src/app/models/gen.dtos';
 
 @Component({
     selector: 'app-edit-process-overview',
@@ -25,7 +25,7 @@ export class EditProcessOverviewComponent {
   protected readonly instanceEdit = inject(InstanceEditService);
   protected readonly servers = inject(ServersService);
 
-  protected clientNodeName = CLIENT_NODE_NAME;
+  protected clientNodeType = NodeType.CLIENT;
 
   protected doDelete() {
     const process = this.edit.process$.value;

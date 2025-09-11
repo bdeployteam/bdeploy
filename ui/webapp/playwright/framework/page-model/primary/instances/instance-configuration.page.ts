@@ -75,7 +75,7 @@ export class InstanceConfigurationPage extends BaseDialog {
     return createPanelFromRow(this.getConfigNode(node).getByRole('row', { name: process }).nth(nth), p => new ProcessSettingsPanel(p));
   }
 
-  /** get the node configuration container. client application node uses __ClientApplications as name */
+  /** get the node configuration container */
   getConfigNode(name: string) {
     return this.getDialog().getByTestId(name);
   }

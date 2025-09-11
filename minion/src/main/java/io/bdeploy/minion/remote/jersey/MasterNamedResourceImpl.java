@@ -110,6 +110,7 @@ import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
@@ -227,7 +228,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             // Create the runnables
             List<Runnable> runnables = new ArrayList<>();
-            for (Map.Entry<String, Manifest.Key> entry : imf.getNonClientInstanceNodeManifestKeys().entrySet()) {
+            for (Map.Entry<String, Manifest.Key> entry : imf.getNonClientInstanceNodeManifestKeys(hive).entrySet()) {
                 String nodeName = entry.getKey();
                 Manifest.Key toDeploy = entry.getValue();
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
@@ -417,12 +418,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 }
             }
 
-            SortedMap<String, Key> fragments = imf.getInstanceNodeManifestKeys();
+            SortedMap<String, Key> fragments = imf.getNonClientInstanceNodeManifestKeys(hive);
             for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
                 String nodeName = entry.getKey();
-                if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
-                    continue;
-                }
                 Manifest.Key toDeploy = entry.getValue();
                 MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
@@ -458,7 +456,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         try (var handle = af.run(Actions.UNINSTALL, name, imf.getConfiguration().id, key.getTag())) {
             List<Runnable> runnables = new ArrayList<>();
-            for (Map.Entry<String, Manifest.Key> entry : imf.getNonClientInstanceNodeManifestKeys().entrySet()) {
+            for (Map.Entry<String, Manifest.Key> entry : imf.getNonClientInstanceNodeManifestKeys(hive).entrySet()) {
                 String nodeName = entry.getKey();
                 Manifest.Key toRemove = entry.getValue();
 
@@ -562,7 +560,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             inmb.setKey(new Manifest.Key(config.id + '/' + entry.getKey(), target.getTag()));
 
             // create dedicated configuration trees for client applications where required.
-            if (InstanceManifest.CLIENT_NODE_NAME.equals(entry.getKey())) {
+            if (inc.nodeType == NodeType.CLIENT) {
                 List<ObjectId> configTrees = new ArrayList<>();
                 // client applications *may* specify config directories.
                 for (var app : inc.applications) {
@@ -1078,9 +1076,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.clientImageIcon = amf.readBrandingIcon(hive);
 
         // set dedicated config tree.
-        Key clientKey = imf.getClientNodeInstanceNodeManifestKey();
-        if (clientKey != null) {
-            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, clientKey);
+        InstanceNodeManifest inmf = imf.getClientNodeInstanceNodeManifest(hive);
+        if (inmf != null) {
             if (inmf != null && !inmf.getConfigTrees().isEmpty()) {
                 // we either have a dedicated one, or not :)
                 cfg.configTree = inmf.getConfigTrees().get(application);
@@ -1409,7 +1406,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 List<String> overallStatusMessages = new ArrayList<>();
 
                 for (var nodeCfg : nodeConfigs) {
-                    if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeCfg.nodeName)) {
+                    if (nodeCfg.nodeConfiguration.nodeType == NodeType.CLIENT) {
                         continue; // don't check client.
                     }
 
@@ -1509,13 +1506,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Instance has no active tag: " + instanceId, Status.NOT_FOUND);
         }
 
-        Manifest.Key key = InstanceManifest.load(hive, instanceId, state.activeTag).getClientNodeInstanceNodeManifestKey(); // only for clients
+        InstanceNodeManifest inmf = InstanceManifest.load(hive, instanceId, state.activeTag)
+                .getClientNodeInstanceNodeManifest(hive); // only for clients
 
-        if (key == null) {
+        if (inmf == null) {
             throw new WebApplicationException("Instance has no client node: " + instanceId, Status.NOT_FOUND);
         }
 
-        InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, key);
         ObjectId configTree = inmf.getConfigTrees().get(application);
 
         if (configTree == null) {

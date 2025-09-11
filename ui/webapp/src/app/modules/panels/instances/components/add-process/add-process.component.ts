@@ -1,7 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, finalize } from 'rxjs/operators';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
@@ -10,6 +9,7 @@ import {
   FlattenedApplicationTemplateConfiguration,
   InstanceNodeConfigurationDto,
   MinionDto,
+  NodeType,
   OperatingSystem,
   ProcessControlConfiguration,
   TemplateVariableType,
@@ -266,7 +266,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   }
 
   private isClientNode(node: InstanceNodeConfigurationDto) {
-    return node.nodeName === CLIENT_NODE_NAME;
+    return node.nodeConfiguration.nodeType === NodeType.CLIENT;
   }
 
   private addProcess(row: AppRow) {

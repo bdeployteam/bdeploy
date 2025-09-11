@@ -1,6 +1,6 @@
 import { Directive, Input, inject } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
+import { NodeType } from 'src/app/models/gen.dtos';
 import {
   bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
@@ -33,7 +33,7 @@ export class EditProcessNameValidatorDirective implements Validator {
 
     const errors: ValidationErrors = {};
     for (const n of this.edit.state$.value.config.nodeDtos) {
-      if (n.nodeName === CLIENT_NODE_NAME) {
+      if (n.nodeConfiguration.nodeType === NodeType.CLIENT) {
         // it is OK for client applications!
         continue;
       }

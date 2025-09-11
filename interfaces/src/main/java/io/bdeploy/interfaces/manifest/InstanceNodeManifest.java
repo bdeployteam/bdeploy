@@ -31,6 +31,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryManager;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
+import io.bdeploy.interfaces.nodes.NodeType;
 
 public class InstanceNodeManifest {
 
@@ -48,6 +49,14 @@ public class InstanceNodeManifest {
         result.key = key;
         result.config = loadDeploymentConfiguration(hive, key);
         result.configTrees = loadConfigTrees(hive, key);
+
+        // Explicitly set the node type so that new servers can still function with old nodes
+        if (result.config.nodeType == null) {
+            String name = key.getName();
+            result.config.nodeType = name.substring(name.lastIndexOf("/") + 1).equals(InstanceManifest.CLIENT_NODE_NAME)
+                    ? NodeType.CLIENT
+                    : NodeType.SERVER;
+        }
 
         return result;
     }

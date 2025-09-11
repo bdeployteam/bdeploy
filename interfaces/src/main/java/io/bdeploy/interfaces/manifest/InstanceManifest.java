@@ -50,6 +50,7 @@ import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallState;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
+import io.bdeploy.interfaces.nodes.NodeType;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -233,13 +234,15 @@ public class InstanceManifest {
      * Returns a {@link SortedMap} of name of the node along with the key of the corresponding
      * {@linkplain InstanceNodeManifest}.<br>
      * The client node is explicitly excluded from this list.
+     *
+     * @param hive The {@link BHive} where the manifests are stored
      */
-    public SortedMap<String, Manifest.Key> getNonClientInstanceNodeManifestKeys() {
+    public SortedMap<String, Manifest.Key> getNonClientInstanceNodeManifestKeys(BHive hive) {
         SortedMap<String, Manifest.Key> result = new TreeMap<>();
         for (var entry : nodes.entrySet()) {
-            String key = entry.getKey();
-            if (!key.equals(CLIENT_NODE_NAME)) {
-                result.put(key, entry.getValue());
+            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, entry.getValue());
+            if (inm.getConfiguration().nodeType != NodeType.CLIENT) {
+                result.put(entry.getKey(), entry.getValue());
             }
         }
         return result;
@@ -248,12 +251,18 @@ public class InstanceManifest {
     /**
      * Returns the key of the {@link InstanceNodeManifest} of the client node.
      *
-     * @see Map#get
+     * @param hive The {@link BHive} where the manifest is stored
      * @return The {@link InstanceNodeManifest} of the client node or <code>null</code> if the instance does not have a client
      *         node
      */
-    public Manifest.Key getClientNodeInstanceNodeManifestKey() {
-        return getInstanceNodeManifestKeys().get(CLIENT_NODE_NAME);
+    public InstanceNodeManifest getClientNodeInstanceNodeManifest(BHive hive) {
+        for (var key : nodes.values()) {
+            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
+            if (inm.getConfiguration().nodeType == NodeType.CLIENT) {
+                return inm;
+            }
+        }
+        return null;
     }
 
     /**
@@ -266,7 +275,7 @@ public class InstanceManifest {
     /**
      * Returns a {@link SortedMap} of the name of the node along with the corresponding {@link InstanceNodeManifest}.
      *
-     * @param hive The {@link BHive} where the manifest is stored
+     * @param hive The {@link BHive} where the manifests are stored
      */
     public SortedMap<String, InstanceNodeManifest> getInstanceNodeManifests(BHive hive) {
         SortedMap<String, InstanceNodeManifest> result = new TreeMap<>();
@@ -279,7 +288,7 @@ public class InstanceManifest {
     /**
      * Returns a {@link SortedMap} of the name of the node along with the corresponding {@link InstanceNodeConfiguration}.
      *
-     * @param hive The {@link BHive} where the manifest is stored
+     * @param hive The {@link BHive} where the manifests are stored
      */
     public SortedMap<String, InstanceNodeConfiguration> getInstanceNodeConfigurations(BHive hive) {
         SortedMap<String, InstanceNodeConfiguration> result = new TreeMap<>();

@@ -42,6 +42,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
@@ -157,6 +158,7 @@ public class TestFactory {
         InstanceNodeConfiguration inc = new InstanceNodeConfiguration();
         inc.name = "DemoInstance";
         inc.id = id;
+        inc.nodeType = NodeType.SERVER;
         inc.applications.add(cfg);
 
         /* STEP 1f: create application configuration based on application descriptor (client) */
@@ -175,6 +177,7 @@ public class TestFactory {
         InstanceNodeConfiguration cinc = new InstanceNodeConfiguration();
         cinc.name = "DemoInstance";
         cinc.id = id;
+        cinc.nodeType = NodeType.CLIENT;
         cinc.applications.add(clientCfg);
 
         /* STEP 2: create an node manifest per node which will participate (master & clients) */
@@ -182,10 +185,8 @@ public class TestFactory {
                 .addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, pmf.getConfigTemplateTreeId());
         Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(Minion.DEFAULT_NAME).insert(local);
 
-        // minion name does not "technically" matter here, real code uses '__ClientApplications'
         InstanceNodeManifest.Builder clientBuilder = new InstanceNodeManifest.Builder();
-        Manifest.Key cinmKey = clientBuilder.setInstanceNodeConfiguration(cinc).setMinionName(InstanceManifest.CLIENT_NODE_NAME)
-                .insert(local);
+        Manifest.Key cinmKey = clientBuilder.setInstanceNodeConfiguration(cinc).setMinionName("DummyClientNode").insert(local);
 
         InstanceConfiguration ic = new InstanceConfiguration();
         ic.name = "DemoInstance";
@@ -198,7 +199,7 @@ public class TestFactory {
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
         // This is the "root" - all instance artifacts are now reachable from here.
         return new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(Minion.DEFAULT_NAME, inmKey)
-                .addInstanceNodeManifest(InstanceManifest.CLIENT_NODE_NAME, cinmKey).insert(local);
+                .addInstanceNodeManifest("DummyClientNode", cinmKey).insert(local);
     }
 
     /**

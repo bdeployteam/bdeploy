@@ -1,9 +1,9 @@
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationConfiguration,
   ApplicationDto,
   InstanceConfigurationDto,
   LinkedValueConfiguration,
+  NodeType,
   OperatingSystem,
   ParameterConfiguration,
   SystemConfiguration,
@@ -169,7 +169,7 @@ export function gatherProcessExpansions(
 
   for (const node of instance.nodeDtos) {
     for (const app of node.nodeConfiguration.applications) {
-      if (node.nodeName === CLIENT_NODE_NAME && app.name === process?.name && app.id !== process?.id) {
+      if (node.nodeConfiguration.nodeType === NodeType.CLIENT && app.name === process?.name && app.id !== process?.id) {
         // client app for different OS - this is actually not well supported, we cannot resolve parameters of this.
         continue;
       }

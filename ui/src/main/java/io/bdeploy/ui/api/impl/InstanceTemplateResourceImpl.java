@@ -66,6 +66,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.CompositeResolver;
@@ -473,6 +474,8 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                         r.nodeConfiguration.copyRedundantFields(config);
                         r.nodeConfiguration.mergeVariables(config, system, null);
                         r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, tvr));
+                        r.nodeConfiguration.nodeType = mappedToNode.equals(InstanceManifest.CLIENT_NODE_NAME) ? NodeType.CLIENT
+                                : NodeType.SERVER;
                         result.add(r);
                         return r;
                     });

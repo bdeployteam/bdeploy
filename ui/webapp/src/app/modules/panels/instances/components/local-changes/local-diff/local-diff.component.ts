@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ApplicationPair, ConfigPair, NodePair } from '../../../utils/diff-utils';
 import { BdDialogComponent } from '../../../../../core/components/bd-dialog/bd-dialog.component';
@@ -11,6 +10,7 @@ import { HistoryHeaderConfigComponent } from '../../history-header-config/histor
 import { HistoryVariablesConfigComponent } from '../../history-variables-config/history-variables-config.component';
 import { HistoryProcessConfigComponent } from '../../history-process-config/history-process-config.component';
 import { AsyncPipe } from '@angular/common';
+import { NodeType } from 'src/app/models/gen.dtos';
 
 @Component({
     selector: 'app-local-diff',
@@ -21,7 +21,7 @@ export class LocalDiffComponent implements OnInit, OnDestroy {
   protected readonly edit = inject(InstanceEditService);
 
   protected configPair$ = new BehaviorSubject<ConfigPair>(null);
-  protected clientNodeName = CLIENT_NODE_NAME;
+  protected clientNodeType = NodeType.CLIENT;
   protected showOnlyDifferences = true;
 
   private subscription: Subscription;

@@ -1,8 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subscription, combineLatest } from 'rxjs';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import { ApplicationType, InstanceNodeConfigurationDto, OperatingSystem } from 'src/app/models/gen.dtos';
+import { ApplicationType, InstanceNodeConfigurationDto, NodeType, OperatingSystem } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -63,13 +62,13 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
 
       const result: NodeRow[] = [];
       for (const node of state.config.nodeDtos) {
-        const nodeType = node.nodeName === CLIENT_NODE_NAME ? ApplicationType.CLIENT : ApplicationType.SERVER;
-        if (app.descriptor.type !== nodeType) {
+        const appType = node.nodeConfiguration.nodeType === NodeType.CLIENT ? ApplicationType.CLIENT : ApplicationType.SERVER;
+        if (app.descriptor.type !== appType) {
           continue;
         }
 
         let nodeOs = null;
-        if (nodeType === ApplicationType.SERVER) {
+        if (appType === ApplicationType.SERVER) {
           const nodeDetails = nodes[node.nodeName];
           if (!nodeDetails) {
             continue;
@@ -81,13 +80,13 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
           }
         }
 
-        const name = this.niceName(node.nodeName);
+        const name = this.niceName(node);
         result.push({
           name: name,
           current: node.nodeName === this.currentNode.nodeName,
           node: node,
           os: nodeOs,
-          type: nodeType,
+          type: appType,
         });
       }
 
@@ -99,8 +98,8 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  private niceName(node: string) {
-    return node === CLIENT_NODE_NAME ? 'Client Applications' : node;
+  private niceName(node: InstanceNodeConfigurationDto) {
+    return node.nodeConfiguration.nodeType === NodeType.CLIENT ? 'Client Applications' : node.nodeName;
   }
 
   protected onSelectNode(node: NodeRow) {
@@ -129,7 +128,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
 
     targetApps.push(cfg);
     this.instanceEdit.getLastControlGroup(targetNode).processOrder.push(cfg.id);
-    this.instanceEdit.conceal(`Move ${cfg.name} from ${this.niceName(this.currentNode.nodeName)} to ${node.name}`);
+    this.instanceEdit.conceal(`Move ${cfg.name} from ${this.niceName(this.currentNode)} to ${node.name}`);
 
     // this edit is so severe that none of the panels (edit overview, etc.) will work as data is shifted. close panels completely.
     this.areas.closePanel();

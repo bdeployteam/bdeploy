@@ -249,12 +249,12 @@ test('Instance Configuration', async ({ standalone }, testInfo) => {
   await varDlg.cancel();
 
   // show client application config file filter
-  const addClientProcess = await config.getAddProcessPanel('__ClientApplications');
+  const addClientProcess = await config.getAddProcessPanel('Client Applications');
   await addClientProcess.addProcess('Client Application');
   await config.waitForValidation();
 
-  await expect(config.getConfigNode('__ClientApplications').getByRole('row', { name: 'Client Application' })).toHaveCount(3);
-  const clientSettings = await config.getProcessSettingsPanel('__ClientApplications', 'Client Application');
+  await expect(config.getConfigNode('Client Applications').getByRole('row', { name: 'Client Application' })).toHaveCount(3);
+  const clientSettings = await config.getProcessSettingsPanel('Client Applications', 'Client Application');
   const clientParams = await clientSettings.getConfigureParametersPanel();
 
   await clientParams.getAllowedConfigDirPaths().locator('input').focus();

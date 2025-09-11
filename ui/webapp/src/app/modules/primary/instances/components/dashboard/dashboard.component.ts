@@ -2,7 +2,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
+import { sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import {
   Actions,
@@ -10,6 +10,7 @@ import {
   InstanceDto,
   InstanceNodeConfigurationDto,
   InstanceStateRecord,
+  NodeType,
   ProcessControlGroupHandlingType,
   ProcessControlGroupWaitType
 } from 'src/app/models/gen.dtos';
@@ -133,7 +134,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         this.serverNodes$.next(
           nodes.nodeConfigDtos
-            .filter((p) => p.nodeName !== CLIENT_NODE_NAME && !!p.nodeConfiguration?.applications?.length)
+            .filter((p) => p.nodeConfiguration.nodeType !== NodeType.CLIENT && !!p.nodeConfiguration?.applications?.length)
             .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)),
         );
 
@@ -144,7 +145,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.allApplications$.next(allApps);
         this.clientNode$.next(
           nodes.nodeConfigDtos.find(
-            (p) => p.nodeName === CLIENT_NODE_NAME && p.nodeConfiguration?.applications?.length,
+            (p) => p.nodeConfiguration.nodeType === NodeType.CLIENT && p.nodeConfiguration?.applications?.length,
           ),
         );
       }),

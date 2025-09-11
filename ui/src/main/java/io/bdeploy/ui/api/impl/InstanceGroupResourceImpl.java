@@ -387,8 +387,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     private static InstanceClientAppsDto listClientApps(InstanceManifest im, BHive hive, OperatingSystem os) {
-        Key clientKey = im.getClientNodeInstanceNodeManifestKey();
-        if (clientKey == null) {
+        InstanceNodeManifest inmf = im.getClientNodeInstanceNodeManifest(hive);
+        if (inmf == null) {
             return null;
         }
         InstanceClientAppsDto clientApps = new InstanceClientAppsDto();
@@ -396,8 +396,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         clientApps.applications = new ArrayList<>();
 
         // Add all configured client applications
-        InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, clientKey);
-        for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
+        for (ApplicationConfiguration appConfig : inmf.getConfiguration().applications) {
             ClientApplicationDto clientApp = new ClientApplicationDto();
             clientApp.id = appConfig.id;
             clientApp.description = appConfig.name;

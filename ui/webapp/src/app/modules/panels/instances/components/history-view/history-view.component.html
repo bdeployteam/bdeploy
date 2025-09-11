@@ -40,7 +40,7 @@
                   <div class="flex flex-col">
                     <div class="bd-type-text">NODE</div>
                     <div class="bd-title-text">
-                      {{ node?.nodeName === clientNodeName ? 'Client Applications' : node?.nodeName }}
+                      {{ node?.nodeConfiguration.nodeType === clientNodeType ? 'Client Applications' : node?.nodeName }}
                     </div>
                   </div>
                 </div>
@@ -51,7 +51,7 @@
                     [baseConfig]="app"
                     [compareConfig]="app"
                     [baseDescriptor]="getAppDesc(cfg?.nodes, app.application.name)"
-                    [hasProcessControl]="node?.nodeName !== clientNodeName"
+                    [hasProcessControl]="node?.nodeConfiguration.nodeType !== clientNodeType"
                   ></app-history-process-config>
                 }
               </div>

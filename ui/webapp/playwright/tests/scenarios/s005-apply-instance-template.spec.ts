@@ -78,7 +78,7 @@ test('S005 Apply instance template', async ({ standalone }, testInfo) => {
 
   // check correct number of processes
   await secondInstanceConfig.shouldHaveNodeCount(2);
-  await secondInstanceConfig.shouldHaveProcessCountForNode('__ClientApplications', 3);
+  await secondInstanceConfig.shouldHaveProcessCountForNode('Client Applications', 3);
   await secondInstanceConfig.shouldHaveControlGroupCountForNode('master', 2);
   await secondInstanceConfig.shouldHaveProcessCountForNode('master', 3);
 

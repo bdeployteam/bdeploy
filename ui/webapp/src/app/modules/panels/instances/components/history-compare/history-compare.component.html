@@ -63,7 +63,7 @@
                   <div class="flex flex-col">
                     <div class="bd-type-text">NODE</div>
                     <div class="bd-title-text">
-                      {{ nodePair.name === clientNodeName ? 'Client Applications' : nodePair.name }}
+                      {{ nodePair.type === clientNodeType ? 'Client Applications' : nodePair.name }}
                     </div>
                   </div>
                 </div>
@@ -89,7 +89,7 @@
                         [baseConfig]="appPair.base"
                         [compareConfig]="appPair.compare"
                         [baseDescriptor]="appPair.baseDesc"
-                        [hasProcessControl]="nodePair.name !== clientNodeName"
+                        [hasProcessControl]="nodePair.type !== clientNodeType"
                         diffSide="left"
                       ></app-history-process-config>
                       <div [hidden]="(appPair.base | customNodeFilter: searchTerm)" class="basis-1/2"></div>
@@ -99,7 +99,7 @@
                         [baseConfig]="appPair.compare"
                         [compareConfig]="appPair.base"
                         [baseDescriptor]="appPair.compareDesc"
-                        [hasProcessControl]="nodePair.name !== clientNodeName"
+                        [hasProcessControl]="nodePair.type !== clientNodeType"
                         diffSide="right"
                       ></app-history-process-config>
                     }

@@ -1,7 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -17,6 +16,7 @@ import { HistoryVariablesConfigComponent } from '../history-variables-config/his
 import { HistoryProcessConfigComponent } from '../history-process-config/history-process-config.component';
 import { AsyncPipe } from '@angular/common';
 import { CustomNodeFilterPipe } from '../../utils/filter-node';
+import { NodeType } from 'src/app/models/gen.dtos';
 
 @Component({
     selector: 'app-history-compare',
@@ -37,7 +37,7 @@ export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable 
   protected compare$ = new BehaviorSubject<string>(null);
 
   protected configPair$ = new BehaviorSubject<ConfigPair>(null);
-  protected clientNodeName = CLIENT_NODE_NAME;
+  protected clientNodeType = NodeType.CLIENT;
 
   protected searchTerm = '';
   protected showOnlyDifferences = true;

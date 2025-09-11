@@ -1,11 +1,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, forkJoin } from 'rxjs';
-import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   InstanceDto,
   InstanceNodeConfigurationListDto,
   MinionStatusDto,
+  NodeType,
   SystemConfigurationDto,
   VariableType,
 } from 'src/app/models/gen.dtos';
@@ -87,7 +87,7 @@ export class PortsService {
 
     // collect ports, and check their states.
     for (const node of cfgs.nodeConfigDtos) {
-      if (node.nodeName === CLIENT_NODE_NAME) {
+      if (node.nodeConfiguration.nodeType === NodeType.CLIENT) {
         // no ports on client node.
         continue;
       }
