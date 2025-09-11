@@ -25,16 +25,6 @@ import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
-import io.bdeploy.interfaces.variables.CompositeResolver;
-import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
-import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
-import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
-import io.bdeploy.interfaces.variables.OsVariableResolver;
-import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.InstanceGroupResource;

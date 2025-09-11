@@ -8,8 +8,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
-import javax.naming.spi.Resolver;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -23,21 +21,9 @@ import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
-import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
-import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
-import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
-import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
-import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.EmptyVariableResolver;
-import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
-import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
-import io.bdeploy.interfaces.variables.ManifestSelfResolver;
-import io.bdeploy.interfaces.variables.OsVariableResolver;
-import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.interfaces.variables.Resolvers;
 
 /**

@@ -43,23 +43,11 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationPoolType;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.CompositeResolver;
-import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
-import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
-import io.bdeploy.interfaces.variables.DeploymentPathResolver;
-import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
-import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
-import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
-import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
-import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
-import io.bdeploy.interfaces.variables.OsVariableResolver;
-import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.interfaces.variables.Resolvers;
 
 /**
