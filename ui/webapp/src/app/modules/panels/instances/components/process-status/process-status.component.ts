@@ -1,4 +1,4 @@
-import { Component, inject, NgZone, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, inject, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, iif, of, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, finalize, map, switchMap } from 'rxjs/operators';
@@ -56,6 +56,7 @@ import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-
 import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
+import { ProductsService } from '../../../../primary/products/services/products.service';
 
 export interface PinnedParameter {
   appId: string;
@@ -97,6 +98,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);
   private readonly router = inject(Router);
   private readonly clients = inject(ClientsService);
+  private readonly products = inject(ProductsService);
   protected readonly auth = inject(AuthenticationService);
   protected readonly groups = inject(GroupsService);
   protected readonly details = inject(ProcessDetailsService);
@@ -168,6 +170,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   private restartProgressHandle: ReturnType<typeof setTimeout>;
   private uptimeCalculateHandle: ReturnType<typeof setTimeout>;
 
+  protected isProductAvailable = signal(false);
+
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
@@ -179,7 +183,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.instances.active$,
       this.instances.activeNodeCfgs$,
       this.systems.systems$,
-    ]).subscribe(([detail, config, active, nodes, systems]) => {
+      this.products.products$
+    ]).subscribe(([detail, config, active, nodes, systems, products]) => {
       this.clearIntervals();
       this.outdated$.next(false);
       this.processConfig = config;
@@ -187,6 +192,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.nodeCfg = nodes?.nodeConfigDtos?.find(
         (n) => n.nodeConfiguration.applications.findIndex((a) => a.id === config?.id) !== -1,
       );
+
+      const prod = this.nodeCfg?.nodeConfiguration?.product;
+      if (prod && products?.find(p => p.key.name === prod.name && p.key.tag === prod.tag)) {
+        this.isProductAvailable.set(true);
+      }
 
       const app = nodes?.applications?.find(
         (a) => a.key.name === config?.application?.name && a.key.tag === config?.application?.tag,
