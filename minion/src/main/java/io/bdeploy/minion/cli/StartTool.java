@@ -15,6 +15,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.audit.AuditRecord;
@@ -22,6 +23,7 @@ import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingFileValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -32,6 +34,7 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -55,6 +58,7 @@ import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.StartTool.MasterConfig;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
 import io.bdeploy.minion.mail.MinionRootMailHandler;
+import io.bdeploy.minion.nodes.MultiNodeRegistration;
 import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonDirectoryEntryResourceImpl;
@@ -68,6 +72,8 @@ import io.bdeploy.minion.remote.jersey.NodeCleanupResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeDeploymentResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeProcessResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeProxyResourceImpl;
+import io.bdeploy.minion.remote.jersey.NodeSyncResourceDummyImpl;
+import io.bdeploy.minion.remote.jersey.NodeSyncResourceMultiImpl;
 import io.bdeploy.schema.SchemaResources;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
@@ -103,6 +109,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         return handle.isPresent();
     };
 
+    // @formatter:off
     public @interface MasterConfig {
 
         @Help("Root directory for the master minion. Must be initialized using the init command.")
@@ -113,6 +120,10 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         @Help("Specify the directory where any incoming updates should be placed in.")
         @EnvironmentFallback("BDEPLOY_INTERNAL_UPDATEDIR")
         String updateDir();
+
+        @Help("The path to a file containing the multi-node connection information required to connect to the master.")
+        @Validator({ ExistingFileValidator.class })
+        String masterFile();
 
         @Help(value = "Publish the web application, defaults to true.", arg = false)
         boolean publishWebapp() default true;
@@ -129,6 +140,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         @Help(value = "Skip auto-start of instances which are configured to automatically start.", arg = false)
         boolean skipAutoStart() default false;
     }
+    // @formatter:on
 
     public StartTool() {
         super(MasterConfig.class);
@@ -169,7 +181,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                     // MASTER (standalone, managed, central)
                     setupServerMaster(config, r, srv, reg);
                 } else {
-                    setupServerNode(config, srv);
+                    setupServerNode(config, r, srv);
                 }
 
                 if (config.shutdownToken() != null) {
@@ -206,10 +218,25 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         }
     }
 
-    private static void setupServerNode(MasterConfig config, JerseyServer srv) {
-        if (config.publishWebapp()) {
-            UiResources.registerNode(srv);
+    private void setupServerNode(MasterConfig config, MinionRoot r, JerseyServer srv) {
+        // in case of multi nodes, startup is a two stage process: first register ourselves with the master, second wait for the
+        // master to finish synchronization of data in our direction.
+        if (r.getNodeType() == MinionDto.MinionNodeType.MULTI_RUNTIME) {
+            helpAndFailIfMissing(config.masterFile(), "Missing --masterFile");
+
+            // need to figure out who we are with as little as we have before starting up fully (no node manager)
+            // we can do that without pretty much any check as this MUST be prepared by init in this way
+            MinionDto self = new MinionManifest(r.getHive()).read().getMinion(r.getState().self);
+            MultiNodeMasterFile mnmf = StorageHelper.fromPath(Paths.get(config.masterFile()), MultiNodeMasterFile.class);
+
+            // trigger registration of the node with the master.
+            srv.afterStartup().thenRun(() -> MultiNodeRegistration.register(r, self, mnmf));
+        } else {
+            // normal node startup: run autostart immediately, not waiting for master at all.
+            srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
         }
+
+        registerNodeResources(srv, config.publishWebapp(), r.getNodeType());
     }
 
     private void setupServerMaster(MasterConfig config, MinionRoot r, JerseyServer srv, BHiveRegistry reg) {
@@ -227,11 +254,12 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         });
         registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory(),
                 r.isInitialConnectionCheckFailed());
+
+        srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
     }
 
     private static BHiveRegistry setupServerCommon(ActivityReporter repo, MinionRoot r, JerseyServer srv, MasterConfig config) {
         r.onStartup(config.consoleLog());
-        srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
 
         srv.setAuditor(r.getAuditor());
         r.setServerProcessManager(new JerseyAwareMinionServerProcessManager(srv, r));
@@ -280,6 +308,23 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         // scan storage locations, register hives
         minionRoot.getStorageLocations().forEach(s -> reg.scanLocation(s, auditorFactory));
+    }
+
+    public static void registerNodeResources(RegistrationTarget srv, boolean webapp, MinionDto.MinionNodeType type) {
+        // in case of multi nodes, startup is a two stage process: first register ourselves with the master, second wait for the
+        // master to finish synchronization of data in our direction.
+        if (type == MinionDto.MinionNodeType.MULTI_RUNTIME) {
+            // the resource which will be notified by the master after synchronization finished
+            srv.register(NodeSyncResourceMultiImpl.class);
+        } else {
+            // register a no-op resource which allows the master to call us without error after sync
+            // might be of use later sometimes :)
+            srv.register(NodeSyncResourceDummyImpl.class);
+        }
+
+        if (webapp) {
+            UiResources.registerNode(srv);
+        }
     }
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {

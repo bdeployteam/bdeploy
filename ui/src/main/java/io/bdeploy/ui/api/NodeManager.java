@@ -1,6 +1,5 @@
 package io.bdeploy.ui.api;
 
-import java.util.Collection;
 import java.util.Map;
 
 import io.bdeploy.common.security.RemoteService;
@@ -23,9 +22,14 @@ public interface NodeManager {
     public Map<String, MinionDto> getAllNodes();
 
     /**
-     * @return the names of all configured nodes in the system.
+     * @return all currently online multi-node runtime nodes for a given multi-node name.
      */
-    public Collection<String> getAllNodeNames();
+    public Map<String, MinionDto> getMultiNodeRuntimeNodes(String name);
+
+    /**
+     * @return the name of the multi-node that is implemented by the given runtime node.
+     */
+    public String getMultiNodeConfigNameForRuntimeNode(String runtimeNode);
 
     /**
      * @return the status of all configured nodes in the system.
@@ -46,9 +50,16 @@ public interface NodeManager {
 
     /**
      * @param name the name of the node to look up.
-     * @return the configuration of the specified node if the node is known and online. <code>null</code> otherwise.
+     * @return the configurations for the specified node which are online. Never <code>null</code>. Might be empty in case no node
+     *         is online. Might be multiple in case of multi-nodes.
      */
-    public MinionDto getNodeConfigIfOnline(String name);
+    public Map<String, MinionDto> getOnlineNodeConfigs(String name);
+
+    /**
+     * @param name the name of a node which must not refer to a multi-node
+     * @return a single {@link MinionDto corresponding to an online} physical node which can be talked to.
+     */
+    public MinionDto getSingleOnlineNodeConfig(String name);
 
     /**
      * @param <T> one of the node remote interfaces.
@@ -97,5 +108,13 @@ public interface NodeManager {
      * @param config the configuration of the node
      */
     public void addMultiNode(String name, MultiNodeDto config);
+
+    /**
+     * Attach a multi node (runtime) to a multi node (configuration).
+     *
+     * @param name the name of the multi-node - must exist in the node manager already.
+     * @param multiNodeDto the actual runtime part to be attached to the multi-node.
+     */
+    public void attachMultiNodeRuntime(String name, MinionDto multiNodeDto);
 
 }

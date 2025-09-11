@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 
+import org.apache.commons.collections4.functors.NOPClosure;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -20,14 +21,19 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ApiAccessToken.Builder;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
+import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionDto.MinionNodeType;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.InitTool;
 import io.bdeploy.minion.cli.StartTool;
+import io.bdeploy.minion.nodes.MultiNodeRegistration;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.ui.api.MinionMode;
 
@@ -43,6 +49,17 @@ public class TestMinion extends TestServer {
     public @interface AuthPack {
     }
 
+    @FunctionalInterface
+    public interface MultiNodeCompletion {
+        public void complete(MultiNodeMasterFile master);
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+    public @interface MultiNodeMaster {
+        public String value();
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
     public @interface SourceMinion {
@@ -54,6 +71,7 @@ public class TestMinion extends TestServer {
 
     private final MinionMode mode;
     private final String disambiguation;
+    private final MinionNodeType nodeType;
 
     /** Compatibility with existing test code: just be able to use TestMinion directly, defaulting to TestMinionStandalone */
     public TestMinion() {
@@ -65,8 +83,13 @@ public class TestMinion extends TestServer {
     }
 
     public TestMinion(MinionMode mode, String disambiguation) {
+        this(mode, disambiguation, MinionNodeType.SERVER);
+    }
+
+    public TestMinion(MinionMode mode, String disambiguation, MinionNodeType type) {
         this.mode = mode;
         this.disambiguation = disambiguation;
+        this.nodeType = type;
     }
 
     @Override
@@ -90,7 +113,7 @@ public class TestMinion extends TestServer {
         log.info("TestMinion mode = {}", finalMode);
 
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
-                k -> new CloseableMinionRoot(getServerPort(context), finalMode), CloseableMinionRoot.class);
+                k -> new CloseableMinionRoot(getServerPort(context), finalMode, nodeType), CloseableMinionRoot.class);
 
         MinionState state = cmr.mr.getState();
 
@@ -123,7 +146,18 @@ public class TestMinion extends TestServer {
 
         // now is the time :D run the after startup.
         CloseableMinionRoot cmr = getExtensionStore(context).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
-        super.afterStartup().thenRun(() -> cmr.mr.afterStartup(true, false));
+
+        // in case of MULTI_RUNTIME we need to complete startup later.
+        if(nodeType != MinionNodeType.MULTI_RUNTIME) {
+            super.afterStartup().thenRun(() -> cmr.mr.afterStartup(true, false));
+        }
+    }
+
+    private MultiNodeMasterFile createMasterFile(MinionRoot root, String nodeName) {
+        var master = new MultiNodeMasterFile();
+        master.master = new RemoteService(root.getSelf().getUri(), root.createWeakToken(nodeName));
+        master.name = nodeName;
+        return master;
     }
 
     @Override
@@ -170,6 +204,14 @@ public class TestMinion extends TestServer {
             return true;
         }
 
+        if(parameterContext.getParameter().getType().isAssignableFrom(MultiNodeCompletion.class)) {
+            return mode == MinionMode.NODE && nodeType == MinionNodeType.MULTI_RUNTIME;
+        }
+
+        if(parameterContext.isAnnotated(MultiNodeMaster.class)) {
+            return mode == MinionMode.MANAGED || mode == MinionMode.STANDALONE;
+        }
+
         return super.supportsParameter(parameterContext, extensionContext);
     }
 
@@ -188,6 +230,22 @@ public class TestMinion extends TestServer {
             return authPack;
         }
 
+        if(parameterContext.getParameter().getType().isAssignableFrom(MultiNodeCompletion.class)) {
+            CloseableMinionRoot cmr = getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
+            MinionDto self = new MinionManifest(cmr.mr.getHive()).read().getMinion(cmr.mr.getState().self);
+
+            MultiNodeCompletion handler = (master) -> {
+                MultiNodeRegistration.register(cmr.mr, self, master);
+            };
+
+            return handler;
+        }
+
+        if(parameterContext.isAnnotated(MultiNodeMaster.class)) {
+            var x = parameterContext.getParameter().getAnnotationsByType(MultiNodeMaster.class);
+            return createMasterFile(getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class).mr, x[0].value());
+        }
+
         return super.resolveParameter(parameterContext, extensionContext);
     }
 
@@ -197,11 +255,11 @@ public class TestMinion extends TestServer {
 
         final MinionRoot mr;
 
-        CloseableMinionRoot(int port, MinionMode mode) {
+        CloseableMinionRoot(int port, MinionMode mode, MinionNodeType type) {
             try {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, new ActivityReporter.Null());
-                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode, MinionDto.MinionNodeType.SERVER, true);
+                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode, type, true);
                 mr.modifyState(s -> s.poolDefaultPath = root.resolve("objpool"));
                 mr.onStartup(true);
             } catch (Exception e) {

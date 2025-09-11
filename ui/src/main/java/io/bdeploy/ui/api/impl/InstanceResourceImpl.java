@@ -1283,6 +1283,10 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         MinionDto node = getMinionConfiguration(instance, state.activeTag).get(nodeName);
+        if (node.minionNodeType == MinionDto.MinionNodeType.MULTI) {
+            // this is not possible, as we'd need to multiplex calls.
+            throw new RuntimeException("UI Endpoints are not supported on multi-nodes");
+        }
         return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath.getPreRenderable());
     }
 

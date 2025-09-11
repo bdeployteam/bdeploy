@@ -19,6 +19,7 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.NodeSynchronizationStatus;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.NodeSyncResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -38,7 +39,7 @@ public class NodeSynchronizer {
         this.statusMap.put(selfName, SYNCHRONIZED);
     }
 
-    public void sync(String nodeName) {
+    public void sync(String nodeName, MinionDto nodeDetails) {
         synchronized (statusMap) {
             if (getStatus(nodeName) == SYNCHRONIZING) {
                 // ignore duplicate requests for whatever reason - the running one will eventually set the state.
@@ -61,6 +62,16 @@ public class NodeSynchronizer {
                     log.warn("Failed to synchronize instance group {} on node {}", group.instanceGroupConfiguration.name,
                             nodeName);
                     break;
+                }
+            }
+
+            try {
+                // independent of the actual status, we tell the node that synchronization is done.
+                ResourceProvider.getVersionedResource(nodeDetails.remote, NodeSyncResource.class, null).synchronizationFinished();
+            } catch (RuntimeException e) {
+                log.info("Cannot inform node about synchronization state: {}", e.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception: ", e);
                 }
             }
 

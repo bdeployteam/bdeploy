@@ -28,6 +28,7 @@ import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonProxyResource;
@@ -215,7 +216,8 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Override
     public void setLoggerConfig(Path config) {
-        Collection<String> nodeNames = nodes.getAllNodeNames();
+        Collection<String> nodeNames = nodes.getAllNodes().entrySet().stream()
+                .filter(e -> e.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI).map(e -> e.getKey()).toList();
         try {
             for (String nodeName : nodeNames) {
                 try {
@@ -233,7 +235,8 @@ public class CommonRootResourceImpl implements CommonRootResource {
     public List<RemoteDirectory> getLogDirectories(String hive) {
         List<RemoteDirectory> result = new ArrayList<>();
 
-        Collection<String> nodeNames = nodes.getAllNodeNames();
+        Collection<String> nodeNames = nodes.getAllNodes().entrySet().stream()
+                .filter(e -> e.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI).map(e -> e.getKey()).toList();
         for (String nodeName : nodeNames) {
             RemoteDirectory dir = new RemoteDirectory();
             dir.minion = nodeName;

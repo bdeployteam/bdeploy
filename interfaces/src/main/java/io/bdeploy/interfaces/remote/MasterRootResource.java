@@ -7,8 +7,10 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.minion.MultiNodeDto;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -42,6 +44,17 @@ public interface MasterRootResource extends CommonUpdateResource {
     @PUT
     @Path("/minions/{name}")
     public void addServerNode(@PathParam("name") String name, RemoteService minion);
+
+    /**
+     * Attaches the given remote node to an already configured multi-node on this master.
+     * <p>
+     * The node will receive all the configuration already present for that multi-node just like a normal node after
+     * registration.
+     */
+    @PUT
+    @WeakTokenAllowed
+    @Path("/minions/multi-node/{name}")
+    public void attachMultiNode(@PathParam("name") String multiNodeName, MinionDto node);
 
     /**
      * @param name the name of the minion to add.

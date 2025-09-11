@@ -59,4 +59,14 @@ public class MinionStatusDto {
         return status;
     }
 
+    public static MinionStatusDto createMulti(MinionDto config, int runtimeCount) {
+        MinionStatusDto status = new MinionStatusDto();
+        status.config = config;
+        status.offline = true; // always offline, there is nothing to talk to.
+        status.startup = Instant.ofEpochMilli(0); // that never starts up.
+        status.infoText = runtimeCount <= 0 ? "Waiting for runtime nodes..." : ("Attached runtime nodes: " + runtimeCount);
+        status.nodeSynchronizationStatus = NodeSynchronizationStatus.SYNCHRONIZED; // always.
+        return status;
+    }
+
 }

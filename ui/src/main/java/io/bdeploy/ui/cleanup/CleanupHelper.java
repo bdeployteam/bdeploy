@@ -31,6 +31,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -105,7 +106,8 @@ public class CleanupHelper {
         if (minion.getMode() != MinionMode.CENTRAL) {
             // minions cleanup
             NodeManager nodes = minion.getNodeManager();
-            Collection<String> nodeNames = nodes.getAllNodeNames();
+            Collection<String> nodeNames = nodes.getAllNodes().entrySet().stream()
+                    .filter(e -> e.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI).map(e -> e.getKey()).toList();
 
             for (String nodeName : nodeNames) {
                 log.info("Calculate node {}, using {} anchors.", nodeName, instanceNodeManifestsToKeep.size());

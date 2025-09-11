@@ -13,7 +13,7 @@ import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.dto.BackendInfoDto;
 
-class MultiMinionTest {
+class MultipleMinionsTest {
 
     @RegisterExtension
     private final TestMinion exStandalone = new TestMinion(MinionMode.STANDALONE);

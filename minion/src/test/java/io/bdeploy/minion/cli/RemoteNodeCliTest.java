@@ -80,7 +80,7 @@ class RemoteNodeCliTest extends BaseMinionCliTest {
         assertEquals("MULTI", multinodeRow.get("Type"));
         assertEquals("", multinodeRow.get("Online"));
         assertEquals("WINDOWS", multinodeRow.get("Os"));
-        assertEquals("No Nodes Connected...", multinodeRow.get("Status"));
+        assertEquals("Waiting for runtime nodes...", multinodeRow.get("Status"));
 
         // Checking validations
         // node name is unique
@@ -146,6 +146,6 @@ class RemoteNodeCliTest extends BaseMinionCliTest {
         assertEquals("MULTI", multinodeRow.get("Type"));
         assertEquals("", multinodeRow.get("Online"));
         assertEquals("WINDOWS", multinodeRow.get("Os"));
-        assertEquals("No Nodes Connected...", multinodeRow.get("Status"));
+        assertEquals("Waiting for runtime nodes...", multinodeRow.get("Status"));
     }
 }

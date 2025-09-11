@@ -233,13 +233,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 Manifest.Key toDeploy = entry.getValue();
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
 
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
-                if (node == null) {
+                Map<String, MinionDto> onlineNodes = nodes.getOnlineNodeConfigs(nodeName);
+                if (onlineNodes.isEmpty()) {
                     log.info("Node {} is offline. Skipping install", nodeName);
                     continue;
                 }
 
-                runnables.add(() -> {
+                onlineNodes.forEach((name, node) -> runnables.add(() -> {
                     // grab all required manifests from the applications
                     InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
                     LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
@@ -270,7 +270,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             NodeDeploymentResource.class, context);
                     hive.execute(pushOp);
                     deployment.install(toDeploy);
-                });
+                }));
             }
 
             // Execute all tasks
@@ -287,7 +287,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void syncNode(String nodeName, String instanceId) {
-        MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+        // Hint: this is never called for nodes of type MULTI. only for SERVER and MULTI_RUNTIMNE, which
+        // are always single nodes, the this map will always only contain a single node.
+        MinionDto node = nodes.getSingleOnlineNodeConfig(nodeName);
 
         if (node == null) {
             String msg = "Node " + nodeName + " is offline. Cannot sync instance " + instanceId;
@@ -305,28 +307,32 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             NodeDeploymentResource deployment = ResourceProvider.getResource(node.remote, NodeDeploymentResource.class, context);
 
+            String nodeConfigName =
+                    node.minionNodeType == MinionDto.MinionNodeType.MULTI_RUNTIME ? nodes.getMultiNodeConfigNameForRuntimeNode(
+                            nodeName) : nodeName;
+
             // if node active tag is different from current active tag -> deactivate
             String nodeActiveTag = nodeStatus.activeTag;
             if (nodeActiveTag != null && !nodeActiveTag.equals(instanceActiveTag)) {
-                Manifest.Key toDeactivate = getNodeKey(nodeName, instanceId, nodeActiveTag);
+                Manifest.Key toDeactivate = getNodeConfigKey(nodeConfigName, instanceId, nodeActiveTag);
                 log.debug("Deactivating {}", toDeactivate);
                 deployment.deactivate(toDeactivate);
             }
 
             // make sure every installed version is installed on the node if applicable
             for (String installedTag : state.installedTags) {
-                Manifest.Key toInstall = getNodeKey(nodeName, instanceId, installedTag);
+                Manifest.Key toInstall = getNodeConfigKey(nodeConfigName, instanceId, installedTag);
                 if (toInstall == null) {
                     continue;
                 }
 
                 log.debug("Installing {}", toInstall);
-                installOnNode(nodeName, toInstall);
+                installOnNode(node, toInstall);
             }
 
             // activate current active version on node if applicable
             if (instanceActiveTag != null && !instanceActiveTag.equals(nodeActiveTag)) {
-                Manifest.Key toActivate = getNodeKey(nodeName, instanceId, instanceActiveTag);
+                Manifest.Key toActivate = getNodeConfigKey(nodeConfigName, instanceId, instanceActiveTag);
                 if (toActivate != null) {
                     log.debug("Activating {}", toActivate);
                     deployment.activate(toActivate);
@@ -336,18 +342,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     // returns null if node is not present in instance version
-    private Manifest.Key getNodeKey(String nodeName, String instanceId, String versionTag) {
+    private Manifest.Key getNodeConfigKey(String nodeName, String instanceId, String versionTag) {
         InstanceManifest imf = InstanceManifest.load(hive, instanceId, versionTag);
         SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifestKeys();
         return fragmentReferences.get(nodeName);
     }
 
-    private void installOnNode(String nodeName, Manifest.Key toDeploy) {
-        MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
-        if (node == null) {
-            log.info("Skipping install of {}. {} is offline", toDeploy, nodeName);
-            return;
-        }
+    private void installOnNode(MinionDto node, Manifest.Key toDeploy) {
         NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class,
                 context);
 
@@ -400,14 +401,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             continue;
                         }
 
-                        MinionDto node = nodes.getNodeConfigIfOnline(oldNode.getKey());
-                        if (node == null) {
-                            log.info("Minion {} not available for de-activation", oldNode.getKey());
+                        Map<String, MinionDto> onlineNodes = nodes.getOnlineNodeConfigs(oldNode.getKey());
+                        if (onlineNodes == null) {
+                            log.info("No node online for de-activation for {}", oldNode.getKey());
                             continue;
                         }
 
-                        ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class, context)
-                                .deactivate(oldNode.getValue());
+                        onlineNodes.values().forEach(node -> {
+                            ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class, context)
+                                    .deactivate(oldNode.getValue());
+                        });
                     }
                 } catch (Exception e) {
                     // in case the old version disappeared (manual deletion, automatic migration,
@@ -422,23 +425,25 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
                 String nodeName = entry.getKey();
                 Manifest.Key toDeploy = entry.getValue();
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+                Map<String, MinionDto> onlineNodes = nodes.getOnlineNodeConfigs(nodeName);
 
                 assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
-                if (node == null) {
-                    log.info("Skipping activation on node {}. Node is offline", nodeName);
+                if (onlineNodes.isEmpty()) {
+                    log.info("Skipping activation on node {}. No node is online", nodeName);
                     continue;
                 }
 
-                NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
-                        NodeDeploymentResource.class, context);
+                onlineNodes.forEach((name, node) -> {
+                    NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
+                            NodeDeploymentResource.class, context);
 
-                try {
-                    deployment.activate(toDeploy);
-                } catch (Exception e) {
-                    // log but don't forward exception to the client
-                    throw new WebApplicationException("Cannot activate on " + nodeName, e, Status.BAD_GATEWAY);
-                }
+                    try {
+                        deployment.activate(toDeploy);
+                    } catch (Exception e) {
+                        // log but don't forward exception to the client
+                        throw new WebApplicationException("Cannot activate on " + name, e, Status.BAD_GATEWAY);
+                    }
+                });
             }
 
             getState(imf, hive).activate(key.getTag());
@@ -460,22 +465,21 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 String nodeName = entry.getKey();
                 Manifest.Key toRemove = entry.getValue();
 
-                runnables.add(() -> {
-                    MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+                Map<String, MinionDto> onlineNodes = nodes.getOnlineNodeConfigs(nodeName);
+                if (onlineNodes.isEmpty()) {
+                    // minion no longer exists or node is offline. this is recoverable as when the node is online
+                    // during the next cleanup cycle, it will clean itself.
+                    log.warn("Node not available: {}. Ignoring.", nodeName);
+                    return;
+                }
 
+                onlineNodes.forEach((name, node) -> runnables.add(() -> {
                     assertNotNull(toRemove, "Cannot lookup node manifest on master: " + toRemove);
-
-                    if (node == null) {
-                        // minion no longer exists or node is offline. this is recoverable as when the node is online
-                        // during the next cleanup cycle, it will clean itself.
-                        log.warn("Node not available: {}. Ignoring.", nodeName);
-                        return;
-                    }
 
                     NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
                             NodeDeploymentResource.class, context);
                     deployment.remove(toRemove);
-                });
+                }));
             }
 
             // Execute all tasks
@@ -988,7 +992,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     idd.minion = nodeName;
                     idd.id = instanceId;
                     try {
-                        MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+                        MinionDto node = nodes.getSingleOnlineNodeConfig(nodeName);
 
                         if (node == null) {
                             idd.problem = "Node is offline";
@@ -1245,11 +1249,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceStatusDto instanceStatus = new InstanceStatusDto(instanceId);
 
         // all node names regardless of their status.
-        Collection<String> nodeNames = nodes.getAllNodeNames();
+        Map<String, MinionDto> allNodes = nodes.getAllNodes();
 
         List<Runnable> actions = new ArrayList<>();
-        for (String nodeName : nodeNames) {
-            MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+        for (var entry : allNodes.entrySet()) {
+            if (entry.getValue().minionNodeType == MinionDto.MinionNodeType.MULTI) {
+                continue; // cannot have status.
+            }
+
+            String nodeName = entry.getKey();
+            MinionDto node = nodes.getSingleOnlineNodeConfig(nodeName);
             if (node == null) {
                 continue; // don't log to avoid flooding - node manager will log once.
             }
@@ -1332,7 +1341,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         MasterRuntimeHistoryDto history = new MasterRuntimeHistoryDto();
 
         // all node names regardless of their status.
-        Collection<String> nodeNames = nodes.getAllNodeNames();
+        Collection<String> nodeNames = nodes.getAllNodes().entrySet().stream()
+                .filter(e -> e.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI).map(e -> e.getKey()).toList();
 
         List<Runnable> runnables = new ArrayList<>();
         for (String nodeName : nodeNames) {

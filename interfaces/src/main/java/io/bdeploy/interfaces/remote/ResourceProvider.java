@@ -44,7 +44,7 @@ public class ResourceProvider {
      *
      * @param service the remote to connect to
      * @param clazz the type of interface to connect to
-     * @param caller the caller on whos behalf to act on. if <code>null</code>, the user of the token in the remote is used.
+     * @param caller the caller on whose behalf to act on. if <code>null</code>, the user of the token in the remote is used.
      */
     public static <T> T getVersionedResource(RemoteService service, Class<T> clazz, SecurityContext caller) {
         JerseyClientFactory factory = of(service);

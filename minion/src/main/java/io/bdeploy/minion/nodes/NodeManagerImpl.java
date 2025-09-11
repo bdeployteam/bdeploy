@@ -1,7 +1,8 @@
 package io.bdeploy.minion.nodes;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -13,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -47,11 +50,13 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
     private MinionRoot root;
     private String self;
+
     private MinionConfiguration config;
     private NodeSynchronizer nodeSynchronizer;
 
     private ChangeEventManager changes;
 
+    private final Map<String, Map<String, MinionDto>> multiNodes = new ConcurrentHashMap<>();
     private final Map<String, Boolean> contactWarning = new ConcurrentHashMap<>();
     private final Map<String, MinionStatusDto> status = new ConcurrentHashMap<>();
     private final ScheduledExecutorService schedule = Executors
@@ -65,6 +70,12 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     private ScheduledFuture<?> saveJob;
 
     public void initialize(MinionRoot root, boolean initialFetch) {
+        if (this.config != null) {
+            // re-initialization is ignored. this might happen in complex startup sequences like
+            // multi-nodes for example.
+            return;
+        }
+
         this.root = root;
         this.config = new MinionManifest(root.getHive()).read();
         this.self = root.getState().self;
@@ -73,8 +84,8 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         // initially, all nodes are offline.
         this.config.entrySet().forEach(e -> this.status.put(e.getKey(),
                 e.getValue().minionNodeType == MinionDto.MinionNodeType.MULTI
-                        ? createOfflineMultiNode(e.getValue())
-                        : createStarting(e.getValue())));
+                        ? createMultiNodeStatus(e.getKey(), e.getValue())
+                        : createStartingStatus(e.getValue())));
 
         if (root.getMode() == MinionMode.CENTRAL) {
             // no need to periodically fetch states here. However we *do* want to verify connectivity
@@ -117,21 +128,21 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         });
     }
 
-    private static MinionStatusDto createStarting(MinionDto node) {
+    private static MinionStatusDto createStartingStatus(MinionDto node) {
         return MinionStatusDto.createOffline(node, "Starting...");
     }
 
-    private static MinionStatusDto createOfflineMultiNode(MinionDto node) {
-        return MinionStatusDto.createOffline(node, "No Nodes Connected...");
+    private MinionStatusDto createMultiNodeStatus(String name, MinionDto node) {
+        return MinionStatusDto.createMulti(node, multiNodes.getOrDefault(name, Collections.emptyMap()).size());
     }
 
     private void fetchNodeStates() {
         if (log.isDebugEnabled()) {
-            log.debug("Fetch status of {} minions", config.values().size());
+            log.debug("Fetch status of {} minions", getAllNodes().size());
         }
 
         try {
-            for (String minion : config.values().keySet()) {
+            for (String minion : getAllNodes().keySet()) {
                 // fetch an existing request.
                 var existing = requests.get(minion);
 
@@ -152,20 +163,20 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         }
     }
 
-    public void synchronizeNode(String node) {
+    public void synchronizeNode(String node, MinionDto nodeDetails) {
         boolean isStandaloneOrManaged = root.getMode() == MinionMode.MANAGED || root.getMode() == MinionMode.STANDALONE;
         if (!isStandaloneOrManaged) {
             log.warn("Skipping node synchronization - only possible on MANAGED or STANDALONE.");
             return;
         }
-        nodeSynchronizer.sync(node);
+        nodeSynchronizer.sync(node, nodeDetails);
     }
 
     /**
      * @param node the minion to contact. The state is recorded in the status map.
      */
     private void fetchNodeState(String node) {
-        MinionDto mdto = config.getMinion(node);
+        MinionDto mdto = getAllNodes().get(node);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Contacting node {}", node);
@@ -174,7 +185,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
             // in case the configuration was removed while we were scheduled.
             if (mdto != null) {
                 if(mdto.minionNodeType == MinionDto.MinionNodeType.MULTI) {
-                    log.info("Skipping multi-node {} start.", node);
+                    log.debug("Nothing to fetch/synchronize for multi-node configuration {}.", node);
                     return;
                 }
 
@@ -193,7 +204,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
                 boolean isStandaloneOrManaged = root.getMode() == MinionMode.MANAGED || root.getMode() == MinionMode.STANDALONE;
                 if (isStandaloneOrManaged && !Objects.equals(node, self) && status.get(node).offline && !msd.offline) {
-                    synchronizeNode(node);
+                    synchronizeNode(node, mdto);
                 }
                 msd.nodeSynchronizationStatus = nodeSynchronizer.getStatus(node);
 
@@ -232,6 +243,8 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 status.put(node, MinionStatusDto.createOffline(mdto, e.toString()));
             }
 
+            // TODO: handle removal of multi-nodes in case they are offline (time limit? re-registration?)
+
             // log it, we don't want to hold status in the futures.
             if (Boolean.TRUE.equals(contactWarning.get(node))) {
                 contactWarning.put(node, Boolean.FALSE); // no warning, contact failed.
@@ -246,12 +259,27 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
     @Override
     public Map<String, MinionDto> getAllNodes() {
-        return Collections.unmodifiableMap(config.values());
+        List<Map<String, MinionDto>> allNodes = new ArrayList<>();
+        allNodes.add(config.values());
+        allNodes.addAll(multiNodes.values());
+        Map<String, MinionDto> allCombined = allNodes.stream().flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return Collections.unmodifiableMap(allCombined);
     }
 
     @Override
-    public Collection<String> getAllNodeNames() {
-        return Collections.unmodifiableSet(config.values().keySet());
+    public Map<String, MinionDto> getMultiNodeRuntimeNodes(String name) {
+        return Collections.unmodifiableMap(multiNodes.get(name));
+    }
+
+    @Override
+    public String getMultiNodeConfigNameForRuntimeNode(String runtimeNode) {
+        for (var entry : multiNodes.entrySet()) {
+            if (entry.getValue().containsKey(runtimeNode)) {
+                return entry.getKey();
+            }
+        }
+        throw new RuntimeException("Multi-node runtime node " + runtimeNode + " not found.");
     }
 
     @Override
@@ -261,7 +289,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
     @Override
     public MinionDto getNodeConfig(String name) {
-        return config.getMinion(name);
+        return getAllNodes().get(name);
     }
 
     @Override
@@ -270,13 +298,41 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     }
 
     @Override
-    public MinionDto getNodeConfigIfOnline(String name) {
+    public Map<String, MinionDto> getOnlineNodeConfigs(String name) {
         var state = status.get(name);
-        if (state == null || state.offline) {
+        if (state == null) {
+            return Collections.emptyMap();
+        }
+
+        if (state.config.minionNodeType == MinionDto.MinionNodeType.MULTI) {
+            // figure out the actually connected runtime nodes here.
+            return multiNodes.getOrDefault(name, Collections.emptyMap()).entrySet().stream()
+                    .filter(e -> !status.get(e.getKey()).offline)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        if (state.offline) {
             // there might be a connection request running which *may* return,
             // however we cannot do anything about unlucky timing and even a
             // small wait here might slow down things *significantly* in case
             // of many nodes.
+            return Collections.emptyMap();
+        }
+        return Map.of(name, state.config);
+    }
+
+    @Override
+    public MinionDto getSingleOnlineNodeConfig(String name) {
+        var state = status.get(name);
+        if (state == null) {
+            return null;
+        }
+
+        if (state.config.minionNodeType == MinionDto.MinionNodeType.MULTI) {
+            throw new RuntimeException("Multi-node cannot be guaranteed to only have a single node");
+        }
+
+        if (state.offline) {
             return null;
         }
         return state.config;
@@ -284,8 +340,17 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
     @Override
     public <T> T getNodeResourceIfOnlineOrThrow(String minion, Class<T> clazz, SecurityContext context) {
-        MinionDto node = getNodeConfigIfOnline(minion);
+        MinionDto node = getAllNodes().get(minion);
         if (node == null) {
+            throw new WebApplicationException("Node not known " + minion, Status.EXPECTATION_FAILED);
+        }
+        if (node.minionNodeType == MinionDto.MinionNodeType.MULTI) {
+            // TODO: this is not possible. callers need to be able to handle multiple resources (all the
+            //  attached multi nodes).
+            throw new WebApplicationException("Cannot create resource for multi-node", Status.EXPECTATION_FAILED);
+        }
+        // can only be a single node in case it is not a multi-node
+        if (getOnlineNodeConfigs(minion).isEmpty()) {
             throw new WebApplicationException("Node not available " + minion, Status.EXPECTATION_FAILED);
         }
         return ResourceProvider.getVersionedResource(node.remote, clazz, context);
@@ -319,7 +384,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         log.info("Adding node {}", name);
 
         config.addMinion(name, minion);
-        status.put(name, createOfflineMultiNode(minion));
+        status.put(name, createStartingStatus(minion));
         contactWarning.put(name, Boolean.FALSE); // was not reachable (new), issue recovery log.
         scheduleSave();
 
@@ -360,12 +425,35 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
         MinionDto minion = MinionDto.createMultiNode(multiNodeDto.operatingSystem);
         config.addMinion(name, minion);
-        status.put(name, createOfflineMultiNode(minion));
+        status.put(name, createMultiNodeStatus(name, minion));
         contactWarning.put(name, Boolean.FALSE); // was not reachable (new), issue recovery log.
         scheduleSave();
+    }
 
-        log.info("Updating state for added multi-node {}", name);
-        fetchNodeState(name);
+    @Override
+    public void attachMultiNodeRuntime(String name, MinionDto multiNodeDto) {
+        String uniqueId = UuidHelper.randomId();
+        log.info("Attaching multi-node {} to {}", uniqueId, name);
+
+        if (multiNodeDto.minionNodeType != MinionDto.MinionNodeType.MULTI_RUNTIME) {
+            throw new RuntimeException("Invalid minion node type " + multiNodeDto.minionNodeType);
+        }
+
+        MinionDto hostMultiNode = getAllNodes().get(name);
+        if (hostMultiNode == null) {
+            throw new RuntimeException("Multi-node " + name + " not found");
+        }
+
+        multiNodes.computeIfAbsent(name, k -> new ConcurrentHashMap<>()).put(uniqueId, multiNodeDto);
+        status.put(uniqueId, createStartingStatus(multiNodeDto));
+        contactWarning.put(uniqueId, Boolean.FALSE);
+
+        // update the status of the hosting configuration node
+        status.put(name, createMultiNodeStatus(name, hostMultiNode));
+
+        // no need to save anything -> all ephemeral
+        log.info("Updating state for added multi-node {}", uniqueId);
+        fetchNodeState(uniqueId);
     }
 
 }

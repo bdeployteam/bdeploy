@@ -109,6 +109,13 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
+    public void attachMultiNode(String multiNodeName, MinionDto node) {
+        try (var handle = af.run(Actions.ADD_NODE, null, null, node.remote.getUri().toString())) {
+            nodes.attachMultiNodeRuntime(multiNodeName, node);
+        }
+    }
+
+    @Override
     public void convertNode(String name, RemoteService minion) {
         try (var handle = af.run(Actions.CONVERT_TO_NODE, null, null, name)) {
             // first, contact and verify information.
@@ -284,7 +291,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                 }
 
                 oldMasterName = entry.getKey();
-            } else if (nodes.getAllNodeNames().contains(entry.getKey())) {
+            } else if (nodes.getAllNodes().keySet().contains(entry.getKey())) {
                 throw new WebApplicationException("Duplicate node name detected, cannot convert: " + entry.getKey(),
                         Status.EXPECTATION_FAILED);
             }
@@ -454,9 +461,10 @@ public class MasterRootResourceImpl implements MasterRootResource {
             // find target OS for update package
             OperatingSystem updateOs = getTargetOsFromUpdate(version);
 
-            // Push the update to the nodes. Ensure that master is the last one
-
-            Collection<String> nodeNames = nodes.getAllNodeNames();
+            // Push the update to the nodes. Ensure that master is the last one. Exclude multi nodes,
+            // as we only want "actual" nodes.
+            Collection<String> nodeNames = nodes.getAllNodes().entrySet().stream()
+                    .filter(e -> e.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI).map(e -> e.getKey()).toList();
             SortedMap<String, MinionUpdateResource> toUpdate = pushUpdate(version, bhive, updateOs, nodeNames);
 
             // DON'T check for cancel from here on anymore to avoid inconsistent setups
@@ -549,7 +557,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
 
         for (String nodeName : nodeNames) {
-            MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
+            MinionDto minionDto = nodes.getSingleOnlineNodeConfig(nodeName);
 
             if (minionDto == null) {
                 // this means the node needs to be updated separately later on.

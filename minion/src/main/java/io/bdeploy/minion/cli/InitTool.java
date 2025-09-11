@@ -246,8 +246,17 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             ConnectivityChecker.checkOrThrow(remote);
         }
 
+        MinionDto self;
+        if (mode != MinionMode.NODE || nodeType == MinionNodeType.SERVER) {
+            self = MinionDto.createServerNode(mode != MinionMode.NODE, remote);
+        } else if (nodeType == MinionNodeType.MULTI_RUNTIME) {
+            self = MinionDto.createMultiNodeRuntime(remote);
+        } else {
+            throw new IllegalArgumentException("Illegal mode/nodeType combination: " + mode + ", " + nodeType);
+        }
+
         MinionConfiguration minionConfiguration = new MinionConfiguration();
-        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.createServerNode(mode != MinionMode.NODE, remote));
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME, self);
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);
@@ -272,7 +281,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     }
 
     private void handleNode(InitConfig config, MinionRoot mr) throws IOException {
-        if (config.nodeType() == MinionNodeType.MULTI) {
+        if (config.nodeType() == MinionNodeType.MULTI_RUNTIME) {
             // no ident file for multi nodes.
             log.debug("Not creating an ident file for multi-node.");
             return;

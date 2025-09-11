@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.minion;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
@@ -12,9 +14,10 @@ import io.bdeploy.common.util.VersionHelper;
 public class MinionDto {
 
     public enum MinionNodeType {
-        UNKNOWN,
+        @JsonEnumDefaultValue
         SERVER,
-        MULTI
+        MULTI,
+        MULTI_RUNTIME,
     }
 
     /**
@@ -40,7 +43,7 @@ public class MinionDto {
     /**
      * The type of node that is attached to this minion
      */
-    public MinionNodeType minionNodeType = MinionNodeType.UNKNOWN;
+    public MinionNodeType minionNodeType = MinionNodeType.SERVER;
 
     /**
      * Creates and returns a new minion DTO using the given remote. The OS and the
@@ -71,6 +74,21 @@ public class MinionDto {
         dto.version = VersionHelper.getVersion();
         dto.os = operatingSystem;
         dto.minionNodeType = MinionNodeType.MULTI;
+        return dto;
+    }
+
+    /**
+     * Creates and returns a new minion DTO, that represent the runtime part of a multi-node.
+     *
+     * @param remote the remote where this node is reachable
+     */
+    public static MinionDto createMultiNodeRuntime(RemoteService remote) {
+        MinionDto dto = new MinionDto();
+        dto.master = false;
+        dto.remote = remote;
+        dto.version = VersionHelper.getVersion();
+        dto.os = OsHelper.getRunningOs();
+        dto.minionNodeType = MinionNodeType.MULTI_RUNTIME;
         return dto;
     }
 }

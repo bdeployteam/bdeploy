@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Master (MultiNode)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="io.bdeploy.minion.cli.MinionServerCli" />
+    <module name="io.bdeploy.minion.main" />
+    <option name="PROGRAM_PARAMETERS" value="-vv start --root=$ProjectFileDir$/../runtime/multi-node --allowCors --consoleLog --masterFile=$Prompt$" />
+    <option name="VM_PARAMETERS" value="-XX:+HeapDumpOnOutOfMemoryError -Xmx256m" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/../runtime/node" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.bdeploy.minion.cli.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
