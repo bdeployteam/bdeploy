@@ -210,6 +210,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
+    public MinionDto.MinionNodeType getNodeType() {
+        return getState().nodeType;
+    }
+
+    @Override
     public RemoteService getSelf() {
         return nodeManager.getSelf().remote;
     }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.ui.api.MinionMode;
 
 /**
@@ -23,6 +24,12 @@ public class MinionState {
      * Defaults to {@link MinionMode#STANDALONE} for compatibility.
      */
     public MinionMode mode = MinionMode.STANDALONE;
+
+    /**
+     * The mode of the node. This can be either SERVER (classic node) or MULTI for now. Defaults to SERVER for compatibility with
+     * all existing nodes.
+     */
+    public MinionDto.MinionNodeType nodeType = MinionDto.MinionNodeType.SERVER;
 
     /**
      * Path to the keystore containing the private key and certificates for the

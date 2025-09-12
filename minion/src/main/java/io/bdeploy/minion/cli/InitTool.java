@@ -9,6 +9,9 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.audit.AuditRecord;
@@ -92,6 +95,10 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         MinionMode mode();
 
+        @Help("The type of the node to initialize in case --mode is set to NODE. Can be SERVER or MULTI.")
+        @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
+        MinionNodeType nodeType() default MinionNodeType.SERVER;
+
         @Help("The initial user's name to create. The initial user is always system administrator. Not required for nodes.")
         String initUser();
 
@@ -108,6 +115,8 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         String pool();
     }
 
+    private static final Logger log = LoggerFactory.getLogger(InitTool.class);
+
     public InitTool() {
         super(InitConfig.class);
     }
@@ -121,7 +130,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         if (config.mode() != MinionMode.NODE) {
             helpAndFailIfMissing(config.initUser(), "Missing --initUser");
             helpAndFailIfMissing(config.initPassword(), "Missing --initPassword");
-        } else {
+        } else if (config.nodeType() == MinionNodeType.SERVER) {
             helpAndFailIfMissing(config.nodeIdentFile(), "Missing --nodeIdentFile");
         }
 
@@ -132,7 +141,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
             mr.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
             String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments(), config.mode(),
-                    config.skipConnectionCheck());
+                    config.nodeType(), config.skipConnectionCheck());
 
             if (config.tokenFile() != null) {
                 Path tokenPath = Paths.get(config.tokenFile());
@@ -175,13 +184,20 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             }
 
             // import original version of minion into new bhive for future updates.
-            if (!"ignore".equals(dist)) {
+            // this is not done for nodes, as they do not require it, and not importing
+            // will speed up init a lot and save a lot of disc space as well.
+            // one drawback: also the manifest for the running node version is not there,
+            // so it might be pushed from the master later, but only when updating the master
+            // to the version that is already running on the node if versions diverged.
+            if (!"ignore".equals(dist) && config.mode() != MinionMode.NODE) {
                 // same logic as remote update: push the content of the ZIP as new manifest to
                 // the local hive.
                 Collection<Key> keys = RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()),
                         Paths.get(dist), getActivityReporter());
 
                 result.addField("Software Imported", keys);
+            } else {
+                log.debug("Skipping software import from {}", dist);
             }
 
             if (config.pooling()) {
@@ -210,6 +226,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     }
 
     public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments, MinionMode mode,
+            MinionNodeType nodeType,
             boolean skipCheck) throws GeneralSecurityException, IOException {
         MinionState state = mr.initKeys();
 
@@ -237,6 +254,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         state.cleanupSchedule = MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE;
         state.fullyMigratedVersion = VersionHelper.getVersion().toString();
         state.mode = mode;
+        state.nodeType = nodeType;
 
         state.deploymentDir = root.resolve("deploy");
         if (deployments != null) {
@@ -250,6 +268,12 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     }
 
     private void handleNode(InitConfig config, MinionRoot mr) throws IOException {
+        if (config.nodeType() == MinionNodeType.MULTI) {
+            // no ident file for multi nodes.
+            log.debug("Not creating an ident file for multi-node.");
+            return;
+        }
+
         MinionConfiguration mc = new MinionManifest(mr.getHive()).read();
         MinionDto self = mc.getMinion(mr.getState().self);
 
