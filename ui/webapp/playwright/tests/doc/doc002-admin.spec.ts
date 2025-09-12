@@ -63,6 +63,16 @@ test('Convert Node', async ({ standalone }) => {
   await admin.screenshot('Doc_Admin_Nodes_Conversion');
 });
 
+test('Add Multi-Node', async ({ standalone }) => {
+  const admin = new AdminPage(standalone);
+  await admin.goto();
+
+  const nodes = await admin.gotoNodesPage();
+  await nodes.addMultiNode();
+
+  await admin.screenshot('Doc_Admin_Multi_Nodes_Add');
+});
+
 test('Mail Settings', async ({ standalone }) => {
   const admin = new AdminPage(standalone);
   await admin.goto();

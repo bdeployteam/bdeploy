@@ -45,6 +45,20 @@ export class BackendApi {
     await this._request.delete(`/api/group/${group}`);
   }
 
+  async removeNodesThatAreNotMaster() {
+    await this._request.get(`/api/node-admin/nodes`).then(
+      async (response) => {
+        const data = await response.json();
+        Object.keys(data).filter(nodeName => "master" !== nodeName)
+          .forEach(nodeName => this.deleteNode(nodeName))
+      }
+    )
+  }
+
+  async deleteNode(node: string) {
+    await this._request.delete(`/api/node-admin/nodes/${node}`);
+  }
+
   async deleteRepo(repo: string) {
     await this._request.delete(`/api/softwarerepository/${repo}`);
   }

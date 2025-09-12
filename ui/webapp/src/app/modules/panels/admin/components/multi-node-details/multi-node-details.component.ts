@@ -22,7 +22,7 @@ import { BdButtonComponent } from '../../../../core/components/bd-button/bd-butt
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-node-details',
+  selector: 'app-multi-node-details',
   templateUrl: './multi-node-details.component.html',
   imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, MatTooltip, MatDivider, BdButtonComponent, AsyncPipe]
 })
