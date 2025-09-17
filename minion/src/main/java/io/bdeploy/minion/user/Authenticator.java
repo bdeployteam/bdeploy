@@ -7,7 +7,7 @@ public interface Authenticator {
 
     /**
      * @param user the user information
-     * @return whether the authenticator is repsonsible for (and can authenticate) this user
+     * @return whether the authenticator is responsible for (and can authenticate) this user
      */
     boolean isResponsible(UserInfo user, AuthenticationSettingsDto settings);
 
@@ -24,7 +24,7 @@ public interface Authenticator {
      * @param user the user to authenticate
      * @param password the password given by the user.
      * @param trace collector for tracing information
-     * @return a user if authentication was successfull. The object may contain updated user information.
+     * @return a user if authentication was successful. The object may contain updated user information.
      */
     UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace);
 
