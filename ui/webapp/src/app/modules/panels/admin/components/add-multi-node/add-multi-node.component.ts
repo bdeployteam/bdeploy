@@ -31,7 +31,7 @@ const DEF_MULTI_NODE: CreateMultiNodeDto = {
 };
 
 @Component({
-  selector: 'app-add-node',
+  selector: 'app-add-multi-node',
   templateUrl: './add-multi-node.component.html',
   styleUrls: [],
   imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, IdentifierValidator, EditUniqueValueValidatorDirective, RevalidateOnDirective, BdButtonComponent, AsyncPipe, BdFormSelectComponent]

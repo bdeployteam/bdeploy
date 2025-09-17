@@ -25,11 +25,11 @@ export class FormSelectElement extends BaseArea {
     return this._value;
   }
 
-  async selectOption(option: string) {
+  async selectOption(option: string, exact: boolean = false) {
     await expect(this._select).toBeVisible();
 
     await this._trigger.click();
-    await this._options.filter({ hasText: option }).click();
+    await this._options.getByText(option, { exact: exact }).click();
   }
 
   getOptions() {

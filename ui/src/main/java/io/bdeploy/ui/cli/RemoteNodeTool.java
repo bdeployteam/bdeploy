@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.minion.MultiNodeDto;
@@ -44,11 +46,18 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
         @Help("Adds a node with the given name.")
         String add();
 
+        @Help("Adds a multi-node with the given name")
+        String addMulti();
+
         @Help("The name of the node to remove.")
         String remove();
 
         @Help("The node remote URL.")
         String node();
+
+        @Help("The operating system running on the machines that participate in the multi-node setup. This field is mandatory and the OS must not be deprecated.")
+        @Configuration.ConfigurationValueMapping(Configuration.ValueMapping.TO_UPPERCASE)
+        OperatingSystem operatingSystem();
 
         @Help("The node remote authentication token.")
         String nodeToken();
@@ -58,6 +67,15 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
 
         @Help("A node identification file which can be used instead of the --add, --node and --nodeToken parameters")
         String nodeIdentFile();
+
+        @Help("Name of the multi-node for which we want to download the master-file")
+        String name();
+
+        @Help("The target file to write the master file for a multi-node.")
+        String masterFile();
+
+        @Help(value = "Use this flag if you want to overwrite the existing file when generating a master file", arg = false)
+        boolean force() default false;
 
         @Help(value = "When given, list all known nodes.", arg = false)
         boolean list() default false;
@@ -79,9 +97,16 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
                 helpAndFailIfMissing(config.node(), "Missing --node");
                 return doAddMinion(svc, config.add(), createNodeRemote(config));
             }
-        } else if (config.remove() != null) {
+        } else if(config.addMulti() != null) {
+            return doAddMultiNode(svc, config.addMulti(), config.operatingSystem());
+        } else if(config.name() != null || config.masterFile() != null) {
+            helpAndFailIfMissing(config.name(), "Cannot generate the master file without the node --name");
+            helpAndFailIfMissing(config.masterFile(), "Missing --masterFile");
+            return doDownloadMultiNodeMasterFile(svc, config.name(), config.masterFile() , config.force());
+        }else if (config.remove() != null) {
             return doRemoveMinion(svc, config.remove());
         }
+
         return createNoOp();
     }
 
@@ -118,6 +143,38 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
         root.addServerNode(dto);
 
         return createSuccess().addField("Node Name", minionName);
+    }
+
+    private DataResult doAddMultiNode(RemoteService svc, String nodeName, OperatingSystem operatingSystem) {
+        NodeManagementResource root = ResourceProvider.getResource(svc, NodeManagementResource.class, getLocalContext());
+
+        CreateMultiNodeDto dto = new CreateMultiNodeDto();
+        dto.name = nodeName;
+        dto.config = new MultiNodeDto();
+        dto.config.operatingSystem = operatingSystem;
+
+        root.addMultiNode(dto);
+
+        return createSuccess().addField("Multi Node Name", nodeName);
+    }
+
+    private DataResult doDownloadMultiNodeMasterFile(RemoteService svc, String nodeName, String masterFile, boolean forceOverwrite) {
+        Path target = Paths.get(masterFile);
+        if (Files.isRegularFile(target) && !forceOverwrite) {
+            helpAndFail("Target file already exists: " + masterFile + ". Use --force for overwriting existing files.");
+        }
+
+        NodeManagementResource root = ResourceProvider.getResource(svc, NodeManagementResource.class, getLocalContext());
+        MultiNodeMasterFile masterFileContents = root.getMultiNodeMasterFile(nodeName);
+        try {
+
+            Files.write(target, StorageHelper.toRawBytes(masterFileContents));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot write master file to " + target, e);
+        }
+
+        return createResultWithSuccessMessage(
+                "Multi-node " + nodeName + " master file has been successfully written to " + target + ".");
     }
 
     private DataResult doRemoveMinion(RemoteService svc, String minionName) {

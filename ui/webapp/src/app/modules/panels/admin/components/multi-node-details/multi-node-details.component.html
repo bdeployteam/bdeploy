@@ -8,7 +8,7 @@
           [dismissable]="false"
           header="{{ nodeName$ | async }} - {{ state.config.os }}"
           >
-          <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
+          <div data-testid="multi-node-specs" class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
             <div>Master:</div>
             <div>{{ state.config.master ? 'yes' : 'no' }}</div>
             <div>Node type:</div>

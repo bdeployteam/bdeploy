@@ -128,7 +128,7 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
     public void addMultiNode(CreateMultiNodeDto createMultiNodeDto) {
         throwIfCentral();
         if (createMultiNodeDto.config.operatingSystem == null || OsHelper.isNotSupported(createMultiNodeDto.config.operatingSystem)) {
-            throw new WebApplicationException("The operating system is required and must be supported, for adding a multi-node.");
+            throw new WebApplicationException("To add a multi-node, the operating system must be entered and must be supported.");
         }
         ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context)
                 .addMultiNode(createMultiNodeDto.name, createMultiNodeDto.config);
