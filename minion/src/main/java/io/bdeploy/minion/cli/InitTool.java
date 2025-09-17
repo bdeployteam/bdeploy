@@ -43,6 +43,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool.InitConfig;
 import io.bdeploy.minion.job.MasterCleanupJob;
+import io.bdeploy.minion.user.PasswordAuthentication;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteMasterTool;
@@ -130,6 +131,11 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         if (config.mode() != MinionMode.NODE) {
             helpAndFailIfMissing(config.initUser(), "Missing --initUser");
             helpAndFailIfMissing(config.initPassword(), "Missing --initPassword");
+            try {
+                PasswordAuthentication.throwIfPasswordInvalid(config.initPassword().toCharArray());
+            } catch (RuntimeException e) {
+                return createResultWithErrorMessage(e.getMessage());
+            }
         } else if (config.nodeType() == MinionNodeType.SERVER) {
             helpAndFailIfMissing(config.nodeIdentFile(), "Missing --nodeIdentFile");
         }
@@ -143,6 +149,19 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments(), config.mode(),
                     config.nodeType(), config.skipConnectionCheck());
 
+            if (config.mode() == MinionMode.NODE) {
+                handleNode(config, mr);
+            } else {
+                try {
+                    mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
+                            Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+                } catch (Exception e) {
+                    return createResultWithErrorMessage(e.getMessage());
+                }
+
+                result.addField("User Created", config.initUser());
+            }
+
             if (config.tokenFile() != null) {
                 Path tokenPath = Paths.get(config.tokenFile());
                 Files.write(tokenPath, pack.getBytes(StandardCharsets.UTF_8));
@@ -155,19 +174,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 PathHelper.mkdirs(logDataDirPath);
                 mr.modifyState(s -> s.logDataDir = logDataDirPath);
                 result.addField("Logging directory", logDataDirPath);
-            }
-
-            if (config.mode() == MinionMode.NODE) {
-                handleNode(config, mr);
-            } else {
-                try {
-                    mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
-                            Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
-                } catch (Exception e) {
-                    return createResultWithErrorMessage(e.getMessage());
-                }
-
-                result.addField("User Created", config.initUser());
             }
 
             result.addField("Mode", config.mode().name());
@@ -226,8 +232,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     }
 
     public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments, MinionMode mode,
-            MinionNodeType nodeType,
-            boolean skipCheck) throws GeneralSecurityException, IOException {
+            MinionNodeType nodeType, boolean skipCheck) throws GeneralSecurityException, IOException {
         MinionState state = mr.initKeys();
 
         SecurityHelper helper = SecurityHelper.getInstance();
@@ -242,8 +247,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         }
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
-        minionConfiguration.addMinion(Minion.DEFAULT_NAME,
-                MinionDto.createServerNode(mode != MinionMode.NODE, remote));
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.createServerNode(mode != MinionMode.NODE, remote));
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);

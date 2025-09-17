@@ -24,7 +24,7 @@ import jakarta.ws.rs.core.Response.Status;
  * @author erickson
  * @see <a href="http://stackoverflow.com/a/2861125/3474">StackOverflow</a>
  */
-final class PasswordAuthentication implements Authenticator {
+public final class PasswordAuthentication implements Authenticator {
 
     /**
      * Each token produced by this class uses this identifier as a prefix.
@@ -49,11 +49,11 @@ final class PasswordAuthentication implements Authenticator {
     }
 
     /**
-     * Hash a password for storage.
+     * Validates the given password and throws a {@link WebApplicationException} if it is invalid.
      *
-     * @return a secure authentication token to be stored for later authentication
+     * @param password The password to validate
      */
-    public static String hash(char[] password) {
+    public static void throwIfPasswordInvalid(char[] password) {
         if (password.length < MIN_SIZE) {
             throw new WebApplicationException("Password too short. Minimum: " + MIN_SIZE + " characters.",
                     Status.EXPECTATION_FAILED);
@@ -62,6 +62,15 @@ final class PasswordAuthentication implements Authenticator {
             throw new WebApplicationException("Password too long. Maximum: " + MAX_SIZE + " characters.",
                     Status.EXPECTATION_FAILED);
         }
+    }
+
+    /**
+     * Hash a password for storage.
+     *
+     * @return a secure authentication token to be stored for later authentication
+     */
+    public static String hash(char[] password) {
+        throwIfPasswordInvalid(password);
 
         byte[] salt = new byte[MAX_SIZE / 8];
         random.nextBytes(salt);
