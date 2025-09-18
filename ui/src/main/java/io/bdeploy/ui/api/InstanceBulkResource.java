@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -92,9 +93,10 @@ public interface InstanceBulkResource {
     public BulkOperationResultDto activateLatestBulk(List<String> instances);
 
     /**
-     * @param instances a set of locally existing instance root manifest keys which are used to identify a set of servers to
-     *            synchronize and update state.
-     * @return a set of overall instance states for all synchronized instances.
+     * @param instances a {@link Set} of locally existing instance root manifest keys which are used to identify a set of servers
+     *            to synchronize and update state. If <code>null</code> or {@link Collection#isEmpty() empty}, all instances of
+     *            the group will be synchronized.
+     * @return a {@link List} of overall instance states for all synchronized instances
      */
     @POST
     @Path("/bulkSync")
