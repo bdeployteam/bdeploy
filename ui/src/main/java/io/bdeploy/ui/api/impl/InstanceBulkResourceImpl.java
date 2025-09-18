@@ -226,7 +226,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             rspos.runAndAwaitAll("Bulk-Update", updateRuns, hive.getTransactions());
 
             // 7) sync!
-            syncBulk(toSync);
+            syncManipulatedInstances(toSync);
         }
 
         return result;
@@ -253,7 +253,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         rspos.runAndAwaitAll("Bulk-Start", actions, hive.getTransactions());
 
-        syncBulk(sync.keySet());
+        syncManipulatedInstances(sync.keySet());
 
         sync.entrySet()
                 .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
@@ -284,7 +284,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         rspos.runAndAwaitAll("Bulk-Start", actions, hive.getTransactions());
 
-        syncBulk(sync.keySet());
+        syncManipulatedInstances(sync.keySet());
 
         sync.entrySet()
                 .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
@@ -315,7 +315,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         rspos.runAndAwaitAll("Bulk-Stop", actions, hive.getTransactions());
 
-        syncBulk(sync.keySet());
+        syncManipulatedInstances(sync.keySet());
 
         sync.entrySet()
                 .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
@@ -348,7 +348,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         rspos.runAndAwaitAll("Bulk-Delete", actions, hive.getTransactions());
 
         // now sync and fire update for all manipulated instances.
-        syncBulk(sync.keySet());
+        syncManipulatedInstances(sync.keySet());
 
         return result;
     }
@@ -414,7 +414,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         rspos.runAndAwaitAll("Bulk-Install-Latest", actions, hive.getTransactions());
 
         // now sync and fire update for all manipulated instances.
-        syncBulk(sync.keySet());
+        syncManipulatedInstances(sync.keySet());
 
         // TODO: same check as above regarding events.
         if (minion.getMode() == MinionMode.CENTRAL) {
@@ -457,7 +457,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         rspos.runAndAwaitAll("Bulk-Activate-Latest", actions, hive.getTransactions());
 
         // now sync and fire update for all manipulated instances.
-        syncBulk(sync.keySet());
+        syncManipulatedInstances(sync.keySet());
 
         // TODO: same check as above regarding events.
         if (minion.getMode() == MinionMode.CENTRAL) {
@@ -524,6 +524,12 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         }
 
         return result;
+    }
+
+    private void syncManipulatedInstances(Set<Key> manipulatedInstances) {
+        if (!manipulatedInstances.isEmpty()) {
+            syncBulk(manipulatedInstances);
+        }
     }
 
 }
