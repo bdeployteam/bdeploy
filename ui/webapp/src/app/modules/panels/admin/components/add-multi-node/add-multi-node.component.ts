@@ -26,7 +26,7 @@ import { BdFormSelectComponent } from '../../../../core/components/bd-form-selec
 const DEF_MULTI_NODE: CreateMultiNodeDto = {
   name: '',
   config: {
-    operatingSystem: OperatingSystem.UNKNOWN
+    operatingSystem: null
   }
 };
 
