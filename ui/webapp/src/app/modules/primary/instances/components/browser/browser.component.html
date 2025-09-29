@@ -58,15 +58,14 @@
         [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
         [disabled]="!(authService.isCurrentScopeWrite$ | async)"
       ></app-bd-button>
-      <div matTooltip="{{instanceCreationDisabledReason$ | async}}" [matTooltipDisabled]="allowInstanceCreation$ | async">
-        <app-bd-panel-button
-          icon="add"
-          text="Add Instance..."
-          [route]="['panels', 'instances', 'add']"
-          tooltipPosition="below"
-          [disabled]="!(allowInstanceCreation$ | async)"
-        ></app-bd-panel-button>
-      </div>
+      <app-bd-panel-button
+        icon="add"
+        text="Add Instance..."
+        [route]="['panels', 'instances', 'add']"
+        [tooltip]="instanceCreationDisabledReason()"
+        tooltipPosition="below"
+        [disabled]="!(allowInstanceCreation$ | async)"
+      ></app-bd-panel-button>
     </app-bd-dialog-toolbar>
     <app-bd-dialog-content>
       <app-bd-data-display

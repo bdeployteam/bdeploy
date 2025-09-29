@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -30,7 +30,6 @@ import { BdButtonComponent } from '../../../../core/components/bd-button/bd-butt
 import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { MatDivider } from '@angular/material/divider';
 import { RouterLink } from '@angular/router';
-import { MatTooltip } from '@angular/material/tooltip';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 
 import { BdNoDataComponent } from '../../../../core/components/bd-no-data/bd-no-data.component';
@@ -39,7 +38,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
     selector: 'app-instances-browser',
     templateUrl: './browser.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDataSortingComponent, BdDataGroupingComponent, BdButtonComponent, BdPanelButtonComponent, MatDivider, RouterLink, MatTooltip, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent, AsyncPipe]
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDataSortingComponent, BdDataGroupingComponent, BdButtonComponent, BdPanelButtonComponent, MatDivider, RouterLink, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent, AsyncPipe]
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   private readonly config = inject(ConfigService);
@@ -77,7 +76,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   protected grouping: BdDataGroupingDefinition<InstanceDto>[];
   protected hasProducts$ = new BehaviorSubject<boolean>(false);
   protected allowInstanceCreation$ = new BehaviorSubject<boolean>(false);
-  protected instanceCreationDisabledReason$ = new BehaviorSubject<string>('');
+  protected instanceCreationDisabledReason = signal<string>(null);
 
   private defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
   private defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
@@ -143,23 +142,23 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       ]).subscribe(([scopeWrite, hasProducts, isCentral, servers]) => {
         if (!scopeWrite) {
           this.allowInstanceCreation$.next(false);
-          this.instanceCreationDisabledReason$.next(
+          this.instanceCreationDisabledReason.set(
             'You do not have the necesarry permissions to create a new instance',
           );
           return;
         }
         if (!hasProducts) {
           this.allowInstanceCreation$.next(false);
-          this.instanceCreationDisabledReason$.next('No products are configured');
+          this.instanceCreationDisabledReason.set('No products are configured');
           return;
         }
         if (isCentral && servers.length < 1) {
           this.allowInstanceCreation$.next(false);
-          this.instanceCreationDisabledReason$.next('No managed servers are configured');
+          this.instanceCreationDisabledReason.set('No managed servers are configured');
           return;
         }
         this.allowInstanceCreation$.next(true);
-        this.instanceCreationDisabledReason$.next('');
+        this.instanceCreationDisabledReason.set(null);
       }),
     );
     this.subscription.add(
