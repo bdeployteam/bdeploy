@@ -104,7 +104,6 @@
                     >.
                   </div>
                 </div>
-                <div matTooltip="{{installButtonDisabledMessage()}}" [matTooltipDisabled]="hasMinMinionVersion()">
                   <app-bd-button
                     color="primary"
                     text="Install"
@@ -113,9 +112,9 @@
                     [collapsed]="isInstalled()"
                     [disabled]="!(states$ | async) || (mappedInstall$ | async) || isInstalled() || !(auth.isCurrentScopeWrite$ | async) || !hasProduct() || !hasMinMinionVersion()"
                     [loadingWhen$]="mappedInstall$"
+                    tooltip="installButtonDisabledMessage()"
                     tooltipPosition="below"
                   ></app-bd-button>
-                </div>
                   <app-bd-button
                     color="primary"
                     text="Activate"
