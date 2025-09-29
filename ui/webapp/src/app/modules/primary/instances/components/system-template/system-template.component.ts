@@ -1,5 +1,5 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, Predicate, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material/stepper';
 import { map, Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
@@ -19,6 +19,9 @@ import {
   InstanceTemplateReferenceResultDto,
   InstanceTemplateReferenceStatus,
   ManagedMasterDto,
+  MinionDto,
+  MinionNodeType,
+  MinionStatusDto,
   ProductDto,
   ProductKeyWithSourceDto,
   SystemTemplateDto,
@@ -147,7 +150,7 @@ export class SystemTemplateComponent implements OnInit {
   protected requiredSystemVariables: TemplateVariable[] = [];
   protected isAllSystemVariablesSet = false;
 
-  protected nodeNames: string[];
+  protected nodes: Record<string, MinionStatusDto>;
   protected isAllTemplateGroupsSelected = false;
   protected isAllVariablesSet = false;
   protected isAnyInstanceApplied = false;
@@ -335,7 +338,7 @@ export class SystemTemplateComponent implements OnInit {
 
   private onConfigureInstanceTemplatesStep() {
     this.isAllTemplateGroupsSelected = false;
-    this.nodeNames = Object.keys(this.template.nodes);
+    this.nodes = this.template.nodes;
     this.templates = this.template.template.instances.map((i) => {
       // cannot be null, as the backend would otherwise reject.
       const initialProductVersionRegex = i.initialProductVersionRegex || i.productVersionRegex; 
@@ -350,11 +353,11 @@ export class SystemTemplateComponent implements OnInit {
 
       const tpl = prod.instanceTemplates.find((t) => t.name === i.templateName);
       const groups: Record<string, string> = {};
-      const nodes: Record<string, string[]> = {};
+      const nodeIds: Record<string, string[]> = {};
       const nodeLabels: Record<string, string[]> = {};
 
       for (const grp of tpl.groups) {
-        nodes[grp.name] = this.getNodesFor(grp);
+        nodeIds[grp.name] = this.getNodesFor(grp);
         nodeLabels[grp.name] = this.getLabelsFor(grp);
         groups[grp.name] = null; // not selected but defined :)
         const mapping = i.defaultMappings?.find((d) => d.group === grp.name);
@@ -362,7 +365,7 @@ export class SystemTemplateComponent implements OnInit {
           // the mapping can use system template variables!
           const expNode = performTemplateVariableSubst(mapping.node, this.systemVariables, expStatus);
 
-          const presetNode = nodes[grp.name].find((n) => n === expNode);
+          const presetNode = nodeIds[grp.name].find((n) => n === expNode);
           if (!presetNode) {
             console.log(`Cannot find node to preset for ${grp.name}: ${expNode}`);
           } else {
@@ -392,7 +395,7 @@ export class SystemTemplateComponent implements OnInit {
         expandedName: expName,
         expandedDescription: expDesc,
         groups: groups,
-        nodeNames: nodes,
+        nodeNames: nodeIds,
         nodeLabels: nodeLabels,
         isApplyInstance: true,
         isAnyGroupSelected: false,
@@ -477,18 +480,24 @@ export class SystemTemplateComponent implements OnInit {
     this.selectedServer = null;
   }
 
+  private getNodeNamesMatching(predicate: Predicate<MinionDto | null>) {
+    return Object.entries(this.nodes).filter(([, node]) => predicate(node?.config)).map(([key]) => key);
+  }
+
   private getNodesFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     if (group.type === ApplicationType.CLIENT) {
-      return [null, '__ClientApplications'];//TODO refactor to eliminate this magic constant
+      //TODO refactor to eliminate this magic constant. To be able to get rid of this, the server
+      //     would need to report the client applications node the same way as any server node.
+      return [null, '__ClientApplications'];
     }
-    return [null, ...this.nodeNames]; //TODO refactor to be able to filter out runtime nodes
+    return [null, ...this.getNodeNamesMatching(n => n?.minionNodeType !== MinionNodeType.MULTI_RUNTIME)]; //TODO refactor to be able to filter out runtime nodes
   }
 
   private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     if (group.type === ApplicationType.CLIENT) {
       return ['(skip)', 'Apply to Client Applications'];
     }
-    return ['(skip)', ...this.nodeNames.map((n) => 'Apply to ' + n)];
+    return ['(skip)', ...this.getNodeNamesMatching(n => n?.minionNodeType !== MinionNodeType.MULTI_RUNTIME).map((n) => 'Apply to ' + n)];
   }
 
   private validateAllTemplateGroupsSelected() {
