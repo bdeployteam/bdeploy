@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.minion;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.common.Version;
@@ -90,5 +92,13 @@ public class MinionDto {
         dto.os = OsHelper.getRunningOs();
         dto.minionNodeType = MinionNodeType.MULTI_RUNTIME;
         return dto;
+    }
+
+    public URI getUriIfDefined() {
+        return remote == null ? null : remote.getUri();
+    }
+
+    public void clearAuthInformation() {
+        remote = new RemoteService(getUriIfDefined());
     }
 }
