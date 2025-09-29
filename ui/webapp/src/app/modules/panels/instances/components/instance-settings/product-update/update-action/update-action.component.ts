@@ -49,7 +49,7 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
     if (minimumVersion) {
       const currentVersion = this.cfg?.config?.version;
       if (currentVersion) {
-        this.hasMinMinionVersion = compareVersions(minimumVersion, currentVersion) < 0;
+        this.hasMinMinionVersion = compareVersions(currentVersion, minimumVersion) >= 0;
         if (!this.hasMinMinionVersion) {
           this.installButtonTooltip =
             'This product version cannot be applied because it requires a BDeploy version of ' +

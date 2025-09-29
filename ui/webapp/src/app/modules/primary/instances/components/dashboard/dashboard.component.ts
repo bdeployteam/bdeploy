@@ -176,7 +176,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (minimumVersion) {
           const currentVersion = this.cfg?.config?.version;
           if (currentVersion) {
-            if (compareVersions(minimumVersion, currentVersion) < 0) {
+            if (compareVersions(currentVersion, minimumVersion) >= 0) {
               this.hasMinMinionVersion.set(true);
               this.installButtonDisabledMessage.set(null);
             } else {

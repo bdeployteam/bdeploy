@@ -182,7 +182,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     if (minimumVersion) {
       const currentVersion = this.cfg?.config?.version;
       if (currentVersion) {
-        if (compareVersions(minimumVersion, currentVersion) < 0) {
+        if (compareVersions(currentVersion, minimumVersion) >= 0) {
           this.addInstanceButtonDisabledMessage.set(null);
         } else {
           this.addInstanceButtonDisabledMessage.set(
