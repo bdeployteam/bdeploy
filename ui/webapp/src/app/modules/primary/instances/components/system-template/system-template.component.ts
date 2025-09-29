@@ -1,7 +1,7 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
-import { MatStepper, MatStep } from '@angular/material/stepper';
-import { Observable, map } from 'rxjs';
+import { Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { MatStep, MatStepper } from '@angular/material/stepper';
+import { map, Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
@@ -25,7 +25,7 @@ import {
   SystemTemplateRequestDto,
   SystemTemplateResultDto,
   TemplateVariable,
-  TemplateVariableType,
+  TemplateVariableType
 } from './../../../../../models/gen.dtos';
 import { GroupsService } from './../../../groups/services/groups.service';
 import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
@@ -37,14 +37,18 @@ import { BdFormSelectComponent } from '../../../../core/components/bd-form-selec
 import { FormsModule } from '@angular/forms';
 import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
 import { BdFileUploadComponent } from '../../../../core/components/bd-file-upload/bd-file-upload.component';
-import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import {
+  BdNotificationCardComponent
+} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
 import { EditUniqueValueValidatorDirective } from '../../../../core/validators/edit-unique-value.directive';
 import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
-import { BdFormTemplateVariableComponent } from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
-import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
+import {
+  BdFormTemplateVariableComponent
+} from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatDivider } from '@angular/material/divider';
@@ -477,7 +481,7 @@ export class SystemTemplateComponent implements OnInit {
     if (group.type === ApplicationType.CLIENT) {
       return [null, '__ClientApplications'];//TODO refactor to eliminate this magic constant
     }
-    return [null, ...this.nodeNames];
+    return [null, ...this.nodeNames]; //TODO refactor to be able to filter out runtime nodes
   }
 
   private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {

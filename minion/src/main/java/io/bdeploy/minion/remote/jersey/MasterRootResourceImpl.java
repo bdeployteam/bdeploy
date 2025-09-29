@@ -109,9 +109,15 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
-    public void attachMultiNode(String multiNodeName, MinionDto node) {
+    public boolean attachMultiNode(String multiNodeName, String runtimeName, boolean force, MinionDto node) {
+        if (!force && nodes.getSingleOnlineNodeConfig(runtimeName) != null) {
+            // it is still there, ignore re-registration attempt :)
+            return false;
+        }
+
         try (var handle = af.run(Actions.ADD_NODE, null, null, node.remote.getUri().toString())) {
-            nodes.attachMultiNodeRuntime(multiNodeName, node);
+            nodes.attachMultiNodeRuntime(multiNodeName, runtimeName, node);
+            return true;
         }
     }
 

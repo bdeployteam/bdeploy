@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
-import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -237,13 +236,16 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 log.debug("Failed to contact {}", node, e);
             }
 
+            if (mdto.minionNodeType == MinionDto.MinionNodeType.MULTI_RUNTIME) {
+                removeNode(node);
+                return; // no status, no warnings.
+            }
+
             if (e instanceof ProcessingException x) {
                 status.put(node, MinionStatusDto.createOffline(mdto, x.getCause().toString()));
             } else {
                 status.put(node, MinionStatusDto.createOffline(mdto, e.toString()));
             }
-
-            // TODO: handle removal of multi-nodes in case they are offline (time limit? re-registration?)
 
             // log it, we don't want to hold status in the futures.
             if (Boolean.TRUE.equals(contactWarning.get(node))) {
@@ -408,10 +410,29 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     public void removeNode(String name) {
         log.info("Removing node {}", name);
 
+        MinionDto minion = getNodeConfig(name);
+        if (minion != null) {
+            if (minion.minionNodeType == MinionDto.MinionNodeType.MULTI) {
+                var runtimes = multiNodes.get(name);
+                if (runtimes != null && !runtimes.isEmpty()) {
+                    runtimes.keySet().forEach(this::removeNode);
+                }
+            } else if (minion.minionNodeType == MinionDto.MinionNodeType.MULTI_RUNTIME) {
+                var parent = getMultiNodeConfigNameForRuntimeNode(name);
+                if (parent != null) {
+                    multiNodes.getOrDefault(parent, Collections.emptyMap()).remove(name);
+                    status.put(parent, createMultiNodeStatus(parent, getNodeConfig(parent)));
+                }
+            }
+        }
+
         config.removeMinion(name);
         status.remove(name);
         contactWarning.remove(name);
-        scheduleSave();
+
+        if (minion == null || minion.minionNodeType != MinionDto.MinionNodeType.MULTI_RUNTIME) {
+            scheduleSave();
+        }
     }
 
     @Override
@@ -431,9 +452,8 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     }
 
     @Override
-    public void attachMultiNodeRuntime(String name, MinionDto multiNodeDto) {
-        String uniqueId = UuidHelper.randomId();
-        log.info("Attaching multi-node {} to {}", uniqueId, name);
+    public void attachMultiNodeRuntime(String name, String runtimeName, MinionDto multiNodeDto) {
+        log.info("Attaching multi-node {} to {}", runtimeName, name);
 
         if (multiNodeDto.minionNodeType != MinionDto.MinionNodeType.MULTI_RUNTIME) {
             throw new RuntimeException("Invalid minion node type " + multiNodeDto.minionNodeType);
@@ -444,16 +464,16 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
             throw new RuntimeException("Multi-node " + name + " not found");
         }
 
-        multiNodes.computeIfAbsent(name, k -> new ConcurrentHashMap<>()).put(uniqueId, multiNodeDto);
-        status.put(uniqueId, createStartingStatus(multiNodeDto));
-        contactWarning.put(uniqueId, Boolean.FALSE);
+        multiNodes.computeIfAbsent(name, k -> new ConcurrentHashMap<>()).put(runtimeName, multiNodeDto);
+        status.put(runtimeName, createStartingStatus(multiNodeDto));
+        contactWarning.put(runtimeName, Boolean.FALSE);
 
         // update the status of the hosting configuration node
         status.put(name, createMultiNodeStatus(name, hostMultiNode));
 
         // no need to save anything -> all ephemeral
-        log.info("Updating state for added multi-node {}", uniqueId);
-        fetchNodeState(uniqueId);
+        log.info("Updating state for added multi-node {}", runtimeName);
+        fetchNodeState(runtimeName);
     }
 
 }
