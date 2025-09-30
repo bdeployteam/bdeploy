@@ -262,7 +262,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     @Override
     public Map<String, MinionDto> getAllNodes() {
         List<Map<String, MinionDto>> allNodes = new ArrayList<>();
-        allNodes.add(config.values());
+        allNodes.add(config.minionMap());
         allNodes.addAll(multiNodes.values());
         Map<String, MinionDto> allCombined = allNodes.stream().flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
