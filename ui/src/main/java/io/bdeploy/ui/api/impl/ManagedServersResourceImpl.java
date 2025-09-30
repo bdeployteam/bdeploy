@@ -259,7 +259,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return masters.getManagedMasters().values().stream().map(e -> {
             e.auth = null;
             // also clear auth of all nodes.
-            e.minions.values().forEach((k, v) -> v.clearAuthInformation());
+            e.minions.values().values().forEach(v -> v.clearAuthInformation());
             return e;
         }).toList();
     }
@@ -281,7 +281,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // clear token - don't transfer over the wire if not required.
         dto.auth = null;
-        dto.minions.values().forEach((k, v) -> v.clearAuthInformation());
+        dto.minions.values().values().forEach(v -> v.clearAuthInformation());
         return dto;
     }
 
