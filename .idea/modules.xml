@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bdeploy-demo-plugin.iml" filepath="$PROJECT_DIR$/.idea/modules/bdeploy-demo-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bdeploy-demo-plugin.main.iml" filepath="$PROJECT_DIR$/.idea/modules/bdeploy-demo-plugin.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bdeploy-demo-plugin.test.iml" filepath="$PROJECT_DIR$/.idea/modules/bdeploy-demo-plugin.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/io.bdeploy.api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api/io.bdeploy.api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.main.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.test.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/bhive/io.bdeploy.bhive.testFixtures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/common/io.bdeploy.common.testFixtures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.test.iml" filepath="$PROJECT_DIR$/.idea/modules/dcu/io.bdeploy.dcu.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.main.iml" filepath="$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.test.iml" filepath="$PROJECT_DIR$/.idea/modules/interfaces/io.bdeploy.interfaces.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.test.iml" filepath="$PROJECT_DIR$/.idea/modules/jersey/io.bdeploy.jersey.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.test.iml" filepath="$PROJECT_DIR$/.idea/modules/launcher/io.bdeploy.launcher.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/logging/io.bdeploy.logging.main.iml" filepath="$PROJECT_DIR$/.idea/modules/logging/io.bdeploy.logging.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.main.iml" filepath="$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.test.iml" filepath="$PROJECT_DIR$/.idea/modules/messaging/io.bdeploy.messaging.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.test.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/pcu/io.bdeploy.pcu.testFixtures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/schema/io.bdeploy.schema.main.iml" filepath="$PROJECT_DIR$/.idea/modules/schema/io.bdeploy.schema.main.iml" />
+    </modules>
+  </component>
+</project>

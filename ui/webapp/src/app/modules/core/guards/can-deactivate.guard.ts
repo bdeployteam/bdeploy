@@ -32,7 +32,7 @@ export class CanDeactivateGuard {
     return component.canDeactivate
       ? component.canDeactivate().pipe(
           tap((allowed) => {
-            if (!allowed && this.router.getCurrentNavigation().trigger === 'popstate') {
+            if (!allowed && this.router.currentNavigation().trigger === 'popstate') {
               // FORWARD navigation is broken by this, but there is no simple and no plausible way to
               // distinguish back vs. forward button (grmpf). In the case where the user presses
               // forward and then cancels due to unsaved changes, we will destroy the forward history

@@ -26,9 +26,9 @@ buildscript {
 plugins {
     id 'base'
     id 'jacoco'
-    id 'com.github.ben-manes.versions' version '0.52.0'
-    id "org.sonarqube" version "6.2.0.5505"
-    id 'org.cyclonedx.bom' version '2.3.1'
+    id 'com.github.ben-manes.versions' version '0.53.0'
+    id "org.sonarqube" version "6.3.1.5724"
+    id 'org.cyclonedx.bom' version '2.4.1'
 }
 
 cyclonedxBom {

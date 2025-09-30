@@ -9,7 +9,7 @@ dependencies {
         project(":interfaces"),
         'com.github.victools:jsonschema-generator:4.38.0',
         'com.github.victools:jsonschema-module-jackson:4.38.0',
-        'com.networknt:json-schema-validator:1.5.8'
+        'com.networknt:json-schema-validator:1.5.9'
     )
     commonTestDeps(testFixtures(project(":jersey")))
 }

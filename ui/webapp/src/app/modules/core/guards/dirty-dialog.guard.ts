@@ -65,7 +65,7 @@ export class DirtyDialogGuard {
   private readonly router = inject(Router);
 
   canDeactivate(component: DirtyableDialog): Observable<boolean> {
-    const ignore = this.router.getCurrentNavigation()?.extras?.state?.['ignoreDirtyGuard'];
+    const ignore = this.router.currentNavigation()?.extras?.state?.['ignoreDirtyGuard'];
     if (ignore) {
       return of(true); // forced navigation.
     }

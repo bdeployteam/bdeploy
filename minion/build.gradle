@@ -23,11 +23,11 @@ dependencies {
         project(":schema"),
         project(":messaging"),
 
-        'org.bouncycastle:bcpkix-jdk18on:1.81',
-        'org.bouncycastle:bcprov-jdk18on:1.81',
+        'org.bouncycastle:bcpkix-jdk18on:1.82',
+        'org.bouncycastle:bcprov-jdk18on:1.82',
         'org.quartz-scheduler:quartz:2.5.0',
         'net.jsign:jsign-core:6.0',
-        'com.nimbusds:oauth2-oidc-sdk:11.27'
+        'com.nimbusds:oauth2-oidc-sdk:11.29.2'
     )
 
     commonTestDeps(project(":launcher"))
