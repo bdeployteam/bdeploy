@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.Variables;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
@@ -37,6 +38,7 @@ import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.LatestProductVersionRequestDto;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductKeyWithSourceDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
@@ -67,6 +69,9 @@ public class SystemResourceImpl implements SystemResource {
 
     @Inject
     private MasterProvider mp;
+
+    @Inject
+    private ChangeEventManager changes;
 
     public SystemResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -117,10 +122,19 @@ public class SystemResourceImpl implements SystemResource {
     @Override
     public void delete(String systemId) {
         Key key = SystemManifest.load(hive, systemId).getKey();
-        RemoteService remote = mp.getControllingMaster(hive, key);
+
+        RemoteService remote;
+        try {
+            remote = mp.getControllingMaster(hive, key);
+        } catch (WebApplicationException e) {
+            // Remote minion is no longer connected to this minion -> delete system on this minion
+            SystemManifest.delete(hive, systemId);
+            changes.remove(ObjectChangeType.SYSTEM, key, new ObjectScope(group));
+            return;
+        }
+
         MasterSystemResource msr = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context)
                 .getNamedMaster(group).getSystemResource();
-
         msr.delete(systemId);
         syncSystem(key);
     }
