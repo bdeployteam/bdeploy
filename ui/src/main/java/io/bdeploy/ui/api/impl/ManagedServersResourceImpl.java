@@ -259,7 +259,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return masters.getManagedMasters().values().stream().map(e -> {
             e.auth = null;
             // also clear auth of all nodes.
-            e.minions.values().values().forEach(v -> v.clearAuthInformation());
+            e.minions.minionMap().values().forEach(v -> v.clearAuthInformation());
             return e;
         }).toList();
     }
@@ -281,7 +281,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // clear token - don't transfer over the wire if not required.
         dto.auth = null;
-        dto.minions.values().values().forEach(v -> v.clearAuthInformation());
+        dto.minions.minionMap().values().forEach(v -> v.clearAuthInformation());
         return dto;
     }
 
@@ -759,7 +759,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             ManagedMasters mm = new ManagedMasters(hive);
             ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-            Map<String, MinionDto> allMinions = attached.minions.values();
+            Map<String, MinionDto> allMinions = attached.minions.minionMap();
 
             // Determine OS of the master
             Optional<MinionDto> masterDto = allMinions.values().stream().filter(dto -> dto.master).findFirst();

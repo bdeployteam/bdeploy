@@ -72,9 +72,9 @@ public class MinionConfiguration {
     }
 
     /**
-     * Returns the map of all minions
+     * @return an unmodifiable view of the {@link Map} of all minions
      */
-    public Map<String, MinionDto> values() {
+    public Map<String, MinionDto> minionMap() {
         return Collections.unmodifiableMap(minions);
     }
 

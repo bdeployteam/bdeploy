@@ -279,7 +279,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
 
             table.row().cell(mmd.hostName).cell(mmd.uri).cell(mmd.description)
                     .cell(mmd.lastSync != null ? FormatHelper.formatTemporal(mmd.lastSync) : "never")
-                    .cell(mmd.minions.values().size()).cell(instances.size()).build();
+                    .cell(mmd.minions.minionMap().size()).cell(instances.size()).build();
         }
         return table;
     }
@@ -348,15 +348,15 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
 
             MinionDto master = null;
             Set<Version> versions = new TreeSet<>();
-            for (var node : mmd.minions.entrySet()) {
-                if (node.getValue().master) {
+            for (var node : mmd.minions.minionMap().values()) {
+                if (node.master) {
                     if (master != null) {
                         out().println("Warning: multiple masters found for " + mmd.hostName + " in " + group);
                     }
-                    master = node.getValue();
+                    master = node;
                 }
-                if (node.getValue().version != null) {
-                    versions.add(node.getValue().version);
+                if (node.version != null) {
+                    versions.add(node.version);
                 }
             }
 
