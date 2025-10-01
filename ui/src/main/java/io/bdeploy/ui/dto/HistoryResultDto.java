@@ -1,5 +1,8 @@
 package io.bdeploy.ui.dto;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +85,15 @@ public class HistoryResultDto {
         if (runtime != null) {
             String pid = String.valueOf(runtime.pid);
             if (pid.equals(text)) {
+                return true;
+            }
+        }
+
+        // Match date/time - the format is hardcoded in the frontend as well.
+        if (dto.timestamp > 0) {
+            String formatted = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm:ss")
+                    .format(Instant.ofEpochMilli(dto.timestamp).atZone(ZoneId.systemDefault()));
+            if (contains(formatted, text)) {
                 return true;
             }
         }
