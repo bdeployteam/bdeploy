@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 
-import org.apache.commons.collections4.functors.NOPClosure;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -234,11 +233,9 @@ public class TestMinion extends TestServer {
             CloseableMinionRoot cmr = getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
             MinionDto self = new MinionManifest(cmr.mr.getHive()).read().getMinion(cmr.mr.getState().self);
 
-            MultiNodeCompletion handler = (master) -> {
-                MultiNodeRegistration.register(cmr.mr, self, master);
+            return (MultiNodeCompletion) (master) -> {
+                MultiNodeRegistration.register(cmr.mr, mode.name() + "-multi-" + disambiguation, self, master);
             };
-
-            return handler;
         }
 
         if(parameterContext.isAnnotated(MultiNodeMaster.class)) {

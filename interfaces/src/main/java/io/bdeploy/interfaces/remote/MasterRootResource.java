@@ -50,11 +50,14 @@ public interface MasterRootResource extends CommonUpdateResource {
      * <p>
      * The node will receive all the configuration already present for that multi-node just like a normal node after
      * registration.
+     *
+     * @return <code>true</code> if registered, <code>false</code> if a node with this runtimeName already exists.
      */
     @PUT
     @WeakTokenAllowed
-    @Path("/minions/multi-node/{name}")
-    public void attachMultiNode(@PathParam("name") String multiNodeName, MinionDto node);
+    @Path("/minions/multi-node/{name}/{runtimeName}")
+    public boolean attachMultiNode(@PathParam("name") String multiNodeName, @PathParam("runtimeName") String runtimeName,
+            @QueryParam("forceRegistration") boolean force, MinionDto node);
 
     /**
      * @param name the name of the minion to add.

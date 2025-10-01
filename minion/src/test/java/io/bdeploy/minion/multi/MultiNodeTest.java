@@ -36,7 +36,7 @@ public class MultiNodeTest {
     void testMultiNode(@SourceMinion(MinionMode.STANDALONE) RemoteService standaloneSvc,
             @MultiNodeMaster(MULTINODE_NAME) MultiNodeMasterFile masterFile,
             @SourceMinion(value = MinionMode.NODE, disambiguation = "1") MultiNodeCompletion start1,
-            @SourceMinion(value = MinionMode.NODE, disambiguation = "1") MultiNodeCompletion start2) throws InterruptedException {
+            @SourceMinion(value = MinionMode.NODE, disambiguation = "2") MultiNodeCompletion start2) throws InterruptedException {
         // create a multi node configuration on the master
         NodeManagementResource rsrc = ResourceProvider.getResource(standaloneSvc, NodeManagementResource.class, null);
 

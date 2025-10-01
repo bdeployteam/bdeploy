@@ -113,8 +113,9 @@ public interface NodeManager {
      * Attach a multi node (runtime) to a multi node (configuration).
      *
      * @param name the name of the multi-node - must exist in the node manager already.
+     * @param runtimeName the unique name of the node as provided by the user
      * @param multiNodeDto the actual runtime part to be attached to the multi-node.
      */
-    public void attachMultiNodeRuntime(String name, MinionDto multiNodeDto);
+    public void attachMultiNodeRuntime(String name, String runtimeName, MinionDto multiNodeDto);
 
 }

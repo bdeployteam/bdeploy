@@ -2,7 +2,7 @@ import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { InstanceNodeConfigurationDto, NodeType } from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationDto, MinionNodeType, NodeType } from 'src/app/models/gen.dtos';
 import {
   BdDialogToolbarComponent
 } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -62,6 +62,13 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
         // nodes which are configured on the server.
         for (const key of Object.keys(nodes)) {
+          const node = nodes[key];
+
+          // don't display runtime nodes.
+          if (node.minionNodeType === MinionNodeType.MULTI_RUNTIME) {
+            continue;
+          }
+
           const config = state.config.nodeDtos.find((n) => n.nodeName === key);
           const row = { name: key, config: config };
           this.records.push(row);

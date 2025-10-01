@@ -125,6 +125,9 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         @Validator({ ExistingFileValidator.class })
         String masterFile();
 
+        @Help("Specifies the name of the multi-node runtime when starting a multi-node")
+        String runtimeName();
+
         @Help(value = "Publish the web application, defaults to true.", arg = false)
         boolean publishWebapp() default true;
 
@@ -223,6 +226,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         // master to finish synchronization of data in our direction.
         if (r.getNodeType() == MinionDto.MinionNodeType.MULTI_RUNTIME) {
             helpAndFailIfMissing(config.masterFile(), "Missing --masterFile");
+            helpAndFailIfMissing(config.runtimeName(), "Missing --runtimeName");
 
             // need to figure out who we are with as little as we have before starting up fully (no node manager)
             // we can do that without pretty much any check as this MUST be prepared by init in this way
@@ -230,7 +234,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             MultiNodeMasterFile mnmf = StorageHelper.fromPath(Paths.get(config.masterFile()), MultiNodeMasterFile.class);
 
             // trigger registration of the node with the master.
-            srv.afterStartup().thenRun(() -> MultiNodeRegistration.register(r, self, mnmf));
+            srv.afterStartup().thenRun(() -> MultiNodeRegistration.register(r, config.runtimeName(), self, mnmf));
         } else {
             // normal node startup: run autostart immediately, not waiting for master at all.
             srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
