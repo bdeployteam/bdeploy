@@ -22,8 +22,8 @@ dependencies {
 
         'com.twelvemonkeys.imageio:imageio-core:3.12.0',
         'com.twelvemonkeys.imageio:imageio-bmp:3.12.0',
-        'net.java.dev.jna:jna:5.17.0',
-        'net.java.dev.jna:jna-platform:5.17.0',
+        'net.java.dev.jna:jna:5.18.0',
+        'net.java.dev.jna:jna-platform:5.18.0',
         'com.formdev:flatlaf:3.6.1',
         'com.formdev:flatlaf-extras:3.6.1',
         'com.formdev:flatlaf-fonts-roboto:2.137'

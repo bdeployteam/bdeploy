@@ -8,7 +8,7 @@ dependencies {
         project(":jersey"),
         project(":bhive"),
         
-        'com.nimbusds:oauth2-oidc-sdk:11.27'
+        'com.nimbusds:oauth2-oidc-sdk:11.29.2'
     )
     api(
         project(":api"),

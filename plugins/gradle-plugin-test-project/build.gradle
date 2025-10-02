@@ -24,7 +24,7 @@ plugins {
 
     id 'io.bdeploy.gradle.plugin'
 
-    id "com.github.ben-manes.versions" version "0.52.0"
+    id "com.github.ben-manes.versions" version "0.53.0"
 }
 
 repositories {
@@ -45,7 +45,7 @@ ext {
 
 dependencies {
     // This dependency is used by the application.
-    implementation 'com.google.guava:guava:33.4.8-jre'
+    implementation 'com.google.guava:guava:33.5.0-jre'
 
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'

@@ -1,4 +1,4 @@
-import { TextWriter, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
+import { FileEntry, TextWriter, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
 import * as Pako from 'pako';
 import { Observable, catchError, forkJoin, from, map, of, switchMap } from 'rxjs';
 import { RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
@@ -45,7 +45,7 @@ function unzip(chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
     map((c) => binaryContentToUint8Array(c)),
     map((data) => new ZipReader(new Uint8ArrayReader(data))),
     switchMap((zipReader) => from(zipReader.getEntries())),
-    switchMap((es) => forkJoin(es.map((e) => e.getData<string>(new TextWriter())))),
+    switchMap((es) => forkJoin(es.filter(e => !e.directory).map(e => e as FileEntry).map((e) => e.getData<string>(new TextWriter())))),
     map((ss) => ss.join('\n')),
     catchError((e) => of(`failed to fetch content. ${e}`)),
     map((content) => ({ ...chunk, content })),
