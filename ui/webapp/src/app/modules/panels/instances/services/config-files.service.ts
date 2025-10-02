@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ConfigFileDto, FileStatusDto, FileStatusType, InstanceDto, ManifestKey } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -14,7 +14,7 @@ export interface ConfigFile {
   modification: FileStatusDto;
 }
 
-export type ConfigFileStatusType = 'new' | 'modified' | 'local' | 'sync' | 'unsync' | 'missing';
+export type ConfigFileStatusType = 'new' | 'new-re-add' | 'modified' | 'local' | 'sync' | 'unsync' | 'missing';
 
 @Injectable({
   providedIn: 'root',
@@ -233,7 +233,7 @@ export class ConfigFilesService {
     }
 
     if (!file.persistent?.instanceId && !!file.persistent?.productId && !!file.modification?.file) {
-      return 'new';
+      return 'new-re-add';
     }
 
     if (file.modification?.file) {

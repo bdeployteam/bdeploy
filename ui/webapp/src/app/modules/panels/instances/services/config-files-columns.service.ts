@@ -1,8 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { FileStatusType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
-import { ConfigFilesActionsComponent } from '../components/instance-settings/config-files/config-files-actions/config-files-actions.component';
+import {
+  ConfigFilesActionsComponent
+} from '../components/instance-settings/config-files/config-files-actions/config-files-actions.component';
 import { ConfigFile, ConfigFilesService } from './config-files.service';
 
 @Injectable({
@@ -71,7 +73,10 @@ export class ConfigFilesColumnsService {
     const s = this.cfgFiles.getStatus(r);
     switch (s) {
       case 'local':
+      case 'new':
         return 'File not in selected product version.';
+      case 'new-re-add':
+        return 'New file, replacing file in product version.';
       case 'unsync':
         return 'File differs from product.';
       case 'missing':
