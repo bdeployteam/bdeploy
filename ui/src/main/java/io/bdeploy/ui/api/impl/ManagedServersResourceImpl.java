@@ -309,17 +309,38 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return instances;
     }
 
+    private Map<Manifest.Key, String> getSystemsControlledBy(String groupName, String serverName) {
+        Map<Manifest.Key, String> systems = new HashMap<>();
+        BHive hive = getInstanceGroupHive(groupName);
+
+        SortedSet<Manifest.Key> latestKeys = SystemManifest.scan(hive);
+
+        for (Manifest.Key key : latestKeys) {
+            String associated = new ControllingMaster(hive, key).read().getName();
+            if (serverName.equals(associated)) {
+                systems.put(key, SystemManifest.of(hive, key).getConfiguration().id);
+            }
+        }
+        return systems;
+    }
+
     @Override
     public void deleteManagedServer(String groupName, String serverName) {
         try (ActionHandle h = af.run(Actions.REMOVE_MANAGED, groupName, null, serverName)) {
             BHive hive = getInstanceGroupHive(groupName);
             List<InstanceConfiguration> controlled = getInstancesControlledBy(groupName, serverName);
 
-            // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach).
             for (InstanceConfiguration cfg : controlled) {
+                // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach)
                 Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.id));
                 allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
             }
+
+            getSystemsControlledBy(groupName, serverName).forEach((key, id) -> {
+                // delete all of the systems /LOCALLY/ on the central, but NOT using the remote master (we "just" detach)
+                SystemManifest.delete(hive, id);
+                changes.remove(ObjectChangeType.SYSTEM, key, new ObjectScope(groupName));
+            });
 
             new ManagedMasters(hive).detach(serverName);
 
@@ -799,8 +820,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManifestListOperation operation = new ManifestListOperation().setManifestName(manifestName);
         Set<Key> result = defaultHive.execute(operation);
         return result.stream().map(ScopedManifestKey::parse).filter(Objects::nonNull)
-                .filter(smk -> smk.getTag().equals(runningVersion))
-                .collect(Collectors.toSet());
+                .filter(smk -> smk.getTag().equals(runningVersion)).collect(Collectors.toSet());
     }
 
 }
