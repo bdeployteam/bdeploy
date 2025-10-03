@@ -112,20 +112,25 @@
                       <app-bd-button
                         text="Copy Selected"
                         icon="content_copy"
-                        (click)="doCopy()"
+                        (click)="doCopyChecked()"
                         [disabled]="!checked?.length || !isCustomGroupSelected"
                         appClickStopPropagation
                       ></app-bd-button>
-                    }
-                    @if (group.isCustom) {
+                    } @else {
                       <app-bd-button
-                        text="Paste"
-                        icon="content_paste_go"
-                        [disabled]="!(clipboardVars$ | async).length"
-                        (click)="doPaste()"
+                        text="Copy All"
+                        icon="content_copy"
+                        (click)="doCopyAll(group)"
                         appClickStopPropagation
                       ></app-bd-button>
                     }
+                    <app-bd-button
+                      text="Paste"
+                      icon="content_paste_go"
+                      [disabled]="!(clipboardVars$ | async).length"
+                      (click)="doPaste(group)"
+                      appClickStopPropagation
+                    ></app-bd-button>
                     @if (group.isCustom) {
                       <app-bd-button
                         text="Add Custom Variable"

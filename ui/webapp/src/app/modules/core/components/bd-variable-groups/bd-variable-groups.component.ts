@@ -10,9 +10,9 @@ import {
   OnInit,
   Output,
   TemplateRef,
-  ViewChild,
+  ViewChild
 } from '@angular/core';
-import { NgForm, FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -23,12 +23,14 @@ import {
   LinkedValueConfiguration,
   SystemConfiguration,
   VariableConfiguration,
-  VariableType,
+  VariableType
 } from 'src/app/models/gen.dtos';
-import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import {
+  ContentCompletion
+} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
-  ACTION_OK,
+  ACTION_OK
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
@@ -41,11 +43,17 @@ import { EditUniqueValueValidatorDirective } from '../../validators/edit-unique-
 import { BdValueEditorComponent } from '../bd-value-editor/bd-value-editor.component';
 import { MatDivider } from '@angular/material/divider';
 import { BdFormSelectComponent } from '../bd-form-select/bd-form-select.component';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelDescription,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
 import { BdButtonComponent } from '../bd-button/bd-button.component';
 import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
 import { MatIcon } from '@angular/material/icon';
-import { NgClass, AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { BdVariableDescCardComponent } from '../bd-variable-desc-card/bd-variable-desc-card.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -144,21 +152,29 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     }
   }
 
-  protected doCopy() {
-    const json = JSON.stringify(this.checked, null, '\t');
+  private copyVariables(vars: ConfigVariable[]) {
+    const json = JSON.stringify(vars, null, '\t');
     navigator.clipboard.writeText(json).then(
       () =>
         this.snackbar.open('Copied to clipboard successfully', null, {
-          duration: 1000,
+          duration: 1000
         }),
       () =>
         this.snackbar.open('Unable to write to clipboard.', null, {
-          duration: 1000,
-        }),
+          duration: 1000
+        })
     );
   }
 
-  protected doPaste() {
+  protected doCopyChecked() {
+    this.copyVariables(this.checked);
+  }
+
+  protected doCopyAll(group: VariableGroup) {
+    this.copyVariables(group.pairs.map(p => ({ name: p.value.id, value: p.value })));
+  }
+
+  protected doPaste(group: VariableGroup) {
     const clipboardVars = this.clipboardVars$.value;
     if (!clipboardVars.length) {
       this.snackbar.open('Unable to read from clipboard.', null, {
@@ -167,27 +183,28 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
       return;
     }
     const newVars: VariableConfiguration[] = [];
-    const existingVars: VariableConfiguration[] = [];
-    const varList = this.variableList ? this.variableList : [];
+    let updateCount = 0;
+    const varList = group.pairs.map(p => p.value);
     clipboardVars.forEach((configVar: ConfigVariable) => {
-      const found = varList.some((iv) => iv.id === configVar.value.id);
-      if (found) {
-        existingVars.push(configVar.value);
+      const v = varList.find((iv) => iv.id === configVar.value.id);
+      if (v) {
+        v.value = configVar.value.value;
+        updateCount++;
       } else {
         newVars.push(configVar.value);
       }
     });
-    let message = `${clipboardVars.length} variables copied from clipboard. `;
-    if (newVars.length) {
+    let message = `${clipboardVars.length} variables read from clipboard.`;
+    if (newVars.length && group.isCustom) {
       varList.push(...newVars);
       varList.sort((a, b) => a.id.localeCompare(b.id));
       this.variableListChanged.emit(varList);
-      message += `Added ${newVars.length} variables. `;
-    } else {
-      message += 'No new variables to add. ';
+      message += ` Added ${newVars.length} variables.`;
+    } else if (newVars.length) {
+      message += ` Ignored ${newVars.length} mismatched variables.`;
     }
-    if (existingVars.length) {
-      message += `Skipped ${existingVars.length} variables for conflicting with existing ones.`;
+    if (updateCount) {
+      message += ` Updated ${updateCount} variables.`;
     }
     this.snackbar.open(message, 'DISMISS');
   }
