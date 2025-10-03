@@ -219,7 +219,7 @@ configure(actualSubprojects) {
     eclipseJdt.doLast {
         file('.settings/org.eclipse.jdt.core.prefs').withWriter { writer ->
             // file is specific for sourceCompatibility which can be overruled in each project build.gradle
-            writer << file("${rootDir}/templates/org.eclipse.jdt.core.prefs-${sourceCompatibility}").text
+            writer << file("${rootDir}/templates/org.eclipse.jdt.core.prefs-${java.sourceCompatibility}").text
         }
         file('.settings/org.eclipse.jdt.ui.prefs').withWriter { writer ->
             writer << file("${rootDir}/templates/org.eclipse.jdt.ui.prefs").text
