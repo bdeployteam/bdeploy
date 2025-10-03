@@ -52,6 +52,7 @@ import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathDummyResolver;
 import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
+import io.bdeploy.interfaces.variables.FileUriDummyResolver;
 import io.bdeploy.interfaces.variables.LocalHostnameResolver;
 import io.bdeploy.interfaces.variables.ManifestVariableDummyResolver;
 import io.bdeploy.interfaces.variables.Resolvers;
@@ -499,11 +500,13 @@ public class ProductUpdateService {
     }
 
     public static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
-        CompositeResolver res = Resolvers.forInstance(node.nodeConfiguration, "1", null);
+        CompositeResolver res = new CompositeResolver();
+        res.add(new FileUriDummyResolver(res));
         res.add(new ManifestVariableDummyResolver());
         res.add(new DeploymentPathDummyResolver());
         res.add(new EnvironmentVariableDummyResolver());
         res.add(new LocalHostnameResolver(false));
+        res.add(Resolvers.forInstance(node.nodeConfiguration, "1", null));
         if (process != null) {
             return Resolvers.forApplication(res, node.nodeConfiguration, process);
         }

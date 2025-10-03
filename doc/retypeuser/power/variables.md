@@ -185,6 +185,14 @@ For example:
 | {{ENV:MY_VARIABLE}}         | Expands to the value of the environmental variable when the application is **installed** on the node or client. |
 | {{DELAYED:ENV:MY_VARIABLE}} | Expands to the value of the environmental variable when the application is **launched** on the node or client.  |
 
+## FILEURI:
+
+Takes a path and transforms it into a file URI. This transformation is operating system dependant.
+
+| Variable  | Description                                    |
+| --------- | ---------------------------------------------- |
+| {{FILEURI:}}  | Transforms the given path into a file URI. |
+
 ## Escaping Special Characters
 
 Allows escaping of special characters.

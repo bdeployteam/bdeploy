@@ -26,6 +26,7 @@ public class Resolvers {
         resolver.add(new OsVariableResolver());
         resolver.add(new EnvironmentVariableResolver());
         resolver.add(new ParameterValueResolver(new ApplicationParameterProvider(config)));
+        resolver.add(new FileUriResolver(resolver));
         resolver.add(new EscapeJsonCharactersResolver(resolver));
         resolver.add(new EscapeXmlCharactersResolver(resolver));
         resolver.add(new EscapeYamlCharactersResolver(resolver));

@@ -83,6 +83,11 @@ export function buildCompletionPrefixes(): ContentCompletion[] {
       description: 'Instance & System Variables',
     },
     {
+      value: '{{FILEURI:',
+      icon: 'folder',
+      description: 'Transforms the given path into a file URI',
+    },
+    {
       value: '{{XML:',
       icon: 'special_character',
       description: 'Escape special XML characters',

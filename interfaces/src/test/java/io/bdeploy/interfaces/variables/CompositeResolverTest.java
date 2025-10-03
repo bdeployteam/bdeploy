@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,22 +29,24 @@ class CompositeResolverTest {
     private static final String ITEM_TAG = "1";
 
     private static final Path DEPLOYMENT_DIR = Path.of("deployment").toAbsolutePath();
-    private static final Path APP_DIR = DEPLOYMENT_DIR.resolve(ITEM_ID);
-    private static final Path DATA_DIR = APP_DIR.resolve("data");
-    private static final Path BIN_DIR = APP_DIR.resolve("bin").resolve(ITEM_TAG);
+    private static final Path ROOT_DIR = DEPLOYMENT_DIR.resolve(ITEM_ID);
+    private static final Path DATA_DIR = ROOT_DIR.resolve("data");
+    private static final Path BIN_DIR = ROOT_DIR.resolve("bin").resolve(ITEM_TAG);
     private static final Path CONFIG_DIR = BIN_DIR.resolve("config");
     private static final Path RUNTIME_DIR = BIN_DIR.resolve("runtime");
-    private static final Path INSTANCE_MANIFEST_POOL_DIR = APP_DIR.resolve("pool");
+    private static final Path INSTANCE_MANIFEST_POOL_DIR = ROOT_DIR.resolve("pool");
     private static final Path MANIFEST_POOL_DIR = DEPLOYMENT_DIR.resolve("pool");
     private static final Path LOG_DATA_DIR = Path.of("log_data").toAbsolutePath();
+    private static final Path LOG_DATA_DIR_ITEM = LOG_DATA_DIR.resolve(ITEM_ID);
 
-    private static final String ROOT_DIR_STRING = APP_DIR.toString();
+    private static final String ROOT_DIR_STRING = ROOT_DIR.toString();
     private static final String DATA_DIR_STRING = DATA_DIR.toString();
     private static final String BIN_DIR_STRING = BIN_DIR.toString();
     private static final String CONFIG_DIR_STRING = CONFIG_DIR.toString();
     private static final String RUNTIME_DIR_STRING = RUNTIME_DIR.toString();
     private static final String INSTANCE_MANIFEST_POOL_DIR_STRING = INSTANCE_MANIFEST_POOL_DIR.toString();
     private static final String MANIFEST_POOL_DIR_STRING = MANIFEST_POOL_DIR.toString();
+    private static final String LOG_DATA_DIR_ITEM_STRING = LOG_DATA_DIR_ITEM.toString();
 
     private static final DeploymentPathProvider DPP = new DeploymentPathProvider(DEPLOYMENT_DIR, LOG_DATA_DIR, ITEM_ID, ITEM_TAG);
 
@@ -211,7 +214,28 @@ class CompositeResolverTest {
             assertEquals(RUNTIME_DIR_STRING, resolver.apply("P:RUNTIME"));
             assertEquals(INSTANCE_MANIFEST_POOL_DIR_STRING, resolver.apply("P:INSTANCE_MANIFEST_POOL"));
             assertEquals(MANIFEST_POOL_DIR_STRING, resolver.apply("P:MANIFEST_POOL"));
-            assertEquals(LOG_DATA_DIR.resolve(ITEM_ID).toString(), resolver.apply("P:LOG_DATA"));
+            assertEquals(LOG_DATA_DIR_ITEM_STRING, resolver.apply("P:LOG_DATA"));
+        });
+
+        // Test deployment path resolution with file URI resolver
+        Function<Path, String> toUri = p -> p.toUri().toString();
+        String ROOT_DIR_STRING_URI = toUri.apply(ROOT_DIR);
+        String DATA_DIR_STRING_URI = toUri.apply(DATA_DIR);
+        String BIN_DIR_STRING_URI = toUri.apply(BIN_DIR);
+        String CONFIG_DIR_STRING_URI = toUri.apply(CONFIG_DIR);
+        String RUNTIME_DIR_STRING_URI = toUri.apply(RUNTIME_DIR);
+        String INSTANCE_MANIFEST_POOL_DIR_STRING_URI = toUri.apply(INSTANCE_MANIFEST_POOL_DIR);
+        String MANIFEST_POOL_DIR_STRING_URI = toUri.apply(MANIFEST_POOL_DIR);
+        String LOG_DATA_DIR_ITEM_STRING_URI = toUri.apply(LOG_DATA_DIR_ITEM);
+        Arrays.stream(resolvers).forEach(resolver -> {
+            assertEquals(ROOT_DIR_STRING_URI, resolver.apply("FILEURI:P:ROOT"));
+            assertEquals(DATA_DIR_STRING_URI, resolver.apply("FILEURI:P:DATA"));
+            assertEquals(BIN_DIR_STRING_URI, resolver.apply("FILEURI:P:BIN"));
+            assertEquals(CONFIG_DIR_STRING_URI, resolver.apply("FILEURI:P:CONFIG"));
+            assertEquals(RUNTIME_DIR_STRING_URI, resolver.apply("FILEURI:P:RUNTIME"));
+            assertEquals(INSTANCE_MANIFEST_POOL_DIR_STRING_URI, resolver.apply("FILEURI:P:INSTANCE_MANIFEST_POOL"));
+            assertEquals(MANIFEST_POOL_DIR_STRING_URI, resolver.apply("FILEURI:P:MANIFEST_POOL"));
+            assertEquals(LOG_DATA_DIR_ITEM_STRING_URI, resolver.apply("FILEURI:P:LOG_DATA"));
         });
 
         // Test instance variable resolution
@@ -222,7 +246,7 @@ class CompositeResolverTest {
             assertEquals("Human readable name of the node config", resolver.apply("I:NAME"));
             assertEquals("test/product", resolver.apply("I:PRODUCT_ID"));
             assertEquals("1", resolver.apply("I:PRODUCT_TAG"));
-            assertEquals(APP_DIR.resolve(InstanceDeploymentInformationApi.FILE_NAME).toString(),
+            assertEquals(ROOT_DIR.resolve(InstanceDeploymentInformationApi.FILE_NAME).toString(),
                     resolver.apply("I:DEPLOYMENT_INFO_FILE"));
         });
         assertEquals("activeTag1", resolver1.apply("I:TAG"));
