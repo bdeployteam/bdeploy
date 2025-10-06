@@ -110,7 +110,8 @@
                   <div class="flex gap-1">
                     @if (group.isCustom) {
                       <app-bd-button
-                        text="Copy Selected"
+                        text="Copy selected variables"
+                        tooltipPosition="below"
                         icon="content_copy"
                         (click)="doCopyChecked()"
                         [disabled]="!checked?.length || !isCustomGroupSelected"
@@ -118,22 +119,26 @@
                       ></app-bd-button>
                     } @else {
                       <app-bd-button
-                        text="Copy All"
+                        text="Copy all variables"
+                        tooltipPosition="below"
                         icon="content_copy"
                         (click)="doCopyAll(group)"
                         appClickStopPropagation
                       ></app-bd-button>
                     }
                     <app-bd-button
-                      text="Paste"
+                      text="Paste variables"
+                      tooltipPosition="below"
                       icon="content_paste_go"
                       [disabled]="!(clipboardVars$ | async).length"
+                      [tooltip]="!(clipboardVars$ | async).length ? 'No variables found in the clipboard. Also check clipboard access.' : null"
                       (click)="doPaste(group)"
                       appClickStopPropagation
                     ></app-bd-button>
                     @if (group.isCustom) {
                       <app-bd-button
                         text="Add Custom Variable"
+                        tooltipPosition="below"
                         icon="add"
                         (click)="onAddCustomVariable(addTemplate)"
                         appClickStopPropagation
