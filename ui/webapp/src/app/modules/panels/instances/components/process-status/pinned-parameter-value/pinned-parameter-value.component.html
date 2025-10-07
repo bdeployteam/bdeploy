@@ -13,16 +13,9 @@
     }
   }
   @if (record.type === 'SERVER_PORT') {
-    @if ((portState$ | async)?.state === false) {
-      <mat-icon matTooltip="Port is not in open state." class="local-greyed"
-        >link_off</mat-icon
-        >
-      }
-      @if ((portState$ | async)?.state === true) {
-        <mat-icon matTooltip="Port is in open state.">link</mat-icon>
-      }
-      @if ((portState$ | async)?.state === undefined) {
-        <mat-icon class="local-greyed">help</mat-icon>
-      }
-    }
-  </div>
+    <mat-icon [matTooltip]="portStateDisplay().tooltip"
+              [ngClass]="{'local-greyed': portStateDisplay()?.isBad}">
+      {{ portStateDisplay().icon }}
+    </mat-icon>
+  }
+</div>

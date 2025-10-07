@@ -178,8 +178,12 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       combineLatest([
         this.edit.node$.pipe(distinctUntilChanged()),
         this.instanceEdit.nodes$,
-        this.clipboardService.clipboard$,
-      ]).subscribe(([node, nodeConfigs, cb]) => this.readFromClipboard(node, nodeConfigs[node.nodeName], cb))
+        this.clipboardService.clipboard$
+      ]).subscribe(([node, nodeConfigs, cb]) => {
+        if (node) {
+          this.readFromClipboard(node, nodeConfigs[node.nodeName], cb);
+        }
+      })
     );
   }
 

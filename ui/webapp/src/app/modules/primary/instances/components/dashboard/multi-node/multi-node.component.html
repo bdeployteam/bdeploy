@@ -1,0 +1,33 @@
+<div class="bd-rect-card flex flex-col sticky-container">
+  <div class="sticky">
+    <div class="flex local-header-bg p-[10px]">
+      <div class="flex flex-col">
+        <div class="bd-type-text">NODE</div>
+        <div class="bd-title-text">{{ node.nodeName }}</div>
+      </div>
+      <div class="flex-auto"></div>
+      <div class="flex gap-1 justify-center items-center pointer-events-auto">
+      </div>
+    </div>
+    <app-node-state-panel
+      [items]="nodeStateItems$ | async"
+      [narrowWhen$]="narrowWhen$"
+      [lastRefreshAt$]="processes.processStatesLoadTime$"
+      [refreshingWhen$]="processes.loading$"
+      (manualRefresh)="onManualRefresh()"
+    ></app-node-state-panel>
+    @if (!(collapsed$ | async)) {
+      <mat-divider></mat-divider>
+    }
+  </div>
+  @if (!(collapsed$ | async)) {
+    <app-node-process-list
+      class="bd-default-padding"
+      [node]="node"
+      [composite]="true"
+      [gridWhen$]="gridWhen$"
+      [groupingWhen$]="groupingWhen$"
+      [bulkMode]="bulkMode"
+    ></app-node-process-list>
+  }
+</div>

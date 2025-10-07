@@ -70,8 +70,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
@@ -103,6 +103,7 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathDummyResolver;
 import io.bdeploy.interfaces.variables.Resolvers;
@@ -679,10 +680,8 @@ public class InstanceResourceImpl implements InstanceResource {
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
         InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
-        Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
-        Optional<ProcessStatusDto> runningOrScheduledInVersion = appStatus.values().stream()
-                .filter(p -> tag.equals(p.instanceTag) && p.processState.isRunningOrScheduled()).findFirst();
-        if (runningOrScheduledInVersion.isPresent()) {
+        if (instanceStatus.hasAtLeastOneNodeThat(
+                instanceNodeStatusDto -> instanceNodeStatusDto.areAppsRunningOrScheduledInVersion(tag))) {
             throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":" + tag
                     + " because it has running or scheduled applications", Status.EXPECTATION_FAILED);
         }
@@ -1157,13 +1156,32 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public Map<Integer, Boolean> getPortStates(String instanceId, String minion, List<Integer> ports) {
-        InstanceManifest im = readInstance(instanceId);
-        if (im == null) {
-            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        MasterNamedResource master = getMasterResource(instanceId);
+        return master.getPortStates(minion, ports);
+    }
+
+    @Override
+    public BulkPortStatesDto getPortStatesBulk(String instanceId, Map<String, List<Integer>> node2ports) {
+        MasterNamedResource master = getMasterResource(instanceId);
+
+        try {
+            return master.getPortStatesBulk(node2ports);
+        } catch (WebApplicationException wea) {
+            if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
+                if (node2ports.size() != 1) {
+                    throw new WebApplicationException("Attempting to retrieve ports from more than one node from a managed "
+                            + " server that does not support this", Status.BAD_REQUEST);
+                }
+
+                BulkPortStatesDto result = new BulkPortStatesDto();
+                String node = node2ports.keySet().iterator().next();
+                master.getPortStates(node, node2ports.values().iterator().next())
+                        .forEach((port, isUsed) -> result.saveNodeState(node, node, port, isUsed));
+                return result;
+            }
+
+            throw wea;
         }
-        RemoteService svc = mp.getControllingMaster(hive, im.getKey());
-        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        return root.getNamedMaster(group).getPortStates(minion, ports);
     }
 
     @Override
@@ -1296,5 +1314,16 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public InstanceBulkResource getBulkResource() {
         return rc.initResource(new InstanceBulkResourceImpl(hive, group));
+    }
+
+    private MasterNamedResource getMasterResource(String instanceId) {
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+
+        MasterRootResource root = ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, im.getKey()),
+                MasterRootResource.class, context);
+        return root.getNamedMaster(group);
     }
 }

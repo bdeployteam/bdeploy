@@ -1,19 +1,5 @@
 <div class="flex justify-start">
-  @if (column.data(record) === false) {
-    <mat-icon
-      class="bd-warning-text"
-      matTooltip="One or more ports are not in the required state."
-      >warning</mat-icon
-      >
-    }
-    @if (column.data(record) === true) {
-      <mat-icon
-        class="bd-success-text"
-        matTooltip="All ports are in their required state."
-        >done</mat-icon
-        >
-      }
-      @if (column.data(record) === undefined) {
-        <mat-icon class="local-unknown">help</mat-icon>
-      }
-    </div>
+  <mat-icon [ngClass]="statusStyleClass()" [matTooltip]="tooltip()">
+    {{ icon() }}
+  </mat-icon>
+</div>

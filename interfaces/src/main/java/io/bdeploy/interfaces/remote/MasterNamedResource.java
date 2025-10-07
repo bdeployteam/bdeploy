@@ -12,6 +12,7 @@ import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -289,11 +290,12 @@ public interface MasterNamedResource {
      *
      * @param instanceId the unique id of the instance.
      * @param applicationId the unique ID of the application.
+     * @param node the SERVER node on which to run. If app is running on a MULTI node this parameter is required. Otherwise this is optional.
      * @param data the data to write to stdin of the application.
      */
     @POST
     @Path("/stdin")
-    public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, String data);
+    public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, @QueryParam("n") String node, String data);
 
     /**
      * @param minion the minion to check port availability on.
@@ -304,6 +306,14 @@ public interface MasterNamedResource {
     @POST
     @Path("/check-ports")
     public Map<Integer, Boolean> getPortStates(@QueryParam("m") String minion, List<Integer> ports);
+
+    /**
+     * @param node2ports a map of ports to node, so that you can bulk request port states
+     * @return a state for each port, true for 'used', false for 'free'.
+     */
+    @POST
+    @Path("/check-ports-bulk")
+    public BulkPortStatesDto getPortStatesBulk(Map<String, List<Integer>> node2ports);
 
     /**
      * Loads all runtime events from the minions
@@ -381,20 +391,22 @@ public interface MasterNamedResource {
      *
      * @param instanceId the unique id of the instance.
      * @param appId the unique id of the application
+     * @param node the SERVER node on which to run. If app is running on a MULTI node this parameter is required. Otherwise this is optional.
      */
     @POST
     @Path("/verify")
-    public VerifyOperationResultDto verify(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
+    public VerifyOperationResultDto verify(@QueryParam("u") String instanceId, @QueryParam("a") String appId, @QueryParam("n") String node);
 
     /**
      * Reinstalls application of an instance.
      *
      * @param instanceId the unique id of the instance.
      * @param appId the unique id of the application
+     * @param node the SERVER node on which to run. If app is running on a MULTI node this parameter is required. Otherwise this is optional.
      */
     @POST
     @Path("/reinstall")
-    public void reinstall(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
+    public void reinstall(@QueryParam("u") String instanceId, @QueryParam("a") String appId, @QueryParam("n") String node);
 
     /**
      * Synchronizes instance for master and node.

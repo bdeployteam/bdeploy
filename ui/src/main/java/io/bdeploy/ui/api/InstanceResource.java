@@ -12,6 +12,7 @@ import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -242,8 +243,15 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}/check-ports/{minion}")
     @RequiredPermission(permission = Permission.READ)
+    @Deprecated(since = "7.8.0")
     public Map<Integer, Boolean> getPortStates(@Scope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, List<Integer> ports);
+
+    @POST
+    @Path("/{instance}/check-ports-bulk")
+    @RequiredPermission(permission = Permission.READ)
+    public BulkPortStatesDto getPortStatesBulk(@Scope @PathParam("instance") String instanceId,
+            Map<String, List<Integer>> node2ports);
 
     @GET
     @Path("/{instance}/banner")

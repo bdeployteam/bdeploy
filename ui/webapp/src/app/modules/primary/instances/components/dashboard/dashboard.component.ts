@@ -47,12 +47,13 @@ import { ServerNodeComponent } from './server-node/server-node.component';
 import { ClientNodeComponent } from './client-node/client-node.component';
 import { AsyncPipe } from '@angular/common';
 import { compareVersions, convert2String } from 'src/app/modules/core/utils/version.utils';
+import { MultiNodeComponent } from './multi-node/multi-node.component';
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
-    imports: [BdDialogComponent, BdDialogToolbarComponent, MatTooltip, BdButtonComponent, MatDivider, BdServerSyncButtonComponent, BdDataGroupingComponent, BdPanelButtonComponent, BdDialogContentComponent, RouterLink, BdBannerComponent, BdNoDataComponent, ServerNodeComponent, ClientNodeComponent, AsyncPipe]
+    imports: [BdDialogComponent, BdDialogToolbarComponent, MatTooltip, BdButtonComponent, MatDivider, BdServerSyncButtonComponent, BdDataGroupingComponent, BdPanelButtonComponent, BdDialogContentComponent, RouterLink, BdBannerComponent, BdNoDataComponent, ServerNodeComponent, MultiNodeComponent, ClientNodeComponent, AsyncPipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly media = inject(BreakpointObserver);
@@ -277,4 +278,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ['panels', 'instances', 'settings'],
     );
   }
+
+  protected readonly NodeType = NodeType;
 }

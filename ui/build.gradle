@@ -274,6 +274,7 @@ tasks.register('genDtos', GenerateTask) {
             'io.bdeploy.interfaces.configuration.instance.FileStatusDto',
             'io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto',
             'io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration',
+            'io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto',
             // UI only DTOs
             'io.bdeploy.ui.dto.ApplicationDto',
             'io.bdeploy.ui.dto.ClientApplicationDto',
@@ -306,6 +307,7 @@ tasks.register('genDtos', GenerateTask) {
             'io.bdeploy.ui.dto.SystemTemplateRequestDto',
             'io.bdeploy.ui.dto.SystemTemplateResultDto',
             'io.bdeploy.ui.dto.InstanceProcessStatusDto',
+            'io.bdeploy.ui.dto.MappedInstanceProcessStatusDto',
             'io.bdeploy.ui.dto.BulkOperationResultDto',
             'io.bdeploy.ui.dto.UserBulkAssignPermissionDto',
             'io.bdeploy.ui.dto.UserBulkRemovePermissionDto',
@@ -313,6 +315,10 @@ tasks.register('genDtos', GenerateTask) {
             'io.bdeploy.ui.dto.UserGroupBulkRemovePermissionDto',
             'io.bdeploy.ui.dto.ProductUpdateDto',
             'io.bdeploy.ui.dto.ReportParameterOptionDto',
+            'io.bdeploy.ui.dto.ports.PortStateDto',
+            'io.bdeploy.ui.dto.ports.CompositePortStateDto',
+            'io.bdeploy.ui.dto.ports.ApplicationPortStatesDto',
+            'io.bdeploy.ui.dto.ports.InstancePortStatesDto',
             // Other, generic
             'io.bdeploy.common.Version',
             'io.bdeploy.common.security.ApiAccessToken',

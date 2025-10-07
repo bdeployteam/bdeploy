@@ -1,21 +1,22 @@
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
+  ApplicationPortStatesDto,
   ApplicationStartType,
   InstanceNodeConfigurationDto,
+  MappedInstanceProcessStatusDto,
   MinionStatusDto,
   NodeSynchronizationStatus,
-  ProcessState,
-  ProcessStatusDto,
+  ProcessState
 } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from '../../../services/instances.service';
-import { NodeApplicationPort, PortsService } from '../../../services/ports.service';
+import { PortsService } from '../../../services/ports.service';
 import { ProcessesService } from '../../../services/processes.service';
-import { StateItem, StateType, NodeStatePanelComponent } from '../state-panel/state-panel.component';
+import { NodeStatePanelComponent, StateItem, StateType } from '../state-panel/state-panel.component';
 import { BdPanelButtonComponent } from '../../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { NodeHeaderComponent } from './header/header.component';
 import { MatDivider } from '@angular/material/divider';
@@ -23,10 +24,10 @@ import { NodeProcessListComponent } from './process-list/process-list.component'
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-instance-server-node',
-    templateUrl: './server-node.component.html',
-    styleUrls: ['./server-node.component.css'],
-    imports: [BdPanelButtonComponent, NodeHeaderComponent, NodeStatePanelComponent, MatDivider, NodeProcessListComponent, AsyncPipe]
+  selector: 'app-instance-server-node',
+  templateUrl: './server-node.component.html',
+  styleUrls: ['./server-node.component.css'],
+  imports: [BdPanelButtonComponent, NodeHeaderComponent, NodeStatePanelComponent, MatDivider, NodeProcessListComponent, AsyncPipe]
 })
 export class ServerNodeComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstancesService);
@@ -54,7 +55,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   private readonly portsItem: StateItem = {
     name: 'Server Ports',
     type: this.portsState,
-    tooltip: this.portsTooltip,
+    tooltip: this.portsTooltip
   };
 
   private readonly processesState = new BehaviorSubject<StateType>('unknown');
@@ -62,7 +63,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   private readonly processesItem: StateItem = {
     name: 'Instance Processes',
     type: this.processesState,
-    tooltip: this.processesTooltip,
+    tooltip: this.processesTooltip
   };
 
   ngOnInit(): void {
@@ -89,18 +90,18 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
             updAvail
               ? '\n\nNewer version available'
               : updAvailInRepo
-              ? '\n\nNewer version available for import from software repository'
-              : ''
+                ? '\n\nNewer version available for import from software repository'
+                : ''
           }`,
           click:
             anyUpdAvail && this.auth.isCurrentScopeWrite()
               ? () => {
-                  this.areas.navigateBoth(
-                    ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
-                    ['panels', 'instances', 'settings', 'product']
-                  );
-                }
-              : null,
+                this.areas.navigateBoth(
+                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
+                  ['panels', 'instances', 'settings', 'product']
+                );
+              }
+              : null
         });
 
         items.push(this.getNodeStateItem(state));
@@ -116,23 +117,23 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         const syncCollapse = [
           NodeSynchronizationStatus.NOT_SYNCHRONIZED,
           NodeSynchronizationStatus.SYNCHRONIZING,
-          NodeSynchronizationStatus.SYNCHRONIZATION_FAILED,
+          NodeSynchronizationStatus.SYNCHRONIZATION_FAILED
         ].some((s) => s === syncStatus);
         this.synchronizationCollapse$.next(syncCollapse);
-      },
+      }
     );
 
     this.subscription.add(
-      combineLatest([this.ports.activePortStates$, this.processes.processStates$]).subscribe(([ports, states]) => {
+      combineLatest([this.ports.activePortStates$, this.processes.processStates$]).subscribe(([activePortStates, states]) => {
         this.updateAllProcesses(states);
-        this.updateAllPortsRating(ports, states);
-      }),
+        this.updateAllPortsRating(activePortStates);
+      })
     );
 
     this.subscription.add(
       combineLatest([this.collapsedWhen$, this.synchronizationCollapse$]).subscribe(([c, s]) => {
         this.collapsed$.next(c || s);
-      }),
+      })
     );
   }
 
@@ -148,14 +149,14 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     if (syncStatus === NodeSynchronizationStatus.NOT_SYNCHRONIZED || isUnknownOffline) {
       return {
         name: 'Offline',
-        type: 'warning',
+        type: 'warning'
       };
     }
 
     if (syncStatus === NodeSynchronizationStatus.SYNCHRONIZED || isUnknownOnline) {
       return {
         name: 'Online',
-        type: 'ok',
+        type: 'ok'
       };
     }
 
@@ -164,7 +165,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         .split('_')
         .map((word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase())
         .join(' '),
-      type: 'warning',
+      type: 'warning'
     };
   }
 
@@ -173,7 +174,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     this.instances.reloadActiveStates(this.instances.active$.value);
   }
 
-  private updateAllProcesses(states: Record<string, ProcessStatusDto>) {
+  private updateAllProcesses(states: MappedInstanceProcessStatusDto) {
     if (!states || Object.keys(states).length === 0) {
       this.processesState.next('unknown');
       this.processesTooltip.next('No information available');
@@ -209,35 +210,38 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         : !stoppedApps && !runningDeadApps
           ? 'All applications are running without problems'
           : `${stoppedApps} 'Instance' type ${
-              stoppedApps === 1 ? 'application is' : 'applications are'
-            } not running\n${runningDeadApps} 'Instance' type ${
-              runningDeadApps === 1 ? 'application is reporting' : 'applications are reporting'
-            } problems`,
+            stoppedApps === 1 ? 'application is' : 'applications are'
+          } not running\n${runningDeadApps} 'Instance' type ${
+            runningDeadApps === 1 ? 'application is reporting' : 'applications are reporting'
+          } problems`
     );
   }
 
-  private updateAllPortsRating(ports: NodeApplicationPort[], states: Record<string, ProcessStatusDto>) {
-    if (!ports || !states) {
+  private updateAllPortsRating(activePortStates: Record<string, ApplicationPortStatesDto>) {
+    if (!activePortStates) {
       this.portsState.next('unknown');
       this.portsTooltip.next('No information available');
       return;
     }
 
-    const appPorts = ports.filter((p) => !!this.node.nodeConfiguration.applications.find((a) => a.id === p.appId));
-
     let badPorts = 0;
-    appPorts.forEach((p) => {
-      const process = ProcessesService.get(states, p.appId);
-      if (ProcessesService.isRunning(process.processState) !== p.state) {
-        badPorts++;
-      }
+    let totalPorts = 0;
+    this.node.nodeConfiguration.applications.forEach(appConfig => {
+      activePortStates[appConfig.id]?.portStates.forEach(compositeState => {
+        totalPorts++;
+        // assuming that just one state is there for this node
+        const portState = compositeState.states[0];
+        if (ProcessesService.isRunning(portState.processState) !== portState.isUsed) {
+          badPorts++;
+        }
+      });
     });
 
     this.portsState.next(!badPorts ? 'ok' : 'warning');
     this.portsTooltip.next(
       !badPorts
-        ? `All ${appPorts.length} server ports OK`
-        : `${badPorts} of ${appPorts.length} server ports are rated bad.`,
+        ? `All ${totalPorts} server ports OK`
+        : `${badPorts} of ${totalPorts} server ports are rated bad.`
     );
   }
 }

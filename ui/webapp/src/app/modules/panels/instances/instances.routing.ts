@@ -117,6 +117,11 @@ export const INSTANCES_PANEL_ROUTES: Route[] = [
     canActivate: [ScopedReadGuard],
   },
   {
+    path: 'multi-node-process/:process',
+    loadComponent: () => import('./components/multi-node-process-status/multi-process-status.component').then(m => m.MultiProcessStatusComponent),
+    canActivate: [ScopedReadGuard]
+  },
+  {
     path: 'process/:process/ports',
     loadComponent: () => import('./components/process-ports/process-ports.component').then(m => m.ProcessPortsComponent),
     canActivate: [ScopedReadGuard],

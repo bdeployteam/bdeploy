@@ -29,7 +29,7 @@ import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils
 import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
-import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
+import { ProcessesService, StartType } from 'src/app/modules/primary/instances/services/processes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
@@ -64,6 +64,7 @@ export interface PinnedParameter {
   name: string;
   value: string;
   type: VariableType;
+  serverNode?: string;
 }
 
 const colPinnedName: BdDataColumn<PinnedParameter, string> = {
@@ -126,7 +127,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected processDetail: ProcessDetailDto;
   protected processConfig: ApplicationConfiguration;
   protected nodeCfg: InstanceNodeConfigurationDto;
-  protected startType: 'Instance' | 'Manual' | 'Confirmed Manual';
+  protected startType: StartType;
   protected pinnedParameters: PinnedParameter[] = [];
   protected readonly pinnedColumns: BdDataColumn<PinnedParameter, unknown>[] = [colPinnedName, colPinnedValue];
   protected uiEndpoints: ProcessUiEndpoint[] = [];
@@ -188,7 +189,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.clearIntervals();
       this.outdated$.next(false);
       this.processConfig = config;
-      this.startType = this.formatStartType(this.processConfig?.processControl.startType);
+      this.startType = ProcessesService.formatStartType(this.processConfig?.processControl.startType);
       this.nodeCfg = nodes?.nodeConfigDtos?.find(
         (n) => n.nodeConfiguration.applications.findIndex((a) => a.id === config?.id) !== -1,
       );
@@ -212,6 +213,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
               appId: config.id,
               paramId: p.id,
               name: desc.name,
+              serverNode: this.nodeCfg.nodeName,
               value: getRenderPreview(
                 p.value,
                 config,
@@ -316,17 +318,6 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     }
     if (this.uptimeCalculateHandle) {
       clearTimeout(this.uptimeCalculateHandle);
-    }
-  }
-
-  private formatStartType(type: ApplicationStartType) {
-    switch (type) {
-      case ApplicationStartType.INSTANCE:
-        return 'Instance';
-      case ApplicationStartType.MANUAL:
-        return 'Manual';
-      case ApplicationStartType.MANUAL_CONFIRM:
-        return 'Confirmed Manual';
     }
   }
 

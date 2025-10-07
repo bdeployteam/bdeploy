@@ -8,6 +8,7 @@ import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.jersey.Scope;
+import io.bdeploy.ui.dto.MappedInstanceProcessStatusDto;
 import io.bdeploy.ui.dto.InstanceProcessStatusDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -15,6 +16,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/processes")
@@ -24,7 +26,12 @@ public interface ProcessResource {
 
     @GET
     @Path("/")
+    @Deprecated(since = "7.8.0")
     public InstanceProcessStatusDto getStatus();
+
+    @GET
+    @Path("/mapped")
+    public MappedInstanceProcessStatusDto getMappedStatus();
 
     @GET
     @Path("/{nodeId}/{appId}")
@@ -82,5 +89,5 @@ public interface ProcessResource {
     @Path("/{appId}/stdin")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(permission = Permission.WRITE)
-    public void writeToStdin(@PathParam("appId") String appId, String data);
+    public void writeToStdin(@PathParam("appId") String appId, @QueryParam("n") String node, String data);
 }

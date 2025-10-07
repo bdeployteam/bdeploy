@@ -1,0 +1,14 @@
+.sticky-container {
+    position: relative;
+}
+
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 101;
+    background-color: var(--bd-bg-dialog);
+}
+
+.local-header-bg {
+    background: linear-gradient(var(--bd-bg-toolbar-gradient), var(--bd-bg-toolbar));
+}
