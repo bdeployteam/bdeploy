@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, finalize, Subscription } from 'rxjs';
-import { Actions, MinionStatusDto } from 'src/app/models/gen.dtos';
+import { Actions, MinionNodeType, MinionStatusDto } from 'src/app/models/gen.dtos';
 import {
   BdDialogToolbarComponent
 } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -91,5 +91,9 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
             });
         }
       });
+  }
+
+  protected isRuntimeNode(node: MinionStatusDto) {
+    return node.config.minionNodeType === MinionNodeType.MULTI_RUNTIME;
   }
 }

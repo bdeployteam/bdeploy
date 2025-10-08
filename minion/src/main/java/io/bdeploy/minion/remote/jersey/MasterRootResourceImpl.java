@@ -102,6 +102,20 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
+    public Map<String, List<String>> getMultiNodeToRuntimeNodes() {
+        Map<String, List<String>> result = new TreeMap<>();
+
+        // TODO: should be changed to getTopLevelNodes once available.
+        for (var entry : nodes.getAllNodes().entrySet()) {
+            if (entry.getValue().minionNodeType == MinionDto.MinionNodeType.MULTI) {
+                result.put(entry.getKey(), nodes.getMultiNodeRuntimeNodes(entry.getKey()).keySet().stream().toList());
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public void addServerNode(String name, RemoteService minion) {
         try (var handle = af.run(Actions.ADD_NODE, null, null, name)) {
             nodes.addNode(name, MinionDto.createServerNode(false, minion));

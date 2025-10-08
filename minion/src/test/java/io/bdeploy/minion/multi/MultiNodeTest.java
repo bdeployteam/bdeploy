@@ -54,7 +54,7 @@ public class MultiNodeTest {
         // need to wait until synchronization and startup finished. should not take long but still...
         boolean checked = false;
         for(int i = 0; i < 20; i++) {
-            var nodes = rsrc.getNodes();
+            var nodes = rsrc.getNodeList().nodes;
 
             // first make sure we waited long enough.
             if(nodes.size() != 4 || !nodes.values().stream().map(n -> n.nodeSynchronizationStatus).allMatch(s ->

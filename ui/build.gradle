@@ -321,6 +321,7 @@ tasks.register('genDtos', GenerateTask) {
             'io.bdeploy.interfaces.minion.MultiNodeDto',
             'io.bdeploy.interfaces.minion.MinionStatusDto',
             'io.bdeploy.interfaces.minion.NodeSynchronizationStatus',
+	    'io.bdeploy.interfaces.nodes.NodeListDto',
             'io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord',
             'io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord',
             'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',

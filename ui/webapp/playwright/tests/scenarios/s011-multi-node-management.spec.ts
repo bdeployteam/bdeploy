@@ -16,19 +16,19 @@ test('S011 manage multi-node', async ({ standalone }) => {
   const admin = new AdminPage(standalone);
   await admin.goto();
   const nodes = await admin.gotoNodesPage();
-  //should have the master node
-  await nodes.shouldHaveTableRows(1);
+  //should have the master node and the grouping header for standard nodes
+  await nodes.shouldHaveTableRows(2);
 
   // Add nodes
   var addPanel = await nodes.addMultiNode();
   await addPanel.fill('MyNode', 'LINUX');
   await addPanel.save();
-  await nodes.shouldHaveTableRows(2);
+  await nodes.shouldHaveTableRows(4);
 
   addPanel = await nodes.addMultiNode();
   await addPanel.fill('MyNode2', 'WINDOWS');
   await addPanel.save();
-  await nodes.shouldHaveTableRows(3);
+  await nodes.shouldHaveTableRows(5);
 
   // Check Node Details
   const detailsPanel = await nodes.selectMultiNode('MyNode');
@@ -36,5 +36,5 @@ test('S011 manage multi-node', async ({ standalone }) => {
 
   // Remove the Node
   await detailsPanel.remove('MyNode');
-  await nodes.shouldHaveTableRows(2);
+  await nodes.shouldHaveTableRows(4);
 });

@@ -10,7 +10,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.interfaces.minion.MultiNodeDto;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 import io.bdeploy.ui.dto.CreateMultiNodeDto;
 import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.ws.rs.Consumes;
@@ -35,10 +35,19 @@ public interface NodeManagementResource {
 
     /**
      * @return the current node status.
+     * @deprecated only there for compat with the old CLI
      */
     @GET
     @Path("/nodes")
+    @Deprecated(since = "7.8.0", forRemoval = true)
     public Map<String, MinionStatusDto> getNodes();
+
+    /**
+     * @return the current node status.
+     */
+    @GET
+    @Path("/node-list")
+    public NodeListDto getNodeList();
 
     /**
      * @param data the attach data including remote configuration (URI, auth).

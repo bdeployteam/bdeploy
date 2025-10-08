@@ -4,9 +4,11 @@ import { BehaviorSubject, debounceTime, finalize, Observable } from 'rxjs';
 import {
   CreateMultiNodeDto,
   ManifestKey,
+  MinionNodeType,
   MinionStatusDto,
   MultiNodeDto,
   NodeAttachDto,
+  NodeListDto,
   ObjectChangeType,
   OperatingSystem,
   RemoteService,
@@ -20,6 +22,7 @@ import { DownloadService } from '../../../core/services/download.service';
 export interface MinionRecord {
   name: string;
   status: MinionStatusDto;
+  parentMultiNode: string;
 }
 
 @Injectable({
@@ -56,15 +59,25 @@ export class NodesAdminService {
   public reload() {
     this.loading$.next(true);
     this.http
-      .get<Record<string, MinionStatusDto>>(`${this.apiPath()}/nodes`)
+      .get<NodeListDto>(`${this.apiPath()}/node-list`)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((nodes) => {
-        const minions = Object.keys(nodes).map((name) => ({
+        const minions = Object.keys(nodes.nodes).map((name) => ({
           name,
-          status: nodes[name]
+          status: nodes.nodes[name],
+          parentMultiNode: nodes.nodes[name].config.minionNodeType == MinionNodeType.MULTI_RUNTIME ? this.findParentFor(name, nodes) : null
         }));
         this.nodes$.next(minions);
       });
+  }
+
+  private findParentFor(name: string, node: NodeListDto): string {
+    for (const key of Object.keys(node.multiNodeToRuntimeNodes)) {
+      if (node.multiNodeToRuntimeNodes[key].includes(name)) {
+        return key;
+      }
+    }
+    return null;
   }
 
   public updateNode(nodeName: string, keys: ManifestKey[]): Observable<string> {
