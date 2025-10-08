@@ -15,12 +15,13 @@ import { CfgFileNameValidatorDirective } from '../../validators/cfg-file-name-va
 import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { AsyncPipe } from '@angular/common';
+import { BdNoDataComponent } from 'src/app/modules/core/components/bd-no-data/bd-no-data.component';
 
 @Component({
     selector: 'app-add-data-file',
     templateUrl: './add-data-file.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, CfgFileNameValidatorDirective, BdFileDropComponent, BdButtonComponent, AsyncPipe]
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNoDataComponent, FormsModule, BdFormInputComponent, CfgFileNameValidatorDirective, BdFileDropComponent, BdButtonComponent, AsyncPipe]
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
