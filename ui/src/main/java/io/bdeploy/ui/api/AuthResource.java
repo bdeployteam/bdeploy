@@ -72,7 +72,7 @@ public interface AuthResource {
     public String createSessionWithOtp();
 
     /**
-     * Terminates the current session and logs the use off.
+     * Terminates the current session and logs the user off.
      * <p>
      * This needs to be {@link Unsecured} to be able to log users off in case the
      * authentication provider is offline.
