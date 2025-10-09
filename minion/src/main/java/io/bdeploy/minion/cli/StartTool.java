@@ -246,6 +246,12 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     private void setupServerMaster(MasterConfig config, MinionRoot r, JerseyServer srv, BHiveRegistry reg) {
         srv.setUserValidator(user -> {
             UserInfo info = r.getUsers().getUser(user);
+
+            /*
+             * TODO This code allows tokens with invalid users as servers that have been initialized LONG ago will have those as
+             * master token. Changing this will invalidate these tokens (which are still around). Nevertheless this poses a
+             * security threat, so we should update the code and provide a migration.
+             */
             if (info == null) {
                 if (user.startsWith("[") && user.endsWith("]")) {
                     // on behalf of remote user (e.g. from central).
