@@ -19,10 +19,20 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-user-admin-detail',
-    templateUrl: './user-admin-detail.component.html',
-    styleUrls: ['./user-admin-detail.component.css'],
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, UserAvatarComponent, MatTooltip, BdDataTableComponent, BdButtonComponent, BdPanelButtonComponent, AsyncPipe]
+  selector: 'app-user-admin-detail',
+  templateUrl: './user-admin-detail.component.html',
+  styleUrls: ['./user-admin-detail.component.css'],
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    UserAvatarComponent,
+    MatTooltip,
+    BdDataTableComponent,
+    BdButtonComponent,
+    BdPanelButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class UserAdminDetailComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -86,7 +96,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /* tepmlate */ onSetInactive(userInfo: UserInfo, newValue: boolean): void {
+  /* template */ onSetInactive(userInfo: UserInfo, newValue: boolean): void {
     this.loading$.next(true);
     userInfo.inactive = newValue;
     this.authAdmin
