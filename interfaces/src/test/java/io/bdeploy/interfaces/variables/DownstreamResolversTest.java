@@ -2,15 +2,51 @@ package io.bdeploy.interfaces.variables;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.nio.file.Path;
+import java.util.function.Function;
+
 import org.junit.jupiter.api.Test;
 
 import io.bdeploy.common.util.VariableResolver;
 
-class EscapeCharactersResolverTest {
+class DownstreamResolversTest {
 
     private static final VariableResolver PARENT1 = s -> s;
     private static final VariableResolver PARENT2 = String::toUpperCase;
     private static final VariableResolver PARENT3 = s -> "###" + s + "###";
+
+    @Test
+    void testFileUriResolver() {
+        Function<Path, String> toUri = p -> p.toUri().toString();
+
+        String input1 = Path.of("a", "b", "c").toString();
+        String input2 = Path.of("a", "b", "c.txt").toString();
+        String input3 = Path.of("a", "b_b b", "c.txt").toString();
+
+        Path p1_1 = Path.of("a", "b", "c");
+        Path p1_2 = Path.of("a", "b", "c.txt");
+        Path p1_3 = Path.of("a", "b_b b", "c.txt");
+        var resolver1 = new FileUriResolver(PARENT1);
+        assertEquals(toUri.apply(p1_1), resolver1.doResolve(input1));
+        assertEquals(toUri.apply(p1_2), resolver1.doResolve(input2));
+        assertEquals(toUri.apply(p1_3), resolver1.doResolve(input3));
+
+        Path p2_1 = Path.of("A", "B", "C");
+        Path p2_2 = Path.of("A", "B", "C.TXT");
+        Path p2_3 = Path.of("A", "B_B B", "C.TXT");
+        var resolver2 = new FileUriResolver(PARENT2);
+        assertEquals(toUri.apply(p2_1), resolver2.doResolve(input1));
+        assertEquals(toUri.apply(p2_2), resolver2.doResolve(input2));
+        assertEquals(toUri.apply(p2_3), resolver2.doResolve(input3));
+
+        Path p3_1 = Path.of("###a", "b", "c###");
+        Path p3_2 = Path.of("###a", "b", "c.txt###");
+        Path p3_3 = Path.of("###a", "b_b b", "c.txt###");
+        var resolver3 = new FileUriResolver(PARENT3);
+        assertEquals(toUri.apply(p3_1), resolver3.doResolve(input1));
+        assertEquals(toUri.apply(p3_2), resolver3.doResolve(input2));
+        assertEquals(toUri.apply(p3_3), resolver3.doResolve(input3));
+    }
 
     @Test
     void testEscapeYamlCharactersResolver() {

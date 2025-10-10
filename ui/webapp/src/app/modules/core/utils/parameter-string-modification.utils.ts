@@ -1,24 +1,27 @@
 const SPECIAL_YAML_CHARACTERS = ['\\', ':', ';', '_', '(', ')', '@', '$', '%', '^', '&', ','];
 
-export enum SpecialCharacterType {
+export enum StringModificationType {
+  FILEURI = 'FILEURI',
   XML = 'XML',
   YAML = 'YAML',
   JSON = 'JSON',
 }
 
-export function escapeSpecialCharacters(type: SpecialCharacterType, unescaped: string): string {
+export function modifyString(type: StringModificationType, unmodified: string): string {
   switch (type) {
-    case SpecialCharacterType.XML:
-      return escapeXmlCharacters(unescaped);
-    case SpecialCharacterType.JSON:
-      return escapeJsonCharacters(unescaped);
-    case SpecialCharacterType.YAML:
-      return escapeYamlCharacters(unescaped);
+    case StringModificationType.FILEURI:
+      return 'file://' + unmodified.replaceAll('\\', '/');
+    case StringModificationType.XML:
+      return escapeXmlCharacters(unmodified);
+    case StringModificationType.JSON:
+      return escapeJsonCharacters(unmodified);
+    case StringModificationType.YAML:
+      return escapeYamlCharacters(unmodified);
   }
 }
 
-function escapeXmlCharacters(unescaped: string): string {
-  return unescaped
+function escapeXmlCharacters(unmodified: string): string {
+  return unmodified
     .replace(/'/g, '&apos;') // Replace ' with &apos;
     .replace(/"/g, '&quot;') // Replace " with &quot;
     .replace(/&/g, '&amp;') // Replace & with &amp;
@@ -26,8 +29,8 @@ function escapeXmlCharacters(unescaped: string): string {
     .replace(/>/g, '&gt;'); // Replace > with &gt;
 }
 
-function escapeJsonCharacters(unescaped: string): string {
-  return unescaped
+function escapeJsonCharacters(unmodified: string): string {
+  return unmodified
     .replace(/x08/g, '\\b') // Backspace is replaced with \b
     .replace(/\f/g, '\\f') // Form feed is replaced with \f
     .replace(/\n/g, '\\n') // Newline is replaced with \n
@@ -37,18 +40,18 @@ function escapeJsonCharacters(unescaped: string): string {
     .replace(/\\/g, '\\\\'); // Backslash is replaced with \\
 }
 
-function escapeYamlCharacters(unescaped: string): string {
+function escapeYamlCharacters(unmodified: string): string {
   let hasSpecialCharacters = false;
   for (const special of SPECIAL_YAML_CHARACTERS) {
-    if (unescaped.includes(special)) {
+    if (unmodified.includes(special)) {
       hasSpecialCharacters = true;
       break;
     }
   }
 
   if (hasSpecialCharacters) {
-    return `"${unescaped.replace(/"/g, '\\"')}"`;
+    return `"${unmodified.replace(/"/g, '\\"')}"`;
   } else {
-    return unescaped;
+    return unmodified;
   }
 }

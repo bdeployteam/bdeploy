@@ -72,6 +72,11 @@ public enum Variables {
     HOST("H:", false),
 
     /**
+     * Transforms the given path into a file URI.
+     */
+    FILEURI("FILEURI:", false),
+
+    /**
      * A conditional which evaluates a nested expression (must be boolean), and evaluates to one of two given values.
      */
     CONDITIONAL("IF:", false),
