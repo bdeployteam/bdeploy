@@ -2,6 +2,7 @@
   <app-bd-dialog-toolbar header="Add Data File" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" class="flex flex-col gap-1">
+      @if (fileMinion$ | async) {
       <div class="my-2">Target Node: <strong name="targetNode">{{ fileMinion$ | async }}</strong></div>
       <app-bd-form-input
         #tempFileInput
@@ -16,10 +17,10 @@
         hintText="Drop file to add initial content"
       ></app-bd-file-drop>
       @if (tempFileContentLoading$ | async) {
-        <div>Loading...</div>
+      <div>Loading...</div>
       }
       @if (tempFileError) {
-        <div class="bd-warning-text">{{ tempFileError }}</div>
+      <div class="bd-warning-text">{{ tempFileError }}</div>
       }
       <app-bd-button
         color="primary"
@@ -29,6 +30,9 @@
         (click)="onSave()"
         [disabled]="form.invalid || !(fileMinion$ | async)"
       ></app-bd-button>
+      } @else {
+      <app-bd-no-data>This panel has been opened with missing or invalid parameters. Please close it.</app-bd-no-data>
+      }
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

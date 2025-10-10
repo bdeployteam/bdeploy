@@ -2,18 +2,18 @@
   <app-bd-dialog-toolbar header="{{isDataFiles?'Data':'Log'}} Files">
     <div class="flex-auto"></div>
     @if (cfg.isCentral$ | async) {
-      <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>
-      <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>
+    <mat-divider [vertical]="true"></mat-divider>
     }
     @if (isDataFiles) {
-      <app-bd-panel-button
-        icon="add"
-        text="Add File..."
-        [collapsed]="false"
-        color="primary"
-        [disabled]="(loading$ | async) || (noactive$ | async) || !(authService.isCurrentScopeWrite$ | async)"
-        [route]="['panels', 'instances', 'data-files', 'add']"
-      ></app-bd-panel-button>
+    <app-bd-panel-button
+      icon="add"
+      text="Add File..."
+      [collapsed]="false"
+      color="primary"
+      [disabled]="(loading$ | async) || (noactive$ | async) || (remoteDirs$ | async)?.length < 1 || !(authService.isCurrentScopeWrite$ | async)"
+      [route]="['panels', 'instances', 'data-files', 'add']"
+    ></app-bd-panel-button>
     }
     <app-bd-panel-button
       #bulkMode
@@ -34,109 +34,97 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     @if (noactive$ | async) {
-      <app-bd-no-data
-        >The current instance does not have an active version yet. {{isDataFiles?'Data':'Log'}} files are not yet
-        available.</app-bd-no-data
-        >
-      } @else {
-        @if (servers.isCurrentInstanceSynchronized$ | async) {
-          @if ((remoteDirs$ | async)?.length > 1) {
-            <mat-tab-group
-              animationDuration="0ms"
-              [selectedIndex]="tabIndex"
-              (selectedTabChange)="onTabChange($event)"
-              >
-              @for (node of remoteDirs$ | async; track node) {
-                <mat-tab [label]="node.minion"> </mat-tab>
-              }
-            </mat-tab-group>
-          }
-          <div class="mt-2 mx-1.5">
-            @if (selectedPath) {
-              <app-bd-breadcrumbs [crumbs]="selectedPath.crumbs"></app-bd-breadcrumbs>
-            }
-          </div>
-          <app-bd-data-table
-            [records]="records$ | async"
-            [columns]="columns"
-            [searchable]="false"
-            (recordClick)="onClick($event)"
-            [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
-            [(checked)]="filesBulkService.selection"
-            >
-            <app-bd-no-data>
-              <p>No data available. This either means that the instance has no active version, or no files exist.</p>
-              <p>Try to refresh to fetch current information from the node(s).</p>
-              <app-bd-button
-                text="Refresh"
-                icon="refresh"
-                (click)="load(instance)"
-                [collapsed]="false"
-                [loadingWhen$]="loading$"
-                [disabled]="loading$ | async"
-              ></app-bd-button>
-            </app-bd-no-data>
-          </app-bd-data-table>
-        } @else {
-          <app-bd-no-data>
-            <p class="text-center">
-              <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
-              <strong>{{ instance?.managedServer?.hostName }}</strong>
-            </p>
-            <p>Synchronize the instance to view {{isDataFiles?'data':'log'}} files.</p>
-            <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
-          </app-bd-no-data>
-        }
+    <app-bd-no-data
+      >The current instance does not have an active version yet. {{isDataFiles?'Data':'Log'}} files are not yet
+      available.</app-bd-no-data
+    >
+    } @else { @if (servers.isCurrentInstanceSynchronized$ | async) { @if ((remoteDirs$ | async)?.length > 1) {
+    <mat-tab-group animationDuration="0ms" [selectedIndex]="tabIndex" (selectedTabChange)="onTabChange($event)">
+      @for (node of remoteDirs$ | async; track node) {
+      <mat-tab [label]="node.minion"> </mat-tab>
       }
-      <ng-template #active>
-        @if (servers.isCurrentInstanceSynchronized$ | async) {
-          @if ((remoteDirs$ | async)?.length > 1) {
-            <mat-tab-group
-              animationDuration="0ms"
-              [selectedIndex]="tabIndex"
-              (selectedTabChange)="onTabChange($event)"
-              >
-              @for (node of remoteDirs$ | async; track node) {
-                <mat-tab [label]="node.minion"> </mat-tab>
-              }
-            </mat-tab-group>
-          }
-          <div class="mt-2 mx-1.5">
-            @if (selectedPath) {
-              <app-bd-breadcrumbs [crumbs]="selectedPath.crumbs"></app-bd-breadcrumbs>
-            }
-          </div>
-          <app-bd-data-table
-            [records]="records$ | async"
-            [columns]="columns"
-            [searchable]="false"
-            (recordClick)="onClick($event)"
-            [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
-            [(checked)]="filesBulkService.selection"
-            >
-            <app-bd-no-data>
-              <p>No data available. This either means that the instance has no active version, or no files exist.</p>
-              <p>Try to refresh to fetch current information from the node(s).</p>
-              <app-bd-button
-                text="Refresh"
-                icon="refresh"
-                (click)="load(instance)"
-                [collapsed]="false"
-                [loadingWhen$]="loading$"
-                [disabled]="loading$ | async"
-              ></app-bd-button>
-            </app-bd-no-data>
-          </app-bd-data-table>
-        } @else {
-          <app-bd-no-data>
-            <p class="text-center">
-              <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
-              <strong>{{ instance?.managedServer?.hostName }}</strong>
-            </p>
-            <p>Synchronize the instance to view {{isDataFiles?'data':'log'}} files.</p>
-            <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
-          </app-bd-no-data>
+    </mat-tab-group>
+    }
+    <div class="mt-2 mx-1.5">
+      @if (selectedPath) {
+      <app-bd-breadcrumbs [crumbs]="selectedPath.crumbs"></app-bd-breadcrumbs>
+      }
+    </div>
+    <app-bd-data-table
+      [records]="records$ | async"
+      [columns]="columns"
+      [searchable]="false"
+      (recordClick)="onClick($event)"
+      [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+      [(checked)]="filesBulkService.selection"
+    >
+      <app-bd-no-data>
+        <p>No data available. This either means that the instance has no active version, or no files exist.</p>
+        <p>Try to refresh to fetch current information from the node(s).</p>
+        <app-bd-button
+          text="Refresh"
+          icon="refresh"
+          (click)="load(instance)"
+          [collapsed]="false"
+          [loadingWhen$]="loading$"
+          [disabled]="loading$ | async"
+        ></app-bd-button>
+      </app-bd-no-data>
+    </app-bd-data-table>
+    } @else {
+    <app-bd-no-data>
+      <p class="text-center">
+        <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
+        <strong>{{ instance?.managedServer?.hostName }}</strong>
+      </p>
+      <p>Synchronize the instance to view {{isDataFiles?'data':'log'}} files.</p>
+      <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
+    </app-bd-no-data>
+    } }
+    <ng-template #active>
+      @if (servers.isCurrentInstanceSynchronized$ | async) { @if ((remoteDirs$ | async)?.length > 1) {
+      <mat-tab-group animationDuration="0ms" [selectedIndex]="tabIndex" (selectedTabChange)="onTabChange($event)">
+        @for (node of remoteDirs$ | async; track node) {
+        <mat-tab [label]="node.minion"> </mat-tab>
         }
-      </ng-template>
-    </app-bd-dialog-content>
-  </app-bd-dialog>
+      </mat-tab-group>
+      }
+      <div class="mt-2 mx-1.5">
+        @if (selectedPath) {
+        <app-bd-breadcrumbs [crumbs]="selectedPath.crumbs"></app-bd-breadcrumbs>
+        }
+      </div>
+      <app-bd-data-table
+        [records]="records$ | async"
+        [columns]="columns"
+        [searchable]="false"
+        (recordClick)="onClick($event)"
+        [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+        [(checked)]="filesBulkService.selection"
+      >
+        <app-bd-no-data>
+          <p>No data available. This either means that the instance has no active version, or no files exist.</p>
+          <p>Try to refresh to fetch current information from the node(s).</p>
+          <app-bd-button
+            text="Refresh"
+            icon="refresh"
+            (click)="load(instance)"
+            [collapsed]="false"
+            [loadingWhen$]="loading$"
+            [disabled]="loading$ | async"
+          ></app-bd-button>
+        </app-bd-no-data>
+      </app-bd-data-table>
+      } @else {
+      <app-bd-no-data>
+        <p class="text-center">
+          <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
+          <strong>{{ instance?.managedServer?.hostName }}</strong>
+        </p>
+        <p>Synchronize the instance to view {{isDataFiles?'data':'log'}} files.</p>
+        <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
+      </app-bd-no-data>
+      }
+    </ng-template>
+  </app-bd-dialog-content>
+</app-bd-dialog>
