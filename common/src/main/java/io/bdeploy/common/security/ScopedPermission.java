@@ -7,17 +7,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Describes access rights to a given resource. Access rights can either be global or restricted (=scoped) to a given
- * resource. Global permissions take precedence over scoped permissions. Thus a user having global read permissions is allowed to
- * access any scoped resource with READ permissions. In contrast to that a user that has scoped READ permissions is not able to
- * access a resource requiring global read permissions.
+ * Describes access rights to a given resource. Access rights can either be global or restricted (=scoped) to a given resource.
+ * Global permissions take precedence over scoped permissions. Thus a user having global read permissions is allowed to access any
+ * scoped resource with READ permissions. In contrast to that a user that has scoped READ permissions is not able to access a
+ * resource requiring global read permissions.
  */
 public final class ScopedPermission {
 
     /**
-     * Available permissions. Permissions are inclusive meaning that higher permissions
-     * include the lower ones. Thus a given resource must only define the lowest required
-     * permission and not multiple ones.
+     * Available permissions. Permissions are inclusive meaning that higher permissions include the lower ones. Thus a given
+     * resource must only define the lowest required permission and not multiple ones.
      */
     public enum Permission {
 
@@ -38,6 +37,7 @@ public final class ScopedPermission {
 
         /**
          * New resources can be created and existing ones can be deleted.
+         * <p>
          * Includes WRITE and READ permissions.
          */
         ADMIN(4);
@@ -130,19 +130,18 @@ public final class ScopedPermission {
     }
 
     /**
-     * Checks whether or not this permission satisfies the given one. Permissions are inclusive and ADMIN is the highest one.
-     * The <tt>ADMIN</tt> permission implicitly grants <tt>WRITE</tt> and <tt>READ</tt> and the <tt>WRITE</tt> permission
-     * implicitly grants <tt>READ</tt> permission.
+     * Checks whether or not this permission satisfies the given one. Permissions are inclusive and ADMIN is the highest one. The
+     * <tt>ADMIN</tt> permission implicitly grants <tt>WRITE</tt> and <tt>READ</tt> and the <tt>WRITE</tt> permission implicitly
+     * grants <tt>READ</tt> permission.
      * <p>
      * <ul>
-     * <li>If this token is a global one then the scoped of the other one is ignored.
-     * Just the permission without the scoped is checked.</li>
-     * <li>If this token is a scoped one and the other one is a global then always {@code false} will be returned.</li>
+     * <li>If this token is a global one then the scoped of the other one is ignored. Just the permission without the scoped is
+     * checked.
+     * <li>If this token is a scoped one and the other one is a global then always {@code false} will be returned.
      * <li>If both are scoped permissions then the scope must match. If so the permission will be compared.
      * </ul>
      *
-     * @param other
-     *            the permission to check
+     * @param other the permission to check
      * @return {@code true} if this permission satisfies the other one and {@code false} otherwise
      */
     public boolean satisfies(ScopedPermission other) {
@@ -170,9 +169,8 @@ public final class ScopedPermission {
      * Compares this permission with the other one.
      *
      * @param other the other permission
-     * @return -1 if the this permission provides lower a permission level than the other one, 0 if the permissions are equal and
-     *         1 if
-     *         this permission provides a higher permission level
+     * @return -1 if the this permission provides a lower permission level than the other one, 0 if the permissions are equal and
+     *         1 if this permission provides a higher permission level
      */
     private int comparePermission(Permission other) {
         return Integer.compare(permission.level, other.level);
