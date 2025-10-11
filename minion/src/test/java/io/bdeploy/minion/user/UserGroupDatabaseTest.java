@@ -57,6 +57,15 @@ class UserGroupDatabaseTest {
 
         // test user does have a required permission
         assertTrue(users.isAuthorized(userName, permission));
+
+        // remove user from group
+        users.removeUserFromGroup(g.id, userName);
+
+        // test user no longer has the permission
+        assertFalse(users.isAuthorized(userName, permission));
+
+        // ensure that removing the user from a group that they are not in doesn't break
+        users.removeUserFromGroup(g.id, userName);
     }
 
     @Test
@@ -87,6 +96,11 @@ class UserGroupDatabaseTest {
         // merged permissions have global permission from group
         assertTrue(groups.getCloneWithMergedPermissions(info).mergedPermissions.contains(permission));
 
+        // remove user from group
+        users.removeUserFromGroup(g.id, userName);
+
+        // ensure that removing the user from a group that they are not in doesn't break
+        users.removeUserFromGroup(g.id, userName);
     }
 
     @Test

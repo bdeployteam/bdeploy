@@ -90,6 +90,7 @@ class UserDatabaseTest {
         assertEquals("JunitTest@example.com", user.email);
 
         db.deleteUser("JunitTest");
+        db.deleteUser("JunitTest"); // removing a non-existant user should do nothing
 
         assertNull(db.getUser("JunitTest"));
         assertNull(db.authenticate("JunitTest", "newpwnewpwnewpw"));
@@ -137,5 +138,4 @@ class UserDatabaseTest {
         assertNull(db.getUser("JUNIT"));
         assertEquals(originalSize, db.getAllNames().size());
     }
-
 }
