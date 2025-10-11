@@ -67,12 +67,28 @@ class UserManagementCliTest extends BaseMinionCliTest {
         admin2data = getUserRowByName(remote, admin2Username);
         assertEquals("[]", admin2data.get("Permissions"));
 
+        // Check if the token actually lost administrative power
+        assertThrows(NotAuthorizedException.class, () -> remote(admin2Remote, RemoteUserTool.class, "--list"));
+
         // Promote the permission of the user
         remote(remote, RemoteUserTool.class, "--update=" + userUsername, "--permission=ADMIN");
 
         // Check if the permission actually got added
         userData = getUserRowByName(remote, userUsername);
         assertEquals("[ADMIN (<<GLOBAL>>)]", userData.get("Permissions"));
+
+        // Check if the token actually gained administrative power
+        assertDoesNotThrow(() -> remote(userRemote, RemoteUserTool.class, "--list"));
+
+        // Set the user to inactive
+        remote(remote, RemoteUserTool.class, "--update=" + userUsername, "--inactive=true");
+
+        // Check if the user actually got set to inactive
+        userData = getUserRowByName(remote, userUsername);
+        assertEquals("*", userData.get("Inact"));
+
+        // Check if the token actually lost administrative power
+        assertThrows(NotAuthorizedException.class, () -> remote(userRemote, RemoteUserTool.class, "--list"));
     }
 
     private StructuredOutputRow getUserRowByName(RemoteService remote, String username) {

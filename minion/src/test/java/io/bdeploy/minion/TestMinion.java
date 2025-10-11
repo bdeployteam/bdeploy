@@ -50,12 +50,14 @@ public class TestMinion extends TestServer {
 
     @FunctionalInterface
     public interface MultiNodeCompletion {
+
         public void complete(MultiNodeMasterFile master);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
     public @interface MultiNodeMaster {
+
         public String value();
     }
 
@@ -119,6 +121,7 @@ public class TestMinion extends TestServer {
         String userName = "Test";
         UserDatabase userDb = cmr.mr.getUsers();
         userDb.createLocalUser(userName, "TheTestPassword", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+        setTokenValidator(new TokenValidator(userDb));
 
         serverStore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
         storePass = state.keystorePass;
@@ -147,7 +150,7 @@ public class TestMinion extends TestServer {
         CloseableMinionRoot cmr = getExtensionStore(context).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
 
         // in case of MULTI_RUNTIME we need to complete startup later.
-        if(nodeType != MinionNodeType.MULTI_RUNTIME) {
+        if (nodeType != MinionNodeType.MULTI_RUNTIME) {
             super.afterStartup().thenRun(() -> cmr.mr.afterStartup(true, false));
         }
     }
@@ -203,11 +206,11 @@ public class TestMinion extends TestServer {
             return true;
         }
 
-        if(parameterContext.getParameter().getType().isAssignableFrom(MultiNodeCompletion.class)) {
+        if (parameterContext.getParameter().getType().isAssignableFrom(MultiNodeCompletion.class)) {
             return mode == MinionMode.NODE && nodeType == MinionNodeType.MULTI_RUNTIME;
         }
 
-        if(parameterContext.isAnnotated(MultiNodeMaster.class)) {
+        if (parameterContext.isAnnotated(MultiNodeMaster.class)) {
             return mode == MinionMode.MANAGED || mode == MinionMode.STANDALONE;
         }
 
@@ -229,8 +232,9 @@ public class TestMinion extends TestServer {
             return authPack;
         }
 
-        if(parameterContext.getParameter().getType().isAssignableFrom(MultiNodeCompletion.class)) {
-            CloseableMinionRoot cmr = getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
+        if (parameterContext.getParameter().getType().isAssignableFrom(MultiNodeCompletion.class)) {
+            CloseableMinionRoot cmr = getExtensionStore(extensionContext).get(CloseableMinionRoot.class,
+                    CloseableMinionRoot.class);
             MinionDto self = new MinionManifest(cmr.mr.getHive()).read().getMinion(cmr.mr.getState().self);
 
             return (MultiNodeCompletion) (master) -> {
@@ -238,9 +242,11 @@ public class TestMinion extends TestServer {
             };
         }
 
-        if(parameterContext.isAnnotated(MultiNodeMaster.class)) {
+        if (parameterContext.isAnnotated(MultiNodeMaster.class)) {
             var x = parameterContext.getParameter().getAnnotationsByType(MultiNodeMaster.class);
-            return createMasterFile(getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class).mr, x[0].value());
+            return createMasterFile(
+                    getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class).mr,
+                    x[0].value());
         }
 
         return super.resolveParameter(parameterContext, extensionContext);
@@ -271,5 +277,4 @@ public class TestMinion extends TestServer {
         }
 
     }
-
 }

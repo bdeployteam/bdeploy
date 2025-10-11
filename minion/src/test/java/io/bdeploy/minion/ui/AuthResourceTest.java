@@ -44,6 +44,7 @@ class AuthResourceTest {
     void testCurrentUserDataUpdateLogic(AuthResource auth) {
         UserInfo userInfo = auth.getCurrentUser();
         UserInfo newUserInfo = new UserInfo(userInfo.name);
+        newUserInfo.permissions.addAll(userInfo.permissions);
 
         newUserInfo.fullName = "Ash Ketchum";
         newUserInfo.email = "pikachu@thundershock.pkm";

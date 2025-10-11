@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
@@ -77,6 +78,7 @@ public class TestServer
 
     private final Map<HttpHandlerRegistration, HttpHandler> handlers = new HashMap<>();
     private ServiceLocator rootLocator;
+    private Predicate<ApiAccessToken> tokenValidator;
     private Auditor auditor;
 
     private RemoteService service;
@@ -122,6 +124,10 @@ public class TestServer
 
     public char[] getStorePass() {
         return storePass;
+    }
+
+    public void setTokenValidator(Predicate<ApiAccessToken> tokenValidator) {
+        this.tokenValidator = tokenValidator;
     }
 
     public void setAuditor(Auditor auditor) {
@@ -300,6 +306,9 @@ public class TestServer
             resources.forEach(this.server::registerResource);
             registrations.forEach(this.server::register);
             wsApplications.forEach(this.server::registerWebsocketApplication);
+            if (tokenValidator != null) {
+                this.server.setTokenValidator(tokenValidator);
+            }
             if (auditor != null) {
                 this.server.setAuditor(auditor);
             }
@@ -317,7 +326,6 @@ public class TestServer
             startup = null;
             server.close();
         }
-
     }
 
     @Provider
@@ -345,5 +353,4 @@ public class TestServer
         public void onShutdown(Container container) {
         }
     }
-
 }

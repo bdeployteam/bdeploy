@@ -50,7 +50,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private static final String WEAK_AUTH = "weak";
 
     private final KeyStore store;
-    private final Predicate<String> userValidator;
+    private final Predicate<ApiAccessToken> tokenValidator;
     private final JerseySessionManager sessionManager;
 
     @Inject
@@ -102,9 +102,10 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
 
     }
 
-    public JerseyAuthenticationProvider(KeyStore store, Predicate<String> userValidator, JerseySessionManager sessionManager) {
+    public JerseyAuthenticationProvider(KeyStore store, Predicate<ApiAccessToken> tokenValidator,
+            JerseySessionManager sessionManager) {
         this.store = store;
-        this.userValidator = userValidator;
+        this.tokenValidator = tokenValidator;
         this.sessionManager = sessionManager;
     }
 
@@ -163,7 +164,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
                 abortWithUnauthorized(requestContext);
             }
 
-            if (!api.isSystem() && userValidator != null && !userValidator.test(api.getIssuedTo())) {
+            if (tokenValidator != null && !tokenValidator.test(api)) {
                 abortWithUnauthorized(requestContext);
             }
 
@@ -175,7 +176,6 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
             log.error("Exception while parsing authorization: {}", e.toString());
             abortWithUnauthorized(requestContext);
         }
-
     }
 
     @Override

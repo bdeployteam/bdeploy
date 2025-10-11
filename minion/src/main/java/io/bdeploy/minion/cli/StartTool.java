@@ -33,7 +33,6 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
-import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -53,6 +52,7 @@ import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
+import io.bdeploy.minion.TokenValidator;
 import io.bdeploy.minion.api.v1.PublicProductValidationResourceImpl;
 import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.StartTool.MasterConfig;
@@ -244,24 +244,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     private void setupServerMaster(MasterConfig config, MinionRoot r, JerseyServer srv, BHiveRegistry reg) {
-        srv.setUserValidator(user -> {
-            UserInfo info = r.getUsers().getUser(user);
-
-            /*
-             * TODO This code allows tokens with invalid users as servers that have been initialized LONG ago will have those as
-             * master token. Changing this will invalidate these tokens (which are still around). Nevertheless this poses a
-             * security threat, so we should update the code and provide a migration.
-             */
-            if (info == null) {
-                if (user.startsWith("[") && user.endsWith("]")) {
-                    // on behalf of remote user (e.g. from central).
-                    return true;
-                }
-                log.error("User not available: {}. Allowing to support legacy tokens.", user);
-                return true;
-            }
-            return r.getUsers().isAuthenticationValid(info);
-        });
+        srv.setTokenValidator(new TokenValidator(r.getUsers()));
         registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory(),
                 r.isInitialConnectionCheckFailed());
 
@@ -400,5 +383,4 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             bind(new TaskSynchronizer()).to(TaskSynchronizer.class);
         }
     }
-
 }

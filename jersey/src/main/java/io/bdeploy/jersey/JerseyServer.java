@@ -51,6 +51,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.audit.Slf4jAuditor;
+import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VersionHelper;
@@ -146,7 +147,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final JerseySessionManager sessionManager;
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
-    private Predicate<String> userValidator;
+    private Predicate<ApiAccessToken> tokenValidator;
 
     /**
      * @param port the port to listen on
@@ -183,10 +184,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
-     * @param validator a validator which can verify a user exists and is allowed to proceed.
+     * @param tokenValidator a {@link Predicate} which can verify the validity of an {@link ApiAccessToken}
      */
-    public void setUserValidator(Predicate<String> validator) {
-        this.userValidator = validator;
+    public void setTokenValidator(Predicate<ApiAccessToken> tokenValidator) {
+        this.tokenValidator = tokenValidator;
     }
 
     @Override
@@ -381,7 +382,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         config.register(MultiPartFeature.class);
 
         // unfortunately, priorities annotated on the providers are not always respected.
-        config.register(new JerseyAuthenticationProvider(store, userValidator, sessionManager), Priorities.AUTHENTICATION);
+        config.register(new JerseyAuthenticationProvider(store, tokenValidator, sessionManager), Priorities.AUTHENTICATION);
         config.register(JerseyAuthenticationUnprovider.class, Priorities.AUTHENTICATION - 1);
         config.register(JerseyAuthenticationWeakenerProvider.class, Priorities.AUTHENTICATION - 2);
 
@@ -462,7 +463,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);
         }
-
     }
 
     /**
@@ -479,7 +479,5 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         public void dispose(Auditor instance) {
             // nothing to do
         }
-
     }
-
 }
