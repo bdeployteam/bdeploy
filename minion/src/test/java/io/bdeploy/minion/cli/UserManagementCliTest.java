@@ -18,37 +18,58 @@ import jakarta.ws.rs.NotAuthorizedException;
 @ExtendWith(TestMinion.class)
 class UserManagementCliTest extends BaseMinionCliTest {
 
-    @Test
-    void testUserCreationAndPermissionManagement(RemoteService remote) {
-        // Ensure that exactly 1 user exists
-        assertEquals(1, remote(remote, RemoteUserTool.class, "--list").size());
+    private static final String admin2Username = "secondadmin";
+    private static final String userUsername = "normaluser";
 
-        String admin1Username = remote(remote, RemoteUserTool.class, "--list").get(0).get("Username");
-        String admin2Username = "secondadmin";
-        String userUsername = "normaluser";
-        StructuredOutputRow admin1data;
+    @Test
+    void testUserActivationAndInactivation(RemoteService remote) {
+        String admin1Username = setupTestUsers(remote);
+
+        // Get data of all 3 users
+        StructuredOutputRow admin1data = getUserRowByName(remote, admin1Username);
+        StructuredOutputRow admin2data = getUserRowByName(remote, admin2Username);
+        StructuredOutputRow userData = getUserRowByName(remote, userUsername);
+
+        // Check if all of them are active
+        assertEquals("", admin1data.get("Inact"));
+        assertEquals("", admin2data.get("Inact"));
+        assertEquals("", userData.get("Inact"));
+
+        // Set the second administrator user inactive
+        remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--inactive");
+
+        // Check if the second administrator actually got set to inactive
+        admin2data = getUserRowByName(remote, admin2Username);
+        assertEquals("*", admin2data.get("Inact"));
+
+        // Set the second administrator user inactive again
+        remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--inactive");
+
+        // Check if the second administrator is still inactive
+        admin2data = getUserRowByName(remote, admin2Username);
+        assertEquals("*", admin2data.get("Inact"));
+
+        // Set the second administrator user active
+        remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--active");
+
+        // Check if the second administrator actually got set to active
+        admin2data = getUserRowByName(remote, admin2Username);
+        assertEquals("", admin2data.get("Inact"));
+
+        // Set the second administrator user inactive again
+        remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--inactive");
+
+        // Check if the second administrator is inactive again
+        admin2data = getUserRowByName(remote, admin2Username);
+        assertEquals("*", admin2data.get("Inact"));
+    }
+
+    @Test
+    void testUserPermissionManagement(RemoteService remote) {
+        String admin1Username = setupTestUsers(remote);
+
         StructuredOutputRow admin2data;
         StructuredOutputRow userData;
-
-        // Ensure that they are a global administrator
-        admin1data = getUserRowByName(remote, admin1Username);
-        assertEquals("[ADMIN (<<GLOBAL>>)]", admin1data.get("Permissions"));
-
-        // Create a second global administrator
-        assertNotEquals(admin2Username, admin1Username);
-        remote(remote, RemoteUserTool.class, "--add=" + admin2Username, "--password=adminadminadmin", "--admin");
-
-        // Ensure that they are a global administrator
-        admin2data = getUserRowByName(remote, admin2Username);
-        assertEquals("[ADMIN (<<GLOBAL>>)]", admin2data.get("Permissions"));
-
-        // Create a normal user
-        assertNotEquals(userUsername, admin1Username);
-        remote(remote, RemoteUserTool.class, "--add=" + userUsername, "--password=useruseruser");
-
-        // Ensure that they have no permissions
-        userData = getUserRowByName(remote, userUsername);
-        assertEquals("[]", userData.get("Permissions"));
 
         // Create explicit remote services for the new users
         RemoteService admin1Remote = getRemoteService(remote, admin1Username);
@@ -89,6 +110,53 @@ class UserManagementCliTest extends BaseMinionCliTest {
 
         // Check if the token actually lost administrative power
         assertThrows(NotAuthorizedException.class, () -> remote(userRemote, RemoteUserTool.class, "--list"));
+    }
+
+    @Test
+    void testUserDeletion(RemoteService remote) {
+        setupTestUsers(remote);
+
+        // Delete the second administrator user
+        remote(remote, RemoteUserTool.class, "--remove=" + admin2Username);
+        assertEquals(2, remote(remote, RemoteUserTool.class, "--list").size());
+
+        // Delete the normal user
+        remote(remote, RemoteUserTool.class, "--remove=" + userUsername);
+        assertEquals(1, remote(remote, RemoteUserTool.class, "--list").size());
+    }
+
+    private String setupTestUsers(RemoteService remote) {
+        // Ensure that exactly 1 user exists
+        assertEquals(1, remote(remote, RemoteUserTool.class, "--list").size());
+
+        // Get the name of the initial administrator and ensure that there are no name clashes
+        String initialAdminUsername = remote(remote, RemoteUserTool.class, "--list").get(0).get("Username");
+        assertNotEquals(initialAdminUsername, admin2Username);
+        assertNotEquals(initialAdminUsername, userUsername);
+
+        StructuredOutputRow admin1data;
+        StructuredOutputRow admin2data;
+        StructuredOutputRow userData;
+
+        // Ensure admin1 is a global administrator
+        admin1data = getUserRowByName(remote, initialAdminUsername);
+        assertEquals("[ADMIN (<<GLOBAL>>)]", admin1data.get("Permissions"));
+
+        // Create a second global administrator
+        remote(remote, RemoteUserTool.class, "--add=" + admin2Username, "--password=adminadminadmin", "--admin");
+
+        // Ensure admin2 is a global administrator
+        admin2data = getUserRowByName(remote, admin2Username);
+        assertEquals("[ADMIN (<<GLOBAL>>)]", admin2data.get("Permissions"));
+
+        // Create a normal user
+        remote(remote, RemoteUserTool.class, "--add=" + userUsername, "--password=useruseruser");
+
+        // Ensure that user has no permissions
+        userData = getUserRowByName(remote, userUsername);
+        assertEquals("[]", userData.get("Permissions"));
+
+        return initialAdminUsername;
     }
 
     private StructuredOutputRow getUserRowByName(RemoteService remote, String username) {
