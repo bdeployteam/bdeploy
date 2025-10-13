@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -39,7 +40,7 @@ public class SystemUserMigration {
                 // the token was issued /before/ we introduced system tokens and contains a system user name, which is no
                 // longer OK on masters... it is OK for nodes, since user names are not verified there, so we only need
                 // to handle masters...
-                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION)
+                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ScopedPermission.GLOBAL_ADMIN)
                         .build();
                 String pack = SecurityHelper.getInstance().createSignaturePack(aat, root.getState().keystorePath,
                         root.getState().keystorePass);

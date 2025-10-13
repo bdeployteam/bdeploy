@@ -9,7 +9,6 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -135,7 +134,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
             group.description = config.description();
         }
         if (config.admin()) {
-            group.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
+            group.permissions.add(ScopedPermission.GLOBAL_ADMIN);
         }
         if (config.permission() != null) {
             group.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));

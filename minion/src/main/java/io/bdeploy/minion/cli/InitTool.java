@@ -30,6 +30,7 @@ import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
@@ -154,7 +155,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             } else {
                 try {
                     mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
-                            Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+                            Collections.singletonList(ScopedPermission.GLOBAL_ADMIN));
                 } catch (Exception e) {
                     return createResultWithErrorMessage(e.getMessage());
                 }
@@ -236,7 +237,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         MinionState state = mr.initKeys();
 
         SecurityHelper helper = SecurityHelper.getInstance();
-        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ScopedPermission.GLOBAL_ADMIN).build();
 
         String pack = helper.createSignaturePack(aat, state.keystorePath, state.keystorePass);
         RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);

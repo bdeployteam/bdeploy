@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestListOperation;
-import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.StringHelper;
@@ -30,13 +29,13 @@ class UserDatabaseTest {
     void testUserRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("JunitTest", "JunitTestJunitTest", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+        db.createLocalUser("JunitTest", "JunitTestJunitTest", Collections.singletonList(ScopedPermission.GLOBAL_ADMIN));
 
         UserInfo info = db.authenticate("JunitTest", "JunitTestJunitTest");
         assertNotNull(info);
         assertNotNull(info.permissions);
         assertEquals(1, info.permissions.size());
-        assertEquals(ApiAccessToken.ADMIN_PERMISSION.permission, info.permissions.iterator().next().permission);
+        assertEquals(ScopedPermission.GLOBAL_ADMIN.permission, info.permissions.iterator().next().permission);
 
         info.permissions.clear();
         info.fullName = "JunitTest User";

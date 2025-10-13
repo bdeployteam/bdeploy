@@ -8,7 +8,6 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -139,7 +138,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
             }
         }
         if (config.admin()) {
-            if (user.permissions.add(ApiAccessToken.ADMIN_PERMISSION)) {
+            if (user.permissions.add(ScopedPermission.GLOBAL_ADMIN)) {
                 updated = true;
             }
         }
@@ -166,7 +165,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
 
         setInactive(user, config);
         if (config.admin()) {
-            user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
+            user.permissions.add(ScopedPermission.GLOBAL_ADMIN);
         }
         if (config.permission() != null) {
             user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));

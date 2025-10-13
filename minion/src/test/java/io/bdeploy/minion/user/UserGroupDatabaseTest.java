@@ -73,7 +73,7 @@ class UserGroupDatabaseTest {
         UserDatabase users = root.getUsers();
         UserGroupDatabase groups = root.getUserGroups();
         String userName = "JunitTest";
-        ScopedPermission permission = new ScopedPermission(null, Permission.ADMIN);
+        ScopedPermission permission = ScopedPermission.GLOBAL_ADMIN;
 
         users.createLocalUser(userName, "JunitTestJunitTest", Collections.emptyList());
 
@@ -108,7 +108,7 @@ class UserGroupDatabaseTest {
         UserDatabase users = root.getUsers();
         UserGroupDatabase groups = root.getUserGroups();
         String userName = "JunitTest";
-        ScopedPermission permission = new ScopedPermission(null, Permission.ADMIN);
+        ScopedPermission permission = ScopedPermission.GLOBAL_ADMIN;
 
         users.createLocalUser(userName, "JunitTestJunitTest", Collections.emptyList());
 

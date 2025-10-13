@@ -16,7 +16,7 @@ public class TokenValidator implements Predicate<ApiAccessToken> {
     private static final Logger log = LoggerFactory.getLogger(TokenValidator.class);
 
     private static Predicate<Collection<ScopedPermission>> isGlobalAdmin = perms -> perms.stream()
-            .anyMatch(p -> p.isGlobal() && p.permission == ScopedPermission.Permission.ADMIN);
+            .anyMatch(p -> ScopedPermission.GLOBAL_ADMIN.equals(p));
 
     private final UserDatabase userDatabase;
 

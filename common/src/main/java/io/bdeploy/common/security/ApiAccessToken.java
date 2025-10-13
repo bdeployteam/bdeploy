@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 public class ApiAccessToken {
 
     public static final String SYSTEM_USER = "BDeploy System";
-    public static final ScopedPermission ADMIN_PERMISSION = new ScopedPermission(ScopedPermission.Permission.ADMIN);
 
     String it; // issuedTo
 

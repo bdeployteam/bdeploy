@@ -40,6 +40,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.UuidHelper;
 import jakarta.ws.rs.Priorities;
@@ -105,7 +106,7 @@ public class TestServer
                 serverStore = helper.loadPrivateKeyStore(is, TEST_STORE_PASS);
             }
             ApiAccessToken aat = new ApiAccessToken.Builder().setIssuedTo(System.getProperty("user.name"))
-                    .addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
+                    .addPermission(ScopedPermission.GLOBAL_ADMIN).build();
             authPack = helper.createSignaturePack(aat, serverStore, TEST_STORE_PASS);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load keystores", e);

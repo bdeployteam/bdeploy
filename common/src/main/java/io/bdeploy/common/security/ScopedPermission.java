@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public final class ScopedPermission {
 
+    /** Permission for global administrators */
+    public static final ScopedPermission GLOBAL_ADMIN = new ScopedPermission(ScopedPermission.Permission.ADMIN);
+
     /**
      * Available permissions. Permissions are inclusive meaning that higher permissions include the lower ones. Thus a given
      * resource must only define the lowest required permission and not multiple ones.

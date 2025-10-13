@@ -22,6 +22,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
@@ -137,7 +138,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
             if (config.exportToken() != null) {
                 SecurityHelper helper = SecurityHelper.getInstance();
-                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION)
+                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ScopedPermission.GLOBAL_ADMIN)
                         .build();
                 String pack = helper.createSignaturePack(aat, state.keystorePath, state.keystorePass);
 
@@ -220,7 +221,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
     private static void updateSelf(MinionRoot mr, Path ks, char[] ksp) throws GeneralSecurityException, IOException {
         SecurityHelper helper = SecurityHelper.getInstance();
-        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ScopedPermission.GLOBAL_ADMIN).build();
 
         String pack = helper.createSignaturePack(aat, ks, ksp);
 

@@ -12,6 +12,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 
@@ -93,7 +94,7 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
 
     private DataResult createNewToken(Path keystore, char[] passphrase) {
         SecurityHelper helper = SecurityHelper.getInstance();
-        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ScopedPermission.GLOBAL_ADMIN).build();
 
         try {
             String pack = helper.createSignaturePack(aat, keystore, passphrase);

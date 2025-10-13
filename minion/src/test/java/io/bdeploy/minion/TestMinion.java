@@ -21,6 +21,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ApiAccessToken.Builder;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
@@ -120,13 +121,13 @@ public class TestMinion extends TestServer {
 
         String userName = "Test";
         UserDatabase userDb = cmr.mr.getUsers();
-        userDb.createLocalUser(userName, "TheTestPassword", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+        userDb.createLocalUser(userName, "TheTestPassword", Collections.singletonList(ScopedPermission.GLOBAL_ADMIN));
         setTokenValidator(new TokenValidator(userDb));
 
         serverStore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
         storePass = state.keystorePass;
 
-        Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addPermission(ApiAccessToken.ADMIN_PERMISSION);
+        Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addPermission(ScopedPermission.GLOBAL_ADMIN);
         authPack = SecurityHelper.getInstance().createSignaturePack(builder.build(), serverStore, state.keystorePass);
 
         setAuditor(RollingFileAuditor.getInstance(cmr.mr.getLogDir()));
