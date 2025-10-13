@@ -44,7 +44,8 @@ startScripts {
 }
 
 evaluationDependsOn(':launcher')
-void addLauncherDist(Distribution dist) {
+
+void addLauncherDist(Distribution dist, boolean isAarch) {
     if(!project(':launcher').linuxX64DistZip.enabled) {
         println("WARNING: Linux x64 launcher dist not enabled, not included in BDeploy release ZIPs");
     } else {
@@ -54,9 +55,10 @@ void addLauncherDist(Distribution dist) {
             }
         }
     }
+
     if(!project(':launcher').linuxAarch64DistZip.enabled) {
         println("WARNING: Linux aarch64 launcher dist not enabled, not included in BDeploy release ZIPs");
-    } else {
+    } else if (isAarch) {
         dist.contents {
             from(project(':launcher').linuxAarch64DistZip) {
                 into 'launcher'
@@ -77,14 +79,14 @@ void addLauncherDist(Distribution dist) {
 distributions {
     winX64 {
         distributionBaseName = 'bdeploy-win-x64'
-        addLauncherDist(it)
+        addLauncherDist(it, false)
         contents {
             exclude '_bdeploy'
         }
     }
     linuxX64 {
         distributionBaseName = 'bdeploy-linux-x64'
-        addLauncherDist(it)
+        addLauncherDist(it, false)
         contents {
             exclude '_bdeploy.bat'
             rename('_bdeploy', 'bdeploy')
@@ -92,7 +94,7 @@ distributions {
     }
     linuxAarch64 {
         distributionBaseName = 'bdeploy-linux-aarch64'
-        addLauncherDist(it)
+        addLauncherDist(it, true)
         contents {
             exclude '_bdeploy.bat'
             rename('_bdeploy', 'bdeploy')
