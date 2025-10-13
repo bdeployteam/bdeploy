@@ -42,7 +42,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         @Help(value = "Add global admin permission to the user. Shortcut for --permission=ADMIN", arg = false)
         boolean admin() default false;
 
-        @Help("Add a specific permission to the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope to, otherwise permission is global.")
+        @Help("Add a specific permission to the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope, otherwise permission is global.")
         String permission();
 
         @Help("Scopes a specific permission specified with --permission to a certain instance group")
