@@ -45,6 +45,9 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         @Help("Add a specific permission to the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope, otherwise permission is global.")
         String permission();
 
+        @Help("Removes a specific permission from the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope, otherwise permission is global.")
+        String removePermission();
+
         @Help("Scopes a specific permission specified with --permission to a certain instance group")
         String scope();
 
@@ -76,6 +79,9 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         if (config.add() != null) {
             addUser(config, admin);
         } else if (config.update() != null) {
+            if (config.permission() != null && config.removePermission() != null) {
+                helpAndFail("Cannot add and remove a permission simultaneously");
+            }
             updateUser(config, admin);
         } else if (config.remove() != null) {
             admin.deleteUser(config.remove());
@@ -140,6 +146,12 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         if (config.permission() != null) {
             if (user.permissions
                     .add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())))) {
+                updated = true;
+            }
+        }
+        if (config.removePermission() != null) {
+            if (user.permissions
+                    .remove(new ScopedPermission(config.scope(), Permission.valueOf(config.removePermission().toUpperCase())))) {
                 updated = true;
             }
         }
