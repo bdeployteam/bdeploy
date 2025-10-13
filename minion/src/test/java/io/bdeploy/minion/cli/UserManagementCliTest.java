@@ -60,6 +60,13 @@ class UserManagementCliTest extends BaseMinionCliTest {
         assertDoesNotThrow(() -> remote(admin2Remote, RemoteUserTool.class, "--list"));
         assertThrows(ForbiddenException.class, () -> remote(userRemote, RemoteUserTool.class, "--list"));
 
+        // Remove the permission of the second administrator
+        remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--removePermission=ADMIN");
+
+        // Check if the permission actually got removed
+        admin2data = getUserRowByName(remote, admin2Username);
+        assertEquals("[]", admin2data.get("Permissions"));
+
         // Promote the permission of the user
         remote(remote, RemoteUserTool.class, "--update=" + userUsername, "--permission=ADMIN");
 
