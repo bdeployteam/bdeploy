@@ -76,16 +76,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         AuthResource auth = ResourceProvider.getResource(remote, AuthResource.class, getLocalContext());
         AuthAdminResource admin = auth.getAdmin();
 
-        if (config.add() != null) {
-            addUser(config, admin);
-        } else if (config.update() != null) {
-            if (config.permission() != null && config.removePermission() != null) {
-                helpAndFail("Cannot add and remove a permission simultaneously");
-            }
-            updateUser(config, admin);
-        } else if (config.remove() != null) {
-            admin.deleteUser(config.remove());
-        } else if (config.list()) {
+        if (config.list()) {
             DataTable table = createDataTable();
             table.setCaption("User accounts on " + remote.getUri());
 
@@ -105,6 +96,15 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         } else if (config.createToken() != null) {
             createToken(config, auth);
             return null; // special output
+        } else if (config.add() != null) {
+            addUser(config, admin);
+        } else if (config.update() != null) {
+            if (config.permission() != null && config.removePermission() != null) {
+                helpAndFail("Cannot add and remove a permission simultaneously");
+            }
+            updateUser(config, admin);
+        } else if (config.remove() != null) {
+            admin.deleteUser(config.remove());
         } else {
             return createNoOp();
         }
@@ -198,5 +198,4 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         }
         return false;
     }
-
 }
