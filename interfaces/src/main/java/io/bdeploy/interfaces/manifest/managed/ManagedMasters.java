@@ -1,11 +1,16 @@
 package io.bdeploy.interfaces.manifest.managed;
 
+import java.util.Collections;
+import java.util.TreeMap;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.common.RetryableScope;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 
 /**
  * Encapsulates a {@link MetaManifest} which keeps track of attached servers
@@ -56,6 +61,21 @@ public class ManagedMasters {
         if (value == null) {
             value = new ManagedMastersConfiguration();
         }
+
+        // when reading, migrate information from the old format to the new one.
+        for (var entry : value.getManagedMasters().entrySet()) {
+            ManagedMasterDto mmd = entry.getValue();
+            if (mmd.minions != null && mmd.nodes == null) {
+                mmd.nodes = new NodeListDto();
+                mmd.nodes.nodes = new TreeMap<>();
+                for (var minionEntry : mmd.minions.entrySet()) {
+                    mmd.nodes.nodes.put(minionEntry.getKey(),
+                            MinionStatusDto.createOffline(minionEntry.getValue(), "Synchronization required."));
+                }
+                mmd.nodes.multiNodeToRuntimeNodes = Collections.emptyMap();
+            }
+        }
+
         return value;
     }
 

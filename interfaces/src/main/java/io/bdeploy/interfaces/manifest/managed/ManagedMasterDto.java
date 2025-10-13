@@ -5,6 +5,7 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 
 public class ManagedMasterDto {
 
@@ -15,7 +16,14 @@ public class ManagedMasterDto {
     public String auth;
     public Instant lastSync;
     public Instant lastMessageReceived;
+
+    /**
+     * @deprecated use {@link #nodes} instead.
+     */
+    @Deprecated(since = "7.8.0", forRemoval = true)
     public MinionConfiguration minions;
+
+    public NodeListDto nodes;
     public MinionUpdateDto update;
     public MinionProductUpdatesDto productUpdates;
 

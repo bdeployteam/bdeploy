@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api;
 
+import java.util.List;
 import java.util.Map;
 
 import io.bdeploy.common.security.RemoteService;
@@ -118,4 +119,8 @@ public interface NodeManager {
      */
     public void attachMultiNodeRuntime(String name, String runtimeName, MinionDto multiNodeDto);
 
+    /**
+     * @return a mapping of multi-node name to the names of all its runtime nodes.
+     */
+    public Map<String, List<String>> getMultiNodeToRuntimeNodes();
 }

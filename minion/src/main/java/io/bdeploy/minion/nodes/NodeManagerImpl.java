@@ -275,6 +275,19 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     }
 
     @Override
+    public Map<String, List<String>> getMultiNodeToRuntimeNodes() {
+        Map<String, List<String>> result = new TreeMap<>();
+
+        for (var entry : getAllNodes().entrySet()) {
+            if (entry.getValue().minionNodeType == MinionDto.MinionNodeType.MULTI) {
+                result.put(entry.getKey(), getMultiNodeRuntimeNodes(entry.getKey()).keySet().stream().toList());
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public String getMultiNodeConfigNameForRuntimeNode(String runtimeNode) {
         for (var entry : multiNodes.entrySet()) {
             if (entry.getValue().containsKey(runtimeNode)) {

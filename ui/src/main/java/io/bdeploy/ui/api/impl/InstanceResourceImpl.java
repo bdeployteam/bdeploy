@@ -454,7 +454,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
                 managedMaster = masters.getManagedMaster(selected);
                 managedMaster.auth = null; // make sure to clear auth.
-                managedMaster.minions.minionMap().values().forEach(v -> v.clearAuthInformation());
+                managedMaster.nodes.nodes.values().forEach(msd -> msd.config.clearAuthInformation());
             } catch (WebApplicationException e) {
                 log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
                 if (log.isDebugEnabled()) {
@@ -543,7 +543,10 @@ public class InstanceResourceImpl implements InstanceResource {
         }
         ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
         ManagedMasterDto server = ms.getServerForInstance(group, instance, versionTag);
-        return server.minions.minionMap();
+
+        var mapped = new TreeMap<String, MinionDto>();
+        server.nodes.nodes.forEach((k, s) -> mapped.put(k, s.config));
+        return mapped;
     }
 
     @Override

@@ -122,11 +122,11 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDe
     if (!isCentral || !current) {
       return true;
     }
-    const minions = current.managedServer?.minions?.minions;
+    const minions = current.managedServer?.nodes?.nodes;
     if (!minions) {
       return true;
     }
-    const hasOldMinion = Object.keys(minions).map((key) => minions[key]).some((minion) => {
+    const hasOldMinion = Object.keys(minions).map((key) => minions[key]?.config).some((minion) => {
       try {
         return compareVersions(minion.version, SYSTEM_VARIABLE_OVERWRITE_VERSION) < 0;
       } catch (e) {
