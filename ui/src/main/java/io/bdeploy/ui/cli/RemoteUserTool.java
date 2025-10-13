@@ -128,16 +128,20 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         }
         boolean updated = false;
         if (config.active() || config.inactive()) {
-            setInactive(user, config);
-            updated = true;
+            if (setInactive(user, config)) {
+                updated = true;
+            }
         }
         if (config.admin()) {
-            user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
-            updated = true;
+            if (user.permissions.add(ApiAccessToken.ADMIN_PERMISSION)) {
+                updated = true;
+            }
         }
         if (config.permission() != null) {
-            user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
-            updated = true;
+            if (user.permissions
+                    .add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())))) {
+                updated = true;
+            }
         }
         if (updated) {
             admin.updateUser(user);
@@ -168,16 +172,19 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         admin.createLocalUser(user);
     }
 
-    private void setInactive(UserInfo user, UserConfig config) {
+    private boolean setInactive(UserInfo user, UserConfig config) {
         if (config.active() && config.inactive()) {
             helpAndFail("Cannot mark user as both active and inactive");
         }
-        if (config.active()) {
+        if (config.active() && user.inactive) {
             user.inactive = false;
+            return true;
         }
-        if (config.inactive()) {
+        if (config.inactive() && !user.inactive) {
             user.inactive = true;
+            return true;
         }
+        return false;
     }
 
 }
