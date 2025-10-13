@@ -76,8 +76,9 @@ public interface AuthService {
      * Deletes the given user, regardless of whether it is local or externally managed.
      *
      * @param name the name of the user.
+     * @return <code>true</code> if a user with the specified name existed, else <code>false</code>
      */
-    public void deleteUser(String name);
+    public boolean deleteUser(String name);
 
     /**
      * Lookup the given user's information.

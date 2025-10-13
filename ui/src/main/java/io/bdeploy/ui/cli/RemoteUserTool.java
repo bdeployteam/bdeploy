@@ -42,7 +42,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         @Help(value = "Add global admin permission to the user. Shortcut for --permission=ADMIN", arg = false)
         boolean admin() default false;
 
-        @Help("Add a specific permission to the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope to, otherwise permission is global.")
+        @Help("Add a specific permission to the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope, otherwise permission is global.")
         String permission();
 
         @Help("Scopes a specific permission specified with --permission to a certain instance group")
@@ -128,16 +128,20 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         }
         boolean updated = false;
         if (config.active() || config.inactive()) {
-            setInactive(user, config);
-            updated = true;
+            if (setInactive(user, config)) {
+                updated = true;
+            }
         }
         if (config.admin()) {
-            user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
-            updated = true;
+            if (user.permissions.add(ApiAccessToken.ADMIN_PERMISSION)) {
+                updated = true;
+            }
         }
         if (config.permission() != null) {
-            user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
-            updated = true;
+            if (user.permissions
+                    .add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())))) {
+                updated = true;
+            }
         }
         if (updated) {
             admin.updateUser(user);
@@ -168,16 +172,19 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         admin.createLocalUser(user);
     }
 
-    private void setInactive(UserInfo user, UserConfig config) {
+    private boolean setInactive(UserInfo user, UserConfig config) {
         if (config.active() && config.inactive()) {
             helpAndFail("Cannot mark user as both active and inactive");
         }
-        if (config.active()) {
+        if (config.active() && user.inactive) {
             user.inactive = false;
+            return true;
         }
-        if (config.inactive()) {
+        if (config.inactive() && !user.inactive) {
             user.inactive = true;
+            return true;
         }
+        return false;
     }
 
 }

@@ -1,6 +1,7 @@
 package io.bdeploy.minion.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -89,8 +90,8 @@ class UserDatabaseTest {
         assertEquals("JunitTest User", user.fullName);
         assertEquals("JunitTest@example.com", user.email);
 
-        db.deleteUser("JunitTest");
-        db.deleteUser("JunitTest"); // removing a non-existant user should do nothing
+        assertTrue(db.deleteUser("JunitTest"));
+        assertFalse(db.deleteUser("JunitTest"));
 
         assertNull(db.getUser("JunitTest"));
         assertNull(db.authenticate("JunitTest", "newpwnewpwnewpw"));
@@ -134,7 +135,7 @@ class UserDatabaseTest {
         }
 
         // Delete user
-        db.deleteUser("JUNIT");
+        assertTrue(db.deleteUser("JUNIT"));
         assertNull(db.getUser("JUNIT"));
         assertEquals(originalSize, db.getAllNames().size());
     }

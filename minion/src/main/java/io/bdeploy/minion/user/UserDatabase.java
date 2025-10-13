@@ -217,12 +217,20 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public void deleteUser(String user) {
+    public boolean deleteUser(String user) {
         user = UserInfo.normalizeName(user);
+        UserInfo info = getUser(user);
+
+        if (info == null) {
+            // User does not exist - nothing to do
+            return false;
+        }
+
         Set<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
         log.info("Deleting {} manifests for user {}", mfs.size(), user);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
         userCache.invalidate(user);
+        return true;
     }
 
     @Override
@@ -555,5 +563,4 @@ public class UserDatabase implements AuthService {
         }
         return false;
     }
-
 }

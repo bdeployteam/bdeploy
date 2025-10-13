@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -166,11 +167,14 @@ public class TestCliTool implements ParameterResolver {
             return new StructuredOutputRow(data.get(index));
         }
 
+        public List<StructuredOutputRow> getAll() {
+            assertNotNull(data);
+            return data.stream().map(x -> new StructuredOutputRow(x)).collect(Collectors.toUnmodifiableList());
+        }
+
         public int size() {
             assertNotNull(data);
             return data.size();
         }
-
     }
-
 }

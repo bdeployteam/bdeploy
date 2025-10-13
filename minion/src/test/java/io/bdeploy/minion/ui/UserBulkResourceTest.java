@@ -120,6 +120,18 @@ class UserBulkResourceTest {
         assertBulkOperationResult(bulkDeletionResult1, group1Count, 0, 0);
         assertEquals(1 + group2Count, admin.getAllUser().size());
         assertEquals(1 + group2Count, admin.getAllUserNames().size());
+
+        // Test bulk delete all users, some of which were already deleted in the previous step
+        BulkOperationResultDto bulkDeletionResult2 = bulk.delete(allNames);
+        assertBulkOperationResult(bulkDeletionResult2, group2Count, 0, group1Count);
+        assertEquals(1, admin.getAllUser().size());
+        assertEquals(1, admin.getAllUserNames().size());
+
+        // Test bulk delete of entirely non-existant users
+        BulkOperationResultDto bulkDeletionResult3 = bulk.delete(testGroup);
+        assertBulkOperationResult(bulkDeletionResult3, 0, 0, testGroupCount);
+        assertEquals(1, admin.getAllUser().size());
+        assertEquals(1, admin.getAllUserNames().size());
     }
 
     private static void createUser(AuthAdminResource admin, String name) {
