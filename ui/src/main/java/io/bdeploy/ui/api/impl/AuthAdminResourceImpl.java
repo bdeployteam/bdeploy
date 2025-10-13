@@ -65,10 +65,12 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     }
 
     @Override
-    public void deleteUser(String name) {
-        if (auth.deleteUser(name)) {
+    public boolean deleteUser(String name) {
+        boolean result = auth.deleteUser(name);
+        if (result) {
             cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
         }
+        return result;
     }
 
     @Override

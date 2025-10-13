@@ -18,6 +18,7 @@ import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -70,6 +71,9 @@ import io.bdeploy.ui.api.AuthService;
 public class UserDatabase implements AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(UserDatabase.class);
+    private static final Predicate<UserInfo> isGlobalAdmin = u -> u.permissions.stream()
+            .anyMatch(p -> ScopedPermission.GLOBAL_ADMIN.equals(p));
+
     public static final String NAMESPACE = "users/";
     public static final String FILE_NAME = "user.json";
 
@@ -223,6 +227,13 @@ public class UserDatabase implements AuthService {
 
         if (info == null) {
             // User does not exist - nothing to do
+            return false;
+        }
+
+        // Abort if we are trying to delete the last active global administrator
+        if (isGlobalAdmin.test(info) && getAll().stream().filter(u -> !u.equals(info)).filter(u -> !u.inactive)
+                .filter(isGlobalAdmin).findAny().isEmpty()) {
+            log.warn("Aborting deletion of user {} because no other active global admin could be found", user);
             return false;
         }
 

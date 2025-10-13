@@ -51,10 +51,13 @@ public interface AuthAdminResource {
     public void updateUsers(List<UserInfo> infos);
 
     /**
+     * Deletes the user with the given name. Never deletes the last active global administrator.
+     *
      * @param name the name of the user to delete
+     * @return <code>true</code> if the user was deleted, else <code>false</code>
      */
     @DELETE
-    public void deleteUser(@QueryParam("name") String name);
+    public boolean deleteUser(@QueryParam("name") String name);
 
     /**
      * @param name the user to load
@@ -142,5 +145,4 @@ public interface AuthAdminResource {
 
     @Path("/user-group-bulk")
     public UserGroupBulkResource getUserGroupBulkResource();
-
 }

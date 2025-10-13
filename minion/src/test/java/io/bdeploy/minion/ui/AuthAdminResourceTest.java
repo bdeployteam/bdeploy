@@ -1,6 +1,7 @@
 package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,6 +22,34 @@ import io.bdeploy.ui.api.AuthResource;
 
 @ExtendWith(TestMinion.class)
 class AuthAdminResourceTest {
+
+    @Test
+    void testDeletionOfLastAdminUser(AuthResource auth) {
+        AuthAdminResource admin = auth.getAdmin();
+
+        // Check that the last global administrator cannot be deleted
+        String initialAdminName = admin.getAllUser().iterator().next().name;
+        assertEquals(1, admin.getAllUser().size());
+        assertFalse(admin.deleteUser(initialAdminName));
+        assertEquals(1, admin.getAllUser().size());
+
+        // Check that the last active global administrator cannot be deleted
+        UserInfo inactiveAdmin = new UserInfo("inactiveadmin");
+        inactiveAdmin.password = "pwpwpwpwpwpwpwpwpwpwpw";
+        inactiveAdmin.inactive = true;
+        inactiveAdmin.permissions = Set.of(ScopedPermission.GLOBAL_ADMIN);
+        admin.createLocalUser(inactiveAdmin);
+
+        assertEquals(2, admin.getAllUser().size());
+        assertFalse(admin.deleteUser(initialAdminName));
+        assertEquals(2, admin.getAllUser().size());
+
+        inactiveAdmin.inactive = false;
+        admin.updateUser(inactiveAdmin);
+
+        assertTrue(admin.deleteUser(initialAdminName));
+        assertEquals(1, admin.getAllUser().size());
+    }
 
     @Test
     void testCreateUpdateDeleteUser(AuthResource auth) {
@@ -104,7 +133,7 @@ class AuthAdminResourceTest {
         UserGroupInfo myGroup;
 
         allUserGroups = admin.getAllUserGroups();
-        assertEquals(1, allUserGroups.size()); // All users group always exists
+        assertEquals(1, allUserGroups.size()); // all-users-group always exists
 
         admin.createUserGroup(userGroupInfo);
         allUserGroups = admin.getAllUserGroups();

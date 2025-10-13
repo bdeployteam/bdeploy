@@ -114,10 +114,21 @@ class UserManagementCliTest extends BaseMinionCliTest {
 
     @Test
     void testUserDeletion(RemoteService remote) {
-        setupTestUsers(remote);
+        String admin1Username = setupTestUsers(remote);
+
+        // Set the second administrator user inactive
+        remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--inactive");
+
+        // Verify that the only active global administrator cannot be deleted
+        remote(remote, RemoteUserTool.class, "--remove=" + admin1Username);
+        assertEquals(3, remote(remote, RemoteUserTool.class, "--list").size());
 
         // Delete the second administrator user
         remote(remote, RemoteUserTool.class, "--remove=" + admin2Username);
+        assertEquals(2, remote(remote, RemoteUserTool.class, "--list").size());
+
+        // Verify that the last global administrator cannot be deleted
+        remote(remote, RemoteUserTool.class, "--remove=" + admin1Username);
         assertEquals(2, remote(remote, RemoteUserTool.class, "--list").size());
 
         // Delete the normal user

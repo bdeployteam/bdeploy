@@ -73,10 +73,10 @@ public interface AuthService {
     public void updateLocalPassword(String user, String pw);
 
     /**
-     * Deletes the given user, regardless of whether it is local or externally managed.
+     * Deletes the user with the given name. Never deletes the last active global administrator.
      *
-     * @param name the name of the user.
-     * @return <code>true</code> if a user with the specified name existed, else <code>false</code>
+     * @param name the name of the user to delete
+     * @return <code>true</code> if the user was deleted, else <code>false</code>
      */
     public boolean deleteUser(String name);
 

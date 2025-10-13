@@ -103,7 +103,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
             }
             updateUser(config, admin);
         } else if (config.remove() != null) {
-            admin.deleteUser(config.remove());
+            return deleteUser(admin, config.remove());
         } else {
             return createNoOp();
         }
@@ -181,6 +181,13 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
 
         user.password = new String(pass);
         admin.createLocalUser(user);
+    }
+
+    private RenderableResult deleteUser(AuthAdminResource admin, String user) {
+        if (admin.deleteUser(user)) {
+            return createSuccess();
+        }
+        return createResultWithErrorMessage("User could not be deleted");
     }
 
     private boolean setInactive(UserInfo user, UserConfig config) {

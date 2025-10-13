@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -137,5 +138,37 @@ class UserDatabaseTest {
         assertTrue(db.deleteUser("JUNIT"));
         assertNull(db.getUser("JUNIT"));
         assertEquals(originalSize, db.getAllNames().size());
+    }
+
+    @Test
+    void testLastGlobalAdminDeletionPrevention(MinionRoot root) {
+        Set<ScopedPermission> globalAdminSet = Collections.singleton(ScopedPermission.GLOBAL_ADMIN);
+
+        UserDatabase db = root.getUsers();
+
+        assertFalse(db.deleteUser("test")); // default global administrator for TestMinion
+
+        db.createLocalUser("JunitTestAdmin1", "JunitTestJunitTest", globalAdminSet);
+        assertTrue(db.deleteUser("JunitTestAdmin1"));
+
+        db.createLocalUser("JunitTestAdmin2", "JunitTestJunitTest", globalAdminSet);
+        assertTrue(db.deleteUser("JunitTestAdmin2"));
+
+        assertFalse(db.deleteUser("test"));
+
+        db.createLocalUser("JunitTestAdmin3", "JunitTestJunitTest", globalAdminSet);
+
+        assertTrue(db.deleteUser("test"));
+        assertFalse(db.deleteUser("JunitTestAdmin3"));
+
+        db.createLocalUser("JunitTestAdmin4", "JunitTestJunitTest", globalAdminSet);
+
+        UserInfo user = db.getUser("JunitTestAdmin4");
+        user.inactive = true;
+        db.updateUserInfo(user);
+
+        assertFalse(db.deleteUser("JunitTestAdmin3"));
+        assertTrue(db.deleteUser("JunitTestAdmin4"));
+        assertFalse(db.deleteUser("JunitTestAdmin3"));
     }
 }
