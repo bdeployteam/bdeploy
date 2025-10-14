@@ -26,6 +26,8 @@ import io.bdeploy.minion.TestMinion;
 @ExtendWith(TestMinion.class)
 class UserDatabaseTest {
 
+    private static final String NAMESPACE = "users/";
+
     @Test
     void testUserRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
@@ -64,7 +66,7 @@ class UserDatabaseTest {
         }
 
         BHive hive = root.getHive();
-        assertEquals(10, hive.execute(new ManifestListOperation().setManifestName(UserDatabase.NAMESPACE + "junittest")).size());
+        assertEquals(10, hive.execute(new ManifestListOperation().setManifestName(NAMESPACE + "junittest")).size());
     }
 
     @Test
@@ -107,8 +109,8 @@ class UserDatabaseTest {
 
         // Ensure it is stored in lower-case
         BHive hive = root.getHive();
-        for (Key key : hive.execute(new ManifestListOperation().setManifestName(UserDatabase.NAMESPACE))) {
-            String name = key.getName().substring(UserDatabase.NAMESPACE.length());
+        for (Key key : hive.execute(new ManifestListOperation().setManifestName(NAMESPACE))) {
+            String name = key.getName().substring(NAMESPACE.length());
             assertTrue(StringHelper.isAllLowerCase(name));
         }
 

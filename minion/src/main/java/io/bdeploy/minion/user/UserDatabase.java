@@ -71,38 +71,34 @@ import io.bdeploy.ui.api.AuthService;
 public class UserDatabase implements AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(UserDatabase.class);
+    private static final String NAMESPACE = "users/";
+    private static final String FILE_NAME = "user.json";
     private static final Predicate<UserInfo> isGlobalAdmin = u -> u.permissions.stream()
             .anyMatch(p -> ScopedPermission.GLOBAL_ADMIN.equals(p));
 
-    public static final String NAMESPACE = "users/";
-    public static final String FILE_NAME = "user.json";
-
     private final Cache<String, UserInfo> userCache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
             .maximumSize(1_000).build();
-
-    private final MinionRoot root;
-    private final BHive target;
 
     private final List<Authenticator> authenticators = new ArrayList<>();
     private final Map<SpecialAuthenticators, Authenticator> specialAuths = new EnumMap<>(SpecialAuthenticators.class);
 
     private final LdapAuthenticator ldapAuthenticator = new LdapAuthenticator();
-    private final OpenIDConnectAuthenticator oidcAuthenticator = new OpenIDConnectAuthenticator();
-    private final Auth0TokenAuthenticator auth0Authenticator = new Auth0TokenAuthenticator();
-    private final OktaTokenAuthenticator oktaAuthenticator = new OktaTokenAuthenticator();
+
+    private final MinionRoot root;
+    private final BHive bhive;
     private final UserGroupDatabase userGroupDatabase;
 
     public UserDatabase(MinionRoot root, UserGroupDatabase userGroupDatabase) {
         this.root = root;
-        this.target = root.getHive();
+        this.bhive = root.getHive();
         this.userGroupDatabase = userGroupDatabase;
 
         this.authenticators.add(new PasswordAuthentication());
-        this.authenticators.add(oidcAuthenticator);
+        this.authenticators.add(new OpenIDConnectAuthenticator());
         this.authenticators.add(ldapAuthenticator);
 
-        this.specialAuths.put(SpecialAuthenticators.AUTH0, auth0Authenticator);
-        this.specialAuths.put(SpecialAuthenticators.OKTA, oktaAuthenticator);
+        this.specialAuths.put(SpecialAuthenticators.AUTH0, new Auth0TokenAuthenticator());
+        this.specialAuths.put(SpecialAuthenticators.OKTA, new OktaTokenAuthenticator());
     }
 
     @Override
@@ -202,18 +198,18 @@ public class UserDatabase implements AuthService {
         info.mergedPermissions = null;
         String normUser = UserInfo.normalizeName(user);
 
-        try (Transaction t = target.getTransactions().begin()) {
-            Long id = target.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + normUser));
+        try (Transaction t = bhive.getTransactions().begin()) {
+            Long id = bhive.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + normUser));
             Manifest.Key key = new Manifest.Key(NAMESPACE + normUser, String.valueOf(id));
 
             Tree.Builder tree = new Tree.Builder();
             tree.add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB),
-                    target.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(info))));
+                    bhive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(info))));
 
-            target.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key)
-                    .setRoot(target.execute(new InsertArtificialTreeOperation().setTree(tree))).build(null)));
+            bhive.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key)
+                    .setRoot(bhive.execute(new InsertArtificialTreeOperation().setTree(tree))).build(null)));
 
-            target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + normUser));
+            bhive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + normUser));
 
             // update the cache.
             userCache.put(normUser, info);
@@ -237,16 +233,16 @@ public class UserDatabase implements AuthService {
             return false;
         }
 
-        Set<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
+        Set<Key> mfs = bhive.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
         log.info("Deleting {} manifests for user {}", mfs.size(), user);
-        mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
+        mfs.forEach(k -> bhive.execute(new ManifestDeleteOperation().setToDelete(k)));
         userCache.invalidate(user);
         return true;
     }
 
     @Override
     public SortedSet<String> getAllNames() {
-        Set<Key> keys = target.execute(new ManifestListOperation().setManifestName(NAMESPACE));
+        Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(NAMESPACE));
         return keys.stream().map(k -> k.getName().substring(NAMESPACE.length())).collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -400,7 +396,7 @@ public class UserDatabase implements AuthService {
     // if there's no password in the dto, check if it is an existing setting and take the password from there, if not, proceed with an empty password
     private void fillPassword(LDAPSettingsDto dto) {
         if (dto.pass == null) {
-            AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
+            AuthenticationSettingsDto settings = SettingsManifest.read(bhive, root.getEncryptionKey(), false).auth;
             Optional<LDAPSettingsDto> storedDto = settings.ldapSettings.stream().filter(l -> l.id.equals(dto.id)).findFirst();
             if (storedDto.isPresent()) {
                 dto.pass = storedDto.get().pass;
@@ -411,7 +407,7 @@ public class UserDatabase implements AuthService {
     private UserInfo authenticateInternal(String user, String pw, AuthTrace trace, List<Authenticator> auths) {
         user = UserInfo.normalizeName(user);
         trace.log("normalized Username: \"" + user + "\"");
-        AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
+        AuthenticationSettingsDto settings = SettingsManifest.read(bhive, root.getEncryptionKey(), false).auth;
 
         UserInfo u = getUser(user);
         if (u == null) {
@@ -477,7 +473,7 @@ public class UserDatabase implements AuthService {
     }
 
     public boolean isAuthenticationValid(UserInfo info) {
-        AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
+        AuthenticationSettingsDto settings = SettingsManifest.read(bhive, root.getEncryptionKey(), false).auth;
         for (Authenticator auth : authenticators) {
             if (auth.isResponsible(info, settings) && auth.isAuthenticationValid(info, settings)) {
                 return true;
@@ -512,21 +508,21 @@ public class UserDatabase implements AuthService {
             return info;
         }
 
-        Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
+        Optional<Long> current = bhive.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
         if (!current.isPresent()) {
             return null;
         }
 
         // check the manifest for manipulation to prevent from manually making somebody admin, etc.
         Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
-        Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
+        Set<ElementView> result = bhive.execute(new ObjectConsistencyCheckOperation().addRoot(key));
         if (!result.isEmpty()) {
             log.error("User corruption detected for {}", name);
             return null;
         }
 
-        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
-        try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
+        Manifest mf = bhive.execute(new ManifestLoadOperation().setManifest(key));
+        try (InputStream is = bhive.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
             info = StorageHelper.fromStream(is, UserInfo.class);
             userCache.put(name, info);
             return info;
