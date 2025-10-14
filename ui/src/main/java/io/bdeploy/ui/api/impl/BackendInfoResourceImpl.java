@@ -5,8 +5,8 @@ import java.util.Map;
 
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -43,7 +43,10 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
         dto.hostName = minion.getHostName();
         dto.auth = nodes.getSelf().remote.getAuthPack();
         dto.uri = info.getBaseUri().toString();
-        dto.minions = new MinionConfiguration(nodes.getAllNodes());
+
+        dto.nodes = new NodeListDto();
+        dto.nodes.nodes = nodes.getAllNodeStatus();
+        dto.nodes.multiNodeToRuntimeNodes = nodes.getMultiNodeToRuntimeNodes();
 
         return dto;
     }
@@ -57,4 +60,17 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
         return ResourceProvider.getVersionedResource(nodes.getSelf().remote, MasterRootResource.class, null).getNodes();
     }
 
+    @Override
+    public NodeListDto getNodeList() {
+        NodeListDto nodeListDto = new NodeListDto();
+
+        nodeListDto.nodes = getNodeStatus();
+
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            nodeListDto.multiNodeToRuntimeNodes = ResourceProvider.getVersionedResource(nodes.getSelf().remote,
+                    MasterRootResource.class, null).getMultiNodeToRuntimeNodes();
+        }
+
+        return nodeListDto;
+    }
 }

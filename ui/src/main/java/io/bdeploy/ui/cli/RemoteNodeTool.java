@@ -195,7 +195,7 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
 
         NodeManagementResource root = ResourceProvider.getResource(r, NodeManagementResource.class, getLocalContext());
 
-        for (Map.Entry<String, MinionStatusDto> entry : root.getNodes().entrySet()) {
+        for (Map.Entry<String, MinionStatusDto> entry : root.getNodeList().nodes.entrySet()) {
             String name = entry.getKey();
             MinionStatusDto details = entry.getValue();
             MinionDto config = details.config;

@@ -4,7 +4,7 @@ import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import {
   bdValidationIdExtractor,
-  bdValidationRegisterMessageExtractor,
+  bdValidationRegisterMessageExtractor
 } from 'src/app/modules/core/validators/messages';
 
 const ID = 'variable-support-server';
@@ -27,8 +27,8 @@ export class VariableServerValidatorDirective implements Validator {
       return null; // "required" must be validated elsewhere.
     }
 
-    for (const k of Object.keys(server.minions.minions)) {
-      const n = server.minions.minions[k];
+    for (const k of Object.keys(server.nodes.nodes)) {
+      const n = server.nodes.nodes[k].config;
       if (n.master) {
         const support =
           n.version.major === 0 || // dev version

@@ -1,6 +1,13 @@
 <app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
   <app-bd-dialog-toolbar header="Nodes">
     <div class="flex-auto"></div>
+    <app-bd-data-grouping
+      (groupingChange)="grouping = $event"
+      [definitions]="groupingDefinition"
+      [records]="nodesAdmin.nodes$ | async"
+      [defaultGrouping]="defaultGrouping"
+      presetKey="nodeGrouping"
+    ></app-bd-data-grouping>
     <app-bd-button text="Refresh" icon="refresh" (click)="nodesAdmin.reload()"></app-bd-button>
     <app-bd-panel-button
       [collapsed]="false"
@@ -21,14 +28,14 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">
-      <app-bd-data-table
-        #dataDisplay
+      <app-bd-data-display
         [records]="nodesAdmin.nodes$ | async"
         [columns]="columns"
         [recordRoute]="getRecordRoute"
         [sort]="sort"
+        [grouping]="grouping"
       >
-      </app-bd-data-table>
+      </app-bd-data-display>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.BackendInfoDto;
 import jakarta.ws.rs.Consumes;
@@ -31,9 +32,18 @@ public interface BackendInfoResource {
 
     /**
      * Requests the runtime state of all nodes.
+     * @deprecated use {@link #getNodeList()} instead.
      */
     @GET
     @Path("/minion-status")
+    @Deprecated(since = "7.8.0", forRemoval = true)
     public Map<String, MinionStatusDto> getNodeStatus();
+
+    /**
+     * @return a list of all nodes along with additional information like mapping of runtime nodes to multi-nodes.
+     */
+    @GET
+    @Path("/node-list")
+    public NodeListDto getNodeList();
 
 }

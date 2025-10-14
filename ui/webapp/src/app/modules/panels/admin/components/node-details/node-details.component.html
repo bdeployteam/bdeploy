@@ -7,7 +7,7 @@
           [svgIcon]="state.config.os"
           [dismissable]="false"
           header="{{ nodeName$ | async }} - {{ state.config.os }}"
-          >
+        >
           <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
             <div>BDeploy Version:</div>
             <div class="truncate">{{ nodeVersion }}</div>
@@ -29,30 +29,32 @@
           }
         </app-bd-notification-card>
         <mat-divider></mat-divider>
-        <app-bd-panel-button
-          [collapsed]="false"
-          text="Edit..."
-          icon="edit"
-          [relative]="true"
-          [route]="['edit']"
-          [disabled]="state.config?.master"
-        ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          text="Replace..."
-          icon="swap_calls"
-          [relative]="true"
-          [route]="['replace']"
-          [disabled]="state.config?.master"
-        ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          text="Convert to Node..."
-          icon="drive_file_move"
-          [relative]="true"
-          [route]="['conversion']"
-          [disabled]="!state.config?.master"
-        ></app-bd-panel-button>
+        @if (!isRuntimeNode(state)) {
+          <app-bd-panel-button
+            [collapsed]="false"
+            text="Edit..."
+            icon="edit"
+            [relative]="true"
+            [route]="['edit']"
+            [disabled]="state.config?.master"
+          ></app-bd-panel-button>
+          <app-bd-panel-button
+            [collapsed]="false"
+            text="Replace..."
+            icon="swap_calls"
+            [relative]="true"
+            [route]="['replace']"
+            [disabled]="state.config?.master"
+          ></app-bd-panel-button>
+          <app-bd-panel-button
+            [collapsed]="false"
+            text="Convert to Node..."
+            icon="drive_file_move"
+            [relative]="true"
+            [route]="['conversion']"
+            [disabled]="!state.config?.master"
+          ></app-bd-panel-button>
+        }
         <app-bd-panel-button
           [collapsed]="false"
           text="Apply Software Update"
@@ -84,7 +86,7 @@
         [type]="'warning'"
         [dismissable]="false"
         header="Server Details not available"
-        >
+      >
         <div class="text-justify">Node details are not available.</div>
       </app-bd-notification-card>
     }

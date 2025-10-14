@@ -1,7 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BdDataColumn } from 'src/app/models/data';
-import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
+import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
+import {
+  BdDataSvgIconCellComponent
+} from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { MinionRecord, NodesAdminService } from '../../services/nodes-admin.service';
 import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
@@ -9,29 +11,30 @@ import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
-import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { AsyncPipe } from '@angular/common';
 import { MinionNodeType } from '../../../../../models/gen.dtos';
+import { BdDataGroupingComponent } from '../../../../core/components/bd-data-grouping/bd-data-grouping.component';
+import { BdDataDisplayComponent } from '../../../../core/components/bd-data-display/bd-data-display.component';
 
 const nodeColName: BdDataColumn<MinionRecord, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
-  width: '350px',
+  width: '350px'
 };
 
 const nodeColStatus: BdDataColumn<MinionRecord, string> = {
   id: 'status',
   name: 'Status',
-  data: (r) => (r.status.offline ? 'Offline' : 'Online'),
-  width: '80px',
+  data: (r) => (r.status.config.minionNodeType === MinionNodeType.MULTI ? 'Virtual' : (r.status.offline ? 'Offline' : 'Online')),
+  width: '80px'
 };
 
 const nodeColInfo: BdDataColumn<MinionRecord, string> = {
   id: 'info',
   name: 'Additional Information',
   data: (r) => r.status.infoText,
-  showWhen: '(min-width: 1280px)',
+  showWhen: '(min-width: 1280px)'
 };
 
 const nodeColVersion: BdDataColumn<MinionRecord, string> = {
@@ -39,7 +42,7 @@ const nodeColVersion: BdDataColumn<MinionRecord, string> = {
   name: 'Version',
   data: (r) => (r.status.config?.version ? convert2String(r.status.config.version) : ''),
   tooltip: () => 'The last known version of the node',
-  width: '140px',
+  width: '140px'
 };
 
 const nodeColOs: BdDataColumn<MinionRecord, string> = {
@@ -47,13 +50,23 @@ const nodeColOs: BdDataColumn<MinionRecord, string> = {
   name: 'OS',
   data: (r) => r.status.config?.os,
   component: BdDataSvgIconCellComponent,
-  width: '30px',
+  width: '30px'
 };
 
+const nodeColMultiNode: BdDataColumn<MinionRecord, string> = {
+  id: 'multiNode',
+  name: 'Multi-Node',
+  data: (r) => (r.status.config.minionNodeType === MinionNodeType.MULTI_RUNTIME ? r.parentMultiNode : 'None'),
+  width: '60px'
+};
+
+const LBL_VIRTUAL = 'Virtual node';
+const LBL_STANDARD = 'Standard node';
+
 @Component({
-    selector: 'app-nodes',
-    templateUrl: './nodes.component.html',
-    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdPanelButtonComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
+  selector: 'app-nodes',
+  templateUrl: './nodes.component.html',
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdPanelButtonComponent, BdDialogContentComponent, AsyncPipe, BdDataGroupingComponent, BdDataDisplayComponent]
 })
 export class NodesComponent {
   protected readonly nodesAdmin = inject(NodesAdminService);
@@ -75,9 +88,31 @@ export class NodesComponent {
 
   protected readonly columns: BdDataColumn<MinionRecord, unknown>[] = [
     nodeColName,
+    nodeColMultiNode,
     nodeColStatus,
     nodeColInfo,
     nodeColVersion,
-    nodeColOs,
+    nodeColOs
   ];
+
+  protected groupingDefinition: BdDataGroupingDefinition<MinionRecord>[] = [
+    {
+      name: 'Node Type',
+      group: (r) => r.status.config.minionNodeType === MinionNodeType.MULTI_RUNTIME ? `Runtime nodes for ${r.parentMultiNode}` : (r.status.config.minionNodeType === MinionNodeType.MULTI ? LBL_VIRTUAL : LBL_STANDARD),
+      associatedColumn: nodeColMultiNode.id,
+      sort:
+        (a, b) => a === LBL_STANDARD ? -1 : b === LBL_STANDARD ? 1 : a === LBL_VIRTUAL ? -1 : b === LBL_VIRTUAL ? 1 : a.localeCompare(b)
+    },
+    {
+      name: 'OS',
+      group: (r) => r.status.config.os,
+      associatedColumn: nodeColOs.id
+    }
+  ];
+
+  protected defaultGrouping: BdDataGrouping<MinionRecord>[] = [
+    { definition: this.groupingDefinition[0], selected: [] }
+  ];
+
+  protected grouping: BdDataGrouping<MinionRecord>[] = [];
 }

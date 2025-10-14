@@ -1,8 +1,17 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar [header]="server?.hostName + ' nodes'" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [header]="server?.hostName + ' nodes'" [panel]="true" [route]="['..']">
+    <div class="flex-auto"></div>
+    <app-bd-data-grouping
+      (groupingChange)="grouping = $event"
+      [definitions]="groupingDefinition"
+      [records]="minions"
+      [defaultGrouping]="defaultGrouping"
+      presetKey="nodeGrouping"
+    ></app-bd-data-grouping>
+  </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <app-bd-data-display [records]="minions" [columns]="columns">
+    <app-bd-data-display [records]="minions" [columns]="columns" [grouping]="grouping">
       <app-bd-no-data>
         <strong>This server does not have any nodes</strong>
       </app-bd-no-data>

@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
+import java.util.List;
 import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -36,6 +37,13 @@ public interface MasterRootResource extends CommonUpdateResource {
     @GET
     @Path("/minions")
     public Map<String, MinionStatusDto> getNodes();
+
+    /**
+     * @return the mapping of multi-node to runtime nodes.
+     */
+    @GET
+    @Path("/minions/multi-node-mapping")
+    public Map<String, List<String>> getMultiNodeToRuntimeNodes();
 
     /**
      * @param name the name of the minion to add.

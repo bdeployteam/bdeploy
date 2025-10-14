@@ -62,9 +62,8 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MinionProductUpdatesDto;
 import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
-import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -259,7 +258,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return masters.getManagedMasters().values().stream().map(e -> {
             e.auth = null;
             // also clear auth of all nodes.
-            e.minions.minionMap().values().forEach(v -> v.clearAuthInformation());
+            e.nodes.nodes.values().forEach(v -> v.config.clearAuthInformation());
             return e;
         }).toList();
     }
@@ -281,7 +280,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // clear token - don't transfer over the wire if not required.
         dto.auth = null;
-        dto.minions.minionMap().values().forEach(v -> v.clearAuthInformation());
+        dto.nodes.nodes.values().forEach(v -> v.config.clearAuthInformation());
         return dto;
     }
 
@@ -555,10 +554,18 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
 
         // 9. Fetch minion information and store in the managed masters
-        Map<String, MinionStatusDto> status = managedBackendInfo.getNodeStatus();
-        Map<String, MinionDto> config = status.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
-        managedMasterDto.minions = new MinionConfiguration(config);
+        try {
+            // fetch list using new endpoint
+            managedMasterDto.nodes = managedBackendInfo.getNodeList();
+        } catch (WebApplicationException e) {
+            if (e.getResponse().getStatus() != CODE_VERSION_MISMATCH) {
+                throw e;
+            }
+
+            // fetch partial information using old endpoint and still create the new DTO.
+            managedMasterDto.nodes = new NodeListDto();
+            managedMasterDto.nodes.nodes = managedBackendInfo.getNodeStatus();
+        }
 
         // 10. Check if managed server has newer products than central
         MinionProductUpdatesDto productUpdatesDto = new MinionProductUpdatesDto();
@@ -780,10 +787,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             ManagedMasters mm = new ManagedMasters(hive);
             ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-            Map<String, MinionDto> allMinions = attached.minions.minionMap();
+            Map<String, MinionStatusDto> allMinions = attached.nodes.nodes;
 
-            // Determine OS of the master
-            Optional<MinionDto> masterDto = allMinions.values().stream().filter(dto -> dto.master).findFirst();
+            // TODO: check if this is still required/makes sense. We're not using this information
+            //       but it still does check that there is a master minion which makes sense.
+            Optional<MinionStatusDto> masterDto = allMinions.values().stream().filter(dto -> dto.config.master).findFirst();
             if (!masterDto.isPresent()) {
                 throw new WebApplicationException("Cannot determine master node");
             }

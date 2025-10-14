@@ -1,6 +1,5 @@
 package io.bdeploy.ui.api.impl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +12,7 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.interfaces.minion.MultiNodeDto;
+import io.bdeploy.interfaces.nodes.NodeListDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
@@ -46,10 +45,19 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
 
     @Override
     public Map<String, MinionStatusDto> getNodes() {
+        return getNodeList().nodes;
+    }
+
+    @Override
+    public NodeListDto getNodeList() {
         if (minion.getMode() == MinionMode.CENTRAL) {
-            return Collections.emptyMap();
+            return new NodeListDto();
         }
-        return ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).getNodes();
+        var mrr = ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context);
+        var result = new NodeListDto();
+        result.nodes = mrr.getNodes();
+        result.multiNodeToRuntimeNodes = mrr.getMultiNodeToRuntimeNodes();
+        return result;
     }
 
     @Override
