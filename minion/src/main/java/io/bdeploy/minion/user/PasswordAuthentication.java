@@ -50,22 +50,29 @@ public final class PasswordAuthentication implements Authenticator {
 
     /**
      * Validates the given password and throws a {@link WebApplicationException} if it is invalid.
+     * <p>
+     * If the check fails, the password array is immediately filled with zeros (before throwing) in order remove the plain-text
+     * password from memory ASAP.
      *
      * @param password The password to validate
      */
     public static void throwIfPasswordInvalid(char[] password) {
         if (password.length < MIN_SIZE) {
+            Arrays.fill(password, '\0'); // Immediately remove from memory
             throw new WebApplicationException("Password too short. Minimum: " + MIN_SIZE + " characters.",
                     Status.EXPECTATION_FAILED);
         }
         if (password.length > MAX_SIZE) {
+            Arrays.fill(password, '\0'); // Immediately remove from memory
             throw new WebApplicationException("Password too long. Maximum: " + MAX_SIZE + " characters.",
                     Status.EXPECTATION_FAILED);
         }
     }
 
     /**
-     * Hash a password for storage.
+     * Hashes a password for storage.
+     * <p>
+     * Fills the password-array with zeros in order to remove it from memory ASAP.
      *
      * @return a secure authentication token to be stored for later authentication
      */
@@ -84,8 +91,10 @@ public final class PasswordAuthentication implements Authenticator {
 
     /**
      * Authenticate with a password and a stored password token.
+     * <p>
+     * Fills the password-array with zeros in order to remove it from memory ASAP.
      *
-     * @return true if the password and token match
+     * @return <code>true</code> if the password and token match, else <code>false</code>
      */
     private static boolean verify(char[] password, String token) {
         Matcher m = layout.matcher(token);
@@ -103,8 +112,12 @@ public final class PasswordAuthentication implements Authenticator {
         return zero == 0;
     }
 
+    /**
+     * Fills the password with zeros after using it to remove it from memory ASAP
+     */
     private static byte[] pbkdf2(char[] password, byte[] salt, int iterations) {
         KeySpec spec = new PBEKeySpec(password, salt, iterations, MAX_SIZE);
+        Arrays.fill(password, '\0'); // Immediately remove from memory
         try {
             SecretKeyFactory f = SecretKeyFactory.getInstance(ALGORITHM);
             return f.generateSecret(spec).getEncoded();
@@ -127,6 +140,7 @@ public final class PasswordAuthentication implements Authenticator {
 
     @Override
     public UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
+        Arrays.fill(password, '\0'); // Immediately remove from memory
         trace.log("  query not supported");
         return null; // not supported
     }
