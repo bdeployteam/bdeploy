@@ -89,7 +89,9 @@ class UserGroupDatabaseTest {
         // merged permissions are empty
         assertTrue(groups.getCloneWithMergedPermissions(info).mergedPermissions.isEmpty());
 
+        // add user to group and re-fetch data
         users.addUserToGroup(g.id, userName);
+        info = users.getUser(userName);
 
         // user info itself does not hold merged permissions
         assertNull(info.mergedPermissions);

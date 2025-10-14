@@ -248,12 +248,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public SortedSet<UserInfo> getAll() {
-        return getAllNames().stream().map(name -> {
-            UserInfo cached = getUser(name);
-            UserInfo clone = StorageHelper.fromRawBytes(StorageHelper.toRawBytes(cached), UserInfo.class);
-            clone.password = null;
-            return clone;
-        }).collect(Collectors.toCollection(TreeSet::new));
+        return getAllNames().stream().map(this::getUser).collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
@@ -505,7 +500,7 @@ public class UserDatabase implements AuthService {
         // Note: We are using getIfPresent and put instead of get(name, Callable) as we need to handle null values
         UserInfo info = userCache.getIfPresent(name);
         if (info != null) {
-            return info;
+            return info.deepCopy();
         }
 
         Optional<Long> current = bhive.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
@@ -525,7 +520,7 @@ public class UserDatabase implements AuthService {
         try (InputStream is = bhive.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
             info = StorageHelper.fromStream(is, UserInfo.class);
             userCache.put(name, info);
-            return info;
+            return info.deepCopy();
         } catch (Exception ex) {
             log.error("Failed to persist user: {}", name, ex);
             return null;

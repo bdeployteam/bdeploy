@@ -91,6 +91,27 @@ public class UserInfo implements Comparable<UserInfo> {
         return name.trim().toLowerCase();
     }
 
+    /**
+     * @return a deep copy of this instance
+     */
+    public UserInfo deepCopy() {
+        UserInfo copy = new UserInfo(this.name, false);
+        copy.password = this.password;
+        copy.fullName = this.fullName;
+        copy.email = this.email;
+        copy.external = this.external;
+        copy.externalSystem = this.externalSystem;
+        copy.externalTag = this.externalTag;
+        copy.inactive = this.inactive;
+        copy.lastActiveLogin = this.lastActiveLogin;
+        copy.permissions = new HashSet<>(this.permissions);
+        copy.groups = new HashSet<>(this.groups);
+        if (this.mergedPermissions != null) {
+            copy.mergedPermissions = new HashSet<>(this.mergedPermissions);
+        }
+        return copy;
+    }
+
     @Generated("Eclipse")
     @Override
     public int hashCode() {

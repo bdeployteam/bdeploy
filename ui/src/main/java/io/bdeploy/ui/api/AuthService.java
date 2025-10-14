@@ -84,7 +84,7 @@ public interface AuthService {
      * Lookup the given user's information.
      *
      * @param name the name of the user
-     * @return all known information for the user.
+     * @return a deep copy of all known information about the user
      */
     public UserInfo getUser(String name);
 

@@ -2,6 +2,7 @@ package io.bdeploy.minion.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -140,6 +141,32 @@ class UserDatabaseTest {
         assertTrue(db.deleteUser("JUNIT"));
         assertNull(db.getUser("JUNIT"));
         assertEquals(originalSize, db.getAllNames().size());
+    }
+
+    @Test
+    void testUserUpdate(MinionRoot root) {
+        UserDatabase db = root.getUsers();
+
+        UserInfo admin = db.getUser("test");
+
+        String initialFullName = admin.fullName;
+        String initialEmail = admin.email;
+
+        admin.fullName = "new name";
+        admin.email = "e@ma.il";
+
+        assertNotEquals(initialFullName, admin.fullName);
+        assertNotEquals(initialEmail, admin.email);
+
+        UserInfo unchanged = db.getUser("test");
+        assertNotEquals(admin.fullName, unchanged.fullName);
+        assertNotEquals(admin.email, unchanged.email);
+
+        db.updateUserInfo(admin);
+
+        UserInfo changed = db.getUser("test");
+        assertEquals(admin.fullName, changed.fullName);
+        assertEquals(admin.email, changed.email);
     }
 
     @Test
