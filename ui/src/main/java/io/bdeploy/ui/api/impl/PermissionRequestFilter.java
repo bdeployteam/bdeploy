@@ -24,7 +24,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.api.AuthService;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -36,7 +36,7 @@ import jakarta.ws.rs.core.UriInfo;
  * Ensures that the user has the required permissions to access a certain method.
  * <p>
  * The URI is visited from left to right and the required permissions and scopes are evaluated. All required permissions
- * must be fulfilled otherwise an {@linkplain ForbiddenException exception} is thrown. Scopes defined on resource locators are
+ * must be fulfilled otherwise a {@linkplain NotAuthorizedException exception} is thrown. Scopes defined on resource locators are
  * inherited to all following resource methods that are called. Thus if a resource locator defines a required permission of READ
  * for scope 'A' all methods defined on that locator will automatically inherit READ for scope 'A'. However the method can
  * overwrite the scope and the permission and define a more restrictive value like WRITE or ADMIN.
@@ -72,7 +72,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         Principal userPrincipal = plainSecurityContext.getUserPrincipal();
         String userName = userPrincipal.getName();
         if (!(plainSecurityContext instanceof JerseySecurityContext)) {
-            throw new ForbiddenException("User '" + userName + "' is not authorized to access requested resource.");
+            throw new NotAuthorizedException("User '" + userName + "' is not authorized to access requested resource.");
         }
         JerseySecurityContext securityContext = (JerseySecurityContext) plainSecurityContext;
 
@@ -138,7 +138,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
 
             // Check if the user has scoped permissions
             if (!authService.isAuthorized(userName, scopedPermission)) {
-                throw new ForbiddenException("User '" + userName + "' is not authorized to access requested resource.");
+                throw new NotAuthorizedException("User '" + userName + "' is not authorized to access requested resource.");
             }
         }
 

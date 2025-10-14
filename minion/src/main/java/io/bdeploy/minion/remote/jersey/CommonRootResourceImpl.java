@@ -44,7 +44,7 @@ import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceContext;
@@ -133,7 +133,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
         // need to obtain from request to avoid SecurityContextInjectee wrapper.
         SecurityContext ctx = context.getSecurityContext();
         if (!(ctx instanceof JerseySecurityContext)) {
-            throw new ForbiddenException(
+            throw new NotAuthorizedException(
                     "User '" + ctx.getUserPrincipal().getName() + "' is not authorized to access requested resource.");
         }
         JerseySecurityContext securityContext = (JerseySecurityContext) ctx;

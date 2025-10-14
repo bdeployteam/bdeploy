@@ -19,7 +19,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.AuthResource;
-import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Response;
 
 class PermissionFilterTest {
@@ -84,25 +84,25 @@ class PermissionFilterTest {
         if (readAllowed) {
             assertTrue(expected.matches(service.read()));
         } else {
-            assertThrows(ForbiddenException.class, service::read);
+            assertThrows(NotAuthorizedException.class, service::read);
         }
 
         if (writeAllowed) {
             assertTrue(expected.matches(service.write()));
         } else {
-            assertThrows(ForbiddenException.class, service::write);
+            assertThrows(NotAuthorizedException.class, service::write);
         }
 
         if (adminAllowed) {
             assertTrue(expected.matches(service.admin()));
         } else {
-            assertThrows(ForbiddenException.class, service::admin);
+            assertThrows(NotAuthorizedException.class, service::admin);
         }
 
         if (adminNoInheritAllowed) {
             assertTrue(expected.matches(service.adminNoInherit()));
         } else {
-            assertThrows(ForbiddenException.class, service::adminNoInherit);
+            assertThrows(NotAuthorizedException.class, service::adminNoInherit);
         }
     }
 

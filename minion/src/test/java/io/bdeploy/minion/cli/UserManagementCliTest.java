@@ -13,7 +13,7 @@ import io.bdeploy.common.TestCliTool.StructuredOutputRow;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.cli.RemoteUserTool;
-import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
 
 @ExtendWith(TestMinion.class)
 class UserManagementCliTest extends BaseMinionCliTest {
@@ -58,7 +58,7 @@ class UserManagementCliTest extends BaseMinionCliTest {
         // Confirm that the tokens have the correct privileges
         assertDoesNotThrow(() -> remote(admin1Remote, RemoteUserTool.class, "--list"));
         assertDoesNotThrow(() -> remote(admin2Remote, RemoteUserTool.class, "--list"));
-        assertThrows(ForbiddenException.class, () -> remote(userRemote, RemoteUserTool.class, "--list"));
+        assertThrows(NotAuthorizedException.class, () -> remote(userRemote, RemoteUserTool.class, "--list"));
 
         // Remove the permission of the second administrator
         remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--removePermission=ADMIN");
