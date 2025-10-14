@@ -8,15 +8,6 @@ import java.util.List;
  */
 public class BulkOperationResultDto {
 
-    public enum OperationResultType {
-        INFO,
-        WARNING,
-        ERROR
-    }
-
-    public record OperationResult(String target, OperationResultType type, String message) {
-    }
-
     /**
      * The results provided.
      */
@@ -25,5 +16,4 @@ public class BulkOperationResultDto {
     public synchronized void add(OperationResult result) {
         results.add(result);
     }
-
 }

@@ -21,8 +21,8 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.dto.BulkOperationResultDto;
-import io.bdeploy.ui.dto.BulkOperationResultDto.OperationResult;
-import io.bdeploy.ui.dto.BulkOperationResultDto.OperationResultType;
+import io.bdeploy.ui.dto.OperationResult;
+import io.bdeploy.ui.dto.OperationResult.OperationResultType;
 
 @ExtendWith(TestMinion.class)
 class UserGroupBulkResourceTest {
