@@ -167,9 +167,12 @@ public class AuthResourceImpl implements AuthResource {
 
     @Override
     public UserProfileInfo getCurrentUserProfile() {
+        UserInfo info = getCurrentUser();
+        if (info == null) {
+            return null;
+        }
         UserProfileInfo profile = new UserProfileInfo();
-        UserInfo user = getCurrentUser();
-        profile.userGroups = authGroup.getUserGroups(user.getGroups());
+        profile.userGroups = authGroup.getUserGroups(info.getGroups());
         return profile;
     }
 
@@ -177,6 +180,28 @@ public class AuthResourceImpl implements AuthResource {
     public void updateCurrentUser(UserInfo info) {
         auth.updateUserInfo(info);
         cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, info.name));
+    }
+
+    @Override
+    public void removeCurrentUserFromGroup(String groupId) {
+        UserInfo info = getCurrentUser();
+        if (info == null) {
+            throw new IllegalStateException("The current user could not be found");
+        }
+        String name = info.name;
+        auth.removeUserFromGroup(groupId, name);
+        cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
+    }
+
+    @Override
+    public void deleteCurrentUser() {
+        UserInfo info = getCurrentUser();
+        if (info == null) {
+            throw new IllegalStateException("The current user could not be found");
+        }
+        String name = info.name;
+        auth.deleteUser(name);
+        cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
     }
 
     @Override

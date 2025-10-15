@@ -22,6 +22,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
@@ -96,5 +97,49 @@ class AuthResourceTest {
         assertTrue(auth.getCurrentUserProfile().userGroups.contains(userGroupInfo));
         authAdmin.removeUserFromGroup(userGroupId, currentUserName);
         assertFalse(auth.getCurrentUserProfile().userGroups.contains(userGroupInfo));
+    }
+
+    @Test
+    void testCurrentUserDeletion(AuthResource auth) {
+        AuthAdminResource authAdmin = auth.getAdmin();
+
+        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser());
+
+        UserInfo newUserInfo = new UserInfo("secondadmin");
+        newUserInfo.password = "blahblahblah";
+        authAdmin.createLocalUser(newUserInfo);
+
+        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser());
+
+        newUserInfo.permissions.add(ScopedPermission.GLOBAL_ADMIN);
+        newUserInfo.inactive = true;
+        authAdmin.updateUser(newUserInfo);
+
+        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser());
+
+        newUserInfo.inactive = false;
+        authAdmin.updateUser(newUserInfo);
+
+        auth.deleteCurrentUser();
+    }
+
+    @Test
+    void testCurrentUserPermissionChange(AuthResource auth) {
+        // Create a second global administrator so that the initial global administrator is allowed to downgrade its own permissions itself
+        UserInfo secondAdminInfo = new UserInfo("secondadmin");
+        secondAdminInfo.password = "blahblahblah";
+        secondAdminInfo.permissions.add(ScopedPermission.GLOBAL_ADMIN);
+        auth.getAdmin().createLocalUser(secondAdminInfo);
+
+        // Downgrade the initial administrator to WRITE level -> this invalidates the token!
+        UserInfo firstAdminInfo = auth.getCurrentUser();
+        firstAdminInfo.permissions.clear();
+        firstAdminInfo.permissions.add(new ScopedPermission(ScopedPermission.Permission.WRITE));
+        auth.updateCurrentUser(firstAdminInfo);
+
+        // Attempt to downgrade the initial administrator even further to READ level -> will fail because of token permission mismatch
+        firstAdminInfo.permissions.clear();
+        firstAdminInfo.permissions.add(new ScopedPermission(ScopedPermission.Permission.READ));
+        assertThrows(NotAuthorizedException.class, () -> auth.updateCurrentUser(firstAdminInfo));
     }
 }

@@ -9,9 +9,11 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.jersey.SessionManager;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Cookie;
@@ -108,6 +110,21 @@ public interface AuthResource {
     @POST
     @Path("/user")
     public void updateCurrentUser(UserInfo info);
+
+    /**
+     * Removes the current user from the given group.
+     *
+     * @param groupId group's id
+     */
+    @DELETE
+    @Path("/group/{groupId}")
+    public void removeCurrentUserFromGroup(@PathParam("groupId") String groupId);
+
+    /**
+     * Deletes the current user. Does nothing if the current user is the last active global administrator.
+     */
+    @DELETE
+    public void deleteCurrentUser();
 
     /**
      * Updates the current user's password.

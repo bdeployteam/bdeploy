@@ -19,6 +19,7 @@ public class TextUIResources {
         tool.register(RemoteTransferTool.class);
         tool.register(RemoteDeploymentTool.class);
         tool.register(RemoteProcessTool.class);
+        tool.register(RemoteUserSelfTool.class);
         tool.register(RemoteUserTool.class);
         tool.register(RemoteUserGroupTool.class);
         tool.register(RemoteRepoTool.class);
@@ -32,5 +33,4 @@ public class TextUIResources {
         tool.register(RemoteProductValidationTool.class);
         tool.register(RemoteReportTool.class);
     }
-
 }
