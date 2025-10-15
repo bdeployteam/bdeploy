@@ -78,8 +78,8 @@ public class UserGroupDatabase implements AuthGroupService {
     }
 
     @Override
-    public SortedSet<UserGroupInfo> getUserGroups(Set<String> ids) {
-        return getAllIds().stream().filter(ids::contains).map(this::getUserGroup).filter(g -> g != null && g.name != null)
+    public SortedSet<UserGroupInfo> getUserGroups(Set<String> groupIds) {
+        return getAllIds().stream().filter(groupIds::contains).map(this::getUserGroup).filter(g -> g != null && g.name != null)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -93,33 +93,33 @@ public class UserGroupDatabase implements AuthGroupService {
     }
 
     @Override
-    public UserGroupInfo getUserGroup(String id) {
+    public UserGroupInfo getUserGroup(String groupId) {
         // Note: We are using getIfPresent and put instead of get(name, Callable) as we need to handle null values
-        UserGroupInfo info = userGroupCache.getIfPresent(id);
+        UserGroupInfo info = userGroupCache.getIfPresent(groupId);
         if (info != null) {
             return info;
         }
 
-        Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + id));
+        Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + groupId));
         if (!current.isPresent()) {
             return null;
         }
 
         // check the manifest for manipulation to prevent from manually making somebody admin, etc.
-        Manifest.Key key = new Manifest.Key(NAMESPACE + id, String.valueOf(current.get()));
+        Manifest.Key key = new Manifest.Key(NAMESPACE + groupId, String.valueOf(current.get()));
         Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
         if (!result.isEmpty()) {
-            log.error("User group corruption detected for {}", id);
+            log.error("User group corruption detected for {}", groupId);
             return null;
         }
 
         Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
             info = StorageHelper.fromStream(is, UserGroupInfo.class);
-            userGroupCache.put(id, info);
+            userGroupCache.put(groupId, info);
             return info;
         } catch (Exception ex) {
-            log.error("Failed to persist user group: {}", id, ex);
+            log.error("Failed to persist user group: {}", groupId, ex);
             return null;
         }
     }
@@ -139,7 +139,7 @@ public class UserGroupDatabase implements AuthGroupService {
     }
 
     @Override
-    public synchronized void updatePermissions(String target, UserGroupPermissionUpdateDto[] permissions) {
+    public synchronized void updatePermissions(String scope, UserGroupPermissionUpdateDto[] permissions) {
         for (UserGroupPermissionUpdateDto dto : permissions) {
             UserGroupInfo info = getUserGroup(dto.group);
             if (info == null) {
@@ -147,11 +147,11 @@ public class UserGroupDatabase implements AuthGroupService {
             }
 
             // clear all scoped permissions for 'group'
-            info.permissions.removeIf(c -> target.equals(c.scope));
+            info.permissions.removeIf(c -> scope.equals(c.scope));
 
             // add given scoped permission
             if (dto.permission != null) {
-                info.permissions.add(new ScopedPermission(target, dto.permission));
+                info.permissions.add(new ScopedPermission(scope, dto.permission));
             }
 
             internalUpdate(info);
@@ -186,7 +186,6 @@ public class UserGroupDatabase implements AuthGroupService {
                 .findAny().ifPresent(g -> {
                     throw new IllegalStateException(String.format("Duplicate name %s for group %s", g.name, g.id));
                 });
-
     }
 
     @Override
@@ -239,5 +238,4 @@ public class UserGroupDatabase implements AuthGroupService {
         feedback.add("Successfully imported group " + info.name + ". ID: " + info.id);
         return info;
     }
-
 }
