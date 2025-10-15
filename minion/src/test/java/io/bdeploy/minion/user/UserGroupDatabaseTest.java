@@ -66,6 +66,10 @@ class UserGroupDatabaseTest {
 
         // ensure that removing the user from a group that they are not in doesn't break
         users.removeUserFromGroup(g.id, userName);
+
+        // test user group deletion
+        groups.deleteUserGroup(g.id);
+        assertNull(groups.getUserGroup(g.id));
     }
 
     @Test
@@ -103,6 +107,10 @@ class UserGroupDatabaseTest {
 
         // ensure that removing the user from a group that they are not in doesn't break
         users.removeUserFromGroup(g.id, userName);
+
+        // test user group deletion
+        groups.deleteUserGroup(g.id);
+        assertNull(groups.getUserGroup(g.id));
     }
 
     @Test
