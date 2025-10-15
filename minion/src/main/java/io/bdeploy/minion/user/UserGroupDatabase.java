@@ -48,9 +48,8 @@ import io.bdeploy.ui.api.AuthGroupService;
 public class UserGroupDatabase implements AuthGroupService {
 
     private static final Logger log = LoggerFactory.getLogger(UserGroupDatabase.class);
-
-    public static final String NAMESPACE = "usergroups/";
-    public static final String FILE_NAME = "usergroup.json";
+    private static final String NAMESPACE = "usergroups/";
+    private static final String FILE_NAME = "usergroup.json";
 
     private final Cache<String, UserGroupInfo> userGroupCache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
             .maximumSize(1_000).build();
@@ -223,7 +222,7 @@ public class UserGroupDatabase implements AuthGroupService {
         return clone;
     }
 
-    public UserGroupInfo importLdapGroup(LdapUserGroupInfo group, StringJoiner feedback) {
+    UserGroupInfo importLdapGroup(LdapUserGroupInfo group, StringJoiner feedback) {
         UserGroupInfo existing = getAll().stream().filter(g -> g.name.equalsIgnoreCase(group.name)).findAny().orElse(null);
 
         if (existing != null) {
