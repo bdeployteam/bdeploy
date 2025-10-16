@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -57,7 +56,7 @@ public class TestHive implements ParameterResolver, BeforeEachCallback {
         return context.getStore(Namespace.create(context.getRequiredTestMethod()));
     }
 
-    private static class CloseableTestHive implements CloseableResource {
+    private static class CloseableTestHive implements AutoCloseable {
 
         private final BHive hive;
         private final Path path;

@@ -10,6 +10,9 @@ dependencies {
         
         'com.nimbusds:oauth2-oidc-sdk:11.29.2'
     )
+    
+    commonTestDeps(testFixtures(project(":bhive")))
+
     api(
         project(":api"),
     )

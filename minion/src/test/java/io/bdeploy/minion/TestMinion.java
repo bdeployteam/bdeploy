@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Objects;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.slf4j.Logger;
@@ -253,7 +252,7 @@ public class TestMinion extends TestServer {
         return super.resolveParameter(parameterContext, extensionContext);
     }
 
-    private static final class CloseableMinionRoot implements CloseableResource {
+    private static final class CloseableMinionRoot implements AutoCloseable {
 
         private final Path root;
 
