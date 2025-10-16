@@ -79,8 +79,8 @@
 		<Logger name="io.bdeploy.pcu" additivity="false" level="info" >
 			<AppenderRef ref="GlobalRoute" />
 		</Logger>
-		
-		<!-- Authentication -->
+
+        <!-- Authentication -->
 		<Logger name="io.bdeploy.minion.user" additivity="false" level="info" >
 			<AppenderRef ref="GlobalRoute" />
 		</Logger>
