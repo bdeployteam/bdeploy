@@ -25,12 +25,12 @@ public class TokenValidator implements Predicate<ApiAccessToken> {
     }
 
     @Override
-    public boolean test(ApiAccessToken api) {
-        if (api.isSystem()) {
+    public boolean test(ApiAccessToken token) {
+        if (token.isSystem()) {
             return true;
         }
 
-        String user = api.getIssuedTo();
+        String user = token.getIssuedTo();
         UserInfo userInfo = userDatabase.getUser(user);
 
         /*
@@ -47,9 +47,10 @@ public class TokenValidator implements Predicate<ApiAccessToken> {
             return true;
         }
 
-        boolean tokenRequiresGlobalAdmin = isGlobalAdmin.test(api.getPermissions());
-        boolean userIsActiveGlobalAdmin = !userInfo.inactive && isGlobalAdmin.test(userInfo.permissions);
-        if (tokenRequiresGlobalAdmin && !userIsActiveGlobalAdmin) {
+        // Validate that the user is still active and still has the same permissions as the token
+        boolean tokenHasGlobalAdminPermissions = isGlobalAdmin.test(token.getPermissions());
+        boolean userHasGlobalAdminPermissions = !userInfo.inactive && isGlobalAdmin.test(userInfo.permissions);
+        if (tokenHasGlobalAdminPermissions && !userHasGlobalAdminPermissions) {
             return false;
         }
 
