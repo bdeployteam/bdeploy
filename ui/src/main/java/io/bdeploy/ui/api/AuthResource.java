@@ -109,7 +109,7 @@ public interface AuthResource {
      */
     @POST
     @Path("/user")
-    public void updateCurrentUser(UserInfo info);
+    public void updateCurrentUser(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session, UserInfo info);
 
     /**
      * Removes the current user from the given group.
@@ -124,7 +124,7 @@ public interface AuthResource {
      * Deletes the current user. Does nothing if the current user is the last active global administrator.
      */
     @DELETE
-    public void deleteCurrentUser();
+    public void deleteCurrentUser(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
 
     /**
      * Updates the current user's password.

@@ -3,49 +3,56 @@
 
   <app-bd-dialog-content>
     @if (user) {
-      <div class="flex flex-col gap-2.5">
-        <div class="flex gap-2.5">
-          <app-user-avatar [mail]="user?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
-          <div class="flex-auto grid grid-cols-[75px_auto] gap-1">
-            <div><strong>Username:</strong></div>
-            <div class="truncate" [matTooltip]="user.name" [matTooltipShowDelay]="1000">{{ user.name }}</div>
-            <div><strong>Full Name:</strong></div>
-            <div class="truncate" [matTooltip]="user.fullName" [matTooltipShowDelay]="1000">{{ user.fullName }}</div>
-            <div><strong>E-Mail:</strong></div>
-            <div class="truncate" [matTooltip]="user.email" [matTooltipShowDelay]="1000">{{ user.email }}</div>
-          </div>
+    <div class="flex flex-col gap-2.5">
+      <div class="flex gap-2.5">
+        <app-user-avatar [mail]="user?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
+        <div class="flex-auto grid grid-cols-[75px_auto] gap-1">
+          <div><strong>Username:</strong></div>
+          <div class="truncate" [matTooltip]="user.name" [matTooltipShowDelay]="1000">{{ user.name }}</div>
+          <div><strong>Full Name:</strong></div>
+          <div class="truncate" [matTooltip]="user.fullName" [matTooltipShowDelay]="1000">{{ user.fullName }}</div>
+          <div><strong>E-Mail:</strong></div>
+          <div class="truncate" [matTooltip]="user.email" [matTooltipShowDelay]="1000">{{ user.email }}</div>
         </div>
-        <app-bd-expand-button text="Own Permissions" icon="security">
-          <app-bd-data-table [records]="user.permissions" [columns]="permColumns"></app-bd-data-table>
-        </app-bd-expand-button>
-        <app-bd-expand-button text="Group Permissions" icon="security">
-          <app-bd-data-table [records]="userGroupPermissions" [columns]="userGroupPermColumns"></app-bd-data-table>
-        </app-bd-expand-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          [disabled]="user.external"
-          [route]="['edit']"
-          [relative]="true"
-          icon="edit"
-          text="Edit User..."
-        ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          [disabled]="user.external"
-          [route]="['password']"
-          [relative]="true"
-          icon="fingerprint"
-          text="Change Password..."
-        ></app-bd-panel-button>
-        <app-bd-panel-button
-          [collapsed]="false"
-          [route]="['token']"
-          [relative]="true"
-          icon="vpn_key"
-          text="Create Token(s)..."
-        ></app-bd-panel-button>
-        <app-bd-button [collapsed]="false" icon="exit_to_app" text="Logout" (click)="logout()"></app-bd-button>
       </div>
+      <app-bd-expand-button text="Own Permissions" icon="security">
+        <app-bd-data-table [records]="user.permissions" [columns]="permColumns"></app-bd-data-table>
+      </app-bd-expand-button>
+      <app-bd-expand-button text="Group Permissions" icon="security">
+        <app-bd-data-table [records]="userGroupPermissions" [columns]="userGroupPermColumns"></app-bd-data-table>
+      </app-bd-expand-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [disabled]="user.external"
+        [route]="['edit']"
+        [relative]="true"
+        icon="edit"
+        text="Edit User..."
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [disabled]="user.external"
+        [route]="['password']"
+        [relative]="true"
+        icon="fingerprint"
+        text="Change Password..."
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [route]="['token']"
+        [relative]="true"
+        icon="vpn_key"
+        text="Create Token(s)..."
+      ></app-bd-panel-button>
+      <app-bd-button
+        [collapsed]="false"
+        icon="person_off"
+        text="Deactivate"
+        (click)="onDeactivateSelf()"
+      ></app-bd-button>
+      <app-bd-button [collapsed]="false" icon="delete" text="Delete" (click)="onDeleteSelf()"></app-bd-button>
+      <app-bd-button [collapsed]="false" icon="exit_to_app" text="Logout" (click)="logout()"></app-bd-button>
+    </div>
     }
   </app-bd-dialog-content>
 </app-bd-dialog>

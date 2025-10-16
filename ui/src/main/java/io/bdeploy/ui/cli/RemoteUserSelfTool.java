@@ -155,7 +155,7 @@ public class RemoteUserSelfTool extends RemoteServiceTool<UserSelfConfig> {
             anyChange = true;
         }
         if (anyChange) {
-            auth.updateCurrentUser(user);
+            auth.updateCurrentUser(null, user);
             return createSuccess();
         }
         return createResultWithSuccessMessage("No change");
@@ -203,7 +203,7 @@ public class RemoteUserSelfTool extends RemoteServiceTool<UserSelfConfig> {
                 ? user.permissions.removeIf(p -> p.permission == toRemove && p.scope == null)
                 : user.permissions.removeIf(p -> p.permission == toRemove && scope.equals(p.scope));
         if (anyChange) {
-            auth.updateCurrentUser(user);
+            auth.updateCurrentUser(null, user);
             return createSuccess();
         }
         return createResultWithSuccessMessage("No change");
@@ -215,12 +215,12 @@ public class RemoteUserSelfTool extends RemoteServiceTool<UserSelfConfig> {
             return createResultWithErrorMessage("The current user could not be found");
         }
         user.inactive = true;
-        auth.updateCurrentUser(user);
+        auth.updateCurrentUser(null, user);
         return createSuccess();
     }
 
     private RenderableResult delete(RemoteService remote, AuthResource auth) {
-        auth.deleteCurrentUser();
+        auth.deleteCurrentUser(null);
         return createSuccess();
     }
 

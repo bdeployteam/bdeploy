@@ -4,15 +4,12 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize, first, skipWhile } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
-
 
 import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { UserAvatarComponent } from '../../../../../core/components/user-avatar/user-avatar.component';
@@ -22,9 +19,19 @@ import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-b
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-edit',
-    templateUrl: './edit.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, UserAvatarComponent, BdFormInputComponent, TrimmedValidator, BdButtonComponent, AsyncPipe]
+  selector: 'app-edit',
+  templateUrl: './edit.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    FormsModule,
+    UserAvatarComponent,
+    BdFormInputComponent,
+    TrimmedValidator,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   private readonly auth = inject(AuthenticationService);
@@ -50,7 +57,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
       .pipe(
         skipWhile((u) => !u),
         first(),
-        finalize(() => this.loading$.next(false)),
+        finalize(() => this.loading$.next(false))
       )
       .subscribe((u) => {
         if (u) {
@@ -68,7 +75,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.disableSave = this.isDirty();
-      }),
+      })
     );
   }
 
@@ -84,10 +91,10 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  public doSave(): Observable<UserInfo> {
+  public doSave(): Observable<object> {
     this.loading$.next(true);
     this.orig = cloneDeep(this.user);
-    return this.auth.updateUserInfo(this.user).pipe(finalize(() => this.loading$.next(false)));
+    return this.auth.updateCurrentUser(this.user).pipe(finalize(() => this.loading$.next(false)));
   }
 
   protected updateMail(): void {

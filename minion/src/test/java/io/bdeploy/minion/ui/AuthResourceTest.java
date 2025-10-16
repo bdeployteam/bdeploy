@@ -50,26 +50,26 @@ class AuthResourceTest {
 
         newUserInfo.fullName = "Ash Ketchum";
         newUserInfo.email = "pikachu@thundershock.pkm";
-        auth.updateCurrentUser(newUserInfo);
+        auth.updateCurrentUser(null, newUserInfo);
         userInfo = auth.getCurrentUser();
         assertEquals(newUserInfo.fullName, userInfo.fullName);
         assertEquals(newUserInfo.email, userInfo.email);
 
         newUserInfo.fullName = "Gary Oak";
         newUserInfo.email = "mewtu@mew.pkm";
-        auth.updateCurrentUser(newUserInfo);
+        auth.updateCurrentUser(null, newUserInfo);
         userInfo = auth.getCurrentUser();
         assertEquals(newUserInfo.fullName, userInfo.fullName);
         assertEquals(newUserInfo.email, userInfo.email);
 
         newUserInfo.inactive = true;
-        assertThrows(RuntimeException.class, () -> auth.updateCurrentUser(newUserInfo));
+        assertThrows(RuntimeException.class, () -> auth.updateCurrentUser(null, newUserInfo));
         userInfo = auth.getCurrentUser();
         assertFalse(userInfo.inactive);
 
         newUserInfo.inactive = false;
         newUserInfo.permissions.clear();
-        assertThrows(RuntimeException.class, () -> auth.updateCurrentUser(newUserInfo));
+        assertThrows(RuntimeException.class, () -> auth.updateCurrentUser(null, newUserInfo));
         userInfo = auth.getCurrentUser();
         assertFalse(userInfo.inactive);
         assertFalse(userInfo.permissions.isEmpty());
@@ -103,24 +103,24 @@ class AuthResourceTest {
     void testCurrentUserDeletion(AuthResource auth) {
         AuthAdminResource authAdmin = auth.getAdmin();
 
-        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser());
+        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser(null));
 
         UserInfo newUserInfo = new UserInfo("secondadmin");
         newUserInfo.password = "blahblahblah";
         authAdmin.createLocalUser(newUserInfo);
 
-        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser());
+        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser(null));
 
         newUserInfo.permissions.add(ScopedPermission.GLOBAL_ADMIN);
         newUserInfo.inactive = true;
         authAdmin.updateUser(newUserInfo);
 
-        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser());
+        assertThrows(RuntimeException.class, () -> auth.deleteCurrentUser(null));
 
         newUserInfo.inactive = false;
         authAdmin.updateUser(newUserInfo);
 
-        auth.deleteCurrentUser();
+        auth.deleteCurrentUser(null);
     }
 
     @Test
@@ -135,11 +135,11 @@ class AuthResourceTest {
         UserInfo firstAdminInfo = auth.getCurrentUser();
         firstAdminInfo.permissions.clear();
         firstAdminInfo.permissions.add(new ScopedPermission(ScopedPermission.Permission.WRITE));
-        auth.updateCurrentUser(firstAdminInfo);
+        auth.updateCurrentUser(null, firstAdminInfo);
 
         // Attempt to downgrade the initial administrator even further to READ level -> will fail because of token permission mismatch
         firstAdminInfo.permissions.clear();
         firstAdminInfo.permissions.add(new ScopedPermission(ScopedPermission.Permission.READ));
-        assertThrows(NotAuthorizedException.class, () -> auth.updateCurrentUser(firstAdminInfo));
+        assertThrows(NotAuthorizedException.class, () -> auth.updateCurrentUser(null, firstAdminInfo));
     }
 }

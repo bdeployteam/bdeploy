@@ -177,9 +177,12 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public void updateCurrentUser(UserInfo info) {
+    public void updateCurrentUser(Cookie session, UserInfo info) {
         auth.updateUserInfo(info);
         cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, info.name));
+        if (info.inactive) {
+            logout(session);
+        }
     }
 
     @Override
@@ -194,7 +197,7 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public void deleteCurrentUser() {
+    public void deleteCurrentUser(Cookie session) {
         UserInfo info = getCurrentUser();
         if (info == null) {
             throw new IllegalStateException("The current user could not be found");
@@ -202,6 +205,7 @@ public class AuthResourceImpl implements AuthResource {
         String name = info.name;
         auth.deleteUser(name);
         cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
+        logout(session);
     }
 
     @Override

@@ -103,9 +103,9 @@ export class AuthenticationService {
               tap((userInfo) => {
                 this.userInfoSubject$.next(userInfo);
                 this.tokenSubject.next(t);
-              }),
+              })
             );
-        }),
+        })
       );
   }
 
@@ -147,7 +147,7 @@ export class AuthenticationService {
             console.log('auth0 expired', err);
             this.logout();
             return of(null);
-          }),
+          })
         )
         .subscribe((t) => {
           // if we got one, we want to use it on the server as well.
@@ -156,7 +156,7 @@ export class AuthenticationService {
               catchError((err) => {
                 console.log('cannot update auth0 token on server', err);
                 return of(err);
-              }),
+              })
             )
             .subscribe(() => {
               console.log('auth0 token updated on server');
@@ -187,7 +187,7 @@ export class AuthenticationService {
       }),
       finalize(() => {
         window.location.reload();
-      }),
+      })
     );
   }
 
@@ -282,7 +282,7 @@ export class AuthenticationService {
   private isScoped(scope: string, userInfo: UserInfo, permission: Permission): boolean {
     if (userInfo?.mergedPermissions) {
       return !!userInfo.mergedPermissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, permission),
+        (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, permission)
       );
     }
     return false;
@@ -292,11 +292,11 @@ export class AuthenticationService {
     if (this.currentUserInfo?.mergedPermissions) {
       // We have either a global or scoped CLIENT permission,
       const clientPerm = this.currentUserInfo.mergedPermissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission === Permission.CLIENT,
+        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission === Permission.CLIENT
       );
       // ... and there is *NO* other permission on the user.
       const nonClientPerm = this.currentUserInfo.mergedPermissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission !== Permission.CLIENT,
+        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission !== Permission.CLIENT
       );
       return !!clientPerm && !nonClientPerm;
     }
@@ -327,9 +327,17 @@ export class AuthenticationService {
     return this.http.get<UserProfileInfo>(this.cfg.config.api + '/auth/user-profile');
   }
 
-  public updateUserInfo(info: UserInfo): Observable<UserInfo> {
+  public updateCurrentUser(info: UserInfo): Observable<object> {
     this.userInfoSubject$.next(info);
-    return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
+    return this.http.post(this.cfg.config.api + '/auth/user', info);
+  }
+
+  public removeCurrentUserFromGroup(groupId: string): Observable<object> {
+    return this.http.delete(this.cfg.config.api + '/auth/group/' + groupId);
+  }
+
+  public deleteCurrentUser(): Observable<object> {
+    return this.http.delete(this.cfg.config.api + '/auth');
   }
 
   public changePassword(dto: UserChangePasswordDto): Observable<unknown> {
