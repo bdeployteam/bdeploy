@@ -214,10 +214,8 @@ public class UserGroupDatabase implements AuthGroupService {
         mergedPermissions.addAll(info.permissions);
         mergedPermissions.addAll(groupPermissions);
 
-        // dumb deep clone by JSON round-trip here - otherwise we might update the cached in memory object.
-        UserInfo clone = StorageHelper.fromRawBytes(StorageHelper.toRawBytes(info), UserInfo.class);
+        UserInfo clone = info.deepCopy();
         clone.mergedPermissions = mergedPermissions;
-
         return clone;
     }
 
