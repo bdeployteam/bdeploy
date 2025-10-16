@@ -17,8 +17,11 @@ import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.UserBulkResource;
 import io.bdeploy.ui.api.UserGroupBulkResource;
+import io.bdeploy.ui.dto.BulkOperationResultDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
+import io.bdeploy.ui.dto.OperationResult;
+import io.bdeploy.ui.dto.OperationResult.OperationResultType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -59,18 +62,24 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     }
 
     @Override
-    public void updateUsers(List<UserInfo> infos) {
-        infos.forEach(this::updateUser);
-        infos.forEach(u -> cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, u.name)));
+    public BulkOperationResultDto updateUsers(List<UserInfo> infos) {
+        BulkOperationResultDto result = new BulkOperationResultDto();
+        for (UserInfo userInfo : infos) {
+            try {
+                updateUser(userInfo);
+                result.results.add(new OperationResult(userInfo.name, OperationResultType.INFO, "Updated"));
+            } catch (RuntimeException e) {
+                result.results
+                        .add(new OperationResult(userInfo.name, OperationResultType.ERROR, "Update failed: " + e.getMessage()));
+            }
+        }
+        return result;
     }
 
     @Override
-    public boolean deleteUser(String name) {
-        boolean result = auth.deleteUser(name);
-        if (result) {
-            cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
-        }
-        return result;
+    public void deleteUser(String name) {
+        auth.deleteUser(name);
+        cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
     }
 
     @Override

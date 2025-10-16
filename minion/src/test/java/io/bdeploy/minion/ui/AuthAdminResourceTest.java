@@ -1,11 +1,12 @@
 package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Function;
@@ -19,35 +20,43 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
+import io.bdeploy.ui.dto.OperationResult.OperationResultType;
 
 @ExtendWith(TestMinion.class)
 class AuthAdminResourceTest {
 
     @Test
-    void testDeletionOfLastAdminUser(AuthResource auth) {
+    void testLastGlobalAdminLockoutPrevention(AuthResource auth) {
         AuthAdminResource admin = auth.getAdmin();
 
         // Check that the last global administrator cannot be deleted
         String initialAdminName = admin.getAllUser().iterator().next().name;
         assertEquals(1, admin.getAllUser().size());
-        assertFalse(admin.deleteUser(initialAdminName));
+        assertThrows(RuntimeException.class, () -> admin.deleteUser(initialAdminName));
         assertEquals(1, admin.getAllUser().size());
 
         // Check that the last active global administrator cannot be deleted
-        UserInfo inactiveAdmin = new UserInfo("inactiveadmin");
-        inactiveAdmin.password = "pwpwpwpwpwpwpwpwpwpwpw";
-        inactiveAdmin.inactive = true;
-        inactiveAdmin.permissions = Set.of(ScopedPermission.GLOBAL_ADMIN);
-        admin.createLocalUser(inactiveAdmin);
+        UserInfo secondAdmin = new UserInfo("secondAdmin");
+        secondAdmin.password = "pwpwpwpwpwpwpwpwpwpwpw";
+        secondAdmin.inactive = true;
+        secondAdmin.permissions = Set.of(ScopedPermission.GLOBAL_ADMIN);
+        admin.createLocalUser(secondAdmin);
 
         assertEquals(2, admin.getAllUser().size());
-        assertFalse(admin.deleteUser(initialAdminName));
+        assertThrows(RuntimeException.class, () -> admin.deleteUser(initialAdminName));
         assertEquals(2, admin.getAllUser().size());
 
-        inactiveAdmin.inactive = false;
-        admin.updateUser(inactiveAdmin);
+        secondAdmin.inactive = false;
+        admin.updateUser(secondAdmin);
 
-        assertTrue(admin.deleteUser(initialAdminName));
+        admin.deleteUser(initialAdminName);
+        assertEquals(1, admin.getAllUser().size());
+
+        // Check that the last active global administrator cannot be demoted
+        secondAdmin = admin.getUser(secondAdmin.name);
+        secondAdmin.permissions.clear();
+        final var secondAdminReference = secondAdmin;
+        assertThrows(RuntimeException.class, () -> admin.updateUser(secondAdminReference));
         assertEquals(1, admin.getAllUser().size());
     }
 
@@ -88,6 +97,17 @@ class AuthAdminResourceTest {
         fetchedUser = admin.getUser("Ash Ketschup");
         assertEquals("Dialga > Palika", fetchedUser.fullName);
         assertEquals("the@truth.forsure", fetchedUser.email);
+        assertTrue(fetchedUser.permissions.isEmpty());
+
+        // Test bulk data modification
+        myUser.fullName = "running";
+        myUser.email = "out@of.ideas";
+        admin.updateUsers(List.of(myUser)).results.forEach(r -> assertTrue(r.type() != OperationResultType.ERROR));
+
+        // Check bulk data modification
+        fetchedUser = admin.getUser("Ash Ketschup");
+        assertEquals("running", fetchedUser.fullName);
+        assertEquals("out@of.ideas", fetchedUser.email);
         assertTrue(fetchedUser.permissions.isEmpty());
 
         // Test permission addition

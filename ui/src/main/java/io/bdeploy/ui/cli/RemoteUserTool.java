@@ -101,9 +101,9 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
             if (config.permission() != null && config.removePermission() != null) {
                 helpAndFail("Cannot add and remove a permission simultaneously");
             }
-            updateUser(config, admin);
+            return updateUser(config, admin);
         } else if (config.remove() != null) {
-            return deleteUser(admin, config.remove());
+            admin.deleteUser(config.remove());
         } else {
             return createNoOp();
         }
@@ -122,11 +122,10 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         out().println("");
     }
 
-    private void updateUser(UserConfig config, AuthAdminResource admin) {
+    private RenderableResult updateUser(UserConfig config, AuthAdminResource admin) {
         UserInfo user = admin.getUser(config.update());
         if (user == null) {
-            out().println("Cannot find user " + config.update());
-            return;
+            return createResultWithErrorMessage("Cannot find user " + config.update());
         }
         if (config.password() != null) {
             admin.updateLocalUserPassword(config.update(), config.password());
@@ -154,9 +153,13 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
                 updated = true;
             }
         }
-        if (updated) {
-            admin.updateUser(user);
+
+        if (!updated) {
+            return createResultWithSuccessMessage("No change");
         }
+
+        admin.updateUser(user);
+        return createSuccess();
     }
 
     private void addUser(UserConfig config, AuthAdminResource admin) {
@@ -181,13 +184,6 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
 
         user.password = new String(pass);
         admin.createLocalUser(user);
-    }
-
-    private RenderableResult deleteUser(AuthAdminResource admin, String user) {
-        if (admin.deleteUser(user)) {
-            return createSuccess();
-        }
-        return createResultWithErrorMessage("User could not be deleted");
     }
 
     private boolean setInactive(UserInfo user, UserConfig config) {

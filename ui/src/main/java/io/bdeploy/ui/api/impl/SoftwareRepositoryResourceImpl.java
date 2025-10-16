@@ -169,10 +169,13 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         if (bHive == null) {
             throw new WebApplicationException("Repository '" + repo + "' does not exist");
         }
-        Manifest.Key key = new SoftwareRepositoryManifest(bHive).getKey();
+
+        Manifest.Key latestKey = new SoftwareRepositoryManifest(bHive).getKey();
+
+        auth.removePermissions(repo);
         registry.unregister(repo);
         PathHelper.deleteRecursiveRetry(Paths.get(bHive.getUri()));
-        changes.remove(ObjectChangeType.SOFTWARE_REPO, key);
+        changes.remove(ObjectChangeType.SOFTWARE_REPO, latestKey);
     }
 
     @Override

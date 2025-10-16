@@ -9,6 +9,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
+import io.bdeploy.ui.dto.BulkOperationResultDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -51,16 +52,15 @@ public interface AuthAdminResource {
      */
     @POST
     @Path("/users")
-    public void updateUsers(List<UserInfo> infos);
+    public BulkOperationResultDto updateUsers(List<UserInfo> infos);
 
     /**
      * Deletes the user with the given name. Never deletes the last active global administrator.
      *
      * @param name the name of the user to delete
-     * @return <code>true</code> if the user was deleted, else <code>false</code>
      */
     @DELETE
-    public boolean deleteUser(@QueryParam("name") String name);
+    public void deleteUser(@QueryParam("name") String name);
 
     /**
      * @param name the user to load

@@ -3,6 +3,7 @@ package io.bdeploy.minion.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.GeneralSecurityException;
@@ -59,6 +60,18 @@ class AuthResourceTest {
         userInfo = auth.getCurrentUser();
         assertEquals(newUserInfo.fullName, userInfo.fullName);
         assertEquals(newUserInfo.email, userInfo.email);
+
+        newUserInfo.inactive = true;
+        assertThrows(RuntimeException.class, () -> auth.updateCurrentUser(newUserInfo));
+        userInfo = auth.getCurrentUser();
+        assertFalse(userInfo.inactive);
+
+        newUserInfo.inactive = false;
+        newUserInfo.permissions.clear();
+        assertThrows(RuntimeException.class, () -> auth.updateCurrentUser(newUserInfo));
+        userInfo = auth.getCurrentUser();
+        assertFalse(userInfo.inactive);
+        assertFalse(userInfo.permissions.isEmpty());
     }
 
     @Test

@@ -68,6 +68,7 @@ class UserManagementCliTest extends BaseMinionCliTest {
     void testUserPermissionManagement(RemoteService remote) {
         String admin1Username = setupTestUsers(remote);
 
+        StructuredOutputRow admin1data;
         StructuredOutputRow admin2data;
         StructuredOutputRow userData;
 
@@ -110,6 +111,29 @@ class UserManagementCliTest extends BaseMinionCliTest {
 
         // Check if the token actually lost administrative power
         assertThrows(NotAuthorizedException.class, () -> remote(userRemote, RemoteUserTool.class, "--list"));
+
+        // Verify that the last active global administrator cannot be demoted
+        assertThrows(RuntimeException.class,
+                () -> remote(remote, RemoteUserTool.class, "--update=" + admin1Username, "--removePermission=ADMIN"));
+
+        // Check if the permission did indeed not get removed
+        admin1data = getUserRowByName(remote, admin1Username);
+        assertEquals("[ADMIN (<<GLOBAL>>)]", admin1data.get("Permissions"));
+
+        // Set the user to active
+        remote(remote, RemoteUserTool.class, "--update=" + userUsername, "--active=true");
+
+        // Check if the user actually got set to active
+        userData = getUserRowByName(remote, userUsername);
+        assertEquals("", userData.get("Inact"));
+
+        // Check if demotion is working again
+        remote(remote, RemoteUserTool.class, "--update=" + admin1Username, "--removePermission=ADMIN");
+
+        // Check if the permission did indeed get removed
+        assertThrows(NotAuthorizedException.class, () -> remote(admin1Remote, RemoteUserTool.class, "--list"));
+        admin1data = getUserRowByName(userRemote, admin1Username); // Note that admin1Remote cannot be used here because we just removed our administrator privileges!
+        assertEquals("[]", admin1data.get("Permissions"));
     }
 
     @Test
@@ -120,7 +144,7 @@ class UserManagementCliTest extends BaseMinionCliTest {
         remote(remote, RemoteUserTool.class, "--update=" + admin2Username, "--inactive");
 
         // Verify that the only active global administrator cannot be deleted
-        remote(remote, RemoteUserTool.class, "--remove=" + admin1Username);
+        assertThrows(RuntimeException.class, () -> remote(remote, RemoteUserTool.class, "--remove=" + admin1Username));
         assertEquals(3, remote(remote, RemoteUserTool.class, "--list").size());
 
         // Delete the second administrator user
@@ -128,7 +152,7 @@ class UserManagementCliTest extends BaseMinionCliTest {
         assertEquals(2, remote(remote, RemoteUserTool.class, "--list").size());
 
         // Verify that the last global administrator cannot be deleted
-        remote(remote, RemoteUserTool.class, "--remove=" + admin1Username);
+        assertThrows(RuntimeException.class, () -> remote(remote, RemoteUserTool.class, "--remove=" + admin1Username));
         assertEquals(2, remote(remote, RemoteUserTool.class, "--list").size());
 
         // Delete the normal user

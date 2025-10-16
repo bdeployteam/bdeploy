@@ -41,12 +41,9 @@ public class UserBulkResourceImpl implements UserBulkResource {
 
         for (String name : userNames) {
             try {
-                if (auth.deleteUser(name)) {
-                    result.add(new OperationResult(name, OperationResultType.INFO, "Deleted"));
-                    cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
-                } else {
-                    result.add(new OperationResult(name, OperationResultType.ERROR, "Cannot delete user with name " + name));
-                }
+                auth.deleteUser(name);
+                result.add(new OperationResult(name, OperationResultType.INFO, "Deleted"));
+                cem.remove(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
             } catch (Exception e) {
                 log.warn("Error while deleting user {}", name, e);
                 result.add(new OperationResult(name, OperationResultType.ERROR, e.getMessage()));

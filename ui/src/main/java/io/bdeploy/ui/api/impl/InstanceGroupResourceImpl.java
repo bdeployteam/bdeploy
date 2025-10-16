@@ -273,7 +273,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public void delete(String group) {
         BHive bHive = registry.get(group);
         if (bHive == null) {
-            throw new WebApplicationException("Hive '" + group + "' does not exist");
+            throw new WebApplicationException("Group '" + group + "' does not exist");
         }
 
         // unload all product-plugins
@@ -281,8 +281,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             pm.unloadProduct(key);
         }
 
-        InstanceGroupManifest igm = new InstanceGroupManifest(bHive);
-        Manifest.Key latestKey = igm.getKey();
+        Manifest.Key latestKey = new InstanceGroupManifest(bHive).getKey();
 
         auth.removePermissions(group);
         registry.unregister(group);

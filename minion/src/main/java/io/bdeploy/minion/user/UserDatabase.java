@@ -103,37 +103,58 @@ public class UserDatabase implements AuthService {
 
     @Override
     public void updateUserInfo(UserInfo info) {
-        UserInfo old = getUser(info.name);
+        String name = info.name;
+        UserInfo old = getUser(name);
+
+        if (old == null) {
+            throw new IllegalStateException("User does not exist");
+        }
 
         if (old.external != info.external) {
-            throw new UnsupportedOperationException("Update on external user not supported");
+            throw new IllegalStateException("Changing an external user to a local user and vice versa is not supported");
+        }
+
+        // If there is no active global administrator besides this user...
+        if (getAll().stream().filter(u -> !u.equals(info)).filter(u -> !u.inactive).filter(isGlobalAdmin).findAny().isEmpty()) {
+            // ...then abort if we are trying to deactivate them
+            if (!old.inactive && info.inactive) {
+                throw new IllegalStateException("Cannot deactivate last active global admin");
+            }
+            // ...then abort if we are trying to downgrade them
+            if (isGlobalAdmin.test(old) && !isGlobalAdmin.test(info)) {
+                throw new IllegalStateException("Cannot demote last active global admin");
+            }
         }
 
         if (old.external) {
-            // managed by external system.
+            // managed by external system
             info.fullName = old.fullName;
             info.email = old.email;
         }
 
-        info.password = old.password; // don't update this.
+        info.password = old.password; // don't update this
 
-        internalUpdate(info.name, info);
+        internalUpdate(name, info);
     }
 
     @Override
-    public synchronized void updatePermissions(String target, UserPermissionUpdateDto[] permissions) {
-        for (UserPermissionUpdateDto dto : permissions) {
+    public synchronized void updatePermissions(String scope, UserPermissionUpdateDto[] updates) {
+        if (scope == null) {
+            throw new IllegalStateException("Cannot update all permissions of the global scope");
+        }
+        for (UserPermissionUpdateDto dto : updates) {
             UserInfo info = getUser(dto.user);
             if (info == null) {
-                throw new IllegalStateException("Cannot find user " + dto.user);
+                log.warn("Could not find user {}", dto.user);
+                continue;
             }
 
-            // clear all scoped permissions for 'group'
-            info.permissions.removeIf(c -> target.equals(c.scope));
+            // clear all permissions for the scope
+            info.permissions.removeIf(c -> scope.equals(c.scope));
 
             // add given scoped permission
             if (dto.permission != null) {
-                info.permissions.add(new ScopedPermission(target, dto.permission));
+                info.permissions.add(new ScopedPermission(scope, dto.permission));
             }
 
             internalUpdate(info.name, info);
@@ -141,66 +162,63 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public void removePermissions(String group) {
-        SortedSet<UserInfo> allUsers = getAll();
+    public void removePermissions(String scope) {
+        if (scope == null) {
+            throw new IllegalStateException("Cannot remove all permissions of the global scope");
+        }
         Set<UserPermissionUpdateDto> changedPermissions = new HashSet<>();
-        for (UserInfo userInfo : allUsers) {
-            if (userInfo.permissions.removeIf(c -> group.equals(c.scope))) {
+        for (UserInfo userInfo : getAll()) {
+            if (userInfo.permissions.removeIf(c -> scope.equals(c.scope))) {
                 changedPermissions.add(new UserPermissionUpdateDto(userInfo.name, null));
             }
         }
-        updatePermissions(group, changedPermissions.toArray(UserPermissionUpdateDto[]::new));
+        updatePermissions(scope, changedPermissions.toArray(UserPermissionUpdateDto[]::new));
     }
 
     @Override
-    public void createLocalUser(String user, String pw, Collection<ScopedPermission> permissions) {
-        user = UserInfo.normalizeName(user);
-        UserInfo info = getUser(user);
-        if (info != null) {
-            throw new IllegalStateException("User already exists: " + user);
+    public void createLocalUser(String name, String password, Collection<ScopedPermission> permissions) {
+        name = UserInfo.normalizeName(name);
+        if (getUser(name) != null) {
+            throw new IllegalStateException("User already exists");
         }
 
-        info = new UserInfo(user);
+        UserInfo info = new UserInfo(name);
+        info.password = PasswordAuthentication.hash(password.toCharArray());
 
-        info.password = PasswordAuthentication.hash(pw.toCharArray());
         if (permissions != null) {
             info.permissions.addAll(permissions);
         }
 
-        internalUpdate(user, info);
+        internalUpdate(name, info);
     }
 
-    /**
-     * Update the password of a local user.
-     *
-     * @param user the user name
-     * @param pw the password to set or <code>null</code> to keep the current password
-     */
     @Override
-    public void updateLocalPassword(String user, String pw) {
-        user = UserInfo.normalizeName(user);
-        UserInfo info = getUser(user);
+    public void updateLocalPassword(String name, String password) {
+        name = UserInfo.normalizeName(name);
+        UserInfo info = getUser(name);
+
         if (info == null) {
-            throw new IllegalStateException("Cannot find user " + user);
+            throw new IllegalStateException("User does not exist");
         }
 
-        if (pw != null) {
+        if (password != null) {
             if (info.external) {
                 throw new IllegalStateException("Cannot set password of externally-managed user");
             }
-            info.password = PasswordAuthentication.hash(pw.toCharArray());
+            info.password = PasswordAuthentication.hash(password.toCharArray());
         }
 
-        internalUpdate(user, info);
+        internalUpdate(name, info);
     }
 
     private synchronized void internalUpdate(String user, UserInfo info) {
         info.mergedPermissions = null;
         String normUser = UserInfo.normalizeName(user);
+        String namespacedName = NAMESPACE + normUser;
 
         try (Transaction t = bhive.getTransactions().begin()) {
-            Long id = bhive.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + normUser));
-            Manifest.Key key = new Manifest.Key(NAMESPACE + normUser, String.valueOf(id));
+            Long id = bhive.execute(new ManifestNextIdOperation().setManifestName(namespacedName));
+            Manifest.Key key = new Manifest.Key(namespacedName, String.valueOf(id));
 
             Tree.Builder tree = new Tree.Builder();
             tree.add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB),
@@ -209,35 +227,32 @@ public class UserDatabase implements AuthService {
             bhive.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key)
                     .setRoot(bhive.execute(new InsertArtificialTreeOperation().setTree(tree))).build(null)));
 
-            bhive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + normUser));
-
-            // update the cache.
-            userCache.put(normUser, info);
+            bhive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(namespacedName));
         }
+
+        userCache.put(normUser, info);
     }
 
     @Override
-    public boolean deleteUser(String user) {
-        user = UserInfo.normalizeName(user);
-        UserInfo info = getUser(user);
+    public void deleteUser(String name) {
+        name = UserInfo.normalizeName(name);
+        UserInfo info = getUser(name);
 
         if (info == null) {
             // User does not exist - nothing to do
-            return false;
+            throw new IllegalStateException("User not found");
         }
 
         // Abort if we are trying to delete the last active global administrator
         if (isGlobalAdmin.test(info) && getAll().stream().filter(u -> !u.equals(info)).filter(u -> !u.inactive)
                 .filter(isGlobalAdmin).findAny().isEmpty()) {
-            log.warn("Aborting deletion of user {} because no other active global admin could be found", user);
-            return false;
+            throw new IllegalStateException("Cannot delete last active global admin");
         }
 
-        Set<Key> mfs = bhive.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
-        log.info("Deleting {} manifests for user {}", mfs.size(), user);
+        Set<Key> mfs = bhive.execute(new ManifestListOperation().setManifestName(NAMESPACE + name));
+        log.info("Deleting {} manifests for user {}", mfs.size(), name);
         mfs.forEach(k -> bhive.execute(new ManifestDeleteOperation().setToDelete(k)));
-        userCache.invalidate(user);
-        return true;
+        userCache.invalidate(name);
     }
 
     @Override
@@ -252,8 +267,8 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public UserInfo authenticate(String user, String pw, SpecialAuthenticators... auths) {
-        return authenticateInternal(user, pw, new AuthTrace(false), getAuthenticators(auths));
+    public UserInfo authenticate(String name, String password, SpecialAuthenticators... auths) {
+        return authenticateInternal(name, password, new AuthTrace(false), getAuthenticators(auths));
     }
 
     private List<Authenticator> getAuthenticators(SpecialAuthenticators... auths) {
@@ -279,9 +294,9 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public List<String> traceAuthentication(String user, String pw) {
+    public List<String> traceAuthentication(String name, String password) {
         AuthTrace trace = new AuthTrace(true);
-        authenticateInternal(user, pw, trace, authenticators);
+        authenticateInternal(name, password, trace, authenticators);
         return trace.getMessages();
     }
 
@@ -399,16 +414,16 @@ public class UserDatabase implements AuthService {
         }
     }
 
-    private UserInfo authenticateInternal(String user, String pw, AuthTrace trace, List<Authenticator> auths) {
-        user = UserInfo.normalizeName(user);
-        trace.log("normalized Username: \"" + user + "\"");
+    private UserInfo authenticateInternal(String name, String password, AuthTrace trace, List<Authenticator> auths) {
+        name = UserInfo.normalizeName(name);
+        trace.log("normalized Username: \"" + name + "\"");
         AuthenticationSettingsDto settings = SettingsManifest.read(bhive, root.getEncryptionKey(), false).auth;
 
-        UserInfo u = getUser(user);
+        UserInfo u = getUser(name);
         if (u == null) {
             trace.log("user unknown -> query all authenticators");
             for (Authenticator auth : auths) {
-                UserInfo newU = internalInitialQuery(auth, null, user, pw, settings, trace);
+                UserInfo newU = internalInitialQuery(auth, null, name, password, settings, trace);
                 if (newU != null) {
                     return newU;
                 }
@@ -422,10 +437,10 @@ public class UserDatabase implements AuthService {
             boolean isResponsible = auth.isResponsible(u, settings);
             trace.log("Authenticator: " + auth.getClass().getSimpleName() + ", responsible: " + isResponsible);
             if (isResponsible) {
-                UserInfo authenticated = auth.authenticate(u, pw.toCharArray(), settings, trace);
+                UserInfo authenticated = auth.authenticate(u, password.toCharArray(), settings, trace);
                 if (authenticated != null) {
                     authenticated.lastActiveLogin = System.currentTimeMillis();
-                    internalUpdate(user, authenticated);
+                    internalUpdate(name, authenticated);
                     logSuccess(trace, authenticated);
                     return authenticated;
                 }
@@ -436,7 +451,7 @@ public class UserDatabase implements AuthService {
         // we will treat this as if the user was a fresh one.
         trace.log("User known but unable to use existing authentication association. Trying all authenticators.");
         for (Authenticator auth : auths) {
-            UserInfo newU = internalInitialQuery(auth, u, user, pw, settings, trace);
+            UserInfo newU = internalInitialQuery(auth, u, name, password, settings, trace);
             if (newU != null) {
                 return newU;
             }
@@ -446,10 +461,10 @@ public class UserDatabase implements AuthService {
         return null;
     }
 
-    private UserInfo internalInitialQuery(Authenticator auth, UserInfo existing, String user, String pw,
+    private UserInfo internalInitialQuery(Authenticator auth, UserInfo existing, String name, String password,
             AuthenticationSettingsDto settings, AuthTrace trace) {
         trace.log("Authenticator: " + auth.getClass().getSimpleName());
-        UserInfo newU = auth.getInitialInfo(user, pw.toCharArray(), settings, trace);
+        UserInfo newU = auth.getInitialInfo(name, password.toCharArray(), settings, trace);
         if (newU != null) {
             if (existing != null) {
                 // apply permissions from existing user to keep them intact.
@@ -459,7 +474,7 @@ public class UserDatabase implements AuthService {
             }
 
             newU.lastActiveLogin = System.currentTimeMillis();
-            internalUpdate(user, newU);
+            internalUpdate(name, newU);
             logSuccess(trace, newU);
             return newU;
         }
@@ -497,6 +512,7 @@ public class UserDatabase implements AuthService {
     @Override
     public UserInfo getUser(String name) {
         name = UserInfo.normalizeName(name);
+
         // Note: We are using getIfPresent and put instead of get(name, Callable) as we need to handle null values
         UserInfo info = userCache.getIfPresent(name);
         if (info != null) {
@@ -528,32 +544,34 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public void addUserToGroup(String groupId, String user) {
-        UserInfo info = getUser(user);
+    public void addUserToGroup(String groupId, String name) {
+        UserInfo info = getUser(name);
         if (info == null) {
-            throw new IllegalStateException("Cannot find user " + user);
+            throw new IllegalStateException("User not found");
         }
         info.getGroups().add(groupId);
         internalUpdate(info.name, info);
     }
 
     @Override
-    public void removeUserFromGroup(String group, String user) {
-        if (ALL_USERS_GROUP_ID.equals(group)) {
-            throw new IllegalStateException("Cannot remove user " + user + " from " + ALL_USERS_GROUP_ID);
+    public void removeUserFromGroup(String groupId, String name) {
+        if (ALL_USERS_GROUP_ID.equals(groupId)) {
+            throw new IllegalStateException("Cannot remove user from " + ALL_USERS_GROUP_ID);
         }
-        UserInfo info = getUser(user);
+        UserInfo info = getUser(name);
         if (info == null) {
-            throw new IllegalStateException("Cannot find user " + user);
+            throw new IllegalStateException("User not found");
         }
-        info.getGroups().remove(group);
+        if (!info.getGroups().remove(groupId)) {
+            throw new IllegalStateException("User was not in group");
+        }
         internalUpdate(info.name, info);
     }
 
     @Override
-    public boolean isAuthorized(String user, ScopedPermission required) {
-        user = UserInfo.normalizeName(user);
-        UserInfo info = getUser(user);
+    public boolean isAuthorized(String name, ScopedPermission required) {
+        name = UserInfo.normalizeName(name);
+        UserInfo info = getUser(name);
         if (info == null) {
             return false;
         }

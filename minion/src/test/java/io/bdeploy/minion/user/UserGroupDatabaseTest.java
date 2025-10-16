@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
@@ -37,9 +38,10 @@ class UserGroupDatabaseTest {
         g.name = "TestGroup";
         assertNull(g.id); // group is not created yet
         groups.createUserGroup(g);
-        assertNotNull(g.id); // group successfully created
+        String id = g.id;
+        assertNotNull(id); // group successfully created
 
-        UserGroupPermissionUpdateDto groupPermissionUpdateDto = new UserGroupPermissionUpdateDto(g.id, permission.permission);
+        UserGroupPermissionUpdateDto groupPermissionUpdateDto = new UserGroupPermissionUpdateDto(id, permission.permission);
         groups.updatePermissions(scope, new UserGroupPermissionUpdateDto[] { groupPermissionUpdateDto });
 
         g = groups.getUserGroup(g.id); // fetch group again to refresh permissions
@@ -53,19 +55,19 @@ class UserGroupDatabaseTest {
         assertFalse(users.isAuthorized(userName, permission));
 
         // test user is added to group with needed permission
-        users.addUserToGroup(g.id, userName);
+        users.addUserToGroup(id, userName);
 
         // test user does have a required permission
         assertTrue(users.isAuthorized(userName, permission));
 
         // remove user from group
-        users.removeUserFromGroup(g.id, userName);
+        users.removeUserFromGroup(id, userName);
 
         // test user no longer has the permission
         assertFalse(users.isAuthorized(userName, permission));
 
-        // ensure that removing the user from a group that they are not in doesn't break
-        users.removeUserFromGroup(g.id, userName);
+        // test removing the user from a group that they are not in
+        assertThrows(RuntimeException.class, () -> users.removeUserFromGroup(id, userName));
 
         // test user group deletion
         groups.deleteUserGroup(g.id);
@@ -105,8 +107,8 @@ class UserGroupDatabaseTest {
         // remove user from group
         users.removeUserFromGroup(g.id, userName);
 
-        // ensure that removing the user from a group that they are not in doesn't break
-        users.removeUserFromGroup(g.id, userName);
+        // test removing the user from a group that they are not in
+        assertThrows(RuntimeException.class, () -> users.removeUserFromGroup(g.id, userName));
 
         // test user group deletion
         groups.deleteUserGroup(g.id);
