@@ -135,9 +135,9 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.tempFileError = null;
     this.tempFileContentLoading$.next(true);
 
-    if (file.size > 1024 * 1024 * 20) {
+    if (file.size > 1024 * 1024 * 14) {
       this.tempFileContentLoading$.next(false);
-      this.tempFileError = 'Selected file is too large, size limit 20MB';
+      this.tempFileError = 'Selected file is too large, the size limit is 14MB';
       return;
     }
 
