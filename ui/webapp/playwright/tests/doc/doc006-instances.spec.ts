@@ -375,6 +375,7 @@ test('Instance Data Files', async ({ standalone }, testInfo) => {
   await addDf.fill('application.log', 'application-test.log');
   await addDf.save();
 
+  await expect(df.getTableRowContaining('application.log')).toBeVisible();
   await df.screenshot('Doc_DataFiles');
   const dfView = await df.getFileViewer('application.log');
   // TODO: wait for terminal to initialize... there is a TODO for this already further up.
