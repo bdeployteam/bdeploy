@@ -20,6 +20,7 @@ test('Main Menu', async ({ standalone }) => {
   await groups.goto();
   await new MainMenu(standalone).expandMainMenu();
 
+  await expect(groups.getDialog()).toContainText('Welcome to BDeploy');
   await groups.screenshot('Doc_MainMenu');
 });
 
