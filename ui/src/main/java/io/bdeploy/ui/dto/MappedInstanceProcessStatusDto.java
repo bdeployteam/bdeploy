@@ -10,7 +10,7 @@ public class MappedInstanceProcessStatusDto {
     /**
      * Each process' state
      */
-    public Map<String, Map<String,ProcessStatusDto>> processStates;
+    public Map<String, Map<String, ProcessStatusDto>> processStates;
 
     /**
      * Mapping of application ID to node name;

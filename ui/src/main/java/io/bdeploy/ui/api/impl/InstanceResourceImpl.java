@@ -1190,6 +1190,7 @@ public class InstanceResourceImpl implements InstanceResource {
         } catch (WebApplicationException wea) {
             if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
                 if (node2ports.size() != 1) {
+                    // This means that we cannot translate this request to send to an old server
                     throw new WebApplicationException("Attempting to retrieve ports from more than one node from a managed "
                             + " server that does not support this", Status.BAD_REQUEST);
                 }

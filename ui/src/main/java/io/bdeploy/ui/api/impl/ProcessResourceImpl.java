@@ -1,7 +1,9 @@
 package io.bdeploy.ui.api.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.interfaces.VerifyOperationResultDto;
@@ -94,10 +96,10 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public ProcessDetailDto getDetails(String nodeName, String appId) {
+    public ProcessDetailDto getDetails(String runtimeNode, String appId) {
         MasterNamedResource master = getMasterResource();
         try {
-            return master.getProcessDetailsFromNode(instance, appId, nodeName);
+            return master.getProcessDetailsFromNode(instance, appId, runtimeNode);
         } catch (WebApplicationException wea) {
             if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
                 return master.getProcessDetails(instance, appId);
@@ -113,9 +115,50 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
+    public void startProcesses(Map<String, List<String>> node2Applications) {
+        MasterNamedResource master = getMasterResource();
+        try {
+            master.start(instance, node2Applications);
+        } catch (WebApplicationException wea) {
+            if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
+                master.start(instance, node2Applications.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+            }
+            throw wea;
+        }
+    }
+
+    @Override
     public void stopProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         master.stop(instance, processIds);
+    }
+
+    @Override
+    public void stopProcesses(Map<String, List<String>> node2Applications) {
+        MasterNamedResource master = getMasterResource();
+        try {
+            master.stop(instance, node2Applications);
+        } catch (WebApplicationException wea) {
+            if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
+                master.stop(instance, node2Applications.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+            }
+            throw wea;
+        }
+    }
+
+    @Override
+    public void restartProcesses(Map<String, List<String>> node2Applications) {
+        MasterNamedResource master = getMasterResource();
+        try {
+            master.stop(instance, node2Applications);
+            master.start(instance, node2Applications);
+        } catch (WebApplicationException wea) {
+            if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
+                master.stop(instance, node2Applications.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+                master.start(instance, node2Applications.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+            }
+            throw wea;
+        }
     }
 
     @Override
@@ -169,15 +212,15 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public VerifyOperationResultDto verify(String appId) {
+    public VerifyOperationResultDto verify(String appId, String runtimeNode) {
         MasterNamedResource master = getMasterResource();
-        return master.verify(instance, appId, null);
+        return master.verify(instance, appId, runtimeNode);
     }
 
     @Override
-    public void reinstall(String appId) {
+    public void reinstall(String appId, String runtimeNode) {
         MasterNamedResource master = getMasterResource();
-        master.reinstall(instance, appId, null);
+        master.reinstall(instance, appId, runtimeNode);
     }
 
 }

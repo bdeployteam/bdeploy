@@ -1,10 +1,9 @@
 package io.bdeploy.ui.cli;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -19,20 +18,20 @@ import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessState;
-import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.descriptor.variable.VariableDescriptor.VariableType;
-import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
-import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.Resolvers;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
-import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.cli.RemotePortsTool.PortsConfig;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
+import io.bdeploy.ui.dto.ports.ApplicationPortStatesDto;
+import io.bdeploy.ui.dto.ports.CompositePortStateDto;
+import io.bdeploy.ui.dto.ports.InstancePortStatesDto;
+import io.bdeploy.ui.dto.ports.PortStateDto;
 
 @Help("List remote ports used by and instance")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -101,84 +100,115 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
         // load the configuration of the active version and collect all ports to check.
         InstanceNodeConfigurationListDto nodeConfigs = ir.getNodeConfigurations(config.uuid(), activeTag);
-        var ports = collectPorts(nodeConfigs);
+        var instancePortStatesDto = collectAndMapPorts(nodeConfigs);
 
         // updates the existing NodePort objects with state
-        fetchAndUpdateStates(config, ir, ports);
+        fetchAndUpdateWithProcessStatusAndPortCheckResults(config, ir, instancePortStatesDto);
 
-        for (var port : ports) {
-            if (port.type == VariableType.CLIENT_PORT && !config.clients()) {
-                continue;
-            }
+        instancePortStatesDto.appStates.forEach(
+                appState -> appState.portStates.stream().sorted(Comparator.comparing(portState -> portState.port))
+                        .forEach(portState -> {
+                            if (portState.isClientPort() && !config.clients()) {
+                                // ignore this row then
+                            }
 
-            if (port.type == VariableType.SERVER_PORT) {
-                table.row().cell(port.getNodeName()).cell(port.appId).cell(port.appName).cell(port.processState)
-                        .cell(port.processState.isRunning() && !activeTag.equals(port.runningTag) ? "*" : "")
-                        .cell(port.description).cell(port.port).cell("SERVER").cell(port.state ? "open" : "closed")
-                        .cell(port.getRating() ? "OK" : "BAD").build();
-            } else {
-                table.row().cell(port.getNodeName()).cell(port.appId).cell(port.appName).cell(port.processState).cell("")
-                        .cell(port.description).cell(port.port).cell("CLIENT").cell("").cell("").build();
-            }
-        }
+                            if (portState.states.isEmpty()) {
+                                // then we do not know anything about this port param
+                                table.row().cell(appState.configuredNode).cell(appState.appId).cell(appState.appName).cell("")
+                                        .cell("").cell(portState.paramName).cell(portState.port)
+                                        .cell(portState.isServerPort() ? "SERVER" : "CLIENT").cell("").cell("").build();
+                                return;
+                            }
+
+                            portState.states.forEach((checkResult) -> {
+                                if (portState.isServerPort()) {
+                                    table.row().cell(getNodeNameDisplay(appState, checkResult)).cell(appState.appId)
+                                            .cell(appState.appName).cell(checkResult.processState)
+                                            .cell(checkResult.isRunning() && !activeTag.equals(checkResult.runningTag) ? "*" : "")
+
+                                            .cell(portState.paramName).cell(portState.port).cell("SERVER")
+                                            .cell(checkResult.isUsed ? "open" : "closed")
+                                            .cell(checkResult.getRating() ? "OK" : "BAD").build();
+                                } else {
+                                    table.row().cell(getNodeNameDisplay(appState, checkResult)).cell(appState.appId)
+                                            .cell(appState.appName).cell(checkResult.processState).cell("")
+                                            .cell(portState.paramName).cell(portState.port).cell("CLIENT").cell("").cell("")
+                                            .build();
+                                }
+                            });
+
+                        }));
 
         return table;
     }
 
-    private void fetchAndUpdateStates(PortsConfig config, InstanceResource ir, List<NodePort> allPorts) {
-        // split by node to be able to fetch individual states per node and filter for server ports.
-        var ports = allPorts.stream().filter(np -> np.type == VariableType.SERVER_PORT)
-                .collect(Collectors.groupingBy(NodePort::getNodeName));
-
+    /**
+     * this method will retrieve data from the nodes and save the status and the port check result in instancePortStates
+     */
+    private void fetchAndUpdateWithProcessStatusAndPortCheckResults(PortsConfig config, InstanceResource ir,
+            InstancePortStatesDto instancePortStates) {
         // load the current process states
-        ProcessResource pr = ir.getProcessResource(config.uuid());
-        var status = pr.getStatus();
+        var status = ir.getProcessResource(config.uuid()).getMappedStatus();
+        // fetch the states for all the ports at once
+        Map<String, List<Integer>> groupedByNode = instancePortStates.getPortsMappedByConfiguredNode();
+        BulkPortStatesDto bulkPortStatesDto = ir.getPortStatesBulk(config.uuid(), groupedByNode);
 
-        // fetch the states of each node's collected ports
-        for (var np : ports.entrySet()) {
-            var states = ir.getPortStates(config.uuid(), np.getKey(), np.getValue().stream().map(NodePort::getPort).toList());
-            var nodePortsGrouped = np.getValue().stream().collect(Collectors.groupingBy(NodePort::getPort));
+        instancePortStates.appStates.forEach(appState -> {
+            var checkResultMappedOnServerNode = bulkPortStatesDto.getNodePortsState(appState.configuredNode);
+            appState.portStates.forEach(compositePortState -> {
+                checkResultMappedOnServerNode.forEach((serverNode, checkResult) -> {
+                    if (checkResult.containsKey(compositePortState.port)) {
+                        var portState = new PortStateDto();
+                        portState.serverNode = serverNode;
+                        portState.isUsed = checkResult.get(compositePortState.port);
 
-            for (var portAndState : states.entrySet()) {
-                var matchedPorts = nodePortsGrouped.get(portAndState.getKey());
-                if (matchedPorts == null || matchedPorts.isEmpty()) {
-                    throw new IllegalStateException(
-                            "Cannot map port " + portAndState.getKey() + " of node " + np.getKey() + ", port: " + matchedPorts);
-                }
+                        if (status.processStates.containsKey(appState.appId) && status.processStates.get(appState.appId)
+                                .containsKey(serverNode)) {
+                            var processStatus = status.processStates.get(appState.appId).get(serverNode);
+                            portState.processState = processStatus.processState;
+                            portState.runningTag = processStatus.instanceTag;
+                        }
 
-                if (matchedPorts.size() > 1) {
-                    out().println("WARNING: Server port " + portAndState.getKey() + " assigned to multiple parameters: "
-                            + matchedPorts);
-                }
-
-                for (var port : matchedPorts) {
-                    port.state = portAndState.getValue();
-                    ProcessStatusDto processStatus = status.processStates.get(port.appId);
-                    if (processStatus != null) {
-                        port.processState = processStatus.processState;
-                        port.runningTag = processStatus.instanceTag;
+                        compositePortState.states.add(portState);
+                    } else {
+                        throw new IllegalStateException(
+                                "Cannot map port " + compositePortState.paramName + " of node " + serverNode + ", port: "
+                                        + compositePortState.port);
                     }
-                }
-            }
-        }
+                    checkForPortDuplicates(appState);
+                });
+            });
+        });
     }
 
-    private List<NodePort> collectPorts(InstanceNodeConfigurationListDto nodeConfigs) {
-        var result = new ArrayList<NodePort>();
+    /**
+     * key = the name of the configured node
+     */
+    private InstancePortStatesDto collectAndMapPorts(InstanceNodeConfigurationListDto nodeConfigs) {
+        var result = new InstancePortStatesDto();
         for (InstanceNodeConfigurationDto node : nodeConfigs.nodeConfigDtos) {
             for (ApplicationConfiguration config : node.nodeConfiguration.applications) {
-                result.addAll(getPortsOfApp(nodeConfigs, node, config));
+                result.addApplicationPortState(config.name, config.id, node.nodeName, node.nodeConfiguration.nodeType,
+                        getPortsOfApp(nodeConfigs, node, config));
             }
         }
-
-        // sort by port number.
-        Collections.sort(result, Comparator.comparing(NodePort::getPort));
 
         return result;
     }
 
-    private Collection<NodePort> getPortsOfApp(InstanceNodeConfigurationListDto nodeConfigs, InstanceNodeConfigurationDto node,
-            ApplicationConfiguration config) {
+    private void checkForPortDuplicates(ApplicationPortStatesDto appState) {
+        Map<Integer, List<CompositePortStateDto>> groupedByPortNumber = appState.portStates.stream()
+                .collect(Collectors.groupingBy(e -> e.port, Collectors.toList()));
+
+        groupedByPortNumber.entrySet().stream().filter(entry -> entry.getValue().size() > 1).forEach(entry -> {
+            out().println(
+                    "WARNING: Server port " + entry.getKey() + " assigned to multiple parameters: " + entry.getValue().stream()
+                            .map(paramState -> paramState.paramName));
+        });
+    }
+
+    private List<CompositePortStateDto> getPortsOfApp(InstanceNodeConfigurationListDto nodeConfigs,
+            InstanceNodeConfigurationDto node, ApplicationConfiguration config) {
         var desc = nodeConfigs.applications.stream().filter(a -> a.key.getName().equals(config.application.getName())).findFirst()
                 .orElse(null);
         if (desc == null) {
@@ -186,7 +216,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                     "Cannot find application descriptor " + config.application.getName() + " for configuration " + config.name);
         }
 
-        Collection<NodePort> result = new ArrayList<>();
+        List<CompositePortStateDto> result = new ArrayList<>();
         if (desc.descriptor.startCommand != null) {
             VariableResolver resolver = createResolver(node, config);
             for (var param : config.start.parameters) {
@@ -199,8 +229,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                         if (param.value.linkExpression != null) {
                             val = TemplateHelper.process(param.value.linkExpression, resolver);
                         }
-                        result.add(new NodePort(node.nodeName, node.nodeConfiguration.nodeType, config.name, config.id,
-                                paramDesc.type, paramDesc.name, Integer.parseInt(val)));
+                        result.add(new CompositePortStateDto(paramDesc.type, param.id, paramDesc.name, Integer.parseInt(val)));
                     } catch (NumberFormatException e) {
                         out().println("Illegal port value configured for " + param.id + " on application " + config.id);
                     }
@@ -215,57 +244,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                 process);
     }
 
-    private static class NodePort {
-
-        private final String nodeName;
-        private final NodeType nodeType;
-
-        private final String appName;
-        private final String appId;
-
-        private final VariableType type;
-        private final String description;
-        private final int port;
-
-        private boolean state;
-        private ProcessState processState;
-        private String runningTag;
-
-        public NodePort(String nodeName, NodeType nodeType, String appName, String appId, VariableType type, String description,
-                int port) {
-            this.nodeName = nodeName;
-            this.nodeType = nodeType;
-            this.appName = appName;
-            this.appId = appId;
-            this.type = type;
-            this.description = description;
-            this.port = port;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public String getNodeName() {
-            if (nodeType == NodeType.CLIENT) {
-                return InstanceManifest.CLIENT_NODE_LABEL;
-            }
-            return nodeName;
-        }
-
-        private boolean getRating() {
-            // if running, it should be open.
-            if (processState.isRunning()) {
-                return state;
-            }
-
-            // otherwise it should not be open.
-            return !state;
-        }
-
-        @Override
-        public String toString() {
-            return description + " on " + appName + " = " + port;
-        }
+    private static String getNodeNameDisplay(ApplicationPortStatesDto appState, PortStateDto portState) {
+        return appState.configuredNode + (portState != null && portState.serverNode != null ? "/" + portState.serverNode : "");
     }
 }

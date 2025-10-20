@@ -212,6 +212,17 @@ public interface MasterNamedResource {
     public void start(@QueryParam("u") String instanceId, List<String> applicationIds);
 
     /**
+     * Starts one or more applications, respecting potential process control groups.
+     * Allows a fine-grained control by allowing you to specify on which node to start a particular app.
+     *
+     * @param instanceId the instance ID
+     * @param node2Applications the set of apps to start for each node
+     */
+    @POST
+    @Path("/startApps/mapped")
+    public void start(@QueryParam("u") String instanceId, Map<String, List<String>> node2Applications);
+
+    /**
      * Stops one or more applications of an instance, respecting potential process control groups.
      *
      * @param instanceId the unique id of the instance.
@@ -221,6 +232,17 @@ public interface MasterNamedResource {
     @POST
     @Path("/stopApps")
     public void stop(@QueryParam("u") String instanceId, List<String> applicationIds);
+
+    /**
+     * Stops one or more applications of an instance, respecting potential process control groups.
+     * Allows a fine-grained control by allowing you to specify on which node to stop a particular app.
+     *
+     * @param instanceId the instance ID
+     * @param node2Applications the set of apps to start for each node
+     */
+    @POST
+    @Path("/stopApps/mapped")
+    public void stop(@QueryParam("u") String instanceId, Map<String, List<String>> node2Applications);
 
     /**
      * Stops all applications of an instance.

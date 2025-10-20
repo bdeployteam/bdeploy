@@ -13,12 +13,16 @@ public class PortStateDto {
 
     public boolean getRating() {
         // if running, it should be open.
-        if (processState.isRunning()) {
+        if (isRunning()) {
             return isUsed;
         }
 
         // otherwise it should not be open.
         return !isUsed;
+    }
+
+    public boolean isRunning() {
+        return processState != null && processState.isRunning();
     }
 
 }

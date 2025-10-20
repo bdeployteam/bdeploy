@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api;
 
 import java.util.List;
+import java.util.Map;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -8,8 +9,8 @@ import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.jersey.Scope;
-import io.bdeploy.ui.dto.MappedInstanceProcessStatusDto;
 import io.bdeploy.ui.dto.InstanceProcessStatusDto;
+import io.bdeploy.ui.dto.MappedInstanceProcessStatusDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -34,8 +35,8 @@ public interface ProcessResource {
     public MappedInstanceProcessStatusDto getMappedStatus();
 
     @GET
-    @Path("/{nodeId}/{appId}")
-    public ProcessDetailDto getDetails(@PathParam("nodeId") String nodeId, @Scope @PathParam("appId") String appId);
+    @Path("/{runtimeNode}/{appId}")
+    public ProcessDetailDto getDetails(@Scope @PathParam("runtimeNode") String runtimeNode, @Scope @PathParam("appId") String appId);
 
     @POST
     @Path("/start")
@@ -43,9 +44,19 @@ public interface ProcessResource {
     public void startProcesses(List<String> appId);
 
     @POST
+    @Path("/start/mapped")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void startProcesses(Map<String, List<String>> node2Applications);
+
+    @POST
     @Path("/stop")
     @RequiredPermission(permission = Permission.WRITE)
     public void stopProcesses(List<String> appId);
+
+    @POST
+    @Path("/stop/mapped")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void stopProcesses(Map<String, List<String>> node2Applications);
 
     @POST
     @Path("/restart")
@@ -53,14 +64,19 @@ public interface ProcessResource {
     public void restartProcesses(List<String> appId);
 
     @POST
+    @Path("/restart/mapped")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void restartProcesses(Map<String, List<String>> node2Applications);
+
+    @POST
     @Path("/verify/{appId}")
     @RequiredPermission(permission = Permission.WRITE)
-    public VerifyOperationResultDto verify(@PathParam("appId") String appId);
+    public VerifyOperationResultDto verify(@PathParam("appId") String appId, @QueryParam("n") String runtimeNode);
 
     @POST
     @Path("/reinstall/{appId}")
     @RequiredPermission(permission = Permission.WRITE)
-    public void reinstall(@PathParam("appId") String appId);
+    public void reinstall(@PathParam("appId") String appId, @QueryParam("n") String runtimeNode);
 
     @GET
     @Path("/startAll")
@@ -89,5 +105,5 @@ public interface ProcessResource {
     @Path("/{appId}/stdin")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(permission = Permission.WRITE)
-    public void writeToStdin(@PathParam("appId") String appId, @QueryParam("n") String node, String data);
+    public void writeToStdin(@PathParam("appId") String appId, @QueryParam("n") String runtimeNode, String data);
 }

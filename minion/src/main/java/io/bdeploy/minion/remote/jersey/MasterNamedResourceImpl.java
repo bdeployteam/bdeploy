@@ -29,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.util.StringUtil;
@@ -1236,6 +1237,23 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public void start(String instanceId, Map<String, List<String>> node2Applications) {
+        Set<String> totalAppItems = node2Applications.values().stream().flatMap(List::stream).collect(Collectors.toSet());
+        try (var handle = af.runMulti(Actions.START_PROCESS, name, instanceId, totalAppItems)) {
+            List<Runnable> runnables = new ArrayList<>();
+            node2Applications.forEach((serverNode, appIds) -> runnables.add(() -> {
+                try {
+                    nodes.getNodeResourceIfOnlineOrThrow(serverNode, NodeProcessResource.class, context)
+                            .start(instanceId, appIds);
+                } catch (Exception e) {
+                    log.error("Cannot start {} on node {}", instanceId, serverNode, e);
+                }
+            }));
+            rspos.runAndAwaitAll("Start-Instance", runnables, hive.getTransactions());
+        }
+    }
+
+    @Override
     public void stop(String instanceId) {
         try (var handle = af.run(Actions.STOP_INSTANCE, name, instanceId)) {
             InstanceStatusDto status = getStatus(instanceId);
@@ -1276,6 +1294,23 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 });
             }
             rspos.runAndAwaitAll("Stop-Processes", runnables, hive.getTransactions());
+        }
+    }
+
+    @Override
+    public void stop(String instanceId, Map<String, List<String>> node2Applications) {
+        Set<String> totalAppItems = node2Applications.values().stream().flatMap(List::stream).collect(Collectors.toSet());
+        try (var handle = af.runMulti(Actions.STOP_PROCESS, name, instanceId, totalAppItems)) {
+            List<Runnable> runnables = new ArrayList<>();
+            node2Applications.forEach((serverNode, appIds) -> runnables.add(() -> {
+                try {
+                    nodes.getNodeResourceIfOnlineOrThrow(serverNode, NodeProcessResource.class, context)
+                            .stop(instanceId, appIds);
+                } catch (Exception e) {
+                    log.error("Cannot stop {} on node {}", instanceId, serverNode, e);
+                }
+            }));
+            rspos.runAndAwaitAll("Stop-Instance", runnables, hive.getTransactions());
         }
     }
 

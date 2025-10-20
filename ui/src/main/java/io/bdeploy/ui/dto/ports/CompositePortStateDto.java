@@ -21,4 +21,12 @@ public class CompositePortStateDto {
         this.port = port;
     }
 
+    public boolean isServerPort() {
+        return type == VariableDescriptor.VariableType.SERVER_PORT;
+    }
+
+    public boolean isClientPort() {
+        return type == VariableDescriptor.VariableType.CLIENT_PORT;
+    }
+
 }

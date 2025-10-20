@@ -59,6 +59,16 @@ public class TestFactory {
 
     public static Manifest.Key createApplicationsAndInstance(BHive local, CommonRootResource root, RemoteService remote, Path tmp,
             boolean push, int port) throws IOException {
+        return createApplicationsAndInstance(local, root, remote, tmp, Minion.DEFAULT_NAME, NodeType.SERVER, push, port);
+    }
+
+    public static Manifest.Key createApplicationsAndInstanceOnMultiNode(BHive local, CommonRootResource root,
+            RemoteService remote, Path tmp, String nodeName) throws IOException {
+        return createApplicationsAndInstance(local, root, remote, tmp, nodeName, NodeType.MULTI, true, 0);
+    }
+
+    private static Manifest.Key createApplicationsAndInstance(BHive local, CommonRootResource root, RemoteService remote,
+            Path tmp, String targetNodeName, NodeType targetNodeType, boolean push, int port) throws IOException {
         /* STEP 1: Applications and external Application provided by development teams */
         Path app = TestAppFactory.createDummyApp("app", tmp, false, port);
         Path client = TestAppFactory.createDummyApp("client", tmp, true, 0);
@@ -90,7 +100,7 @@ public class TestFactory {
 
         Manifest.Key instance;
         try (Transaction t = local.getTransactions().begin()) {
-            instance = createDemoInstance(local, prodKey, appKey, clientKey);
+            instance = createDemoInstance(local, prodKey, appKey, clientKey, targetNodeName, targetNodeType);
         }
 
         if (push) {
@@ -112,7 +122,7 @@ public class TestFactory {
      * Fakes the configuration UI.
      */
     private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Manifest.Key serverApp,
-            Manifest.Key clientApp) {
+            Manifest.Key clientApp, String targetNodeName, NodeType targetNodeType) throws IOException {
         String id = "aaa-bbb-ccc";
 
         /* STEP 1a: read available applications from product manifest */
@@ -158,7 +168,7 @@ public class TestFactory {
         InstanceNodeConfiguration inc = new InstanceNodeConfiguration();
         inc.name = "DemoInstance";
         inc.id = id;
-        inc.nodeType = NodeType.SERVER;
+        inc.nodeType = targetNodeType;
         inc.applications.add(cfg);
 
         /* STEP 1f: create application configuration based on application descriptor (client) */
@@ -183,7 +193,7 @@ public class TestFactory {
         /* STEP 2: create an node manifest per node which will participate (master & clients) */
         InstanceNodeManifest.Builder builder = new InstanceNodeManifest.Builder()
                 .addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, pmf.getConfigTemplateTreeId());
-        Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(Minion.DEFAULT_NAME).insert(local);
+        Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(targetNodeName).insert(local);
 
         InstanceNodeManifest.Builder clientBuilder = new InstanceNodeManifest.Builder();
         Manifest.Key cinmKey = clientBuilder.setInstanceNodeConfiguration(cinc).setMinionName("DummyClientNode").insert(local);
@@ -198,7 +208,7 @@ public class TestFactory {
 
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
         // This is the "root" - all instance artifacts are now reachable from here.
-        return new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(Minion.DEFAULT_NAME, inmKey)
+        return new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(targetNodeName, inmKey)
                 .addInstanceNodeManifest("DummyClientNode", cinmKey).insert(local);
     }
 
