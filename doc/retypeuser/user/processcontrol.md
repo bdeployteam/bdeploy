@@ -135,6 +135,8 @@ The pinned parameter is visible after saving, **installation** and **activation*
 
 The **Data Files** page lists all files that are stored in the data directory of each node. All files can be downloaded, and some supported filetypes (e.g. .txt) can even be opened and edited directly in the UI by clicking on them. The table is by default sorted by the last modification timestamp. Thus the newest files are displayed first.
 
+The **Data Files** are displayed on a per-node basis. Only nodes which actually contribute to the instance are available in the dialog.
+
 :::{align=center}
 ![Data Files](/images/Doc_DataFiles.png){width=480}
 :::
