@@ -32,7 +32,6 @@ import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -290,7 +289,7 @@ public class TestServer
         register(new JerseyAuthenticationDisabler());
     }
 
-    protected final class CloseableServer implements CloseableResource {
+    protected final class CloseableServer implements AutoCloseable {
 
         URI uri;
         JerseyServer server;

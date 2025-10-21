@@ -33,6 +33,7 @@ public class BHiveTransactions {
     private static final Logger log = LoggerFactory.getLogger(BHiveTransactions.class);
     private static final String TX_PID_FILE = "tx.pid";
 
+    private final ThreadLocal<Boolean> detachedTransactions = ThreadLocal.withInitial(() -> false);
     private final InheritableThreadLocal<Stack<String>> transactions = new InheritableThreadLocal<>();
     private final Map<String, MarkerDatabase> dbs = new ConcurrentHashMap<>();
     private final BHive hive;
@@ -50,7 +51,7 @@ public class BHiveTransactions {
      * to explicitly detach the current Thread from its parent (and potential sibling threads).
      */
     public void detachThread() {
-        transactions.set(new Stack<>());
+        transactions.remove();
     }
 
     private Stack<String> getOrCreate() {
@@ -58,6 +59,19 @@ public class BHiveTransactions {
         if (result == null) {
             result = new Stack<>();
             transactions.set(result);
+            detachedTransactions.set(true);
+        } else if (!detachedTransactions.get()) {
+            log.trace("Detach transaction stack {}", result);
+
+            // we never want to modify another threads transactions stack. BUT we might
+            // have inherited one from another (parent) thread. Thus we need to make sure
+            // that we have our own stack on this thread. So we copy it, no matter what
+            // and use the copy as the new source of truth.
+            Stack<String> copy = new Stack<>();
+            result.forEach(copy::push);
+            transactions.set(copy);
+            detachedTransactions.set(true);
+            return copy;
         }
         return result;
     }
@@ -115,7 +129,8 @@ public class BHiveTransactions {
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Starting transaction {}", txid, new RuntimeException("Starting Transaction"));
+            log.trace("Starting transaction {}, current stack: {}", txid, transactions.get(),
+                    new RuntimeException("Starting Transaction"));
         }
 
         return () -> {
@@ -138,6 +153,10 @@ public class BHiveTransactions {
             stack.remove(txid);
             dbs.remove(txid);
 
+            if (stack.isEmpty()) {
+                transactions.remove();
+            }
+
             Path mdb = mdbPath;
             if (!Files.isDirectory(mdb)) {
                 return; // nothing to clean.
@@ -147,6 +166,9 @@ public class BHiveTransactions {
             // in here from a try-with-resources. In case no other exception happens, this
             // will simply be ignored - so at least log it.
             try {
+                if (log.isTraceEnabled()) {
+                    log.trace("Removing transaction DB {}", txid);
+                }
                 PathHelper.deleteRecursiveRetry(mdb);
             } catch (Exception e) {
                 log.warn("Cannot remove transaction {}", txid, e);
