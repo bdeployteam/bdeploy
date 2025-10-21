@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.SortedSet;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
@@ -20,6 +22,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredPermission(permission = Permission.ADMIN)
 public interface AuthAdminResource {
 
     /**

@@ -1,8 +1,6 @@
 package io.bdeploy.ui.api;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
-import io.bdeploy.common.security.RequiredPermission;
-import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserProfileInfo;
@@ -132,6 +130,5 @@ public interface AuthResource {
      * @return the administrative interface for user managements.
      */
     @Path("/admin")
-    @RequiredPermission(permission = Permission.ADMIN)
     public AuthAdminResource getAdmin();
 }
