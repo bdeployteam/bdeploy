@@ -143,10 +143,11 @@ public class UserGroupDatabase implements AuthGroupService {
         for (UserGroupPermissionUpdateDto dto : permissions) {
             UserGroupInfo info = getUserGroup(dto.group);
             if (info == null) {
-                throw new IllegalStateException("Cannot find user group with id " + dto.group);
+                log.warn("Cannot find user group {}", dto.group);
+                continue;
             }
 
-            // clear all scoped permissions for 'group'
+            // clear all scoped permissions in the scope
             info.permissions.removeIf(c -> scope.equals(c.scope));
 
             // add given scoped permission
@@ -174,10 +175,10 @@ public class UserGroupDatabase implements AuthGroupService {
                     .setRoot(target.execute(new InsertArtificialTreeOperation().setTree(tree))).build(null)));
 
             target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + info.id));
-
-            // update the cache.
-            userGroupCache.put(info.id, info);
         }
+
+        // update the cache.
+        userGroupCache.put(info.id, info);
     }
 
     private void validateUniqueName(UserGroupInfo info) {
