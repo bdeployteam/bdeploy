@@ -111,7 +111,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
     }
 
     private void createToken(UserConfig config, AuthResource auth) {
-        String token = auth.getAuthPack(config.createToken(), Boolean.TRUE);
+        String token = auth.getAdmin().getAuthPack(config.createToken(), Boolean.TRUE);
 
         out().println("Generating token with 50 years validity for " + config.createToken());
         out().println("Use the following token to remotely access this server in your name");

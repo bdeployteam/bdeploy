@@ -83,6 +83,14 @@ public interface AuthResource {
     public Response logout(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
 
     /**
+     * @return an authentication pack of the current user
+     */
+    @GET
+    @Path("/auth-pack-self")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getCurrentAuthPack(@QueryParam("full") Boolean full);
+
+    /**
      * Retrieve the current user.
      * <p>
      * The password field is cleared out.
@@ -134,14 +142,6 @@ public interface AuthResource {
     @POST
     @Path("/change-password")
     public Response changePassword(UserChangePasswordDto dto);
-
-    /**
-     * @return an authentication pack which can be used for build integrations and command line token authentication.
-     */
-    @GET
-    @Path("/auth-pack")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getAuthPack(@QueryParam("user") String user, @QueryParam("full") Boolean full);
 
     /**
      * @return the administrative interface for user managements.

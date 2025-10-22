@@ -225,12 +225,13 @@ public class RemoteUserSelfTool extends RemoteServiceTool<UserSelfConfig> {
     }
 
     private void createToken(UserSelfConfig config, AuthResource auth) {
+        String token = auth.getCurrentAuthPack(Boolean.TRUE);
         out().println("Generating token with 50 years validity for the current user.");
         out().println("Use the following token to remotely access this server in your name");
         out().println("Attention: This token is sensitive information as it allows remote access under your name. "
                 + "Do not pass this token on to others.");
         out().println("");
-        out().println(auth.getAuthPack(null, Boolean.TRUE));
+        out().println(token);
         out().println("");
     }
 }

@@ -39,7 +39,7 @@ export class TokenComponent implements OnInit {
   protected regenPack() {
     this.loading$.next(true);
     this.authService
-      .getAuthPackForUser(this.genFull)
+      .getAuthPackForCurrentUser(this.genFull)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((r) => this.pack$.next(r));
   }

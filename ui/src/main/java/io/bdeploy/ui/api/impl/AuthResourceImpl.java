@@ -154,6 +154,11 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
+    public String getCurrentAuthPack(Boolean full) {
+        return getAdmin().getAuthPack(null, full);
+    }
+
+    @Override
     public UserInfo getCurrentUser() {
         UserInfo info = auth.getUser(context.getUserPrincipal().getName());
         if (info == null) {
@@ -219,19 +224,7 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public String getAuthPack(String user, Boolean full) {
-        if (user == null) {
-            user = context.getUserPrincipal().getName();
-        }
-
-        UserInfo userInfo = auth.getUser(user);
-        UserInfo clone = authGroup.getCloneWithMergedPermissions(userInfo);
-        return minion.createToken(user, clone.getGlobalPermissions(), Boolean.TRUE.equals(full));
-    }
-
-    @Override
     public AuthAdminResource getAdmin() {
         return rc.initResource(new AuthAdminResourceImpl());
     }
-
 }

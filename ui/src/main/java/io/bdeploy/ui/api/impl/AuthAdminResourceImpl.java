@@ -15,6 +15,7 @@ import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.UserBulkResource;
 import io.bdeploy.ui.api.UserGroupBulkResource;
 import io.bdeploy.ui.dto.BulkOperationResultDto;
@@ -25,6 +26,7 @@ import io.bdeploy.ui.dto.OperationResult.OperationResultType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class AuthAdminResourceImpl implements AuthAdminResource {
 
@@ -35,6 +37,12 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     private AuthGroupService authGroup;
 
     @Inject
+    private SecurityContext context;
+
+    @Inject
+    private Minion minion;
+
+    @Inject
     private ChangeEventManager cem;
 
     @Inject
@@ -42,6 +50,17 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
 
     @Context
     private ResourceContext rc;
+
+    @Override
+    public String getAuthPack(String user, Boolean full) {
+        if (user == null) {
+            user = context.getUserPrincipal().getName();
+        }
+
+        UserInfo userInfo = auth.getUser(user);
+        UserInfo clone = authGroup.getCloneWithMergedPermissions(userInfo);
+        return minion.createToken(user, clone.getGlobalPermissions(), Boolean.TRUE.equals(full));
+    }
 
     @Override
     public void createLocalUser(UserInfo info) {

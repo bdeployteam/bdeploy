@@ -316,6 +316,13 @@ export class AuthenticationService {
     }
   }
 
+  public getAuthPackForCurrentUser(genFull: boolean): Observable<string> {
+    return this.http.get(this.cfg.config.api + '/auth/auth-pack-self', {
+      responseType: 'text',
+      params: new HttpParams().append('full', genFull ? 'true' : 'false'),
+    });
+  }
+
   public getUserInfo(): Observable<UserInfo> {
     this.http
       .get<UserInfo>(this.cfg.config.api + '/auth/user')
@@ -344,13 +351,6 @@ export class AuthenticationService {
     return this.http.post(this.cfg.config.api + '/auth/change-password', dto, {
       responseType: 'text',
       headers: suppressGlobalErrorHandling(new HttpHeaders()),
-    });
-  }
-
-  public getAuthPackForUser(genFull: boolean): Observable<string> {
-    return this.http.get(this.cfg.config.api + '/auth/auth-pack', {
-      responseType: 'text',
-      params: new HttpParams().append('full', genFull ? 'true' : 'false'),
     });
   }
 }
