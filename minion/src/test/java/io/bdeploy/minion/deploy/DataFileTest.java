@@ -47,7 +47,7 @@ class DataFileTest {
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         master.getNamedMaster("demo").install(instance);
-        master.getNamedMaster("demo").activate(instance);
+        master.getNamedMaster("demo").activate(instance, false);
 
         long beforeWrite = System.currentTimeMillis() - 10_000; // filesystem dependent resolution.
 

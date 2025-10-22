@@ -3,6 +3,8 @@ import { expect, Page } from '@playwright/test';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { createPanelFromRow } from '@bdeploy-pom/common/common-functions';
 import { ProcessStatusPanel } from '@bdeploy-pom/panels/instances/process-status.panel';
+import { LaunchConfirmationPopup } from '@bdeploy-pom/panels/instances/process-status/launch-confirmation.popup';
+import { InstallationConfirmationPopup } from '@bdeploy-pom/panels/instances/installation-confirmation.popup';
 
 export class InstanceDashboardPage extends BaseDialog {
   constructor(page: Page, private readonly group: string, private readonly instance: string) {
@@ -42,6 +44,12 @@ export class InstanceDashboardPage extends BaseDialog {
     await expect(activateBtn.locator('mat-spinner')).not.toBeVisible();
   }
 
+  async activateAndExpectConfirmationDialog() {
+    const activateBtn = this.getActivateButton();
+    await activateBtn.click();
+    return this.getConfirmationPopup();
+  }
+
   async getProcessStatus(node: string, process: string) {
     return createPanelFromRow(this.getServerNode(node).getByRole('row', { name: process }), (p) => new ProcessStatusPanel(p));
   }
@@ -63,4 +71,18 @@ export class InstanceDashboardPage extends BaseDialog {
   getClientNode(name: string) {
     return this.getDialog().locator('app-instance-client-node');
   }
+
+  getConfirmationPopup() {
+    return new InstallationConfirmationPopup(this.getDialog());
+  }
+
+  async shouldHaveServerNodeCount(expectedNrOfNodes: number) {
+    await expect(this.getDialog().locator('app-instance-server-node')).toHaveCount(expectedNrOfNodes);
+  }
+
+  async shouldHaveProcessCountForNode(nodeTestId: string, expectedNrOfProcesses: number) {
+    await expect(this.getServerNode(nodeTestId).locator('tr:has(td.cdk-column-id)'))
+      .toHaveCount(expectedNrOfProcesses);
+  }
+
 }

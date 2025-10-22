@@ -46,7 +46,7 @@ class DataFilesTest {
         InstanceResource ir = igr.getInstanceResource("demo");
 
         ir.install(im.getConfiguration().id, instance.getTag());
-        ir.activate(im.getConfiguration().id, instance.getTag());
+        ir.activate(im.getConfiguration().id, instance.getTag(), false);
 
         FileStatusDto newFile = new FileStatusDto();
         newFile.type = FileStatusType.ADD;

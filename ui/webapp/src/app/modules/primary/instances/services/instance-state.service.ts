@@ -1,8 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable, ReplaySubject, combineLatest, of } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, share } from 'rxjs/operators';
-import { InstanceDto, InstanceGroupConfiguration, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import {
+  InstanceActivateCheckDto,
+  InstanceDto,
+  InstanceGroupConfiguration,
+  InstanceStateRecord
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from '../../groups/services/groups.service';
@@ -68,12 +73,22 @@ export class InstanceStateService {
       .pipe(measure(`Uninstall ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }
 
-  public activate(version: string): Observable<unknown> {
+  public preActivate(version: string): Observable<InstanceActivateCheckDto> {
+    return this.http
+      .get<InstanceActivateCheckDto>(
+        `${this.apiPath(this.groups.current$.value.name)}/${
+          this.instances.current$.value.instanceConfiguration.id
+        }/${version}/pre-activate`
+      )
+      .pipe(measure(`Pre-Activate Check ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
+  }
+
+  public activate(version: string, force = false): Observable<unknown> {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
           this.instances.current$.value.instanceConfiguration.id
-        }/${version}/activate`,
+        }/${version}/activate?force=${force}`,
       )
       .pipe(measure(`Activate ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`));
   }

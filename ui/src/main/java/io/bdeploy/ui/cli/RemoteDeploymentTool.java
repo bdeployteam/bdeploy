@@ -55,7 +55,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         if (config.install()) {
             ir.install(config.uuid(), config.version());
         } else if (config.activate()) {
-            ir.activate(config.uuid(), config.version());
+            ir.activate(config.uuid(), config.version(), false);
         } else if (config.uninstall()) {
             ir.uninstall(config.uuid(), config.version());
         } else {

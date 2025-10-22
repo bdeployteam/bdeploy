@@ -444,7 +444,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             var master = mp.getControllingMaster(hive, im.getKey());
             try {
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-                root.getNamedMaster(group).activate(im.getKey());
+                root.getNamedMaster(group).activate(im.getKey(), false);
 
                 sync.put(im.getKey(), im.getConfiguration().id); // only on success.
                 result.add(new OperationResult(i, OperationResultType.INFO, "Activated"));

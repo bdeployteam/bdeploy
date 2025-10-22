@@ -73,6 +73,7 @@ import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceActivateCheckDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -382,9 +383,93 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public InstanceActivateCheckDto preActivate(Key key) {
+        return preActivateCheck(key);
+    }
+
+    private InstanceActivateCheckDto preActivateCheck(Key key) {
+        var result = new InstanceActivateCheckDto();
+        var imf = InstanceManifest.of(hive, key);
+
+        // these are the applications that are allowed to run even after activation of the new version. this includes all apps
+        // on all nodes that are applicable in the current setup.
+        var allowable = new TreeMap<String, List<String>>();
+
+        for (var entry : imf.getInstanceNodeConfigurations(hive).entrySet()) {
+            var allNodes = nodes.getAllNodes();
+            var cfgNodeName = entry.getKey();
+
+            if (!allNodes.containsKey(cfgNodeName)) {
+                // node not present but configured... we do support activating this, so all good, we just can skip the check
+                // as the node cannot be running anything if it is not there.
+                continue;
+            }
+
+            var expandedNodes = Collections.singleton(cfgNodeName);
+            if (allNodes.get(cfgNodeName).minionNodeType == MinionDto.MinionNodeType.MULTI) {
+                expandedNodes = nodes.getMultiNodeRuntimeNodes(cfgNodeName).keySet();
+            }
+
+            for (var app : entry.getValue().applications) {
+                expandedNodes.forEach(name -> allowable.computeIfAbsent(name, k -> new ArrayList<>()).add(app.id));
+            }
+        }
+
+        // now we fetch the *actual* status of the nodes for this instance. this may contain applications that are running
+        // which no longer exist in the according node configuration - thus they need to be stopped *before* activating.
+        var status = getStatus(imf.getConfiguration().id);
+
+        // we check the status for anything that is not in the allowed map. if there is, we add it to the result.
+        var apps = status.getAppsOnServerNodesStatus();
+
+        for (var appEntry : apps.entrySet()) {
+            var appId = appEntry.getKey();
+            for (var nodeEntry : appEntry.getValue().entrySet()) {
+                var nodeId = nodeEntry.getKey();
+                if (nodeEntry.getValue().processState.isStopped() || (allowable.containsKey(nodeId) && allowable.get(nodeId)
+                        .contains(appId))) {
+                    continue;
+                }
+
+                // it is running and not found in the "allowed" mapping of applications/node
+                result.runningForbidden.computeIfAbsent(nodeId, k -> new ArrayList<>()).add(appId);
+            }
+        }
+
+        return result;
+    }
+
+    private void stopOffenders(InstanceActivateCheckDto check, InstanceManifest imf) {
+        List<Runnable> tasks = new ArrayList<>();
+        for (var entry : check.runningForbidden.entrySet()) {
+            var onlineNodes = nodes.getOnlineNodeConfigs(entry.getKey());
+            onlineNodes.values().forEach(node -> {
+                tasks.add(() -> {
+                    ResourceProvider.getVersionedResource(node.remote, NodeProcessResource.class, context)
+                            .stop(imf.getConfiguration().id, entry.getValue());
+                });
+            });
+        }
+        rspos.runAndAwaitAll("Stop Offenders", tasks, hive.getTransactions());
+    }
+
+    @Override
     @WriteLock
-    public void activate(Key key) {
+    public void activate(Key key, boolean force) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
+
+        // we re-do the check completely from scratch intentionally as it may happen (e.g. old central) that the pre-check is
+        // not performed, *or* that processes have not been properly stopped, *or* processes have been unintentionally (or
+        // intentionally) started in the meantime.
+        var check = preActivateCheck(key);
+        if (!check.runningForbidden.isEmpty()) {
+            if (!force) {
+                // we need to stop those processes right away.
+                throw new RuntimeException("Cannot activate as the pre-activation check failed; " + check.runningForbidden.size()
+                        + " processes which no longer exist are still running and need to be stopped.");
+            }
+            stopOffenders(check, imf);
+        }
 
         try (var handle = af.run(Actions.ACTIVATE, name, imf.getConfiguration().id, key.getTag())) {
             // record de-activation

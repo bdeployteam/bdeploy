@@ -101,7 +101,7 @@ class PublicApiV1Test {
         assertThrows(NotFoundException.class, () -> pir.getAllEndpoints(ica.uuid));
 
         master.getNamedMaster("demo").install(instance);
-        master.getNamedMaster("demo").activate(instance);
+        master.getNamedMaster("demo").activate(instance, false);
 
         SortedMap<String, EndpointsConfigurationApi> eps = pir.getAllEndpoints(ica.uuid);
         assertTrue(eps.containsKey("app"));

@@ -267,6 +267,7 @@ tasks.register('genDtos', GenerateTask) {
             'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
             'io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto',
             'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.InstanceActivateCheckDto',
             'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto',
             'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
             'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',

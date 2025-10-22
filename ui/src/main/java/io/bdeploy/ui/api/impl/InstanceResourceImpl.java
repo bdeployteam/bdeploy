@@ -64,6 +64,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
+import io.bdeploy.interfaces.configuration.instance.InstanceActivateCheckDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -698,12 +699,32 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void activate(String instanceId, String tag) {
+    public InstanceActivateCheckDto preActivate(String instanceId, String tag) {
+        InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
+        RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+
+        try {
+            return master.getNamedMaster(group).preActivate(instance.getKey());
+        } catch (WebApplicationException e) {
+            // preActivate only exists on servers > 7.7.x
+            if (e.getResponse().getStatus() != VersionMismatchFilter.CODE_VERSION_MISMATCH) {
+                throw e;
+            }
+
+            // it is an old server, so the check yields no result - activation will also just
+            // work as before, as activate will also not check on that server.
+            return new InstanceActivateCheckDto();
+        }
+    }
+
+    @Override
+    public void activate(String instanceId, String tag, boolean force) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
 
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        master.getNamedMaster(group).activate(instance.getKey());
+        master.getNamedMaster(group).activate(instance.getKey(), force);
 
         syncInstance(minion, rc, group, instanceId);
 

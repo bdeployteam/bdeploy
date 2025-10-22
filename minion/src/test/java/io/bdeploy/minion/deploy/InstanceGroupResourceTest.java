@@ -49,7 +49,7 @@ class InstanceGroupResourceTest {
         assertEquals(0, clientApps.clients.size());
 
         // Activate and check if we now get the desired result
-        master.activate(instance);
+        master.activate(instance, false);
         clientApps = resource.listAllClients(GROUP_NAME, runningOs);
         assertEquals(1, clientApps.clients.size());
 

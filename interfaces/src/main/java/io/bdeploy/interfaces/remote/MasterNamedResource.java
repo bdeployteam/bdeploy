@@ -9,10 +9,11 @@ import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceActivateCheckDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -55,12 +56,16 @@ public interface MasterNamedResource {
     @PUT
     public void install(Manifest.Key key);
 
+    @POST
+    @Path("/pre-activate")
+    public InstanceActivateCheckDto preActivate(Manifest.Key key);
+
     /**
      * @param key activates the previously installed master manifest.
      * @see #install(io.bdeploy.bhive.model.Manifest.Key)
      */
     @POST
-    public void activate(Manifest.Key key);
+    public void activate(Manifest.Key key, @QueryParam("force") boolean force);
 
     /**
      * @param key the installation to remove.

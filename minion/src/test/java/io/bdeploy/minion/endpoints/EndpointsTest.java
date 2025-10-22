@@ -60,7 +60,7 @@ class EndpointsTest {
 
         assertThrows(ClientErrorException.class, () -> common.getInstanceResource("demo").getAllEndpoints(id).isEmpty());
 
-        master.getNamedMaster("demo").activate(instance);
+        master.getNamedMaster("demo").activate(instance, false);
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(id).activeTag);
 
         master.getNamedMaster("demo").start(id, List.of("app"));

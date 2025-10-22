@@ -3,7 +3,7 @@ import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
 import { BdNotificationCardComponent } from '../bd-notification-card/bd-notification-card.component';
-import { NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { BdFormInputComponent } from '../bd-form-input/bd-form-input.component';
 import { FormsModule } from '@angular/forms';
 import { BdActionRowComponent } from '../bd-action-row/bd-action-row.component';
@@ -31,7 +31,7 @@ export interface BdDialogMessage<T> {
   /** Header shown at the top of the message */
   header: string;
 
-  /** Descriptive message */
+  /** Descriptive message - can contain HTML */
   message?: string;
 
   /** Template for the message used *instead* of the message. */

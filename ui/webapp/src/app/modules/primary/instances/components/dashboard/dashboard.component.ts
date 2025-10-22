@@ -1,12 +1,13 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { Component, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subscription, switchMap } from 'rxjs';
+import { finalize, take } from 'rxjs/operators';
 import { sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import {
   Actions,
   ApplicationConfiguration,
+  InstanceActivateCheckDto,
   InstanceDto,
   InstanceNodeConfigurationDto,
   InstanceStateRecord,
@@ -48,6 +49,7 @@ import { ClientNodeComponent } from './client-node/client-node.component';
 import { AsyncPipe } from '@angular/common';
 import { compareVersions, convert2String } from 'src/app/modules/core/utils/version.utils';
 import { MultiNodeComponent } from './multi-node/multi-node.component';
+import { BdDialogMessage } from '../../../../core/components/bd-dialog-message/bd-dialog-message.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -63,6 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly processesColumns = inject(ProcessesColumnsService);
   private readonly actions = inject(ActionsService);
   private readonly products = inject(ProductsService);
+  private readonly dialog = viewChild(BdDialogComponent);
   protected readonly instances = inject(InstancesService);
   protected readonly areas = inject(NavAreasService);
   protected readonly servers = inject(ServersService);
@@ -222,12 +225,59 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
+  private formatPreActivateMessage(apps: ApplicationConfiguration[], check: InstanceActivateCheckDto) {
+    const appMsgs = [];
+
+    for (const node of Object.keys(check.runningForbidden)) {
+      for (const app of check.runningForbidden[node]) {
+        const appName = apps.filter(a => a.id === app)?.map(a => a.name)?.at(0);
+        appMsgs.push(`<li>On <b>${node}</b>: <b>${appName}</b></li>`);
+      }
+    }
+
+    let msg = `${appMsgs.length} processes are still running, but have been removed from the configuration:</br><ul class="local-list list-inside list-disc p-2">`;
+
+    if (appMsgs.length > 10) {
+      msg += appMsgs.slice(0, 10).join('');
+      msg += `<li>... and ${appMsgs.length - 10} more</li>`;
+    } else {
+      msg += appMsgs.join();
+    }
+
+    msg += '</ul>';
+    return msg;
+  }
+
   protected doActivate(version: string) {
     this.activating$.next(true);
-    this.states
-      .activate(version)
-      .pipe(finalize(() => this.activating$.next(false)))
-      .subscribe();
+
+    forkJoin([this.allApplications$.pipe(take(1)), this.states.preActivate(version)]).pipe(switchMap(([apps, check]) => {
+        type QuestionResult = 'continue' | 'abort' | 'not-required'
+        let userQuestion: Observable<QuestionResult> = of('not-required');
+
+        if (Object.keys(check.runningForbidden).length) {
+          const m: BdDialogMessage<QuestionResult> = {
+            header: 'Running Applications',
+            message: this.formatPreActivateMessage(apps, check),
+            icon: 'deployed_code_alert',
+            actions: [
+              { name: 'Cancel activation', result: 'abort', confirm: false },
+              { name: 'Stop applications and continue', result: 'continue', confirm: true }
+            ]
+          };
+          userQuestion = this.dialog().message(m);
+        }
+
+        return userQuestion.pipe(switchMap((res) => {
+          if (res === 'abort') {
+            return of(null); // do nothing.
+          }
+
+          // force it in case we pressed continue. don't if we did not ask.
+          return this.states.activate(version, res === 'continue');
+        }));
+      }
+    ), finalize(() => this.activating$.next(false))).subscribe();
   }
 
   private getControlGroupDesc(app: ApplicationConfiguration): string {

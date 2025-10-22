@@ -15,4 +15,9 @@ export class ProcessSettingsPanel extends BasePanel {
   async getConfigureEndpointsPanel() {
     return createPanel(this.getDialog(), 'Configure Endpoints...', p => new ConfigureEndpointsPanel(p));
   }
+
+  async deleteProcess() {
+      await this.getDialog().getByRole('button', { name: 'Delete' }).click();
+  }
+
 }

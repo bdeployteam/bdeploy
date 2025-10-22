@@ -95,7 +95,7 @@ class MinionDeployTest {
         master.getNamedMaster("demo").install(instance);
         assertFalse(master.getNamedMaster("demo").getInstanceState(instanceId).installedTags.isEmpty());
 
-        master.getNamedMaster("demo").activate(instance);
+        master.getNamedMaster("demo").activate(instance, false);
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(instanceId).activeTag);
 
         // check the deployment info file for correct content
@@ -258,7 +258,7 @@ class MinionDeployTest {
         assertTrue(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
         master.getNamedMaster("demo").install(importedInstance);
         assertFalse(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
-        master.getNamedMaster("demo").activate(importedInstance);
+        master.getNamedMaster("demo").activate(importedInstance, false);
     }
 
 }

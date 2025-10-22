@@ -10,6 +10,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceActivateCheckDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
@@ -119,9 +120,14 @@ public interface InstanceResource {
     public void uninstall(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
 
     @GET
+    @Path("/{instance}/{tag}/pre-activate")
+    public InstanceActivateCheckDto preActivate(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
+
+    @GET
     @Path("/{instance}/{tag}/activate")
     @RequiredPermission(permission = Permission.WRITE)
-    public void activate(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
+    public void activate(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag,
+            @QueryParam("force") boolean force);
 
     @POST
     @Path("/{instance}/updateProductVersion/{target}")
