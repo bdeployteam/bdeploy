@@ -24,10 +24,10 @@ interface MarkedEvent {
 }
 
 @Component({
-    selector: 'app-node-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.css'],
-    imports: [NgClass, MatTooltip, AsyncPipe, DatePipe]
+  selector: 'app-node-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css'],
+  imports: [NgClass, MatTooltip, AsyncPipe, DatePipe],
 })
 export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   private readonly instances = inject(InstancesService);
@@ -77,12 +77,12 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
         this.curve = state.monitoring.cpuUsage;
         this.curveLabel = 'System CPU Usage';
         this.maxValue = 1.0; // system cpu load: 0.0 to 1.0
-        this.formatter = (n) => Math.round((n * 100 + Number.EPSILON) * 100) / 100 + '%';
+        this.formatter = (n) => (n * 100).toFixed(2) + '%';
       } else {
         this.curve = state.monitoring.loadAvg;
         this.curveLabel = 'Load Average';
         this.maxValue = state.monitoring.availableProcessors;
-        this.formatter = (n) => Math.round(((n + Number.EPSILON) * 100) / 100).toString();
+        this.formatter = (n) => n.toFixed(2);
       }
 
       this.maxLabel = 'Available CPUs: ' + state.monitoring.availableProcessors;
@@ -140,7 +140,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
         }
 
         this.events = eventsToRender;
-      }),
+      })
     );
   }
 
