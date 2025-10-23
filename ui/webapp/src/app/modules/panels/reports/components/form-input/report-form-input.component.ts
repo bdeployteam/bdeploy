@@ -4,7 +4,7 @@ import {
   ReportDescriptor,
   ReportParameterDescriptor,
   ReportParameterInputType,
-  ReportRequestDto
+  ReportRequestDto,
 } from 'src/app/models/gen.dtos';
 import { ReportsService } from 'src/app/modules/primary/reports/services/reports.service';
 import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
@@ -19,10 +19,10 @@ export interface ReportInputChange {
 }
 
 @Component({
-    selector: 'app-report-form-input',
-    templateUrl: './report-form-input.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BdFormInputComponent, MatTooltip, FormsModule, BdFormToggleComponent, BdFormSelectComponent]
+  selector: 'app-report-form-input',
+  templateUrl: './report-form-input.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BdFormInputComponent, MatTooltip, FormsModule, BdFormToggleComponent, BdFormSelectComponent],
 })
 export class ReportFormInputComponent implements OnInit, OnDestroy {
   protected readonly reports = inject(ReportsService);
@@ -56,7 +56,7 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.changed$
         .pipe(
-          filter((ch) => ch && this.param.dependsOn.indexOf(ch.key) !== -1),
+          filter((ch) => ch && this.param.dependsOn.includes(ch.key)),
           tap(() => {
             this.values = [];
             this.labels = [];
@@ -67,11 +67,7 @@ export class ReportFormInputComponent implements OnInit, OnDestroy {
           }),
           debounceTime(100),
           switchMap(() =>
-            this.reports.getParameterOptions(
-              this.param.parameterOptionsPath,
-              this.param.dependsOn,
-              this.request.params
-            )
+            this.reports.getParameterOptions(this.param.parameterOptionsPath, this.param.dependsOn, this.request.params)
           )
         )
         .subscribe((ps) => {

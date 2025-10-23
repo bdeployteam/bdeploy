@@ -10,7 +10,7 @@ import {
   TemplateRef,
   ViewChild,
   ViewChildren,
-  ViewEncapsulation
+  ViewEncapsulation,
 } from '@angular/core';
 import { FormsModule, NgControl, NgForm } from '@angular/forms';
 import { MatButtonToggle, MatButtonToggleChange, MatButtonToggleGroup } from '@angular/material/button-toggle';
@@ -27,14 +27,12 @@ import {
   ParameterConfigurationTarget,
   ParameterDescriptor,
   SystemConfiguration,
-  VariableType
+  VariableType,
 } from 'src/app/models/gen.dtos';
-import {
-  ContentCompletion
-} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
-  ACTION_OK
+  ACTION_OK,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
@@ -57,7 +55,7 @@ import {
   MatExpansionPanel,
   MatExpansionPanelDescription,
   MatExpansionPanelHeader,
-  MatExpansionPanelTitle
+  MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
 import { ClickStopPropagationDirective } from '../../../../../../core/directives/click-stop-propagation.directive';
@@ -90,38 +88,38 @@ interface ParameterGroup {
 }
 
 @Component({
-    selector: 'app-config-process-param-group',
-    templateUrl: './config-process-param-group.component.html',
-    styleUrls: ['./config-process-param-group.component.css'],
-    encapsulation: ViewEncapsulation.None,
-    imports: [
-        BdFormInputComponent,
-        EditCustomIdValidatorDirective,
-        EditUniqueValueValidatorDirective,
-        FormsModule,
-        TrimmedValidator,
-        BdFormSelectComponent,
-        MatAccordion,
-        MatExpansionPanel,
-        MatExpansionPanelHeader,
-        MatExpansionPanelTitle,
-        MatExpansionPanelDescription,
-        BdButtonComponent,
-        ClickStopPropagationDirective,
-        MatIcon,
-        NgClass,
-        ParamDescCardComponent,
-        MatCheckbox,
-        MatTooltip,
-        BdValueEditorComponent,
-      BdPopupDirective,
-        EditServerIssuesValidatorDirective,
-        MatDivider,
-        MatButtonToggleGroup,
-        MatButtonToggle,
-        HistoryProcessConfigComponent,
-        AsyncPipe,
-    ],
+  selector: 'app-config-process-param-group',
+  templateUrl: './config-process-param-group.component.html',
+  styleUrls: ['./config-process-param-group.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    BdFormInputComponent,
+    EditCustomIdValidatorDirective,
+    EditUniqueValueValidatorDirective,
+    FormsModule,
+    TrimmedValidator,
+    BdFormSelectComponent,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    BdButtonComponent,
+    ClickStopPropagationDirective,
+    MatIcon,
+    NgClass,
+    ParamDescCardComponent,
+    MatCheckbox,
+    MatTooltip,
+    BdValueEditorComponent,
+    BdPopupDirective,
+    EditServerIssuesValidatorDirective,
+    MatDivider,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    HistoryProcessConfigComponent,
+    AsyncPipe,
+  ],
 })
 export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly systems = inject(SystemsService);
@@ -261,7 +259,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       ])
         .pipe(skipWhile(([p, a, i]) => !p || !a || !i))
         .subscribe(([process, application, instance, system]) => {
-          const previewProcess = structuredClone(process)
+          const previewProcess = structuredClone(process);
           previewProcess.start.parameters.forEach((p) => {
             const descriptor = application.descriptor.startCommand.parameters.find((appParam) => appParam.id === p.id);
             const lv = this.expandPreview
@@ -631,7 +629,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
   private doUpdateConditionals(p: ParameterPair) {
     const id = p.descriptor ? p.descriptor.id : p.value?.id;
-    if(!id) {
+    if (!id) {
       return;
     }
     for (const grp of this.groups$.value) {
@@ -726,12 +724,16 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     }
 
     // search name, description, parameter, value.
-    return (
-      [p.descriptor?.name, p.descriptor?.longDescription, p.descriptor?.parameter, p.value?.id, getPreRenderable(p.value?.value, p.descriptor?.type)]
-        .join(' ')
-        .toLowerCase()
-        .indexOf(this.search.toLowerCase()) !== -1
-    );
+    return [
+      p.descriptor?.name,
+      p.descriptor?.longDescription,
+      p.descriptor?.parameter,
+      p.value?.id,
+      getPreRenderable(p.value?.value, p.descriptor?.type),
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(this.search.toLowerCase());
   }
 
   protected hasGroupSearchMatch(g: ParameterGroup): boolean {

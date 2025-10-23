@@ -21,7 +21,7 @@ import {
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateParameter,
-  VariableType
+  VariableType,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -33,7 +33,7 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProcessEditService {
   private readonly edit = inject(InstanceEditService);
@@ -56,7 +56,7 @@ export class ProcessEditService {
       this.areas.panelRoute$,
       this.products.products$,
       this.edit.state$,
-      this.edit.stateApplications$
+      this.edit.stateApplications$,
     ]).subscribe(([route, prods, state, apps]) => {
       const nodeName = route?.params['node'];
       const process = route?.params['process'];
@@ -451,7 +451,7 @@ export class ProcessEditService {
     );
 
     // no value or value could not be resolved fully.
-    if (value === null || value === undefined || value.indexOf('{{') !== -1) {
+    if (value === null || value === undefined || value.includes('{{')) {
       return param.condition.must === ParameterConditionType.BE_EMPTY;
     }
 
@@ -459,7 +459,7 @@ export class ProcessEditService {
       case ParameterConditionType.EQUAL:
         return value === param.condition.value;
       case ParameterConditionType.CONTAIN:
-        return value.indexOf(param.condition.value) !== -1;
+        return value.includes(param.condition.value);
       case ParameterConditionType.START_WITH:
         return value.startsWith(param.condition.value);
       case ParameterConditionType.END_WITH:

@@ -18,7 +18,7 @@ import {
   encodeFilePath,
   findFilePath,
   getDescendants,
-  toFileList
+  toFileList,
 } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { FilesBulkService } from '../../services/files-bulk.service';
@@ -26,9 +26,7 @@ import { FileListEntry, FilePath, FilesService } from '../../services/files.serv
 import { InstancesService } from '../../services/instances.service';
 
 import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
-import {
-  BdServerSyncButtonComponent
-} from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
+import { BdServerSyncButtonComponent } from '../../../../core/components/bd-server-sync-button/bd-server-sync-button.component';
 import { MatDivider } from '@angular/material/divider';
 import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-button/bd-panel-button.component';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
@@ -84,10 +82,24 @@ const colAvatar: BdDataColumn<FilePath, string> = {
 };
 
 @Component({
-    selector: 'app-files-display',
-    templateUrl: './files-display.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdServerSyncButtonComponent, MatDivider, BdPanelButtonComponent, BdButtonComponent, BdDialogContentComponent, BdNoDataComponent, MatTabGroup, MatTab, BdBreadcrumbsComponent, BdDataTableComponent, AsyncPipe]
+  selector: 'app-files-display',
+  templateUrl: './files-display.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdServerSyncButtonComponent,
+    MatDivider,
+    BdPanelButtonComponent,
+    BdButtonComponent,
+    BdDialogContentComponent,
+    BdNoDataComponent,
+    MatTabGroup,
+    MatTab,
+    BdBreadcrumbsComponent,
+    BdDataTableComponent,
+    AsyncPipe,
+  ],
 })
 export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly instances = inject(InstancesService);
@@ -104,7 +116,13 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
   private searchTerm = '';
   private subscription: Subscription;
 
-  private readonly searchColumns: BdDataColumn<FilePath, unknown>[] = [colAvatar, colPath, colItems, colModTime, colSize];
+  private readonly searchColumns: BdDataColumn<FilePath, unknown>[] = [
+    colAvatar,
+    colPath,
+    colItems,
+    colModTime,
+    colSize,
+  ];
   private readonly defaultColumns: BdDataColumn<FilePath, unknown>[];
   private readonly colDownload: BdDataColumn<FilePath, string> = {
     id: 'download',
@@ -151,7 +169,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
           return;
         }
         this.load(inst);
-      },
+      }
     );
 
     this.subscription.add(
@@ -169,7 +187,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
           }
 
           const remoteDirEntries: FileListEntry[] = remoteDirectory.entries.map(
-            (entry) => ({ directory: remoteDirectory, entry } as FileListEntry),
+            (entry) => ({ directory: remoteDirectory, entry } as FileListEntry)
           );
           remoteDirs.push(constructFilePath(remoteDirectory.minion, remoteDirEntries, (p) => this.selectPath(p)));
         }
@@ -177,7 +195,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
 
         this.remoteDirs$.next(remoteDirs);
         this.loading$.next(false);
-      }),
+      })
     );
 
     this.subscription.add(
@@ -207,7 +225,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
         }
 
         this.bdOnSearch(this.searchTerm);
-      }),
+      })
     );
 
     this.subscription.add(this.searchService.register(this));
@@ -223,7 +241,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
       this.columns = this.searchColumns;
       const filtered = this.selectedPath?.children
         ?.flatMap((child) => getDescendants(child))
-        ?.filter((descendant) => descendant.name.indexOf(this.searchTerm) !== -1);
+        ?.filter((descendant) => descendant.name.includes(this.searchTerm));
       this.records$.next(filtered);
     } else {
       this.columns = this.defaultColumns;
@@ -281,7 +299,7 @@ export class FilesDisplayComponent implements OnInit, OnDestroy, BdSearchable {
         `The ${r.children.length ? 'folder (and its contents)' : 'file'} <strong>${r.path}</strong> on node <strong>${
           r.minion
         }</strong> will be deleted permanently.`,
-        'delete',
+        'delete'
       )
       .subscribe((confirm) => {
         if (confirm) {

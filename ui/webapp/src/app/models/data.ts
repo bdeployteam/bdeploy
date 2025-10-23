@@ -187,7 +187,7 @@ export function bdDataDefaultSearch<T>(search: string, records: T[], columns: Bd
   const lowerSearch = search.toLowerCase();
   return records.filter((r) => {
     const value = createSearchString(r, columns);
-    return value.indexOf(lowerSearch) !== -1;
+    return value.includes(lowerSearch);
   });
 }
 

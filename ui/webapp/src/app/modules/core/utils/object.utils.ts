@@ -61,9 +61,9 @@ export function expandVar(variable: string, variables: Record<string, string>, s
 export function performTemplateVariableSubst(
   value: string,
   variables: Record<string, string>,
-  status: StatusMessage[],
+  status: StatusMessage[]
 ): string {
-  if (!!value && value.indexOf('{{T:') !== -1) {
+  if (!!value && value.includes('{{T:')) {
     let found = true;
     while (found) {
       const rex = new RegExp(/{{T:([^}]*)}}/).exec(value);

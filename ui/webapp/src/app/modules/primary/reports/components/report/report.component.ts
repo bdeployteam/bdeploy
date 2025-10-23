@@ -14,18 +14,18 @@ import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 
 @Component({
-    selector: 'app-report',
-    templateUrl: './report.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        BdDialogComponent,
-        BdDialogToolbarComponent,
-        BdButtonComponent,
-        RouterLink,
-        BdDataGroupingComponent,
-        BdDialogContentComponent,
-        BdDataTableComponent,
-    ],
+  selector: 'app-report',
+  templateUrl: './report.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdButtonComponent,
+    RouterLink,
+    BdDataGroupingComponent,
+    BdDialogContentComponent,
+    BdDataTableComponent,
+  ],
 })
 export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly cd = inject(ChangeDetectorRef);
@@ -67,7 +67,7 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
           }));
         this.rows = this.calculateRows(desc.columns, generated?.rows || [], search);
         this.cd.markForCheck();
-      },
+      }
     );
     this.subscription.add(this.search.register(this));
   }
@@ -83,13 +83,13 @@ export class ReportComponent implements OnInit, OnDestroy, BdSearchable {
   private calculateRows(
     columns: ReportColumnDescriptor[],
     rows: Record<string, string>[],
-    search: string,
+    search: string
   ): Record<string, string>[] {
     if (!search) {
       return rows;
     }
     return rows.filter((row) =>
-      columns.some((col) => row[col.key]?.length && row[col.key].toUpperCase().indexOf(search.toUpperCase()) !== -1),
+      columns.some((col) => row[col.key]?.length && row[col.key].toUpperCase().includes(search.toUpperCase()))
     );
   }
 

@@ -21,10 +21,22 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-user-group-admin-detail',
-    templateUrl: './user-group-admin-detail.component.html',
-    styleUrls: ['./user-group-admin-detail.component.css'],
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatIcon, MatTooltip, AddUserToGroupComponent, BdDataTableComponent, MatDivider, BdButtonComponent, BdPanelButtonComponent, AsyncPipe]
+  selector: 'app-user-group-admin-detail',
+  templateUrl: './user-group-admin-detail.component.html',
+  styleUrls: ['./user-group-admin-detail.component.css'],
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    MatIcon,
+    MatTooltip,
+    AddUserToGroupComponent,
+    BdDataTableComponent,
+    MatDivider,
+    BdButtonComponent,
+    BdPanelButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -78,7 +90,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
         }
         const group = groups.find((g) => g.id === route.params['group']);
         this.group$.next(group);
-      },
+      }
     );
     this.subscription.add(
       combineLatest([this.authAdmin.users$, this.group$]).subscribe(([users, group]) => {
@@ -86,10 +98,10 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
           this.users = [];
           this.suggestedUsers = [];
         } else {
-          this.users = users.filter((u) => u.groups.indexOf(group.id) >= 0);
-          this.suggestedUsers = users.filter((u) => u.groups.indexOf(group.id) === -1);
+          this.users = users.filter((u) => u.groups.includes(group.id));
+          this.suggestedUsers = users.filter((u) => !u.groups.includes(group.id));
         }
-      }),
+      })
     );
   }
 

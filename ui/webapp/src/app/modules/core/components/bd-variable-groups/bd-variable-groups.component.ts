@@ -10,7 +10,7 @@ import {
   OnInit,
   Output,
   TemplateRef,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,14 +23,12 @@ import {
   LinkedValueConfiguration,
   SystemConfiguration,
   VariableConfiguration,
-  VariableType
+  VariableType,
 } from 'src/app/models/gen.dtos';
-import {
-  ContentCompletion
-} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
-  ACTION_OK
+  ACTION_OK,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
@@ -48,7 +46,7 @@ import {
   MatExpansionPanel,
   MatExpansionPanelDescription,
   MatExpansionPanelHeader,
-  MatExpansionPanelTitle
+  MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 import { BdButtonComponent } from '../bd-button/bd-button.component';
 import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
@@ -66,11 +64,34 @@ interface ConfigVariable {
 }
 
 @Component({
-    selector: 'app-bd-variable-groups',
-    templateUrl: './bd-variable-groups.component.html',
-    styleUrl: './bd-variable-groups.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, BdFormInputComponent, TrimmedValidator, EditUniqueValueValidatorDirective, BdValueEditorComponent, MatDivider, BdFormSelectComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, BdButtonComponent, ClickStopPropagationDirective, MatIcon, NgClass, BdVariableDescCardComponent, MatCheckbox, MatTooltip, MatRipple, BdPopupDirective, AsyncPipe]
+  selector: 'app-bd-variable-groups',
+  templateUrl: './bd-variable-groups.component.html',
+  styleUrl: './bd-variable-groups.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    BdFormInputComponent,
+    TrimmedValidator,
+    EditUniqueValueValidatorDirective,
+    BdValueEditorComponent,
+    MatDivider,
+    BdFormSelectComponent,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    BdButtonComponent,
+    ClickStopPropagationDirective,
+    MatIcon,
+    NgClass,
+    BdVariableDescCardComponent,
+    MatCheckbox,
+    MatTooltip,
+    MatRipple,
+    BdPopupDirective,
+    AsyncPipe,
+  ],
 })
 export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly cd = inject(ChangeDetectorRef);
@@ -171,7 +192,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
   }
 
   protected doCopyAll(group: VariableGroup) {
-    this.copyVariables(group.pairs.map(p => ({ name: p.value.id, value: p.value })));
+    this.copyVariables(group.pairs.map((p) => ({ name: p.value.id, value: p.value })));
   }
 
   protected doPaste(group: VariableGroup) {
@@ -184,7 +205,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     }
     const newVars: VariableConfiguration[] = [];
     let updateCount = 0;
-    const varList = group.pairs.map(p => p.value);
+    const varList = group.pairs.map((p) => p.value);
     clipboardVars.forEach((configVar: ConfigVariable) => {
       const v = varList.find((iv) => iv.id === configVar.value.id);
       if (v) {
@@ -297,7 +318,7 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     const varList = this.variableList;
     varList.splice(
       varList.findIndex((x) => x.id === p.value.id),
-      1,
+      1
     );
 
     this.checked = this.checked.filter((cv) => cv.value.id !== p.value.id);
@@ -343,19 +364,17 @@ export class BdVariableGroupsComponent implements OnInit, OnDestroy, BdSearchabl
     }
 
     // search by name, description, value, id.
-    return (
-      [
-        p.descriptor?.name,
-        p.descriptor?.longDescription,
-        p.value?.id,
-        p.value?.description,
-        p.value?.value?.value,
-        p.value?.value?.linkExpression,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .indexOf(this.search.toLowerCase()) !== -1
-    );
+    return [
+      p.descriptor?.name,
+      p.descriptor?.longDescription,
+      p.value?.id,
+      p.value?.description,
+      p.value?.value?.value,
+      p.value?.value?.linkExpression,
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(this.search.toLowerCase());
   }
 
   protected hasOptionals(g: VariableGroup): boolean {

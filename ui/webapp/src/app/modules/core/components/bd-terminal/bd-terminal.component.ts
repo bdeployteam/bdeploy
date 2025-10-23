@@ -30,7 +30,7 @@ const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
   selector: 'app-bd-terminal',
   templateUrl: './bd-terminal.component.html',
   styleUrls: ['./bd-terminal.component.css'],
-  imports: [NgTerminalModule]
+  imports: [NgTerminalModule],
 })
 export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly searchService = inject(SearchService);
@@ -61,7 +61,7 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
       (event: KeyboardEvent) =>
         // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
         // and default Ctrl-C/X has nothing to copy) and Ctrl-V
-        !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1
+        !event.ctrlKey || 'cxv'.includes(event.key.toLowerCase())
     );
 
     this.term.underlying.options.fontSize = 12;

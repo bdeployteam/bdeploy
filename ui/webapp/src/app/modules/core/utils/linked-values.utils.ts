@@ -16,9 +16,7 @@ import { getAppOs } from './manifest.utils';
 const ARITH_EXPR = `(\\+|-|)?[0-9]+`;
 
 export function createLinkedValue(val: string): LinkedValueConfiguration {
-  return !!val && val.indexOf('{{') !== -1
-    ? { linkExpression: val, value: null }
-    : { linkExpression: null, value: val };
+  return !!val && val.includes('{{') ? { linkExpression: val, value: null } : { linkExpression: null, value: val };
 }
 
 export function getPreRenderable(config: LinkedValueConfiguration, type?: VariableType): string {

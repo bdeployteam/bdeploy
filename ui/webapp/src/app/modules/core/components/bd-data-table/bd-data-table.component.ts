@@ -15,7 +15,7 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection, MatSortHeader } from '@angular/material/sort';
@@ -29,10 +29,26 @@ import {
   bdDataDefaultSort,
   BdDataGrouping,
   bdSortGroups,
-  UNMATCHED_GROUP
+  UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { BdSearchable, SearchService } from '../../services/search.service';
-import { MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatFooterRowDef, MatFooterRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatFooterCellDef, MatFooterCell, MatCellDef, MatCell } from '@angular/material/table';
+import {
+  MatTable,
+  MatHeaderRowDef,
+  MatHeaderRow,
+  MatRowDef,
+  MatRow,
+  MatNoDataRow,
+  MatFooterRowDef,
+  MatFooterRow,
+  MatColumnDef,
+  MatHeaderCellDef,
+  MatHeaderCell,
+  MatFooterCellDef,
+  MatFooterCell,
+  MatCellDef,
+  MatCell,
+} from '@angular/material/table';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ClickStopPropagationDirective } from '../../directives/click-stop-propagation.directive';
@@ -82,12 +98,44 @@ const MAX_ROWS_PER_GROUP = 500;
  *  * Filtering (Searching, BdSearchable) with automatic SearchService registration
  */
 @Component({
-    selector: 'app-bd-data-table',
-    templateUrl: './bd-data-table.component.html',
-    styleUrls: ['./bd-data-table.component.css'],
-    encapsulation: ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatTable, MatSort, CdkDropList, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, CdkDrag, RouterLink, RouterLinkActive, MatNoDataRow, MatFooterRowDef, MatFooterRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatTooltip, MatCheckbox, ClickStopPropagationDirective, MatFooterCellDef, MatFooterCell, MatCellDef, MatCell, NgClass, MatIconButton, MatIcon, CdkDragHandle, BdDataComponentCellComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-bd-data-table',
+  templateUrl: './bd-data-table.component.html',
+  styleUrls: ['./bd-data-table.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatTable,
+    MatSort,
+    CdkDropList,
+    MatHeaderRowDef,
+    MatHeaderRow,
+    MatRowDef,
+    MatRow,
+    CdkDrag,
+    RouterLink,
+    RouterLinkActive,
+    MatNoDataRow,
+    MatFooterRowDef,
+    MatFooterRow,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatHeaderCell,
+    MatSortHeader,
+    MatTooltip,
+    MatCheckbox,
+    ClickStopPropagationDirective,
+    MatFooterCellDef,
+    MatFooterCell,
+    MatCellDef,
+    MatCell,
+    NgClass,
+    MatIconButton,
+    MatIcon,
+    CdkDragHandle,
+    BdDataComponentCellComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
   private readonly searchService = inject(SearchService);
@@ -449,8 +497,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       // create nodes for groups, recurse grouping.
       const result: Node<T>[] = [];
       for (const [key, value] of byGroupSorted) {
-        const searchMatchesGroup =
-          this.search?.length > 0 && key.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
+        const searchMatchesGroup = this.search?.length > 0 && key.toLowerCase().includes(this.search.toLowerCase());
         const children = this.generateModel(value, grouping.slice(1), sort, skipSearch || searchMatchesGroup);
         if (children?.length) {
           result.push({
@@ -483,13 +530,16 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // last step is to transform the raw input data into Node<T> which is then further processed
     // by the transformer callback of treeControl.
     this.hasMoreData = sortedData.length > this.maxRows;
-    return sortedData.slice(0, this.maxRows).map((i) => ({
-      nodeId: idCols?.length ? idCols.map((c) => c.data(i)).join('_') : this.nodeCnt++,
-      item: i,
-      groupOrFirstColumn: this._columns[0].data(i),
-      children: [],
-      checkForbidden: this.checkChangeForbidden(i)
-    } as Node<T>));
+    return sortedData.slice(0, this.maxRows).map(
+      (i) =>
+        ({
+          nodeId: idCols?.length ? idCols.map((c) => c.data(i)).join('_') : this.nodeCnt++,
+          item: i,
+          groupOrFirstColumn: this._columns[0].data(i),
+          children: [],
+          checkForbidden: this.checkChangeForbidden(i),
+        } as Node<T>)
+    );
   }
 
   protected trackNode(index: number, node: FlatNode<T>) {
@@ -530,7 +580,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     } else {
       const isChecked = this.isChecked(node);
 
-      if(isChecked) {
+      if (isChecked) {
         // if ALL are checked, we deselect all,
         this.checkSelection.deselect(node);
       } else {
@@ -540,7 +590,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
       const children = this.treeControl.getDescendants(node);
 
-      if(this.checkSelection.isSelected(node)) {
+      if (this.checkSelection.isSelected(node)) {
         this.checkSelection.select(...children);
       } else {
         this.checkSelection.deselect(...children);
@@ -552,7 +602,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   protected toggleCheckAll(cb: MatCheckbox) {
     const isChecked = this.isAnyChecked();
 
-    if(isChecked) {
+    if (isChecked) {
       this.checkSelection.deselect(...this.treeControl.dataNodes);
     } else {
       this.checkSelection.select(...this.treeControl.dataNodes);
@@ -609,7 +659,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   protected getDataAsStringFor(col: BdDataColumn<T, unknown>, record: T) {
-    if(!!record && !!col.data(record)) {
+    if (!!record && !!col.data(record)) {
       return col.data(record).toString();
     }
 
@@ -617,10 +667,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   protected getTooltipTextFor(col: BdDataColumn<T, unknown>, record: T) {
-      if(!!record && !!col.tooltip) {
-        return col.tooltip(record);
-      }
+    if (!!record && !!col.tooltip) {
+      return col.tooltip(record);
+    }
 
-      return this.getDataAsStringFor(col, record);
+    return this.getDataAsStringFor(col, record);
   }
 }

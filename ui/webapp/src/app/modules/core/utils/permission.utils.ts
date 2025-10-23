@@ -14,13 +14,13 @@ export function getGlobalOrLocalPermission(permissions: ScopedPermission[], scop
 
 export function getInheritedPermissions(user: UserInfo, userGroups: UserGroupInfo[]): ScopedPermission[] {
   return userGroups
-    .filter((userGroup) => user.groups.indexOf(userGroup.id) !== -1)
+    .filter((userGroup) => user.groups.includes(userGroup.id))
     .flatMap((userGroup) => userGroup.permissions);
 }
 
 export function getInheritedPermissionHint(user: UserInfo, userGroups: UserGroupInfo[], scope: string): string {
   const userGroupNames = userGroups
-    .filter((userGroup) => user.groups.indexOf(userGroup.id) !== -1)
+    .filter((userGroup) => user.groups.includes(userGroup.id))
     .filter((userGroup) => getGlobalOrLocalPermission(userGroup.permissions, scope))
     .map((userGroup) => userGroup.name);
   if (userGroupNames.length === 0) {
