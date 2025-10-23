@@ -16,6 +16,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.dto.InstanceProcessStatusDto;
+import io.bdeploy.ui.dto.MappedInstanceProcessStatusDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
@@ -49,15 +50,46 @@ public class ProcessResourceImpl implements ProcessResource {
         result.processToNode = new TreeMap<>();
 
         for (var app : result.processStates.keySet()) {
-            result.processToNode.put(app, instanceStatus.getNodeWhereAppIsDeployed(app));
+            // The getStatus() endpoint is here for backwards compatibility, and we expect only old servers and CLIs to use it.
+            // Seeing the messages bellow signify API misuse.
+            result.processToNode.put(app, instanceStatus.getSingleNodeThat(nodeStatus -> nodeStatus.isAppDeployed(app),
+                    "Cannot get status from app deployed on multiple nodes."));
 
-            var running = instanceStatus.getNodeWhereAppIsRunningOrScheduled(app);
+            var running = instanceStatus.getSingleNodeThat(nodeStatus -> nodeStatus.isAppRunningOrScheduled(app),
+                    "Cannot get status from app running or scheduled on multiple nodes.");
+
             if (running != null) {
                 // takes precedence
                 result.processToNode.put(app, running);
             }
         }
 
+        return result;
+    }
+
+    @Override
+    public MappedInstanceProcessStatusDto getMappedStatus() {
+        MasterNamedResource master = getMasterResource();
+        InstanceStatusDto instanceStatus = master.getStatus(instance);
+
+        MappedInstanceProcessStatusDto result = new MappedInstanceProcessStatusDto();
+        result.processStates = instanceStatus.getAppsOnServerNodesStatus();
+        result.multiNodeToRuntimeNode = new TreeMap<>();
+        result.processToNode = new TreeMap<>();
+
+        result.processStates.forEach((app, nodeToStatusMap) -> {
+            nodeToStatusMap.keySet().stream().findFirst().ifPresent(serverNode -> {
+                // taking the first server node in the map - either it is the single
+                // server node that this was configured to run on or it is
+                // a multi runtime node that this belongs to
+                String configuredNode = instanceStatus.identifyTopLevelNode(serverNode);
+                result.processToNode.put(app, configuredNode);
+                if (instanceStatus.isMultiNode(configuredNode)) {
+                    // assume all nodes in the status belong to this
+                    result.multiNodeToRuntimeNode.put(configuredNode, nodeToStatusMap.keySet());
+                }
+            });
+        });
         return result;
     }
 
@@ -124,9 +156,9 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public void writeToStdin(String processId, String data) {
+    public void writeToStdin(String processId, String node, String data) {
         MasterNamedResource master = getMasterResource();
-        master.writeToStdin(instance, processId, data);
+        master.writeToStdin(instance, processId, node, data);
     }
 
     private MasterNamedResource getMasterResource() {
@@ -139,13 +171,13 @@ public class ProcessResourceImpl implements ProcessResource {
     @Override
     public VerifyOperationResultDto verify(String appId) {
         MasterNamedResource master = getMasterResource();
-        return master.verify(instance, appId);
+        return master.verify(instance, appId, null);
     }
 
     @Override
     public void reinstall(String appId) {
         MasterNamedResource master = getMasterResource();
-        master.reinstall(instance, appId);
+        master.reinstall(instance, appId, null);
     }
 
 }

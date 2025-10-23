@@ -1,17 +1,11 @@
 <div class="flex justify-start">
-  @if (outdated$ | async) {
-    <div
-      class="local-chip local-outdated-chip"
-      matTooltip="The process is still running in a non-active version."
-      >
+  @if (isOutdated()) {
+    <div class="local-chip local-outdated-chip" [matTooltip]="tooltip()">
       Outdated
     </div>
   }
-  @if (!(outdated$ | async) && running$ | async) {
-    <div
-      class="local-chip local-ok-chip"
-      matTooltip="The process is running in the current version."
-      >
+  @if (!(isOutdated()) && isRunning()) {
+    <div class="local-chip local-ok-chip" [matTooltip]="tooltip()">
       OK
     </div>
   }

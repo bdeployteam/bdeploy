@@ -44,10 +44,9 @@ export class ProcessDetailsService implements OnDestroy {
       this.instances.active$,
       this.instances.activeNodeCfgs$,
     ]).subscribe(([route, states, instance, nodes]) => {
-      // don't subscribe to processToNode$ separately, as it will always trigger twice together with process states.
-      const app2node = this.processes.processToNode$.value;
-      const process = route?.params['process'];
-      if (!process || !app2node?.[process] || !instance || !nodes) {
+      const appId = route?.params['process'];
+      const nodeThisIsRunningOn = ProcessesService.identifyServerNode(states, appId, route?.params['node']);
+      if (!nodeThisIsRunningOn || !instance || !nodes) {
         this.zone.run(() => {
           this.processConfig$.next(null);
           this.processDetail$.next(null);
@@ -61,12 +60,13 @@ export class ProcessDetailsService implements OnDestroy {
         x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [],
       );
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
-      const app = allApps.find((a) => a?.id === process);
+      const app = allApps.find((a) => a?.id === appId);
+
 
       this.zone.run(() => {
         this.processConfig$.next(app);
 
-        if (!states?.[process]) {
+        if (!ProcessesService.get(states, nodeThisIsRunningOn)) {
           this.processDetail$.next(null);
           return;
         }
@@ -77,12 +77,10 @@ export class ProcessDetailsService implements OnDestroy {
       // if we're already performing a call, cancel it - only one detail at a time.
       this.detailsCall?.unsubscribe();
 
-      // now load the status details and popuplate the service data.
+      // now load the status details and populate the service data.
       this.detailsCall = this.http
         .get<ProcessDetailDto>(
-          `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.id)}/processes/${
-            app2node[process]
-          }/${process}`,
+          `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.id)}/processes/${nodeThisIsRunningOn}/${appId}`,
           NO_LOADING_BAR,
         )
         .pipe(

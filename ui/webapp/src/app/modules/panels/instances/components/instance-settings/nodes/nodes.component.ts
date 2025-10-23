@@ -20,6 +20,7 @@ import { AsyncPipe } from '@angular/common';
 
 interface NodeRow {
   name: string;
+  nodeType: NodeType;
   config: InstanceNodeConfigurationDto;
 }
 
@@ -70,7 +71,11 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
           }
 
           const config = state.config.nodeDtos.find((n) => n.nodeName === key);
-          const row = { name: key, config: config };
+          const row = {
+            name: key,
+            config: config,
+            nodeType: node.minionNodeType === MinionNodeType.MULTI ? NodeType.MULTI : NodeType.SERVER
+          };
           this.records.push(row);
           if (config) {
             this.checked.push(row);
@@ -81,7 +86,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
         for (const node of state.config.nodeDtos) {
           const hasNode = !!nodes[node.nodeName];
           if (!hasNode && node.nodeConfiguration.nodeType !== NodeType.CLIENT) {
-            const row = { name: node.nodeName, config: node };
+            const row = { name: node.nodeName, config: node, nodeType: node.nodeConfiguration.nodeType };
             this.records.push(row);
             this.checked.push(row);
           }
@@ -115,7 +120,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
     for (const row of rows) {
       if (!this.edit.state$.value?.config.nodeDtos.find((n) => n.nodeName === row.name)) {
         const inst = this.edit.current$.value;
-        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration, NodeType.SERVER));
+        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration, row.nodeType));
       }
     }
     this.hasPendingChanges = this.edit.hasPendingChanges();

@@ -1,6 +1,6 @@
 import { Component, HostBinding, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
-import { Actions, ApplicationConfiguration, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
+import { Actions, MappedInstanceProcessStatusDto, ProcessState } from 'src/app/models/gen.dtos';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ProcessesService } from '../../../services/processes.service';
 import { MatIcon } from '@angular/material/icon';
@@ -9,25 +9,26 @@ import { AsyncPipe, NgClass } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { BdDataColumn } from '../../../../../../models/data';
 import { CellComponent } from '../../../../../core/components/bd-data-component-cell/bd-data-component-cell.component';
+import { ProcessDisplayData } from '../../../services/processes-columns.service';
 
 @Component({
-    selector: 'app-process-status-icon',
-    templateUrl: './process-status-icon.component.html',
-    styleUrls: ['./process-status-icon.component.css'],
-    imports: [
-        MatIcon,
-        MatTooltip,
-        NgClass,
-        MatProgressSpinner,
-        AsyncPipe,
-    ],
+  selector: 'app-process-status-icon',
+  templateUrl: './process-status-icon.component.html',
+  styleUrls: ['./process-status-icon.component.css'],
+  imports: [
+    MatIcon,
+    MatTooltip,
+    NgClass,
+    MatProgressSpinner,
+    AsyncPipe
+  ]
 })
-export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy, CellComponent<ApplicationConfiguration, string> {
+export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy, CellComponent<ProcessDisplayData, string> {
   private readonly processes = inject(ProcessesService);
   private readonly actions = inject(ActionsService);
 
-  @Input() record: ApplicationConfiguration;
-  @Input() column: BdDataColumn<ApplicationConfiguration, string>;
+  @Input() record: ProcessDisplayData;
+  @Input() column: BdDataColumn<ProcessDisplayData, string>;
   @HostBinding('attr.data-testid') dataCy: string;
 
   protected icon$ = new BehaviorSubject<string>('help');
@@ -50,7 +51,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy,
   ngOnInit(): void {
     this.subscription = combineLatest([
       this.processes.processStates$,
-      this.change$,
+      this.change$
     ]).subscribe(([ps, _]) => {
       if (this.record) {
         this.id$.next(this.record.id);
@@ -67,39 +68,53 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy,
     this.subscription?.unsubscribe();
   }
 
-  private update(ps: Record<string, ProcessStatusDto>) {
-    const state = ProcessesService.get(ps, this.record.id);
-    if (!state) {
+  private update(ps: MappedInstanceProcessStatusDto) {
+    const states = ProcessesService.getAppStates(ps, this.record.id);
+    if (!states) {
       this.next('help', null, 'Unknown', 'local-unknown');
       return;
     }
 
-    this.dataCy = state.processState;
+    if (this.record.serverNode) {
+      const processState = states[this.record.serverNode].processState;
+      this.dataCy = processState;
 
-    switch (state.processState) {
-      case ProcessState.STOPPED:
-        return this.next('stop', null, 'Stopped', 'local-stopped');
-      case ProcessState.STOPPED_START_PLANNED:
-        return this.next(null, 'start-scheduled', 'Process scheduled to start', 'local-stopped');
-      case ProcessState.RUNNING_NOT_STARTED:
-        return this.next(null, 'start-scheduled', 'Process starting', 'local-running');
-      case ProcessState.RUNNING:
-        return this.next('favorite', null, 'Running', 'local-running');
-      case ProcessState.RUNNING_UNSTABLE:
-        return this.next('favorite', null, 'Running (Recently Crashed)', 'local-crashed');
-      case ProcessState.RUNNING_NOT_ALIVE:
-        return this.next(
-          'heart_broken',
-          null,
-          'Process liveness probe reported a problem in the running process',
-          'local-crashed'
-        );
-      case ProcessState.RUNNING_STOP_PLANNED:
-        return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');
-      case ProcessState.CRASHED_WAITING:
-        return this.next('report_problem', null, 'Crashed (Restart pending)', 'local-crashed');
-      case ProcessState.CRASHED_PERMANENTLY:
-        return this.next('error', null, 'Crashed (Too many retries, stopped)', 'local-crashed');
+      switch (processState) {
+        case ProcessState.STOPPED:
+          return this.next('stop', null, 'Stopped', 'local-stopped');
+        case ProcessState.STOPPED_START_PLANNED:
+          return this.next(null, 'start-scheduled', 'Process scheduled to start', 'local-stopped');
+        case ProcessState.RUNNING_NOT_STARTED:
+          return this.next(null, 'start-scheduled', 'Process starting', 'local-running');
+        case ProcessState.RUNNING:
+          return this.next('favorite', null, 'Running', 'local-running');
+        case ProcessState.RUNNING_UNSTABLE:
+          return this.next('favorite', null, 'Running (Recently Crashed)', 'local-crashed');
+        case ProcessState.RUNNING_NOT_ALIVE:
+          return this.next(
+            'heart_broken',
+            null,
+            'Process liveness probe reported a problem in the running process',
+            'local-crashed'
+          );
+        case ProcessState.RUNNING_STOP_PLANNED:
+          return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');
+        case ProcessState.CRASHED_WAITING:
+          return this.next('report_problem', null, 'Crashed (Restart pending)', 'local-crashed');
+        case ProcessState.CRASHED_PERMANENTLY:
+          return this.next('error', null, 'Crashed (Too many retries, stopped)', 'local-crashed');
+      }
+    } else {
+      const totalProcesses = Object.entries(states).length;
+      const nrOfAppsRunning = Object.entries(states)
+        .map(entry => (ProcessesService.isRunning(entry[1].processState) ? 1 : 0) as number)
+        .reduce((a, b) => a + b, 0);
+
+      if (0 == nrOfAppsRunning) {
+        return this.next('stop', null, `0/${totalProcesses} are running`, 'local-stopped');
+      } else {
+        return this.next('favorite', null, `${nrOfAppsRunning}/${totalProcesses}`, 'local-running');
+      }
     }
   }
 

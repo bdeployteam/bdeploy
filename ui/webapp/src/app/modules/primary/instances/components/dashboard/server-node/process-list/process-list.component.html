@@ -1,5 +1,5 @@
 <app-bd-data-display
-  [records]="node.nodeConfiguration.applications"
+  [records]="processList()"
   [columns]="columns"
   [grid]="gridWhen$ | async"
   [grouping]="groupingWhen$ | async"
@@ -10,7 +10,7 @@
   [checkMode]="bulkMode"
   [checked]="(bulk.selection$ | async)[node.nodeName] || []"
   (checkedChange)="bulk.update(node.nodeName, $event)"
-  >
+>
   <ng-template #dataDisplayExtraCardDetails let-record="record">
     @for (param of getPinnedParameters(record); track doTrack($index, param)) {
       <mat-icon class="bd-small-icon" matTooltip="Pinned Parameter" [matTooltipShowDelay]="1000">push_pin</mat-icon>

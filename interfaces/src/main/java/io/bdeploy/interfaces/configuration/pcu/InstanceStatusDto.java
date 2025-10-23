@@ -5,12 +5,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.ws.rs.WebApplicationException;
 
 /**
  * Holds the deployment and runtime status of an entire instance.
@@ -20,8 +27,10 @@ public class InstanceStatusDto {
     /** The unique ID of the instance */
     private final String instanceId;
 
-    /** Node status informations. Key = NAME of the node */
-    public final Map<String, InstanceNodeStatusDto> node2Applications = new ConcurrentHashMap<>();
+    /** Node status information. Key = NAME of the node */
+    private final Map<String, InstanceNodeStatusDto> node2Applications = new ConcurrentHashMap<>();
+
+    private final Map<String, Set<String>> multiNodeToRuntimeNode = new ConcurrentHashMap<>();
 
     /**
      * Creates a new status DTO for the given instance.
@@ -70,87 +79,43 @@ public class InstanceStatusDto {
         node2Applications.put(minion, nodeStatus);
     }
 
+    public synchronized void add(String multiNodeName, String runtimeNode, InstanceNodeStatusDto nodeStatus) {
+        add(runtimeNode, nodeStatus);
+        multiNodeToRuntimeNode.computeIfAbsent(multiNodeName, key -> new TreeSet<>()).add(runtimeNode);
+    }
+
+    public InstanceNodeStatusDto getNodeStatus(String serverNode) {
+        return node2Applications.get(serverNode);
+    }
+
     /**
-     * Returns whether or not an application with the given UID is running or scheduled on any node.
+     * Returns whether an application with the given UID is running or scheduled on any node.
      *
      * @param applicationId
      *            the application identifier
      * @return {@code true} if it is running and {@code false} otherwise
      */
     public boolean isAppRunningOrScheduled(String applicationId) {
-        return getNodeWhereAppIsRunningOrScheduled(applicationId) != null;
+        return !getNodesWhereAppIsRunningOrScheduled(applicationId).isEmpty();
     }
 
     /**
      * Returns the node where this application is running or scheduled on.
      *
-     * @param applicationId
-     *            the application identifier
-     * @return the name of the node or {@code null} if not running
+     * @param applicationId the application identifier
+     * @return the names of the node or an empty set if not running anywhere
      */
-    public String getNodeWhereAppIsRunningOrScheduled(String applicationId) {
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            String nodeName = entry.getKey();
-            InstanceNodeStatusDto node = entry.getValue();
-            if (node.isAppRunningOrScheduled(applicationId)) {
-                return nodeName;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the node where this application is running or scheduled on.
-     *
-     * @param applicationId
-     *            the application identifier
-     * @return the name of the node or {@code null} if not running
-     */
-    public String getNodeWhereAppIsRunning(String applicationId) {
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            String nodeName = entry.getKey();
-            InstanceNodeStatusDto node = entry.getValue();
-            if (node.isAppRunning(applicationId)) {
-                return nodeName;
-            }
-        }
-        return null;
+    public Set<String> getNodesWhereAppIsRunningOrScheduled(String applicationId) {
+        return getNodesThat(instanceNodeStatusDto -> instanceNodeStatusDto.isAppRunningOrScheduled(applicationId));
     }
 
     /**
      * Returns a collection of nodes where at least one application is currently running.
      *
-     * @return the list of nodes running at least one application
+     * @return the set of nodes running at least one application
      */
-    public Collection<String> getNodesWhereAppsAreRunningOrScheduled() {
-        Set<String> nodes = new TreeSet<>();
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            String nodeName = entry.getKey();
-            InstanceNodeStatusDto nodeDto = entry.getValue();
-            if (!nodeDto.areAppsRunningOrScheduled()) {
-                continue;
-            }
-            nodes.add(nodeName);
-        }
-        return nodes;
-    }
-
-    /**
-     * Returns the node where the active version has this application deployed.
-     *
-     * @param applicationId
-     *            the application identifier
-     * @return the name of the node
-     */
-    public String getNodeWhereAppIsDeployed(String applicationId) {
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            String nodeName = entry.getKey();
-            InstanceNodeStatusDto nodeDto = entry.getValue();
-            if (nodeDto.isAppDeployed(applicationId)) {
-                return nodeName;
-            }
-        }
-        return null;
+    public Set<String> getNodesWhereAppsAreRunningOrScheduled() {
+        return getNodesThat(InstanceNodeStatusDto::areAppsRunningOrScheduled);
     }
 
     /**
@@ -177,21 +142,101 @@ public class InstanceStatusDto {
     }
 
     /**
+     * Returns a map of statuses indexed by the app = UID.
+     * The second level map is each process indexed by the name of the SERVER node this
+     * process is running on.
+     *
+     */
+    public Map<String, Map<String, ProcessStatusDto>> getAppsOnServerNodesStatus() {
+        Map<String, Map<String, ProcessStatusDto>> statusMap = new HashMap<>();
+
+        // Add all deployed applications of the active tag.
+        node2Applications.forEach((nodeName, nodeDto) -> {
+            if (nodeDto.activeTag != null) {
+                ProcessListDto list = nodeDto.deployed.get(nodeDto.activeTag);
+                list.deployed.forEach((appId, processStatusDto) ->
+                        statusMap.computeIfAbsent(appId, k -> new HashMap<>()).put(nodeName, processStatusDto));
+            }
+        });
+
+        // Now put all running applications. Overwrites previous state.
+        node2Applications.forEach((nodeName, nodeDto) -> {
+            nodeDto.runningOrScheduled.forEach((appId, processStatusDto) ->
+                    statusMap.computeIfAbsent(appId, k -> new HashMap<>()).put(nodeName, processStatusDto));
+        });
+        return statusMap;
+    }
+
+    /**
      * Returns a collection of nodes where at least one application is deployed in the active version.
+     * You must supply an explanation in case there are multiple entries that match.
      *
      * @return a collection of nodes
      */
     public Collection<String> getNodesWithApps() {
-        List<String> nodes = new ArrayList<>();
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            String nodeName = entry.getKey();
-            InstanceNodeStatusDto status = entry.getValue();
-            if (!status.hasApps()) {
-                continue;
-            }
-            nodes.add(nodeName);
+        return getNodesThat(InstanceNodeStatusDto::hasApps);
+    }
+
+    public String getSingleNodeThat(Predicate<InstanceNodeStatusDto> condition, String multipleMatchedExceptionDetail) {
+        return getSingleNodeThat(condition, () -> multipleMatchedExceptionDetail);
+    }
+
+    public String getSingleNodeThat(Predicate<InstanceNodeStatusDto> condition, Supplier<String> multipleMatchedExceptionDetailSupplier) {
+        Set<String> nodeNames = getNodesThat(condition);
+
+        // none of the nodes matched the condition
+        if (nodeNames.isEmpty()) {
+            return null;
         }
-        return nodes;
+
+        // wrong usage of the api; because no node was specified and yet this app is on multiple
+        if (nodeNames.size() > 1) {
+            throw new WebApplicationException(null == multipleMatchedExceptionDetailSupplier
+                    ? "Found multiple nodes that match the required condition. "
+                    : multipleMatchedExceptionDetailSupplier.get());
+        }
+
+        return nodeNames.iterator().next();
+    }
+
+    public boolean hasAtLeastOneNodeThat(Predicate<InstanceNodeStatusDto> condition) {
+        return node2Applications.entrySet().stream().anyMatch(entry -> condition.test(entry.getValue()));
+    }
+
+    public Map<String, List<String>> getAppsGroupedByNodeOnWhichTheyRun(List<String> applicationIds) {
+        Map<String, List<String>> groupedByNode = new TreeMap<>();
+
+        for (var applicationId : applicationIds) {
+            // Find node where the application is running
+            Optional<String> node = node2Applications.entrySet().stream()
+                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
+                            && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
+                    .map(Map.Entry::getKey).findFirst();
+
+            if (node.isEmpty()) {
+                continue; // ignore - not deployed.
+            }
+
+            groupedByNode.computeIfAbsent(node.get(), n -> new ArrayList<>()).add(applicationId);
+        }
+
+        return groupedByNode;
+    }
+
+    public String identifyTopLevelNode(String nodeName) {
+        return multiNodeToRuntimeNode.entrySet().stream()
+                .filter(entry -> entry.getValue().contains(nodeName))
+                .map(Map.Entry::getKey)
+                .findAny().orElse(nodeName);
+    }
+
+    public boolean isMultiNode(String nodeName) {
+        return multiNodeToRuntimeNode.containsKey(nodeName);
+    }
+
+    private Set<String> getNodesThat(Predicate<InstanceNodeStatusDto> condition) {
+        return node2Applications.entrySet().stream().filter(entry -> condition.test(entry.getValue())).map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
 }

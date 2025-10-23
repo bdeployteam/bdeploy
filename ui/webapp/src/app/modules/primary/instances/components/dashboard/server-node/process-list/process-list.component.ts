@@ -1,10 +1,11 @@
-import { AfterViewInit, Component, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, Input, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { BehaviorSubject, filter, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
   InstanceNodeConfigurationListDto,
+  NodeType,
   ParameterConfiguration
 } from 'src/app/models/gen.dtos';
 import { BdDataDisplayComponent } from 'src/app/modules/core/components/bd-data-display/bd-data-display.component';
@@ -13,12 +14,12 @@ import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { InstancesService } from '../../../../services/instances.service';
 import { ProcessesBulkService } from '../../../../services/processes-bulk.service';
-import { ProcessesColumnsService } from '../../../../services/processes-columns.service';
-import { PortsService } from './../../../../services/ports.service';
+import { ProcessDisplayData, ProcessesColumnsService } from '../../../../services/processes-columns.service';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
+import { ProcessesService } from '../../../../services/processes.service';
 
 interface PinnedParameter {
   name: string;
@@ -26,40 +27,52 @@ interface PinnedParameter {
 }
 
 export const CONTROL_GROUP_COL_ID = 'ctrlGroup';
+
 @Component({
-    selector: 'app-node-process-list',
-    templateUrl: './process-list.component.html',
+  selector: 'app-node-process-list',
+  templateUrl: './process-list.component.html',
   imports: [BdDataDisplayComponent, MatIcon, MatTooltip, AsyncPipe]
 })
 export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly appCols = inject(ProcessesColumnsService);
   private readonly cardViewService = inject(CardViewService);
-  private readonly ports = inject(PortsService);
+  private readonly processesService = inject(ProcessesService);
   private readonly instances = inject(InstancesService);
   private readonly systems = inject(SystemsService);
   protected readonly bulk = inject(ProcessesBulkService);
 
-  private readonly processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration, string> = {
+  private readonly processCtrlGroupColumn: BdDataColumn<ProcessDisplayData, string> = {
     id: CONTROL_GROUP_COL_ID,
     name: 'Control Group',
     data: (r) => this.getControlGroup(r),
     width: '120px',
-    showWhen: '(min-width:1410px)',
+    showWhen: '(min-width:1410px)'
   };
 
   @Input() node: InstanceNodeConfigurationDto;
+  @Input({ required: false }) composite = false;
   @Input() bulkMode: boolean;
   @Input() gridWhen$: BehaviorSubject<boolean>;
-  @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
+  @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ProcessDisplayData>[]>;
 
-  @ViewChild(BdDataDisplayComponent) private readonly data: BdDataDisplayComponent<ApplicationConfiguration>;
+  @ViewChild(BdDataDisplayComponent) private readonly data: BdDataDisplayComponent<ProcessDisplayData>;
 
+  protected processList = signal([]);
   protected columns = [...this.appCols.defaultProcessesColumns];
 
-  protected getRecordRoute = (row: ApplicationConfiguration) => [
-    '',
-    { outlets: { panel: ['panels', 'instances', 'process', row.id] } },
-  ];
+  protected getRecordRoute = (row: ProcessDisplayData) => {
+    if (this.composite) {
+      return [
+        '',
+        { outlets: { panel: ['panels', 'instances', 'multi-node-process', row.id] } }
+      ];
+    } else {
+      return [
+        '',
+        { outlets: { panel: ['panels', 'instances', 'process', row.id] } }
+      ];
+    }
+  };
 
   protected isCardView: boolean;
   protected presetKeyValue = 'processList';
@@ -74,8 +87,25 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngAfterViewInit(): void {
-    // active ports states reacts to *all* other state changes, so we use this as update trigger.
-    this.subscription = this.ports.activePortStates$.subscribe(() => this.data.redraw());
+    this.subscription = this.processesService.processStates$.subscribe((instanceProcessStates) => {
+      const processList: ProcessDisplayData[] = [];
+      this.node.nodeConfiguration.applications.forEach(appConfig => {
+        if (this.node.nodeConfiguration.nodeType == NodeType.MULTI) {
+          if (this.composite) {
+            processList.push(appConfig);
+          } else {
+            instanceProcessStates?.multiNodeToRuntimeNode[this.node.nodeName]?.forEach(runtimeNode => {
+              processList.push({ ...appConfig, serverNode: runtimeNode });
+            });
+          }
+        } else {
+          processList.push({ ...appConfig, serverNode: this.node.nodeName });
+        }
+      });
+
+      this.processList.set(processList);
+      this.data.redraw();
+    });
   }
 
   ngOnDestroy(): void {
@@ -88,14 +118,14 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
 
   protected getPinnedParameters(record: ApplicationConfiguration): PinnedParameter[] {
     const app = this.nodes?.applications?.find(
-      (a) => a.key.name === record.application?.name && a.key.tag === record.application?.tag,
+      (a) => a.key.name === record.application?.name && a.key.tag === record.application?.tag
     );
     const params = app?.descriptor?.startCommand?.parameters;
     return record.start.parameters
       .filter((p) => p.pinned)
       .map((p) => ({
         name: params?.find((x) => x.id === p.id)?.name,
-        value: this.getPinnedParameterValue(record, p),
+        value: this.getPinnedParameterValue(record, p)
       }));
   }
 
@@ -113,9 +143,9 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
       record,
       {
         config: instanceConfiguration,
-        nodeDtos,
+        nodeDtos
       },
-      system?.config,
+      system?.config
     );
   }
 

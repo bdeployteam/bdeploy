@@ -1,0 +1,41 @@
+.local-control-button {
+    width: 64px;
+    height: 64px;
+}
+
+.local-control-button > div > button {
+    height: 64px !important;
+}
+
+.local-unknown {
+    color: var(--bd-text-secondary);
+}
+
+.local-running {
+    color: var(--bd-text-success);
+}
+
+.local-stopped {
+    color: var(--bd-text-secondary);
+}
+
+.local-crashed {
+    color: var(--bd-warn);
+}
+
+.local-chip {
+    text-transform: uppercase;
+    border-radius: 3px;
+    padding: 3px 6px;
+    display: inline;
+}
+
+.local-outdated-chip {
+    background-color: var(--bd-warn);
+    color: var(--bd-warn-contrast);
+}
+
+.local-ok-chip {
+    background-color: var(--bd-text-success);
+    color: var(--bd-warn-contrast);
+}

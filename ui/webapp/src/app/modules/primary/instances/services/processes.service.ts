@@ -1,14 +1,15 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone, inject } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, Observable, Subscription, combineLatest, debounceTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
+  ApplicationStartType,
   InstanceDto,
-  InstanceProcessStatusDto,
+  MappedInstanceProcessStatusDto,
   ProcessState,
   ProcessStatusDto,
-  VerifyOperationResultDto,
+  VerifyOperationResultDto
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NO_LOADING_BAR } from 'src/app/modules/core/utils/loading-bar.util';
@@ -17,8 +18,11 @@ import { GroupsService } from '../../groups/services/groups.service';
 import { ServersService } from '../../servers/services/servers.service';
 import { InstancesService } from './instances.service';
 
+
+export type StartType = 'Instance' | 'Manual' | 'Confirmed Manual';
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ProcessesService {
   private readonly cfg = inject(ConfigService);
@@ -30,8 +34,7 @@ export class ProcessesService {
   private readonly zone = inject(NgZone);
 
   public loading$ = new BehaviorSubject<boolean>(true);
-  public processStates$ = new BehaviorSubject<Record<string, ProcessStatusDto>>(null);
-  public processToNode$ = new BehaviorSubject<Record<string, string>>({} as Record<string, string>);
+  public processStates$ = new BehaviorSubject<MappedInstanceProcessStatusDto>(null);
   public processStatesLoadTime$ = new BehaviorSubject<number>(null);
 
   private instance: InstanceDto;
@@ -42,15 +45,77 @@ export class ProcessesService {
   private loadCancelCount = 0;
   private loadWarnIssued = false;
 
-  public static get(states: Record<string, ProcessStatusDto>, processId: string): ProcessStatusDto {
-    if (!states) {
+
+  /**
+   * Returns a single process status.
+   * The node name, if specified will must be a SERVER node, otherwise this will return null.
+   * If not specified, it will be assumed this is configured on a SERVER node and if that is
+   * not the case, this will return null
+   *
+   * @param instanceProcessStatus
+   * @param appId
+   * @param nodeName
+   */
+  public static get(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string, nodeName?: string): ProcessStatusDto {
+    // if we don't know the states
+    if (!instanceProcessStatus) {
       return null;
     }
 
-    return states[processId];
+    const targetNode: string = ProcessesService.identifyServerNode(instanceProcessStatus, appId, nodeName);
+    if (!!targetNode && !!instanceProcessStatus.processStates[appId]) {
+      return instanceProcessStatus.processStates[appId][targetNode];
+    }
+
+    return null;
   }
 
-  public static isRunning(status: ProcessState) {
+  public static getAppStates(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string): Record<string, ProcessStatusDto> {
+    // if we don't know the states
+    if (!instanceProcessStatus) {
+      return null;
+    }
+
+    return instanceProcessStatus.processStates[appId];
+  }
+
+  public static getNumberOfProcesses(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string): number {
+    const appStates = ProcessesService.getAppStates(instanceProcessStatus, appId);
+    return appStates ? Object.entries(appStates).length : 0;
+  }
+
+  /**
+   * This method ensured that it supplies a server node so that the (appId, result) is valid for doing calls
+   * that require to identify a server node.
+   * If nodeName is supplied it is assumed the caller already has that name from a context which points to that
+   * app making sense on that node, and only a check to make sure that node is a not a multi node will be done.
+   *
+   * @param instanceProcessStatus
+   * @param appId
+   * @param nodeName
+   */
+  public static identifyServerNode(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string, nodeName?: string): string {
+    if (!!appId && !!instanceProcessStatus) {
+      // HINT: processToNode contains app->configuredNode mapping and can return a fictional node
+      const configuredNode = nodeName ? nodeName : instanceProcessStatus.processToNode[appId];
+      return Object.hasOwn(instanceProcessStatus.multiNodeToRuntimeNode, configuredNode) ? null : configuredNode;
+
+    }
+
+    return null;
+  }
+
+  public static confirmAppIsConfiguredOnMultiNode(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string): string {
+    if (instanceProcessStatus?.processToNode[appId]) {
+      const node = instanceProcessStatus.processToNode[appId];
+
+      return Object.hasOwn(instanceProcessStatus.multiNodeToRuntimeNode, node) ? node : null;
+    }
+
+    return null;
+  }
+
+  public static isRunning(status: ProcessState): boolean {
     return (
       status === ProcessState.RUNNING ||
       status === ProcessState.RUNNING_NOT_STARTED ||
@@ -58,13 +123,6 @@ export class ProcessesService {
       status === ProcessState.RUNNING_UNSTABLE ||
       status === ProcessState.RUNNING_NOT_ALIVE
     );
-  }
-
-  public static getPort(states: Record<number, boolean>, port: number): boolean {
-    if (!states) {
-      return false;
-    }
-    return states[port];
   }
 
   private readonly apiPath = (group: string, instance: string) =>
@@ -92,7 +150,7 @@ export class ProcessesService {
           });
 
           this.reload();
-        },
+        }
       );
   }
 
@@ -144,9 +202,9 @@ export class ProcessesService {
 
     const group = this.groups.current$.value;
     const call = this.http
-      .get<InstanceProcessStatusDto>(
-        `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}`,
-        NO_LOADING_BAR,
+      .get<MappedInstanceProcessStatusDto>(
+        `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}/mapped`,
+        NO_LOADING_BAR
       )
       .pipe(
         finalize(() => {
@@ -157,12 +215,11 @@ export class ProcessesService {
             this.loading$.next(false);
           });
         }),
-        measure('Load Process States'),
+        measure('Load Process States')
       )
       .subscribe((p) => {
         this.zone.run(() => {
-          this.processToNode$.next(p.processToNode);
-          this.processStates$.next(p.processStates);
+          this.processStates$.next(p);
           this.processStatesLoadTime$.next(Date.now()); // local time wanted.
         });
       });
@@ -193,14 +250,14 @@ export class ProcessesService {
   public verify(pid: string): Observable<VerifyOperationResultDto> {
     return this.http.post<VerifyOperationResultDto>(
       `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/verify/${pid}`,
-      null,
+      null
     );
   }
 
   public reinstall(pid: string): Observable<unknown> {
     return this.http.post<boolean>(
       `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/reinstall/${pid}`,
-      null,
+      null
     );
   }
 
@@ -220,5 +277,16 @@ export class ProcessesService {
     return this.http
       .get(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/restartAll`)
       .pipe(finalize(() => this.reload()));
+  }
+
+  public static formatStartType(type: ApplicationStartType): StartType {
+    switch (type) {
+      case ApplicationStartType.INSTANCE:
+        return 'Instance';
+      case ApplicationStartType.MANUAL:
+        return 'Manual';
+      case ApplicationStartType.MANUAL_CONFIRM:
+        return 'Confirmed Manual';
+    }
   }
 }

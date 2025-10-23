@@ -156,14 +156,26 @@
                 </app-bd-no-data>
               }
               @for (node of serverNodes$ | async; track node) {
-                <app-instance-server-node
-                  [node]="node"
-                  [gridWhen$]="gridMode$"
-                  [groupingWhen$]="grouping$"
-                  [collapsedWhen$]="collapsed$"
-                  [narrowWhen$]="narrow$"
-                  [bulkMode]="bulkBtn.toggle && bulkBtn.rla?.isActive"
-                ></app-instance-server-node>
+                @if (node.nodeConfiguration.nodeType !== NodeType.MULTI) {
+                  <app-instance-server-node
+                    [node]="node"
+                    [gridWhen$]="gridMode$"
+                    [groupingWhen$]="grouping$"
+                    [collapsedWhen$]="collapsed$"
+                    [narrowWhen$]="narrow$"
+                    [bulkMode]="bulkBtn.toggle && bulkBtn.rla?.isActive"
+                  ></app-instance-server-node>
+                }
+                @if (node.nodeConfiguration.nodeType === NodeType.MULTI) {
+                  <app-instance-multi-node
+                    [node]="node"
+                    [gridWhen$]="gridMode$"
+                    [groupingWhen$]="grouping$"
+                    [collapsedWhen$]="collapsed$"
+                    [narrowWhen$]="narrow$"
+                    [bulkMode]="bulkBtn.toggle && bulkBtn.rla?.isActive"
+                  ></app-instance-multi-node>
+                }
               }
               @if (clientNode$ | async; as node) {
                 <app-instance-client-node

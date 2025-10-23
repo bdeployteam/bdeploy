@@ -116,7 +116,7 @@ class MinionDeployTest {
         } while (status.getAppStatus().get("app").processState != ProcessState.RUNNING);
 
         assertTrue(status.isAppRunningOrScheduled("app"));
-        assertEquals(ProcessState.RUNNING, status.node2Applications.get("master").getStatus("app").processState);
+        assertEquals(ProcessState.RUNNING, status.getNodeStatus("master").getStatus("app").processState);
 
         ProcessDetailDto details = master.getNamedMaster("demo").getProcessDetailsFromNode(instanceId, "app", "master");
         assertNotNull(details);

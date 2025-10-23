@@ -1,0 +1,200 @@
+<app-bd-dialog [hideContentWhenLoading]="false">
+  <app-bd-dialog-toolbar [panel]="true" header="{{ processConfig?.name }}">
+    <div class="flex-auto"></div>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button
+      [text]='isProductAvailable() ? "Jump to Configuration" : "Product not available"'
+      icon="settings"
+      tooltipPosition="below"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async) || !isProductAvailable()"
+      (click)="
+          areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, instances.current$.value.instanceConfiguration.id], ['panels', 'instances', 'config', 'process', nodeCfg.nodeName, processConfig.id])
+        "
+    ></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    @if (!(servers.isCurrentInstanceSynchronized$ | async)) {
+      <app-bd-notification-card
+        icon="history"
+        [type]="'warning'"
+        [dismissable]="false"
+        header="Server Not Synchronized"
+      >
+        <div class="text-justify">
+          The managed server hosting this instance is not synchronized, runtime details are unavailable. Please
+          synchronize the server to see additional details.
+        </div>
+      </app-bd-notification-card>
+    }
+    @if (processConfig) {
+      <div class="p-3 grid grid-cols-[22px_80px_auto] gap-2.5 items-center">
+        <mat-icon class="bd-secondary-text">fingerprint</mat-icon>
+        <div class="bd-secondary-text">Process ID</div>
+        <div class="bd-secondary-text">
+          <app-bd-identifier [showCopyButton]="true" [id]="processConfig?.id"></app-bd-identifier>
+        </div>
+        <mat-icon>flight_takeoff</mat-icon>
+        <div>Start Type</div>
+        <div>{{ startType }}</div>
+        <mat-icon>favorite_outline</mat-icon>
+        <div>Keep Alive</div>
+        <div>{{ processConfig?.processControl.keepAlive ? 'Enabled' : 'Disabled' }}</div>
+      </div>
+    }
+    <mat-divider></mat-divider>
+    @if (!multiStatus) {
+      <div class="bd-hint-text mt-2.5">
+        No process details available.
+      </div>
+    }
+    @if (multiStatus) {
+      <div class="flex justify-center items-center gap-2.5 p-2.5">
+        <app-bd-button
+          class="local-control-button"
+          [collapsed]="false"
+          color="primary"
+          [disabled]="startDisabled$ | async"
+          (click)="start()"
+          matTooltip="Start Process"
+          data-testid="start-process"
+        >
+          @if (!(mappedStart$ | async)) {
+            <mat-icon class="material-symbols-filled flex-auto">play_arrow</mat-icon>
+          }
+          @if (mappedStart$ | async) {
+            <div class="flex-auto flex justify-center items-center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+            </div>
+          }
+        </app-bd-button>
+        <app-bd-button
+          class="local-control-button"
+          [collapsed]="false"
+          [disabled]="stopDisabled$ | async"
+          (click)="stop()"
+          matTooltip="Stop Process"
+          data-testid="stop-process"
+        >
+          @if (!(mappedStop$ | async)) {
+            <mat-icon class="material-symbols-filled flex-auto">stop</mat-icon>
+          }
+          @if (mappedStop$ | async) {
+            <div class="flex-auto flex justify-center items-center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+            </div>
+          }
+        </app-bd-button>
+        <app-bd-button
+          class="local-control-button"
+          [collapsed]="false"
+          [disabled]="restartDisabled$ | async"
+          (click)="restart()"
+          matTooltip="Restart Process"
+          data-testid="restart-process"
+        >
+          @if (!(mappedRestart$ | async)) {
+            <mat-icon class="material-symbols-filled flex-auto">replay</mat-icon>
+          }
+          @if (mappedRestart$ | async) {
+            <div class="flex-auto flex justify-center items-center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+            </div>
+          }
+        </app-bd-button>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="flex flex-col gap-2.5 pt-2.5">
+        <mat-divider></mat-divider>
+        <app-bd-expand-button text="Process Status" icon="cardiology" [expanded]="true">
+          <div class="p-2 grid grid-cols-[24px_auto_auto] gap-2.5 items-center">
+            <span></span>
+            <div class="bd-secondary-text font-bold">Total</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.total }}</div>
+
+            <mat-icon class="material-symbols-filled local-running">favorite</mat-icon>
+            <div class="bd-secondary-text">Running</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.RUNNING] }}</div>
+
+            <mat-icon class="material-symbols-filled local-crashed">favorite</mat-icon>
+            <div class="bd-secondary-text">Running (recently crashed)</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.RUNNING_UNSTABLE] }}</div>
+
+            <mat-icon class="material-symbols-filled local-crashed">heart_broken</mat-icon>
+            <div class="bd-secondary-text">Process liveness probe reported a problem in the running process</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.RUNNING_NOT_ALIVE] }}</div>
+
+            <mat-icon class="material-symbols-filled  local-stopped" svgIcon="start-scheduled"></mat-icon>
+            <div class="bd-secondary-text">Process scheduled to start</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.STOPPED_START_PLANNED] }}</div>
+
+            <mat-icon class="material-symbols-filled  local-running" svgIcon="start-scheduled"></mat-icon>
+            <div class="bd-secondary-text">Process starting</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.STOPPED_START_PLANNED] }}</div>
+
+            <mat-icon class="material-symbols-filled local-running" svgIcon="stop-scheduled"></mat-icon>
+            <div class="bd-secondary-text">Running (stop planned)</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.RUNNING_STOP_PLANNED] }}</div>
+
+            <mat-icon class="material-symbols-filled local-crashed">report_problem</mat-icon>
+            <div class="bd-secondary-text">Crashed (restart pending)</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.CRASHED_WAITING] }}</div>
+
+            <mat-icon class="material-symbols-filled local-crashed">error</mat-icon>
+            <div class="bd-secondary-text">Crashed (too many retries, stopped)</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.CRASHED_PERMANENTLY] }}</div>
+
+            <mat-icon class="material-symbols-filled local-stopped">stop</mat-icon>
+            <div class="bd-secondary-text">Stopped</div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.statusMap[ProcessState.STOPPED] }}</div>
+          </div>
+        </app-bd-expand-button>
+      </div>
+      <div class="flex flex-col gap-2.5 pt-2.5">
+        <mat-divider></mat-divider>
+        <app-bd-expand-button text="Port Status" icon="power" [expanded]="true">
+          @if (multiStatus.arePortStatesKnown) {
+            <div class="p-2 grid grid-cols-[24px_auto_auto] gap-2.5 items-center">
+              <mat-icon class="material-symbols-filled bd-success-text">done</mat-icon>
+              <div class="bd-secondary-text">Nodes with ports as expected</div>
+              <div class="bd-secondary-text text-right">{{ multiStatus.total - multiStatus.processesWithBrokenPorts }}</div>
+
+              <mat-icon class="material-symbols-filled bd-warning-text">warning</mat-icon>
+              <div class="bd-secondary-text">Nodes with ports in bad states</div>
+              <div class="bd-secondary-text text-right">{{ multiStatus.processesWithBrokenPorts }}</div>
+            </div>
+          } @else {
+            <app-bd-no-data>
+              <p>Port states are unknown.</p>
+            </app-bd-no-data>
+          }
+        </app-bd-expand-button>
+      </div>
+
+      <div class="flex flex-col gap-2.5 pt-2.5">
+        <mat-divider></mat-divider>
+        <app-bd-expand-button text="Actuality" icon="thermostat" [expanded]="true">
+          <div class="p-2 grid grid-cols-2 gap-2.5 gap-y-4">
+            <div class="text-left">
+              <div class="local-chip local-ok-chip">OK</div>
+            </div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.total - multiStatus.nrOfOutdatedApps }}</div>
+
+            <div class="text-left">
+              <div class="local-chip local-outdated-chip">Outdated</div>
+            </div>
+            <div class="bd-secondary-text text-right">{{ multiStatus.nrOfOutdatedApps }}</div>
+          </div>
+        </app-bd-expand-button>
+      </div>
+
+      <div class="flex flex-col gap-2.5 pt-2.5">
+        @if (pinnedParameters?.length) {
+          <mat-divider></mat-divider>
+          <app-bd-expand-button text="Pinned Parameters" icon="push_pin" [expanded]="true">
+            <app-bd-data-table [records]="pinnedParameters" [columns]="pinnedColumns"></app-bd-data-table>
+          </app-bd-expand-button>
+        }
+      </div>
+    }
+  </app-bd-dialog-content>
+</app-bd-dialog>

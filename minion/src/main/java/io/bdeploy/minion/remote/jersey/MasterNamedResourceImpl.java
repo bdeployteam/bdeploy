@@ -28,6 +28,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.util.StringUtil;
@@ -78,12 +79,12 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.pcu.BulkPortStatesDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
@@ -102,7 +103,6 @@ import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistoryRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
-import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord.OverallStatus;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -1104,21 +1104,20 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void start(String instanceId) {
         try (var handle = af.run(Actions.START_INSTANCE, name, instanceId)) {
-            InstanceStatusDto status = getStatus(instanceId);
-
-            // find all nodes where applications are deployed.
-            Collection<String> nodesWithApps = status.getNodesWithApps();
+            String activeTag = getInstanceState(instanceId).activeTag;
+            InstanceManifest imf = InstanceManifest.load(hive, instanceId, activeTag);
 
             List<Runnable> runnables = new ArrayList<>();
-            for (String nodeName : nodesWithApps) {
-                runnables.add(() -> {
-                    try {
-                        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).start(instanceId);
-                    } catch (Exception e) {
-                        log.error("Cannot start {} on node {}", instanceId, nodeName, e);
-                    }
-                });
-            }
+            imf.getInstanceNodeManifestKeys().forEach((configuredNode, value) ->
+                    nodes.getOnlineNodeConfigs(configuredNode).keySet().forEach(serverNode -> runnables.add(() -> {
+                            try {
+                                nodes.getNodeResourceIfOnlineOrThrow(serverNode, NodeProcessResource.class, context).start(instanceId);
+                            } catch (Exception e) {
+                                log.error("Cannot start {} on node {}", instanceId, serverNode, e);
+                            }
+                        })
+                    )
+            );
             rspos.runAndAwaitAll("Start-Instance", runnables, hive.getTransactions());
         }
     }
@@ -1126,26 +1125,28 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void start(String instanceId, List<String> applicationIds) {
         try (var handle = af.runMulti(Actions.START_PROCESS, name, instanceId, applicationIds)) {
-            InstanceStatusDto status = getStatus(instanceId);
-            Map<String, List<String>> groupedByNode = new TreeMap<>();
-
-            for (String applicationId : applicationIds) {
-                // Find minion where the application is deployed
-                String nodeName = status.getNodeWhereAppIsDeployed(applicationId);
-                if (nodeName == null) {
-                    throw new WebApplicationException("Application is not deployed on any node: " + applicationId,
-                            Status.INTERNAL_SERVER_ERROR);
-                }
-                groupedByNode.computeIfAbsent(nodeName, n -> new ArrayList<>()).add(applicationId);
-            }
+            String activeTag = getInstanceState(instanceId).activeTag;
+            InstanceManifest imf = InstanceManifest.load(hive, instanceId, activeTag);
 
             List<Runnable> runnables = new ArrayList<>();
-            for (var entry : groupedByNode.entrySet()) {
-                // Now launch this application on the node
-                runnables.add(() -> nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context)
-                        .start(instanceId, entry.getValue()));
-            }
-            rspos.runAndAwaitAll("Start-Processes", runnables, hive.getTransactions());
+            imf.getInstanceNodeManifestKeys().forEach((configuredNode, nodeManifestKey) -> {
+                InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeManifestKey);
+                nodes.getOnlineNodeConfigs(configuredNode).keySet().forEach(serverNode -> {
+                    List<String> targetAppsOnServerNode = inm.getConfiguration().applications.stream().map(a -> a.id)
+                            .filter(applicationIds::contains).toList();
+                    if (!targetAppsOnServerNode.isEmpty()) {
+                        runnables.add(() -> {
+                            try {
+                                nodes.getNodeResourceIfOnlineOrThrow(serverNode, NodeProcessResource.class, context)
+                                        .start(instanceId, targetAppsOnServerNode);
+                            } catch (Exception e) {
+                                log.error("Cannot start {} on node {}", instanceId, serverNode, e);
+                            }
+                        });
+                    }
+                });
+            });
+            rspos.runAndAwaitAll("Start-Instance", runnables, hive.getTransactions());
         }
     }
 
@@ -1175,27 +1176,19 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void stop(String instanceId, List<String> applicationIds) {
         try (var handle = af.runMulti(Actions.STOP_PROCESS, name, instanceId, applicationIds)) {
             InstanceStatusDto status = getStatus(instanceId);
-            Map<String, List<String>> groupedByNode = new TreeMap<>();
-
-            for (var applicationId : applicationIds) {
-                // Find node where the application is running
-                Optional<String> node = status.node2Applications.entrySet().stream()
-                        .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
-                                && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
-                        .map(Entry::getKey).findFirst();
-
-                if (node.isEmpty()) {
-                    continue; // ignore - not deployed.
-                }
-
-                groupedByNode.computeIfAbsent(node.get(), n -> new ArrayList<>()).add(applicationId);
-            }
+            Map<String, List<String>> groupedByNode = status.getAppsGroupedByNodeOnWhichTheyRun(applicationIds);
 
             List<Runnable> runnables = new ArrayList<>();
             for (var entry : groupedByNode.entrySet()) {
                 // Now stop the applications on the node
-                runnables.add(() -> nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context)
-                        .stop(instanceId, entry.getValue()));
+                runnables.add(() -> {
+                    try {
+                        nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context)
+                                .stop(instanceId, entry.getValue());
+                    } catch (Exception e) {
+                        log.error("Cannot stop {} on node {}", instanceId, entry.getKey(), e);
+                    }
+                });
             }
             rspos.runAndAwaitAll("Stop-Processes", runnables, hive.getTransactions());
         }
@@ -1267,7 +1260,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 NodeProcessResource spc = ResourceProvider.getVersionedResource(node.remote, NodeProcessResource.class, context);
                 try {
                     InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
-                    instanceStatus.add(nodeName, nodeStatus);
+                    if(node.minionNodeType == MinionDto.MinionNodeType.MULTI_RUNTIME) {
+                        instanceStatus.add(nodes.getMultiNodeConfigNameForRuntimeNode(nodeName), nodeName, nodeStatus);
+                    } else {
+                        instanceStatus.add(nodeName, nodeStatus);
+                    }
                 } catch (Exception e) {
                     log.error("Cannot fetch process status of {}", nodeName);
                     if (log.isDebugEnabled()) {
@@ -1283,13 +1280,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public ProcessDetailDto getProcessDetails(String instanceId, String appId) {
         try (var handle = af.run(Actions.READ_PROCESS_STATUS, name, instanceId, appId)) {
-            // Check if the application is running on a node
             InstanceStatusDto status = getStatus(instanceId); // this is super-slow (potentially), thus this method is deprecated.
-            String nodeName = status.getNodeWhereAppIsRunning(appId);
 
-            // Check if the application is deployed on a node
-            if (nodeName == null) {
-                nodeName = status.getNodeWhereAppIsDeployed(appId);
+            // The getProcessDetails() endpoint is here for backwards compatibility, and we expect only old servers and CLIs to use it.
+            // Seeing the messages bellow signify API misuse.
+            Supplier<String> exceptionMessageProducer = () -> "Cannot retrieve process details because app with id " + appId
+                    + " was found on multiple nodes.";
+
+            String nodeName = status.getSingleNodeThat(nodeStatus -> nodeStatus.isAppRunning(appId), exceptionMessageProducer);
+            if(null == nodeName) {
+                // Check if the application is deployed on a node
+                nodeName = status.getSingleNodeThat(nodeStatus -> nodeStatus.isAppDeployed(appId), exceptionMessageProducer);
             }
 
             // Application is nowhere deployed and nowhere running
@@ -1319,15 +1320,23 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public void writeToStdin(String instanceId, String applicationId, String data) {
-        InstanceStatusDto status = getStatus(instanceId);
-        String nodeName = status.getNodeWhereAppIsRunning(applicationId);
-        if (nodeName == null) {
-            throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
+    public void writeToStdin(String instanceId, String applicationId, String nodeName, String data) {
+        if(null != nodeName) {
+            ProcessDetailDto processDetail = getProcessDetailsFromNode(instanceId, applicationId, nodeName);
+            if (processDetail.status.processState.isRunningOrScheduled()) {
+                throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
+            }
+            nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
+                    .writeToStdin(instanceId, applicationId, data);
+        } else {
+            InstanceStatusDto status = getStatus(instanceId);
+            String serverNode = status.getSingleNodeThat(instanceNodeStatusDto -> instanceNodeStatusDto.isAppRunning(applicationId),
+                    () -> "Writing to STDIN requires a single node to be identified. App " + applicationId
+                            + " was found running on multiple nodes.");
+            if (serverNode == null) {
+                throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
+            }
         }
-
-        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).writeToStdin(instanceId, applicationId,
-                data);
     }
 
     @Override
@@ -1336,13 +1345,29 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public BulkPortStatesDto getPortStatesBulk(Map<String, List<Integer>> node2ports) {
+        BulkPortStatesDto result = new BulkPortStatesDto();
+        List<Runnable> actions = new ArrayList<>();
+
+        node2ports.forEach((configuredNode, ports) -> nodes.getOnlineNodeConfigs(configuredNode).keySet().forEach(
+                serverNode -> actions.add(
+                        () -> nodes.getNodeResourceIfOnlineOrThrow(serverNode, NodeDeploymentResource.class, context)
+                                .getPortStates(ports)
+                                .forEach((port, isUsed) -> result.saveNodeState(configuredNode, serverNode, port, isUsed)))));
+
+        rspos.runAndAwaitAll("Port-States", actions, hive.getTransactions());
+        return result;
+    }
+
+    @Override
     public MasterRuntimeHistoryDto getRuntimeHistory(String instanceId) {
         // we don't use the instance manifest to figure out nodes, since node assignment can change over versions. we simply query all nodes for now.
         MasterRuntimeHistoryDto history = new MasterRuntimeHistoryDto();
 
-        // all node names regardless of their status.
+        // all node names (server nodes) regardless of their status.
         Collection<String> nodeNames = nodes.getAllNodes().entrySet().stream()
-                .filter(e -> e.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI).map(e -> e.getKey()).toList();
+                .filter(entry -> entry.getValue().minionNodeType != MinionDto.MinionNodeType.MULTI)
+                .map(Entry::getKey).toList();
 
         List<Runnable> runnables = new ArrayList<>();
         for (String nodeName : nodeNames) {
@@ -1391,7 +1416,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void updateOverallStatus() {
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
-        Map<String, MinionStatusDto> nodeStatus = nodes.getAllNodeStatus();
 
         try (var handle = af.run(Actions.UPDATE_OVERALL_STATUS, name)) {
             for (Key imKey : imKeys) {
@@ -1420,41 +1444,44 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         continue; // don't check client.
                     }
 
-                    MinionStatusDto state = nodeStatus.get(nodeCfg.nodeName);
+                    Set<String> serverNodes = nodeCfg.nodeConfiguration.nodeType == NodeType.MULTI ?
+                            nodes.getMultiNodeRuntimeNodes(nodeCfg.nodeName).keySet(): Set.of(nodeCfg.nodeName);
 
-                    if (state == null || state.offline) {
-                        overallStatus = InstanceOverallStateRecord.OverallStatus.WARNING;
-                        overallStatusMessages.add("Node " + nodeCfg.nodeName + " is not available");
-                        continue;
-                    }
-
-                    InstanceNodeStatusDto statusOnNode = processStatus.node2Applications.get(nodeCfg.nodeName);
-
-                    for (var app : nodeCfg.nodeConfiguration.applications) {
-                        if (app.processControl.startType != ApplicationStartType.INSTANCE) {
+                    for (String serverNode : serverNodes) {
+                        MinionStatusDto state = nodes.getNodeStatus(serverNode);
+                        if (state == null || state.offline) {
+                            overallStatus = OverallStatus.WARNING;
+                            overallStatusMessages.add("Node " + nodeCfg.nodeName + " is not available");
                             continue;
                         }
 
-                        if (!statusOnNode.isAppDeployed(app.id)) {
-                            log.warn("Expected application is not currently deployed: {}", app.id);
-                            continue;
-                        }
+                        InstanceNodeStatusDto statusOnNode = processStatus.getNodeStatus(serverNode);
+                        for (var app : nodeCfg.nodeConfiguration.applications) {
+                            if (app.processControl.startType != ApplicationStartType.INSTANCE) {
+                                continue;
+                            }
 
-                        // instance application, check status
-                        ProcessStatusDto status = statusOnNode.getStatus(app.id);
-                        switch (status.processState) {
-                            case RUNNING, RUNNING_UNSTABLE:
-                                runningWithProbeApps++;
-                                break;
-                            case RUNNING_NOT_ALIVE:
-                                runningWithoutProbeApps++;
-                                break;
-                            case STOPPED, CRASHED_PERMANENTLY:
-                                stoppedApps++;
-                                break;
-                            case RUNNING_STOP_PLANNED, RUNNING_NOT_STARTED, CRASHED_WAITING, STOPPED_START_PLANNED:
-                                transitioningApps++;
-                                break;
+                            if (!statusOnNode.isAppDeployed(app.id)) {
+                                log.warn("Expected application is not currently deployed: {}", app.id);
+                                continue;
+                            }
+
+                            // instance application, check status
+                            ProcessStatusDto status = statusOnNode.getStatus(app.id);
+                            switch (status.processState) {
+                                case RUNNING, RUNNING_UNSTABLE:
+                                    runningWithProbeApps++;
+                                    break;
+                                case RUNNING_NOT_ALIVE:
+                                    runningWithoutProbeApps++;
+                                    break;
+                                case STOPPED, CRASHED_PERMANENTLY:
+                                    stoppedApps++;
+                                    break;
+                                case RUNNING_STOP_PLANNED, RUNNING_NOT_STARTED, CRASHED_WAITING, STOPPED_START_PLANNED:
+                                    transitioningApps++;
+                                    break;
+                            }
                         }
                     }
                 }
@@ -1566,26 +1593,30 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public VerifyOperationResultDto verify(String instanceId, String appId) {
+    public VerifyOperationResultDto verify(String instanceId, String appId, String serverNode) {
         Map.Entry<String, Manifest.Key> node = getInstanceNodeManifest(instanceId, appId);
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, node.getValue());
         String item = inm.getConfiguration().applications.stream().filter(a -> a.id.equals(appId))
                 .map(a -> a.application.toString()).findFirst().orElseThrow();
+        String targetNode = Optional.of(serverNode).orElse(node.getKey());
+
         try (var handle = af.run(Actions.VERIFY_APPLICATION, null, null, item)) {
-            NodeDeploymentResource ndr = nodes.getNodeResourceIfOnlineOrThrow(node.getKey(), NodeDeploymentResource.class,
+            NodeDeploymentResource ndr = nodes.getNodeResourceIfOnlineOrThrow(targetNode, NodeDeploymentResource.class,
                     context);
             return ndr.verify(appId, node.getValue());
         }
     }
 
     @Override
-    public void reinstall(String instanceId, String appId) {
+    public void reinstall(String instanceId, String appId, String serverNode) {
         Map.Entry<String, Manifest.Key> node = getInstanceNodeManifest(instanceId, appId);
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, node.getValue());
         String item = inm.getConfiguration().applications.stream().filter(a -> a.id.equals(appId))
                 .map(a -> a.application.toString()).findFirst().orElseThrow();
+        String targetNode = Optional.of(serverNode).orElse(node.getKey());
+
         try (var handle = af.run(Actions.REINSTALL_APPLICATION, null, null, item)) {
-            NodeDeploymentResource ndr = nodes.getNodeResourceIfOnlineOrThrow(node.getKey(), NodeDeploymentResource.class,
+            NodeDeploymentResource ndr = nodes.getNodeResourceIfOnlineOrThrow(targetNode, NodeDeploymentResource.class,
                     context);
             ndr.reinstall(appId, node.getValue());
         }
