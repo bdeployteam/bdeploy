@@ -16,15 +16,13 @@ import {
   ProcessControlGroupConfiguration,
   ProductDto,
   TemplateVariable,
-  TemplateVariableType
+  TemplateVariableType,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_OK
+  ACTION_OK,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
@@ -41,9 +39,7 @@ import { BdFormSelectComponent } from '../../../../../core/components/bd-form-se
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
-import {
-  BdFormTemplateVariableComponent
-} from '../../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { BdFormTemplateVariableComponent } from '../../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
 import { BdNoDataComponent } from '../../../../../core/components/bd-no-data/bd-no-data.component';
 import { AsyncPipe } from '@angular/common';
 
@@ -256,7 +252,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         continue;
       }
       for (const v of grpDef.groupVariables) {
-        if (this.allRequiredVariables.findIndex((t) => t.id === v.id) === -1) {
+        if (!this.allRequiredVariables.some((t) => t.id === v.id)) {
           this.allRequiredVariables.push(v);
         }
       }
@@ -483,7 +479,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           // pick the first valid node info
           first(),
           // filter out runtime nodes, those are not directly assignable.
-          filter(r => r[nodeName].minionNodeType !== MinionNodeType.MULTI_RUNTIME),
+          filter((r) => r[nodeName].minionNodeType !== MinionNodeType.MULTI_RUNTIME),
           // map the node info to the application key we need for our node.
           map((n) => {
             return {

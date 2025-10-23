@@ -136,7 +136,7 @@ export function gatherVariableExpansions(
         } as LinkVariable;
       })
       .forEach((v) => {
-        if (result.findIndex((x) => x.name === v.name) < 0) {
+        if (!result.some((x) => x.name === v.name)) {
           result.push(v);
         }
       });

@@ -13,11 +13,11 @@ import {
   ProcessDetailDto,
   ProcessProbeResultDto,
   ProcessState,
-  VariableType
+  VariableType,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
-  ACTION_OK
+  ACTION_OK,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
@@ -37,15 +37,11 @@ import { VerifyResultComponent } from '../verify-result/verify-result.component'
 import { PinnedParameterValueComponent } from './pinned-parameter-value/pinned-parameter-value.component';
 
 import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
-import {
-  ProcessStatusIconComponent
-} from '../../../../primary/instances/components/dashboard/process-status-icon/process-status-icon.component';
+import { ProcessStatusIconComponent } from '../../../../primary/instances/components/dashboard/process-status-icon/process-status-icon.component';
 import { MatDivider } from '@angular/material/divider';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
-import {
-  BdNotificationCardComponent
-} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { MatIcon } from '@angular/material/icon';
 import { BdIdentifierComponent } from '../../../../core/components/bd-identifier/bd-identifier.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -85,11 +81,30 @@ interface ProcessUiEndpoint extends HttpEndpoint {
 }
 
 @Component({
-    selector: 'app-process-status',
-    templateUrl: './process-status.component.html',
-    styleUrls: ['./process-status.component.css'],
-    encapsulation: ViewEncapsulation.None,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, ProcessStatusIconComponent, MatDivider, BdButtonComponent, BdDialogContentComponent, BdNotificationCardComponent, MatIcon, BdIdentifierComponent, MatProgressSpinner, MatTooltip, BdExpandButtonComponent, ProbeStatusComponent, BdNoDataComponent, BdPanelButtonComponent, BdDataTableComponent, AsyncPipe, DatePipe]
+  selector: 'app-process-status',
+  templateUrl: './process-status.component.html',
+  styleUrls: ['./process-status.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    ProcessStatusIconComponent,
+    MatDivider,
+    BdButtonComponent,
+    BdDialogContentComponent,
+    BdNotificationCardComponent,
+    MatIcon,
+    BdIdentifierComponent,
+    MatProgressSpinner,
+    MatTooltip,
+    BdExpandButtonComponent,
+    ProbeStatusComponent,
+    BdNoDataComponent,
+    BdPanelButtonComponent,
+    BdDataTableComponent,
+    AsyncPipe,
+    DatePipe,
+  ],
 })
 export class ProcessStatusComponent implements OnInit, OnDestroy {
   private readonly cfg = inject(ConfigService);
@@ -144,23 +159,23 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     this.restarting$,
     null,
     null,
-    this.pid$,
+    this.pid$
   );
 
   protected performing$ = combineLatest([this.mappedStart$, this.mappedStop$, this.mappedRestart$]).pipe(
-    map(([a, b, c]) => a || b || c),
+    map(([a, b, c]) => a || b || c)
   );
 
   // legacy warning. isRunning, etc. is available through trigger outdated$
   private readonly disabledBase = combineLatest([this.auth.isCurrentScopeWrite$, this.performing$, this.outdated$]);
   protected startDisabled$ = this.disabledBase.pipe(
-    map(([perm, perform, outdated]) => !perm || perform || outdated || this.isRunning || this.isStopping),
+    map(([perm, perform, outdated]) => !perm || perform || outdated || this.isRunning || this.isStopping)
   );
   protected stopDisabled$ = this.disabledBase.pipe(
-    map(([perm]) => !perm || this.isStopping || !(this.isRunning || this.isCrashedWaiting)),
+    map(([perm]) => !perm || this.isStopping || !(this.isRunning || this.isCrashedWaiting))
   );
   protected restartDisabled$ = this.disabledBase.pipe(
-    map(([perm, perform, outdated]) => !perm || perform || outdated || !(this.isRunning || this.isCrashedWaiting)),
+    map(([perm, perform, outdated]) => !perm || perform || outdated || !(this.isRunning || this.isCrashedWaiting))
   );
   protected verifyDisabled$ = combineLatest([
     this.auth.isCurrentScopeWrite$,
@@ -190,17 +205,17 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.outdated$.next(false);
       this.processConfig = config;
       this.startType = ProcessesService.formatStartType(this.processConfig?.processControl.startType);
-      this.nodeCfg = nodes?.nodeConfigDtos?.find(
-        (n) => n.nodeConfiguration.applications.findIndex((a) => a.id === config?.id) !== -1,
+      this.nodeCfg = nodes?.nodeConfigDtos?.find((n) =>
+        n.nodeConfiguration.applications.some((a) => a.id === config?.id)
       );
 
       const prod = this.nodeCfg?.nodeConfiguration?.product;
-      if (prod && products?.find(p => p.key.name === prod.name && p.key.tag === prod.tag)) {
+      if (prod && products?.find((p) => p.key.name === prod.name && p.key.tag === prod.tag)) {
         this.isProductAvailable.set(true);
       }
 
       const app = nodes?.applications?.find(
-        (a) => a.key.name === config?.application?.name && a.key.tag === config?.application?.tag,
+        (a) => a.key.name === config?.application?.name && a.key.tag === config?.application?.tag
       );
 
       const system = systems?.find((s) => s.key.name === active?.instanceConfiguration?.system?.name);
@@ -221,7 +236,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
                   config: active.instanceConfiguration,
                   nodeDtos: nodes?.nodeConfigDtos,
                 },
-                system?.config,
+                system?.config
               ),
               type: desc.type,
             };
@@ -239,7 +254,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
               config: active?.instanceConfiguration,
               nodeDtos: nodes?.nodeConfigDtos,
             },
-            system?.config,
+            system?.config
           );
           return !!preview && preview !== 'false' && !preview.match(/{{([^}]+)}}/g);
         });
@@ -299,11 +314,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.details.processConfig$
         .pipe(
           map((config) => config?.id),
-          distinctUntilChanged(),
+          distinctUntilChanged()
         )
         .subscribe(() => {
           this.dialog?.messageComp.reset();
-        }),
+        })
     );
   }
 

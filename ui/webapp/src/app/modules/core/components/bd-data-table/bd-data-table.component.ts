@@ -385,7 +385,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
         if (c.showWhen && !this.media.isMatched(c.showWhen)) {
           return false;
         }
-        if (this.grouping && this.grouping.findIndex((g) => g.definition?.associatedColumn === c.id) !== -1) {
+        if (this.grouping && this.grouping.some((g) => g.definition?.associatedColumn === c.id)) {
           return false;
         }
         return true;

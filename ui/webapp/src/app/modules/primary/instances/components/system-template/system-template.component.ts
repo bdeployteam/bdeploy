@@ -453,7 +453,7 @@ export class SystemTemplateComponent implements OnInit {
       }
 
       grp.groupVariables?.forEach((v) => {
-        if (tpl.requiredVariables.findIndex((x) => x.id === v.id) === -1) {
+        if (!tpl.requiredVariables.some((x) => x.id === v.id)) {
           tpl.requiredVariables.push(v);
         }
       });
@@ -461,7 +461,7 @@ export class SystemTemplateComponent implements OnInit {
 
     // according to the "new" requiredVariables list, clear out properties which should not be there (anymore)
     for (const varName of Object.keys(tpl.variables)) {
-      if (tpl.requiredVariables.findIndex((x) => x.id === varName) === -1) {
+      if (!tpl.requiredVariables.some((x) => x.id === varName)) {
         delete tpl.variables[varName];
       }
     }

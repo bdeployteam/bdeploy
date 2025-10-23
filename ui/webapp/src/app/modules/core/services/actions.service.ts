@@ -11,7 +11,7 @@ import {
   ObjectChangeDetails,
   ObjectChangeType,
   ObjectEvent,
-  ObjectScope
+  ObjectScope,
 } from '../../../models/gen.dtos';
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
@@ -89,7 +89,7 @@ export class ActionsService {
           this.actions$
             .pipe(
               skipWhile((a) => !a),
-              take(1),
+              take(1)
             )
             .subscribe((actions) => {
               if (c.event === ObjectEvent.CREATED) {
@@ -115,12 +115,12 @@ export class ActionsService {
   }
 
   private addAction(current: ActionBroadcastDto[], dto: ActionBroadcastDto) {
-    if (current.findIndex((e) => this.isSame(e, dto)) !== -1) {
+    if (current.some((e) => this.isSame(e, dto))) {
       // we have the exact action already. we're done.
       return;
     }
 
-    if (dto.exclusive && current.findIndex((e) => this.isSameAction(e.action, dto.action)) !== -1) {
+    if (dto.exclusive && current.some((e) => this.isSameAction(e.action, dto.action))) {
       console.log(`Exclusive action already present with different execution`, dto);
       return;
     }
@@ -161,7 +161,7 @@ export class ActionsService {
      * A list of items which are matched on server actions to determine whether the action is running.
      * If not given, the item field on events is ignored and any value will match.
      */
-    item?: Observable<string | string[]>,
+    item?: Observable<string | string[]>
   ): Observable<boolean> {
     // take into account all given observables of the request and provide defaults in case they are not set.
     const groupObs = groups || this.areas.groupContext$;
@@ -189,7 +189,7 @@ export class ActionsService {
     action: ActionBroadcastDto,
     groups: ActionAttribute,
     instances: ActionAttribute,
-    items: ActionAttribute,
+    items: ActionAttribute
   ): boolean {
     return (
       this.actionAttributeMatch(action.action.bhive, groups) &&
