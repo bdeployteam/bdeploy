@@ -12,9 +12,9 @@ import { BdDataTableComponent } from '../../../../core/components/bd-data-table/
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-history-compare-select',
-    templateUrl: './history-compare-select.component.html',
-    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe]
+  selector: 'app-history-compare-select',
+  templateUrl: './history-compare-select.component.html',
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, AsyncPipe],
 })
 export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -71,7 +71,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
         } else {
           this.records$.next(this.doSort(versions));
         }
-      }),
+      })
     );
   }
 
@@ -112,7 +112,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   }
 
   protected onBack() {
-    window.history.back();
+    globalThis.history.back();
   }
 
   protected doSort(records: InstanceVersionDto[]) {

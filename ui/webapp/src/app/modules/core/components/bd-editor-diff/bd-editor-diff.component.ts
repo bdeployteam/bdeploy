@@ -10,9 +10,9 @@ import { BdMonacoDiffEditorComponent } from '../bd-monaco-editor/bd-monaco-diff-
 import IStandaloneDiffEditorConstructionOptions = editor.IStandaloneDiffEditorConstructionOptions;
 
 @Component({
-    selector: 'app-bd-editor-diff',
-    templateUrl: './bd-editor-diff.component.html',
-    imports: [AsyncPipe, BdMonacoDiffEditorComponent]
+  selector: 'app-bd-editor-diff',
+  templateUrl: './bd-editor-diff.component.html',
+  imports: [AsyncPipe, BdMonacoDiffEditorComponent],
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
@@ -47,7 +47,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
 
   onMonacoInit(monaco: IStandaloneDiffEditor) {
     this.monaco = monaco;
-    this.globalMonaco = (window as unknown as WindowWithMonacoLoaded).monaco;
+    this.globalMonaco = (globalThis as unknown as WindowWithMonacoLoaded).monaco;
 
     // wait for init to complete, otherwise we leak models.
     setTimeout(() => this.initMonaco(), 0);
@@ -65,12 +65,12 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
       original: this.globalMonaco.editor.createModel(
         this.originalContent,
         undefined,
-        this.globalMonaco.Uri.parse(`a/${this.path}`),
+        this.globalMonaco.Uri.parse(`a/${this.path}`)
       ),
       modified: this.globalMonaco.editor.createModel(
         this.modifiedContent,
         undefined,
-        this.globalMonaco.Uri.parse(`b/${this.path}`),
+        this.globalMonaco.Uri.parse(`b/${this.path}`)
       ),
     };
     this.monaco.setModel(model);

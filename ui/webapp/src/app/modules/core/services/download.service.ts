@@ -77,12 +77,12 @@ export class DownloadService {
    */
   public downloadBlob(name: string, blob: Blob) {
     const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
+    link.href = globalThis.URL.createObjectURL(blob);
     link.download = name;
     document.body.appendChild(link);
     downloadLocation.click(link);
     link.remove();
-    // Don't call window.URL.revokeObjectURL(link.href) as it would free the link even though a UI test (for example)
+    // Don't call globalThis.URL.revokeObjectURL(link.href) as it would free the link even though a UI test (for example)
     // might access the object URL asynchronously later on...
   }
 

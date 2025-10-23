@@ -19,7 +19,9 @@ let loadPromise: Promise<void>;
  * @param <T> Type of editor
  * @param <X> Type of options that should be used with that editor
  */
-export abstract class BdMonacoBaseEditorComponent<T extends IEditor, X extends IEditorOptions> implements AfterViewInit, OnDestroy {
+export abstract class BdMonacoBaseEditorComponent<T extends IEditor, X extends IEditorOptions>
+  implements AfterViewInit, OnDestroy
+{
   @ViewChild('editorContainer', { static: true }) _editorContainer: ElementRef;
   @Output() init = new EventEmitter<T>();
   protected _editor: T;
@@ -36,21 +38,21 @@ export abstract class BdMonacoBaseEditorComponent<T extends IEditor, X extends I
       loadedMonaco = true;
       loadPromise = new Promise<void>((resolve: () => void) => {
         const baseUrl = './assets/monaco-editor/min/vs';
-        if (typeof (<any>window).monaco === 'object') {
+        if (typeof (<any>globalThis).monaco === 'object') {
           resolve();
           return;
         }
         const onGotAmdLoader = () => {
           // Load monaco
-          (<any>window).require.config({ paths: { vs: `${baseUrl}` } });
-          (<any>window).require([`vs/editor/editor.main`], () => {
+          (<any>globalThis).require.config({ paths: { vs: `${baseUrl}` } });
+          (<any>globalThis).require([`vs/editor/editor.main`], () => {
             this.initMonaco(this._options);
             resolve();
           });
         };
 
         // Load AMD loader if necessary
-        if (!(<any>window).require) {
+        if (!(<any>globalThis).require) {
           const loaderScript: HTMLScriptElement = document.createElement('script');
           loaderScript.type = 'text/javascript';
           loaderScript.src = `${baseUrl}/loader.js`;

@@ -186,7 +186,7 @@ export class AuthenticationService {
         return of(null); // just swallow it :)
       }),
       finalize(() => {
-        window.location.reload();
+        globalThis.location.reload();
       })
     );
   }

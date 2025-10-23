@@ -97,7 +97,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   protected onMonacoInit(monaco: IStandaloneCodeEditor) {
     this.monaco = monaco;
-    this.globalMonaco = (window as unknown as WindowWithMonacoLoaded).monaco;
+    this.globalMonaco = (globalThis as unknown as WindowWithMonacoLoaded).monaco;
     // only do this once!
     if (!this.globalMonaco.__providerRegistered) {
       // register completion provider.

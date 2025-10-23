@@ -13,14 +13,18 @@ declare let monaco: GlobalMonacoModule;
   selector: 'app-bd-monaco-editor',
   templateUrl: './bd-monaco-editor.component.html',
   styleUrl: './bd-monaco-editor.component.css',
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => BdMonacoEditorComponent),
-    multi: true
-  }
-  ]
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => BdMonacoEditorComponent),
+      multi: true,
+    },
+  ],
 })
-export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent<IStandaloneCodeEditor, IStandaloneEditorConstructionOptions> implements ControlValueAccessor {
+export class BdMonacoEditorComponent
+  extends BdMonacoBaseEditorComponent<IStandaloneCodeEditor, IStandaloneEditorConstructionOptions>
+  implements ControlValueAccessor
+{
   private readonly zone = inject(NgZone);
 
   private _value = '';
@@ -86,7 +90,7 @@ export class BdMonacoEditorComponent extends BdMonacoBaseEditorComponent<IStanda
     if (this._windowResizeSubscription) {
       this._windowResizeSubscription.unsubscribe();
     }
-    this._windowResizeSubscription = fromEvent(window, 'resize').subscribe(() => this._editor.layout());
+    this._windowResizeSubscription = fromEvent(globalThis, 'resize').subscribe(() => this._editor.layout());
     this.init.emit(this._editor);
   }
 }

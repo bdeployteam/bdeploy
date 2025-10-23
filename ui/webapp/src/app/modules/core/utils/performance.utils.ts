@@ -18,7 +18,7 @@ import { catchError, finalize } from 'rxjs/operators';
  */
 export const measure = function <T>(name: string) {
   const prefix = 'bdeploy:';
-  const nativeWindow = window;
+  const nativeWindow = globalThis;
   const fullName = prefix + name;
   return (source: Observable<T>) => {
     if ('performance' in nativeWindow && nativeWindow.performance !== undefined) {

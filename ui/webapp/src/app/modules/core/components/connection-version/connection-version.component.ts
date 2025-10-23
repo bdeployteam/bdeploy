@@ -13,11 +13,11 @@ export interface VersionMismatch {
 export const VERSION_DATA = new InjectionToken<VersionMismatch>('VERSION_DATA');
 
 @Component({
-    selector: 'app-connection-version',
-    templateUrl: './connection-version.component.html',
-    styleUrls: ['./connection-version.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BdLogoComponent, BdButtonComponent]
+  selector: 'app-connection-version',
+  templateUrl: './connection-version.component.html',
+  styleUrls: ['./connection-version.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BdLogoComponent, BdButtonComponent],
 })
 export class ConnectionVersionComponent {
   protected newVersion: string;
@@ -33,6 +33,6 @@ export class ConnectionVersionComponent {
   }
 
   onReload(): void {
-    window.location.reload();
+    globalThis.location.reload();
   }
 }

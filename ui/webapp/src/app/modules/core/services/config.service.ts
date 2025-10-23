@@ -13,7 +13,7 @@ import { BackendInfoDto, MinionMode, PluginInfoDto, Version, WebAuthSettingsDto 
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import {
   ConnectionVersionComponent,
-  VERSION_DATA
+  VERSION_DATA,
 } from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_CONTEXT } from '../utils/loading-bar.util';
 import { suppressGlobalErrorHandling, suppressUnauthenticatedDelay } from '../utils/server.utils';
@@ -126,11 +126,11 @@ export class ConfigService {
             headers: suppressUnauthenticatedDelay(new HttpHeaders())
           });
 
-          const fullHref = window.location.href;
+          const fullHref = globalThis.location.href;
           const urlParams = new URLSearchParams(fullHref.substring(fullHref.indexOf('?') + 1));
           const otp = urlParams.get('otp');
           if (otp) {
-            window.history.replaceState({}, document.title, window.location.pathname);
+            globalThis.history.replaceState({}, document.title, globalThis.location.pathname);
           }
           return combineLatest([of(c), loadAuthSettings, this.loadSession(otp)]);
         }),
@@ -161,8 +161,8 @@ export class ConfigService {
   public loadSession(oneTimePassword: string): Observable<string | null> {
     const params = oneTimePassword
       ? {
-        otp: oneTimePassword
-      }
+          otp: oneTimePassword
+        }
       : null;
     return this.http
       .get(`${this.config.api}/auth/session`, {
@@ -251,7 +251,7 @@ export class ConfigService {
         }
 
         if (!this.config) {
-          window.location.reload();
+          globalThis.location.reload();
         } else {
           this.doCheckVersion(backendInfoDto);
         }
@@ -286,7 +286,7 @@ export class ConfigService {
           if (e?.status === 404) {
             // in case the version backend is no longer available, it is extremely likely
             // that the server has been migrated to NODE (nodes don't have UI backends).
-            window.location.reload();
+            globalThis.location.reload();
           }
           throw e;
         }),

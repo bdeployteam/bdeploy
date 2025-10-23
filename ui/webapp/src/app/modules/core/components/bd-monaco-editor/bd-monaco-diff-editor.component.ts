@@ -13,8 +13,10 @@ declare let monaco: GlobalMonacoModule;
   templateUrl: './bd-monaco-diff-editor.component.html',
   styleUrl: './bd-monaco-diff-editor.component.css',
 })
-export class BdMonacoDiffEditorComponent extends BdMonacoBaseEditorComponent<IStandaloneDiffEditor, IStandaloneDiffEditorConstructionOptions> {
-
+export class BdMonacoDiffEditorComponent extends BdMonacoBaseEditorComponent<
+  IStandaloneDiffEditor,
+  IStandaloneDiffEditorConstructionOptions
+> {
   @Input()
   set options(options: IStandaloneDiffEditorConstructionOptions) {
     this._options = { ...options };
@@ -38,7 +40,7 @@ export class BdMonacoDiffEditorComponent extends BdMonacoBaseEditorComponent<ISt
     if (this._windowResizeSubscription) {
       this._windowResizeSubscription.unsubscribe();
     }
-    this._windowResizeSubscription = fromEvent(window, 'resize').subscribe(() => this._editor.layout());
+    this._windowResizeSubscription = fromEvent(globalThis, 'resize').subscribe(() => this._editor.layout());
     this.init.emit(this._editor);
   }
 }

@@ -66,7 +66,7 @@ export class ObjectChangesService {
             action: RegistrationAction.ADD,
             type: this._refs[key].type,
             scope: this._refs[key].scope,
-          } as ObjectChangeRegistrationDto),
+          } as ObjectChangeRegistrationDto)
         );
       }
 
@@ -104,7 +104,7 @@ export class ObjectChangesService {
   private getWebsocketUrl(): string {
     // relative, use browser information to figure out an absolute URL, since WebSockets require this.
     if (this.cfg.config.ws.startsWith('/')) {
-      const url = new URL(window.location.href);
+      const url = new URL(globalThis.location.href);
       const isHttps = url.protocol === 'https:';
       const wsProtocol = isHttps ? 'wss:' : 'ws:';
       return wsProtocol + url.host + this.cfg.config.ws;
@@ -125,7 +125,7 @@ export class ObjectChangesService {
     type: ObjectChangeType,
     scope: ObjectScope,
     next: (next: ObjectChangeDto) => void,
-    error?: (err: ErrorEvent) => void,
+    error?: (err: ErrorEvent) => void
   ): Subscription {
     // First determine whether we need to subscribe on the server.
     const key = this.key(type, scope);
@@ -139,7 +139,7 @@ export class ObjectChangesService {
             action: RegistrationAction.ADD,
             type: type,
             scope: scope,
-          } as ObjectChangeRegistrationDto),
+          } as ObjectChangeRegistrationDto)
         );
       }
     } else {
@@ -176,7 +176,7 @@ export class ObjectChangesService {
             action: RegistrationAction.REMOVE,
             type: type,
             scope: scope,
-          } as ObjectChangeRegistrationDto),
+          } as ObjectChangeRegistrationDto)
         );
       } else {
         // we're not the last one, so just decrease the ref-count for the server subscription.
