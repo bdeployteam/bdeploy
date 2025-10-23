@@ -37,7 +37,7 @@ export function unwrap(file: RemoteDirectoryEntry, chunk: StringEntryChunkDto): 
 }
 
 function binaryContentToUint8Array(chunk: StringEntryChunkDto): Uint8Array {
-  return Uint8Array.from(atob(chunk.binaryContent), (c) => c.charCodeAt(0));
+  return Uint8Array.from(atob(chunk.binaryContent), (c) => c.codePointAt(0));
 }
 
 function unzip(chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
@@ -48,7 +48,7 @@ function unzip(chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
     switchMap((es) => forkJoin(es.filter(e => !e.directory).map(e => e as FileEntry).map((e) => e.getData<string>(new TextWriter())))),
     map((ss) => ss.join('\n')),
     catchError((e) => of(`failed to fetch content. ${e}`)),
-    map((content) => ({ ...chunk, content })),
+    map((content) => ({ ...chunk, content }))
   );
 }
 
@@ -57,6 +57,6 @@ function ungzip(chunk: StringEntryChunkDto): Observable<StringEntryChunkDto> {
     map((c) => binaryContentToUint8Array(c)),
     map((data) => Pako.ungzip(data, { to: 'string' })),
     catchError((e) => of(`failed to decompress. ${e}`)),
-    map((content) => ({ ...chunk, content })),
+    map((content) => ({ ...chunk, content }))
   );
 }

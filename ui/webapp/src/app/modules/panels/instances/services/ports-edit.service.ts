@@ -101,7 +101,7 @@ export class PortsEditService {
         continue;
       }
 
-      const current = parseInt(port.port, 10);
+      const current = Number.parseInt(port.port, 10);
       const num = current + amount;
 
       if (num < 0 || num > 65535) {
@@ -155,7 +155,7 @@ export class PortsEditService {
   }
 
   private isPortExpression(value: LinkedValueConfiguration, type: VariableType) {
-    const num = parseInt(this.getPortValue(value, type), 10);
+    const num = Number.parseInt(this.getPortValue(value, type), 10);
     return isNaN(num);
   }
 }

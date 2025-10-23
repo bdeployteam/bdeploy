@@ -24,10 +24,31 @@ import { AttributesTabComponent } from './attributes-tab/attributes-tab.componen
 import { PluginsTabComponent } from './plugins-tab/plugins-tab.component';
 
 @Component({
-    selector: 'app-settings-general',
-    templateUrl: './settings-general.component.html',
-    encapsulation: ViewEncapsulation.None,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdPanelButtonComponent, MatDivider, BdButtonComponent, BdDialogContentComponent, MatTabGroup, MatTab, MatTabLabel, MatIcon, GeneralTabComponent, MailSendingTabComponent, MailReceivingTabComponent, OidcTabComponent, Auth0TabComponent, OktaTabComponent, LdapTabComponent, AttributesTabComponent, MatTabContent, PluginsTabComponent]
+  selector: 'app-settings-general',
+  templateUrl: './settings-general.component.html',
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdPanelButtonComponent,
+    MatDivider,
+    BdButtonComponent,
+    BdDialogContentComponent,
+    MatTabGroup,
+    MatTab,
+    MatTabLabel,
+    MatIcon,
+    GeneralTabComponent,
+    MailSendingTabComponent,
+    MailReceivingTabComponent,
+    OidcTabComponent,
+    Auth0TabComponent,
+    OktaTabComponent,
+    LdapTabComponent,
+    AttributesTabComponent,
+    MatTabContent,
+    PluginsTabComponent,
+  ],
 })
 export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
@@ -42,7 +63,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDia
 
   ngOnInit() {
     this.areas.registerDirtyable(this, 'admin');
-    this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
+    this.tabIndex = Number.parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
   }
 
   ngOnDestroy(): void {

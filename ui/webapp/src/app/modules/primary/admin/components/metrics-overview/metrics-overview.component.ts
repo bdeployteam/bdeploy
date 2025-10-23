@@ -94,7 +94,7 @@ export class MetricsOverviewComponent implements OnInit {
           this.allMetrics.set(metricEntry[0] as MetricGroup, metricEntry[1]);
         }
         this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
-        const tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
+        const tabIndex = Number.parseInt(this.route.snapshot.queryParamMap.get('tabIndex'), 10);
         this.doSelect(isNaN(tabIndex) ? 0 : tabIndex);
       });
   }
