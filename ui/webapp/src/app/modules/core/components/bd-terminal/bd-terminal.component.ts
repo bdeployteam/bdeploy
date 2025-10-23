@@ -27,10 +27,10 @@ const CNL: string = CSI + 'E'; // Cursor Next Line (col=0)
 const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
 
 @Component({
-    selector: 'app-bd-terminal',
-    templateUrl: './bd-terminal.component.html',
-    styleUrls: ['./bd-terminal.component.css'],
-    imports: [NgTerminalModule]
+  selector: 'app-bd-terminal',
+  templateUrl: './bd-terminal.component.html',
+  styleUrls: ['./bd-terminal.component.css'],
+  imports: [NgTerminalModule]
 })
 export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly searchService = inject(SearchService);
@@ -61,7 +61,7 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
       (event: KeyboardEvent) =>
         // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
         // and default Ctrl-C/X has nothing to copy) and Ctrl-V
-        !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1,
+        !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1
     );
 
     this.term.underlying.options.fontSize = 12;
@@ -153,7 +153,7 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
           if (input[idx] === '\r') {
             idx++;
             this.sendStdin();
-          } else if (input.charCodeAt(idx) === 0x7f) {
+          } else if (input.codePointAt(idx) === 0x7f) {
             idx++;
             if (this.stdinBufferCursorPos > 0) {
               this.clearInput();
@@ -165,7 +165,7 @@ export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
             }
           } else {
             this.clearInput();
-            if (input.charCodeAt(idx) >= 32) {
+            if (input.codePointAt(idx) >= 32) {
               this.stdinBuffer = [
                 this.stdinBuffer.slice(0, this.stdinBufferCursorPos),
                 input[idx],

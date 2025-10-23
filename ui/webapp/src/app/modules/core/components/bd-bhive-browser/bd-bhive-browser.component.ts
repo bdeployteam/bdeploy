@@ -33,9 +33,19 @@ interface BHivePathSegment {
 }
 
 @Component({
-    selector: 'app-bd-bhive-browser',
-    templateUrl: './bd-bhive-browser.component.html',
-  imports: [BdEditorComponent, BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, MatDivider, BdDialogContentComponent, BdBreadcrumbsComponent, BdDataTableComponent, AsyncPipe]
+  selector: 'app-bd-bhive-browser',
+  templateUrl: './bd-bhive-browser.component.html',
+  imports: [
+    BdEditorComponent,
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdButtonComponent,
+    MatDivider,
+    BdDialogContentComponent,
+    BdBreadcrumbsComponent,
+    BdDataTableComponent,
+    AsyncPipe,
+  ],
 })
 export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -151,7 +161,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
       return [{ name, tag }];
     }
 
-    throw Error(`Unexpected type ${this.type}`);
+    throw new Error(`Unexpected type ${this.type}`);
   }
 
   private getBHive(primaryRoute: ActivatedRouteSnapshot, panelRoute: ActivatedRouteSnapshot): string {
@@ -162,7 +172,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     } else if (this.type === 'product') {
       return primaryRoute.params['group'];
     } else {
-      throw Error(`Unexpected bhive browser type ${this.type}`);
+      throw new Error(`Unexpected bhive browser type ${this.type}`);
     }
   }
 
@@ -200,8 +210,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     if (!pathSegments?.length) {
       return null;
     }
-    const allStrings: string[] = pathSegments
-      .map((s) => `|[${s.name}|${s.tag ? s.tag : ''}|${s.id ? s.id : ''}]|`);
+    const allStrings: string[] = pathSegments.map((s) => `|[${s.name}|${s.tag ? s.tag : ''}|${s.id ? s.id : ''}]|`);
     return Base64.encode(JSON.stringify(allStrings), true);
   }
 
@@ -209,7 +218,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
     const decoded = Base64.decode(encodedPath);
     const allStrings: string[] = JSON.parse(decoded);
     return allStrings
-      .filter((segmentAsString) =>(segmentAsString.startsWith('|[') && segmentAsString.endsWith(']|')))
+      .filter((segmentAsString) => segmentAsString.startsWith('|[') && segmentAsString.endsWith(']|'))
       .map((segmentAsString) => {
         const parts = segmentAsString.substring(2, segmentAsString.length - 2).split('|');
         return {
@@ -217,7 +226,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
           tag: parts[1]?.length ? parts[1] : undefined,
           id: parts[2]?.length ? parts[2] : undefined
         };
-    });
+      });
   }
 
   private showPreviewIfText(data: Blob, name: string) {
