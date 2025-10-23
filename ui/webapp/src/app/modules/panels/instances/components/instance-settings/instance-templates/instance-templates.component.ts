@@ -202,14 +202,14 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         anyGroupAssigned = true;
 
         // check if group contains only valid applications
-        appLoop: for (const app of this.template.groups.find((group) => group.name === k).applications) {
-          const processControlConfig = app.processControl;
+        appLoop: for (const appCfg of this.template.groups.find((group) => group.name === k).applications) {
+          const processControlConfig = appCfg.processControl;
           if (!processControlConfig) {
             continue;
           }
 
           // need to find all apps in the product which match the key name...
-          const searchKey = this.product.product + '/' + app.application;
+          const searchKey = this.product.product + '/' + appCfg.application;
           for (const app of this.instanceEdit.stateApplications$.value) {
             const appKey = getAppKeyName(app.key);
             if (searchKey === appKey) {

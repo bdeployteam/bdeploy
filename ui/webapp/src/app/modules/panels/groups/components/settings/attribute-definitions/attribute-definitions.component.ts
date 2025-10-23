@@ -5,7 +5,7 @@ import { BdDataColumn } from 'src/app/models/data';
 import { CustomAttributeDescriptor, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import {
   ACTION_APPLY,
-  ACTION_CANCEL
+  ACTION_CANCEL,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
@@ -23,9 +23,21 @@ import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-b
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-attribute-definitions',
-    templateUrl: './attribute-definitions.component.html',
-  imports: [BdFormInputComponent, FormsModule, TrimmedValidator, EditUniqueValueValidatorDirective, BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataDisplayComponent, BdNoDataComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-attribute-definitions',
+  templateUrl: './attribute-definitions.component.html',
+  imports: [
+    BdFormInputComponent,
+    FormsModule,
+    TrimmedValidator,
+    EditUniqueValueValidatorDirective,
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdDataDisplayComponent,
+    BdNoDataComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class AttributeDefinitionsComponent {
   protected readonly groups = inject(GroupsService);
@@ -97,10 +109,7 @@ export class AttributeDefinitionsComponent {
 
   private removeDefinition(record: CustomAttributeDescriptor) {
     const group = this.groups.current$.value; // this is the same as used in the template, so it must be valid.
-    group.instanceAttributes.splice(
-      group.instanceAttributes.findIndex((r) => r === record),
-      1,
-    );
+    group.instanceAttributes.splice(group.instanceAttributes.indexOf(record), 1);
 
     this.loading$.next(true);
     this.details

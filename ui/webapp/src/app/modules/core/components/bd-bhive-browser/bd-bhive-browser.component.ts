@@ -182,7 +182,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
         this.entries$.next(manifests);
       });
     } else {
-      const lastSegment = this.path$.value[this.path$.value.length - 1];
+      const lastSegment = this.path$.value.at(-1);
       if (lastSegment?.id) {
         this.hives.list(this.bhive$.value, lastSegment.id).subscribe((entries) => {
           this.entries$.next(entries);
@@ -324,7 +324,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   }
 
   protected downloadAll() {
-    const s = this.path$.value[this.path$.value.length - 1];
+    const s = this.path$.value.at(-1);
     const dto: HiveEntryDto = {
       id: s.id,
       mName: s.name,

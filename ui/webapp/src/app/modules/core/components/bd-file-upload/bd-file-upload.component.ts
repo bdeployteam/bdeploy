@@ -18,9 +18,9 @@ import { AsyncPipe } from '@angular/common';
  * The resultEvaluator default implementation assumes the detail is of type 'ManifestKey[]',
  * even if the signature is generic.
  *
- * @param <T> The type of UploadStatus.detail
+ * @param <D> The type of UploadStatus.detail
  */
-export class BdFileUploadComponent<T> implements OnInit {
+export class BdFileUploadComponent<D> implements OnInit {
   @Input() file: File;
   @Input() url: string;
   @Input() parameters: UrlParameter[];
@@ -31,7 +31,7 @@ export class BdFileUploadComponent<T> implements OnInit {
 
   private readonly uploads = inject(UploadService);
 
-  protected status: UploadStatus<T>;
+  protected status: UploadStatus<D>;
   protected finished$ = new BehaviorSubject<boolean>(false);
   protected failed$ = new BehaviorSubject<boolean>(false);
   protected uploading$ = new BehaviorSubject<boolean>(false);
@@ -40,7 +40,7 @@ export class BdFileUploadComponent<T> implements OnInit {
   protected header$ = new BehaviorSubject<string>(this.getHeader());
 
   ngOnInit(): void {
-    this.status = this.uploads.uploadFile<T>(this.url, this.file, this.parameters, this.formDataParam);
+    this.status = this.uploads.uploadFile<D>(this.url, this.file, this.parameters, this.formDataParam);
 
     this.status.stateObservable.subscribe((state) => {
       this.setProcessDetails();

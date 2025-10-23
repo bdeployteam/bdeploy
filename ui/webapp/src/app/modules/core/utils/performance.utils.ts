@@ -37,7 +37,7 @@ export const measure = function <T>(name: string) {
             } catch (err) {
               console.warn(`Error while measuring ${fullName}.`, err);
             }
-          }),
+          })
         );
       });
     }
@@ -46,7 +46,7 @@ export const measure = function <T>(name: string) {
 };
 
 function logMeasurements(name: string, entries: PerformanceEntryList) {
-  const last = entries[entries.length - 1];
+  const last = entries.at(-1);
   const avg = entries.map((entry) => entry.duration).reduce((p, c) => p + c, 0) / entries.length;
   console.group(name);
   try {

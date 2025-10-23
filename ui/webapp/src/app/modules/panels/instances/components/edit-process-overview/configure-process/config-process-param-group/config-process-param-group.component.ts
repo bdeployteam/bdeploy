@@ -261,7 +261,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       ])
         .pipe(skipWhile(([p, a, i]) => !p || !a || !i))
         .subscribe(([process, application, instance, system]) => {
-          const previewProcess = JSON.parse(JSON.stringify(process)) as ApplicationConfiguration;
+          const previewProcess = structuredClone(process)
           previewProcess.start.parameters.forEach((p) => {
             const descriptor = application.descriptor.startCommand.parameters.find((appParam) => appParam.id === p.id);
             const lv = this.expandPreview

@@ -76,7 +76,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
       if ((!!this.show && this.show === 'cpu') || (!this.show && state.config.os === OperatingSystem.WINDOWS)) {
         this.curve = state.monitoring.cpuUsage;
         this.curveLabel = 'System CPU Usage';
-        this.maxValue = 1.0; // system cpu load: 0.0 to 1.0
+        this.maxValue = 1; // system cpu load: 0 to 1
         this.formatter = (n) => (n * 100).toFixed(2) + '%';
       } else {
         this.curve = state.monitoring.loadAvg;

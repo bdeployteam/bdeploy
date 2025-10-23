@@ -105,7 +105,7 @@ export class ProcessEditService {
 
     // remove from control group(s)
     for (const grp of this.node$.value.nodeConfiguration.controlGroups) {
-      const idx = grp.processOrder.findIndex((id) => id === this.process$.value.id);
+      const idx = grp.processOrder.indexOf(this.process$.value.id);
       if (idx !== -1) {
         grp.processOrder.splice(idx, 1);
       }

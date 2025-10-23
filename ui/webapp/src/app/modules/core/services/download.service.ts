@@ -81,7 +81,7 @@ export class DownloadService {
     link.download = name;
     document.body.appendChild(link);
     downloadLocation.click(link);
-    document.body.removeChild(link);
+    link.remove();
     // Don't call window.URL.revokeObjectURL(link.href) as it would free the link even though a UI test (for example)
     // might access the object URL asynchronously later on...
   }

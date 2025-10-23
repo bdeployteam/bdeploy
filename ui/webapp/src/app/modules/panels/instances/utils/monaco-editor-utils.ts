@@ -1,8 +1,8 @@
-import * as monaco from 'monaco-editor';
+import { editor, MarkerSeverity } from 'monaco-editor';
 
-export function errorMarker(message: string, match: monaco.editor.FindMatch): monaco.editor.IMarkerData {
+export function errorMarker(message: string, match: editor.FindMatch): editor.IMarkerData {
   return {
-    severity: monaco.MarkerSeverity.Error,
+    severity: MarkerSeverity.Error,
     startLineNumber: match.range.startLineNumber,
     startColumn: match.range.startColumn,
     endLineNumber: match.range.endLineNumber,

@@ -2,14 +2,16 @@ import { Directive, Input } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS } from '@angular/forms';
 import {
   bdValidationIdExtractor,
-  bdValidationRegisterMessageExtractor, StrictValidationErrors, StrictValidator,
-  ValidatorConfiguration
+  bdValidationRegisterMessageExtractor,
+  StrictValidationErrors,
+  StrictValidator,
+  ValidatorConfiguration,
 } from './messages';
 
 const ID = 'regex_w_msg';
 bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
-export type Pattern =  'LDAP' | 'IMAP' | 'SMTP';
+export type Pattern = 'LDAP' | 'IMAP' | 'SMTP';
 
 export interface PatternValidatorConfiguration extends ValidatorConfiguration {
   regex?: string;
@@ -17,23 +19,23 @@ export interface PatternValidatorConfiguration extends ValidatorConfiguration {
 }
 
 interface KnownPatternConfig {
-  errorMessage?: string,
-  regex: RegExp
+  errorMessage?: string;
+  regex: RegExp;
 }
 
 const KNOWN_PATTERNS: Record<Pattern, KnownPatternConfig> = {
   ['IMAP']: {
     regex: new RegExp('^[i|I][m|M][a|A][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}($|(\\/[\\w\\-\\.~]+)+$)'),
-    errorMessage: 'Doesn\'t match IMAP URL scheme'
+    errorMessage: "Doesn't match IMAP URL scheme",
   },
   ['SMTP']: {
     regex: new RegExp('^[s|S][m|M][t|T][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}$'),
-    errorMessage: 'Doesn\'t match SMTP URL scheme'
+    errorMessage: "Doesn't match SMTP URL scheme",
   },
   ['LDAP']: {
     regex: new RegExp('^[l|L][d|D][a|A][p|P][s|S]?:\\/\\/[\\w\\-\\.~]+:\\d{1,5}$'),
-    errorMessage: 'Doesn\'t match LDAP URL scheme'
-  }
+    errorMessage: "Doesn't match LDAP URL scheme",
+  },
 };
 
 /**
@@ -45,15 +47,15 @@ const KNOWN_PATTERNS: Record<Pattern, KnownPatternConfig> = {
  * Otherwise, you need to configure a regex and an errorMessage.
  */
 @Directive({
-    selector: '[appPattern]',
-    providers: [{ provide: NG_VALIDATORS, useExisting: PatternValidator, multi: true }]
+  selector: '[appPattern]',
+  providers: [{ provide: NG_VALIDATORS, useExisting: PatternValidator, multi: true }]
 })
 export class PatternValidator implements StrictValidator {
   @Input() appPattern: PatternValidatorConfiguration | Pattern;
 
   public validate(control: AbstractControl): StrictValidationErrors {
     const value = control.value;
-    if(!value) {
+    if (!value) {
       return null;
     }
 
@@ -61,7 +63,7 @@ export class PatternValidator implements StrictValidator {
     if (!value || regex.test(control.value)) {
       return null;
     } else {
-      const errors:StrictValidationErrors = {};
+      const errors: StrictValidationErrors = {};
       errors[ID] = this.getErrorMessageIfConfigured() ?? `Value must match: ${regex.source}`;
 
       return errors;
@@ -69,17 +71,17 @@ export class PatternValidator implements StrictValidator {
   }
 
   private getErrorMessageIfConfigured() {
-    if (typeof this.appPattern === "string") {
+    if (typeof this.appPattern === 'string') {
       return KNOWN_PATTERNS[this.appPattern].errorMessage;
     }
-    return (this.appPattern as PatternValidatorConfiguration).errorMessage
+    return this.appPattern.errorMessage;
   }
 
   private determineRegex() {
-    if (typeof this.appPattern === "string") {
+    if (typeof this.appPattern === 'string') {
       return KNOWN_PATTERNS[this.appPattern].regex;
     }
 
-    return new RegExp((this.appPattern as PatternValidatorConfiguration).regex);
+    return new RegExp(this.appPattern.regex);
   }
 }

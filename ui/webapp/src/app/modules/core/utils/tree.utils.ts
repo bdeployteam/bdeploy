@@ -7,7 +7,6 @@ import { map, take } from 'rxjs/operators';
  * and in the data source to handle a tree after it was flattened.
  */
 export class FlatTreeControl<T> {
-
   dataNodes: T[];
 
   expansionModel: SelectionModel<unknown> = new SelectionModel<unknown>(true);
@@ -19,8 +18,7 @@ export class FlatTreeControl<T> {
     public isExpandable: (dataNode: T) => boolean,
     // identity function for the node
     public trackBy?: (dataNode: T) => unknown
-  ) {
-  }
+  ) {}
 
   /**
    * Identify all descendants and return them as a list.
@@ -44,7 +42,7 @@ export class FlatTreeControl<T> {
   }
 
   expandAll(): void {
-    this.expansionModel.select(...this.dataNodes.map(node => this._trackByValue(node)));
+    this.expansionModel.select(...this.dataNodes.map((node) => this._trackByValue(node)));
   }
 
   toggle(dataNode: T): void {
@@ -64,7 +62,7 @@ export class FlatTreeControl<T> {
   }
 
   toggleDescendants(dataNode: T): void {
-    if(this.expansionModel.isSelected(this._trackByValue(dataNode))) {
+    if (this.expansionModel.isSelected(this._trackByValue(dataNode))) {
       this.collapseDescendants(dataNode);
     } else {
       this.expandDescendants(dataNode);
@@ -78,13 +76,13 @@ export class FlatTreeControl<T> {
   expandDescendants(dataNode: T): void {
     const toBeProcessed = [dataNode];
     toBeProcessed.push(...this.getDescendants(dataNode));
-    this.expansionModel.select(...toBeProcessed.map(value => this._trackByValue(value)));
+    this.expansionModel.select(...toBeProcessed.map((value) => this._trackByValue(value)));
   }
 
   collapseDescendants(dataNode: T): void {
     const toBeProcessed = [dataNode];
     toBeProcessed.push(...this.getDescendants(dataNode));
-    this.expansionModel.deselect(...toBeProcessed.map(value => this._trackByValue(value)));
+    this.expansionModel.deselect(...toBeProcessed.map((value) => this._trackByValue(value)));
   }
 
   protected _trackByValue(value: T | unknown): unknown {
@@ -102,8 +100,7 @@ export class TreeFlattener<T, F> {
     public getLevel: (node: F) => number,
     public isExpandable: (node: F) => boolean,
     public getChildren: (node: T) => Observable<T[]> | T[] | undefined | null
-  ) {
-  }
+  ) {}
 
   _flattenNode(node: T, level: number, resultNodes: F[], parentMap: boolean[]): F[] {
     const flatNode = this.transformFunction(node, level);
@@ -115,7 +112,7 @@ export class TreeFlattener<T, F> {
         if (Array.isArray(childrenNodes)) {
           this._flattenChildren(childrenNodes, level, resultNodes, parentMap);
         } else {
-          childrenNodes.pipe(take(1)).subscribe(children => {
+          childrenNodes.pipe(take(1)).subscribe((children) => {
             this._flattenChildren(children, level, resultNodes, parentMap);
           });
         }
@@ -127,7 +124,7 @@ export class TreeFlattener<T, F> {
   _flattenChildren(children: T[], level: number, resultNodes: F[], parentMap: boolean[]): void {
     children.forEach((child, index) => {
       const childParentMap: boolean[] = parentMap.slice();
-      childParentMap.push(index != children.length - 1);
+      childParentMap.push(index !== children.length - 1);
       this._flattenNode(child, level + 1, resultNodes, childParentMap);
     });
   }
@@ -137,7 +134,7 @@ export class TreeFlattener<T, F> {
    */
   flattenNodes(structuredData: T[]): F[] {
     const resultNodes: F[] = [];
-    structuredData.forEach(node => this._flattenNode(node, 0, resultNodes, []));
+    structuredData.forEach((node) => this._flattenNode(node, 0, resultNodes, []));
     return resultNodes;
   }
 
@@ -150,7 +147,7 @@ export class TreeFlattener<T, F> {
     const currentExpand: boolean[] = [];
     currentExpand[0] = true;
 
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       let expand = true;
       for (let i = 0; i <= this.getLevel(node); i++) {
         expand = expand && currentExpand[i];
@@ -187,8 +184,8 @@ export class FlatDataSource<T, F> extends DataSource<F> {
   private readonly _data = new BehaviorSubject<T[]>([]);
 
   constructor(
-    private _treeControl: FlatTreeControl<F>,
-    private _treeFlattener: TreeFlattener<T, F>,
+    private readonly _treeControl: FlatTreeControl<F>,
+    private readonly _treeFlattener: TreeFlattener<T, F>,
     initialData?: T[]
   ) {
     super();
@@ -199,15 +196,9 @@ export class FlatDataSource<T, F> extends DataSource<F> {
   }
 
   connect(collectionViewer: CollectionViewer): Observable<F[]> {
-    return merge(
-      collectionViewer.viewChange,
-      this._treeControl.expansionModel.changed,
-      this._flattenedData
-    ).pipe(
+    return merge(collectionViewer.viewChange, this._treeControl.expansionModel.changed, this._flattenedData).pipe(
       map(() => {
-        this._expandedData.next(
-          this._treeFlattener.expandFlattenedNodes(this._flattenedData.value, this._treeControl)
-        );
+        this._expandedData.next(this._treeFlattener.expandFlattenedNodes(this._flattenedData.value, this._treeControl));
         return this._expandedData.value;
       })
     );

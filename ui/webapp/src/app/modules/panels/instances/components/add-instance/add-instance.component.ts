@@ -2,7 +2,13 @@ import { Component, inject, OnDestroy, OnInit, signal, ViewChild } from '@angula
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceConfiguration, InstancePurpose, ManagedMasterDto, ManifestKey, Version } from 'src/app/models/gen.dtos';
+import {
+  InstanceConfiguration,
+  InstancePurpose,
+  ManagedMasterDto,
+  ManifestKey,
+  Version,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -31,9 +37,21 @@ interface ProductRow {
 }
 
 @Component({
-    selector: 'app-add-instance',
-    templateUrl: './add-instance.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, FormsModule, BdFormInputComponent, TrimmedValidator, BdFormSelectComponent, SystemOnServerValidatorDirective, BdFormToggleComponent, MatTooltip, BdButtonComponent]
+  selector: 'app-add-instance',
+  templateUrl: './add-instance.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    FormsModule,
+    BdFormInputComponent,
+    TrimmedValidator,
+    BdFormSelectComponent,
+    SystemOnServerValidatorDirective,
+    BdFormToggleComponent,
+    MatTooltip,
+    BdButtonComponent,
+  ],
 })
 export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly groups = inject(GroupsService);
@@ -79,7 +97,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
-      }),
+      })
     );
     this.subscription.add(
       this.groups.newId().subscribe((r) => {
@@ -113,14 +131,14 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         }
 
         this.loading$.next(false);
-      }),
+      })
     );
 
     this.subscription.add(
       this.servers.servers$.subscribe((s) => {
         this.serverList = s;
         this.serverNames = this.serverList.map((c) => `${c.hostName} - ${c.description}`);
-      }),
+      })
     );
 
     this.subscription.add(
@@ -135,7 +153,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
           const description = config.description;
           return description ? `${name} (${description})` : name;
         });
-      }),
+      })
     );
   }
 
@@ -155,7 +173,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.doSave().subscribe(() => {
       this.areas.navigateBoth(
         ['/instances', 'configuration', this.areas.groupContext$.value, this.config.id],
-        ['panels', 'instances', 'settings'],
+        ['panels', 'instances', 'settings']
       );
       this.subscription?.unsubscribe();
     });
@@ -163,8 +181,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
 
   public doSave(): Observable<InstanceConfiguration> {
     this.loading$.next(true);
-    return this.instances.create(this.config, this.server?.hostName)
-      .pipe(finalize(() => this.loading$.next(false)));
+    return this.instances.create(this.config, this.server?.hostName).pipe(finalize(() => this.loading$.next(false)));
   }
 
   protected updateProduct() {
@@ -172,13 +189,15 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.config.product.tag = null;
   }
 
-  protected getVersions(){
-    return this.selectedProduct?.versions.map(v => v.tag);
+  protected getVersions() {
+    return this.selectedProduct?.versions.map((v) => v.tag);
   }
 
   protected calculateAddInstanceButtonDisabledMessage() {
-    const minimumVersion = this.selectedProduct?.versions?.filter((v) => v.tag === this.config.product.tag)[0]
-      .minMinionVersion;
+    const minimumVersion = this.selectedProduct?.versions?.find(
+      (v) => v.tag === this.config.product.tag
+    ).minMinionVersion;
+
     if (minimumVersion) {
       const currentVersion = this.cfg?.config?.version;
       if (currentVersion) {

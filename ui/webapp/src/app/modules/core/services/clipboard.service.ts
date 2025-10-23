@@ -16,7 +16,7 @@ export class ClipboardService {
 
   private readonly _clipboard$ = new BehaviorSubject<ClipboardData>({ data: null, error: null });
   public readonly clipboard$: Observable<ClipboardData> = this._clipboard$.pipe(
-    distinctUntilChanged((a, b) => a.data === b.data && a.error === b.error),
+    distinctUntilChanged((a, b) => a.data === b.data && a.error === b.error)
   );
 
   constructor() {
@@ -58,9 +58,9 @@ export class ClipboardService {
           });
         }
       },
-      (reason) => {
-        this._clipboard$.next({ data: null, error: `Cannot check clipboard permission (${reason}).` });
-      },
+      (error) => {
+        this._clipboard$.next({ data: null, error: `Cannot check clipboard permission (${error}).` });
+      }
     );
 
     navigator.clipboard.readText().then(
@@ -69,7 +69,7 @@ export class ClipboardService {
       },
       () => {
         this._clipboard$.next({ data: null, error: 'Unable to read from clipboard.' });
-      },
+      }
     );
   }
 }

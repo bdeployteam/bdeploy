@@ -2,12 +2,12 @@ import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import * as he from 'he';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
 import { ConfigService } from '../services/config.service';
 import { NavAreasService } from '../services/nav-areas.service';
+import he from 'he';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
@@ -30,7 +30,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
               // let 401 pass through for logout redirection in the other interceptor :)
               break;
             case 403:
-              /* falls through */
+            /* falls through */
             case 404:
               msg = `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`;
               this.snackbar.open(msg, 'DISMISS', {
@@ -62,7 +62,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
           }
         }
         return throwError(() => e);
-      }),
+      })
     );
   }
 }

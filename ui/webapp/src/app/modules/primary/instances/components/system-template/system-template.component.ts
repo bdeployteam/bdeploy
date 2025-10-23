@@ -28,7 +28,7 @@ import {
   SystemTemplateRequestDto,
   SystemTemplateResultDto,
   TemplateVariable,
-  TemplateVariableType
+  TemplateVariableType,
 } from './../../../../../models/gen.dtos';
 import { GroupsService } from './../../../groups/services/groups.service';
 import { BdDialogComponent } from '../../../../core/components/bd-dialog/bd-dialog.component';
@@ -40,17 +40,13 @@ import { BdFormSelectComponent } from '../../../../core/components/bd-form-selec
 import { FormsModule } from '@angular/forms';
 import { BdFileDropComponent } from '../../../../core/components/bd-file-drop/bd-file-drop.component';
 import { BdFileUploadComponent } from '../../../../core/components/bd-file-upload/bd-file-upload.component';
-import {
-  BdNotificationCardComponent
-} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { BdDataTableComponent } from '../../../../core/components/bd-data-table/bd-data-table.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { BdFormInputComponent } from '../../../../core/components/bd-form-input/bd-form-input.component';
 import { EditUniqueValueValidatorDirective } from '../../../../core/validators/edit-unique-value.directive';
 import { TrimmedValidator } from '../../../../core/validators/trimmed.directive';
-import {
-  BdFormTemplateVariableComponent
-} from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
+import { BdFormTemplateVariableComponent } from '../../../../core/components/bd-form-template-variable/bd-form-template-variable.component';
 import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { BdFormToggleComponent } from '../../../../core/components/bd-form-toggle/bd-form-toggle.component';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -110,8 +106,8 @@ const colInstResIcon: BdDataColumn<InstanceTemplateReferenceResultDto, string> =
     r.status === InstanceTemplateReferenceStatus.OK
       ? 'check'
       : r.status === InstanceTemplateReferenceStatus.ERROR
-        ? 'error'
-        : 'warning',
+      ? 'error'
+      : 'warning',
   component: BdDataIconCellComponent,
   width: '50px',
 };
@@ -123,11 +119,37 @@ const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto, string> =
 };
 
 @Component({
-    selector: 'app-system-template',
-    templateUrl: './system-template.component.html',
-    styleUrls: ['./system-template.component.css'],
-    encapsulation: ViewEncapsulation.None,
-    imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, RouterLink, BdDialogContentComponent, MatStepper, MatStep, BdFormSelectComponent, FormsModule, BdFileDropComponent, BdFileUploadComponent, BdNotificationCardComponent, BdDataTableComponent, MatProgressSpinner, BdFormInputComponent, EditUniqueValueValidatorDirective, TrimmedValidator, BdFormTemplateVariableComponent, MatTabGroup, MatTab, MatTabLabel, BdFormToggleComponent, MatTooltip, MatDivider, AsyncPipe]
+  selector: 'app-system-template',
+  templateUrl: './system-template.component.html',
+  styleUrls: ['./system-template.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdButtonComponent,
+    RouterLink,
+    BdDialogContentComponent,
+    MatStepper,
+    MatStep,
+    BdFormSelectComponent,
+    FormsModule,
+    BdFileDropComponent,
+    BdFileUploadComponent,
+    BdNotificationCardComponent,
+    BdDataTableComponent,
+    MatProgressSpinner,
+    BdFormInputComponent,
+    EditUniqueValueValidatorDirective,
+    TrimmedValidator,
+    BdFormTemplateVariableComponent,
+    MatTabGroup,
+    MatTab,
+    MatTabLabel,
+    BdFormToggleComponent,
+    MatTooltip,
+    MatDivider,
+    AsyncPipe,
+  ],
 })
 export class SystemTemplateComponent implements OnInit {
   protected readonly cfg = inject(ConfigService);
@@ -170,7 +192,10 @@ export class SystemTemplateComponent implements OnInit {
 
   protected systemNames$: Observable<string[]>;
   protected importProductsState: ImportProductsState = { completed: false };
-  protected readonly importProductCols: BdDataColumn<ProductKeyWithSourceDto, unknown>[] = [colImportRepo, colImportProduct];
+  protected readonly importProductCols: BdDataColumn<ProductKeyWithSourceDto, unknown>[] = [
+    colImportRepo,
+    colImportProduct,
+  ];
 
   protected onUploadResult: (status: UploadStatus<SystemTemplateDto>) => string = (s) => {
     if (s.state === UploadState.FAILED) {
@@ -181,7 +206,9 @@ export class SystemTemplateComponent implements OnInit {
 
     const templateDescriptor = this.template.template;
     const instanceCount = templateDescriptor.instances?.length;
-    return `Loaded '${templateDescriptor.name}', will create ${instanceCount} instance${instanceCount !== 1 ? 's' : ''}.`;
+    return `Loaded '${templateDescriptor.name}', will create ${instanceCount} instance${
+      instanceCount !== 1 ? 's' : ''
+    }.`;
   };
 
   @ViewChild(MatStepper) private readonly stepper: MatStepper;
@@ -307,9 +334,9 @@ export class SystemTemplateComponent implements OnInit {
     this.systems.apply(data).subscribe((resultDto) => {
       this.result = resultDto;
       this.resultIsSuccess =
-        resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) === -1;
+        resultDto.results.map((r) => r.status).indexOf(InstanceTemplateReferenceStatus.ERROR) === -1;
       this.resultHasWarnings =
-        resultDto.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !== -1;
+        resultDto.results.map((r) => r.status).indexOf(InstanceTemplateReferenceStatus.WARNING) !== -1;
       this.stepper.next();
     });
   }
@@ -341,10 +368,11 @@ export class SystemTemplateComponent implements OnInit {
     this.nodes = this.template.nodes;
     this.templates = this.template.template.instances.map((i) => {
       // cannot be null, as the backend would otherwise reject.
-      const initialProductVersionRegex = i.initialProductVersionRegex || i.productVersionRegex; 
+      const initialProductVersionRegex = i.initialProductVersionRegex || i.productVersionRegex;
       const prod = this.template.products.find(
         (p) =>
-          p.product === i.productId && (!initialProductVersionRegex || new RegExp(initialProductVersionRegex).test(p.key.tag)),
+          p.product === i.productId &&
+          (!initialProductVersionRegex || new RegExp(initialProductVersionRegex).test(p.key.tag))
       );
 
       const expStatus: StatusMessage[] = [];
@@ -375,11 +403,11 @@ export class SystemTemplateComponent implements OnInit {
       }
 
       // We use the value from the instance-template if the system template didn't override it.
-      if(i.autoStart == null) {
+      if (i.autoStart == null) {
         i.autoStart = tpl.autoStart;
       }
 
-      if(i.autoUninstall == null) {
+      if (i.autoUninstall == null) {
         i.autoUninstall = tpl.autoUninstall;
       }
 
@@ -481,7 +509,9 @@ export class SystemTemplateComponent implements OnInit {
   }
 
   private getNodeNamesMatching(predicate: Predicate<MinionDto | null>) {
-    return Object.entries(this.nodes).filter(([, node]) => predicate(node?.config)).map(([key]) => key);
+    return Object.entries(this.nodes)
+      .filter(([, node]) => predicate(node?.config))
+      .map(([key]) => key);
   }
 
   private getNodesFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
@@ -490,14 +520,19 @@ export class SystemTemplateComponent implements OnInit {
       //     would need to report the client applications node the same way as any server node.
       return [null, '__ClientApplications'];
     }
-    return [null, ...this.getNodeNamesMatching(n => n?.minionNodeType !== MinionNodeType.MULTI_RUNTIME)]; //TODO refactor to be able to filter out runtime nodes
+    return [null, ...this.getNodeNamesMatching((n) => n?.minionNodeType !== MinionNodeType.MULTI_RUNTIME)]; //TODO refactor to be able to filter out runtime nodes
   }
 
   private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     if (group.type === ApplicationType.CLIENT) {
       return ['(skip)', 'Apply to Client Applications'];
     }
-    return ['(skip)', ...this.getNodeNamesMatching(n => n?.minionNodeType !== MinionNodeType.MULTI_RUNTIME).map((n) => 'Apply to ' + n)];
+    return [
+      '(skip)',
+      ...this.getNodeNamesMatching((n) => n?.minionNodeType !== MinionNodeType.MULTI_RUNTIME).map(
+        (n) => 'Apply to ' + n
+      ),
+    ];
   }
 
   private validateAllTemplateGroupsSelected() {

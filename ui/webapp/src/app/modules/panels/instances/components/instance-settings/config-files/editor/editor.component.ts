@@ -1,15 +1,11 @@
 import { Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
-import * as monaco from 'monaco-editor';
+import { editor } from 'monaco-editor';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { InstanceConfigurationDto, SystemConfiguration } from 'src/app/models/gen.dtos';
-import {
-  ContentCompletion
-} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -20,18 +16,22 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
 import { ConfigFilesService } from '../../../../services/config-files.service';
 import { errorMarker } from '../../../../utils/monaco-editor-utils';
 
-
 import { BdButtonComponent } from '../../../../../../core/components/bd-button/bd-button.component';
-import {
-  BdDialogContentComponent
-} from '../../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
+import { BdDialogContentComponent } from '../../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { BdEditorComponent } from '../../../../../../core/components/bd-editor/bd-editor.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-editor',
-    templateUrl: './editor.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, BdEditorComponent, AsyncPipe]
+  selector: 'app-editor',
+  templateUrl: './editor.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdButtonComponent,
+    BdDialogContentComponent,
+    BdEditorComponent,
+    AsyncPipe,
+  ],
 })
 export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -56,7 +56,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  protected markUnresolvedExpansion = (match: monaco.editor.FindMatch): monaco.editor.IMarkerData => {
+  protected markUnresolvedExpansion = (match: editor.FindMatch): editor.IMarkerData => {
     const exp = match.matches[0];
 
     if (exp.includes('DELAYED:')) {
@@ -99,7 +99,7 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
         i.config,
         s?.find((systemConfigDto) => systemConfigDto.key.name === i.config.config.system?.name)?.config,
         null,
-        a,
+        a
       ).filter((contentCompletion) => !contentCompletion.value.startsWith('{{DELAYED')); // DELAYED variables should not be used in config files
 
       this.system = s?.find((system) => system.key.name === c?.instanceConfiguration?.system?.name)?.config;
@@ -129,12 +129,12 @@ export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
         this.cfgFiles.edit(
           this.file$.value,
           Base64.encode(this.content),
-          false, // cannot be binary, we're editing it.
+          false // cannot be binary, we're editing it.
         );
 
         this.content = '';
         this.originalContent = '';
-      }),
+      })
     );
   }
 

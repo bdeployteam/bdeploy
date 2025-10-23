@@ -3,15 +3,12 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceNodeConfigurationDto, MinionNodeType, NodeType } from 'src/app/models/gen.dtos';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
-
 
 import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { BdDataTableComponent } from '../../../../../core/components/bd-data-table/bd-data-table.component';
@@ -32,9 +29,16 @@ const colNodeName: BdDataColumn<NodeRow, string> = {
 };
 
 @Component({
-    selector: 'app-nodes',
-    templateUrl: './nodes.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-nodes',
+  templateUrl: './nodes.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdDataTableComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
@@ -91,7 +95,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
             this.checked.push(row);
           }
         }
-      }),
+      })
     );
   }
 
@@ -105,7 +109,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   protected onCheckedChange(rows: NodeRow[]) {
     // need to propagate changes to the state object.
-    for (const node of [...this.edit.state$.value.config.nodeDtos]) {
+    for (const node of this.edit.state$.value.config.nodeDtos) {
       if (node.nodeConfiguration.nodeType === NodeType.CLIENT) {
         continue;
       }
@@ -120,7 +124,9 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
     for (const row of rows) {
       if (!this.edit.state$.value?.config.nodeDtos.find((n) => n.nodeName === row.name)) {
         const inst = this.edit.current$.value;
-        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration, row.nodeType));
+        this.edit.state$.value?.config.nodeDtos.push(
+          this.edit.createEmptyNode(row.name, inst.instanceConfiguration, row.nodeType)
+        );
       }
     }
     this.hasPendingChanges = this.edit.hasPendingChanges();
@@ -136,7 +142,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
       return this.dialog.confirm(
         `Remove Node`,
         `Removing the node <strong>${row.name}</strong> will also remove <strong>${row.config.nodeConfiguration.applications.length}</strong> applications.`,
-        'delete',
+        'delete'
       );
     }
 

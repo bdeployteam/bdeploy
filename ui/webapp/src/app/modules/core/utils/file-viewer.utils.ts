@@ -1,5 +1,5 @@
 import { FileEntry, TextWriter, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
-import * as Pako from 'pako';
+import Pako from 'pako';
 import { Observable, catchError, forkJoin, from, map, of, switchMap } from 'rxjs';
 import { RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
 

@@ -47,7 +47,30 @@ interface DirTreeNode extends ConfigDirDto {
   selector: 'app-config-process-header',
   templateUrl: './config-process-header.component.html',
   styleUrls: ['./config-process-header.component.css'],
-  imports: [MatCard, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTreeNodePadding, MatIconButton, MatCheckbox, MatIcon, BdButtonComponent, FormsModule, ConfigDescElementComponent, BdFormInputComponent, TrimmedValidator, EditProcessNameValidatorDirective, BdFormSelectComponent, BdFormToggleComponent, MatTooltip, EditItemInListValidatorDirective, ClickStopPropagationDirective, BdPopupDirective, AsyncPipe]
+  imports: [
+    MatCard,
+    MatTree,
+    MatTreeNodeDef,
+    MatTreeNode,
+    MatTreeNodeToggle,
+    MatTreeNodePadding,
+    MatIconButton,
+    MatCheckbox,
+    MatIcon,
+    BdButtonComponent,
+    FormsModule,
+    ConfigDescElementComponent,
+    BdFormInputComponent,
+    TrimmedValidator,
+    EditProcessNameValidatorDirective,
+    BdFormSelectComponent,
+    BdFormToggleComponent,
+    MatTooltip,
+    EditItemInListValidatorDirective,
+    ClickStopPropagationDirective,
+    BdPopupDirective,
+    AsyncPipe,
+  ],
 })
 export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly instances = inject(InstancesService);
@@ -84,14 +107,13 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
 
     this.subscription.add(
       this.instances.current$.pipe(skipWhile((i) => !i)).subscribe((i) => {
-          if (i.configRoot) {
-            this.dirDataSource = [i.configRoot as DirTreeNode];
-            this.generateTreeNodesAndAllowedValues('', i.configRoot as DirTreeNode);
-          } else {
-            this.dirDataSource = [];
-          }
+        if (i.configRoot) {
+          this.dirDataSource = [i.configRoot as DirTreeNode];
+          this.generateTreeNodesAndAllowedValues('', i.configRoot as DirTreeNode);
+        } else {
+          this.dirDataSource = [];
         }
-      )
+      })
     );
   }
 
@@ -117,7 +139,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
     const suffixedParentPath = parentPath.length > 1 ? parentPath + '/' : parentPath;
     node.path = suffixedParentPath + node.name;
     if (this.isExpandable(node)) {
-      node.children.forEach(child => this.generateTreeNodesAndAllowedValues(node.path, child));
+      node.children.forEach((child) => this.generateTreeNodesAndAllowedValues(node.path, child));
     } else {
       // only leafs are allowed as values
       this.dirFlatAllowedValues.push(node.path);
@@ -129,9 +151,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
     this.dirSelection.clear();
     if (dirs?.trim()?.length) {
       const pathsAlreadySelected: string[] = dirs === '/' ? ['/'] : dirs.split(',');
-      pathsAlreadySelected.forEach((path) =>
-        this.dirDataSource.forEach((node) => this.findLeafAndSelect(node, path))
-      );
+      pathsAlreadySelected.forEach((path) => this.dirDataSource.forEach((node) => this.findLeafAndSelect(node, path)));
     }
 
     this.changeDetectorRef.detectChanges();
@@ -141,7 +161,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
   private findLeafAndSelect(node: DirTreeNode, pathToSelect: string) {
     if (this.isExpandable(node)) {
       // if expandable check children
-      node.children.forEach(child => this.findLeafAndSelect(child, pathToSelect));
+      node.children.forEach((child) => this.findLeafAndSelect(child, pathToSelect));
     } else if (node.path === pathToSelect) {
       // if found leaf and matched the path
       this.dirSelection.select(node);
@@ -150,22 +170,23 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
 
   protected doApplyDirectories() {
     const selectedLeafs: string[] = this.dirSelection.selected
-      .filter(node => !this.isExpandable(node))
-      .map(node => node.path);
+      .filter((node) => !this.isExpandable(node))
+      .map((node) => node.path);
     this.edit.process$.value.processControl.configDirs = selectedLeafs.join(',');
     this.dirSelector.closeOverlay();
   }
 
   protected hasAnyChildSelected(node: DirTreeNode): boolean {
     // if leaf, check if selected otherwise check children
-    return this.isExpandable(node) ? node.children.some((child) => this.hasAnyChildSelected(child)) :
-      this.dirSelection.isSelected(node);
+    return this.isExpandable(node)
+      ? node.children.some((child) => this.hasAnyChildSelected(child))
+      : this.dirSelection.isSelected(node);
   }
 
   /** Whether all the descendants of the node are selected */
   protected descendantsAllSelected(node: DirTreeNode): boolean {
     if (this.isExpandable(node)) {
-      return node.children.every(child => this.descendantsAllSelected(child));
+      return node.children.every((child) => this.descendantsAllSelected(child));
     } else {
       return this.dirSelection.isSelected(node);
     }
@@ -186,16 +207,13 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
 
   private setSelection(shouldSelect: boolean, node: DirTreeNode) {
     if (this.isExpandable(node)) {
-      node.children.forEach(child => {
+      node.children.forEach((child) => {
         this.setSelection(shouldSelect, child);
       });
+    } else if (shouldSelect) {
+      this.dirSelection.select(node);
     } else {
-      // only leafs should be added to selection
-      if (shouldSelect) {
-        this.dirSelection.select(node);
-      } else {
-        this.dirSelection.deselect(node);
-      }
+      this.dirSelection.deselect(node);
     }
   }
 

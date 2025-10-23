@@ -43,9 +43,17 @@ const redoColumn: BdDataColumn<InstanceEditRow, string> = {
 };
 
 @Component({
-    selector: 'app-local-changes',
-    templateUrl: './local-changes.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, BdPanelButtonComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-local-changes',
+  templateUrl: './local-changes.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdDataTableComponent,
+    BdPanelButtonComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class LocalChangesComponent implements OnInit, OnDestroy {
   protected readonly edit = inject(InstanceEditService);
@@ -66,7 +74,7 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
       }
 
       if (this.edit.undos.length) {
-        recs[recs.length - 1].isCurrent = true;
+        recs.at(-1).isCurrent = true;
       }
 
       for (const redo of [...this.edit.redos].reverse()) {
@@ -86,7 +94,7 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
       .confirm(
         `Discard unsaved changes?`,
         `Discard <strong>${this.edit.undos.length}</strong> unsaved local changes? This cannot be undone.`,
-        'undo',
+        'undo'
       )
       .subscribe((confirm) => {
         if (confirm) {

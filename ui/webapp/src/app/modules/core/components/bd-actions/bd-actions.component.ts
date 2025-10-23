@@ -10,10 +10,10 @@ import { BdNoDataComponent } from '../bd-no-data/bd-no-data.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-bd-actions',
-    templateUrl: './bd-actions.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BdNotificationCardComponent, MatProgressBar, BdNoDataComponent, AsyncPipe]
+  selector: 'app-bd-actions',
+  templateUrl: './bd-actions.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BdNotificationCardComponent, MatProgressBar, BdNoDataComponent, AsyncPipe]
 })
 export class BdActionsComponent {
   private readonly instances = inject(InstancesService);
@@ -45,7 +45,7 @@ export class BdActionsComponent {
       const inst = this.instances.instances$.pipe(
         skipWhile((i) => !i),
         take(1),
-        map((i) => i.find((x) => x.instanceConfiguration.id === dto.action.instance)),
+        map((i) => i.find((x) => x.instanceConfiguration.id === dto.action.instance))
       );
 
       // if the item is a process, we want to load this one as well!
@@ -60,19 +60,19 @@ export class BdActionsComponent {
               ?.find((n) => n.nodeConfiguration?.applications?.findIndex((a) => a.id === dto.action.item) !== -1)
               ?.nodeConfiguration?.applications?.find((x) => x.id === dto.action.item)?.name,
           ]),
-          map(filteredJoiner),
+          map(filteredJoiner)
         );
       } else {
         return inst.pipe(
           map((i) => [dto.description, dto.action.bhive, i.instanceConfiguration.name, dto.action.item]),
-          map(filteredJoiner),
+          map(filteredJoiner)
         );
       }
     }
   }
 
   protected formatDuration(exec: ActionExecution) {
-    const ms = new Date().getTime() - exec.start;
+    const ms = Date.now() - exec.start;
     const sec = Math.floor(ms / 1_000) % 60;
     const min = Math.floor(ms / 60_000) % 60;
     const hours = Math.floor(ms / 3_600_000) % 24;
