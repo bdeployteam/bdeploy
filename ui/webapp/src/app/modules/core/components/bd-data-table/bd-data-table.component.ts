@@ -626,7 +626,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   protected isAnyChecked() {
-    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length > 0;
+    return this.checkSelection.selected.some((n) => !!n?.node?.item);
   }
 
   protected isPartiallyChecked(node: FlatNode<T>) {

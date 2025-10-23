@@ -678,12 +678,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       return !!g.pairs.length;
     }
 
-    return (
-      g.pairs
-        .filter((p) => !!p.descriptor)
-        .map((p) => p.descriptor.mandatory)
-        .filter((m) => !m).length > 0
-    );
+    return g.pairs
+      .filter((p) => !!p.descriptor)
+      .map((p) => p.descriptor.mandatory)
+      .some((m) => !m);
   }
 
   protected isInvalid(groupForm: NgForm, g: ParameterGroup): boolean {

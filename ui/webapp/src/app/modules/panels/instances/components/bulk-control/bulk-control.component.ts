@@ -11,17 +11,23 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 
 import { BdDialogToolbarComponent } from '../../../../core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogContentComponent } from '../../../../core/components/bd-dialog-content/bd-dialog-content.component';
-import {
-  BdNotificationCardComponent
-} from '../../../../core/components/bd-notification-card/bd-notification-card.component';
+import { BdNotificationCardComponent } from '../../../../core/components/bd-notification-card/bd-notification-card.component';
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 import { MatDivider } from '@angular/material/divider';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-bulk-control',
-    templateUrl: './bulk-control.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNotificationCardComponent, BdButtonComponent, MatDivider, AsyncPipe]
+  selector: 'app-bulk-control',
+  templateUrl: './bulk-control.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdNotificationCardComponent,
+    BdButtonComponent,
+    MatDivider,
+    AsyncPipe,
+  ],
 })
 export class BulkControlComponent implements OnInit {
   private readonly processes = inject(ProcessesService);
@@ -50,21 +56,21 @@ export class BulkControlComponent implements OnInit {
     this.startingMulti$,
     null,
     null,
-    this.bulkSelection$,
+    this.bulkSelection$
   );
   protected mappedStopMulti$ = this.actions.action(
     [Actions.STOP_PROCESS],
     this.stoppingMulti$,
     null,
     null,
-    this.bulkSelection$,
+    this.bulkSelection$
   );
   protected mappedRestartMulti$ = this.actions.action(
     [Actions.START_PROCESS, Actions.STOP_PROCESS],
     this.restartingMulti$,
     null,
     null,
-    this.bulkSelection$,
+    this.bulkSelection$
   );
 
   @ViewChild(BdDialogComponent) private readonly dialog: BdDialogComponent;
@@ -77,8 +83,8 @@ export class BulkControlComponent implements OnInit {
         return;
       }
 
-      this.bulkContainsConfirmed = Object.keys(s).some(
-        (k) => s[k].filter((c) => c?.processControl?.startType === ApplicationStartType.MANUAL_CONFIRM).length > 0,
+      this.bulkContainsConfirmed = Object.keys(s).some((k) =>
+        s[k].some((c) => c?.processControl?.startType === ApplicationStartType.MANUAL_CONFIRM)
       );
 
       const result: string[] = [];
@@ -93,7 +99,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Start',
-        `This will start all processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
+        `This will start all processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
       )
       .subscribe((b) => {
         if (b) {
@@ -110,7 +116,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Stop',
-        `This will stop all currently running processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
+        `This will stop all currently running processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
       )
       .subscribe((b) => {
         if (b) {
@@ -127,7 +133,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Restart',
-        `This will restart all running, and start all other processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
+        `This will restart all running, and start all other processes of start type 'Instance' in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
       )
       .subscribe((b) => {
         if (b) {
@@ -144,7 +150,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Start',
-        `This will start selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
+        `This will start selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
       )
       .subscribe((b) => {
         if (b) {
@@ -161,7 +167,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Stop',
-        `This will stop selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
+        `This will stop selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
       )
       .subscribe((b) => {
         if (b) {
@@ -178,7 +184,7 @@ export class BulkControlComponent implements OnInit {
     this.dialog
       .confirm(
         'Confirm Restart',
-        `This will restart selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`,
+        `This will restart selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
       )
       .subscribe((b) => {
         if (b) {

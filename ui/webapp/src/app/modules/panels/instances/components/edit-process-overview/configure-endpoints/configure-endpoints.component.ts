@@ -9,14 +9,10 @@ import {
   InstanceConfigurationDto,
   LinkedValueConfiguration,
   SystemConfiguration,
-  VariableType
+  VariableType,
 } from 'src/app/models/gen.dtos';
-import {
-  ContentCompletion
-} from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -26,15 +22,12 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
 
-
 import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-button.component';
 import { BdDialogContentComponent } from '../../../../../core/components/bd-dialog-content/bd-dialog-content.component';
 import { ConfigDescElementComponent } from '../../config-desc-element/config-desc-element.component';
 import { BdValueEditorComponent } from '../../../../../core/components/bd-value-editor/bd-value-editor.component';
 import { AllowedValuesValidatorDirective } from '../../../validators/allowed-values-validator.directive';
-import {
-  BdExpressionToggleComponent
-} from '../../../../../core/components/bd-expression-toggle/bd-expression-toggle.component';
+import { BdExpressionToggleComponent } from '../../../../../core/components/bd-expression-toggle/bd-expression-toggle.component';
 import { BdFormToggleComponent } from '../../../../../core/components/bd-form-toggle/bd-form-toggle.component';
 import { BdNoDataComponent } from '../../../../../core/components/bd-no-data/bd-no-data.component';
 import { AsyncPipe } from '@angular/common';
@@ -45,9 +38,22 @@ interface HttpEndpointDisabledStatus {
 }
 
 @Component({
-    selector: 'app-configure-endpoints',
-    templateUrl: './configure-endpoints.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdButtonComponent, BdDialogContentComponent, FormsModule, ConfigDescElementComponent, BdValueEditorComponent, AllowedValuesValidatorDirective, BdExpressionToggleComponent, BdFormToggleComponent, BdNoDataComponent, AsyncPipe]
+  selector: 'app-configure-endpoints',
+  templateUrl: './configure-endpoints.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdButtonComponent,
+    BdDialogContentComponent,
+    FormsModule,
+    ConfigDescElementComponent,
+    BdValueEditorComponent,
+    AllowedValuesValidatorDirective,
+    BdExpressionToggleComponent,
+    BdFormToggleComponent,
+    BdNoDataComponent,
+    AsyncPipe,
+  ],
 })
 export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnDestroy, AfterViewInit {
   private readonly systems = inject(SystemsService);
@@ -91,7 +97,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
         } else {
           this.system = systemConfigDto.find(
             (x) =>
-              x.key.name === editState.config.config.system.name && x.key.tag === editState.config.config.system.tag,
+              x.key.name === editState.config.config.system.name && x.key.tag === editState.config.config.system.tag
           )?.config;
         }
 
@@ -100,7 +106,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
           this.instance,
           this.system,
           this.process,
-          this.instanceEdit.stateApplications$.value,
+          this.instanceEdit.stateApplications$.value
         );
 
         if (appConfig?.endpoints?.http?.length) {
@@ -109,7 +115,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
             this.calculateDisabledStatus(appConfig.endpoints.http[i]);
           }
         }
-      },
+      }
     );
 
     this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
@@ -124,7 +130,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
         form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
           this.isFromInvalid = status === 'INVALID';
           this.hasPendingChanges = this.isDirty();
-        }),
+        })
       );
     });
   }
@@ -138,7 +144,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
   }
 
   public isInvalid(): boolean {
-    return this.forms.filter((f) => f.invalid).length !== 0;
+    return this.forms.some((f) => f.invalid);
   }
 
   protected onSave() {
@@ -153,7 +159,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
     return of(true).pipe(
       tap(() => {
         this.instanceEdit.conceal('Change endpoint configuration');
-      }),
+      })
     );
   }
 
@@ -171,7 +177,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
   }
 
   protected combineForDisplay(path: string, contextPath: string) {
-    return contextPath ? (path + ' (' + contextPath + ')') : path;
+    return contextPath ? path + ' (' + contextPath + ')' : path;
   }
 
   protected onChangeAuthType(type: LinkedValueConfiguration, index: number) {
