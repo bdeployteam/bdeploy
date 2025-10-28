@@ -154,6 +154,11 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
+    public String getAuthPack(String user, Boolean full) {
+        return getAdmin().getAuthPack(user, full);
+    }
+
+    @Override
     public String getCurrentAuthPack(Boolean full) {
         return getAdmin().getAuthPack(null, full);
     }
