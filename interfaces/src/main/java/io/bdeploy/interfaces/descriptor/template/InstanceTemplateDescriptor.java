@@ -33,9 +33,9 @@ public class InstanceTemplateDescriptor {
     public List<TemplateVariable> templateVariables = new ArrayList<>();
 
     /**
-     * @deprecated As of release 7.2
+     * @deprecated As of release 7.2.0
      */
-    @Deprecated(since = "7.2")
+    @Deprecated(since = "7.2.0")
     @JsonPropertyDescription("A collection of instance variables to create when applying the instance template.")
     public List<TemplateableVariableConfiguration> instanceVariables = new ArrayList<>();
 
@@ -43,9 +43,9 @@ public class InstanceTemplateDescriptor {
     public List<InstanceVariableConfiguration> instanceVariableValues = new ArrayList<>();
 
     /**
-     * @deprecated As of release 7.2
+     * @deprecated As of release 7.2.0
      */
-    @Deprecated(since = "7.2")
+    @Deprecated(since = "7.2.0")
     @JsonPropertyDescription("A collection of override values for instanceVariables. Especially useful when including instanceVariableTemplates in the product, and referencing them from instanceVariables.")
     public List<TemplateableVariableDefaultConfiguration> instanceVariableDefaults = new ArrayList<>();
 
