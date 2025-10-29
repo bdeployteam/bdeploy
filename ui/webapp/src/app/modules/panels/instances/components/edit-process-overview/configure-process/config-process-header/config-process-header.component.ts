@@ -8,7 +8,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatTree, MatTreeNode, MatTreeNodeDef, MatTreeNodePadding, MatTreeNodeToggle } from '@angular/material/tree';
@@ -219,9 +219,9 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy, AfterVie
 
   private getStartTypes(app: ApplicationDto): ApplicationStartType[] {
     const supported = app?.descriptor?.processControl?.supportedStartTypes;
-    if (!supported?.length || !!supported.find((s) => s === ApplicationStartType.INSTANCE)) {
+    if (!supported?.length || !!supported.includes(ApplicationStartType.INSTANCE)) {
       return [ApplicationStartType.INSTANCE, ApplicationStartType.MANUAL, ApplicationStartType.MANUAL_CONFIRM];
-    } else if (supported.find((s) => s === ApplicationStartType.MANUAL)) {
+    } else if (supported.includes(ApplicationStartType.MANUAL)) {
       return [ApplicationStartType.MANUAL, ApplicationStartType.MANUAL_CONFIRM];
     } else {
       return supported;

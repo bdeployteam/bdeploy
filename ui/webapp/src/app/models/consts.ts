@@ -19,11 +19,11 @@ export const sortNodesMasterFirst = (a: string, b: string): number => {
  * See https://stackoverflow.com/questions/53720910/merge-arrays-and-keep-ordering
  */
 export function mergeOrdererd<T>(a: T[], b: T[], key: (ele: T) => T): T[] {
-  const result:T[] = [];
+  const result: T[] = [];
   [a, b].forEach((array) => {
     array.forEach((item: T, idx: number) => {
       // check if the item has already been added, if not, try to add
-      if (!result.find((x) => key(x) === key(item))) {
+      if (!result.some((x) => key(x) === key(item))) {
         // if item is not first item, find position of its left sibling in result array
         if (idx) {
           const resultIndex = result.indexOf(array[idx - 1]);

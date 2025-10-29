@@ -352,7 +352,7 @@ export class InstanceEditService {
 
           // make sure we have the client application virtual node if there are client applications.
           const clientNode = base.nodeDtos.find((n) => n.nodeConfiguration.nodeType === NodeType.CLIENT);
-          if (!clientNode && !!nodes.applications.find((a) => a.descriptor.type === ApplicationType.CLIENT)) {
+          if (!clientNode && !!nodes.applications.some((a) => a.descriptor.type === ApplicationType.CLIENT)) {
             base.nodeDtos.push(this.createEmptyNode('', base.config, NodeType.CLIENT));
           }
 
@@ -646,7 +646,7 @@ export class InstanceEditService {
     const products = this.products.products$.value || [];
     return !this.state$.value?.config?.config?.product?.name
       ? false
-      : !!products.find(
+      : !!products.some(
           (p) =>
             p.key.name === this.state$.value.config.config.product.name &&
             p.key.tag === this.state$.value.config.config.product.tag

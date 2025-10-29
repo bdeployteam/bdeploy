@@ -114,7 +114,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
         continue;
       }
 
-      if (!rows.find((r) => r.name === node.nodeName)) {
+      if (!rows.some((r) => r.name === node.nodeName)) {
         // no longer in the list, remove.
         this.edit.state$.value?.config.nodeDtos.splice(this.edit.state$.value?.config.nodeDtos.indexOf(node), 1);
         this.records.find((r) => r.name === node.nodeName).config = null;

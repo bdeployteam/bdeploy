@@ -28,9 +28,9 @@ const colNodeName: BdDataColumn<NodeRow, string> = {
 };
 
 @Component({
-    selector: 'app-move-process',
-    templateUrl: './move-process.component.html',
-    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, RouterLink, BdDataTableComponent]
+  selector: 'app-move-process',
+  templateUrl: './move-process.component.html',
+  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, RouterLink, BdDataTableComponent],
 })
 export class MoveProcessComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -57,12 +57,13 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
       }
 
       this.currentNode = state.config.nodeDtos.find(
-        (n) => !!n.nodeConfiguration.applications.find((a) => a.id === process.id),
+        (n) => !!n.nodeConfiguration.applications.some((a) => a.id === process.id)
       );
 
       const result: NodeRow[] = [];
       for (const node of state.config.nodeDtos) {
-        const appType = node.nodeConfiguration.nodeType === NodeType.CLIENT ? ApplicationType.CLIENT : ApplicationType.SERVER;
+        const appType =
+          node.nodeConfiguration.nodeType === NodeType.CLIENT ? ApplicationType.CLIENT : ApplicationType.SERVER;
         if (app.descriptor.type !== appType) {
           continue;
         }
@@ -111,7 +112,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
     const cfg = this.edit.process$.value;
 
     const targetNode = this.instanceEdit.state$.value?.config?.nodeDtos?.find(
-      (n) => n.nodeName === node.name,
+      (n) => n.nodeName === node.name
     )?.nodeConfiguration;
     const targetApps = targetNode?.applications;
 

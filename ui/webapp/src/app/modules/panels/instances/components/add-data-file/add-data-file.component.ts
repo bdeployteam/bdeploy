@@ -18,10 +18,21 @@ import { AsyncPipe } from '@angular/common';
 import { BdNoDataComponent } from 'src/app/modules/core/components/bd-no-data/bd-no-data.component';
 
 @Component({
-    selector: 'app-add-data-file',
-    templateUrl: './add-data-file.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdNoDataComponent, FormsModule, BdFormInputComponent, CfgFileNameValidatorDirective, BdFileDropComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-add-data-file',
+  templateUrl: './add-data-file.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdNoDataComponent,
+    FormsModule,
+    BdFormInputComponent,
+    CfgFileNameValidatorDirective,
+    BdFileDropComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readonly areas = inject(NavAreasService);
@@ -57,7 +68,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
           }
         }
         this.minions$.next(dd.map((d) => d.minion));
-      }),
+      })
     );
     this.subscription.add(
       combineLatest([this.minions$, this.areas.primaryRoute$]).subscribe(([minions, route]) => {
@@ -67,7 +78,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
         const path = decodeFilePath(route.params['path']);
         this.fileMinion$.next(minions.find((minion) => path.minion === minion));
         this.currentPath$.next(path.path + (path.path ? '/' : ''));
-      }),
+      })
     );
   }
 
@@ -118,17 +129,15 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
             return this.filesService.updateFile(this.directory, this.fileToSave).pipe(map(() => true));
           }
           return of(false);
-        }),
+        })
       );
     }
 
-    return update.pipe(
-      finalize(() => this.saving$.next(false))
-    );
+    return update.pipe(finalize(() => this.saving$.next(false)));
   }
 
   private shouldReplace() {
-    return !!this.directory.entries.find((e) => e.path.replace('\\', '/') === this.filePath);
+    return !!this.directory.entries.some((e) => e.path.replace('\\', '/') === this.filePath);
   }
 
   protected doAddFileContent(file: File) {

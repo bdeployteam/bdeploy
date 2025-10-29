@@ -22,9 +22,21 @@ import { BdButtonComponent } from '../../../../core/components/bd-button/bd-butt
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-product-transfer-repo',
-    templateUrl: './product-transfer-repo.component.html',
-    imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, MatStepper, MatStep, BdFormSelectComponent, FormsModule, BdLoadingOverlayComponent, BdDataTableComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-product-transfer-repo',
+  templateUrl: './product-transfer-repo.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    MatStepper,
+    MatStep,
+    BdFormSelectComponent,
+    FormsModule,
+    BdLoadingOverlayComponent,
+    BdDataTableComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class ProductTransferRepoComponent implements OnInit {
   private readonly repositories = inject(RepositoriesService);
@@ -47,7 +59,7 @@ export class ProductTransferRepoComponent implements OnInit {
   protected selectedVersions$ = new BehaviorSubject<ProductDto[]>([]);
 
   protected loading$ = combineLatest([this.products.loading$, this.repositories.loading$]).pipe(
-    map(([a, b]) => a || b),
+    map(([a, b]) => a || b)
   );
 
   protected importing$ = new BehaviorSubject<boolean>(false);
@@ -56,7 +68,7 @@ export class ProductTransferRepoComponent implements OnInit {
     this.importing$,
     null,
     null,
-    this.selectedVersions$.pipe(map((x) => x.map((y) => `${y.key.name}:${y.key.tag}`))),
+    this.selectedVersions$.pipe(map((x) => x.map((y) => `${y.key.name}:${y.key.tag}`)))
   );
 
   private queryRepo: string = null;
@@ -111,7 +123,7 @@ export class ProductTransferRepoComponent implements OnInit {
           .subscribe((prods) => {
             const products = this.products.products$.value || [];
             const filtered = prods.filter(
-              (p) => !products.find((p2) => p2.key.name === p.key.name && p2.key.tag === p.key.tag),
+              (p) => !products.some((p2) => p2.key.name === p.key.name && p2.key.tag === p.key.tag)
             );
             this.prodsById = groupBy(filtered, (p) => p.product);
             this.prodIds = Object.keys(this.prodsById);

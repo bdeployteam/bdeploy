@@ -18,7 +18,7 @@ export class ApplicationPair {
     public base: ApplicationConfiguration,
     public compare: ApplicationConfiguration,
     public baseDesc: ApplicationDescriptor,
-    public compareDesc: ApplicationDescriptor,
+    public compareDesc: ApplicationDescriptor
   ) {
     const left = new ApplicationConfigurationDiff(base, compare, baseDesc);
     const right = new ApplicationConfigurationDiff(compare, base, compareDesc);
@@ -37,7 +37,7 @@ export class NodePair {
     base: InstanceNodeConfigurationDto,
     compare: InstanceNodeConfigurationDto,
     baseApplications: ApplicationDto[],
-    compareApplications: ApplicationDto[],
+    compareApplications: ApplicationDto[]
   ) {
     this.name = base?.nodeName ? base.nodeName : compare?.nodeName;
     this.type = base?.nodeConfiguration.nodeType ? base.nodeConfiguration.nodeType : compare.nodeConfiguration.nodeType;
@@ -65,8 +65,8 @@ export class NodePair {
           baseApplications ? baseApplications.find((a) => a.key.name === baseApp?.application?.name)?.descriptor : null,
           compareApplications
             ? compareApplications.find((a) => a.key.name === compareApp?.application?.name)?.descriptor
-            : null,
-        ),
+            : null
+        )
       );
     }
 
@@ -75,26 +75,20 @@ export class NodePair {
 }
 
 export class HeaderPair {
-  constructor(
-    public base: InstanceConfiguration,
-    public compare: InstanceConfiguration,
-  ) {}
+  constructor(public base: InstanceConfiguration, public compare: InstanceConfiguration) {}
 }
 
 export class ConfigPair {
   nodes: NodePair[] = [];
   header: HeaderPair;
 
-  constructor(
-    public base: InstanceConfigCache,
-    public compare: InstanceConfigCache,
-  ) {
+  constructor(public base: InstanceConfigCache, public compare: InstanceConfigCache) {
     this.header = new HeaderPair(base?.config, compare?.config);
 
     const sortedNodes = base?.nodes?.nodeConfigDtos ? [...base.nodes.nodeConfigDtos] : [];
     if (compare?.nodes?.nodeConfigDtos) {
       for (const node of compare.nodes.nodeConfigDtos) {
-        if (!sortedNodes.find((n) => n.nodeName === node.nodeName)) {
+        if (!sortedNodes.some((n) => n.nodeName === node.nodeName)) {
           sortedNodes.push(node);
         }
       }

@@ -454,7 +454,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       level: level
     };
 
-    if (!!node.item && !!this.checked && !!this.checked.find((c) => c === node.item)) {
+    if (!!node.item && !!this.checked && !!this.checked.includes(node.item)) {
       this.checkSelection.select(flatNode);
     }
 

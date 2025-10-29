@@ -206,7 +206,7 @@ export class AuthenticationService {
   private isGlobal(permission: Permission): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload?.c) {
-      return !!tokenPayload.c.find((c) => c.scope === null && this.ge(c.permission, permission));
+      return !!tokenPayload.c.some((c) => c.scope === null && this.ge(c.permission, permission));
     }
     return false;
   }
@@ -281,7 +281,7 @@ export class AuthenticationService {
 
   private isScoped(scope: string, userInfo: UserInfo, permission: Permission): boolean {
     if (userInfo?.mergedPermissions) {
-      return !!userInfo.mergedPermissions.find(
+      return !!userInfo.mergedPermissions.some(
         (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, permission)
       );
     }

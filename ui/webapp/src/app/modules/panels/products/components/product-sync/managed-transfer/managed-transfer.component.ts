@@ -1,9 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, finalize, map, Observable, of, Subscription } from 'rxjs';
 import { Actions, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
-import {
-  BdDialogToolbarComponent
-} from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsColumnsService } from 'src/app/modules/primary/products/services/products-columns.service';
@@ -17,9 +15,16 @@ import { BdButtonComponent } from '../../../../../core/components/bd-button/bd-b
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-managed-transfer',
-    templateUrl: './managed-transfer.component.html',
-  imports: [BdDialogComponent, BdDialogToolbarComponent, BdDialogContentComponent, BdDataTableComponent, BdButtonComponent, AsyncPipe]
+  selector: 'app-managed-transfer',
+  templateUrl: './managed-transfer.component.html',
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdDataTableComponent,
+    BdButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class ManagedTransferComponent implements OnInit, OnDestroy {
   private readonly areas = inject(NavAreasService);
@@ -59,7 +64,7 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
         of(false),
         null,
         null,
-        this.selected$.pipe(map((productDto) => productDto.map((x) => `${x.key.name}:${x.key.tag}`))),
+        this.selected$.pipe(map((productDto) => productDto.map((x) => `${x.key.name}:${x.key.tag}`)))
       );
 
       this.server$.next(server);
@@ -89,11 +94,11 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
         .subscribe((x) => {
           if (target === MinionMode.CENTRAL) {
             this.records$.next(
-              x.filter((rp) => !p.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag)),
+              x.filter((rp) => !p.some((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag))
             );
           } else {
             this.records$.next(
-              p.filter((rp) => !x.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag)),
+              p.filter((rp) => !x.some((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag))
             );
           }
         });

@@ -455,7 +455,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       const myIndex = descriptors.findIndex((x) => x.id === p.descriptor.id);
 
       // find the next descriptor which *has* a value *after* my own desciptor.
-      const nextDesc = descriptors.find((v, i) => i > myIndex && !!paramList.find((x) => x.id === v.id));
+      const nextDesc = descriptors.find((v, i) => i > myIndex && !!paramList.some((x) => x.id === v.id));
 
       // if we don't have a next one, simply push it at the end of the list.
       if (!nextDesc) {
