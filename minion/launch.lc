@@ -51,6 +51,18 @@ java configuration Node-Init : minion-base {
 	argument "--mode=NODE";
 }
 
+/** Initialize a new multi-node root */
+java configuration MultiNode-Init : minion-base {
+	argument "init";
+	argument "--root=${workspace_loc}/runtime/multinode";
+	argument "--logData=${workspace_loc}/runtime/multinode/external";
+	argument "--hostname=localhost";
+	argument "--port=7703";
+	argument "--dist=ignore";
+	argument "--mode=NODE";
+	argument "--nodeType=MULTI_RUNTIME";
+}
+
 /** Initialize a new master root for a central server */
 java configuration Central-Init : minion-base {
 	argument "init";
@@ -131,6 +143,16 @@ java configuration Node : minion-base {
 	argument "--root=${workspace_loc}/runtime/node";
 	argument "--consoleLog";
 //	vm-argument "-Dbdeploy.version.override=4.1.3"; // TESTING
+	memory max=256 MB;
+}
+
+/** Runs the multi-node */
+java configuration MultiNode : minion-base {
+	argument "start";
+	argument "--consoleLog";
+	argument "--root=${workspace_loc}/runtime/multinode";
+	argument "--runtimeName=runtimeNode";
+	argument "--masterFile=${workspace_loc}/runtime/master-file.json";
 	memory max=256 MB;
 }
 
