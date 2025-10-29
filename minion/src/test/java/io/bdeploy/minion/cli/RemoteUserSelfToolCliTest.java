@@ -111,12 +111,12 @@ public class RemoteUserSelfToolCliTest extends BaseMinionCliTest {
     }
 
     @Test
-    void testUserDelete(RemoteService remote) {
-        assertThrows(RuntimeException.class, () -> remote(remote, RemoteUserSelfTool.class, "--delete"));
+    void testUserRemove(RemoteService remote) {
+        assertThrows(RuntimeException.class, () -> remote(remote, RemoteUserSelfTool.class, "--remove"));
 
         remote(remote, RemoteUserTool.class, "--add=admin2", "--password=adminadminadmin", "--admin");
 
-        StructuredOutput attempt2 = remote(remote, RemoteUserSelfTool.class, "--delete");
+        StructuredOutput attempt2 = remote(remote, RemoteUserSelfTool.class, "--remove");
         assertEquals("Success", attempt2.get(0).get("message"));
 
         /**

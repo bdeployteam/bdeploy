@@ -65,7 +65,7 @@ public class RemoteUserSelfTool extends RemoteServiceTool<UserSelfConfig> {
         boolean deactivate() default false;
 
         @Help(value = "Deletes the current user", arg = false)
-        boolean delete() default false;
+        boolean remove() default false;
 
         @Help(value = "Creates a token for the current user", arg = false)
         boolean createToken() default false;
@@ -92,7 +92,7 @@ public class RemoteUserSelfTool extends RemoteServiceTool<UserSelfConfig> {
             return removePermission(config, remote, auth);
         } else if (config.deactivate()) {
             return deactivate(remote, auth);
-        } else if (config.delete()) {
+        } else if (config.remove()) {
             return delete(remote, auth);
         } else if (config.createToken()) {
             createToken(config, auth);
