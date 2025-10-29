@@ -92,11 +92,11 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     @Override
     protected RenderableResult run(RemoteProcessConfig config, RemoteService svc) {
-        String instanceId = config.uuid();
-        helpAndFailIfMissing(instanceId, "Missing --uuid");
-
         String groupName = config.instanceGroup();
         helpAndFailIfMissing(groupName, "Missing --instanceGroup");
+
+        String instanceId = config.uuid();
+        helpAndFailIfMissing(instanceId, "Missing --uuid");
 
         int flagCount = (config.list() ? 1 : 0) + (config.start() ? 1 : 0) + (config.stop() ? 1 : 0);
         if (flagCount == 0) {
@@ -152,8 +152,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             return createAllProcessesTable(config, svc, ir, deploymentStates);
         } else {
             MappedInstanceProcessStatusDto allStatus = ir.getProcessResource(instanceId).getMappedStatus();
-            ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(
-                    config.nodeName() != null ? config.nodeName() : allStatus.processToNode.get(appId), appId);
+            ProcessDetailDto appStatus = ir.getProcessResource(instanceId)
+                    .getDetails(config.nodeName() != null ? config.nodeName() : allStatus.processToNode.get(appId), appId);
             InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceId,
                     appStatus.status.instanceTag);
             Optional<ApplicationConfiguration> app = findAppConfig(appId, cfg);
@@ -196,8 +196,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return findAppConfig(config.application(), nodes.orElse(null));
     }
 
-    private static void doJoin(long pollIntervalMs, Supplier<Map<String, ProcessStatusDto>> processStatesSupplier, Set<ProcessState> targets) {
-        if(null == processStatesSupplier.get()) {
+    private static void doJoin(long pollIntervalMs, Supplier<Map<String, ProcessStatusDto>> processStatesSupplier,
+            Set<ProcessState> targets) {
+        if (null == processStatesSupplier.get()) {
             // assuming that there is nothing to do because there isn't any node that we can take the status from
             return;
         }
@@ -206,8 +207,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         }
     }
 
-    private static Optional<ApplicationConfiguration> findAppConfig(String appId,
-            InstanceNodeConfigurationListDto nodes) {
+    private static Optional<ApplicationConfiguration> findAppConfig(String appId, InstanceNodeConfigurationListDto nodes) {
         Optional<ApplicationConfiguration> app = Optional.empty();
         if (nodes == null) {
             return app;
@@ -252,12 +252,13 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
         Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();
-        List<Map.Entry<String,ProcessStatusDto>> processEntries = getOrderedProcessEntries(config, ir, deploymentStates.activeTag);
+        List<Map.Entry<String, ProcessStatusDto>> processEntries = getOrderedProcessEntries(config, ir,
+                deploymentStates.activeTag);
 
         ProcessResource pr = ir.getProcessResource(config.uuid());
         MappedInstanceProcessStatusDto overall = pr.getMappedStatus();
 
-        for (Map.Entry<String,ProcessStatusDto> processEntry : processEntries) {
+        for (Map.Entry<String, ProcessStatusDto> processEntry : processEntries) {
             ProcessStatusDto processStatusDto = processEntry.getValue();
             String tag = processStatusDto.instanceTag;
             Optional<InstanceConfiguration> instance = instanceInfos.computeIfAbsent(tag, k -> {
@@ -296,8 +297,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return table;
     }
 
-    private static List<Map.Entry<String,ProcessStatusDto>> getOrderedProcessEntries(RemoteProcessConfig config, InstanceResource ir,
-            String activeTag) {
+    private static List<Map.Entry<String, ProcessStatusDto>> getOrderedProcessEntries(RemoteProcessConfig config,
+            InstanceResource ir, String activeTag) {
         String instanceId = config.uuid();
         String controlGroupName = config.controlGroupName();
         String controlGroupNodeName = config.controlGroupNodeName();
@@ -311,13 +312,14 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .map(controlGroup -> controlGroup.processOrder).flatMap(Collection::stream).toList();
 
         Comparator<Map.Entry<String, ProcessStatusDto>> comparator = (a, b) -> {
-            int result = Integer.compare(processOrderList.indexOf(a.getValue().appId), processOrderList.indexOf(b.getValue().appId));
+            int result = Integer.compare(processOrderList.indexOf(a.getValue().appId),
+                    processOrderList.indexOf(b.getValue().appId));
             return result == 0 ? a.getKey().compareTo(b.getKey()) : result;
         };
 
-        return ir.getProcessResource(instanceId).getMappedStatus().processStates.entrySet().stream().flatMap(
-                        configuredNodeEntry -> configuredNodeEntry.getValue().entrySet().stream()
-                                .map(runtimeNodeEntry -> Map.entry(runtimeNodeEntry.getKey(), runtimeNodeEntry.getValue())))
+        return ir.getProcessResource(instanceId).getMappedStatus().processStates.entrySet().stream()
+                .flatMap(configuredNodeEntry -> configuredNodeEntry.getValue().entrySet().stream()
+                        .map(runtimeNodeEntry -> Map.entry(runtimeNodeEntry.getKey(), runtimeNodeEntry.getValue())))
                 .sorted(comparator).collect(Collectors.toList());
     }
 
@@ -374,8 +376,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 doActionsWithNodeMap.accept(ir.getProcessResource(instanceId), Map.of(config.nodeName(), List.of(appId)));
             } else {
                 String activeTag = ir.getDeploymentStates(instanceId).activeTag;
-                List<String> appIds = !isNullOrEmpty(appId)
-                        ? List.of(appId)
+                List<String> appIds = !isNullOrEmpty(appId) ? List.of(appId)
                         : getOrderedProcessEntries(config, ir, activeTag).stream()
                                 .map(processEntry -> processEntry.getValue().appId).toList();
 
@@ -388,10 +389,10 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     return createResultWithErrorMessage("Cannot load configuration for application " + appId);
                 }
 
-                var targetStates = waitForStartupWhenJoining && (cfg.get().processControl.startType
-                        == ProcessControlDescriptor.ApplicationStartType.INSTANCE)
-                        ? Set.of(ProcessState.RUNNING)
-                        : Set.of(ProcessState.STOPPED, ProcessState.CRASHED_PERMANENTLY);
+                var targetStates = waitForStartupWhenJoining
+                        && (cfg.get().processControl.startType == ProcessControlDescriptor.ApplicationStartType.INSTANCE)
+                                ? Set.of(ProcessState.RUNNING)
+                                : Set.of(ProcessState.STOPPED, ProcessState.CRASHED_PERMANENTLY);
 
                 doJoin(2000, () -> ir.getProcessResource(instanceId).getMappedStatus().processStates.get(appId), targetStates);
             }
