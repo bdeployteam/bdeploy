@@ -1,6 +1,8 @@
 package io.bdeploy.ui.api;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserProfileInfo;
@@ -81,6 +83,17 @@ public interface AuthResource {
     @Path("/session/logout")
     @Unsecured
     public Response logout(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
+
+    /**
+     * @return an authentication pack which can be used for build integrations and command line token authentication.
+     * @deprecated Use {@link AuthAdminResource#getAuthPack(String, Boolean)} instead
+     */
+    @Deprecated(forRemoval = true, since = "7.8.0")
+    @GET
+    @Path("/auth-pack")
+    @Produces(MediaType.TEXT_PLAIN)
+    @RequiredPermission(permission = Permission.ADMIN)
+    public String getAuthPack(@QueryParam("user") String user, @QueryParam("full") Boolean full);
 
     /**
      * @return an authentication pack of the current user
