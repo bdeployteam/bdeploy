@@ -105,39 +105,38 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         // updates the existing NodePort objects with state
         fetchAndUpdateWithProcessStatusAndPortCheckResults(config, ir, instancePortStatesDto);
 
-        instancePortStatesDto.appStates.forEach(
-                appState -> appState.portStates.stream().sorted(Comparator.comparing(portState -> portState.port))
-                        .forEach(portState -> {
-                            if (portState.isClientPort() && !config.clients()) {
-                                // ignore this row then
-                            }
+        for (var appState : instancePortStatesDto.appStates) {
+            boolean skipClientNodes = !config.clients();
+            appState.portStates.stream().sorted(Comparator.comparingInt(portState -> portState.port)).forEach(portState -> {
+                if (skipClientNodes && portState.isClientPort()) {
+                    return;
+                }
 
-                            if (portState.states.isEmpty()) {
-                                // then we do not know anything about this port param
-                                table.row().cell(appState.configuredNode).cell(appState.appId).cell(appState.appName).cell("")
-                                        .cell("").cell(portState.paramName).cell(portState.port)
-                                        .cell(portState.isServerPort() ? "SERVER" : "CLIENT").cell("").cell("").build();
-                                return;
-                            }
+                if (portState.states.isEmpty()) {
+                    // then we do not know anything about this port param
+                    table.row().cell(appState.configuredNode).cell(appState.appId).cell(appState.appName).cell("").cell("")
+                            .cell(portState.paramName).cell(portState.port).cell(portState.isServerPort() ? "SERVER" : "CLIENT")
+                            .cell("").cell("").build();
+                    return;
+                }
 
-                            portState.states.forEach((checkResult) -> {
-                                if (portState.isServerPort()) {
-                                    table.row().cell(getNodeNameDisplay(appState, checkResult)).cell(appState.appId)
-                                            .cell(appState.appName).cell(checkResult.processState)
-                                            .cell(checkResult.isRunning() && !activeTag.equals(checkResult.runningTag) ? "*" : "")
+                portState.states.forEach((checkResult) -> {
+                    if (portState.isServerPort()) {
+                        table.row().cell(getNodeNameDisplay(appState, checkResult)).cell(appState.appId).cell(appState.appName)
+                                .cell(checkResult.processState)
+                                .cell(checkResult.isRunning() && !activeTag.equals(checkResult.runningTag) ? "*" : "")
 
-                                            .cell(portState.paramName).cell(portState.port).cell("SERVER")
-                                            .cell(checkResult.isUsed ? "open" : "closed")
-                                            .cell(checkResult.getRating() ? "OK" : "BAD").build();
-                                } else {
-                                    table.row().cell(getNodeNameDisplay(appState, checkResult)).cell(appState.appId)
-                                            .cell(appState.appName).cell(checkResult.processState).cell("")
-                                            .cell(portState.paramName).cell(portState.port).cell("CLIENT").cell("").cell("")
-                                            .build();
-                                }
-                            });
-
-                        }));
+                                .cell(portState.paramName).cell(portState.port).cell("SERVER")
+                                .cell(checkResult.isUsed ? "open" : "closed").cell(checkResult.getRating() ? "OK" : "BAD")
+                                .build();
+                    } else {
+                        table.row().cell(getNodeNameDisplay(appState, checkResult)).cell(appState.appId).cell(appState.appName)
+                                .cell(checkResult.processState).cell("").cell(portState.paramName).cell(portState.port)
+                                .cell("CLIENT").cell("").cell("").build();
+                    }
+                });
+            });
+        }
 
         return table;
     }
@@ -162,8 +161,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                         portState.serverNode = serverNode;
                         portState.isUsed = checkResult.get(compositePortState.port);
 
-                        if (status.processStates.containsKey(appState.appId) && status.processStates.get(appState.appId)
-                                .containsKey(serverNode)) {
+                        if (status.processStates.containsKey(appState.appId)
+                                && status.processStates.get(appState.appId).containsKey(serverNode)) {
                             var processStatus = status.processStates.get(appState.appId).get(serverNode);
                             portState.processState = processStatus.processState;
                             portState.runningTag = processStatus.instanceTag;
@@ -171,9 +170,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
                         compositePortState.states.add(portState);
                     } else {
-                        throw new IllegalStateException(
-                                "Cannot map port " + compositePortState.paramName + " of node " + serverNode + ", port: "
-                                        + compositePortState.port);
+                        throw new IllegalStateException("Cannot map port " + compositePortState.paramName + " of node "
+                                + serverNode + ", port: " + compositePortState.port);
                     }
                     checkForPortDuplicates(appState);
                 });
@@ -201,9 +199,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                 .collect(Collectors.groupingBy(e -> e.port, Collectors.toList()));
 
         groupedByPortNumber.entrySet().stream().filter(entry -> entry.getValue().size() > 1).forEach(entry -> {
-            out().println(
-                    "WARNING: Server port " + entry.getKey() + " assigned to multiple parameters: " + entry.getValue().stream()
-                            .map(paramState -> paramState.paramName));
+            out().println("WARNING: Server port " + entry.getKey() + " assigned to multiple parameters: "
+                    + entry.getValue().stream().map(paramState -> paramState.paramName));
         });
     }
 
