@@ -18,9 +18,14 @@ public class InstancePortStatesDto {
         appStates.add(appState);
     }
 
+    /**
+     * excluding client apps
+     */
     public Map<String, List<Integer>> getPortsMappedByConfiguredNode() {
         return appStates.stream()
-                .flatMap(appState -> appState.portStates.stream().map(portState -> Map.entry(appState.appId, portState.port)))
+                .filter(appState -> appState.nodeType != NodeType.CLIENT)
+                .flatMap(appState -> appState.portStates.stream()
+                        .map(portState -> Map.entry(appState.configuredNode, portState.port)))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 

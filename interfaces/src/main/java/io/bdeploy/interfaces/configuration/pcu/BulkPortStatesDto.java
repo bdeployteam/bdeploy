@@ -17,7 +17,7 @@ public class BulkPortStatesDto {
     }
 
     public Map<String, Map<Integer, Boolean>> getNodePortsState(String nodeName) {
-        return Collections.unmodifiableMap(node2Ports.get(nodeName));
+        return node2Ports.containsKey(nodeName) ? Collections.unmodifiableMap(node2Ports.get(nodeName)) : Collections.emptyMap();
     }
 
 }

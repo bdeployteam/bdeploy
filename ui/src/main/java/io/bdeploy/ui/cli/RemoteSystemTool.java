@@ -39,7 +39,6 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
-import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -55,6 +54,7 @@ import io.bdeploy.ui.dto.BulkOperationResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
+import io.bdeploy.ui.dto.MappedInstanceProcessStatusDto;
 import io.bdeploy.ui.dto.OperationResult;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.dto.SystemTemplateDto;
@@ -300,6 +300,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         resultTable.column(new DataTableColumn.Builder("Instance UUID").setMinWidth(13).build());
         resultTable.column(new DataTableColumn.Builder("Process Name").setMinWidth(13).build());
         resultTable.column(new DataTableColumn.Builder("Process UUID").setMinWidth(13).build());
+        resultTable.column(new DataTableColumn.Builder("Node").setMinWidth(15).build());
         resultTable.column(new DataTableColumn.Builder("Status").setMinWidth(7).build());
         resultTable.column(new DataTableColumn.Builder("Last Sync").build());
         resultTable.column(new DataTableColumn.Builder("Messages").build());
@@ -318,6 +319,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
                     .cell(instanceConfig.id)//
                     .cell(null)//
                     .cell(null)//
+                    .cell(null)//
                     .cell(overallStatusDto.status)//
                     .cell(overallStatusDto.timestamp <= 0 ? "Never"
                             : FormatHelper.formatTemporal(Instant.ofEpochMilli(overallStatusDto.timestamp)))//
@@ -325,22 +327,19 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
                     .build();
 
             if (includeDetails) {
-                Set<Entry<String, ProcessStatusDto>> processes = ir.getProcessResource(instanceConfig.id)
-                        .getStatus().processStates.entrySet();
-                if (!processes.isEmpty()) {
-                    for (Entry<String, ProcessStatusDto> processEntry : processes) {
-                        ProcessStatusDto processStatusDto = processEntry.getValue();
-                        resultTable.row()//
-                                .cell(instanceConfig.name)//
-                                .cell(instanceConfig.id)//
-                                .cell(processStatusDto.appName)//
-                                .cell(processEntry.getKey())//
-                                .cell(processStatusDto.processState)//
-                                .cell(null)//
-                                .cell(null)//
-                                .build();
-
-                    }
+                MappedInstanceProcessStatusDto instanceStatus = ir.getProcessResource(instanceConfig.id).getMappedStatus();
+                if (!instanceStatus.processStates.isEmpty()) {
+                    instanceStatus.processStates.forEach((appId, node2processState) -> node2processState.forEach(
+                            (serverNode, processStatusDto) -> resultTable.row()//
+                                    .cell(instanceConfig.name)//
+                                    .cell(instanceConfig.id)//
+                                    .cell(processStatusDto.appName)//
+                                    .cell(appId)//
+                                    .cell(getNodeNameDisplay(instanceStatus, appId, serverNode))//
+                                    .cell(processStatusDto.processState)//
+                                    .cell(null)//
+                                    .cell(null)//
+                                    .build()));
                 }
                 if (i < max) {
                     resultTable.addHorizontalRuler();
@@ -568,5 +567,15 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         }
 
         return resultTable;
+    }
+
+    private static String getNodeNameDisplay(MappedInstanceProcessStatusDto instanceStatus, String appId, String serverNode) {
+        String configuredNode = instanceStatus.processToNode.get(appId);
+
+        if (configuredNode.equals(serverNode)) {
+            return configuredNode;
+        } else {
+            return configuredNode + (serverNode != null ? "/" + serverNode : "");
+        }
     }
 }

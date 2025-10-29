@@ -1,6 +1,9 @@
 package io.bdeploy.minion.cli;
 
+import static io.bdeploy.minion.cli.MultiNodeTestActions.attachMultiNodes;
+import static io.bdeploy.minion.cli.MultiNodeTestActions.createMultiNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -9,31 +12,44 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.descriptor.node.MultiNodeMasterFile;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateGroup;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.minion.TestMinion.MultiNodeMaster;
+import io.bdeploy.minion.TestMinion.MultiNodeCompletion;
+import io.bdeploy.minion.TestMinion.SourceMinion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
 import io.bdeploy.ui.cli.RemoteProcessConfigTool;
 import io.bdeploy.ui.cli.RemoteProcessTool;
 import io.bdeploy.ui.cli.RemoteSystemTool;
 
-@ExtendWith(TestMinion.class)
 class RemoteSystemCliTest extends BaseMinionCliTest {
+
+    private static final String MULTINODE_NAME = "multiNode";
+    private static final String RUNTIME_NODE_NAME = "runtimeNode";
+
+    @RegisterExtension
+    private final TestMinion exStandalone = new TestMinion(MinionMode.STANDALONE);
+    @RegisterExtension
+    private final TestMinion exRuntimeNode = new TestMinion(MinionMode.NODE, RUNTIME_NODE_NAME, MinionDto.MinionNodeType.MULTI_RUNTIME);
 
     /*
      * This test gathers the cases with minimal amount of setup to check defaults.
      */
     @Test
-    void testCreateSystemWithMinimalSetup(RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testCreateSystemWithMinimalSetup(@SourceMinion(MinionMode.STANDALONE) RemoteService  remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
 
         Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
@@ -116,7 +132,7 @@ class RemoteSystemCliTest extends BaseMinionCliTest {
      * This test gathers the cases in which the values are in the instance template.
      */
     @Test
-    void testCreateSystemWithInstanceThatUsesTemplateValues(RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testCreateSystemWithInstanceThatUsesTemplateValues(@SourceMinion(MinionMode.STANDALONE) RemoteService  remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
 
         Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
@@ -194,7 +210,7 @@ class RemoteSystemCliTest extends BaseMinionCliTest {
      * This test gathers the cases in which the values are defined in the system template.
      */
     @Test
-    void testCreateSystemWithInstanceThatIsDefinedInReference(RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testCreateSystemWithInstanceThatIsDefinedInReference(@SourceMinion(MinionMode.STANDALONE) RemoteService  remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
 
         Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
@@ -274,7 +290,7 @@ class RemoteSystemCliTest extends BaseMinionCliTest {
      * This test gathers the cases where everything is everywhere.
      */
     @Test
-    void testCreateSystemWithInstanceWithFullOverrides(RemoteService remote, @TempDir Path tmp) throws IOException {
+    void testCreateSystemWithInstanceWithFullOverrides(@SourceMinion(MinionMode.STANDALONE) RemoteService  remote, @TempDir Path tmp) throws IOException {
         createInstanceGroup(remote);
 
         Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
@@ -352,7 +368,121 @@ class RemoteSystemCliTest extends BaseMinionCliTest {
         assertEquals("350", getSleepParamValue(remote, uuid, processRows.get("Application 4")));
     }
 
-    private String getSleepParamValue(RemoteService remote, String uuid, TestCliTool.StructuredOutputRow processRow) {
+    @Test
+    void testActionsOnAMultiNode(@SourceMinion(MinionMode.STANDALONE) RemoteService remote,
+            @MultiNodeMaster(MULTINODE_NAME) MultiNodeMasterFile masterFile,
+            @SourceMinion(value = MinionMode.NODE, disambiguation = "runtimeNode") MultiNodeCompletion runtimeNode,
+            @TempDir Path tmp) throws IOException, InterruptedException {
+        createMultiNode(remote, MULTINODE_NAME);
+
+        createInstanceGroup(remote);
+
+        Path bhivePath = Files.createDirectory(tmp.resolve("bhive"));
+        var product = TestProductFactory.generateProduct();
+        product.descriptor.minMinionVersion = "0.0.0";
+        uploadProduct(remote, tmp, bhivePath, product);
+
+        // Create the system template
+        Path systemTemplatePath = tmp.resolve("system-template.yaml");
+        SystemTemplateDescriptor systemTemplate = TestProductFactory.generateSystemTemplate();
+        systemTemplate.instances.get(0).defaultMappings.getFirst().node = MULTINODE_NAME;
+        TestProductFactory.writeToFile(systemTemplatePath, systemTemplate);
+
+        // Import the system template
+        var systemCreationOutput = remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--create",
+                "--name=SYSTEM_NAME", "--purpose=TEST", "--createFrom=" + systemTemplatePath);
+        assertTrue(systemCreationOutput.get(0).get("TestInstance").contains("Successfully created instance with ID"));
+        String instanceUuid = systemCreationOutput.get(0).get("TestInstance")
+                .replaceFirst("OK: Successfully created instance with ID ", "");
+
+        // Listing system output
+        var systemListOutput = doRemoteAndIndexOutputOn("Name", remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME",
+                "--list");
+        assertEquals(1, systemListOutput.size());
+        String systemUuid = systemListOutput.get("SYSTEM_NAME").get("Id");
+
+        // Check system info display
+        var systemInfoOutput = remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + systemUuid,
+                "--info");
+        assertEquals("Info for System " + systemUuid + " - SYSTEM_NAME", systemInfoOutput.get(0).get("message"));
+        assertEquals("", systemInfoOutput.get(0).get("ConfigVariables"));
+        assertEquals("SYSTEM_DESCRIPTION", systemInfoOutput.get(0).get("Description"));
+
+        // Check system status display
+        var systemStatusOutput = remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + systemUuid,
+                "--status");
+        assertEquals("Test Instance", systemStatusOutput.get(0).get("InstanceName"));
+        assertEquals(instanceUuid, systemStatusOutput.get(0).get("InstanceUuid"));
+        assertEquals("", systemStatusOutput.get(0).get("ProcessName"));
+        assertEquals("", systemStatusOutput.get(0).get("ProcessUuid"));
+        assertEquals("", systemStatusOutput.get(0).get("Node"));
+        assertEquals("WARNING", systemStatusOutput.get(0).get("Status"));
+        assertEquals("Never", systemStatusOutput.get(0).get("LastSync"));
+        assertEquals("Status unknown", systemStatusOutput.get(0).get("Messages"));
+
+        // do install, activate and start and check details
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + instanceUuid, "--version=1",
+                "--install");
+        remote(remote, RemoteDeploymentTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + instanceUuid, "--version=1",
+                "--activate");
+
+        var startSystemOutput = remote(remote, RemoteSystemTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + systemUuid,
+                "--start");
+        assertEquals(systemUuid, startSystemOutput.get(0).get("System"));
+        assertEquals(instanceUuid, startSystemOutput.get(0).get("Instance"));
+        assertEquals("INFO", startSystemOutput.get(0).get("Type"));
+        assertEquals("Started", startSystemOutput.get(0).get("Message"));
+
+        // No nodes attached so nothing to do
+        var systemDetailsOutput = doRemoteAndIndexOutputOn("ProcessName", remote, RemoteSystemTool.class,
+                "--instanceGroup=GROUP_NAME", "--uuid=" + systemUuid, "--status", "--details");
+        assertEquals(1, systemDetailsOutput.size());
+
+        TestCliTool.StructuredOutputRow instanceRow = systemDetailsOutput.get("");
+        assertEquals("Test Instance", instanceRow.get("InstanceName"));
+        assertEquals(instanceUuid, instanceRow.get("InstanceUuid"));
+        assertEquals("", instanceRow.get("ProcessUuid"));
+        assertEquals("", instanceRow.get("Node"));
+        assertEquals("STOPPED", instanceRow.get("Status"));
+        assertNotEquals("", instanceRow.get("LastSync"));
+        assertEquals("", instanceRow.get("Messages"));
+
+        // attach multi and check status again
+        attachMultiNodes(remote, masterFile, runtimeNode);
+        systemDetailsOutput = doRemoteAndIndexOutputOn("ProcessName", remote, RemoteSystemTool.class,
+                "--instanceGroup=GROUP_NAME", "--uuid=" + systemUuid, "--status", "--details");
+        assertEquals(3, systemDetailsOutput.size());
+
+        instanceRow = systemDetailsOutput.get("");
+        assertEquals("Test Instance", instanceRow.get("InstanceName"));
+        assertEquals(instanceUuid, instanceRow.get("InstanceUuid"));
+        assertEquals("", instanceRow.get("ProcessUuid"));
+        assertEquals("", instanceRow.get("Node"));
+        assertEquals("STOPPED", instanceRow.get("Status"));
+        assertNotEquals("", instanceRow.get("LastSync"));
+        assertEquals("", instanceRow.get("Messages"));
+
+        TestCliTool.StructuredOutputRow serverWithSleepRow = systemDetailsOutput.get("Server With Sleep");
+        assertEquals("Test Instance", serverWithSleepRow.get("InstanceName"));
+        assertEquals(instanceUuid, serverWithSleepRow.get("InstanceUuid"));
+        assertNotEquals("", serverWithSleepRow.get("ProcessUuid"));
+        assertEquals("multiNode/NODE-multi-runtimeNode", serverWithSleepRow.get("Node"));
+        assertEquals("STOPPED", serverWithSleepRow.get("Status"));
+        assertEquals("", serverWithSleepRow.get("LastSync"));
+        assertEquals("", serverWithSleepRow.get("Messages"));
+
+        TestCliTool.StructuredOutputRow testServerAppRow = systemDetailsOutput.get("Test Server Application");
+        assertEquals("Test Instance", testServerAppRow.get("InstanceName"));
+        assertEquals(instanceUuid, testServerAppRow.get("InstanceUuid"));
+        assertNotEquals("", testServerAppRow.get("ProcessUuid"));
+        assertEquals("multiNode/NODE-multi-runtimeNode", testServerAppRow.get("Node"));
+        assertEquals("STOPPED", testServerAppRow.get("Status"));
+        assertEquals("", testServerAppRow.get("LastSync"));
+        assertEquals("", testServerAppRow.get("Messages"));
+    }
+
+    private String getSleepParamValue(@SourceMinion(MinionMode.STANDALONE) RemoteService remote, String uuid,
+            TestCliTool.StructuredOutputRow processRow) {
         String processId = processRow.get("Id");
         Map<String, TestCliTool.StructuredOutputRow> appParams = doRemoteAndIndexOutputOn("Id", remote,
                 RemoteProcessConfigTool.class, "--instanceGroup=GROUP_NAME", "--uuid=" + uuid, "--process=" + processId,
