@@ -328,19 +328,17 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
             if (includeDetails) {
                 MappedInstanceProcessStatusDto instanceStatus = ir.getProcessResource(instanceConfig.id).getMappedStatus();
-                if (!instanceStatus.processStates.isEmpty()) {
-                    instanceStatus.processStates.forEach((appId, node2processState) -> node2processState.forEach(
-                            (serverNode, processStatusDto) -> resultTable.row()//
-                                    .cell(instanceConfig.name)//
-                                    .cell(instanceConfig.id)//
-                                    .cell(processStatusDto.appName)//
-                                    .cell(appId)//
-                                    .cell(getNodeNameDisplay(instanceStatus, appId, serverNode))//
-                                    .cell(processStatusDto.processState)//
-                                    .cell(null)//
-                                    .cell(null)//
-                                    .build()));
-                }
+                instanceStatus.processStates.forEach((appId,
+                        node2processState) -> node2processState.forEach((serverNode, processStatusDto) -> resultTable.row()//
+                                .cell(instanceConfig.name)//
+                                .cell(instanceConfig.id)//
+                                .cell(processStatusDto.appName)//
+                                .cell(appId)//
+                                .cell(getNodeNameDisplay(instanceStatus, appId, serverNode))//
+                                .cell(processStatusDto.processState)//
+                                .cell(null)//
+                                .cell(null)//
+                                .build()));
                 if (i < max) {
                     resultTable.addHorizontalRuler();
                 }
