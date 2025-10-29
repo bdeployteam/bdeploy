@@ -191,7 +191,7 @@ export class UploadService {
         }
       },
       error: (error: HttpErrorResponse) => {
-        uploadStatus.error = error.statusText + ' (Status ' + error.status + ')';
+        uploadStatus.error = `${error.statusText} (Status ${error.status})`;
         stateSubject.next(UploadState.FAILED);
         progressSubject.complete();
         stateSubject.complete();
@@ -221,7 +221,7 @@ export class UploadService {
           stateSubject.complete();
         },
         error: (error: HttpErrorResponse) => {
-          importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
+          importStatus.detail = `${error.statusText} (Status ${error.status})`;
           stateSubject.next(ImportState.FAILED);
           stateSubject.complete();
         },

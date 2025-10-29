@@ -19,7 +19,7 @@ export class DownloadService {
   private readonly cfg = inject(ConfigService);
 
   public buildResponseFileName(productName: string, instanceTemplateName: string) {
-    return 'ResponseFile - ' + productName + ' - ' + instanceTemplateName + '.yaml';
+    return `ResponseFile - ${productName} - ${instanceTemplateName}.yaml`;
   }
 
   /**
@@ -100,6 +100,6 @@ export class DownloadService {
    * Creates a new URL to download a file that has been prepared by another call.
    */
   public createDownloadUrl(token: string) {
-    return this.cfg.config.api + '/download/file/' + token;
+    return `${this.cfg.config.api}/download/file/${token}`;
   }
 }

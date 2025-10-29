@@ -25,23 +25,23 @@ import { BdPanelButtonComponent } from '../../../../core/components/bd-panel-but
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-software-details',
-    templateUrl: './software-details.component.html',
-    styleUrls: ['./software-details.component.css'],
-    providers: [SoftwareDetailsService],
-    imports: [
-      BdDialogComponent,
-        BdDialogToolbarComponent,
-        BdDialogContentComponent,
-        MatIcon,
-        BdIdentifierComponent,
-        BdExpandButtonComponent,
-        BdDataDisplayComponent,
-        BdNoDataComponent,
-        BdButtonComponent,
-        BdPanelButtonComponent,
-        AsyncPipe,
-    ],
+  selector: 'app-software-details',
+  templateUrl: './software-details.component.html',
+  styleUrls: ['./software-details.component.css'],
+  providers: [SoftwareDetailsService],
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    MatIcon,
+    BdIdentifierComponent,
+    BdExpandButtonComponent,
+    BdDataDisplayComponent,
+    BdNoDataComponent,
+    BdButtonComponent,
+    BdPanelButtonComponent,
+    AsyncPipe,
+  ],
 })
 export class SoftwareDetailsComponent implements OnInit {
   protected readonly repository = inject(RepositoryService);
@@ -54,7 +54,7 @@ export class SoftwareDetailsComponent implements OnInit {
 
   protected softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
-  private readonly p$ = this.detailsService.softwarePackage$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
+  private readonly p$ = this.detailsService.softwarePackage$.pipe(map((p) => `${p?.key.name}:${p?.key.tag}`));
 
   private readonly deleting$ = new BehaviorSubject<boolean>(false);
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);
@@ -63,7 +63,7 @@ export class SoftwareDetailsComponent implements OnInit {
   protected loading$ = combineLatest([this.mappedDelete$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
 
   protected isRequiredByProduct$ = this.detailsService.softwarePackage$.pipe(
-    map((software) => software.requiredByProduct),
+    map((software) => software.requiredByProduct)
   );
   protected resetWhen$: Observable<boolean>;
 
@@ -105,11 +105,7 @@ export class SoftwareDetailsComponent implements OnInit {
     this.dialog
       .confirm('Include defaults?', 'Do you want to include variables that have a default value in the response file?')
       .subscribe((result) =>
-        this.detailsService.downloadResponseFile(
-          data,
-          this.detailsService.softwarePackage$.value.key.tag,
-          result,
-        ),
+        this.detailsService.downloadResponseFile(data, this.detailsService.softwarePackage$.value.key.tag, result)
       );
   };
 }

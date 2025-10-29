@@ -8,9 +8,9 @@ import { BdActionRowComponent } from '../../../../core/components/bd-action-row/
 import { BdButtonComponent } from '../../../../core/components/bd-button/bd-button.component';
 
 @Component({
-    selector: 'app-verify-result',
-    templateUrl: './verify-result.component.html',
-    imports: [BdNotificationCardComponent, BdTerminalComponent, BdActionRowComponent, BdButtonComponent]
+  selector: 'app-verify-result',
+  templateUrl: './verify-result.component.html',
+  imports: [BdNotificationCardComponent, BdTerminalComponent, BdActionRowComponent, BdButtonComponent],
 })
 export class VerifyResultComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<VerifyResultComponent>);
@@ -33,13 +33,13 @@ export class VerifyResultComponent implements OnInit {
       return;
     }
 
-    this.verifyResult$.next('\nMissing Files: ' + result.missingFiles.length + '\n');
-    result.missingFiles.forEach((file) => this.verifyResult$.next(file + '\n'));
+    this.verifyResult$.next(`\nMissing Files: ${result.missingFiles.length}\n`);
+    result.missingFiles.forEach((file) => this.verifyResult$.next(`${file}\n`));
 
-    this.verifyResult$.next('\nModified Files: ' + result.modifiedFiles.length + '\n');
-    result.modifiedFiles.forEach((file) => this.verifyResult$.next(file + '\n'));
+    this.verifyResult$.next(`\nModified Files: ${result.modifiedFiles.length}\n`);
+    result.modifiedFiles.forEach((file) => this.verifyResult$.next(`${file}\n`));
 
-    this.verifyResult$.next('\nRemaining ' + result.unmodifiedFiles.length + ' files are unmodified.\n');
+    this.verifyResult$.next(`\nRemaining ${result.unmodifiedFiles.length} files are unmodified.\n`);
   }
 
   confirm(answer: boolean) {

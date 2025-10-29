@@ -21,7 +21,7 @@ export function getTemplateAppKey(
   template: FlattenedApplicationTemplateConfiguration,
   node: MinionDto,
 ) {
-  return product.product + '/' + template.application + '/' + node.os.toLowerCase();
+  return `${product.product}/${template.application}/${node.os.toLowerCase()}`;
 }
 
 /**

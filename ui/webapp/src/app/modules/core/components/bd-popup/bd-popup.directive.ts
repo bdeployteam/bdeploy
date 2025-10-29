@@ -111,8 +111,8 @@ const RIGHT_BELOW: ConnectedPosition = {
 };
 
 @Directive({
-    selector: '[appBdPopup]',
-    exportAs: 'appBdPopup'
+  selector: '[appBdPopup]',
+  exportAs: 'appBdPopup'
 })
 export class BdPopupDirective implements OnDestroy {
   private readonly host = inject(ElementRef);
@@ -258,7 +258,7 @@ export class BdPopupDirective implements OnDestroy {
     const result: ConnectedPosition[] = [];
     pos.forEach((p) => {
       const x: ConnectedPosition = cloneDeep(p);
-      x.panelClass = x.panelClass + '-' + name;
+      x.panelClass = `${x.panelClass}-${name}`;
       result.push(x);
     });
     return result;

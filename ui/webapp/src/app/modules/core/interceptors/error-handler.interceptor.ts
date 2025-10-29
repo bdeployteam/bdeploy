@@ -55,7 +55,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
                 // silent.
               }
               // response status texts are HTML encoded, so we need to decode that here manually.
-              this.snackbar.open(e.status + ': ' + he.decode(e.statusText) + ': ' + displayPath, 'DISMISS', {
+              this.snackbar.open(`${e.status}: ${he.decode(e.statusText)}: ${displayPath}`, 'DISMISS', {
                 panelClass: 'error-snackbar',
               });
               return throwError(() => e);

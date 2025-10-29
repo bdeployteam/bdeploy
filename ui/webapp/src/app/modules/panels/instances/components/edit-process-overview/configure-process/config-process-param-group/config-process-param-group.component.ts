@@ -635,7 +635,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     for (const grp of this.groups$.value) {
       for (const pair of grp.pairs) {
         // in case the value of a parameter is *referencing* this parameter, we need to update conditionals for the other parameter as well.
-        if (pair.value?.value?.linkExpression && pair.value?.value?.linkExpression?.indexOf(':' + id + '}}') > 0) {
+        if (pair.value?.value?.linkExpression && pair.value?.value?.linkExpression?.indexOf(`:${id}}}`) > 0) {
           // MIGHT be a reference to another application, but we update just in case.
           this.doUpdateConditionals(pair);
         }

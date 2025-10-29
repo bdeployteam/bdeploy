@@ -205,7 +205,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           }
 
           // need to find all apps in the product which match the key name...
-          const searchKey = this.product.product + '/' + appCfg.application;
+          const searchKey = `${this.product.product}/${appCfg.application}`;
           for (const app of this.instanceEdit.stateApplications$.value) {
             const appKey = getAppKeyName(app.key);
             if (searchKey === appKey) {
@@ -233,12 +233,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       this.areAssignedGroupsValid = false;
       this.groupSelectionNextButtonTooltip.set(
         invalidGroups.length === 1
-          ? "The group '" +
-              invalidGroups[0] +
-              "' contains invalid application templates and therefore cannot be selected"
-          : "The groups '" +
-              invalidGroups.join("', '") +
-              "' contain invalid application templates and therefore cannot be selected"
+          ? `The group '${invalidGroups[0]}' contains invalid application templates and therefore cannot be selected`
+          : `The groups '${invalidGroups.join(
+              "', '"
+            )}' contain invalid application templates and therefore cannot be selected`
       );
     } else {
       this.groupSelectionNextButtonTooltip.set('Proceed to variable configuration');
@@ -435,7 +433,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   ) {
     for (const template of group.applications) {
       // need to find all apps in the product which match the key name...
-      const searchKey = this.product.product + '/' + template.application;
+      const searchKey = `${this.product.product}/${template.application}`;
       const status: StatusMessage[] = [];
       for (const app of this.instanceEdit.stateApplications$.value) {
         const appKey = getAppKeyName(app.key);

@@ -102,7 +102,7 @@ export class PortsComponent implements OnInit {
         node?.nodeName,
       ]);
     }
-    const filename = 'ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv';
+    const filename = `ports-${this.edit.current$.value.instanceConfiguration.id}.csv`;
     this.dl.downloadCsv(filename, columns, rows);
   }
 

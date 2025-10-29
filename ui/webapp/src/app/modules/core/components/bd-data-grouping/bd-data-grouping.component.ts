@@ -33,11 +33,26 @@ enum PresetType {
 }
 
 @Component({
-    selector: 'app-bd-data-grouping',
-    templateUrl: './bd-data-grouping.component.html',
-    styleUrls: ['./bd-data-grouping.component.css'],
-    encapsulation: ViewEncapsulation.None,
-    imports: [BdButtonPopupComponent, MatTooltip, MatCard, MatFormField, MatLabel, MatSelect, MatOption, BdButtonComponent, MatDivider, CdkDropList, BdDataGroupingPanelComponent, CdkDrag, MatIcon, CdkDragHandle]
+  selector: 'app-bd-data-grouping',
+  templateUrl: './bd-data-grouping.component.html',
+  styleUrls: ['./bd-data-grouping.component.css'],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    BdButtonPopupComponent,
+    MatTooltip,
+    MatCard,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    BdButtonComponent,
+    MatDivider,
+    CdkDropList,
+    BdDataGroupingPanelComponent,
+    CdkDrag,
+    MatIcon,
+    CdkDragHandle,
+  ],
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   private readonly snackBar = inject(MatSnackBar);
@@ -124,7 +139,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   private getStorageKey() {
-    return 'grouping-' + (this.multiple ? 'm-' : 's-') + this.presetKey;
+    return `grouping-${this.multiple ? 'm-' : 's-'}${this.presetKey}`;
   }
 
   private loadPreset() {
@@ -168,7 +183,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
           ({
             name: g.definition.name,
             selected: g.selected,
-          }) as CustomDataGrouping,
+          } as CustomDataGrouping)
       );
   }
 
@@ -184,7 +199,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   private presetTypeKey(): string {
-    return 'preset-type-' + (this.multiple ? 'm-' : 's-') + this.presetKey;
+    return `preset-type-${this.multiple ? 'm-' : 's-'}${this.presetKey}`;
   }
 
   private loadPresetType() {

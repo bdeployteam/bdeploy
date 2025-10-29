@@ -25,7 +25,7 @@ export class AddPluginComponent {
     }
 
     const details = result.detail;
-    return 'Added ' + details.name + ' ' + details.version;
+    return `Added ${details.name} ${details.version}`;
   }
 
   protected fileAdded(file: File) {

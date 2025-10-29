@@ -177,7 +177,7 @@ export class ConfigureEndpointsComponent implements DirtyableDialog, OnInit, OnD
   }
 
   protected combineForDisplay(path: string, contextPath: string) {
-    return contextPath ? path + ' (' + contextPath + ')' : path;
+    return contextPath ? `${path} (${contextPath})` : path;
   }
 
   protected onChangeAuthType(type: LinkedValueConfiguration, index: number) {

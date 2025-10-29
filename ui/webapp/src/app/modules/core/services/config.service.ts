@@ -269,7 +269,7 @@ export class ConfigService {
 
   /** The base URL for a given plugin */
   public getPluginUrl(plugin: PluginInfoDto) {
-    return this.config.api + '/plugins/' + plugin.id.id;
+    return `${this.config.api}/plugins/${plugin.id.id}`;
   }
 
   /** Tries to fetch the current server version, suppresses global error handling */

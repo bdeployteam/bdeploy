@@ -205,17 +205,16 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
           this.addInstanceButtonDisabledMessage.set(null);
         } else {
           this.addInstanceButtonDisabledMessage.set(
-            'Creation of the instance is not possible because the selected product version requires a BDeploy version of ' +
-              convert2String(minimumVersion) +
-              ' or above, but the current minion only has version ' +
-              convert2String(currentVersion)
+            `Creation of the instance is not possible because the selected product version requires a BDeploy version of ${convert2String(
+              minimumVersion
+            )} or above, but the current minion only has version ${convert2String(currentVersion)}`
           );
         }
       } else {
         this.addInstanceButtonDisabledMessage.set(
-          'Creation of the instance is not possible because the selected product version requires a BDeploy version of ' +
-            convert2String(minimumVersion) +
-            ' or above, but the version of the current minion could not be determined'
+          `Creation of the instance is not possible because the selected product version requires a BDeploy version of ${convert2String(
+            minimumVersion
+          )} or above, but the version of the current minion could not be determined`
         );
       }
     } else {

@@ -317,7 +317,7 @@ export class AuthenticationService {
   }
 
   public getAuthPackForCurrentUser(genFull: boolean): Observable<string> {
-    return this.http.get(this.cfg.config.api + '/auth/auth-pack-self', {
+    return this.http.get(`${this.cfg.config.api}/auth/auth-pack-self`, {
       responseType: 'text',
       params: new HttpParams().append('full', genFull ? 'true' : 'false'),
     });
@@ -325,30 +325,30 @@ export class AuthenticationService {
 
   public getUserInfo(): Observable<UserInfo> {
     this.http
-      .get<UserInfo>(this.cfg.config.api + '/auth/user')
+      .get<UserInfo>(`${this.cfg.config.api}/auth/user`)
       .subscribe((userInfo) => this.userInfoSubject$.next(userInfo));
     return this.userInfoSubject$.asObservable();
   }
 
   public getUserProfileInfo(): Observable<UserProfileInfo> {
-    return this.http.get<UserProfileInfo>(this.cfg.config.api + '/auth/user-profile');
+    return this.http.get<UserProfileInfo>(`${this.cfg.config.api}/auth/user-profile`);
   }
 
   public updateCurrentUser(info: UserInfo): Observable<object> {
     this.userInfoSubject$.next(info);
-    return this.http.post(this.cfg.config.api + '/auth/user', info);
+    return this.http.post(`${this.cfg.config.api}/auth/user`, info);
   }
 
   public removeCurrentUserFromGroup(groupId: string): Observable<object> {
-    return this.http.delete(this.cfg.config.api + '/auth/group/' + groupId);
+    return this.http.delete(`${this.cfg.config.api}/auth/group/${groupId}`);
   }
 
   public deleteCurrentUser(): Observable<object> {
-    return this.http.delete(this.cfg.config.api + '/auth');
+    return this.http.delete(`${this.cfg.config.api}/auth`);
   }
 
   public changePassword(dto: UserChangePasswordDto): Observable<unknown> {
-    return this.http.post(this.cfg.config.api + '/auth/change-password', dto, {
+    return this.http.post(`${this.cfg.config.api}/auth/change-password`, dto, {
       responseType: 'text',
       headers: suppressGlobalErrorHandling(new HttpHeaders()),
     });

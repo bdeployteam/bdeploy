@@ -186,18 +186,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
             } else {
               this.hasMinMinionVersion.set(false);
               this.installButtonDisabledMessage.set(
-                'Installation is not possible because this product version requires a minimum BDeploy version of ' +
-                  convert2String(minimumVersion) +
-                  ' or above, but the current minion only has version ' +
-                  convert2String(currentVersion)
+                `Installation is not possible because this product version requires a minimum BDeploy version of ${convert2String(minimumVersion)} or above, but the current minion only has version ${convert2String(currentVersion)}`
               );
             }
           } else {
             this.hasMinMinionVersion.set(false);
             this.installButtonDisabledMessage.set(
-              'Installation is not possible because this product version requires a minimum BDeploy version of ' +
-                convert2String(minimumVersion) +
-                ' or above, but the version of the current minion could not be determined'
+              `Installation is not possible because this product version requires a minimum BDeploy version of ${convert2String(
+                minimumVersion
+              )} or above, but the version of the current minion could not be determined`
             );
           }
         } else {

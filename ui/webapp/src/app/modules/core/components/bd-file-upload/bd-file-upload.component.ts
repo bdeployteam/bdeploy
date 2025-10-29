@@ -70,7 +70,7 @@ export class BdFileUploadComponent<D> implements OnInit {
       return 'Software version already exists. Nothing to do.';
     }
     const softwares: ManifestKey[] = status.detail;
-    return 'New software: ' + softwares.map((key) => key.name + ' ' + key.tag).join(',');
+    return `New software: ${softwares.map((key) => key.name + ' ' + key.tag).join(',')}`;
   }
 
   private getIcon() {

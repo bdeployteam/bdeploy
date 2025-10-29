@@ -18,11 +18,12 @@ const RECURSIVE_PREFIXES = ['DELAYED', 'JSON', 'XML', 'YAML'];
 export function getRecursivePrefix(
   word: string,
   acc: string,
-  recursivePrefixes: string[] = RECURSIVE_PREFIXES,
+  recursivePrefixes: string[] = RECURSIVE_PREFIXES
 ): string {
   for (const prefix of recursivePrefixes) {
-    if (word.startsWith(acc + prefix + ':')) {
-      return getRecursivePrefix(word, acc + prefix + ':');
+    const s = `${acc + prefix}:`;
+    if (word.startsWith(s)) {
+      return getRecursivePrefix(word, s);
     }
   }
   return acc;
@@ -110,7 +111,7 @@ export function buildCompletions(
   instance: InstanceConfigurationDto,
   system: SystemConfiguration,
   process: ApplicationConfiguration,
-  apps: ApplicationDto[],
+  apps: ApplicationDto[]
 ): ContentCompletion[] {
   return [
     ...gatherVariableExpansions(instance, system).map((l) => ({

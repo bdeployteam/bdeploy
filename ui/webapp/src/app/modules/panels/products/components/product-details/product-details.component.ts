@@ -54,25 +54,25 @@ const refTagColumn: BdDataColumn<ManifestKey, string> = {
 };
 
 @Component({
-    selector: 'app-product-details',
-    templateUrl: './product-details.component.html',
-    styleUrls: ['./product-details.component.css'],
-    providers: [ProductDetailsService],
-    imports: [
-      BdDialogComponent,
-        BdDialogToolbarComponent,
-        BdDialogContentComponent,
-        MatIcon,
-        BdIdentifierComponent,
-        BdExpandButtonComponent,
-        BdDataDisplayComponent,
-        BdNoDataComponent,
-        MatProgressSpinner,
-        BdButtonComponent,
-        BdPanelButtonComponent,
-        MatTooltip,
-        AsyncPipe,
-    ],
+  selector: 'app-product-details',
+  templateUrl: './product-details.component.html',
+  styleUrls: ['./product-details.component.css'],
+  providers: [ProductDetailsService],
+  imports: [
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    MatIcon,
+    BdIdentifierComponent,
+    BdExpandButtonComponent,
+    BdDataDisplayComponent,
+    BdNoDataComponent,
+    MatProgressSpinner,
+    BdButtonComponent,
+    BdPanelButtonComponent,
+    MatTooltip,
+    AsyncPipe,
+  ],
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
   private readonly actions = inject(ActionsService);
@@ -82,7 +82,10 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthenticationService);
   protected readonly productActionColumns = inject(ProductActionsColumnsService);
 
-  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto, unknown>[] = [instanceNameColumn, instanceTagColumn];
+  protected readonly instanceColumns: BdDataColumn<InstanceUsageDto, unknown>[] = [
+    instanceNameColumn,
+    instanceTagColumn,
+  ];
   protected readonly refColumns: BdDataColumn<ManifestKey, unknown>[] = [refNameColumn, refTagColumn];
   protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
@@ -92,7 +95,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   protected deletionButtonDisabledReason$ = new BehaviorSubject<string>('');
   private readonly deleting$ = new BehaviorSubject<boolean>(false);
 
-  private readonly p$ = this.singleProduct.product$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
+  private readonly p$ = this.singleProduct.product$.pipe(map((p) => `${p?.key.name}:${p?.key.tag}`));
 
   // this one *is* allowed multiple times! so no server action mapping.
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);
@@ -131,7 +134,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
         if (count === 1) {
           const instanceDto = usedIn[0];
           this.deletionButtonDisabledReason$.next(
-            'Product is still in use by version ' + instanceDto.tag + ' of instance ' + instanceDto.name,
+            `Product is still in use by version ${instanceDto.tag} of instance ${instanceDto.name}`
           );
         } else {
           const mappedDtos = usedIn.reduce((resultArray, dto) => {
@@ -149,10 +152,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
           if (instanceCount === 1) {
             const onlyEntry = mappedDtos[0];
             this.deletionButtonDisabledReason$.next(
-              'Product is still in use by the following versions of instance ' +
-                onlyEntry.versions[0].name +
-                ': ' +
-                onlyEntry.versions.map((dto) => dto.tag).join(', '),
+              `Product is still in use by the following versions of instance ${
+                onlyEntry.versions[0].name
+              }: ${onlyEntry.versions.map((dto) => dto.tag).join(', ')}`
             );
           } else {
             const maxNamedInstances = 3;

@@ -99,10 +99,7 @@ export class LinkManagedComponent {
   }
 
   protected onDownloadCentralIdent() {
-    this.downloads.downloadBlob(
-      'central-' + this.payload.hostName + '.txt',
-      new Blob([this.ident], { type: 'text/plain' }),
-    );
+    this.downloads.downloadBlob(`central-${this.payload.hostName}.txt`, new Blob([this.ident], { type: 'text/plain' }));
     this.areas.closePanel();
   }
 }

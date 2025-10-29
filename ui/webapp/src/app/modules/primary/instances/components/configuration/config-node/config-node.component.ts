@@ -8,7 +8,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
-  ViewChildren
+  ViewChildren,
 } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
@@ -17,11 +17,11 @@ import {
   InstanceNodeConfigurationDto,
   MinionDto,
   NodeType,
-  ProcessControlGroupConfiguration
+  ProcessControlGroupConfiguration,
 } from 'src/app/models/gen.dtos';
 import {
   BdDataTableComponent,
-  DragReorderEvent
+  DragReorderEvent,
 } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { DEF_CONTROL_GROUP } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { InstanceEditService, ProcessEditState } from '../../../services/instance-edit.service';
@@ -34,16 +34,10 @@ import { ControlGroupComponent } from './control-group/control-group.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-    selector: 'app-config-node',
-    templateUrl: './config-node.component.html',
-    styleUrls: ['./config-node.component.css'],
-    imports: [
-        MatIcon,
-        BdPanelButtonComponent,
-        ControlGroupComponent,
-      BdDataTableComponent,
-        AsyncPipe,
-    ],
+  selector: 'app-config-node',
+  templateUrl: './config-node.component.html',
+  styleUrls: ['./config-node.component.css'],
+  imports: [MatIcon, BdPanelButtonComponent, ControlGroupComponent, BdDataTableComponent, AsyncPipe],
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly edit = inject(InstanceEditService);
@@ -169,7 +163,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
           // don't use groupedProcesses keys, as this will not contain *empty* groups.
           this.allowedSources$.next(
-            nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name)
+            nodeConfig.nodeConfiguration.controlGroups.map((cg) => `${this.nodeName}||${cg.name}`)
           );
           this.groupedProcesses$.next(grouped);
           this.data.forEach((t) => t.update());

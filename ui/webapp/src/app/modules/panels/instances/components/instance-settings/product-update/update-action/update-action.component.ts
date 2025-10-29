@@ -52,17 +52,13 @@ export class UpdateActionComponent implements OnInit, CellComponent<ProductDto, 
         this.hasMinMinionVersion = compareVersions(currentVersion, minimumVersion) >= 0;
         if (!this.hasMinMinionVersion) {
           this.installButtonTooltip =
-            'This product version cannot be applied because it requires a BDeploy version of ' +
-            convert2String(minimumVersion) +
-            ' or above, but the current minion only has version ' +
-            convert2String(currentVersion);
+            `This product version cannot be applied because it requires a BDeploy version of ${convert2String(minimumVersion)} or above, but the current minion only has version ${convert2String(currentVersion)}`;
         }
       } else {
         this.hasMinMinionVersion = false;
-        this.installButtonTooltip =
-          'This product version cannot be applied because it requires a BDeploy version of ' +
-          convert2String(minimumVersion) +
-          ' or above, but the version of the current minion could not be determined';
+        this.installButtonTooltip = `This product version cannot be applied because it requires a BDeploy version of ${convert2String(
+          minimumVersion
+        )} or above, but the version of the current minion could not be determined`;
       }
     } else {
       this.hasMinMinionVersion = true;
