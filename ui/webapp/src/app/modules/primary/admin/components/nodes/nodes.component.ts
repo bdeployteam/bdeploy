@@ -20,14 +20,14 @@ const nodeColName: BdDataColumn<MinionRecord, string> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
-  width: '350px'
+  width: '200px'
 };
 
 const nodeColStatus: BdDataColumn<MinionRecord, string> = {
   id: 'status',
   name: 'Status',
   data: (r) => (r.status.config.minionNodeType === MinionNodeType.MULTI ? 'Virtual' : (r.status.offline ? 'Offline' : 'Online')),
-  width: '80px'
+  width: '50px'
 };
 
 const nodeColInfo: BdDataColumn<MinionRecord, string> = {
@@ -42,7 +42,7 @@ const nodeColVersion: BdDataColumn<MinionRecord, string> = {
   name: 'Version',
   data: (r) => (r.status.config?.version ? convert2String(r.status.config.version) : ''),
   tooltip: () => 'The last known version of the node',
-  width: '140px'
+  width: '80px'
 };
 
 const nodeColOs: BdDataColumn<MinionRecord, string> = {
@@ -56,12 +56,16 @@ const nodeColOs: BdDataColumn<MinionRecord, string> = {
 const nodeColMultiNode: BdDataColumn<MinionRecord, string> = {
   id: 'multiNode',
   name: 'Multi-Node',
-  data: (r) => (r.status.config.minionNodeType === MinionNodeType.MULTI_RUNTIME ? r.parentMultiNode : 'None'),
-  width: '60px'
+  data: (r) => r.parentMultiNode,
+  width: '90px'
 };
 
-const LBL_VIRTUAL = 'Virtual node';
-const LBL_STANDARD = 'Standard node';
+const nodeColType: BdDataColumn<MinionRecord, MinionNodeType> = {
+  id: 'type',
+  name: 'Type',
+  data: (r) => r.status.config.minionNodeType,
+  width: '150px'
+};
 
 @Component({
   selector: 'app-nodes',
@@ -88,6 +92,7 @@ export class NodesComponent {
 
   protected readonly columns: BdDataColumn<MinionRecord, unknown>[] = [
     nodeColName,
+    nodeColType,
     nodeColMultiNode,
     nodeColStatus,
     nodeColInfo,
@@ -98,10 +103,15 @@ export class NodesComponent {
   protected groupingDefinition: BdDataGroupingDefinition<MinionRecord>[] = [
     {
       name: 'Node Type',
-      group: (r) => r.status.config.minionNodeType === MinionNodeType.MULTI_RUNTIME ? `Runtime nodes for ${r.parentMultiNode}` : (r.status.config.minionNodeType === MinionNodeType.MULTI ? LBL_VIRTUAL : LBL_STANDARD),
+      group: nodeColType.data,
+      associatedColumn: nodeColType.id,
+      sort: NodesAdminService.nodeTypeColumnSort
+    },
+    {
+      name: 'Multi-Node',
+      group: (r) => r.status.config.minionNodeType === MinionNodeType.MULTI_RUNTIME ? r.parentMultiNode : 'None',
       associatedColumn: nodeColMultiNode.id,
-      sort:
-        (a, b) => a === LBL_STANDARD ? -1 : b === LBL_STANDARD ? 1 : a === LBL_VIRTUAL ? -1 : b === LBL_VIRTUAL ? 1 : a.localeCompare(b)
+      sort: NodesAdminService.multiNodeColumnSort
     },
     {
       name: 'OS',

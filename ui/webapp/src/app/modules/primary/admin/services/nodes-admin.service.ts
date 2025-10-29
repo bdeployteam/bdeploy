@@ -6,7 +6,6 @@ import {
   ManifestKey,
   MinionNodeType,
   MinionStatusDto,
-  MultiNodeDto,
   NodeAttachDto,
   NodeListDto,
   ObjectChangeType,
@@ -126,10 +125,6 @@ export class NodesAdminService {
     return this.http.put(`${this.apiPath()}/multi-nodes`, dto).pipe(measure(`Add multi-node ${dto.name}`));
   }
 
-  public editMultiNode(nodeName: string, config: MultiNodeDto): Observable<unknown> {
-    return this.http.post(`${this.apiPath()}/multi-nodes/${nodeName}`, config).pipe(measure(`Edit multi-node ${nodeName}`));
-  }
-
   public downloadMultiNodeMasterFile(nodeName: string): Observable<unknown> {
     return new Observable((s) => {
       this.http.get(`${this.apiPath()}/multi-nodes/${nodeName}/masterFile`)
@@ -145,6 +140,27 @@ export class NodesAdminService {
           }
         });
     });
+  }
+
+
+  public static nodeTypeColumnSort(a: MinionNodeType, b: MinionNodeType) {
+    return NodesAdminService.getNodeTypeWeight(a) - NodesAdminService.getNodeTypeWeight(b);
+  }
+
+  public static multiNodeColumnSort(a: string, b: string) {
+    return a === 'None' ? -1 : (b === 'None' ? 1 : a.localeCompare(b));
+  }
+
+  private static getNodeTypeWeight(nodeType: MinionNodeType): number {
+    switch (nodeType) {
+      case MinionNodeType.SERVER:
+        return 1;
+      case MinionNodeType.MULTI:
+        return 2;
+      case MinionNodeType.MULTI_RUNTIME:
+      default:
+        return 3;
+    }
   }
 
 }
