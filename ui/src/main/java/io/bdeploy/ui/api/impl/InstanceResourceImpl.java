@@ -681,8 +681,8 @@ public class InstanceResourceImpl implements InstanceResource {
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
         InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
-        if (instanceStatus.hasAtLeastOneNodeThat(
-                instanceNodeStatusDto -> instanceNodeStatusDto.areAppsRunningOrScheduledInVersion(tag))) {
+        if (instanceStatus
+                .hasAtLeastOneNodeThat(instanceNodeStatusDto -> instanceNodeStatusDto.areAppsRunningOrScheduledInVersion(tag))) {
             throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":" + tag
                     + " because it has running or scheduled applications", Status.EXPECTATION_FAILED);
         }
@@ -1177,28 +1177,33 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public Map<Integer, Boolean> getPortStates(String instanceId, String minion, List<Integer> ports) {
+        if (ports.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         MasterNamedResource master = getMasterResource(instanceId);
         return master.getPortStates(minion, ports);
     }
 
     @Override
     public BulkPortStatesDto getPortStatesBulk(String instanceId, Map<String, List<Integer>> node2ports) {
-        MasterNamedResource master = getMasterResource(instanceId);
+        if (node2ports.isEmpty()) {
+            return new BulkPortStatesDto();
+        }
 
+        MasterNamedResource master = getMasterResource(instanceId);
         try {
             return master.getPortStatesBulk(node2ports);
         } catch (WebApplicationException wea) {
             if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
-                if (node2ports.size() != 1) {
-                    // This means that we cannot translate this request to send to an old server
-                    throw new WebApplicationException("Attempting to retrieve ports from more than one node from a managed "
-                            + " server that does not support this", Status.BAD_REQUEST);
-                }
-
+                // This means that the remote master does not support the getPortStatesBulk endpoint and we have to fallback on the older getPortStates endpoint
                 BulkPortStatesDto result = new BulkPortStatesDto();
-                String node = node2ports.keySet().iterator().next();
-                master.getPortStates(node, node2ports.values().iterator().next())
-                        .forEach((port, isUsed) -> result.saveNodeState(node, node, port, isUsed));
+                for (var entry : node2ports.entrySet()) {
+                    String node = entry.getKey();
+                    List<Integer> ports = entry.getValue();
+                    Map<Integer, Boolean> portStates = master.getPortStates(node, ports);
+                    portStates.forEach((port, isUsed) -> result.saveNodeState(node, node, port, isUsed));
+                }
                 return result;
             }
 
