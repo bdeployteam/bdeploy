@@ -631,6 +631,11 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public void installNewest(String instanceId) {
+        install(instanceId, null);
+    }
+
+    @Override
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getKey());
@@ -716,6 +721,11 @@ public class InstanceResourceImpl implements InstanceResource {
             // work as before, as activate will also not check on that server.
             return new InstanceActivateCheckDto();
         }
+    }
+
+    @Override
+    public void activateNewest(String instanceId, boolean force) {
+        activate(instanceId, null, force);
     }
 
     @Override

@@ -120,14 +120,25 @@ public interface InstanceResource {
     public void uninstall(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
 
     @GET
+    @Path("/{instance}/installNewest")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void installNewest(@Scope @PathParam("instance") String instanceId);
+
+    @GET
     @Path("/{instance}/{tag}/pre-activate")
-    public InstanceActivateCheckDto preActivate(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
+    public InstanceActivateCheckDto preActivate(@Scope @PathParam("instance") String instanceId,
+            @Scope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/activate")
     @RequiredPermission(permission = Permission.WRITE)
     public void activate(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag,
             @QueryParam("force") boolean force);
+
+    @GET
+    @Path("/{instance}/activateNewest")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void activateNewest(@Scope @PathParam("instance") String instanceId, @QueryParam("force") boolean force);
 
     @POST
     @Path("/{instance}/updateProductVersion/{target}")

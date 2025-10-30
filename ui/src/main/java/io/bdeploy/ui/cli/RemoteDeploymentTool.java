@@ -47,17 +47,28 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
     protected RenderableResult run(RemoteDeployConfig config, RemoteService svc) {
         helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
         helpAndFailIfMissing(config.uuid(), "Missing --uuid");
-        helpAndFailIfMissing(config.version(), "Missing --version");
 
         InstanceResource ir = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(config.instanceGroup());
 
+        String uuid = config.uuid();
+        String version = config.version();
+
         if (config.install()) {
-            ir.install(config.uuid(), config.version());
+            if (version == null) {
+                ir.installNewest(uuid);
+            } else {
+                ir.install(uuid, version);
+            }
         } else if (config.activate()) {
-            ir.activate(config.uuid(), config.version(), false);
+            if (version == null) {
+                ir.activateNewest(uuid, false);
+            } else {
+                ir.activate(uuid, version, false);
+            }
         } else if (config.uninstall()) {
-            ir.uninstall(config.uuid(), config.version());
+            helpAndFailIfMissing(version, "Missing --version");
+            ir.uninstall(uuid, version);
         } else {
             helpAndFail("ERROR: Missing --install, --activate or --uninstall");
         }
