@@ -95,11 +95,15 @@ export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestro
             processList.push(appConfig);
           } else {
             instanceProcessStates?.multiNodeToRuntimeNode[this.node.nodeName]?.forEach(runtimeNode => {
-              processList.push({ ...appConfig, serverNode: runtimeNode });
+              const displayData = appConfig as ProcessDisplayData;
+              displayData.serverNode = runtimeNode;
+              processList.push(displayData);
             });
           }
         } else {
-          processList.push({ ...appConfig, serverNode: this.node.nodeName });
+          const displayData = appConfig as ProcessDisplayData;
+          displayData.serverNode = this.node.nodeName;
+          processList.push(displayData);
         }
       });
 
