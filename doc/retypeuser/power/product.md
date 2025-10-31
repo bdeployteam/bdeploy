@@ -141,37 +141,43 @@ startCommand: <10>
         - "Value 1"
         - "Value 2"
     - id: "my.param.3"
+      name: "My parameter without value"
+      longDescription: "This is a parameter without a value. It will only put its name on the CLI."
+      groupName: "My Parameters"
+      parameter: "-v"
+      hasValue: false <13>
+    - id: "my.param.4"
       name: "My conditional parameter"
       longDescription: "This is only visible and configurable if my.param.2 has value 'Value 1'"
       parameter: "--conditional"
       mandatory: true
-      condition: <13>
+      condition: <14>
         parameter: "my.param.2"
         must: EQUAL
         value: "Value 1"
-    - template: param.template <14>
+    - template: param.template <15>
 
-stopCommand: <15>
+stopCommand: <16>
   ...
 
-endpoints: <16>
+endpoints: <17>
   http:
-    - id: "my-endpoint" <17>
+    - id: "my-endpoint" <18>
       path: "path/to/the/endpoint"
-      port: "{{V:port-param}}" <18>
+      port: "{{V:port-param}}" <19>
       secure: false
     - id: "Startup Endpoint"
-      type: PROBE_STARTUP <19>
+      type: PROBE_STARTUP <20>
       path: "startup/endpoint"
       port: "{{V:port-param}}"
       secure: false
     - id: "Liveness Endpoint"
-      type: PROBE_ALIVE <19>
+      type: PROBE_ALIVE <20>
       path: "liveness/endpoint"
       port: "{{V:port-param}}"
       secure: false
 
-runtimeDependencies: <20>
+runtimeDependencies: <21>
   - "adoptium/jre:1.8.0_202-b08"
 ```
 
@@ -187,14 +193,15 @@ runtimeDependencies: <20>
 10. The start command of the **Application**. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of [parameter](#supported-parameters-attributes) attributes. To apply e.g. instance-specific values, [Variable Expansion](/power/variables/#variable-expansions) is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
 11. [Variable Expansion](/power/variables/#variable-expansions) can also be used to expand to [Instance Variables](/user/instance/#instance-variables) in default values. These instance variables are required to exist once the application is configured in an instance. They can either be pre-provided using [Instance Templates](/user/instance/#instance-templates) or need to be manually created when required.
 12. An optional regular expression that will be used to validate input on UI parameter configuration form (not applicable to `BOOLEAN` type).
-13. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter of the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
-14. A product can provide [parameter templates](#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
-15. The optional stop command can be specified to provide a mechanism for a clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
-16. Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. **BDeploy** can later on call these endpoints when instructed to do so by a third-party application.
-17. The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of **BDeploy** servers.
-18. [Variable Expansion](/power/variables/#variable-expansions) can be used on most of the endpoint properties.
-19. The type of the endpoint can be used to control how the endpoint is handled by **BDeploy**.
-20. Optional runtime dependencies. These dependencies are included in the **Product** when building it. Dependencies are fetched from [**Software Repositories**](/power/runtimedependencies/#software-repositories). `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptium/jre}}` [Variable Expansion](/power/variables/#variable-expansions), e.g. `launcherPath: {{M:adoptium/jre}}/bin/java`. Note that the declared _dependency_ does not need to specify an operating system, but **must** specify a _version_. This will be resolved by **BDeploy** to either an exact match if available, or a operating system specific match, e.g. `adoptium/jre/linux:1.8.0_202-b08` on `LINUX`. When _referencing_ the dependency in a [Variable Expansion](/power/variables/#variable-expansions), neither an operating system nor a version is required - in fact it must not be specified.
+13. A parameter without a value can be used to put a fixed value into the start command. It will appear as a BOOLEAN parameter that can be toggled on and off. This is most useful for flag-like arguments (e.g. -v for verbose).
+14. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter of the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
+15. A product can provide [parameter templates](#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
+16. The optional stop command can be specified to provide a mechanism for a clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
+17. Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. **BDeploy** can later on call these endpoints when instructed to do so by a third-party application.
+18. The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of **BDeploy** servers.
+19. [Variable Expansion](/power/variables/#variable-expansions) can be used on most of the endpoint properties.
+20. The type of the endpoint can be used to control how the endpoint is handled by **BDeploy**.
+21. Optional runtime dependencies. These dependencies are included in the **Product** when building it. Dependencies are fetched from [**Software Repositories**](/power/runtimedependencies/#software-repositories). `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptium/jre}}` [Variable Expansion](/power/variables/#variable-expansions), e.g. `launcherPath: {{M:adoptium/jre}}/bin/java`. Note that the declared _dependency_ does not need to specify an operating system, but **must** specify a _version_. This will be resolved by **BDeploy** to either an exact match if available, or a operating system specific match, e.g. `adoptium/jre/linux:1.8.0_202-b08` on `LINUX`. When _referencing_ the dependency in a [Variable Expansion](/power/variables/#variable-expansions), neither an operating system nor a version is required - in fact it must not be specified.
 
 ### Supported `processControl` attributes
 
