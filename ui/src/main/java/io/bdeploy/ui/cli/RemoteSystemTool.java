@@ -458,11 +458,11 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         if (config.name() == null && config.description() == null && config.setVariable() == null
                 && config.removeVariable() == null) {
-            helpAndFail("ERROR: Missing --name, --description, --setKey or --removeKey");
+            helpAndFail("ERROR: Missing --name, --description, --setVariable or --removeVariable");
         }
 
         if (config.setVariable() != null && config.setValue() == null) {
-            helpAndFail("ERROR: Got --setKey but missing --setVariable");
+            helpAndFail("ERROR: Got --setVariable but missing --setValue");
         }
 
         Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(systemUuid)).findAny();
