@@ -56,18 +56,10 @@ export class ProcessesService {
    * @param appId
    * @param nodeName
    */
-  public static get(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string, nodeName?: string): ProcessStatusDto {
-    // if we don't know the states
-    if (!instanceProcessStatus) {
-      return null;
-    }
-
-    const targetNode: string = ProcessesService.identifyServerNode(instanceProcessStatus, appId, nodeName);
-    if (!!targetNode && !!instanceProcessStatus.processStates[appId]) {
-      return instanceProcessStatus.processStates[appId][targetNode];
-    }
-
-    return null;
+  public static get(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string, nodeName: string): ProcessStatusDto {
+    return ProcessesService.confirmAppIsOnRuntimeNode(instanceProcessStatus, appId, nodeName) ?
+      instanceProcessStatus.processStates[appId][nodeName] :
+        null;
   }
 
   public static getAppStates(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string): Record<string, ProcessStatusDto> {
@@ -99,16 +91,18 @@ export class ProcessesService {
       // HINT: processToNode contains app->configuredNode mapping and can return a fictional node
       const configuredNode = nodeName ? nodeName : instanceProcessStatus.processToNode[appId];
       return Object.hasOwn(instanceProcessStatus.multiNodeToRuntimeNode, configuredNode) ? null : configuredNode;
-
     }
 
     return null;
   }
 
-  public static confirmAppIsConfiguredOnMultiNode(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string): string {
+  public static confirmAppIsOnRuntimeNode(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string, nodeName: string): boolean {
+      return nodeName && !!instanceProcessStatus?.processStates[appId]?.[nodeName];
+  }
+
+  public static identifyMultiNode(instanceProcessStatus: MappedInstanceProcessStatusDto, appId: string): string {
     if (instanceProcessStatus?.processToNode[appId]) {
       const node = instanceProcessStatus.processToNode[appId];
-
       return Object.hasOwn(instanceProcessStatus.multiNodeToRuntimeNode, node) ? node : null;
     }
 
