@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -208,16 +207,16 @@ public class InstanceStatusDto {
 
         for (var applicationId : applicationIds) {
             // Find node where the application is running
-            Optional<String> node = node2Applications.entrySet().stream()
+            Set<String> nodes = node2Applications.entrySet().stream()
                     .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
-                            && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
-                    .map(Map.Entry::getKey).findFirst();
+                            && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED).map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
 
-            if (node.isEmpty()) {
+            if (nodes.isEmpty()) {
                 continue; // ignore - not deployed.
             }
 
-            groupedByNode.computeIfAbsent(node.get(), n -> new ArrayList<>()).add(applicationId);
+            nodes.forEach(node -> groupedByNode.computeIfAbsent(node, n -> new ArrayList<>()).add(applicationId));
         }
 
         return groupedByNode;
