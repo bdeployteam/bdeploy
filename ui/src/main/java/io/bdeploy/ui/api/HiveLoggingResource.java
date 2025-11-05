@@ -18,7 +18,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/logging")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredPermission(permission = Permission.ADMIN)
@@ -41,5 +40,4 @@ public interface HiveLoggingResource {
     @Unsecured
     @Path("/stream/{token}")
     public Response getLogContentStream(@PathParam("token") String token);
-
 }

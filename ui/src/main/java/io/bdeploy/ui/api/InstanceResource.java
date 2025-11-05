@@ -44,7 +44,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface InstanceResource {
@@ -303,5 +302,4 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.CLIENT)
     public String getUiDirectUrl(@Scope @PathParam("instance") String instance, @PathParam("app") String application,
             @PathParam("ep") String endpoint);
-
 }

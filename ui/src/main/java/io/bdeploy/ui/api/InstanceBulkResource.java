@@ -19,7 +19,6 @@ import jakarta.ws.rs.core.MediaType;
 /**
  * Bulk operations for instances.
  */
-@Path("/bulk")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface InstanceBulkResource {
@@ -101,5 +100,4 @@ public interface InstanceBulkResource {
     @POST
     @Path("/bulkSync")
     public List<InstanceOverallStatusDto> syncBulk(Set<Manifest.Key> instances);
-
 }

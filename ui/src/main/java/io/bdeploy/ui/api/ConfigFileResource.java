@@ -11,7 +11,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/cfgFiles")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface ConfigFileResource {
@@ -32,5 +31,4 @@ public interface ConfigFileResource {
     @Path("/loadTemplate/{file: .+}")
     public String loadProductConfigFile(@QueryParam("prodName") String prodName, @QueryParam("prodTag") String prodTag,
             @PathParam("file") String file);
-
 }

@@ -18,7 +18,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/softwarerepository")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface SoftwareResource {
@@ -56,5 +55,4 @@ public interface SoftwareResource {
     @Path("/bulk")
     @RequiredPermission(permission = Permission.ADMIN, scope = "softwareRepository")
     public SoftwareBulkResource getBulkResource();
-
 }

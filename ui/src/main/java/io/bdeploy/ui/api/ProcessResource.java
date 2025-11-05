@@ -20,7 +20,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/processes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface ProcessResource {
@@ -36,7 +35,8 @@ public interface ProcessResource {
 
     @GET
     @Path("/{runtimeNode}/{appId}")
-    public ProcessDetailDto getDetails(@Scope @PathParam("runtimeNode") String runtimeNode, @Scope @PathParam("appId") String appId);
+    public ProcessDetailDto getDetails(@Scope @PathParam("runtimeNode") String runtimeNode,
+            @Scope @PathParam("appId") String appId);
 
     @POST
     @Path("/start")
