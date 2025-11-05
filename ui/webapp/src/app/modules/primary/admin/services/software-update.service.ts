@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
-import { LauncherDto, ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
+import { ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 export interface SoftwareVersion {
@@ -80,10 +80,6 @@ export class SoftwareUpdateService {
 
   public listLauncherVersions(): Observable<ManifestKey[]> {
     return this.http.get<ManifestKey[]>(`${this.apiPath()}/launcher`);
-  }
-
-  public getLatestLaunchers(): Observable<LauncherDto> {
-    return this.http.get<LauncherDto>(`${this.apiPath()}/launcherLatest`);
   }
 
   public deleteVersion(keys: ManifestKey[]) {
