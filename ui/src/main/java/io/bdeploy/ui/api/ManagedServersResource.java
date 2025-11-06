@@ -59,6 +59,7 @@ public interface ManagedServersResource {
     @PUT
     @Path("/manual-attach-central")
     @Consumes(MediaType.TEXT_PLAIN)
+    @RequiredPermission(permission = Permission.ADMIN)
     public String manualAttachCentral(String central);
 
     /**
