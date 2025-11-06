@@ -175,24 +175,20 @@ class RemoteProcessCliTest extends BaseMinionCliTest {
 
         StructuredOutput result;
 
-        /* Start and list with no runtime nodes */
+        /* Start without specifying the runtime node */
         remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--join", "--application=app");
         result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
         assertEquals(0, result.size());
 
-        /* Start and list with runtime nodes */
+        // attaching nodes and listing
         attachMultiNodes(remote, masterFile, runtimeNode1, runtimeNode2);
 
         result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--application=app");
         assertEquals("Success", result.get(0).get("message"));
 
-        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--application=app", "--nodeName=NODE-multi-runtimeNode2");
-        assertEquals("Success", result.get(0).get("message"));
-
         Map<String, TestCliTool.StructuredOutputRow> processRows = doRemoteAndIndexOutputOn("Node", remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
         assertEquals(2, processRows.size());
         TestCliTool.StructuredOutputRow processRow = processRows.get("multiNode/NODE-multi-runtimeNode1");
-        assertEquals("app", processRow.get("Id"));
         assertEquals("app", processRow.get("Id"));
         assertEquals("app", processRow.get("Name"));
         assertTrue("RUNNING_NOT_STARTED".equals(processRow.get("Status")) || "RUNNING".equals(processRow.get("Status")));
@@ -202,6 +198,41 @@ class RemoteProcessCliTest extends BaseMinionCliTest {
         assertNotEquals("-", processRow.get("StartedAt"));
         assertNotEquals("-", processRow.get("OsUser"));
         assertNotEquals("-", processRow.get("Pid"));
+        assertEquals("", processRow.get("StartupStatus"));
+        assertEquals("", processRow.get("LivenessStatus"));
+
+        processRow = processRows.get("multiNode/NODE-multi-runtimeNode2");
+        assertEquals("app", processRow.get("Id"));
+        assertEquals("app", processRow.get("Name"));
+        assertTrue("RUNNING_NOT_STARTED".equals(processRow.get("Status")) || "RUNNING".equals(processRow.get("Status")));
+        assertEquals("1", processRow.get("Version"));
+        assertEquals("1.0.0.1234", processRow.get("ProductVersion"));
+        assertEquals("MANUAL", processRow.get("StartType"));
+        assertNotEquals("-", processRow.get("StartedAt"));
+        assertNotEquals("-", processRow.get("OsUser"));
+        assertNotEquals("-", processRow.get("Pid"));
+        assertEquals("", processRow.get("StartupStatus"));
+        assertEquals("", processRow.get("LivenessStatus"));
+
+        /* Stop without specifying the runtime node */
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--application=app");
+        assertEquals("Success", result.get(0).get("message"));
+
+        processRows = doRemoteAndIndexOutputOn("Node", remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
+        assertEquals(2, processRows.size());
+        processRow = processRows.get("multiNode/NODE-multi-runtimeNode1");
+        assertEquals("app", processRow.get("Id"));
+        assertEquals("app", processRow.get("Name"));
+        assertEquals("STOPPED", processRow.get("Status"));
+        assertEquals("1", processRow.get("Version"));
+        assertEquals("1.0.0.1234", processRow.get("ProductVersion"));
+        assertEquals("MANUAL", processRow.get("StartType"));
+        assertEquals("-", processRow.get("StartedAt"));
+        assertEquals("-", processRow.get("OsUser"));
+        assertEquals("-", processRow.get("Pid"));
+        assertNotEquals("", processRow.get("ExitCode"));
+        assertEquals("", processRow.get("StartupStatus"));
+        assertEquals("", processRow.get("LivenessStatus"));
 
         processRow = processRows.get("multiNode/NODE-multi-runtimeNode2");
         assertEquals("app", processRow.get("Id"));
@@ -217,12 +248,46 @@ class RemoteProcessCliTest extends BaseMinionCliTest {
         assertEquals("", processRow.get("StartupStatus"));
         assertEquals("", processRow.get("LivenessStatus"));
 
-
-        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--application=app", "--nodeName=NODE-multi-runtimeNode1");
+        /* Start and stop on a single specified node */
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--start", "--application=app", "--nodeName=NODE-multi-runtimeNode2");
         assertEquals("Success", result.get(0).get("message"));
-        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
-        assertEquals(2, result.size());
-        assertEquals("STOPPED", result.get(0).get("Status"));
-        assertEquals("STOPPED", result.get(1).get("Status"));
+
+        processRows = doRemoteAndIndexOutputOn("Node", remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
+        assertEquals(2, processRows.size());
+        processRow = processRows.get("multiNode/NODE-multi-runtimeNode1");
+        assertEquals("STOPPED", processRow.get("Status"));
+        assertEquals("app", processRow.get("Id"));
+        assertEquals("app", processRow.get("Name"));
+        assertEquals("STOPPED", processRow.get("Status"));
+        assertEquals("1", processRow.get("Version"));
+        assertEquals("1.0.0.1234", processRow.get("ProductVersion"));
+        assertEquals("MANUAL", processRow.get("StartType"));
+        assertEquals("-", processRow.get("StartedAt"));
+        assertEquals("-", processRow.get("OsUser"));
+        assertEquals("-", processRow.get("Pid"));
+        assertNotEquals("", processRow.get("ExitCode"));
+        assertEquals("", processRow.get("StartupStatus"));
+        assertEquals("", processRow.get("LivenessStatus"));
+
+        processRow = processRows.get("multiNode/NODE-multi-runtimeNode2");
+        assertEquals("app", processRow.get("Id"));
+        assertEquals("app", processRow.get("Name"));
+        assertTrue("RUNNING_NOT_STARTED".equals(processRow.get("Status")) || "RUNNING".equals(processRow.get("Status")));
+        assertEquals("1", processRow.get("Version"));
+        assertEquals("1.0.0.1234", processRow.get("ProductVersion"));
+        assertEquals("MANUAL", processRow.get("StartType"));
+        assertNotEquals("-", processRow.get("StartedAt"));
+        assertNotEquals("-", processRow.get("OsUser"));
+        assertNotEquals("-", processRow.get("Pid"));
+        assertEquals("", processRow.get("StartupStatus"));
+        assertEquals("", processRow.get("LivenessStatus"));
+
+        result = remote(remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--stop", "--application=app", "--nodeName=NODE-multi-runtimeNode2");
+        assertEquals("Success", result.get(0).get("message"));
+
+        processRows = doRemoteAndIndexOutputOn("Node", remote, RemoteProcessTool.class, "--instanceGroup=demo", "--uuid=" + id, "--list");
+        assertEquals(2, processRows.size());
+        assertEquals("STOPPED", processRows.get("multiNode/NODE-multi-runtimeNode1").get("Status"));
+        assertEquals("STOPPED", processRows.get("multiNode/NODE-multi-runtimeNode2").get("Status"));
     }
 }
