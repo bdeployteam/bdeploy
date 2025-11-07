@@ -196,10 +196,9 @@ public interface InstanceResource {
     public Response downloadSplash(@PathParam("instance") String instanceId, @PathParam("applicationId") String applicationId);
 
     @GET
-    @Unsecured
     @Path("/{instance}/export/{tag}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @RequiredPermission(permission = Permission.WRITE)
+    @RequiredPermission(permission = Permission.READ)
     public Response exportInstance(@Scope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
 
     @POST
