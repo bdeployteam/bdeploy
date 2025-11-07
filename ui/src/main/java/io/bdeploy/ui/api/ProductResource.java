@@ -40,14 +40,17 @@ public interface ProductResource {
     public void delete(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @Path("/{name : .+}/{tag}/application")
+    @RequiredPermission(permission = Permission.READ)
     public ApplicationResource getApplicationResource(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
     @Path("/{name : .+}/{tag}/usedIn")
+    @RequiredPermission(permission = Permission.READ)
     public List<InstanceUsageDto> getProductUsedIn(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
     @Path("/{name : .+}/{tag}/zip")
+    @RequiredPermission(permission = Permission.READ)
     public String createProductZipFile(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @POST
@@ -64,10 +67,12 @@ public interface ProductResource {
 
     @GET
     @Path("/{name : .+}/{tag}/config/{file: .+}")
+    @RequiredPermission(permission = Permission.READ)
     public String loadConfigFile(@PathParam("name") String name, @PathParam("tag") String tag, @PathParam("file") String file);
 
     @GET
     @Path("/get-response-file")
+    @RequiredPermission(permission = Permission.READ)
     public String getResponseFile(@QueryParam("productId") String productId, @QueryParam("version") String version,
             @QueryParam("instanceTemplate") String instanceTemplate, @QueryParam("includeDefaults") Boolean includeDefaults);
 
