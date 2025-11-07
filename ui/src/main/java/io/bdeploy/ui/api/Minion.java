@@ -103,7 +103,7 @@ public interface Minion {
     public <T> String getEncryptedPayload(T payload);
 
     /**
-     * Descrypts a payload encrypted using {@link #getEncryptedPayload(Object)}.
+     * Decrypts a payload encrypted using {@link #getEncryptedPayload(Object)}.
      */
     public <T> T getDecryptedPayload(String encrypted, Class<T> clazz);
 
