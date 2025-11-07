@@ -7,6 +7,10 @@ export class ConfigureParametersPanel extends BasePanel {
     super(page, 'app-configure-process');
   }
 
+  async fillProcessName(newName: string) {
+    await this.getDialog().getByLabel("name").fill(newName);
+  }
+
   async getParameterGroup(name: string) {
     return new ParameterGroupArea(this.page, this.getDialog(), name);
   }

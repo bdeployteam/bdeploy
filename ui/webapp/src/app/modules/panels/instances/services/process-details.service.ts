@@ -45,8 +45,7 @@ export class ProcessDetailsService implements OnDestroy {
       this.instances.activeNodeCfgs$,
     ]).subscribe(([route, states, instance, nodes]) => {
       const appId = route?.params['process'];
-      const nodeThisIsRunningOn = ProcessesService.identifyServerNode(states, appId, route?.params['node']);
-      if (!nodeThisIsRunningOn || !instance || !nodes) {
+      if (!appId || !instance || !nodes || route.url.some(segment => segment.path == 'config')) {
         this.zone.run(() => {
           this.processConfig$.next(null);
           this.processDetail$.next(null);
@@ -55,6 +54,7 @@ export class ProcessDetailsService implements OnDestroy {
         return;
       }
 
+      const nodeThisIsRunningOn = ProcessesService.identifyServerNode(states, appId, route?.params['node']);
       // find the configuration for the application we're showing details for
       const appsPerNode = nodes.nodeConfigDtos.map((x) =>
         x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [],
@@ -62,39 +62,39 @@ export class ProcessDetailsService implements OnDestroy {
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
       const app = allApps.find((a) => a?.id === appId);
 
-
       this.zone.run(() => {
         this.processConfig$.next(app);
 
-        if (!ProcessesService.get(states, nodeThisIsRunningOn)) {
+        if (!ProcessesService.confirmAppIsOnRuntimeNode(states, appId, nodeThisIsRunningOn)) {
           this.processDetail$.next(null);
-          return;
+        } else {
+          this.loading$.next(true);
         }
-
-        this.loading$.next(true);
       });
 
-      // if we're already performing a call, cancel it - only one detail at a time.
-      this.detailsCall?.unsubscribe();
+      if (ProcessesService.confirmAppIsOnRuntimeNode(states, appId, nodeThisIsRunningOn)) {
+        // if we're already performing a call, cancel it - only one detail at a time.
+        this.detailsCall?.unsubscribe();
 
-      // now load the status details and populate the service data.
-      this.detailsCall = this.http
-        .get<ProcessDetailDto>(
-          `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.id)}/processes/${nodeThisIsRunningOn}/${appId}`,
-          NO_LOADING_BAR,
-        )
-        .pipe(
-          finalize(() => {
-            this.zone.run(() => {
-              this.detailsCall = null;
-              this.loading$.next(false);
-            });
-          }),
-          measure(`Process Details`),
-        )
-        .subscribe((d) => {
-          this.processDetail$.next(d);
-        });
+        // now load the status details and populate the service data.
+        this.detailsCall = this.http
+          .get<ProcessDetailDto>(
+            `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.id)}/processes/${nodeThisIsRunningOn}/${appId}`,
+            NO_LOADING_BAR,
+          )
+          .pipe(
+            finalize(() => {
+              this.zone.run(() => {
+                this.detailsCall = null;
+                this.loading$.next(false);
+              });
+            }),
+            measure(`Process Details`),
+          )
+          .subscribe((d) => {
+            this.processDetail$.next(d);
+          });
+      }
     });
   }
 

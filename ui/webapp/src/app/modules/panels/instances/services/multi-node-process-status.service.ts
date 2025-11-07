@@ -39,7 +39,7 @@ export class MultiNodeProcessStatusService implements OnDestroy {
       this.instances.activeNodeCfgs$
     ]).subscribe(([route, states, portStates, instance, nodes]) => {
       const appId = route?.params['process'];
-      const multiNodeAppIsConfiguredOn = ProcessesService.confirmAppIsConfiguredOnMultiNode(states, appId);
+      const multiNodeAppIsConfiguredOn = ProcessesService.identifyMultiNode(states, appId);
       if (!multiNodeAppIsConfiguredOn || !instance || !nodes) {
         this.zone.run(() => {
           this.processConfig$.next(null);

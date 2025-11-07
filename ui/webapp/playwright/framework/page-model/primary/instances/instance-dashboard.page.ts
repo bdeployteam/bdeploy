@@ -3,8 +3,8 @@ import { expect, Page } from '@playwright/test';
 import { InstancesBrowserPage } from '@bdeploy-pom/primary/instances/instances-browser.page';
 import { createPanelFromRow } from '@bdeploy-pom/common/common-functions';
 import { ProcessStatusPanel } from '@bdeploy-pom/panels/instances/process-status.panel';
-import { LaunchConfirmationPopup } from '@bdeploy-pom/panels/instances/process-status/launch-confirmation.popup';
 import { InstallationConfirmationPopup } from '@bdeploy-pom/panels/instances/installation-confirmation.popup';
+import { MultiNodeProcessStatusPanel } from '@bdeploy-pom/panels/instances/multi-node-process-status.panel';
 
 export class InstanceDashboardPage extends BaseDialog {
   constructor(page: Page, private readonly group: string, private readonly instance: string) {
@@ -35,6 +35,7 @@ export class InstanceDashboardPage extends BaseDialog {
     await expect(this.getDialog().locator('.bd-rect-card').getByText(`(version ${expectedVersion})`)).toBeVisible();
     const installBtn = this.getInstallButton();
     await installBtn.click();
+    await installBtn.locator('mat-spinner').waitFor({ state: 'detached' });
     await expect(installBtn.locator('mat-spinner')).not.toBeVisible();
   }
 
@@ -51,7 +52,11 @@ export class InstanceDashboardPage extends BaseDialog {
   }
 
   async getProcessStatus(node: string, process: string) {
-    return createPanelFromRow(this.getServerNode(node).getByRole('row', { name: process }), (p) => new ProcessStatusPanel(p));
+    return createPanelFromRow(this.getNode(node).getByRole('row', { name: process }), (p) => new ProcessStatusPanel(p));
+  }
+
+  async getMultiNodeProcessStatus(node: string, process: string) {
+    return createPanelFromRow(this.getNode(node).getByRole('row', { name: process }), (p) => new MultiNodeProcessStatusPanel(p));
   }
 
   async toggleBulkControl() {
@@ -68,6 +73,10 @@ export class InstanceDashboardPage extends BaseDialog {
     return this.getDialog().locator('app-instance-server-node', { hasText: name });
   }
 
+  getNode(name: string) {
+    return this.getDialog().locator('app-instance-server-node, app-instance-multi-node', { hasText: name });
+  }
+
   getClientNode(name: string) {
     return this.getDialog().locator('app-instance-client-node');
   }
@@ -80,8 +89,12 @@ export class InstanceDashboardPage extends BaseDialog {
     await expect(this.getDialog().locator('app-instance-server-node')).toHaveCount(expectedNrOfNodes);
   }
 
+  async shouldHaveMultiNodeCount(expectedNrOfNodes: number) {
+    await expect(this.getDialog().locator('app-instance-multi-node')).toHaveCount(expectedNrOfNodes);
+  }
+
   async shouldHaveProcessCountForNode(nodeTestId: string, expectedNrOfProcesses: number) {
-    await expect(this.getServerNode(nodeTestId).locator('tr:has(td.cdk-column-id)'))
+    await expect(this.getNode(nodeTestId).locator('tr:has(td.cdk-column-id)'))
       .toHaveCount(expectedNrOfProcesses);
   }
 

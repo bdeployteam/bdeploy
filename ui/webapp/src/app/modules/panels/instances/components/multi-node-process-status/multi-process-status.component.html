@@ -6,6 +6,7 @@
       [text]='isProductAvailable() ? "Jump to Configuration" : "Product not available"'
       icon="settings"
       tooltipPosition="below"
+      data-testid="go-to-config-process"
       [disabled]="!(auth.isCurrentScopeWrite$ | async) || !isProductAvailable()"
       (click)="
           areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, instances.current$.value.instanceConfiguration.id], ['panels', 'instances', 'config', 'process', nodeCfg.nodeName, processConfig.id])

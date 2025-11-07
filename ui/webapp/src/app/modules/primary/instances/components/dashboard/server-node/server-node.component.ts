@@ -189,14 +189,16 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const state = ProcessesService.get(states, app.id)?.processState;
-      if (!ProcessesService.isRunning(state)) {
-        stoppedApps++;
-      } else if (state === ProcessState.RUNNING_NOT_ALIVE) {
-        runningDeadApps++;
-      } else {
-        runningAliveApps++;
-      }
+      const statePerEachNode = ProcessesService.getAppStates(states, app.id) ?? {};
+      Object.entries(statePerEachNode).forEach(([runtimeNode, statusDto]) => {
+        if (!ProcessesService.isRunning(statusDto.processState)) {
+          stoppedApps++;
+        } else if (statusDto.processState === ProcessState.RUNNING_NOT_ALIVE) {
+          runningDeadApps++;
+        } else {
+          runningAliveApps++;
+        }
+      });
     });
 
     this.updateProcessStateItem(runningAliveApps, runningDeadApps, stoppedApps);
