@@ -7,7 +7,8 @@
       icon="settings"
       tooltipPosition="below"
       data-testid="go-to-config-process"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async) || !isProductAvailable()"
+      data-testid="go-to-config-process"
+      [disabled]="!nodeCfg || !(auth.isCurrentScopeWrite$ | async) || !isProductAvailable()"
       (click)="
           areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, instances.current$.value.instanceConfiguration.id], ['panels', 'instances', 'config', 'process', nodeCfg.nodeName, processConfig.id])
         "
@@ -104,7 +105,7 @@
         </app-bd-button>
       </div>
       <mat-divider></mat-divider>
-      <div class="flex flex-col gap-2.5 pt-2.5">
+      <div class="flex flex-col gap-2.5 pt-2.5" data-testid="multi-process-status-report">
         <mat-divider></mat-divider>
         <app-bd-expand-button text="Process Status" icon="cardiology" [expanded]="true">
           <div class="p-2 grid grid-cols-[24px_auto_auto] gap-2.5 items-center">
@@ -150,9 +151,9 @@
           </div>
         </app-bd-expand-button>
       </div>
-      <div class="flex flex-col gap-2.5 pt-2.5">
+      <div class="flex flex-col gap-2.5 pt-2.5" data-testid="port-states">
         <mat-divider></mat-divider>
-        <app-bd-expand-button text="Port Status" icon="power" [expanded]="true">
+        <app-bd-expand-button text="Port Status" icon="power" [expanded]="multiStatus.total > 0">
           @if (multiStatus.arePortStatesKnown) {
             <div class="p-2 grid grid-cols-[24px_auto_auto] gap-2.5 items-center">
               <mat-icon class="material-symbols-filled bd-success-text">done</mat-icon>
@@ -171,9 +172,9 @@
         </app-bd-expand-button>
       </div>
 
-      <div class="flex flex-col gap-2.5 pt-2.5">
+      <div class="flex flex-col gap-2.5 pt-2.5" data-testid="actuality-status">
         <mat-divider></mat-divider>
-        <app-bd-expand-button text="Actuality" icon="thermostat" [expanded]="true">
+        <app-bd-expand-button text="Actuality" icon="thermostat" [expanded]="multiStatus.total > 0">
           <div class="p-2 grid grid-cols-2 gap-2.5 gap-y-4">
             <div class="text-left">
               <div class="local-chip local-ok-chip">OK</div>

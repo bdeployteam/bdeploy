@@ -88,11 +88,23 @@ test('S011 Multi-node node without any runtime nodes', async ({ standalone }, te
   await instanceDashboard.shouldHaveMultiNodeCount(1);
   await instanceDashboard.shouldHaveProcessCountForNode('MyNode2', 1);
 
+  // check that the process panel appears even without runtime nodes
+  const multiProcessPanel = await instanceDashboard.getMultiNodeProcessStatus('MyNode2', 'Server Application');
+  await expect(multiProcessPanel.getGoToConfig()).toBeEnabled();
+
+  await expect(multiProcessPanel.getStatusReport().locator('div.mat-expansion-panel-body > div > :nth-child(3n)', { hasText: '0' }))
+    .toHaveCount(10);
+  await expect(multiProcessPanel.getPortStates().locator('div.mat-expansion-panel-body > div > :nth-child(3n)', { hasText: '0' }))
+    .toHaveCount(2);
+  await expect(multiProcessPanel.getActualityStatus().locator('div.mat-expansion-panel-body > div > :nth-child(2n)', { hasText: '0' }))
+    .toHaveCount(2);
+
   // ------------------ Bug scenario 1 ---------------------
   // navigate to master process status then multi node config to check no errors appears
   await instanceDashboard.getProcessStatus('master', 'App on Master');
 
-  instanceConfig.goto()
+  await instanceDashboard.getMultiNodeProcessStatus('MyNode2', 'Server Application');
+  await multiProcessPanel.getGoToConfig().click();
   await instanceConfig.getProcessSettingsPanel('MyNode2', 'Server Application');
   await expect(standalone.locator(".error-snackbar")).toHaveCount(0);
   // end bug
