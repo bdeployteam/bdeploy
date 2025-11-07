@@ -1,6 +1,6 @@
 import { inject, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { ApplicationConfiguration, ProcessState } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, InstanceNodeConfigurationDto, ProcessState } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
@@ -39,8 +39,8 @@ export class MultiNodeProcessStatusService implements OnDestroy {
       this.instances.activeNodeCfgs$
     ]).subscribe(([route, states, portStates, instance, nodes]) => {
       const appId = route?.params['process'];
-      const multiNodeAppIsConfiguredOn = ProcessesService.identifyMultiNode(states, appId);
-      if (!multiNodeAppIsConfiguredOn || !instance || !nodes) {
+      // check that the multi node status panel is open
+      if (!route.url.some(segment => segment.path == 'multi-node-process') || !appId || !instance || !nodes) {
         this.zone.run(() => {
           this.processConfig$.next(null);
           this.multiStatus$.next(null);
@@ -48,10 +48,27 @@ export class MultiNodeProcessStatusService implements OnDestroy {
         return;
       }
 
-      const app = nodes.nodeConfigDtos
-        .find(nodeConfigDto => nodeConfigDto.nodeName == multiNodeAppIsConfiguredOn)
-        .nodeConfiguration.applications.find(a => a?.id === appId);
+      // attempting to find configuration without instanceStatus
+      // because there might not be any nodes attached
+      let app: ApplicationConfiguration = null;
+      let nodeCfg: InstanceNodeConfigurationDto = null;
+      for (const config of nodes.nodeConfigDtos) {
+        app = config.nodeConfiguration.applications.find(a => a?.id === appId);
+        if (app) {
+          nodeCfg = config;
+          break;
+        }
+      }
 
+      if(app == null || nodeCfg == null) {
+        this.zone.run(() => {
+          this.processConfig$.next(null);
+          this.multiStatus$.next(null);
+        });
+        return;
+      }
+
+      // if we have found the config we want to show the empty status
       const multiStatus = {
         total: 0,
         totalRunning: 0,
@@ -71,7 +88,7 @@ export class MultiNodeProcessStatusService implements OnDestroy {
         }
       } as MultiProcessStatusDto;
 
-      Object.entries(states.processStates[appId]).forEach(
+      Object.entries(states.processStates[appId] ?? []).forEach(
         entry => {
           const serverNode = entry[0];
           const processStatus = entry[1];
