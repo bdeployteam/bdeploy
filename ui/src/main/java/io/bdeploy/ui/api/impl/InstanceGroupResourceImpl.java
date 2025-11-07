@@ -53,6 +53,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.nodes.NodeType;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.interfaces.variables.CompositeResolver;
@@ -425,6 +426,10 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         allInstEps.endpoints = new ArrayList<>();
 
         for (var instanceNode : im.getInstanceNodeManifests(hive).values()) {
+            if(instanceNode.getConfiguration().nodeType == NodeType.MULTI) {
+                continue;
+            }
+
             // Add all configured client applications
             for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
                 CompositeResolver resolver = CommonEndpointHelper.createEndpoindResolver(instanceNode, appConfig, null);
